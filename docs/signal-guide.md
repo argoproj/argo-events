@@ -1,5 +1,5 @@
 # Signal Guide
-Signals are the sensor's dependencies. To take advantage of the certain signal sources, you can follow this guide to help you getting started installing these other services on your kubernetes cluster. If you need to reference the underlying sensor api, please use the [api-guide](./sensor-api.md).
+Signals are the sensor's dependencies. To take advantage of the certain signal sources, you can follow this guide to help you getting started installing these other services on your kubernetes cluster. If you need to reference the underlying sensor api, please use the [api-guide](sensor-api.md).
 
 ## What is a signal?
 A `signal` is a dependency, namely:
@@ -10,7 +10,7 @@ A `signal` is a dependency, namely:
 
 ### Prerequisites
 You need a working Kubernetes cluster at version >= 1.9. You will also need to install the `sensor-controller` into the cluster. This controller is is responsible for managing the `sensor` resources.
-In order to take advantage of the various signal types, you may need to install compatible message platforms (e.g. amqp, mmqp, NATS, etc..) and s3 api compatible object storage servers (e.g. Minio, Rook, CEPH, NetApp). See the [signal guide](./signal-guide.md) for more information about installing messaging platforms and [artifact guide](./artifact-guide.md) for installing object stores.
+In order to take advantage of the various signal types, you may need to install compatible message platforms (e.g. amqp, mmqp, NATS, etc..) and s3 api compatible object storage servers (e.g. Minio, Rook, CEPH, NetApp). See the [signal guide](signal-guide.md) for more information about installing messaging platforms and [artifact guide](artifact-guide.md) for installing object stores.
 
 ## Sensor Controller
 The `sensor-controller` is responsible for managing the `Sensor` resources and creating `sensor-executor` jobs. 
