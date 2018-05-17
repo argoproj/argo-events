@@ -13,7 +13,6 @@ Axis is an open source container-native event-based dependency manager for Kuber
 ## Why Axis?
 - Containers. Axis is designed from the ground-up as Kubernetes native. 
 - Extremely lightweight. All signals, with exception of calendar based signals, are event-driven, meaning there is no polling involved.
-- Cloud-agnostic. Run Axis on any Kubernetes cluster.
 - High performance. Each Axis `sensor` runs in its own Kubernetes job enabling high bandwidth for processing near-real time events.
 - Simple or Complex dependencies. Manage everything from simple, linear, real-time dependencies to complex, multi-source batch job dependencies.
 

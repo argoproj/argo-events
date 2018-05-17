@@ -1,5 +1,5 @@
 # Sensor API
-The API specifications for Kubernetes Sensor CRDs. See the ./examples directory for applications of this API.
+The API specifications for Kubernetes Sensor CRDs. See the project's `examples` directory for applications of this API.
 
 ## Sensor v1alpha1 event
 
@@ -18,6 +18,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### SensorSpec v1alpha1 event
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `signals`    | *[Signal](#signal-v1alpha1-event)* array                | List of signal dependencies   |
@@ -27,6 +28,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### SensorStatus v1alpha1 event
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `phase`      | *string*                                 | Current condition of the sensor |
@@ -38,6 +40,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Signal v1alpha1 event
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `name`       | *string*                                 | Unique name for this dependencies |
@@ -53,6 +56,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Trigger v1alpha1 event
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `name`       | *string*                                 | Unique name for this action   |
@@ -61,12 +65,14 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 | `retryStrategy` | *[RetryStrategy](#retry-strategy)*    | Defines a strategy to retry if the trigger fails (currently not yet implemented) |
 
 ### Message
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `body`       | *string*                                 | The content of the message    |
 | `stream`     | *[Stream](#stream-v1alpha1-event)*       | The stream resource queue on which to send the message |
 
 ### Stream v1alpha1 event
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `nats`       | *[NATS](#nats)*                          | [NATS](https://nats.io/documentation/) stream |
@@ -75,6 +81,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 | `kafka`      | *[KAFKA](#kafka)*                        | [KAFKA](https://kafka.apache.org/) stream |
 
 ### ResourceObject
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `namespace`  | *string*                                 | The Kubernetes namespace to create this resource object |
@@ -85,18 +92,21 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 | `s3`         | *[S3](#s3-artifact)*                     | The S3 Artifact location of the resource file |
 
 ### NATS
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `url`        | *string*                                 | The url for client connections to the NATS cluster |
 | `subject`    | *string*                                 | The subject on which to receive messages |
 
 ### MQTT
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `url`        | *string*                                 | The url of the MQTT message broker |
 | `topic  `    | *string*                                 | The topic on which to receive messages |
 
 ### AMQP
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `url`        | *string*                                 | The url of the AMQP message broker |
@@ -105,6 +115,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 | `routingKey` | *string*                                 | A list of words delimited by dots. If the exchange is a `topic` exchange, the routingKey must be provided. The routing key specifies some features connected to the messages being received. As many words as you like, up to the limit of 255 bytes. |
 
 ### Kafka
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `url`        | *string*                                 | The url of the Kafka message broker |
@@ -113,6 +124,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Artifact Signal
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `s3`         | *[S3Artifact](#s3-artifact)              | An S3 artifact                |
@@ -120,6 +132,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Calendar Signal
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `schedule`   | *string*                                 | A [cron](https://en.wikipedia.org/wiki/Cron) |
@@ -128,6 +141,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Resource Signal
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `namespace`  | *string*                                 | The Kubernetes namespace to watch for these resources |
@@ -137,12 +151,14 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Signal Constraints
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `time`       | *[TimeConstraints](#time-constraints)*   | The time constraints for this dependency |    
 
 
 ### Time Constraints
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `start`      | *[Time](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.10/#time-v1-meta)* | RFC 3339 date and time at which the sensor should start accepting events from the specified dependency |
@@ -150,6 +166,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Escalation Policy
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `level`      | *string*                                 | Degree of importance for this sensor |
@@ -157,6 +174,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### Node Status
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `id`         | *string*                                 | Unique identifier for this sensor node |
@@ -170,6 +188,7 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 
 
 ### S3 Artifact
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `endpoint`   | *string*                                 | The URL of the S3 object storage server |
@@ -179,12 +198,14 @@ The API specifications for Kubernetes Sensor CRDs. See the ./examples directory 
 | `filter`     | *[S3Filter](#s3-filter)                  | An additional filter applied on S3 object notifications |
 
 ### S3 Filter
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `prefix`     | *string*                                 | The string literal prefix to match for S3 objects |
 | `suffix`     | *string*                                 | The string literal suffix to match for S3 objects |
 
 ### Resource Filter
+
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `prefix`     | *string*                                 | The string literal prefix to match for resource object meta name |
