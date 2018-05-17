@@ -25,7 +25,7 @@ The following types of signals are supported:
  - Message triggers produce messages on a streaming platform
 
 ## Sensor Executor
-The `sensor-executor` is responsible for listening for various signals and updating the `sensor` resource with updates. There is a one-to-one mapping from `sensor` resource to executor job. Jobs are named in the following format: `{sensor-name}-sensor` and the associated job's pods are named in the following format: `{sensor-name}-sensor-{id}`. On successful resolution of a `sensor`, the job terminates and the `sensor` is marked as Successful. 
+The `sensor-executor` is responsible for listening for various signals and updating the sensor resource with updates. There is a one-to-one mapping from sensor resource to executor job. Jobs are named in the following format: `{sensor-name}-sensor` and the associated job's pods are named in the following format: `{sensor-name}-sensor-{id}`. On successful resolution of a sensor, the job terminates and the sensor is marked as `Successful`. If an error occurs during signal processing, the sensor is marked as `Error`.
 
 
 ## Types of Signal Dependencies
@@ -37,8 +37,14 @@ The `sensor-executor` is responsible for listening for various signals and updat
 - [StormMQ](http://stormmq.com/)
 - [RabbitMQ](https://www.rabbitmq.com/)
 
+### Calendar
+Time-based signals can include signals based on a [cron]() schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event. Eventually, we hope to support a calendar-plugin or interface where users can configure special handling calendar/business logic.
+
 ### MMQP
 [MMQP](http://mqtt.org/) is a M2M "Internet of Things" connectivity protocol (ISO/IEC PRF 20922) designed to be extremely lightweight and ideal for mobile applications. Some broker implementations can be found [here](https://github.com/mqtt/mqtt.github.io/wiki/brokers).
+
+### Kafka
+[Apache Kafka](https://kafka.apache.org/) is a distributed streaming platform. We use Shopify's [sarama](https://github.com/Shopify/sarama) client for consuming Kafka messages.
 
 ### NATS
 [Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.
@@ -46,7 +52,6 @@ The `sensor-executor` is responsible for listening for various signals and updat
 #### NATS Operator
 The `NATS` [Operator](https://github.com/nats-io/nats-operator) manages `NATS` clusters on Kubernetes. NATS clusters are implemented as CRDs and the operator automates their creation and administration.
 
-### Install
  1. Create the natscluster.nats.io custom resource and nats operator
 ```
 $ kubectl apply -f https://raw.githubusercontent.com/nats-io/nats-operator/master/example/deployment.yaml
@@ -57,3 +62,8 @@ $ kubectl apply -f https://raw.githubusercontent.com/nats-io/nats-operator/maste
 kubectl apply -f examples/natsCluster.yaml
 ```
 
+### Kubernetes Resources
+Axis supports watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy.
+
+### S3
+Axis supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
