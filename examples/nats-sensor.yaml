@@ -1,0 +1,21 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: nats-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: hello
+      nats:
+        url: nats://example-nats-cluster:4222
+        subject: hello
+  triggers:
+    - name: "done-nat-stream"
+      message:
+        body: "this is the message body"
+        stream:
+          nats:
+            url: nats://example-nats-cluster:4222
+            subject: gateway-sensor
+

@@ -1,0 +1,21 @@
+# The sensor controller listens for changes on the sensor CRD and creates sensor executor jobs
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sensor-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      serviceAccountName: axis
+      containers:
+      - name: sensor-controller
+        image: aladdin/sensor-controller:latest
+        env:
+          - name: SENSOR_NAMESPACE
+            value: default
+          - name: SENSOR_CONFIG_MAP
+            value: sensor-controller-configmap

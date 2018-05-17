@@ -1,0 +1,24 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: amqp-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: hello
+      amqp:
+        url: amqp://localhost:5672
+        exchangeName: myExchangeName
+        exchangeType: fanout
+        routingKey: myRoutingKey
+  triggers:
+    - name: "done-amqp-message"
+      message:
+        body: "this is the message body"
+        stream:
+          amqp:
+            url: amqp://localhost:5672
+            exchangeName: doneExchangeName
+            routingKey: gateway-sensor
+

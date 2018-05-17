@@ -1,0 +1,23 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: kafka-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: hello
+      kafka:
+        url: localhost:9092
+        topic: hello
+        partition: 0
+  triggers:
+    - name: "done-kafka-stream"
+      message:
+        body: "this is the message body"
+        stream:
+          kafka:
+            url: localhost:9092
+            topic: gateway-sensor
+            partition: 1
+

@@ -1,0 +1,30 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: cal-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: time
+      calendar:
+        interval: 10s
+  triggers:
+    - name: done-workflow
+      resource:
+        namespace: default
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        artifactLocation:
+          s3:
+            bucket: workflows
+            key: hello-world.yaml
+            endpoint: artifacts-minio.default:9000
+            insecure: true
+            accessKey:
+              key: accesskey
+              name: artifacts-minio
+            secretKey:
+              key: secretkey
+              name: artifacts-minio

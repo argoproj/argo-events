@@ -1,0 +1,27 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: default:axis-binding
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: default:axis
+subjects:
+- kind: ServiceAccount
+  name: axis
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: default:axis
+  namespace: default
+rules:
+# Allow actions on everything
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'

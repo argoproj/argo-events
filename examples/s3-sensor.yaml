@@ -1,0 +1,39 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: s3-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: minioS3
+      artifact:
+        s3:
+          bucket: hello
+          endpoint: artifacts-minio.default:9000
+          insecure: true
+          accessKey:
+            key: accesskey
+            name: artifacts-minio
+          secretKey:
+            key: secretkey
+            name: artifacts-minio
+          event: s3:ObjectCreated:Put
+          arn:
+            partition: minio
+            service: sqs
+            region: us-east-1
+            accountID: "1"
+            resource: nats
+        stream:
+          nats:
+            url: nats://example-nats-cluster:4222
+            subject: bucketevents
+  triggers:
+    - name: "done-nat-stream"
+      message:
+        body: "this is the message body"
+        stream:
+          nats:
+            url: nats://example-nats-cluster:4222
+            subject: gateway-sensor
