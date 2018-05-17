@@ -24,6 +24,7 @@ import (
 	"time"
 
 	minio "github.com/minio/minio-go"
+	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"
 	"github.com/stretchr/testify/assert"
@@ -35,6 +36,13 @@ import (
 )
 
 func TestSignal(t *testing.T) {
+	natsEmbeddedServerOpts := server.Options{
+		Host:           "localhost",
+		Port:           4223,
+		NoLog:          true,
+		NoSigs:         true,
+		MaxControlLine: 256,
+	}
 	es := job.New(nil, nil, zap.NewNop())
 	Artifact(es)
 	artifactFactory, ok := es.GetFactory(v1alpha1.SignalTypeArtifact)
@@ -58,7 +66,7 @@ func TestSignal(t *testing.T) {
 				},
 				NotificationStream: v1alpha1.Stream{
 					NATS: &v1alpha1.NATS{
-						URL:     "nats://" + test.DefaultTestOptions.Host + ":" + strconv.Itoa(test.DefaultTestOptions.Port),
+						URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
 						Subject: "test",
 					},
 				},
@@ -78,7 +86,7 @@ func TestSignal(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// run an embedded gnats server
-	testServer := test.RunDefaultServer()
+	testServer := test.RunServer(&natsEmbeddedServerOpts)
 	defer testServer.Shutdown()
 	err = signal.Start(testCh)
 	assert.Nil(t, err)

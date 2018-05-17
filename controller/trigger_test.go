@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 
 	"github.com/stretchr/testify/assert"
@@ -73,7 +74,14 @@ func TestProcessTrigger(t *testing.T) {
 }
 
 func TestSendMessage(t *testing.T) {
-	testServer := test.RunDefaultServer()
+	natsEmbeddedServerOpts := server.Options{
+		Host:           "localhost",
+		Port:           4224,
+		NoLog:          true,
+		NoSigs:         true,
+		MaxControlLine: 256,
+	}
+	testServer := test.RunServer(&natsEmbeddedServerOpts)
 	defer testServer.Shutdown()
 
 	unsupportedMsg := &v1alpha1.Message{
@@ -87,7 +95,7 @@ func TestSendMessage(t *testing.T) {
 		Body: "",
 		Stream: v1alpha1.Stream{
 			NATS: &v1alpha1.NATS{
-				URL:     "nats://" + test.DefaultTestOptions.Host + ":" + strconv.Itoa(test.DefaultTestOptions.Port),
+				URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
 				Subject: "test",
 			},
 		},

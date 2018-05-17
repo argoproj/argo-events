@@ -561,6 +561,7 @@
   revision = "4a1945a9cfdfa104d202059c7e64250618d8d009"
 
 [[projects]]
+  branch = "release-6.0"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -646,8 +647,7 @@
     "util/integer",
     "util/workqueue"
   ]
-  revision = "78700dec6369ba22221b72770783300f143df150"
-  version = "v6.0.0"
+  revision = "1692bdde78a61f6316cfb6988015bd460067b238"
 
 [[projects]]
   branch = "release-1.9"
@@ -702,6 +702,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "67a869eb8347e42dc81ecf547d83149d1d7598d893526d1c33dfd5ddb70041a5"
+  inputs-digest = "73bc0186ad4354cd8673e3790d3145321e918558f5af23e6427cc3c3e1a19db8"
   solver-name = "gps-cdcl"
   solver-version = 1

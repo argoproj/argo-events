@@ -23,6 +23,7 @@ import (
 
 	"github.com/blackrock/axis/job"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"
 	"github.com/stretchr/testify/assert"
@@ -30,6 +31,13 @@ import (
 )
 
 func TestNats(t *testing.T) {
+	natsEmbeddedServerOpts := server.Options{
+		Host:           "localhost",
+		Port:           4222,
+		NoLog:          true,
+		NoSigs:         true,
+		MaxControlLine: 256,
+	}
 	es := job.New(nil, nil, zap.NewNop())
 	NATS(es)
 	natsFactory, ok := es.GetFactory(v1alpha1.SignalTypeNats)
@@ -38,7 +46,7 @@ func TestNats(t *testing.T) {
 		Signal: v1alpha1.Signal{
 			Name: "nats-test",
 			NATS: &v1alpha1.NATS{
-				URL:     "nats://" + test.DefaultTestOptions.Host + ":" + strconv.Itoa(test.DefaultTestOptions.Port),
+				URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
 				Subject: "test",
 			},
 		},
@@ -53,7 +61,7 @@ func TestNats(t *testing.T) {
 	assert.NotNil(t, err)
 
 	// run an embedded gnats server
-	testServer := test.RunDefaultServer()
+	testServer := test.RunServer(&natsEmbeddedServerOpts)
 	defer testServer.Shutdown()
 	err = signal.Start(testCh)
 	assert.Nil(t, err)
