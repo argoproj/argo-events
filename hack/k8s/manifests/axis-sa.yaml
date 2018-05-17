@@ -1,0 +1,6 @@
+# All axis services are bound to the "axis" service account. In RBAC enabled setups, this SA is bound to specific roles.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: axis
+  namespace: default

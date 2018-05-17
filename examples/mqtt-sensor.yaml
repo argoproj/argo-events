@@ -1,0 +1,21 @@
+apiVersion: core.events/v1alpha1
+kind: Sensor
+metadata:
+  name: mqtt-example
+  labels:
+    sensors.core.events/controller-instanceid: axis
+spec:
+  signals:
+    - name: hello
+      mqtt:
+        url: tcp://localhost:1883
+        topic: hello
+  triggers:
+    - name: "done-mqtt-stream"
+      message:
+        body: "this is the message body"
+        stream:
+          mqtt:
+            url: tcp://localhost:1883
+            topic: gateway-sensor
+
