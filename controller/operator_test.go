@@ -18,10 +18,14 @@ package controller
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
+	"github.com/nats-io/gnatsd/server"
+	"github.com/nats-io/gnatsd/test"
 	"github.com/stretchr/testify/assert"
+	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -190,6 +194,94 @@ func TestReRunSensor(t *testing.T) {
 	assert.Equal(t, v1alpha1.NodePhaseInit, natsSignalNode.Phase)
 	resourceSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
 	assert.Equal(t, v1alpha1.NodePhaseInit, resourceSignalNode.Phase)
+}
+
+func TestEscalationSent(t *testing.T) {
+	fake := newFakeController()
+	defer fake.teardown()
+
+	natsEmbeddedServerOpts := server.Options{
+		Host:           "localhost",
+		Port:           4225,
+		NoLog:          true,
+		NoSigs:         true,
+		MaxControlLine: 256,
+	}
+	testServer := test.RunServer(&natsEmbeddedServerOpts)
+	defer testServer.Shutdown()
+
+	sampleSensor.Spec.Escalation = v1alpha1.EscalationPolicy{
+		Level: "High",
+		Message: v1alpha1.Message{
+			Body: "esclating this sensor on failure",
+			Stream: v1alpha1.Stream{
+				NATS: &v1alpha1.NATS{
+					URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+					Subject: "escalation",
+				},
+			},
+		},
+	}
+
+	sampleSensor.Status = v1alpha1.SensorStatus{
+		Escalated: false,
+		Phase:     v1alpha1.NodePhaseError,
+		Nodes:     make(map[string]v1alpha1.NodeStatus),
+	}
+	for _, signal := range sampleSensor.Spec.Signals {
+		nodeID := sampleSensor.NodeID(signal.Name)
+		sampleSensor.Status.Nodes[nodeID] = v1alpha1.NodeStatus{
+			ID:          nodeID,
+			Name:        signal.Name,
+			DisplayName: signal.Name,
+			Type:        v1alpha1.NodeTypeSignal,
+			Phase:       v1alpha1.NodePhaseError,
+			StartedAt:   metav1.Time{},
+			Message:     "failed node reason",
+		}
+	}
+
+	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	assert.Nil(t, err)
+	soc := newSensorOperationCtx(sensor, fake.SensorController)
+
+	// create the executor job
+	executorJob := &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      soc.s.Name + "-sensor",
+			Namespace: fake.Config.Namespace,
+			Labels:    map[string]string{common.LabelKeyResolved: "false"},
+		},
+		Spec: batchv1.JobSpec{},
+	}
+	_, err = fake.kubeClientset.BatchV1().Jobs(fake.Config.Namespace).Create(executorJob)
+	assert.Nil(t, err)
+
+	// create the executor pod
+	executorPod := &apiv1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      soc.s.Name + "-sensor-123",
+			Namespace: fake.Config.Namespace,
+			Labels:    map[string]string{common.LabelJobName: soc.s.Name + "-sensor", common.LabelKeyResolved: "false"},
+		},
+		Spec: apiv1.PodSpec{},
+		Status: apiv1.PodStatus{
+			Phase: apiv1.PodFailed,
+		},
+	}
+	_, err = fake.kubeClientset.CoreV1().Pods(fake.Config.Namespace).Create(executorPod)
+	assert.Nil(t, err)
+
+	// if sensor not yet escalated, make sure we escalate and update it
+	soc.operate()
+	assert.True(t, soc.s.Status.Escalated)
+	assert.True(t, soc.updated)
+
+	// second pass through, verify we don't escalate and update
+	soc.updated = false // reset this field
+	soc.operate()
+	assert.True(t, soc.s.Status.Escalated)
+	assert.False(t, soc.updated)
 }
 
 func TestInferFailedPodCause(t *testing.T) {
