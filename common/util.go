@@ -109,6 +109,11 @@ func CreateJobPrefix(name string) string {
 	return name + "-" + sensor.Singular
 }
 
+// CreateServiceSuffix formats the service name backed by sensor job
+func CreateServiceSuffix(name string) string {
+	return name + "-svc"
+}
+
 // ParseJobPrefix and return the sensorName
 func ParseJobPrefix(job string) string {
 	// first trim the ID at the end, should be everything after and including the last '-'

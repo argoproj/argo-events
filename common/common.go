@@ -62,3 +62,12 @@ const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
 )
+
+// SENSOR JOB CONSTANTS
+const (
+	// WebhookServicePort is the port of the service
+	WebhookServicePort = 9000
+
+	// WebhookServiceTargetPort is the port of the targeted job
+	WebhookServiceTargetPort = 9000
+)

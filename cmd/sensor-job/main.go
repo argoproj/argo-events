@@ -34,6 +34,7 @@ import (
 	"github.com/blackrock/axis/job/resource"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
+	"github.com/blackrock/axis/job/webhook"
 )
 
 func main() {
@@ -109,6 +110,8 @@ func getSignalRegisters(signals []v1alpha1.Signal) ([]func(*job.ExecutorSession)
 			registerFuncs = append(registerFuncs, resource.Resource)
 		case v1alpha1.SignalTypeCalendar:
 			registerFuncs = append(registerFuncs, calendar.Calendar)
+		case v1alpha1.SignalTypeWebhook:
+			registerFuncs = append(registerFuncs, webhook.Webhook)
 		default:
 			return registerFuncs, fmt.Errorf("%s signal type not supported", signal.GetType())
 		}

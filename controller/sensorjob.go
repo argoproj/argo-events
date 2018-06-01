@@ -24,6 +24,7 @@ import (
 
 	"github.com/blackrock/axis/common"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 var (
@@ -102,11 +103,47 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 		job.Spec.Template.ObjectMeta.Labels[common.LabelKeySensorControllerInstanceID] = soc.controller.Config.InstanceID
 	}
 
-	created, err := soc.controller.kubeClientset.BatchV1().Jobs(soc.s.ObjectMeta.Namespace).Create(&job)
+	createdJob, err := soc.controller.kubeClientset.BatchV1().Jobs(soc.s.ObjectMeta.Namespace).Create(&job)
 	if err != nil {
 		soc.log.Warnf("Failed to create executor job", zap.Error(err))
 		return err
 	}
-	soc.log.Infof("created signal executor job '%s'", created.Name)
+	soc.log.Infof("created signal executor job '%s'", createdJob.Name)
+
+	// If signal is of type Webhook, create a service backed by the job
+	for _, signal := range soc.s.Spec.Signals {
+		if signal.GetType() == v1alpha1.SignalTypeWebhook {
+			targetPort := signal.Webhook.Port
+			if signal.Webhook.Port == 0 {
+				targetPort = common.WebhookServiceTargetPort
+			}
+			webhookSvc := corev1.Service{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: common.CreateServiceSuffix(soc.s.Name),
+					Namespace: soc.s.Namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
+					},
+				},
+				Spec: corev1.ServiceSpec{
+					Type: corev1.ServiceTypeLoadBalancer,
+					Selector: createdJob.Labels,
+					Ports: []corev1.ServicePort{
+						{
+							Protocol: corev1.ProtocolTCP,
+							Port: common.WebhookServicePort,
+							TargetPort: intstr.FromInt(targetPort),
+						},
+					},
+				},
+			}
+			createdSvc, err := soc.controller.kubeClientset.CoreV1().Services(soc.s.ObjectMeta.Namespace).Create(&webhookSvc)
+			if err != nil {
+				soc.log.Warnf("Failed to create executor service", zap.Error(err))
+				return err
+			}
+			soc.log.Infof("Created executor service %s", createdSvc.Name)
+		}
+	}
 	return nil
 }
