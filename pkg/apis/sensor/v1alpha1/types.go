@@ -352,18 +352,7 @@ type S3Artifact struct {
 	S3Bucket `json:",inline" protobuf:"bytes,5,opt,name=s3Bucket"`
 	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
-	ARN      *ARN                        `json:"arn,omitempty" protobuf:"bytes,3,opt,name=arn"`
-	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,4,opt,name=filter"`
-}
-
-// ARN - holds ARN information that will be sent to the web service
-// ARN desciption can be found in http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
-type ARN struct {
-	Partition string `json:"partition" protobuf:"bytes,1,opt,name=partition"`
-	Service   string `json:"service" protobuf:"bytes,2,opt,name=service"`
-	Region    string `json:"region" protobuf:"bytes,3,opt,name=region"`
-	AccountID string `json:"accountID" protobuf:"bytes,4,opt,name=accountID"`
-	Resource  string `json:"resource" protobuf:"bytes,5,opt,name=resource"`
+	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
 }
 
 // S3Bucket contains information for an S3 Bucket

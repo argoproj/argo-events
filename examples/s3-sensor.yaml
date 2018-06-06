@@ -10,6 +10,7 @@ spec:
       artifact:
         s3:
           bucket: hello
+          event: s3:ObjectCreated:Put
           endpoint: artifacts-minio.default:9000
           insecure: true
           accessKey:
@@ -18,13 +19,6 @@ spec:
           secretKey:
             key: secretkey
             name: artifacts-minio
-          event: s3:ObjectCreated:Put
-          arn:
-            partition: minio
-            service: sqs
-            region: us-east-1
-            accountID: "1"
-            resource: nats
         stream:
           nats:
             url: nats://example-nats-cluster:4222
