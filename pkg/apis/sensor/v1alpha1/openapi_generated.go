@@ -29,7 +29,6 @@ import (
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP":              schema_pkg_apis_sensor_v1alpha1_AMQP(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ARN":               schema_pkg_apis_sensor_v1alpha1_ARN(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactLocation":  schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal":    schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal":    schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref),
@@ -91,50 +90,6 @@ func schema_pkg_apis_sensor_v1alpha1_AMQP(ref common.ReferenceCallback) common.O
 					},
 				},
 				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_ARN(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ARN - holds ARN information that will be sent to the web service ARN desciption can be found in http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html",
-				Properties: map[string]spec.Schema{
-					"partition": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"service": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"region": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"accountID": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"resource": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"partition", "service", "region", "accountID", "resource"},
 			},
 		},
 		Dependencies: []string{},
@@ -694,11 +649,6 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 							Format: "",
 						},
 					},
-					"arn": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ARN"),
-						},
-					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter"),
@@ -708,7 +658,7 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ARN", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

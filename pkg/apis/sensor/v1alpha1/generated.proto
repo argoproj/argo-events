@@ -40,20 +40,6 @@ message AMQP {
   optional string routingKey = 4;
 }
 
-// ARN - holds ARN information that will be sent to the web service
-// ARN desciption can be found in http://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html
-message ARN {
-  optional string partition = 1;
-
-  optional string service = 2;
-
-  optional string region = 3;
-
-  optional string accountID = 4;
-
-  optional string resource = 5;
-}
-
 // ArtifactLocation describes the location for an external artifact
 message ArtifactLocation {
   optional S3Artifact s3 = 1;
@@ -219,9 +205,7 @@ message S3Artifact {
 
   optional string event = 2;
 
-  optional ARN arn = 3;
-
-  optional S3Filter filter = 4;
+  optional S3Filter filter = 3;
 }
 
 // S3Bucket contains information for an S3 Bucket
