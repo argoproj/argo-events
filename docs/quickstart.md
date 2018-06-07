@@ -5,8 +5,7 @@ This is a guide to getting started with using Axis using Minikube.
 * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
 * Have a [kubeconfig](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/) file (default location is `~/.kube/config`).
 * Installed Minikube >v0.26.1
-* Installed Go >1.9
-* Properly setup the GOPATH. Follow this [go install guide](https://golang.org/doc/install).
+* Installed Go >1.9 and properly setup the [GOPATH](https://golang.org/doc/install)
 * Installed [dep](https://golang.github.io/dep/docs/installation.html), Go's dependency tool
 
 ## 1. Checkout project's master branch

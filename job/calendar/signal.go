@@ -83,9 +83,9 @@ func (c *calendar) handleEvents(events chan job.Event) {
 			timestamp: t,
 		}
 		// perform constraint checks
-		err := c.CheckConstraints(event.GetTimestamp())
-		if err != nil {
-			event.SetError(err)
+		ok := c.CheckConstraints(event.GetTimestamp())
+		if !ok {
+			event.SetError(job.ErrFailedTimeConstraint)
 		}
 		c.Log.Debug("sending calendar event", zap.String("nodeID", event.GetID()))
 		events <- event
