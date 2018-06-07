@@ -59,10 +59,9 @@ func (n *nats) listen(events chan job.Event) {
 				timestamp:     time.Now().UTC(),
 			}
 			// perform constraint checks
-			err := n.CheckConstraints(event.GetTimestamp())
-			n.Log.Debug("constraint check", zap.Error(err))
-			if err != nil {
-				event.SetError(err)
+			ok := n.CheckConstraints(event.GetTimestamp())
+			if !ok {
+				event.SetError(job.ErrFailedTimeConstraint)
 			}
 			n.Log.Debug("sending nat event", zap.String("nodeID", event.GetID()))
 			events <- event

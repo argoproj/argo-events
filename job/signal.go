@@ -17,6 +17,7 @@ limitations under the License.
 package job
 
 import (
+	"errors"
 	"time"
 
 	"go.uber.org/zap"
@@ -36,8 +37,8 @@ type Signal interface {
 	Stop() error
 
 	// CheckConstraints for the signal
-	// Returns a value of true, nil if the signal passes constraints
-	CheckConstraints(time.Time) error
+	// Returns a true if the signal passes constraints
+	CheckConstraints(time.Time) bool
 }
 
 // AbstractSignal is the base implementation of a signal
@@ -53,27 +54,27 @@ func (as *AbstractSignal) GetID() string {
 	return as.id
 }
 
+// ErrFailedTimeConstraint is the error for events that do not pass the CheckConstraints method
+var ErrFailedTimeConstraint = errors.New("failed time constraint check")
+
 // CheckConstraints for the signal
-// returns an error if the constraint check fails
-func (as *AbstractSignal) CheckConstraints(timeSnapshot time.Time) error {
-	return nil
+// returns false if the constraint check fails
+func (as *AbstractSignal) CheckConstraints(snapshot time.Time) bool {
 	//need to figure out why the constraints start and stop time are showing up with the same weird value thats causing this to be false
-	/*
-		tConstraints := as.Constraints.Time
-		as.Log.Debug("checking", zap.Time("timestamp", snapshot), zap.Time("start", tConstraints.Start.Time), zap.Time("stop", tConstraints.Stop.Time))
-		if tConstraints.Start.IsZero() {
-			if tConstraints.Stop.IsZero() {
-				// no time constraints set
-				return true
-			}
-			// stop contraint only set
-			return tConstraints.Stop.Time.After(snapshot)
-		}
+	tConstraints := as.Constraints.Time
+	as.Log.Debug("checking", zap.Time("timestamp", snapshot), zap.Time("start", tConstraints.Start.Time), zap.Time("stop", tConstraints.Stop.Time))
+	if tConstraints.Start.IsZero() {
 		if tConstraints.Stop.IsZero() {
-			// start constraint only set
-			return tConstraints.Start.Time.Before(snapshot)
+			// no time constraints set
+			return true
 		}
-		// both start and stop set
-		return tConstraints.Start.Time.Before(snapshot) && tConstraints.Stop.Time.After(snapshot)
-	*/
+		// stop contraint only set
+		return tConstraints.Stop.Time.After(snapshot)
+	}
+	if tConstraints.Stop.IsZero() {
+		// start constraint only set
+		return tConstraints.Start.Time.Before(snapshot)
+	}
+	// both start and stop set
+	return tConstraints.Start.Time.Before(snapshot) && tConstraints.Stop.Time.After(snapshot)
 }
