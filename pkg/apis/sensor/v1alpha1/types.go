@@ -37,6 +37,7 @@ const (
 	SignalTypeArtifact SignalType = "Artifact"
 	SignalTypeCalendar SignalType = "Calendar"
 	SignalTypeResource SignalType = "Resource"
+	SignalTypeWebhook  SignalType = "Webhook"
 )
 
 // StreamType is the type of a stream
@@ -137,8 +138,11 @@ type Signal struct {
 	// Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource
 	Resource *ResourceSignal `json:"resource,omitempty" protobuf:"bytes,9,opt,name=resource"`
 
+	// Webhook defines a HTTP notification dependency
+	Webhook *WebhookSignal `json:"webhook,omitempty" protobuf:"bytes,10,opt,name=webhook"`
+
 	// Constraints and rules governing tolerations of success and overrides
-	Constraints SignalConstraints `json:"constraints,omitempty" protobuf:"bytes,10,opt,name=constraints"`
+	Constraints SignalConstraints `json:"constraints,omitempty" protobuf:"bytes,11,opt,name=constraints"`
 }
 
 // ArtifactSignal describes an external object dependency
@@ -269,6 +273,17 @@ type Kafka struct {
 	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
 	// Partition of the kafka stream
 	Partition int32 `json:"partition" protobuf:"bytes,3,opt,name=partition"`
+}
+
+// WebhookSignal is a general purpose REST API
+type WebhookSignal struct {
+	// REST API endpoint
+	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+	// Port to listen on
+	Port int `json:"port" protobuf:"bytes,2,opt,name=port"`
+	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
+	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
+	Method string `json:"method" protobuf:"bytes,3,opt,name=method"`
 }
 
 // Message represents a message on a queue
@@ -403,6 +418,9 @@ func (signal *Signal) GetType() SignalType {
 	}
 	if signal.Calendar != nil {
 		return SignalTypeCalendar
+	}
+	if signal.Webhook != nil {
+		return SignalTypeWebhook
 	}
 	return "Unknown"
 }
