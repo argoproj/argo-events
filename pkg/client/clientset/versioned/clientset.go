@@ -18,7 +18,7 @@ limitations under the License.
 package versioned
 
 import (
-	axisv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
+	argoprojv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
 	glog "github.com/golang/glog"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -27,27 +27,27 @@ import (
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
-	AxisV1alpha1() axisv1alpha1.AxisV1alpha1Interface
+	ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface
 	// Deprecated: please explicitly pick a version if possible.
-	Axis() axisv1alpha1.AxisV1alpha1Interface
+	Argoproj() argoprojv1alpha1.ArgoprojV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
 // version included in a Clientset.
 type Clientset struct {
 	*discovery.DiscoveryClient
-	axisV1alpha1 *axisv1alpha1.AxisV1alpha1Client
+	argoprojV1alpha1 *argoprojv1alpha1.ArgoprojV1alpha1Client
 }
 
-// AxisV1alpha1 retrieves the AxisV1alpha1Client
-func (c *Clientset) AxisV1alpha1() axisv1alpha1.AxisV1alpha1Interface {
-	return c.axisV1alpha1
+// ArgoprojV1alpha1 retrieves the ArgoprojV1alpha1Client
+func (c *Clientset) ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface {
+	return c.argoprojV1alpha1
 }
 
-// Deprecated: Axis retrieves the default version of AxisClient.
+// Deprecated: Argoproj retrieves the default version of ArgoprojClient.
 // Please explicitly pick a version.
-func (c *Clientset) Axis() axisv1alpha1.AxisV1alpha1Interface {
-	return c.axisV1alpha1
+func (c *Clientset) Argoproj() argoprojv1alpha1.ArgoprojV1alpha1Interface {
+	return c.argoprojV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -66,7 +66,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	}
 	var cs Clientset
 	var err error
-	cs.axisV1alpha1, err = axisv1alpha1.NewForConfig(&configShallowCopy)
+	cs.argoprojV1alpha1, err = argoprojv1alpha1.NewForConfig(&configShallowCopy)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
-	cs.axisV1alpha1 = axisv1alpha1.NewForConfigOrDie(c)
+	cs.argoprojV1alpha1 = argoprojv1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -92,7 +92,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 // New creates a new Clientset for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
-	cs.axisV1alpha1 = axisv1alpha1.New(c)
+	cs.argoprojV1alpha1 = argoprojv1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

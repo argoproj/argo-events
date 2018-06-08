@@ -18,7 +18,7 @@ package sensor
 
 const (
 	// Group is the API Group
-	Group string = "core.events"
+	Group string = "argoproj.io"
 
 	// Sensor constants
 	Kind     string = "Sensor"

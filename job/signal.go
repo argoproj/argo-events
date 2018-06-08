@@ -60,7 +60,7 @@ var ErrFailedTimeConstraint = errors.New("failed time constraint check")
 // CheckConstraints for the signal
 // returns false if the constraint check fails
 func (as *AbstractSignal) CheckConstraints(snapshot time.Time) bool {
-	//need to figure out why the constraints start and stop time are showing up with the same weird value thats causing this to be false
+	// should figure out why the constraints start and stop time are showing up with the same weird values that are not zero valued
 	tConstraints := as.Constraints.Time
 	as.Log.Debug("checking", zap.Time("timestamp", snapshot), zap.Time("start", tConstraints.Start.Time), zap.Time("stop", tConstraints.Stop.Time))
 	if tConstraints.Start.IsZero() {

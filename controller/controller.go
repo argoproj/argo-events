@@ -217,6 +217,7 @@ func (c *SensorController) processNextJob() bool {
 	jobName, ok := pod.Labels[common.LabelJobName]
 	if !ok {
 		c.log.Warnf("pod unrelated to any sensor: %s", pod.ObjectMeta.Name)
+		return false
 	}
 
 	// TODO: currently we requeue the sensor on *any* job updates

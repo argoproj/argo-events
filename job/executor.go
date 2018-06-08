@@ -162,7 +162,7 @@ func (es *ExecutorSession) handleError(kubeClient kubernetes.Interface, name, na
 // first value is if we should stop the signal
 // second value is if the sensor is completely resolved
 func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
-	ssInterface := es.sensorClientset.AxisV1alpha1().Sensors(es.namespace)
+	ssInterface := es.sensorClientset.ArgoprojV1alpha1().Sensors(es.namespace)
 	s, err := ssInterface.Get(es.name, metav1.GetOptions{})
 	if err != nil {
 		// the sensor was most likely deleted manually - this is a problem, we exit the pod with status 1
