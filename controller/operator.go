@@ -100,7 +100,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 	}
 
-	err := soc.evaluateSensorJob()
+	err := soc.evaluateSensorPod()
 	if err != nil {
 		return err
 	}
@@ -148,23 +148,16 @@ func (soc *sOperationCtx) operate() error {
 	return nil
 }
 
-// evaluate the associated sensor executor job and update the node status
-// records all jobs which were observed resolved, which are labeled resolved=true after persisting the sensor
-func (soc *sOperationCtx) evaluateSensorJob() error {
+// evaluateSensorPod evaluates the associated sensor executor pod and updates the node status
+func (soc *sOperationCtx) evaluateSensorPod() error {
 	if soc.s.Status.Phase == "" {
 		soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
 		soc.needJobCreation = true
 		return nil
 	}
-	job, err := soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(common.CreateJobPrefix(soc.s.Name), metav1.GetOptions{})
-	if err != nil {
-		// the job was not found. it may have been deleted
-		soc.log.Warnf("encountered error attempting to get job: %s", soc.s.ObjectMeta.Name)
-		return err
-	}
 
 	// now get the pods for this job
-	podLabels := labels.Set(map[string]string{common.LabelJobName: job.Name})
+	podLabels := labels.Set(map[string]string{common.LabelKeySensor: soc.s.Name})
 	listOptions := metav1.ListOptions{LabelSelector: podLabels.AsSelector().String()}
 	pods, err := soc.controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).List(listOptions)
 	if err != nil {
@@ -189,7 +182,7 @@ func (soc *sOperationCtx) evaluateSensorJob() error {
 	case apiv1.PodPending:
 		soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
 	case apiv1.PodSucceeded:
-		soc.markSensorPhase(v1alpha1.NodePhaseSucceeded, true)
+		common.AddPodLabel(soc.controller.kubeClientset, pod.Name, pod.Namespace, common.LabelKeyResolved, "true")
 	case apiv1.PodFailed:
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, inferFailedPodCause(pod))
 	case apiv1.PodRunning:

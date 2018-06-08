@@ -56,11 +56,11 @@ func TestProcessNextJob(t *testing.T) {
 	controller.podInformer = controller.newPodInformer()
 
 	controller.podQueue.Add("hi")
-	res := controller.processNextJob()
+	res := controller.processNextPod()
 	assert.True(t, res)
 
 	controller.podQueue.ShutDown()
-	res = controller.processNextJob()
+	res = controller.processNextPod()
 	assert.False(t, res)
 }
 
