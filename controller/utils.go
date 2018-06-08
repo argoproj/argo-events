@@ -16,7 +16,9 @@ limitations under the License.
 
 package controller
 
-import "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+import (
+	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+)
 
 // getNodeByName returns a copy of the node from this sensor for the nodename
 // for signals this nodename should be the name of the signal

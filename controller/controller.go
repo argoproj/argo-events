@@ -182,11 +182,11 @@ func (c *SensorController) runWorker() {
 }
 
 func (c *SensorController) podWorker() {
-	for c.processNextJob() {
+	for c.processNextPod() {
 	}
 }
 
-func (c *SensorController) processNextJob() bool {
+func (c *SensorController) processNextPod() bool {
 	key, quit := c.podQueue.Get()
 	if quit {
 		return false
@@ -214,7 +214,7 @@ func (c *SensorController) processNextJob() bool {
 		return true
 	}
 
-	jobName, ok := pod.Labels[common.LabelJobName]
+	sensor, ok := pod.Labels[common.LabelKeySensor]
 	if !ok {
 		c.log.Warnf("pod unrelated to any sensor: %s", pod.ObjectMeta.Name)
 		return false
@@ -222,6 +222,6 @@ func (c *SensorController) processNextJob() bool {
 
 	// TODO: currently we requeue the sensor on *any* job updates
 	// But this can be made smarter to only requeue on changes we care about
-	c.ssQueue.Add(pod.ObjectMeta.Namespace + "/" + common.ParseJobPrefix(jobName))
+	c.ssQueue.Add(pod.ObjectMeta.Namespace + "/" + sensor)
 	return true
 }
