@@ -82,10 +82,9 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 				ObjectMeta: metav1.ObjectMeta{
 					GenerateName: common.CreateJobPrefix(soc.s.Name),
 					Labels: map[string]string{
-						common.LabelJobName:     common.CreateJobPrefix(soc.s.Name),
+						common.LabelKeySensor:   soc.s.Name,
 						common.LabelKeyResolved: "false",
 					},
-					Annotations: map[string]string{},
 					OwnerReferences: []metav1.OwnerReference{
 						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
 					},

@@ -44,8 +44,8 @@ const (
 	// LabelKeyResolved is the label to mark sensor jobs as having resolved all dependencies
 	LabelKeyResolved = sensor.FullName + "/resolved"
 
-	// LabelJobName is the label to mark sensor job pods in order to find them from the job
-	LabelJobName = sensor.FullName + "/job"
+	// LabelKeySensor is the label to mark sensor pods as associated with a certain sensor
+	LabelKeySensor = sensor.FullName + "/name"
 
 	// AnnotationKeyNodeMessage is the job metadata annotation key the job executor will use to communicate errors during execution
 	AnnotationKeyNodeMessage = sensor.FullName + "/node-message"

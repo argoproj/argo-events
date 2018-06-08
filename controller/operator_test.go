@@ -113,7 +113,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name + "-sensor-123",
 			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelJobName: soc.s.Name + "-sensor", common.LabelKeyResolved: "false"},
+			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
 		},
 		Spec: apiv1.PodSpec{},
 		Status: apiv1.PodStatus{
@@ -262,7 +262,7 @@ func TestEscalationSent(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name + "-sensor-123",
 			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelJobName: soc.s.Name + "-sensor", common.LabelKeyResolved: "false"},
+			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
 		},
 		Spec: apiv1.PodSpec{},
 		Status: apiv1.PodStatus{
