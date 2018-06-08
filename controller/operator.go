@@ -248,7 +248,7 @@ func (soc *sOperationCtx) persistUpdates() {
 	if !soc.updated {
 		return
 	}
-	sensorClient := soc.controller.sensorClientset.AxisV1alpha1().Sensors(soc.s.ObjectMeta.Namespace)
+	sensorClient := soc.controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.ObjectMeta.Namespace)
 	soc.s, err = sensorClient.Update(soc.s)
 	if err != nil {
 		soc.log.Warnf("error updating sensor: %v", err)

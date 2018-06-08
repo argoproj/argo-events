@@ -52,7 +52,7 @@ type sensors struct {
 }
 
 // newSensors returns a Sensors
-func newSensors(c *AxisV1alpha1Client, namespace string) *sensors {
+func newSensors(c *ArgoprojV1alpha1Client, namespace string) *sensors {
 	return &sensors{
 		client: c.RESTClient(),
 		ns:     namespace,

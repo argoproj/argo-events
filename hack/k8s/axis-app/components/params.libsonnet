@@ -11,9 +11,9 @@
       namespace: "default",
       replicas: 1,
       controllerName: "sensor-controller",
-      controllerImage: "aladdin/sensor-controller:latest",
+      controllerImage: "argoproj/sensor-controller:latest",
       executorName: "sensor-executor",
-      executorImage: "aladdin/executor-job:latest",
+      executorImage: "argoproj/executor-job:latest",
       executorResources: {
         limits: {
           cpu: "150m",

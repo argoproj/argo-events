@@ -24,22 +24,22 @@ import (
 	rest "k8s.io/client-go/rest"
 )
 
-type AxisV1alpha1Interface interface {
+type ArgoprojV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	SensorsGetter
 }
 
-// AxisV1alpha1Client is used to interact with features provided by the axis.sensor group.
-type AxisV1alpha1Client struct {
+// ArgoprojV1alpha1Client is used to interact with features provided by the argoproj.io group.
+type ArgoprojV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *AxisV1alpha1Client) Sensors(namespace string) SensorInterface {
+func (c *ArgoprojV1alpha1Client) Sensors(namespace string) SensorInterface {
 	return newSensors(c, namespace)
 }
 
-// NewForConfig creates a new AxisV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*AxisV1alpha1Client, error) {
+// NewForConfig creates a new ArgoprojV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ArgoprojV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -48,12 +48,12 @@ func NewForConfig(c *rest.Config) (*AxisV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AxisV1alpha1Client{client}, nil
+	return &ArgoprojV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new AxisV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new ArgoprojV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *AxisV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *ArgoprojV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -61,9 +61,9 @@ func NewForConfigOrDie(c *rest.Config) *AxisV1alpha1Client {
 	return client
 }
 
-// New creates a new AxisV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *AxisV1alpha1Client {
-	return &AxisV1alpha1Client{c}
+// New creates a new ArgoprojV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ArgoprojV1alpha1Client {
+	return &ArgoprojV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -81,7 +81,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *AxisV1alpha1Client) RESTClient() rest.Interface {
+func (c *ArgoprojV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

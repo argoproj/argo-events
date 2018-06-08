@@ -92,7 +92,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	fake := newFakeController()
 	defer fake.teardown()
 
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
@@ -179,7 +179,7 @@ func TestReRunSensor(t *testing.T) {
 			},
 		},
 	}
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
@@ -241,7 +241,7 @@ func TestEscalationSent(t *testing.T) {
 		}
 	}
 
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 

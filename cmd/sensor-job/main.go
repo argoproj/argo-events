@@ -56,7 +56,7 @@ func main() {
 		panic(fmt.Errorf("Unable to get job namespace from environment variable %s", common.EnvVarNamespace))
 	}
 
-	sensor, err := sensorClientset.AxisV1alpha1().Sensors(namespace).Get(common.ParseJobPrefix(jobName), metav1.GetOptions{})
+	sensor, err := sensorClientset.ArgoprojV1alpha1().Sensors(namespace).Get(common.ParseJobPrefix(jobName), metav1.GetOptions{})
 	if err != nil {
 		panic(err.Error())
 	}

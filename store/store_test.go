@@ -57,8 +57,6 @@ func TestGetArtifactReader(t *testing.T) {
 func TestDecodeAndUnstructure(t *testing.T) {
 	t.Run("sensor", decodeSensor)
 	t.Run("workflow", decodeWorkflow)
-	t.Run("deploymentv1", decodeDeploymentv1)
-	t.Run("jobv1", decodeJobv1)
 	t.Run("unsupported", decodeUnsupported)
 	t.Run("unknown", decodeUnknown)
 }
