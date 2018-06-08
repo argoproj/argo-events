@@ -27,8 +27,6 @@ import (
 	// import packages for the universal deserializer
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	ss_v1alpha1 "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
-	appsv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
 )
 
 // NOTE: custom resources must be manually added here
@@ -53,6 +51,7 @@ func FetchArtifact(reader ArtifactReader, gvk ss_v1alpha1.GroupVersionKind) (*un
 	return decodeAndUnstructure(obj, gvk)
 }
 
+// GetArtifactReader returns the ArtifactReader for this location
 func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
@@ -73,15 +72,11 @@ func decodeAndUnstructure(b []byte, gvk ss_v1alpha1.GroupVersionKind) (*unstruct
 	}
 
 	var obj interface{}
-	switch object.GetObjectKind().GroupVersionKind().GroupVersion() {
-	case ss_v1alpha1.SchemeGroupVersion:
+	switch object.GetObjectKind().GroupVersionKind() {
+	case ss_v1alpha1.SchemaGroupVersionKind:
 		obj = object.(*ss_v1alpha1.Sensor)
-	case wf_v1alpha1.SchemeGroupVersion:
+	case wf_v1alpha1.SchemaGroupVersionKind:
 		obj = object.(*wf_v1alpha1.Workflow)
-	case appsv1.SchemeGroupVersion:
-		obj = object.(*appsv1.Deployment)
-	case batchv1.SchemeGroupVersion:
-		obj = object.(*batchv1.Job)
 	default:
 		return nil, fmt.Errorf("unsupported object kind %s", object.GetObjectKind())
 	}

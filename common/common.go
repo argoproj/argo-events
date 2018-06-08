@@ -45,7 +45,7 @@ const (
 	LabelKeyResolved = sensor.FullName + "/resolved"
 
 	// LabelJobName is the label to mark sensor job pods in order to find them from the job
-	LabelJobName = "job-name"
+	LabelJobName = sensor.FullName + "/job"
 
 	// AnnotationKeyNodeMessage is the job metadata annotation key the job executor will use to communicate errors during execution
 	AnnotationKeyNodeMessage = sensor.FullName + "/node-message"

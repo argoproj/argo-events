@@ -124,9 +124,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Axis() sensor.Interface
+	Argoproj() sensor.Interface
 }
 
-func (f *sharedInformerFactory) Axis() sensor.Interface {
+func (f *sharedInformerFactory) Argoproj() sensor.Interface {
 	return sensor.New(f, f.namespace, f.tweakListOptions)
 }
