@@ -55,6 +55,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream":            schema_pkg_apis_sensor_v1alpha1_Stream(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.TimeConstraints":   schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Trigger":           schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal":     schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref),
 	}
 }
 
@@ -1003,6 +1004,12 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal"),
 						},
 					},
+					"webhook": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Webhook defines a HTTP notification dependency",
+							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"),
+						},
+					},
 					"constraints": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Constraints and rules governing tolerations of success and overrides",
@@ -1014,7 +1021,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints"},
+			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"},
 	}
 }
 
@@ -1134,5 +1141,40 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 		},
 		Dependencies: []string{
 			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.RetryStrategy"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "WebhookSignal is a general purpose REST API",
+				Properties: map[string]spec.Schema{
+					"endpoint": {
+						SchemaProps: spec.SchemaProps{
+							Description: "REST API endpoint",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Port to listen on",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+					"method": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"endpoint", "port", "method"},
+			},
+		},
+		Dependencies: []string{},
 	}
 }
