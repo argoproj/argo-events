@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"fmt"
 	"time"
+	"io/ioutil"
 )
 
 type webhook struct {
@@ -38,16 +39,22 @@ type webhook struct {
 func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
 	w.Log.Info("received a request from", zap.String("host", request.Host))
 	if request.Method == w.Webhook.Method {
-		w.payload = request.Body
+		payload, err := ioutil.ReadAll(request.Body)
+		if err != nil {
+			w.Log.Warn("unable to process request payload. Cause: %v", zap.Error(err))
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		event := &event{
 			webhook: w,
 			requestHost: request.Host,
 			timestamp: time.Now().UTC(),
+			payload: payload,
 		}
 		w.events <- event
 		writer.WriteHeader(http.StatusOK)
 	} else {
-		w.Log.Warn("HTTP method mismatch", zap.String("request method", request.Method), zap.String("signal method", w.Webhook.Method))
+		w.Log.Warn("HTTP method mismatch", zap.String("actual", request.Method), zap.String("expected", w.Webhook.Method))
 		writer.WriteHeader(http.StatusBadRequest)
 	}
 }

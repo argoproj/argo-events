@@ -25,6 +25,7 @@ import (
 type event struct {
 	job.AbstractEvent
 	webhook   *webhook
+	payload []byte
 	requestHost string
 	timestamp time.Time
 }
@@ -39,6 +40,10 @@ func (e *event) GetSource() string {
 
 func (e *event) GetSignal() job.Signal {
 	return e.webhook
+}
+
+func (e *event) GetBody() []byte {
+	return e.payload
 }
 
 func (e *event) GetTimestamp() time.Time {
