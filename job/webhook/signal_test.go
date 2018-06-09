@@ -26,11 +26,17 @@ import (
 	"net/http"
 	"fmt"
 	"strings"
-	"net"
 	"time"
+	"net"
 )
 
-var client = &http.Client{}
+var(
+	client = &http.Client{
+		Timeout: time.Duration(10 * time.Second),
+	}
+	payload = "{name: x}"
+)
+
 
 func createWebhookSignal(t *testing.T, httpMethod string, endpoint string) job.Signal {
 	es := job.New(nil, nil, zap.NewNop())
@@ -55,6 +61,9 @@ func createWebhookSignal(t *testing.T, httpMethod string, endpoint string) job.S
 func handleEvent(t *testing.T, testEventChan chan job.Event) {
 	event := <-testEventChan
 	assert.Equal(t, event.GetSource(), fmt.Sprintf("localhost:%d", common.WebhookServicePort))
+	body := event.GetBody()
+	assert.NotNil(t, body)
+	assert.Equal(t, string(body[:]), payload)
 }
 
 func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
@@ -64,22 +73,18 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 
 	go handleEvent(t, testEventChan)
 
-	conn, err := net.DialTimeout("tcp", fmt.Sprintf(":%d", common.WebhookServicePort), time.Second * 5)
-	// Server has started
-	if err == nil {
-		conn.Close()
-		request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", common.WebhookServicePort, endpoint), strings.NewReader("{name: x}"))
-		if err != nil {
-			assert.Fail(t, "unable to create http request", err)
-		}
-		resp, err := client.Do(request)
-		assert.Nil(t, err)
-		assert.Equal(t, resp.Status, "200 OK")
-		err = webhookSignal.Stop()
-		assert.Equal(t, err, nil)
-	} else {
-		assert.Fail(t, "unable to connect to http server")
+	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", common.WebhookServicePort, endpoint), strings.NewReader(payload))
+	if err != nil {
+		assert.Fail(t, "unable to create http request", err)
 	}
+	resp, err := client.Do(request)
+	if err != nil && err.(net.Error).Timeout() {
+		assert.Fail(t, "unable to connect to http server", err)
+	}
+	assert.Nil(t, err)
+	assert.Equal(t, resp.Status, "200 OK")
+	err = webhookSignal.Stop()
+	assert.Equal(t, err, nil)
 }
 
 func TestSignal(t *testing.T) {

@@ -52,6 +52,7 @@ The API specifications for Kubernetes Sensor CRDs. See the project's `examples` 
 | `artifact`   | *[ArtifactSignal](#artifact-signal)*     | Artifact based signal. currently S3 is the only type supported |
 | `calendar`   | *[CalendarSignal](#calendar-signal)*     | Time-based signal |
 | `resource`   | *[ResourceSignal](#resource-signal)*     | Kubernetes resource based signal     |
+| `webhook`    | *[WebhookSignal](#webhook-signal)*       | HTTP notification dependency   |
 | `constraints`| *[SignalConstraints](#signal-constraints)*  | Rules governing tolerations and accepted event-meta information |
 
 
@@ -140,14 +141,23 @@ The API specifications for Kubernetes Sensor CRDs. See the project's `examples` 
 | `recurrence` | *string* array                           | List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. This feature is not yet implemented. |
 
 
-### Resource Signal
 
+### Resource Signal
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
 | `namespace`  | *string*                                 | The Kubernetes namespace to watch for these resources |
 | `group`      | *string*                                 | The API Group as specified in the REST path and in the `apiVersion` field of a Kubernetes object, e.g. `core`, `batch`, etc. |
 | `version`    | *string*                                 | The version as part of the named group's REST path: `apis/$GROUP_NAME/$VERSION`, and `apiVersion: $GROUP_NAME/$VERSION` |
 | `kind`       | *string*                                 | The kind of the Kubernetes resource, as specified in the `TypeMeta` of the object |
+
+
+
+### Webhook Signal
+| Field        | Type                                     | Description                   |
+|--------------|------------------------------------------|-------------------------------|
+| `endpoint`  | *string*                                 | REST API endpoint |
+| `port`      | *int*                                    | HTTP server port to listen on |
+| `method`    | *string*                                 | HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 |
 
 
 ### Signal Constraints
