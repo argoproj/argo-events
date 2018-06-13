@@ -18,20 +18,22 @@ package webhook
 
 import (
 	"net/http"
+
 	"go.uber.org/zap"
 
-	"github.com/blackrock/axis/job"
-	"io"
-	"strconv"
 	"fmt"
-	"time"
+	"io"
 	"io/ioutil"
+	"strconv"
+	"time"
+
+	"github.com/blackrock/axis/job"
 )
 
 type webhook struct {
 	job.AbstractSignal
-	events chan job.Event
-	server *http.Server
+	events  chan job.Event
+	server  *http.Server
 	payload io.ReadCloser
 }
 
@@ -46,10 +48,10 @@ func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
 			return
 		}
 		event := &event{
-			webhook: w,
+			webhook:     w,
 			requestHost: request.Host,
-			timestamp: time.Now().UTC(),
-			payload: payload,
+			timestamp:   time.Now().UTC(),
+			payload:     payload,
 		}
 		w.events <- event
 		writer.WriteHeader(http.StatusOK)
@@ -62,7 +64,7 @@ func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
 // Start signal
 func (w *webhook) Start(events chan job.Event) error {
 	w.events = events
-	port := strconv.Itoa(w.AbstractSignal.Webhook.Port)
+	port := strconv.Itoa(int(w.AbstractSignal.Webhook.Port))
 	endpoint := w.AbstractSignal.Webhook.Endpoint
 	// Attach handler
 	http.HandleFunc(endpoint, w.handler)

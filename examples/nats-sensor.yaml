@@ -7,9 +7,11 @@ metadata:
 spec:
   signals:
     - name: hello
-      nats:
+      stream:
+        type: NATS
         url: nats://example-nats-cluster:4222
-        subject: hello
+        attributes:
+          subject: hello
   triggers:
     - name: "done-nat-stream"
       message:

@@ -32,9 +32,9 @@ import (
 	"github.com/blackrock/axis/job/mqtt"
 	"github.com/blackrock/axis/job/nats"
 	"github.com/blackrock/axis/job/resource"
+	"github.com/blackrock/axis/job/webhook"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
-	"github.com/blackrock/axis/job/webhook"
 )
 
 func main() {
@@ -83,29 +83,20 @@ func getSignalRegisters(signals []v1alpha1.Signal) ([]func(*job.ExecutorSession)
 	var registerFuncs []func(*job.ExecutorSession)
 	for _, signal := range signals {
 		switch signal.GetType() {
-		case v1alpha1.SignalTypeNats:
-			registerFuncs = append(registerFuncs, nats.NATS)
-		case v1alpha1.SignalTypeMQTT:
-			registerFuncs = append(registerFuncs, mqtt.MQTT)
-		case v1alpha1.SignalTypeAMQP:
-			registerFuncs = append(registerFuncs, amqp.AMQP)
-		case v1alpha1.SignalTypeKafka:
-			registerFuncs = append(registerFuncs, kafka.Kafka)
+		case v1alpha1.SignalTypeStream:
+			streamFactory, err := resolveSignalStreamFactory(*signal.Stream)
+			if err != nil {
+				return registerFuncs, err
+			}
+			registerFuncs = append(registerFuncs, streamFactory)
 		case v1alpha1.SignalTypeArtifact:
 			registerFuncs = append(registerFuncs, artifact.Artifact)
 			// for artifacts, need to find which stream to use
-			switch signal.Artifact.NotificationStream.GetType() {
-			case v1alpha1.StreamTypeNats:
-				registerFuncs = append(registerFuncs, nats.NATS)
-			case v1alpha1.StreamTypeMQTT:
-				registerFuncs = append(registerFuncs, mqtt.MQTT)
-			case v1alpha1.StreamTypeAMQP:
-				registerFuncs = append(registerFuncs, amqp.AMQP)
-			case v1alpha1.StreamTypeKafka:
-				registerFuncs = append(registerFuncs, kafka.Kafka)
-			default:
-				return registerFuncs, fmt.Errorf("artifact signal does not define a notification output stream")
+			streamFactory, err := resolveSignalStreamFactory(signal.Artifact.NotificationStream)
+			if err != nil {
+				return registerFuncs, err
 			}
+			registerFuncs = append(registerFuncs, streamFactory)
 		case v1alpha1.SignalTypeResource:
 			registerFuncs = append(registerFuncs, resource.Resource)
 		case v1alpha1.SignalTypeCalendar:
@@ -117,4 +108,19 @@ func getSignalRegisters(signals []v1alpha1.Signal) ([]func(*job.ExecutorSession)
 		}
 	}
 	return registerFuncs, nil
+}
+
+func resolveSignalStreamFactory(stream v1alpha1.Stream) (func(*job.ExecutorSession), error) {
+	switch stream.Type {
+	case nats.StreamTypeNats:
+		return nats.NATS, nil
+	case mqtt.StreamTypeMqtt:
+		return mqtt.MQTT, nil
+	case amqp.StreamTypeAMQP:
+		return amqp.AMQP, nil
+	case kafka.StreamTypeKafka:
+		return kafka.Kafka, nil
+	default:
+		return nil, fmt.Errorf("artifact signal does not define a notification output stream")
+	}
 }

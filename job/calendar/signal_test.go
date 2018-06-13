@@ -30,7 +30,7 @@ import (
 func TestCalendarStartFailures(t *testing.T) {
 	es := job.New(nil, nil, zap.NewNop())
 	Calendar(es)
-	calFactory, ok := es.GetFactory(v1alpha1.SignalTypeCalendar)
+	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
 	assert.True(t, ok, "calendar factory is not found")
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
@@ -42,11 +42,13 @@ func TestCalendarStartFailures(t *testing.T) {
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal := calFactory.Create(abstractSignal)
+	signal, err := calFactory.Create(abstractSignal)
+	assert.Nil(t, err, "fail to create real calendar signal from abstract recurrence spec")
+
 	testCh := make(chan job.Event)
 
 	// test unknown signal
-	err := signal.Start(testCh)
+	err = signal.Start(testCh)
 	assert.NotNil(t, err)
 
 	// test invalid parsing of schedule
@@ -60,7 +62,8 @@ func TestCalendarStartFailures(t *testing.T) {
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal = calFactory.Create(abstractSignal)
+	signal, err = calFactory.Create(abstractSignal)
+	assert.Nil(t, err, "failed to create real calendar signal from abstract schedule spec")
 	err = signal.Start(testCh)
 	assert.NotNil(t, err)
 
@@ -75,7 +78,8 @@ func TestCalendarStartFailures(t *testing.T) {
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal = calFactory.Create(abstractSignal)
+	signal, err = calFactory.Create(abstractSignal)
+	assert.Nil(t, err)
 	err = signal.Start(testCh)
 	assert.NotNil(t, err)
 }
@@ -83,7 +87,7 @@ func TestCalendarStartFailures(t *testing.T) {
 func TestScheduleCalendar(t *testing.T) {
 	es := job.New(nil, nil, zap.NewNop())
 	Calendar(es)
-	calFactory, ok := es.GetFactory(v1alpha1.SignalTypeCalendar)
+	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
 	assert.True(t, ok, "calendar factory is not found")
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
@@ -95,10 +99,11 @@ func TestScheduleCalendar(t *testing.T) {
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal := calFactory.Create(abstractSignal)
+	signal, err := calFactory.Create(abstractSignal)
+	assert.Nil(t, err)
 	testCh := make(chan job.Event)
 
-	err := signal.Start(testCh)
+	err = signal.Start(testCh)
 	assert.Nil(t, err)
 
 	time.Sleep(time.Millisecond)
@@ -118,7 +123,7 @@ func TestScheduleCalendar(t *testing.T) {
 func TestIntervalCalendar(t *testing.T) {
 	es := job.New(nil, nil, zap.NewNop())
 	Calendar(es)
-	calFactory, ok := es.GetFactory(v1alpha1.SignalTypeCalendar)
+	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
 	assert.True(t, ok, "calendar factory is not found")
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
@@ -130,10 +135,11 @@ func TestIntervalCalendar(t *testing.T) {
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal := calFactory.Create(abstractSignal)
+	signal, err := calFactory.Create(abstractSignal)
+	assert.Nil(t, err)
 	testCh := make(chan job.Event)
 
-	err := signal.Start(testCh)
+	err = signal.Start(testCh)
 	assert.Nil(t, err)
 
 	time.Sleep(time.Millisecond)

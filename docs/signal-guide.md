@@ -32,13 +32,6 @@ The `sensor-executor` is responsible for listening for various signals and updat
 
 ## Types of Signal Dependencies
 
-### AMQP
-[AMQP](https://www.amqp.org/) is a open standard messaging protocol (ISO/IEC 19464). There are a variety of broker implementations including, but not limited to the following:
-- [Apache ActiveMQ](http://activemq.apache.org/)
-- [Apache Qpid](https://qpid.apache.org/)
-- [StormMQ](http://stormmq.com/)
-- [RabbitMQ](https://www.rabbitmq.com/)
-
 ### Calendar
 Time-based signals can include signals based on a [cron]() schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event. Eventually, we hope to support a calendar-plugin or interface where users can configure special handling calendar/business logic.
 
@@ -46,30 +39,69 @@ Time-based signals can include signals based on a [cron]() schedule or an [inter
 Webhook offers a basic HTTP server. User can provide the server port and register the REST API endpoint.
 See Request Methods in RFC7231 to define the HTTP REST endpoint.  
 
-### MMQP
-[MMQP](http://mqtt.org/) is a M2M "Internet of Things" connectivity protocol (ISO/IEC PRF 20922) designed to be extremely lightweight and ideal for mobile applications. Some broker implementations can be found [here](https://github.com/mqtt/mqtt.github.io/wiki/brokers).
-
-### Kafka
-[Apache Kafka](https://kafka.apache.org/) is a distributed streaming platform. We use Shopify's [sarama](https://github.com/Shopify/sarama) client for consuming Kafka messages.
-
-### NATS
-[Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.
-
-#### NATS Operator
-The `NATS` [Operator](https://github.com/nats-io/nats-operator) manages `NATS` clusters on Kubernetes. NATS clusters are implemented as CRDs and the operator automates their creation and administration.
-
- 1. Create the natscluster.nats.io custom resource and nats operator
-```
-$ kubectl apply -f https://raw.githubusercontent.com/nats-io/nats-operator/master/example/deployment.yaml
-```
-
-2. Create a 1 node cluster
-```
-kubectl apply -f examples/natsCluster.yaml
-```
-
 ### Kubernetes Resources
 Axis supports watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy.
 
 ### S3
 Axis supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
+
+### Message Streams / Brokers
+Axis supports a generic specification for message stream signals. Currently, there is a push signals toward being extensible and one solution we are investigating is toward classifying signals with common definitions and building a plugin-based architecture for supporting the specific signal implementations. The following defines the currently supported types of stream signals and examples of how to define them.
+
+#### NATS
+[Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.
+```
+signals:
+    - name: nats-signal
+      stream:
+        type: NATS
+        url: nats://example-nats-cluster:4222
+        attributes:
+            subject: hello
+```
+
+
+#### MQTT
+[MMQP](http://mqtt.org/) is a M2M "Internet of Things" connectivity protocol (ISO/IEC PRF 20922) designed to be extremely lightweight and ideal for mobile applications. Some broker implementations can be found [here](https://github.com/mqtt/mqtt.github.io/wiki/brokers).
+```
+signals:
+    - name: mqtt-signal
+      stream:
+        type: MQTT
+        url: tcp://localhost:1883
+        attributes:
+            topic: hello
+```
+
+
+#### AMQP
+[AMQP](https://www.amqp.org/) is a open standard messaging protocol (ISO/IEC 19464). There are a variety of broker implementations including, but not limited to the following:
+- [Apache ActiveMQ](http://activemq.apache.org/)
+- [Apache Qpid](https://qpid.apache.org/)
+- [StormMQ](http://stormmq.com/)
+- [RabbitMQ](https://www.rabbitmq.com/)
+```
+signals:
+    - name: amqp-signal
+      stream:
+        type: AMQP
+        url: amqp://localhost:5672
+        attributes:
+            exchangeName: myExchangeName
+            exchangeType: fanout
+            routingKey: myRoutingKey
+```
+
+
+#### Kafka
+[Apache Kafka](https://kafka.apache.org/) is a distributed streaming platform. We use Shopify's [sarama](https://github.com/Shopify/sarama) client for consuming Kafka messages.
+```
+signals:
+    - name: kafka-signal
+      stream:
+        type: KAFKA
+        url: tcp://localhost:1883
+        attributes:
+            topic: hello
+            partition: "0"
+```

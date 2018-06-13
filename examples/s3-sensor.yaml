@@ -20,9 +20,10 @@ spec:
             key: secretkey
             name: artifacts-minio
         stream:
-          nats:
-            url: nats://example-nats-cluster:4222
-            subject: bucketevents
+          type: NATS
+          url: nats://example-nats-cluster:4222
+          attributes:
+            subject: hello
   triggers:
     - name: "done-nat-stream"
       message:
