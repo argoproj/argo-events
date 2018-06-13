@@ -57,6 +57,16 @@ func TestAddJobAnnotationAndLabels(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestAddPodAnnotationsAndLabels(t *testing.T) {
+	fakeKube := fake.NewSimpleClientset()
+
+	err := AddPodAnnotation(fakeKube, "podName", "default", "key", "value")
+	assert.Nil(t, err)
+
+	err = AddPodLabel(fakeKube, "PodName", "default", "key", "value")
+	assert.Nil(t, err)
+}
+
 func TestCreateJobPrefix(t *testing.T) {
 	prefix := CreateJobPrefix("test")
 	assert.Equal(t, "test-sensor", prefix)

@@ -34,13 +34,13 @@ import (
 
 // Factory declares the interface to create real signals from abstract signals
 type Factory interface {
-	Create(AbstractSignal) Signal
+	Create(AbstractSignal) (Signal, error)
 }
 
 // the registry is a key-value store that holds the various signal factories
 type registry struct {
 	lock      sync.Mutex
-	factories map[v1alpha1.SignalType]Factory
+	factories map[string]Factory
 }
 
 // ExecutorSession is the session for this sensor job executor
@@ -60,7 +60,7 @@ func New(kubeConfig *rest.Config, sensorClientset sensorclientset.Interface, log
 		kubeConfig:      kubeConfig,
 		sensorClientset: sensorClientset,
 		registry: registry{
-			factories: make(map[v1alpha1.SignalType]Factory),
+			factories: make(map[string]Factory),
 		},
 		log: log,
 	}
@@ -88,10 +88,20 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, signalRegisters []func(*
 	wg.Add(1)
 	go func() {
 		for _, rawSignal := range sensor.Spec.Signals {
-			registry, ok := es.GetFactory(rawSignal.GetType())
-			if !ok {
-				es.err = fmt.Errorf("Failed to instantiate %s registry for signal %s", rawSignal.GetType(), rawSignal.Name)
-				panic(es.err)
+			var registry Factory
+			var ok bool
+			if rawSignal.GetType() == v1alpha1.SignalTypeStream {
+				registry, ok = es.GetStreamFactory(rawSignal.Stream.Type)
+				if !ok {
+					es.err = fmt.Errorf("Failed to instantiate %s registry for signal %s", rawSignal.Stream.Type, rawSignal.Name)
+					panic(es.err)
+				}
+			} else {
+				registry, ok = es.GetCoreFactory(rawSignal.GetType())
+				if !ok {
+					es.err = fmt.Errorf("Failed to instantiate %s registry for signal %s", rawSignal.GetType(), rawSignal.Name)
+					panic(es.err)
+				}
 			}
 
 			abstractSignal := AbstractSignal{
@@ -100,10 +110,14 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, signalRegisters []func(*
 				Log:     es.log.With(zap.String("signal", rawSignal.Name)),
 				Session: es,
 			}
-			signal := registry.Create(abstractSignal)
+			signal, err := registry.Create(abstractSignal)
+			if err != nil {
+				es.err = err
+				abstractSignal.Log.Panic("failed to create", zap.String("type", string(rawSignal.GetType())), zap.Error(err))
+			}
 
 			// start the signals
-			err := signal.Start(events)
+			err = signal.Start(events)
 			if err != nil {
 				es.err = err
 				abstractSignal.Log.Panic("failed to start", zap.String("type", string(rawSignal.GetType())), zap.Error(err))
@@ -162,7 +176,7 @@ func (es *ExecutorSession) handleError(kubeClient kubernetes.Interface, name, na
 // first value is if we should stop the signal
 // second value is if the sensor is completely resolved
 func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
-	ssInterface := es.sensorClientset.AxisV1alpha1().Sensors(es.namespace)
+	ssInterface := es.sensorClientset.ArgoprojV1alpha1().Sensors(es.namespace)
 	s, err := ssInterface.Get(es.name, metav1.GetOptions{})
 	if err != nil {
 		// the sensor was most likely deleted manually - this is a problem, we exit the pod with status 1
@@ -208,18 +222,33 @@ func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
 	return true, updated.IsResolved(v1alpha1.NodeTypeSignal)
 }
 
-// AddFactory allows access to add a factory to the session registry
-func (es *ExecutorSession) AddFactory(sigType v1alpha1.SignalType, r Factory) {
+// AddCoreFactory allows access to add a core signal factory to the session registry
+func (es *ExecutorSession) AddCoreFactory(sigType v1alpha1.SignalType, r Factory) {
 	es.registry.lock.Lock()
 	defer es.registry.lock.Unlock()
-	es.registry.factories[sigType] = r
+	es.registry.factories[string(sigType)] = r
 }
 
-// GetFactory allows access to retrieve a factory from the session registry
-func (es *ExecutorSession) GetFactory(sigType v1alpha1.SignalType) (Factory, bool) {
+// AddStreamFactory allows access to add a stream signal factory to the session registry
+func (es *ExecutorSession) AddStreamFactory(streamType string, r Factory) {
 	es.registry.lock.Lock()
 	defer es.registry.lock.Unlock()
-	val, ok := es.registry.factories[sigType]
+	es.registry.factories[streamType] = r
+}
+
+// GetCoreFactory allows access to retrieve a core factory from the session registry
+func (es *ExecutorSession) GetCoreFactory(sigType v1alpha1.SignalType) (Factory, bool) {
+	es.registry.lock.Lock()
+	defer es.registry.lock.Unlock()
+	val, ok := es.registry.factories[string(sigType)]
+	return val, ok
+}
+
+// GetStreamFactory allows access to retrieve a stream factory from the session registry
+func (es *ExecutorSession) GetStreamFactory(streamType string) (Factory, bool) {
+	es.registry.lock.Lock()
+	defer es.registry.lock.Unlock()
+	val, ok := es.registry.factories[streamType]
 	return val, ok
 }
 

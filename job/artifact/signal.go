@@ -72,9 +72,9 @@ func (a *artifact) interceptFilterAndEnhanceStreamEvents(sendCh chan job.Event, 
 			if checkArtifactSignal(record, *a.AbstractSignal.Artifact) {
 				// ignore the constraints set for this guy as it's for a different signal
 				// perform constraint checks against the artifact signal
-				err := a.CheckConstraints(event.GetTimestamp())
-				if err != nil {
-					event.SetError(err)
+				ok := a.CheckConstraints(event.GetTimestamp())
+				if !ok {
+					event.SetError(job.ErrFailedTimeConstraint)
 				}
 				a.Log.Debug("sending artifact event", zap.String("nodeID", event.GetID()))
 				sendCh <- event

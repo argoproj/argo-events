@@ -1,17 +1,19 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: amqp-example
   labels:
-    sensors.core.events/controller-instanceid: axis
+    sensors.argoproj.io/controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      amqp:
+      stream:
+        type: AMQP
         url: amqp://localhost:5672
-        exchangeName: myExchangeName
-        exchangeType: fanout
-        routingKey: myRoutingKey
+        attributes:
+          exchangeName: myExchangeName
+          exchangeType: fanout
+          routingKey: myRoutingKey
   triggers:
     - name: "done-amqp-message"
       message:

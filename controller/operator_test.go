@@ -42,9 +42,10 @@ var sampleSensor = v1alpha1.Sensor{
 		Signals: []v1alpha1.Signal{
 			{
 				Name: "nats-test",
-				NATS: &v1alpha1.NATS{
-					URL:     "nats://sample-test:4222",
-					Subject: "testing-in",
+				Stream: &v1alpha1.Stream{
+					Type:       "NATS",
+					URL:        "nats://sample-test:4222",
+					Attributes: map[string]string{"subject": "testing-in"},
 				},
 			},
 			{
@@ -65,10 +66,9 @@ var sampleSensor = v1alpha1.Sensor{
 				Message: &v1alpha1.Message{
 					Body: "this is where the message body goes",
 					Stream: v1alpha1.Stream{
-						NATS: &v1alpha1.NATS{
-							URL:     "nats://sample-test:4222",
-							Subject: "testing-out",
-						},
+						Type:       "NATS",
+						URL:        "nats://sample-test:4222",
+						Attributes: map[string]string{"subject": "testing-out"},
 					},
 				},
 				Resource: &v1alpha1.ResourceObject{
@@ -92,7 +92,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	fake := newFakeController()
 	defer fake.teardown()
 
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
@@ -113,7 +113,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name + "-sensor-123",
 			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelJobName: soc.s.Name + "-sensor", common.LabelKeyResolved: "false"},
+			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
 		},
 		Spec: apiv1.PodSpec{},
 		Status: apiv1.PodStatus{
@@ -179,7 +179,7 @@ func TestReRunSensor(t *testing.T) {
 			},
 		},
 	}
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
@@ -215,10 +215,9 @@ func TestEscalationSent(t *testing.T) {
 		Message: v1alpha1.Message{
 			Body: "esclating this sensor on failure",
 			Stream: v1alpha1.Stream{
-				NATS: &v1alpha1.NATS{
-					URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-					Subject: "escalation",
-				},
+				Type:       "NATS",
+				URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+				Attributes: map[string]string{"subject": "escalation"},
 			},
 		},
 	}
@@ -241,7 +240,7 @@ func TestEscalationSent(t *testing.T) {
 		}
 	}
 
-	sensor, err := fake.sensorClientset.AxisV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
@@ -262,7 +261,7 @@ func TestEscalationSent(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name + "-sensor-123",
 			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelJobName: soc.s.Name + "-sensor", common.LabelKeyResolved: "false"},
+			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
 		},
 		Spec: apiv1.PodSpec{},
 		Status: apiv1.PodStatus{

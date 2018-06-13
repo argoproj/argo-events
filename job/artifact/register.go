@@ -17,6 +17,8 @@ limitations under the License.
 package artifact
 
 import (
+	"fmt"
+
 	"github.com/blackrock/axis/job"
 	"github.com/blackrock/axis/job/nats"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
@@ -25,40 +27,43 @@ import (
 
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
 	abstract.Log.Info("creating signal", zap.String("raw", abstract.Artifact.String()))
+	streamSignal := v1alpha1.Signal{
+		Stream: &abstract.Artifact.NotificationStream,
+	}
 	var streamFactory job.Factory
-	var streamSignal v1alpha1.Signal
 	var ok bool
-	switch abstract.Artifact.NotificationStream.GetType() {
-	case v1alpha1.StreamTypeNats:
-		streamFactory, ok = abstract.Session.GetFactory(v1alpha1.SignalTypeNats)
+	switch abstract.Artifact.NotificationStream.Type {
+	case nats.StreamTypeNats:
+		streamFactory, ok = abstract.Session.GetStreamFactory(nats.StreamTypeNats)
 		if !ok {
 			abstract.Log.Warn("failed to initialize NATS stream registry properly, attempting manual add")
 			nats.NATS(abstract.Session)
-			streamFactory, ok = abstract.Session.GetFactory(v1alpha1.SignalTypeNats)
-		}
-		streamSignal = v1alpha1.Signal{
-			NATS: abstract.Artifact.NotificationStream.NATS,
+			streamFactory, ok = abstract.Session.GetStreamFactory(nats.StreamTypeNats)
 		}
 	default:
-		panic("unknown stream type for artifact signal")
+		return nil, fmt.Errorf("unknown stream type for artifact signal")
 	}
 	if !ok {
-		panic("failed to find and/or initialize stream registry")
+		return nil, fmt.Errorf("failed to find and/or initialize stream registry")
 	}
 	streamAbstract := job.AbstractSignal{
 		Signal:  streamSignal,
 		Log:     abstract.Log,
 		Session: abstract.Session,
 	}
+	realStreamSignal, err := streamFactory.Create(streamAbstract)
+	if err != nil {
+		return nil, err
+	}
 	return &artifact{
 		AbstractSignal: abstract,
-		streamSignal:   streamFactory.Create(streamAbstract),
-	}
+		streamSignal:   realStreamSignal,
+	}, nil
 }
 
 // Artifact will be added to the executor session
 func Artifact(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeArtifact, &factory{})
+	es.AddCoreFactory(v1alpha1.SignalTypeArtifact, &factory{})
 }

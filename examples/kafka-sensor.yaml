@@ -1,16 +1,18 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: kafka-example
   labels:
-    sensors.core.events/controller-instanceid: axis
+    sensors.argoproj.io/controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      kafka:
+      stream:
+        type: KAFKA
         url: localhost:9092
-        topic: hello
-        partition: 0
+        attributes:
+          topic: hello
+          partition: "0"
   triggers:
     - name: "done-kafka-stream"
       message:

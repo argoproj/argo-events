@@ -58,7 +58,7 @@ func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
 			options.LabelSelector = labelSelector.String()
 		},
 	)
-	informer := sensorInformerFactory.Axis().V1alpha1().Sensors().Informer()
+	informer := sensorInformerFactory.Argoproj().V1alpha1().Sensors().Informer()
 	informer.AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
@@ -88,7 +88,8 @@ func (c *SensorController) newPodInformer() cache.SharedIndexInformer {
 	restClient := c.kubeClientset.CoreV1().RESTClient()
 	// selectors
 	fieldSelector := fields.ParseSelectorOrDie("status.phase!=Pending")
-	labelSelector := labels.NewSelector().Add(c.instanceIDReq())
+	incompleteReq, _ := labels.NewRequirement(common.LabelKeyResolved, selection.Equals, []string{"false"})
+	labelSelector := labels.NewSelector().Add(*incompleteReq).Add(c.instanceIDReq())
 
 	informer := cache.NewSharedIndexInformer(
 		&cache.ListWatch{

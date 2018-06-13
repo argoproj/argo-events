@@ -31,7 +31,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/job/nats"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 )
 
@@ -45,7 +44,7 @@ func TestSignal(t *testing.T) {
 	}
 	es := job.New(nil, nil, zap.NewNop())
 	Artifact(es)
-	artifactFactory, ok := es.GetFactory(v1alpha1.SignalTypeArtifact)
+	artifactFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeArtifact)
 	assert.True(t, ok, "artifact factory is not found")
 
 	abstractSignal := job.AbstractSignal{
@@ -65,24 +64,23 @@ func TestSignal(t *testing.T) {
 					},
 				},
 				NotificationStream: v1alpha1.Stream{
-					NATS: &v1alpha1.NATS{
-						URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-						Subject: "test",
-					},
+					Type:       "NATS",
+					URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+					Attributes: map[string]string{"subject": "test"},
 				},
 			},
 		},
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal := artifactFactory.Create(abstractSignal)
 
-	nats.NATS(es) // now register NATS factory and re-create
-	signal = artifactFactory.Create(abstractSignal)
+	signal, err := artifactFactory.Create(abstractSignal)
+	assert.Nil(t, err)
+
 	testCh := make(chan job.Event)
 
 	// failure to start because of connecting to NATS
-	err := signal.Start(testCh)
+	err = signal.Start(testCh)
 	assert.NotNil(t, err)
 
 	// run an embedded gnats server
@@ -92,7 +90,7 @@ func TestSignal(t *testing.T) {
 	assert.Nil(t, err)
 
 	// send a misformed message
-	conn, err := natsio.Connect(abstractSignal.Signal.Artifact.NotificationStream.NATS.URL)
+	conn, err := natsio.Connect(abstractSignal.Signal.Artifact.NotificationStream.URL)
 	defer conn.Close()
 	assert.Nil(t, err)
 	err = conn.Publish("test", []byte("hello, world"))
@@ -129,7 +127,8 @@ func TestSignal(t *testing.T) {
 	assert.Nil(t, err)
 
 	abstractSignal.Artifact.S3.Filter = nil
-	signal = artifactFactory.Create(abstractSignal)
+	signal, err = artifactFactory.Create(abstractSignal)
+	assert.Nil(t, err)
 	signal.Start(testCh)
 	// now filter out a bucket notification
 	err = conn.Publish("test", []byte(filteredNotification))

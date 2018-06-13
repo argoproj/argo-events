@@ -28,16 +28,12 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP":              schema_pkg_apis_sensor_v1alpha1_AMQP(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactLocation":  schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal":    schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal":    schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.EscalationPolicy":  schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.GroupVersionKind":  schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka":             schema_pkg_apis_sensor_v1alpha1_Kafka(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT":              schema_pkg_apis_sensor_v1alpha1_MQTT(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message":           schema_pkg_apis_sensor_v1alpha1_Message(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS":              schema_pkg_apis_sensor_v1alpha1_NATS(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NodeStatus":        schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceFilter":    schema_pkg_apis_sensor_v1alpha1_ResourceFilter(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceObject":    schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
@@ -56,44 +52,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.TimeConstraints":   schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Trigger":           schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal":     schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref),
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_AMQP(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "AMQP (Advanced Message Queueing Protocol) defines app layer message oriented middleware. See ISO/IEC 19464 for reference. A RabbitMQ client is used to interface",
-				Properties: map[string]spec.Schema{
-					"url": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"exchangeName": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"exchangeType": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"routingKey": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
-			},
-		},
-		Dependencies: []string{},
 	}
 }
 
@@ -164,7 +122,7 @@ func schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref common.ReferenceCallback
 					},
 					"recurrence": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. RRULE is a recurrence rule which defines a repeating pattern for recurring events RDATE defines the list of DATE-TIME values for recurring events EXDATE defines the list of DATE-TIME exceptions for recurring events the combination of these rules and dates combine to form a set of date times",
+							Description: "List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. RRULE is a recurrence rule which defines a repeating pattern for recurring events. RDATE defines the list of DATE-TIME values for recurring events. EXDATE defines the list of DATE-TIME exceptions for recurring events. the combination of these rules and dates combine to form a set of date times. NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -188,7 +146,7 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state",
+				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state. NOTE: this functionality is currently experimental, but we believe serves as an important future enhancement around handling lifecycle error conditions of a sensor.",
 				Properties: map[string]spec.Schema{
 					"level": {
 						SchemaProps: spec.SchemaProps{
@@ -216,7 +174,7 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling",
+				Description: "GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.",
 				Properties: map[string]spec.Schema{
 					"group": {
 						SchemaProps: spec.SchemaProps{
@@ -238,69 +196,6 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 					},
 				},
 				Required: []string{"group", "version", "kind"},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_Kafka(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Kafka defines a Kafka stream",
-				Properties: map[string]spec.Schema{
-					"url": {
-						SchemaProps: spec.SchemaProps{
-							Description: "URL of the kafka message broker",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"topic": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Topic of the kafka stream",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"partition": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Partition of the kafka stream",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-				},
-				Required: []string{"url", "topic", "partition"},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_MQTT(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "MQTT (Message Queuing Telemetry Transport) is an ISO standard (ISO/IEC PRF 20922)[2] publish-subscribe-based messaging protocol",
-				Properties: map[string]spec.Schema{
-					"url": {
-						SchemaProps: spec.SchemaProps{
-							Description: "URL of the message broker",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"topic": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Topic of interest",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"url", "topic"},
 			},
 		},
 		Dependencies: []string{},
@@ -334,39 +229,11 @@ func schema_pkg_apis_sensor_v1alpha1_Message(ref common.ReferenceCallback) commo
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_NATS(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "NATS contains information to interact with a NATS messaging system",
-				Properties: map[string]spec.Schema{
-					"url": {
-						SchemaProps: spec.SchemaProps{
-							Description: "URL is the exposed service for client connections to a NATS cluster",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"subject": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Subject is the name of the subject to subscribe to",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"url", "subject"},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "NodeStatus describes the status for an individual node in the sensor's FSM",
+				Description: "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for signal or a trigger.",
 				Properties: map[string]spec.Schema{
 					"id": {
 						SchemaProps: spec.SchemaProps{
@@ -546,7 +413,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref common.ReferenceCallback
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ResourceSignal refers to a dependency on a k8 resource",
+				Description: "ResourceSignal refers to a dependency on a k8s resource.",
 				Properties: map[string]spec.Schema{
 					"group": {
 						SchemaProps: spec.SchemaProps{
@@ -861,13 +728,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"escalation": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Escalation describes the policy for signal failures and violations of the dependency's constraints",
+							Description: "Escalation describes the policy for signal failures and violations of the dependency's constraints.",
 							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
 					"repeat": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repeat is a flag that determines if the sensor status should be reset after completion - expiremental for real-time use cases",
+							Description: "Repeat is a flag that determines if the sensor status should be reset after completion. NOTE: functionality is currently expiremental and part of an initiative to define a more concrete pattern or cycle for sensor reptition.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -885,7 +752,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SensorStatus contains information about the status of a sensor",
+				Description: "SensorStatus contains information about the status of a sensor.",
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
@@ -915,7 +782,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 					},
 					"nodes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor",
+							Description: "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Schema: &spec.Schema{
@@ -957,33 +824,15 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 					},
 					"deadline": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated This trumps the recurrence patterns of calendar signal and allows a calendar signal to have a strict defined life After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed",
+							Description: "Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated. Note: this functionality is not yet respected, but it's theoretical behavior is as follows: This trumps the recurrence patterns of calendar signals and allows any signal to have a strict defined life. After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed and proper escalations should proceed.",
 							Type:        []string{"integer"},
 							Format:      "int64",
 						},
 					},
-					"nats": {
+					"stream": {
 						SchemaProps: spec.SchemaProps{
-							Description: "NATS defines a stream based dependency",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS"),
-						},
-					},
-					"mqtt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "MQTT (Message Queueing Telemetry Transport) defines a pubsub-based messaging broker and topic. See ISO/IEC PRF 20922 for reference.",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT"),
-						},
-					},
-					"amqp": {
-						SchemaProps: spec.SchemaProps{
-							Description: "AMQP (Advanced Message Queueing Protocol) defines app layer message oriented middleware. See ISO/IEC 19464 for reference.",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP"),
-						},
-					},
-					"kafka": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kafka defines a kafka stream",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka"),
+							Description: "Stream defines a message stream dependency",
+							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"),
 						},
 					},
 					"artifact": {
@@ -1021,7 +870,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"},
+			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"},
 	}
 }
 
@@ -1029,7 +878,7 @@ func schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref common.ReferenceCallb
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SignalConstraints defines constraints for a dependent signal",
+				Description: "SignalConstraints defines constraints for a dependent signal.",
 				Properties: map[string]spec.Schema{
 					"time": {
 						SchemaProps: spec.SchemaProps{
@@ -1051,31 +900,39 @@ func schema_pkg_apis_sensor_v1alpha1_Stream(ref common.ReferenceCallback) common
 			SchemaProps: spec.SchemaProps{
 				Description: "Stream describes a queue stream resource",
 				Properties: map[string]spec.Schema{
-					"nats": {
+					"type": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS"),
+							Description: "Type of the stream resource",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"mqtt": {
+					"url": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT"),
+							Description: "URL is the exposed endpoint for client connections to this service",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"amqp": {
+					"attributes": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP"),
-						},
-					},
-					"kafka": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka"),
+							Description: "Attributes contains additional fields specific to each service implementation",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
+				Required: []string{"type", "url"},
 			},
 		},
-		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.AMQP", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Kafka", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.MQTT", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NATS"},
+		Dependencies: []string{},
 	}
 }
 

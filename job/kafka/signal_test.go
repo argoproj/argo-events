@@ -41,9 +41,10 @@ func TestSignal(t *testing.T) {
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
 			Name: "kafka-test",
-			Kafka: &v1alpha1.Kafka{
-				URL:   "localhost",
-				Topic: "unknown",
+			Stream: &v1alpha1.Stream{
+				Type:       "KAFKA",
+				URL:        "localhost",
+				Attributes: map[string]string{"topic": "unknown"},
 			},
 		},
 		Log:     zap.NewNop(),
@@ -51,8 +52,10 @@ func TestSignal(t *testing.T) {
 	}
 	signal := &kafka{
 		AbstractSignal: abstractSignal,
-		stop:           make(chan struct{}),
 		consumer:       consumer,
+		stop:           make(chan struct{}),
+		topic:          "unknown",
+		partition:      0,
 	}
 	testCh := make(chan job.Event)
 
@@ -67,8 +70,8 @@ func TestSignal(t *testing.T) {
 
 	// success
 	consumer.SetTopicMetadata(map[string][]int32{"test": []int32{0}})
-	abstractSignal.Kafka.Topic = "test"
-	signal.AbstractSignal = abstractSignal
+	signal.topic = "test"
+	signal.partition = 0
 
 	err = signal.Start(testCh)
 	assert.Nil(t, err)

@@ -90,6 +90,44 @@ func addJobMetadata(c kubernetes.Interface, field, jobName, namespace, key, valu
 	return err
 }
 
+// AddPodAnnotation adds an annotation to a pod
+func AddPodAnnotation(c kubernetes.Interface, podName, namespace, key, value string) error {
+	return addPodMetadata(c, "annotations", podName, namespace, key, value)
+}
+
+// AddPodLabel adds an label to a pod
+func AddPodLabel(c kubernetes.Interface, podName, namespace, key, value string) error {
+	return addPodMetadata(c, "labels", podName, namespace, key, value)
+}
+
+// addPodMetadata is helper to either add a job label or annotation to the job
+func addPodMetadata(c kubernetes.Interface, field, podName, namespace, key, value string) error {
+	metadata := map[string]interface{}{
+		"metadata": map[string]interface{}{
+			field: map[string]string{
+				key: value,
+			},
+		},
+	}
+	var err error
+	patch, err := json.Marshal(metadata)
+	if err != nil {
+		return err
+	}
+	for attempt := 0; attempt < 5; attempt++ {
+		_, err = c.CoreV1().Pods(namespace).Patch(podName, types.MergePatchType, patch)
+		if err != nil {
+			if !errors.IsConflict(err) {
+				return err
+			}
+		} else {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+	return err
+}
+
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
 func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)

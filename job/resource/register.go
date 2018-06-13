@@ -24,15 +24,15 @@ import (
 
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
 	abstract.Log.Info("creating signal", zap.String("raw", abstract.Resource.String()))
 	return &resource{
 		AbstractSignal: abstract,
 		kubeConfig:     abstract.Session.GetKubeConfig(),
-	}
+	}, nil
 }
 
 // Resource will be added to the executor session
 func Resource(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeResource, &factory{})
+	es.AddCoreFactory(v1alpha1.SignalTypeResource, &factory{})
 }

@@ -17,44 +17,47 @@ limitations under the License.
 package webhook
 
 import (
+	"fmt"
+	"net"
+	"net/http"
+	"strings"
 	"testing"
+	"time"
+
+	"github.com/blackrock/axis/common"
 	"github.com/blackrock/axis/job"
-	"go.uber.org/zap"
 	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"github.com/blackrock/axis/common"
-	"net/http"
-	"fmt"
-	"strings"
-	"time"
-	"net"
+	"go.uber.org/zap"
 )
 
-var(
+var (
 	client = &http.Client{
 		Timeout: time.Duration(10 * time.Second),
 	}
 	payload = "{name: x}"
 )
 
-
 func createWebhookSignal(t *testing.T, httpMethod string, endpoint string) job.Signal {
 	es := job.New(nil, nil, zap.NewNop())
 	Webhook(es)
-	webhookFactory, ok := es.GetFactory(v1alpha1.SignalTypeWebhook)
+	webhookFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeWebhook)
 	assert.True(t, ok, "webhook factory not found")
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
 			Webhook: &v1alpha1.WebhookSignal{
-				Port: common.WebhookServiceTargetPort,
+				Port:     common.WebhookServiceTargetPort,
 				Endpoint: endpoint,
-				Method: httpMethod,
+				Method:   httpMethod,
 			},
 		},
-		Log: zap.NewNop(),
+		Log:     zap.NewNop(),
 		Session: es,
 	}
-	webhookSignal := webhookFactory.Create(abstractSignal)
+	webhookSignal, err := webhookFactory.Create(abstractSignal)
+	if err != nil {
+		assert.Fail(t, "unable to create real webhook signal from abstract spec")
+	}
 	return webhookSignal
 }
 

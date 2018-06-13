@@ -27,14 +27,19 @@ type amqp struct {
 	job.AbstractSignal
 	conn     *amqplib.Connection
 	delivery <-chan amqplib.Delivery
+
+	//attribute fields
+	exchangeName string
+	exchangeType string
+	routingKey   string
 }
 
 func (a *amqp) Start(events chan job.Event) error {
 	var err error
 	//todo: add support for passing in config with credentials
-	a.conn, err = amqplib.Dial(a.AMQP.URL)
+	a.conn, err = amqplib.Dial(a.Stream.URL)
 	if err != nil {
-		a.Log.Warn("failed to connect to RabbitMQ", zap.String("url", a.AMQP.URL))
+		a.Log.Warn("failed to connect to RabbitMQ", zap.String("url", a.Stream.URL))
 		return err
 	}
 
@@ -44,9 +49,9 @@ func (a *amqp) Start(events chan job.Event) error {
 		return err
 	}
 
-	err = ch.ExchangeDeclare(a.AMQP.ExchangeName, a.AMQP.ExchangeType, true, false, false, false, nil)
+	err = ch.ExchangeDeclare(a.exchangeName, a.exchangeType, true, false, false, false, nil)
 	if err != nil {
-		a.Log.Warn("failed to declare RabbitMQ exchange", zap.String("name", a.AMQP.ExchangeName), zap.String("type", a.AMQP.ExchangeType))
+		a.Log.Warn("failed to declare RabbitMQ exchange", zap.String("name", a.exchangeName), zap.String("type", a.exchangeType))
 		return err
 	}
 
@@ -56,9 +61,9 @@ func (a *amqp) Start(events chan job.Event) error {
 		return err
 	}
 
-	err = ch.QueueBind(q.Name, a.AMQP.RoutingKey, a.AMQP.ExchangeName, false, nil)
+	err = ch.QueueBind(q.Name, a.routingKey, a.exchangeName, false, nil)
 	if err != nil {
-		a.Log.Warn("failed to bind RabbitMQ exchange to queue", zap.String("queueName", q.Name), zap.String("exchangeName", a.AMQP.ExchangeName), zap.String("key", a.AMQP.RoutingKey))
+		a.Log.Warn("failed to bind RabbitMQ exchange to queue", zap.String("queueName", q.Name), zap.String("exchangeName", a.exchangeName), zap.String("key", a.routingKey))
 		return err
 	}
 	a.delivery, err = ch.Consume(q.Name, "", true, false, false, false, nil)
@@ -82,9 +87,9 @@ func (a *amqp) listen(events chan job.Event) {
 			delivery: msg,
 		}
 		// perform constraint checks
-		err := a.CheckConstraints(event.GetTimestamp())
-		if err != nil {
-			event.SetError(err)
+		ok := a.CheckConstraints(event.GetTimestamp())
+		if !ok {
+			event.SetError(job.ErrFailedTimeConstraint)
 		}
 		a.Log.Debug("sending amqp event", zap.String("nodeID", event.GetID()))
 		events <- event
