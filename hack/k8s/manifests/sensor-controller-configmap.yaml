@@ -8,7 +8,8 @@ data:
   config: |
     namespace: default
     serviceAccount: axis
-    executorImage: aladdin/sensor-executor:latest
+    instanceID: axis
+    executorImage: argoproj/sensor-executor:latest
     executorResources:
       limits:
         cpu: 150m

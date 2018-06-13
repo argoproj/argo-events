@@ -30,25 +30,11 @@ type SignalType string
 
 // possible types of signals or inputs
 const (
-	SignalTypeAMQP     SignalType = "AMQP"
-	SignalTypeMQTT     SignalType = "MQTT"
-	SignalTypeNats     SignalType = "NATS"
-	SignalTypeKafka    SignalType = "Kafka"
+	SignalTypeStream   SignalType = "Stream"
 	SignalTypeArtifact SignalType = "Artifact"
 	SignalTypeCalendar SignalType = "Calendar"
 	SignalTypeResource SignalType = "Resource"
 	SignalTypeWebhook  SignalType = "Webhook"
-)
-
-// StreamType is the type of a stream
-type StreamType string
-
-// possible types of streams
-const (
-	StreamTypeAMQP  StreamType = "AMQP"
-	StreamTypeMQTT  StreamType = "MQTT"
-	StreamTypeNats  StreamType = "NATS"
-	StreamTypeKafka StreamType = "Kafka"
 )
 
 // NodeType is the type of a node
@@ -71,6 +57,7 @@ const (
 	NodePhaseInit       NodePhase = "Init"       // the node is initializing
 	NodePhaseUnresolved NodePhase = "Unresolved" // the node is unresolved - timeout has been reached or constraints exceeded
 	NodePhaseError      NodePhase = "Error"      // the node has encountered an error in processing
+	NodePhaseNew        NodePhase = ""           // the node is new
 )
 
 // Sensor is the definition of a sensor resource
@@ -100,10 +87,12 @@ type SensorSpec struct {
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
-	// Escalation describes the policy for signal failures and violations of the dependency's constraints
+	// Escalation describes the policy for signal failures and violations of the dependency's constraints.
 	Escalation EscalationPolicy `json:"escalation,omitempty" protobuf:"bytes,3,opt,name=escalation"`
 
-	// Repeat is a flag that determines if the sensor status should be reset after completion - expiremental for real-time use cases
+	// Repeat is a flag that determines if the sensor status should be reset after completion.
+	// NOTE: functionality is currently expiremental and part of an initiative to define
+	// a more concrete pattern or cycle for sensor reptition.
 	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
 }
 
@@ -112,37 +101,30 @@ type Signal struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
-	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated
-	// This trumps the recurrence patterns of calendar signal and allows a calendar signal to have a strict defined life
+	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated.
+	// Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
+	// This trumps the recurrence patterns of calendar signals and allows any signal to have a strict defined life.
 	// After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed
+	// and proper escalations should proceed.
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
-	// NATS defines a stream based dependency
-	NATS *NATS `json:"nats,omitempty" protobuf:"bytes,3,opt,name=nats"`
-
-	// MQTT (Message Queueing Telemetry Transport) defines a pubsub-based messaging broker and topic. See ISO/IEC PRF 20922 for reference.
-	MQTT *MQTT `json:"mqtt,omitempty" protobuf:"bytes,4,opt,name=mqtt"`
-
-	// AMQP (Advanced Message Queueing Protocol) defines app layer message oriented middleware. See ISO/IEC 19464 for reference.
-	AMQP *AMQP `json:"amqp,omitempty" protobuf:"bytes,5,opt,name=amqp"`
-
-	// Kafka defines a kafka stream
-	Kafka *Kafka `json:"kafka,omitempty" protobuf:"bytes,6,opt,name=kafka"`
+	// Stream defines a message stream dependency
+	Stream *Stream `json:"stream,omitempty" protobuf:"bytes,3,opt,name=stream"`
 
 	// artifact defines an external file dependency
-	Artifact *ArtifactSignal `json:"artifact,omitempty" protobuf:"bytes,7,opt,name=artifact"`
+	Artifact *ArtifactSignal `json:"artifact,omitempty" protobuf:"bytes,4,opt,name=artifact"`
 
 	// Calendar defines a time based dependency
-	Calendar *CalendarSignal `json:"calendar,omitempty" protobuf:"bytes,8,opt,name=calendar"`
+	Calendar *CalendarSignal `json:"calendar,omitempty" protobuf:"bytes,5,opt,name=calendar"`
 
 	// Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource
-	Resource *ResourceSignal `json:"resource,omitempty" protobuf:"bytes,9,opt,name=resource"`
+	Resource *ResourceSignal `json:"resource,omitempty" protobuf:"bytes,6,opt,name=resource"`
 
 	// Webhook defines a HTTP notification dependency
-	Webhook *WebhookSignal `json:"webhook,omitempty" protobuf:"bytes,10,opt,name=webhook"`
+	Webhook *WebhookSignal `json:"webhook,omitempty" protobuf:"bytes,7,opt,name=webhook"`
 
 	// Constraints and rules governing tolerations of success and overrides
-	Constraints SignalConstraints `json:"constraints,omitempty" protobuf:"bytes,11,opt,name=constraints"`
+	Constraints SignalConstraints `json:"constraints,omitempty" protobuf:"bytes,8,opt,name=constraints"`
 }
 
 // ArtifactSignal describes an external object dependency
@@ -163,29 +145,30 @@ type CalendarSignal struct {
 	Interval string `json:"interval" protobuf:"bytes,2,opt,name=interval"`
 
 	// List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
-	// RRULE is a recurrence rule which defines a repeating pattern for recurring events
-	// RDATE defines the list of DATE-TIME values for recurring events
-	// EXDATE defines the list of DATE-TIME exceptions for recurring events
-	// the combination of these rules and dates combine to form a set of date times
+	// RRULE is a recurrence rule which defines a repeating pattern for recurring events.
+	// RDATE defines the list of DATE-TIME values for recurring events.
+	// EXDATE defines the list of DATE-TIME exceptions for recurring events.
+	// the combination of these rules and dates combine to form a set of date times.
+	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
 	Recurrence []string `json:"recurrence" protobuf:"bytes,3,rep,name=recurrence"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
-// to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling
+// to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
 type GroupVersionKind struct {
 	Group   string `json:"group" protobuf:"bytes,1,opt,name=group"`
 	Version string `json:"version" protobuf:"bytes,2,opt,name=version"`
 	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
 }
 
-// ResourceSignal refers to a dependency on a k8 resource
+// ResourceSignal refers to a dependency on a k8s resource.
 type ResourceSignal struct {
 	GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
 	Namespace        string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
 	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 }
 
-// SignalConstraints defines constraints for a dependent signal
+// SignalConstraints defines constraints for a dependent signal.
 type SignalConstraints struct {
 	// Time constraints on the signal
 	Time TimeConstraints `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
@@ -232,55 +215,24 @@ type ResourceObject struct {
 
 // Stream describes a queue stream resource
 type Stream struct {
-	NATS  *NATS  `json:"nats,omitempty" protobuf:"bytes,1,opt,name=nats"`
-	MQTT  *MQTT  `json:"mqtt,omitempty" protobuf:"bytes,2,opt,name=mqtt"`
-	AMQP  *AMQP  `json:"amqp,omitempty" protobuf:"bytes,3,opt,name=amqp"`
-	Kafka *Kafka `json:"kafka,omitempty" protobuf:"bytes,4,opt,name=kafka"`
-}
+	// Type of the stream resource
+	Type string `json:"type" protobuf:"bytes,1,opt,name=type"`
 
-// NATS contains information to interact with a NATS messaging system
-type NATS struct {
-	// URL is the exposed service for client connections to a NATS cluster
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+	// URL is the exposed endpoint for client connections to this service
+	URL string `json:"url" protobuf:"bytes,2,opt,name=url"`
 
-	// Subject is the name of the subject to subscribe to
-	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
-}
-
-// MQTT (Message Queuing Telemetry Transport) is an ISO standard (ISO/IEC PRF 20922)[2] publish-subscribe-based messaging protocol
-type MQTT struct {
-	// URL of the message broker
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
-
-	// Topic of interest
-	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
-}
-
-// AMQP (Advanced Message Queueing Protocol) defines app layer message oriented middleware. See ISO/IEC 19464 for reference.
-// A RabbitMQ client is used to interface
-type AMQP struct {
-	URL          string `json:"url" protobuf:"bytes,1,opt,name=url"`
-	ExchangeName string `json:"exchangeName" protobuf:"bytes,2,opt,name=exchangeName"`
-	ExchangeType string `json:"exchangeType" protobuf:"bytes,3,opt,name=exchangeType"`
-	RoutingKey   string `json:"routingKey" protobuf:"bytes,4,opt,name=routingKey"`
-}
-
-// Kafka defines a Kafka stream
-type Kafka struct {
-	// URL of the kafka message broker
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
-	// Topic of the kafka stream
-	Topic string `json:"topic" protobuf:"bytes,2,opt,name=topic"`
-	// Partition of the kafka stream
-	Partition int32 `json:"partition" protobuf:"bytes,3,opt,name=partition"`
+	// Attributes contains additional fields specific to each service implementation
+	Attributes map[string]string `json:"attributes,omitempty" protobuf:"bytes,3,rep,name=attributes"`
 }
 
 // WebhookSignal is a general purpose REST API
 type WebhookSignal struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+
 	// Port to listen on
-	Port int `json:"port" protobuf:"bytes,2,opt,name=port"`
+	Port int32 `json:"port" protobuf:"bytes,2,opt,name=port"`
+
 	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
 	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
 	Method string `json:"method" protobuf:"bytes,3,opt,name=method"`
@@ -295,10 +247,13 @@ type Message struct {
 }
 
 // RetryStrategy represents a strategy for retrying operations
+// TODO: implement me
 type RetryStrategy struct {
 }
 
-// EscalationPolicy describes the policy for escalating sensors in an Error state
+// EscalationPolicy describes the policy for escalating sensors in an Error state.
+// NOTE: this functionality is currently experimental, but we believe serves as an
+// important future enhancement around handling lifecycle error conditions of a sensor.
 type EscalationPolicy struct {
 	// Level is the degree of importance
 	Level string `json:"level" protobuf:"bytes,1,opt,name=level"`
@@ -307,7 +262,7 @@ type EscalationPolicy struct {
 	Message Message `json:"message" protobuf:"bytes,2,opt,name=message"`
 }
 
-// SensorStatus contains information about the status of a sensor
+// SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	// Phase is the high-level summary of the sensor
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
@@ -322,14 +277,15 @@ type SensorStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 
 	// Nodes is a mapping between a node ID and the node's status
-	// it records the states for the FSM of this sensor
+	// it records the states for the FSM of this sensor.
 	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
 
 	// Escalated is a flag for whether this sensor was escalated
 	Escalated bool `json:"escalated,omitempty" protobuf:"bytes,6,opt,name=escalated"`
 }
 
-// NodeStatus describes the status for an individual node in the sensor's FSM
+// NodeStatus describes the status for an individual node in the sensor's FSM.
+// A single node can represent the status for signal or a trigger.
 type NodeStatus struct {
 	// ID is a unique identifier of a node within a sensor
 	// It is a hash of the node name
@@ -401,14 +357,8 @@ func (a *ArtifactLocation) HasLocation() bool {
 
 // GetType returns the type of this signal
 func (signal *Signal) GetType() SignalType {
-	if signal.NATS != nil {
-		return SignalTypeNats
-	}
-	if signal.MQTT != nil {
-		return SignalTypeMQTT
-	}
-	if signal.AMQP != nil {
-		return SignalTypeAMQP
+	if signal.Stream != nil {
+		return SignalTypeStream
 	}
 	if signal.Resource != nil {
 		return SignalTypeResource
@@ -421,23 +371,6 @@ func (signal *Signal) GetType() SignalType {
 	}
 	if signal.Webhook != nil {
 		return SignalTypeWebhook
-	}
-	return "Unknown"
-}
-
-// GetType returns the type of this stream
-func (stream *Stream) GetType() StreamType {
-	if stream.NATS != nil {
-		return StreamTypeNats
-	}
-	if stream.MQTT != nil {
-		return StreamTypeMQTT
-	}
-	if stream.AMQP != nil {
-		return StreamTypeAMQP
-	}
-	if stream.Kafka != nil {
-		return StreamTypeKafka
 	}
 	return "Unknown"
 }

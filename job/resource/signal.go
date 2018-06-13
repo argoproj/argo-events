@@ -125,9 +125,9 @@ func (r *resource) listen(events chan job.Event, w watch.Interface) {
 			event.SetError(err)
 		}
 
-		err := r.CheckConstraints(event.GetTimestamp())
-		if err != nil {
-			event.SetError(err)
+		ok := r.CheckConstraints(event.GetTimestamp())
+		if !ok {
+			event.SetError(job.ErrFailedTimeConstraint)
 		}
 
 		if r.passFilters(itemObj, r.Resource.Filter) {

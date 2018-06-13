@@ -30,18 +30,21 @@ type nats struct {
 	stop             chan struct{}
 	natsSubscription *natsio.Subscription
 	msgCh            chan *natsio.Msg
+
+	//attribute fields
+	subject string
 }
 
 // Start listening for NATS signals and send them on the events channel
 func (n *nats) Start(events chan job.Event) error {
-	n.Log.Info("starting", zap.String("url", n.NATS.URL), zap.String("subject", n.NATS.Subject))
-	natsConn, err := natsio.Connect(n.NATS.URL)
+	n.Log.Info("starting", zap.String("url", n.Stream.URL), zap.String("subject", n.subject))
+	natsConn, err := natsio.Connect(n.Stream.URL)
 	if err != nil {
-		return fmt.Errorf("failed to connect to nats cluster url %s. Cause: %+v", n.NATS.URL, err.Error())
+		return fmt.Errorf("failed to connect to nats cluster url %s. Cause: %+v", n.Stream.URL, err.Error())
 	}
-	n.natsSubscription, err = natsConn.ChanSubscribe(n.NATS.Subject, n.msgCh)
+	n.natsSubscription, err = natsConn.ChanSubscribe(n.subject, n.msgCh)
 	if err != nil {
-		return fmt.Errorf("failed to subscribe to nats subject %s. Cause: %+v", n.NATS.Subject, err.Error())
+		return fmt.Errorf("failed to subscribe to nats subject %s. Cause: %+v", n.subject, err.Error())
 	}
 
 	go n.listen(events)
@@ -59,10 +62,9 @@ func (n *nats) listen(events chan job.Event) {
 				timestamp:     time.Now().UTC(),
 			}
 			// perform constraint checks
-			err := n.CheckConstraints(event.GetTimestamp())
-			n.Log.Debug("constraint check", zap.Error(err))
-			if err != nil {
-				event.SetError(err)
+			ok := n.CheckConstraints(event.GetTimestamp())
+			if !ok {
+				event.SetError(job.ErrFailedTimeConstraint)
 			}
 			n.Log.Debug("sending nat event", zap.String("nodeID", event.GetID()))
 			events <- event
@@ -74,7 +76,7 @@ func (n *nats) listen(events chan job.Event) {
 
 func (n *nats) Stop() error {
 	defer close(n.msgCh)
-	n.Log.Info("stopping", zap.String("url", n.NATS.URL), zap.String("subject", n.NATS.Subject))
+	n.Log.Info("stopping", zap.String("url", n.Stream.URL), zap.String("subject", n.subject))
 	n.stop <- struct{}{}
 	return n.natsSubscription.Unsubscribe()
 }

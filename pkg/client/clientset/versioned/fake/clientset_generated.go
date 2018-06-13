@@ -19,8 +19,8 @@ package fake
 
 import (
 	clientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
-	axisv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
-	fakeaxisv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1/fake"
+	argoprojv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
+	fakeargoprojv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -61,12 +61,12 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 
 var _ clientset.Interface = &Clientset{}
 
-// AxisV1alpha1 retrieves the AxisV1alpha1Client
-func (c *Clientset) AxisV1alpha1() axisv1alpha1.AxisV1alpha1Interface {
-	return &fakeaxisv1alpha1.FakeAxisV1alpha1{Fake: &c.Fake}
+// ArgoprojV1alpha1 retrieves the ArgoprojV1alpha1Client
+func (c *Clientset) ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface {
+	return &fakeargoprojv1alpha1.FakeArgoprojV1alpha1{Fake: &c.Fake}
 }
 
-// Axis retrieves the AxisV1alpha1Client
-func (c *Clientset) Axis() axisv1alpha1.AxisV1alpha1Interface {
-	return &fakeaxisv1alpha1.FakeAxisV1alpha1{Fake: &c.Fake}
+// Argoproj retrieves the ArgoprojV1alpha1Client
+func (c *Clientset) Argoproj() argoprojv1alpha1.ArgoprojV1alpha1Interface {
+	return &fakeargoprojv1alpha1.FakeArgoprojV1alpha1{Fake: &c.Fake}
 }

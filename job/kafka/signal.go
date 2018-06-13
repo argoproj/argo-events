@@ -29,22 +29,26 @@ type kafka struct {
 	consumer          sarama.Consumer
 	partitionConsumer sarama.PartitionConsumer
 	stop              chan struct{}
+
+	// attribute fields
+	topic     string
+	partition int32
 }
 
 func (k *kafka) Start(events chan job.Event) error {
 	var err error
-	availablePartitions, err := k.consumer.Partitions(k.Kafka.Topic)
+	availablePartitions, err := k.consumer.Partitions(k.topic)
 	if err != nil {
-		return fmt.Errorf(fmt.Sprintf("unable to get available partitions for kafka topic '%s'. cause: %s", k.Kafka.Topic, err.Error()))
+		return fmt.Errorf(fmt.Sprintf("unable to get available partitions for kafka topic '%s'. cause: %s", k.topic, err.Error()))
 	}
 
 	if ok := k.verifyPartitionAvailable(availablePartitions); !ok {
-		return fmt.Errorf(fmt.Sprintf("partition %v does not exist for topic '%s'", k.Kafka.Partition, k.Kafka.Topic))
+		return fmt.Errorf(fmt.Sprintf("partition %v does not exist for topic '%s'", k.partition, k.topic))
 	}
 
-	k.partitionConsumer, err = k.consumer.ConsumePartition(k.Kafka.Topic, k.Kafka.Partition, sarama.OffsetNewest)
+	k.partitionConsumer, err = k.consumer.ConsumePartition(k.topic, k.partition, sarama.OffsetNewest)
 	if err != nil {
-		return fmt.Errorf(fmt.Sprintf("failed to create partition consumer for topic '%s' and partition: %v. cause: %s", k.Kafka.Topic, k.Kafka.Partition, err.Error()))
+		return fmt.Errorf(fmt.Sprintf("failed to create partition consumer for topic '%s' and partition: %v. cause: %s", k.topic, k.partition, err.Error()))
 	}
 
 	go k.listen(events)
@@ -73,9 +77,9 @@ func (k *kafka) listen(events chan job.Event) {
 				kafkaMsg: msg,
 			}
 			// perform constraint checks
-			err := k.CheckConstraints(event.GetTimestamp())
-			if err != nil {
-				event.SetError(err)
+			ok := k.CheckConstraints(event.GetTimestamp())
+			if !ok {
+				event.SetError(job.ErrFailedTimeConstraint)
 			}
 			k.Log.Debug("sending kafka event", zap.String("nodeID", event.GetID()))
 			events <- event
@@ -95,7 +99,7 @@ func (k *kafka) listen(events chan job.Event) {
 
 func (k *kafka) verifyPartitionAvailable(partitions []int32) bool {
 	for _, p := range partitions {
-		if k.Kafka.Partition == p {
+		if k.partition == p {
 			return true
 		}
 	}

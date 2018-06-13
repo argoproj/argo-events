@@ -1,9 +1,9 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: s3-example
   labels:
-    sensors.core.events/controller-instanceid: axis
+    sensors.argoproj.io/controller-instanceid: axis
 spec:
   signals:
     - name: minioS3
@@ -20,9 +20,10 @@ spec:
             key: secretkey
             name: artifacts-minio
         stream:
-          nats:
-            url: nats://example-nats-cluster:4222
-            subject: bucketevents
+          type: NATS
+          url: nats://example-nats-cluster:4222
+          attributes:
+            subject: hello
   triggers:
     - name: "done-nat-stream"
       message:

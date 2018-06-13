@@ -1,15 +1,17 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: mqtt-example
   labels:
-    sensors.core.events/controller-instanceid: axis
+    sensors.argoproj.io/controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      mqtt:
+      stream:
+        type: MQTT
         url: tcp://localhost:1883
-        topic: hello
+        attributes:
+          topic: hello
   triggers:
     - name: "done-mqtt-stream"
       message:

@@ -62,13 +62,13 @@ func NewFilteredSensorInformer(client versioned.Interface, namespace string, res
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AxisV1alpha1().Sensors(namespace).List(options)
+				return client.ArgoprojV1alpha1().Sensors(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AxisV1alpha1().Sensors(namespace).Watch(options)
+				return client.ArgoprojV1alpha1().Sensors(namespace).Watch(options)
 			},
 		},
 		&sensor_v1alpha1.Sensor{},

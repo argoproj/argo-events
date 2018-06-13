@@ -45,10 +45,7 @@ The API specifications for Kubernetes Sensor CRDs. See the project's `examples` 
 |--------------|------------------------------------------|-------------------------------|
 | `name`       | *string*                                 | Unique name for this dependencies |
 | `deadline`   | *int64*                                  | Duration in seconds after the *startedAt* time in which the signal is terminated (currently not implemented) |
-| `nats`       | *[NATS](#nats)*                          | [NATS](https://nats.io/documentation/) stream signal |
-| `mqtt`       | *[MQTT](#mqtt)*                          | [MQTT](http://mqtt.org/) stream signal |
-| `amqp`       | *[AMQP](#amqp)*                          | [AMQP](https://www.amqp.org/) stream signal |
-| `kafka`      | *[KAFKA](#kafka)*                        | [KAFKA](https://kafka.apache.org/) stream signal |
+| `stream`     | *[Stream](#stream-v1alpha1-event)*       | An arbitrary message stream signal |
 | `artifact`   | *[ArtifactSignal](#artifact-signal)*     | Artifact based signal. currently S3 is the only type supported |
 | `calendar`   | *[CalendarSignal](#calendar-signal)*     | Time-based signal |
 | `resource`   | *[ResourceSignal](#resource-signal)*     | Kubernetes resource based signal     |
@@ -76,10 +73,9 @@ The API specifications for Kubernetes Sensor CRDs. See the project's `examples` 
 
 | Field        | Type                                     | Description                   |
 |--------------|------------------------------------------|-------------------------------|
-| `nats`       | *[NATS](#nats)*                          | [NATS](https://nats.io/documentation/) stream |
-| `mqtt`       | *[MQTT](#mqtt)*                          | [MQTT](http://mqtt.org/) stream |
-| `amqp`       | *[AMQP](#amqp)*                          | [AMQP](https://www.amqp.org/) stream |
-| `kafka`      | *[KAFKA](#kafka)*                        | [KAFKA](https://kafka.apache.org/) stream |
+| `type`       | *string*                                 | The type of the stream        |
+| `url`        | *string*                                 | The url for client connections to the service |
+| `attributes` | map *string* -> *string*                 | A map of the additional fields or properties specific to each service implementation |
 
 ### ResourceObject
 
@@ -91,37 +87,6 @@ The API specifications for Kubernetes Sensor CRDs. See the project's `examples` 
 | `kind`       | *string*                                 | The kind of the Kubernetes resource, as specified in the `TypeMeta` of the object |
 | `labels`     | map *string* -> *string*                 | The labels to apply to this resource |
 | `s3`         | *[S3](#s3-artifact)*                     | The S3 Artifact location of the resource file |
-
-### NATS
-
-| Field        | Type                                     | Description                   |
-|--------------|------------------------------------------|-------------------------------|
-| `url`        | *string*                                 | The url for client connections to the NATS cluster |
-| `subject`    | *string*                                 | The subject on which to receive messages |
-
-### MQTT
-
-| Field        | Type                                     | Description                   |
-|--------------|------------------------------------------|-------------------------------|
-| `url`        | *string*                                 | The url of the MQTT message broker |
-| `topic  `    | *string*                                 | The topic on which to receive messages |
-
-### AMQP
-
-| Field        | Type                                     | Description                   |
-|--------------|------------------------------------------|-------------------------------|
-| `url`        | *string*                                 | The url of the AMQP message broker |
-| `exchangeName` | *string*                               | The name of the exchange |
-| `exchangeType` | *string*                               | The type of the exchange, e.g. direct, fanout |
-| `routingKey` | *string*                                 | A list of words delimited by dots. If the exchange is a `topic` exchange, the routingKey must be provided. The routing key specifies some features connected to the messages being received. As many words as you like, up to the limit of 255 bytes. |
-
-### Kafka
-
-| Field        | Type                                     | Description                   |
-|--------------|------------------------------------------|-------------------------------|
-| `url`        | *string*                                 | The url of the Kafka message broker |
-| `topic`      | *string*                                 | The topic on which to consume messages |
-| `partition`  | *int32*                                  | The partition on which to consume messages. If you wish to gaurantee consistency and availability, partitions only work as long as you are producing to one partition and consuming from one partition. This means that a single consumer should be assigned to read from this specific partition. For more information, see this [blog post](https://sookocheff.com/post/kafka/kafka-in-a-nutshell/) |
 
 
 ### Artifact Signal

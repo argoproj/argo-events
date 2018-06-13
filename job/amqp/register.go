@@ -17,23 +17,45 @@ limitations under the License.
 package amqp
 
 import (
+	"fmt"
+
 	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	amqplib "github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 
+const (
+	// StreamTypeAMQP defines the exact string representation for AMQP stream types
+	StreamTypeAMQP  = "AMQP"
+	exchangeNameKey = "exchangeName"
+	exchangeTypeKey = "exchangeType"
+	routingKeyKey   = "routingKey"
+)
+
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
-	abstract.Log.Info("creating signal", zap.String("raw", abstract.NATS.String()))
-	return &amqp{
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
+	abstract.Log.Info("creating signal", zap.String("type", abstract.Stream.Type))
+	amqp := &amqp{
 		AbstractSignal: abstract,
 		delivery:       make(<-chan amqplib.Delivery),
 	}
+	// parse attributes
+	var ok bool
+	if amqp.exchangeName, ok = abstract.Stream.Attributes[exchangeNameKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, exchangeNameKey)
+	}
+	if amqp.exchangeType, ok = abstract.Stream.Attributes[exchangeTypeKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, exchangeTypeKey)
+	}
+	if amqp.routingKey, ok = abstract.Stream.Attributes[routingKeyKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, routingKeyKey)
+	}
+
+	return amqp, nil
 }
 
 // AMQP will be added to the executor session
 func AMQP(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeAMQP, &factory{})
+	es.AddStreamFactory(StreamTypeAMQP, &factory{})
 }

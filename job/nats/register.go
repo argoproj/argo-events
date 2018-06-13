@@ -17,24 +17,37 @@ limitations under the License.
 package nats
 
 import (
+	"fmt"
+
 	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	natsio "github.com/nats-io/go-nats"
 	"go.uber.org/zap"
 )
 
+const (
+	// StreamTypeNats defines the exact string representation for NATS stream types
+	StreamTypeNats = "NATS"
+	subjectKey     = "subject"
+)
+
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
-	abstract.Log.Info("creating signal", zap.String("raw", abstract.NATS.String()))
-	return &nats{
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
+	abstract.Log.Info("creating signal", zap.String("type", abstract.Stream.Type))
+	n := &nats{
 		AbstractSignal: abstract,
 		stop:           make(chan struct{}),
 		msgCh:          make(chan *natsio.Msg),
 	}
+	var ok bool
+	if n.subject, ok = abstract.Stream.Attributes[subjectKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, subjectKey)
+	}
+
+	return n, nil
 }
 
 // NATS will be added to the executor session
 func NATS(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeNats, &factory{})
+	es.AddStreamFactory(StreamTypeNats, &factory{})
 }

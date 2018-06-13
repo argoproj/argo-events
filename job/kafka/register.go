@@ -18,29 +18,51 @@ package kafka
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/Shopify/sarama"
 	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	"go.uber.org/zap"
+)
+
+const (
+	// StreamTypeKafka defines the exact string representation for Kafka stream types
+	StreamTypeKafka = "KAFKA"
+	topicKey        = "topic"
+	partitionKey    = "partition"
 )
 
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
-	abstract.Log.Info("creating signal", zap.String("raw", abstract.Kafka.String()))
-	consumer, err := sarama.NewConsumer([]string{abstract.Kafka.URL}, nil)
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
+	abstract.Log.Info("creating signal", zap.String("type", abstract.Stream.Type))
+	consumer, err := sarama.NewConsumer([]string{abstract.Stream.URL}, nil)
 	if err != nil {
-		panic(fmt.Errorf("failed to connect to kafka cluster at %s", abstract.Kafka.URL))
+		return nil, fmt.Errorf("failed to connect to kafka cluster at %s", abstract.Stream.URL)
 	}
-	return &kafka{
+	k := &kafka{
 		AbstractSignal: abstract,
 		stop:           make(chan struct{}),
 		consumer:       consumer,
 	}
+	var ok bool
+	if k.topic, ok = abstract.Stream.Attributes[topicKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, topicKey)
+	}
+	var pString string
+	if pString, ok = abstract.Stream.Attributes[partitionKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, partitionKey)
+	}
+	pInt, err := strconv.ParseInt(pString, 10, 32)
+	if err != nil {
+		return nil, err
+	}
+	k.partition = int32(pInt)
+
+	return k, nil
 }
 
 // Kafka will be added to the executor session
 func Kafka(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeKafka, &factory{})
+	es.AddStreamFactory(StreamTypeKafka, &factory{})
 }

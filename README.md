@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/blackrock/axis.svg?branch=master)](https://travis-ci.org/blackrock/axis) [![License Apache 2.0](https://img.shields.io/badge/License-Apache2-brightgreen.svg)](https://img.shields.io/badge/License-Apache2-brightgreen.svg)
 
 ## What is Axis?
-Axis is an open source container-native event-based dependency manager for Kubernetes. The core concept of the project are `sensors` which are implemented as a Kubernetes-native Custom Resource Definition that define a set of dependencies (signals) and actions (triggers). The sensor's triggers will only be fired after all of it's signals have been satisfied. `Sensors` can be short-lived (once and done) or repeated.
+Axis is an open source event-based dependency manager for Kubernetes. The core concept of the project are `sensors` which are implemented as a Kubernetes-native Custom Resource Definition that define a set of dependencies (signals) and actions (triggers). The sensor's triggers will only be fired after it's signals have been resolved. `Sensors` can be once or repeated.
 - Define multiple dependencies from a variety of sources
 - Define dependency constraints and build plugins to support business-level constraint logic
 - Trigger messages and Kubernetes object creation after successful dependency resolution
@@ -15,10 +15,6 @@ Axis is an open source container-native event-based dependency manager for Kuber
 - Extremely lightweight. All signals, with exception of calendar based signals, are event-driven, meaning there is no polling involved.
 - High performance. Each Axis `sensor` runs in its own Kubernetes job enabling high bandwidth for processing near-real time events.
 - Simple or Complex dependencies. Manage everything from simple, linear, real-time dependencies to complex, multi-source batch job dependencies.
-
-## Typical Use Casees
-- Trigger processes to run after a single dependent event. 
-- Manage multiple external dependencies for a complex downstream process.
 
 ## Getting Started
 Axis is a Kubernetes CRD which can manage dependencies using kubectl commands.

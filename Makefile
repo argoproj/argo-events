@@ -16,12 +16,12 @@ override LDFLAGS += \
 
 # docker image publishing options
 DOCKER_PUSH=false
-IMAGE_NAMESPACE=aladdin
+IMAGE_NAMESPACE=argoproj
 IMAGE_TAG=latest
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
-$(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=aladdin))
+$(error IMAGE_NAMESPACE must be set to push images (e.g. IMAGE_NAMESPACE=argoproj))
 endif
 endif
 

@@ -29,13 +29,13 @@ import (
 
 // FakeSensors implements SensorInterface
 type FakeSensors struct {
-	Fake *FakeAxisV1alpha1
+	Fake *FakeArgoprojV1alpha1
 	ns   string
 }
 
-var sensorsResource = schema.GroupVersionResource{Group: "axis.sensor", Version: "v1alpha1", Resource: "sensors"}
+var sensorsResource = schema.GroupVersionResource{Group: "argoproj.io", Version: "v1alpha1", Resource: "sensors"}
 
-var sensorsKind = schema.GroupVersionKind{Group: "axis.sensor", Version: "v1alpha1", Kind: "Sensor"}
+var sensorsKind = schema.GroupVersionKind{Group: "argoproj.io", Version: "v1alpha1", Kind: "Sensor"}
 
 // Get takes name of the sensor, and returns the corresponding sensor object, and an error if there is any.
 func (c *FakeSensors) Get(name string, options v1.GetOptions) (result *v1alpha1.Sensor, err error) {

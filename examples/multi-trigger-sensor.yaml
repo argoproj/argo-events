@@ -1,15 +1,17 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: nats-example
   labels:
-    sensors.core.events/controller-instanceid: axis
+    sensors.argoproj.io/controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      nats:
+      stream:
+        type: NATS
         url: nats://example-nats-cluster:4222
-        subject: hello
+        attributes:
+          subject: hello
   triggers:
     - name: "workflow"
       resource:

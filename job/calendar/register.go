@@ -26,16 +26,16 @@ import (
 
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
 	abstract.Log.Info("creating signal", zap.String("raw", abstract.Calendar.String()))
 	return &calendar{
 		AbstractSignal: abstract,
 		stop:           make(chan struct{}),
 		wg:             sync.WaitGroup{},
-	}
+	}, nil
 }
 
 // Calendar will be added to the executor session
 func Calendar(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeCalendar, &factory{})
+	es.AddCoreFactory(v1alpha1.SignalTypeCalendar, &factory{})
 }
