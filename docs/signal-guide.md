@@ -7,6 +7,7 @@ A `signal` is a dependency, namely:
 - An object created in S3
 - A repeated calendar schedule
 - A kubernetes resource
+- A HTTP notification
 
 ### Prerequisites
 You need a working Kubernetes cluster at version >= 1.9. You will also need to install the `sensor-controller` into the cluster. This controller is is responsible for managing the `sensor` resources.
@@ -15,10 +16,11 @@ In order to take advantage of the various signal types, you may need to install 
 ## Sensor Controller
 The `sensor-controller` is responsible for managing the `Sensor` resources and creating `sensor-executor` jobs. 
 The following types of signals are supported:
- - Artifact signals which can include things like S3 Bucket Notifications, Git Webhooks, etc..
+ - Artifact signals which can include things like S3 Bucket Notifications etc..
  - Stream signals which subscribe to messages on a queue or a topic
  - Calendar signals which contain time constraints and calendar events
  - Resource signals watch changes to Kubernetes resources
+ - Webhook signals which can include things like Git, JIRA, Trello etc. webhook notifications
 
  The following types of triggers are supported:
  - Resource triggers produce Kubernetes objects
@@ -39,6 +41,10 @@ The `sensor-executor` is responsible for listening for various signals and updat
 
 ### Calendar
 Time-based signals can include signals based on a [cron]() schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event. Eventually, we hope to support a calendar-plugin or interface where users can configure special handling calendar/business logic.
+
+### Webhook
+Webhook offers a basic HTTP server. User can provide the server port and register the REST API endpoint.
+See Request Methods in RFC7231 to define the HTTP REST endpoint.  
 
 ### MMQP
 [MMQP](http://mqtt.org/) is a M2M "Internet of Things" connectivity protocol (ISO/IEC PRF 20922) designed to be extremely lightweight and ideal for mobile applications. Some broker implementations can be found [here](https://github.com/mqtt/mqtt.github.io/wiki/brokers).
