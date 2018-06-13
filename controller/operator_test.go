@@ -42,9 +42,10 @@ var sampleSensor = v1alpha1.Sensor{
 		Signals: []v1alpha1.Signal{
 			{
 				Name: "nats-test",
-				NATS: &v1alpha1.NATS{
-					URL:     "nats://sample-test:4222",
-					Subject: "testing-in",
+				Stream: &v1alpha1.Stream{
+					Type:       "NATS",
+					URL:        "nats://sample-test:4222",
+					Attributes: map[string]string{"subject": "testing-in"},
 				},
 			},
 			{
@@ -65,10 +66,9 @@ var sampleSensor = v1alpha1.Sensor{
 				Message: &v1alpha1.Message{
 					Body: "this is where the message body goes",
 					Stream: v1alpha1.Stream{
-						NATS: &v1alpha1.NATS{
-							URL:     "nats://sample-test:4222",
-							Subject: "testing-out",
-						},
+						Type:       "NATS",
+						URL:        "nats://sample-test:4222",
+						Attributes: map[string]string{"subject": "testing-out"},
 					},
 				},
 				Resource: &v1alpha1.ResourceObject{
@@ -215,10 +215,9 @@ func TestEscalationSent(t *testing.T) {
 		Message: v1alpha1.Message{
 			Body: "esclating this sensor on failure",
 			Stream: v1alpha1.Stream{
-				NATS: &v1alpha1.NATS{
-					URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-					Subject: "escalation",
-				},
+				Type:       "NATS",
+				URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+				Attributes: map[string]string{"subject": "escalation"},
 			},
 		},
 	}

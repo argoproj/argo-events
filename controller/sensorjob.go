@@ -68,8 +68,8 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: common.CreateJobPrefix(soc.s.Name),
 			Labels: map[string]string{
+				common.LabelKeySensor:   soc.s.Name,
 				common.LabelKeyResolved: "false",
-				common.LabelJobName: common.CreateJobPrefix(soc.s.Name),
 			},
 			Annotations: map[string]string{},
 			OwnerReferences: []metav1.OwnerReference{
@@ -120,22 +120,20 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 			}
 			webhookSvc := corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: common.CreateServiceSuffix(soc.s.Name),
+					Name:      common.CreateServiceSuffix(soc.s.Name),
 					Namespace: soc.s.Namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
 					},
 				},
 				Spec: corev1.ServiceSpec{
-					Type: corev1.ServiceTypeLoadBalancer,
-					Selector: map[string]string{
-						common.LabelJobName: createdJob.ObjectMeta.Labels[common.LabelJobName],
-					},
+					Type:     corev1.ServiceTypeLoadBalancer,
+					Selector: createdJob.Labels,
 					Ports: []corev1.ServicePort{
 						{
-							Protocol: corev1.ProtocolTCP,
-							Port: common.WebhookServicePort,
-							TargetPort: intstr.FromInt(targetPort),
+							Protocol:   corev1.ProtocolTCP,
+							Port:       common.WebhookServicePort,
+							TargetPort: intstr.FromInt(int(targetPort)),
 						},
 					},
 				},

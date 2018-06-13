@@ -16,10 +16,4 @@ List of currently supported K8 Resources:
 - [Workflow](https://github.com/argoproj/argo)
 
 ### Messages
-Messages define content and a queue resource on which to send the content. 
-
-List of currently supported Streams:
-- NATS
-- Kafka
-- AMQP (RabbitMQ)
-- MQTT
+Messages define content and a stream queue resource on which to send the content. 

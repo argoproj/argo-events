@@ -7,9 +7,11 @@ metadata:
 spec:
   signals:
     - name: hello
-      mqtt:
+      stream:
+        type: MQTT
         url: tcp://localhost:1883
-        topic: hello
+        attributes:
+          topic: hello
   triggers:
     - name: "done-mqtt-stream"
       message:

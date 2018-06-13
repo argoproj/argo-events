@@ -7,11 +7,13 @@ metadata:
 spec:
   signals:
     - name: hello
-      amqp:
+      stream:
+        type: AMQP
         url: amqp://localhost:5672
-        exchangeName: myExchangeName
-        exchangeType: fanout
-        routingKey: myRoutingKey
+        attributes:
+          exchangeName: myExchangeName
+          exchangeType: fanout
+          routingKey: myRoutingKey
   triggers:
     - name: "done-amqp-message"
       message:

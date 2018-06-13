@@ -40,24 +40,26 @@ func TestNats(t *testing.T) {
 	}
 	es := job.New(nil, nil, zap.NewNop())
 	NATS(es)
-	natsFactory, ok := es.GetFactory(v1alpha1.SignalTypeNats)
+	natsFactory, ok := es.GetStreamFactory(StreamTypeNats)
 	assert.True(t, ok, "nats factory is not found")
 	abstractSignal := job.AbstractSignal{
 		Signal: v1alpha1.Signal{
 			Name: "nats-test",
-			NATS: &v1alpha1.NATS{
-				URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-				Subject: "test",
+			Stream: &v1alpha1.Stream{
+				Type:       "NATS",
+				URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+				Attributes: map[string]string{"subject": "test"},
 			},
 		},
 		Log:     zap.NewNop(),
 		Session: es,
 	}
-	signal := natsFactory.Create(abstractSignal)
+	signal, err := natsFactory.Create(abstractSignal)
+	assert.Nil(t, err)
 	testCh := make(chan job.Event)
 
 	// attempt to start signal with no gnats server running
-	err := signal.Start(testCh)
+	err = signal.Start(testCh)
 	assert.NotNil(t, err)
 
 	// run an embedded gnats server
@@ -67,7 +69,7 @@ func TestNats(t *testing.T) {
 	assert.Nil(t, err)
 
 	// now publish a NATS message on same subject
-	conn, err := natsio.Connect(abstractSignal.Signal.NATS.URL)
+	conn, err := natsio.Connect(abstractSignal.Signal.Stream.URL)
 	defer conn.Close()
 	assert.Nil(t, err)
 	err = conn.Publish("test", []byte("hello, world"))

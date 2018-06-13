@@ -17,24 +17,36 @@ limitations under the License.
 package mqtt
 
 import (
+	"fmt"
+
 	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 )
 
+const (
+	// StreamTypeMqtt defines the exact string representation for MQTT stream types
+	StreamTypeMqtt = "MQTT"
+	topicKey       = "topic"
+)
+
 type factory struct{}
 
-func (f *factory) Create(abstract job.AbstractSignal) job.Signal {
-	abstract.Log.Info("creating signal", zap.String("raw", abstract.NATS.String()))
-	return &mqtt{
+func (f *factory) Create(abstract job.AbstractSignal) (job.Signal, error) {
+	abstract.Log.Info("creating signal", zap.String("type", abstract.Stream.Type))
+	m := &mqtt{
 		AbstractSignal: abstract,
 		stop:           make(chan struct{}),
 		msgCh:          make(chan MQTTlib.Message),
 	}
+	var ok bool
+	if m.topic, ok = abstract.Stream.Attributes[topicKey]; !ok {
+		return nil, fmt.Errorf(job.ErrMissingAttribute, abstract.Stream.Type, topicKey)
+	}
+	return m, nil
 }
 
 // MQTT will be added to the executor session
 func MQTT(es *job.ExecutorSession) {
-	es.AddFactory(v1alpha1.SignalTypeMQTT, &factory{})
+	es.AddStreamFactory(StreamTypeMqtt, &factory{})
 }

@@ -84,16 +84,17 @@ func (soc *sOperationCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 
 func sendMessage(message *v1alpha1.Message) error {
 	payload := []byte(message.Body)
-	switch message.Stream.GetType() {
-	case v1alpha1.StreamTypeNats:
-		natsConnection, err := nats.Connect(message.Stream.NATS.URL)
+	switch message.Stream.Type {
+	case "NATS":
+		natsConnection, err := nats.Connect(message.Stream.URL)
 		if err != nil {
 			return err
 		}
+		subject := message.Stream.Attributes["subject"]
 		defer natsConnection.Close()
-		return natsConnection.Publish(message.Stream.NATS.Subject, payload)
+		return natsConnection.Publish(subject, payload)
 	default:
-		return fmt.Errorf("unsupported type of stream %s", message.Stream.GetType())
+		return fmt.Errorf("unsupported type of stream %s", message.Stream.Type)
 	}
 }
 

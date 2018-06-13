@@ -78,7 +78,7 @@ func (soc *sOperationCtx) operate() error {
 		return nil
 	}
 
-	if soc.s.Status.Phase == "" {
+	if soc.s.Status.Phase == v1alpha1.NodePhaseNew {
 		// perform one-time sensor validation & job creation
 		err := validateSensor(soc.s)
 		if err != nil {
@@ -133,7 +133,7 @@ func (soc *sOperationCtx) operate() error {
 	if soc.s.IsComplete() {
 		// escalate
 		if !soc.s.Status.Escalated {
-			soc.log.Warnf("escalating sensor to level %s via %s message", soc.s.Spec.Escalation.Level, soc.s.Spec.Escalation.Message.Stream.GetType())
+			soc.log.Warnf("escalating sensor to level %s via %s message", soc.s.Spec.Escalation.Level, soc.s.Spec.Escalation.Message.Stream.Type)
 			err := sendMessage(&soc.s.Spec.Escalation.Message)
 			if err != nil {
 				return err
@@ -150,7 +150,7 @@ func (soc *sOperationCtx) operate() error {
 
 // evaluateSensorPod evaluates the associated sensor executor pod and updates the node status
 func (soc *sOperationCtx) evaluateSensorPod() error {
-	if soc.s.Status.Phase == "" {
+	if soc.s.Status.Phase == v1alpha1.NodePhaseNew {
 		soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
 		soc.needJobCreation = true
 		return nil

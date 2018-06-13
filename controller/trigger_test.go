@@ -94,10 +94,9 @@ func TestSendMessage(t *testing.T) {
 	supportedMsg := &v1alpha1.Message{
 		Body: "",
 		Stream: v1alpha1.Stream{
-			NATS: &v1alpha1.NATS{
-				URL:     "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-				Subject: "test",
-			},
+			Type:       "NATS",
+			URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+			Attributes: map[string]string{"subject": "test"},
 		},
 	}
 	err = sendMessage(supportedMsg)
