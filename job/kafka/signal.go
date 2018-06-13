@@ -73,9 +73,9 @@ func (k *kafka) listen(events chan job.Event) {
 				kafkaMsg: msg,
 			}
 			// perform constraint checks
-			err := k.CheckConstraints(event.GetTimestamp())
-			if err != nil {
-				event.SetError(err)
+			ok := k.CheckConstraints(event.GetTimestamp())
+			if !ok {
+				event.SetError(job.ErrFailedTimeConstraint)
 			}
 			k.Log.Debug("sending kafka event", zap.String("nodeID", event.GetID()))
 			events <- event

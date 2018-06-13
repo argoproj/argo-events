@@ -13,7 +13,8 @@ spec:
       serviceAccountName: axis
       containers:
       - name: sensor-controller
-        image: aladdin/sensor-controller:latest
+        image: argoproj/sensor-controller:latest
+        imagePullPolicy: IfNotPresent
         env:
           - name: SENSOR_NAMESPACE
             value: default

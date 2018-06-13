@@ -76,9 +76,9 @@ func (m *mqtt) listen(events chan job.Event) {
 				timestamp: time.Now().UTC(),
 			}
 			// perform constraint checks
-			err := m.CheckConstraints(event.GetTimestamp())
-			if err != nil {
-				event.SetError(err)
+			ok := m.CheckConstraints(event.GetTimestamp())
+			if !ok {
+				event.SetError(job.ErrFailedTimeConstraint)
 			}
 			m.Log.Debug("sending mqtt event", zap.String("nodeID", event.GetID()))
 			events <- event

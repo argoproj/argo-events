@@ -82,9 +82,9 @@ func (a *amqp) listen(events chan job.Event) {
 			delivery: msg,
 		}
 		// perform constraint checks
-		err := a.CheckConstraints(event.GetTimestamp())
-		if err != nil {
-			event.SetError(err)
+		ok := a.CheckConstraints(event.GetTimestamp())
+		if !ok {
+			event.SetError(job.ErrFailedTimeConstraint)
 		}
 		a.Log.Debug("sending amqp event", zap.String("nodeID", event.GetID()))
 		events <- event
