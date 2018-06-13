@@ -69,6 +69,7 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 			Name: common.CreateJobPrefix(soc.s.Name),
 			Labels: map[string]string{
 				common.LabelKeyResolved: "false",
+				common.LabelJobName: common.CreateJobPrefix(soc.s.Name),
 			},
 			Annotations: map[string]string{},
 			OwnerReferences: []metav1.OwnerReference{
@@ -127,7 +128,9 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 				},
 				Spec: corev1.ServiceSpec{
 					Type: corev1.ServiceTypeLoadBalancer,
-					Selector: createdJob.Labels,
+					Selector: map[string]string{
+						common.LabelJobName: createdJob.ObjectMeta.Labels[common.LabelJobName],
+					},
 					Ports: []corev1.ServicePort{
 						{
 							Protocol: corev1.ProtocolTCP,
