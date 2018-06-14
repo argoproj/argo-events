@@ -18,7 +18,6 @@ package webhook
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
 	"testing"
@@ -31,7 +30,7 @@ import (
 )
 
 var (
-	client  = &http.Client{Timeout: 0}
+	client  = &http.Client{}
 	payload = "{name: x}"
 )
 
@@ -52,18 +51,14 @@ func createWebhookSignal(t *testing.T, httpMethod string, endpoint string) job.S
 		Session: es,
 	}
 	webhookSignal, err := webhookFactory.Create(abstractSignal)
-	if err != nil {
-		assert.Fail(t, "unable to create real webhook signal from abstract spec")
-	}
+	assert.Nil(t, err, "unable to create real webhook signal from abstract spec")
 	return webhookSignal
 }
 
 func handleEvent(t *testing.T, testEventChan chan job.Event) {
 	event := <-testEventChan
-	assert.Equal(t, event.GetSource(), fmt.Sprintf("localhost:%d", common.WebhookServicePort))
-	body := event.GetBody()
-	assert.NotNil(t, body)
-	assert.Equal(t, string(body[:]), payload)
+	assert.Equal(t, fmt.Sprintf("localhost:%d", common.WebhookServicePort), event.GetSource())
+	assert.Equal(t, payload, string(event.GetBody()))
 }
 
 func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
@@ -74,21 +69,29 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 	go handleEvent(t, testEventChan)
 
 	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", common.WebhookServicePort, endpoint), strings.NewReader(payload))
-	if err != nil {
-		assert.Fail(t, "unable to create http request", err)
-	}
+	assert.Nil(t, err, "unable to create http request")
+	request.Close = true // do not keep the connection alive
 	resp, err := client.Do(request)
-	if err != nil && err.(net.Error).Timeout() {
-		assert.Fail(t, "unable to connect to http server", err)
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, resp.Status, "200 OK")
+	assert.Nil(t, err, "failed to perform http request")
+	assert.Equal(t, "200 OK", resp.Status)
 	err = webhookSignal.Stop()
-	assert.Equal(t, err, nil)
+	assert.Nil(t, err, "failed to stop webhook signal")
+}
+
+func testPostRequest(t *testing.T) {
+	makeAPIRequest(t, http.MethodPost, "/post")
+}
+
+func testPutRequest(t *testing.T) {
+	makeAPIRequest(t, http.MethodPut, "/put")
+}
+
+func testDeleteRequest(t *testing.T) {
+	makeAPIRequest(t, http.MethodDelete, "/delete")
 }
 
 func TestSignal(t *testing.T) {
-	makeAPIRequest(t, http.MethodPost, "/post")
-	makeAPIRequest(t, http.MethodPut, "/put")
-	makeAPIRequest(t, http.MethodDelete, "/delete")
+	t.Run("post", testPostRequest)
+	t.Run("put", testPutRequest)
+	t.Run("delete", testDeleteRequest)
 }
