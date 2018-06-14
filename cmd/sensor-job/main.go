@@ -121,6 +121,6 @@ func resolveSignalStreamFactory(stream v1alpha1.Stream) (func(*job.ExecutorSessi
 	case kafka.StreamTypeKafka:
 		return kafka.Kafka, nil
 	default:
-		return nil, fmt.Errorf("artifact signal does not define a notification output stream")
+		return nil, fmt.Errorf("unsupported stream type")
 	}
 }
