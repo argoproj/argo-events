@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/blackrock/axis/common"
 	"github.com/blackrock/axis/job"
@@ -32,9 +31,7 @@ import (
 )
 
 var (
-	client = &http.Client{
-		Timeout: time.Duration(10 * time.Second),
-	}
+	client  = &http.Client{Timeout: 0}
 	payload = "{name: x}"
 )
 
