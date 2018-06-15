@@ -18,8 +18,8 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          kafka:
-            url: localhost:9092
-            topic: gateway-sensor
-            partition: 1
-
+          type: KAFKA
+          url: localhost:9092
+          attributes:
+            topic: gateway
+            partition: "1"
