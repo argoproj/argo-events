@@ -17,7 +17,7 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          mqtt:
-            url: tcp://localhost:1883
-            topic: gateway-sensor
-
+          type: MQTT
+          url: tcp://localhost:1883
+          attributes:
+            topic: gateway

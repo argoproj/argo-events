@@ -19,8 +19,8 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          amqp:
-            url: amqp://localhost:5672
+          type: AMQP
+          url: amqp://localhost:5672
+          attributes:
             exchangeName: doneExchangeName
             routingKey: gateway-sensor
-

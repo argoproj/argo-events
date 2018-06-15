@@ -29,6 +29,7 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          nats:
-            url: nats://example-nats-cluster:4222
-            subject: gateway-sensor
+          type: NATS
+          url: nats://example-nats-cluster:4222
+          attributes:
+            subject: gateway
