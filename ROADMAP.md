@@ -1,6 +1,4 @@
 # Roadmap
-Development of the project is currently managed via GitLab issues, however the following is a high-level overview of the future development plans for `Axis`.
-
 
 ## Development Phase
 - E2E testing
