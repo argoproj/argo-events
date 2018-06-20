@@ -40,13 +40,13 @@ Webhook offers a basic HTTP server. User can provide the server port and registe
 See Request Methods in RFC7231 to define the HTTP REST endpoint.  
 
 ### Kubernetes Resources
-Axis supports watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy.
+Supports watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy.
 
 ### S3
-Axis supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
+Supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
 
 ### Message Streams / Brokers
-Axis supports a generic specification for message stream signals. Currently, there is a push signals toward being extensible and one solution we are investigating is toward classifying signals with common definitions and building a plugin-based architecture for supporting the specific signal implementations. The following defines the currently supported types of stream signals and examples of how to define them.
+Supports a generic specification for message stream signals. Currently, there is a push signals toward being extensible and one solution we are investigating is toward classifying signals with common definitions and building a plugin-based architecture for supporting the specific signal implementations. The following defines the currently supported types of stream signals and examples of how to define them.
 
 #### NATS
 [Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.
