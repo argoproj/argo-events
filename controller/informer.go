@@ -26,8 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/blackrock/axis/common"
-	sensorinformers "github.com/blackrock/axis/pkg/client/informers/externalversions"
+	"github.com/argoproj/argo-events/common"
+	sensorinformers "github.com/argoproj/argo-events/pkg/client/informers/externalversions"
 )
 
 func (c *SensorController) instanceIDReq() labels.Requirement {

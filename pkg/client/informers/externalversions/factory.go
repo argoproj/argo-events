@@ -24,9 +24,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/blackrock/axis/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/blackrock/axis/pkg/client/informers/externalversions/internalinterfaces"
-	sensor "github.com/blackrock/axis/pkg/client/informers/externalversions/sensor"
+	versioned "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/informers/externalversions/internalinterfaces"
+	sensor "github.com/argoproj/argo-events/pkg/client/informers/externalversions/sensor"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

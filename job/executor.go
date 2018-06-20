@@ -27,9 +27,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/blackrock/axis/common"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 )
 
 // Factory declares the interface to create real signals from abstract signals

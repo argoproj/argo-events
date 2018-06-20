@@ -17,7 +17,7 @@ limitations under the License.
 package common
 
 import (
-	"github.com/blackrock/axis/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 // SENSOR CONTROLLER CONSTANTS

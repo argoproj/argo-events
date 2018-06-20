@@ -17,7 +17,7 @@ limitations under the License.
 package controller
 
 import (
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // getNodeByName returns a copy of the node from this sensor for the nodename

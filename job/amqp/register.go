@@ -19,7 +19,7 @@ package amqp
 import (
 	"fmt"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	amqplib "github.com/streadway/amqp"
 	"go.uber.org/zap"
 )

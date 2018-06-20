@@ -19,7 +19,7 @@ package mqtt
 import (
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 )
