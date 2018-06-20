@@ -19,15 +19,15 @@ package webhook
 import (
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 )
 
 type event struct {
 	job.AbstractEvent
-	webhook   *webhook
-	payload []byte
+	webhook     *webhook
+	payload     []byte
 	requestHost string
-	timestamp time.Time
+	timestamp   time.Time
 }
 
 func (e *event) GetID() string {

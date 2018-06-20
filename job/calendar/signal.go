@@ -23,7 +23,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	cronlib "github.com/robfig/cron"
 )
 

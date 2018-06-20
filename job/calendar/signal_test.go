@@ -20,8 +20,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cronlib "github.com/robfig/cron"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"

@@ -19,7 +19,7 @@ package amqp
 import (
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	amqplib "github.com/streadway/amqp"
 )
 

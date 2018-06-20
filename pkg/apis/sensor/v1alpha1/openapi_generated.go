@@ -28,30 +28,30 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactLocation":  schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal":    schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal":    schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.EscalationPolicy":  schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.GroupVersionKind":  schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message":           schema_pkg_apis_sensor_v1alpha1_Message(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NodeStatus":        schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceFilter":    schema_pkg_apis_sensor_v1alpha1_ResourceFilter(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceObject":    schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal":    schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.RetryStrategy":     schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Artifact":        schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Bucket":          schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter":          schema_pkg_apis_sensor_v1alpha1_S3Filter(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Sensor":            schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorList":        schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorSpec":        schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorStatus":      schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Signal":            schema_pkg_apis_sensor_v1alpha1_Signal(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints": schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream":            schema_pkg_apis_sensor_v1alpha1_Stream(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.TimeConstraints":   schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Trigger":           schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
-		"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal":     schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":  schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal":    schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal":    schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy":  schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":  schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message":           schema_pkg_apis_sensor_v1alpha1_Message(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":        schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter":    schema_pkg_apis_sensor_v1alpha1_ResourceFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":    schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal":    schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy":     schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact":        schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Bucket":          schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter":          schema_pkg_apis_sensor_v1alpha1_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":            schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":        schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":        schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":      schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal":            schema_pkg_apis_sensor_v1alpha1_Signal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints": schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream":            schema_pkg_apis_sensor_v1alpha1_Stream(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints":   schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":           schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal":     schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref),
 	}
 }
 
@@ -63,14 +63,14 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"s3": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Artifact"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Artifact"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"},
 	}
 }
 
@@ -82,13 +82,13 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref common.ReferenceCallback
 				Properties: map[string]spec.Schema{
 					"s3": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Artifact"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"),
 						},
 					},
 					"stream": {
 						SchemaProps: spec.SchemaProps{
 							Description: "NotificationStream is the stream to listen for artifact notifications",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
 						},
 					},
 				},
@@ -96,7 +96,7 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Artifact", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"},
 	}
 }
 
@@ -158,7 +158,7 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "need someway to progressively get more serious notifications",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"),
 						},
 					},
 				},
@@ -166,7 +166,7 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"},
 	}
 }
 
@@ -217,7 +217,7 @@ func schema_pkg_apis_sensor_v1alpha1_Message(ref common.ReferenceCallback) commo
 					"stream": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Stream descibes queue resources to send the message on",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
 						},
 					},
 				},
@@ -225,7 +225,7 @@ func schema_pkg_apis_sensor_v1alpha1_Message(ref common.ReferenceCallback) commo
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"},
 	}
 }
 
@@ -383,7 +383,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					"artifactLocation": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Location in which the K8 resource file(s) are stored. If omitted, will attempt to use the default artifact location configured in the controller.",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},
 					"labels": {
@@ -405,7 +405,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactLocation"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"},
 	}
 }
 
@@ -441,7 +441,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref common.ReferenceCallback
 					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceFilter"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter"),
 						},
 					},
 				},
@@ -449,7 +449,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter"},
 	}
 }
 
@@ -519,14 +519,14 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -631,12 +631,12 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorSpec"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorStatus"),
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus"),
 						},
 					},
 				},
@@ -644,7 +644,7 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorSpec", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SensorStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -679,7 +679,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Sensor"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor"),
 									},
 								},
 							},
@@ -690,7 +690,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Sensor", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -707,7 +707,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Signal"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal"),
 									},
 								},
 							},
@@ -720,7 +720,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Trigger"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"),
 									},
 								},
 							},
@@ -729,7 +729,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					"escalation": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Escalation describes the policy for signal failures and violations of the dependency's constraints.",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
 					"repeat": {
@@ -744,7 +744,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Signal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
 	}
 }
 
@@ -787,7 +787,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							AdditionalProperties: &spec.SchemaOrBool{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NodeStatus"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus"),
 									},
 								},
 							},
@@ -805,7 +805,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -832,37 +832,37 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 					"stream": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Stream defines a message stream dependency",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
 						},
 					},
 					"artifact": {
 						SchemaProps: spec.SchemaProps{
 							Description: "artifact defines an external file dependency",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal"),
 						},
 					},
 					"calendar": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Calendar defines a time based dependency",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal"),
 						},
 					},
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal"),
 						},
 					},
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Webhook defines a HTTP notification dependency",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal"),
 						},
 					},
 					"constraints": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Constraints and rules governing tolerations of success and overrides",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints"),
 						},
 					},
 				},
@@ -870,7 +870,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Stream", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.WebhookSignal"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal"},
 	}
 }
 
@@ -883,14 +883,14 @@ func schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref common.ReferenceCallb
 					"time": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Time constraints on the signal",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.TimeConstraints"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.TimeConstraints"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints"},
 	}
 }
 
@@ -977,19 +977,19 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource describes the resource that will be created by this action",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceObject"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject"),
 						},
 					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Message describes a message that will be sent on a queue",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"),
 						},
 					},
 					"retryStrategy": {
 						SchemaProps: spec.SchemaProps{
 							Description: "RetryStrategy is the strategy to retry a trigger if it fails",
-							Ref:         ref("github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.RetryStrategy"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"),
 						},
 					},
 				},
@@ -997,7 +997,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 			},
 		},
 		Dependencies: []string{
-			"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.Message", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1.RetryStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"},
 	}
 }
 

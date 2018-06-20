@@ -1,5 +1,4 @@
 # Axis - The Event-Based Dependency Manager for Kubernetes
-[![Build Status](https://travis-ci.org/blackrock/axis.svg?branch=master)](https://travis-ci.org/blackrock/axis) [![License Apache 2.0](https://img.shields.io/badge/License-Apache2-brightgreen.svg)](https://img.shields.io/badge/License-Apache2-brightgreen.svg)
 
 ## What is Axis?
 Axis is an open source event-based dependency manager for Kubernetes. The core concept of the project are `sensors` which are implemented as a Kubernetes-native Custom Resource Definition that define a set of dependencies (signals) and actions (triggers). The sensor's triggers will only be fired after it's signals have been resolved. `Sensors` can be once or repeated.

@@ -7,7 +7,7 @@ metadata:
 data:
   config: |
     namespace: default
-    serviceAccount: axis
+    serviceAccount: argo-events
     instanceID: axis
     executorImage: argoproj/sensor-executor:latest
     executorResources:

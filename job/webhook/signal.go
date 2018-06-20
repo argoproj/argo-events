@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 )
 
 type webhook struct {

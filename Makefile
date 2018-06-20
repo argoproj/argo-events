@@ -1,4 +1,4 @@
-PACKAGE=github.com/blackrock/axis
+PACKAGE=github.com/argoproj/argo-events
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 

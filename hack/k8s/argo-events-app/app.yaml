@@ -7,7 +7,7 @@ environments:
     k8sVersion: v1.10.0
     path: default
 kind: ksonnet.io/app
-name: axis-app
+name: argo-events-app
 registries:
   incubator:
     gitVersion:

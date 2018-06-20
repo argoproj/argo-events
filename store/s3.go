@@ -19,7 +19,7 @@ package store
 import (
 	"io/ioutil"
 
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	minio "github.com/minio/minio-go"
 )
 

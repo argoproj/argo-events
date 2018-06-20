@@ -26,9 +26,9 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 
-	"github.com/blackrock/axis/common"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
-	"github.com/blackrock/axis/store"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/store"
 )
 
 // check all the signal statuses and if they are all resolved and constraints are met, let's create the trigger event

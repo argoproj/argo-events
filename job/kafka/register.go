@@ -21,7 +21,7 @@ import (
 	"strconv"
 
 	"github.com/Shopify/sarama"
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	"go.uber.org/zap"
 )
 
