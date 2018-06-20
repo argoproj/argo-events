@@ -1,8 +1,7 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-example
-  namespace: cloud-native-scheduler
   labels:
     sensors.core.events/controller-instanceid: axis
 spec:
@@ -16,7 +15,6 @@ spec:
   triggers:
     - name: done-workflow
       resource:
-        namespace: cloud-native-scheduler
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -24,7 +22,7 @@ spec:
           s3:
             bucket: workflows
             key: hello-world.yaml
-            endpoint: minio-service.cloud-native-scheduler:9000
+            endpoint: minio-service.default:9000
             insecure: true
             accessKey:
               key: accesskey

@@ -31,8 +31,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 
-	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type resource struct {

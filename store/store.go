@@ -26,7 +26,7 @@ import (
 
 	// import packages for the universal deserializer
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	ss_v1alpha1 "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // NOTE: custom resources must be manually added here

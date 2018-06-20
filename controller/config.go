@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/blackrock/axis/common"
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -32,7 +32,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/blackrock/axis/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 // DefaultRetry is a default retry backoff settings when retrying API calls

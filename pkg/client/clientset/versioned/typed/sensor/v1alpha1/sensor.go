@@ -18,8 +18,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
-	scheme "github.com/blackrock/axis/pkg/client/clientset/versioned/scheme"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	scheme "github.com/argoproj/argo-events/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

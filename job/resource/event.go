@@ -22,7 +22,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 )
 
 type event struct {

@@ -28,10 +28,10 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/blackrock/axis"
-	"github.com/blackrock/axis/common"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
+	"github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 )
 
 const (
