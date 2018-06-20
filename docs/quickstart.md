@@ -1,5 +1,5 @@
 # Getting Started - Quickstart
-This is a guide to getting started with using Axis using Minikube.
+This is a guide to getting started with Argo Events using Minikube.
 
 ## Requirements
 * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
@@ -10,7 +10,7 @@ This is a guide to getting started with using Axis using Minikube.
 
 ## 1. Checkout project's master branch
 ```
-$ git clone git@github.com:/axis.git
+$ git clone git@github.com:argoproj/argo-events.git
 ```
 
 ## 2. Install vendor dependencies
@@ -28,7 +28,7 @@ $ minikube start
 $ eval $(minikube docker-env)
 ```
 
-## 5. Build the Axis project & Docker images
+## 5. Build the project & Docker images
 ```
 $ cd go/src/github.com/argoproj/argo-events
 $ make all
