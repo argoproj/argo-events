@@ -18,7 +18,7 @@ limitations under the License.
 package versioned
 
 import (
-	argoprojv1alpha1 "github.com/blackrock/axis/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
+	argoprojv1alpha1 "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
 	glog "github.com/golang/glog"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"

@@ -19,8 +19,8 @@ package controller
 import (
 	"testing"
 
-	"github.com/blackrock/axis/common"
-	fake_ss "github.com/blackrock/axis/pkg/client/clientset/versioned/fake"
+	"github.com/argoproj/argo-events/common"
+	fake_ss "github.com/argoproj/argo-events/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/kubernetes/fake"

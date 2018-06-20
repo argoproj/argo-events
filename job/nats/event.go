@@ -19,7 +19,7 @@ package nats
 import (
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	natsio "github.com/nats-io/go-nats"
 )
 

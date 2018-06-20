@@ -10,7 +10,7 @@ spec:
       labels:
         app: sensor-controller
     spec:
-      serviceAccountName: axis
+      serviceAccountName: argo-events
       containers:
       - name: sensor-controller
         image: argoproj/sensor-controller:latest

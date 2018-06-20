@@ -19,7 +19,7 @@ package controller
 import (
 	"fmt"
 
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // validateSensor accepts a sensor and performs validation against it

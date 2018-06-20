@@ -24,8 +24,8 @@ import (
 
 	"github.com/minio/minio-go"
 
-	"github.com/blackrock/axis/job"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type artifact struct {

@@ -6,8 +6,8 @@
   components: {
     // Component-level parameters, defined initially from 'ks prototype use ...'
     // Each object below should correspond to a component in the components/ directory
-    "axis": {
-      serviceAccount: "axis",
+    "argo-events": {
+      serviceAccount: "argo-events",
       namespace: "default",
       replicas: 1,
       controllerName: "sensor-controller",
