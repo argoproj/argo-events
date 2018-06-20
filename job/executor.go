@@ -19,14 +19,18 @@ package job
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	"github.com/golang/protobuf/ptypes"
 	plugin "github.com/hashicorp/go-plugin"
 )
 
@@ -89,17 +93,15 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, plugins plugin.ClientPro
 			wg.Add(1)
 			go func() {
 				for event := range sigEvents {
-					es.log.Info("received event", zap.String("source", event.Context.Source.Host))
+					es.log.Info("received event")
 					// todo: add signal processing and sync node
-					es.log.Info("syncing node...")
+					es.syncNode(sensor.NodeID(rawSignal.Name), event)
 
 					err := signaler.Stop()
 					if err != nil {
 						es.log.Warn("failed to stop signal", zap.Error(err))
 					}
-					es.log.Debug("stopped signal")
 				}
-				es.log.Info("no more events", zap.String("signal", name))
 				wg.Done()
 			}()
 		}
@@ -131,35 +133,34 @@ func (es *ExecutorSession) handleError(kubeClient kubernetes.Interface, name, na
 // returns a tuple of booleans
 // first value is if we should stop the signal
 // second value is if the sensor is completely resolved
-/*
-func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
+func (es *ExecutorSession) syncNode(nodeID string, event Event) (bool, bool) {
+	log := es.log.With(zap.String("nodeID", nodeID))
 	ssInterface := es.sensorClientset.ArgoprojV1alpha1().Sensors(es.namespace)
 	s, err := ssInterface.Get(es.name, metav1.GetOptions{})
 	if err != nil {
 		// the sensor was most likely deleted manually - this is a problem, we exit the pod with status 1
-		es.log.Error("failed to get sensor on event", zap.Error(err))
+		log.Error("failed to get sensor on event", zap.Error(err))
 	}
 
-	nodeID := event.GetID()
 	node, ok := s.Status.Nodes[nodeID]
 	if !ok {
 		// we should never get here as the job should only be created after the sensor was persisted
-		es.log.Warn("node not found or initialized, ignoring event", zap.String("nodeID", event.GetID()))
+		log.Warn("node not found or initialized, ignoring event")
 		return false, s.IsResolved(v1alpha1.NodeTypeSignal)
 	}
 	// first check that the node is Active - if it's not, we don't want to update the sensor
 	if node.Phase != v1alpha1.NodePhaseActive {
-		es.log.Warn("node is not active, ignoring event", zap.String("nodeID", event.GetID()))
+		log.Warn("node is not active, ignoring event")
 		return node.IsComplete(), s.IsResolved(v1alpha1.NodeTypeSignal)
 	}
 
-	if event.GetError() != nil {
-		node.Phase = v1alpha1.NodePhaseError
-		node.Message = event.GetError().Error()
-	} else {
-		node.Phase = v1alpha1.NodePhaseResolved
-		node.ResolvedAt = metav1.Time{Time: event.GetTimestamp()}
+	t, err := ptypes.Timestamp(event.Context.EventTime)
+	if err != nil {
+		log.Warn("event context is missing EventTime")
 	}
+
+	node.Phase = v1alpha1.NodePhaseResolved
+	node.ResolvedAt = metav1.Time{Time: t}
 	s.Status.Nodes[nodeID] = node
 
 	var updated *v1alpha1.Sensor
@@ -168,7 +169,7 @@ func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
 		if err != nil {
 			if !errors.IsConflict(err) {
 				es.err = err
-				es.log.Panic("failed to update sensor's signal node", zap.String("nodeID", event.GetID()), zap.Error(err))
+				log.Panic("failed to update sensor's signal node", zap.Error(err))
 			}
 		} else {
 			break
@@ -178,7 +179,6 @@ func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
 
 	return true, updated.IsResolved(v1alpha1.NodeTypeSignal)
 }
-*/
 
 func (es *ExecutorSession) GetKubeConfig() *rest.Config {
 	return es.kubeConfig
