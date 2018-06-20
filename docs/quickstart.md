@@ -43,5 +43,5 @@ kubectl create -f hack/k8s/manifests/*
 ## 7. Creating a sensor
 See the `examples/` directory for a list of sample `Sensors`. Once the `sensor-controller` is deployed, creating a sensor is easy as:
 ```
-kubectl create -f examples/hello-sensor.yaml
+kubectl create -f examples/calendar-sensor.yaml
 ```
