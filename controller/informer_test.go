@@ -23,7 +23,6 @@ import (
 	fake_ss "github.com/argoproj/argo-events/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestInstanceIDReq(t *testing.T) {
@@ -52,15 +51,4 @@ func TestNewSensorInformer(t *testing.T) {
 		sensorClientset: fake_ss.NewSimpleClientset(),
 	}
 	controller.newSensorInformer()
-}
-
-func TestNewPodInformer(t *testing.T) {
-	controller := &SensorController{
-		Config: SensorControllerConfig{
-			Namespace:  "testing",
-			InstanceID: "",
-		},
-		kubeClientset: fake.NewSimpleClientset(),
-	}
-	controller.newPodInformer()
 }

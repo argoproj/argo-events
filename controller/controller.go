@@ -18,10 +18,11 @@ package controller
 
 import (
 	"context"
+	"sync"
 	"time"
 
+	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -29,36 +30,24 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	"github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	"github.com/argoproj/argo-events/shared"
 )
 
 const (
-	sensorResyncPeriod = 20 * time.Minute
+	sensorResyncPeriod      = 20 * time.Minute
+	pluginHealthCheckPeriod = 30 * time.Second
 )
 
 // SensorControllerConfig contain the configuration settings for the sensor controller
 type SensorControllerConfig struct {
-	// ExecutorImage is the name of the image to run for the container inside the sensor executor jobs
-	ExecutorImage string `json:"executorImage"`
-
-	// ExecutorImagePullPolicy is the imagePullPolicy for the the executor. If this is empty,
-	// the imagePullPolicy is "Always".
-	ExecutorImagePullPolicy string `json:"executorImagePullPolicy"`
-
 	// InstanceID is a label selector to limit the controller's watch of sensor jobs to a specific instance.
 	// If omitted, the controller watches sensors that *are not* labeled with an instance id.
 	InstanceID string `json:"instanceID,omitempty"`
 
 	// Namespace is a label selector filter to limit controller's watch to specific namespace
 	Namespace string `json:"namespace"`
-
-	// The service account to attach to the sensor executor pods
-	ServiceAccount string `json:"serviceAccount"`
-
-	// ExecutorResources specifies the resource requirements that will be used for the sensor executor pods
-	ExecutorResources *corev1.ResourceRequirements `json:"executorResources,omitempty"`
 }
 
 // SensorController listens for new sensors and hands off handling of each sensor on the queue to the operator
@@ -70,40 +59,48 @@ type SensorController struct {
 	// Config is the sensor controller's configuration
 	Config SensorControllerConfig
 
+	// kubernetes config and apis
 	kubeConfig      *rest.Config
 	kubeClientset   kubernetes.Interface
 	sensorClientset sensorclientset.Interface
 
-	ssQueue     workqueue.RateLimitingInterface
-	podQueue    workqueue.RateLimitingInterface
-	ssInformer  cache.SharedIndexInformer
-	podInformer cache.SharedIndexInformer
+	// sensor informer and queue
+	informer cache.SharedIndexInformer
+	queue    workqueue.RateLimitingInterface
+
+	// plugins
+	signalProto plugin.ClientProtocol
+
+	// inventories
+	signalMu sync.Mutex
+	signals  map[string]shared.Signaler
 
 	log *zap.SugaredLogger
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, kubeClient kubernetes.Interface, sensorClient sensorclientset.Interface, log *zap.SugaredLogger, configMap string) *SensorController {
+func NewSensorController(rest *rest.Config, configMap string, signalProto plugin.ClientProtocol, log *zap.SugaredLogger) *SensorController {
 	return &SensorController{
-		kubeConfig:      rest,
-		kubeClientset:   kubeClient,
-		sensorClientset: sensorClient,
 		ConfigMap:       configMap,
-		ssQueue:         workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		podQueue:        workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		kubeConfig:      rest,
+		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
+		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
+		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		signalProto:     signalProto,
+		signals:         make(map[string]shared.Signaler),
 		log:             log,
 	}
 }
 
 func (c *SensorController) processNextItem() bool {
 	// Wait until there is a new item in the queue
-	key, quit := c.ssQueue.Get()
+	key, quit := c.queue.Get()
 	if quit {
 		return false
 	}
-	defer c.ssQueue.Done(key)
+	defer c.queue.Done(key)
 
-	obj, exists, err := c.ssInformer.GetIndexer().GetByKey(key.(string))
+	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
 		c.log.Warnf("failed to get sensor '%s' from informer index: %+v", key, err)
 		return true
@@ -133,23 +130,22 @@ func (c *SensorController) handleErr(err error, key interface{}) {
 	if err == nil {
 		// Forget about the #AddRateLimited history of key on every successful synch
 		// Ensure future updates for this key are not delayed because of outdated error history
-		c.ssQueue.Forget(key)
+		c.queue.Forget(key)
 		return
 	}
 
-	if c.ssQueue.NumRequeues(key) < 3 {
+	if c.queue.NumRequeues(key) < 3 {
 		c.log.Errorf("Error syncing sensor %v: %v", key, err)
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
-		c.ssQueue.AddRateLimited(key)
+		c.queue.AddRateLimited(key)
 		return
 	}
 }
 
 // Run executes the controller
-func (c *SensorController) Run(ctx context.Context, ssThreads, jobThreads int) {
-	defer c.ssQueue.ShutDown()
-	defer c.podQueue.ShutDown()
+func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
+	defer c.queue.ShutDown()
 
 	c.log.Infof("sensor controller (version: %s) (instance: %s) starting", axis.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
@@ -158,23 +154,17 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, jobThreads int) {
 		return
 	}
 
-	c.ssInformer = c.newSensorInformer()
-	c.podInformer = c.newPodInformer()
-	go c.ssInformer.Run(ctx.Done())
-	go c.podInformer.Run(ctx.Done())
+	c.informer = c.newSensorInformer()
+	go c.informer.Run(ctx.Done())
+	go c.monitorPlugins(ctx.Done())
 
-	for _, informer := range []cache.SharedIndexInformer{c.ssInformer, c.podInformer} {
-		if !cache.WaitForCacheSync(ctx.Done(), informer.HasSynced) {
-			c.log.Panicf("timed out waiting for the caches to sync")
-			return
-		}
+	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
+		c.log.Panicf("timed out waiting for the caches to sync")
+		return
 	}
 
 	for i := 0; i < ssThreads; i++ {
 		go wait.Until(c.runWorker, time.Second, ctx.Done())
-	}
-	for i := 0; i < jobThreads; i++ {
-		go wait.Until(c.podWorker, time.Second, ctx.Done())
 	}
 
 	<-ctx.Done()
@@ -185,47 +175,21 @@ func (c *SensorController) runWorker() {
 	}
 }
 
-func (c *SensorController) podWorker() {
-	for c.processNextPod() {
+// monitors the plugins to ensure they are all still up & running
+// if a ping fails, we exit the program so k8s can restart the controller
+// and re-initialize a connection to the plugin processes
+func (c *SensorController) monitorPlugins(done <-chan struct{}) {
+	timer := time.NewTimer(pluginHealthCheckPeriod)
+	for {
+		select {
+		case <-timer.C:
+			err := c.signalProto.Ping()
+			if err != nil {
+				c.log.Fatalf("signal plugin client connection failed")
+			}
+		case <-done:
+			timer.Stop()
+			return
+		}
 	}
-}
-
-func (c *SensorController) processNextPod() bool {
-	key, quit := c.podQueue.Get()
-	if quit {
-		return false
-	}
-	defer c.podQueue.Done(key)
-
-	obj, exists, err := c.podInformer.GetIndexer().GetByKey(key.(string))
-	if err != nil {
-		c.log.Errorf("failed to get pod '%s' from informer index: %+v", key, err)
-		return true
-	}
-	if !exists {
-		// we can get here if job was queued into the job workqueue,
-		// but it was either deleted or labeled completed by the time
-		// we dequeued it.
-		return true
-	}
-	pod, ok := obj.(*corev1.Pod)
-	if !ok {
-		c.log.Warnf("key '%s' in index is not a pod", key)
-		return true
-	}
-	if pod.Labels == nil {
-		c.log.Warnf("pod '%s' did not have labels", key)
-		return true
-	}
-
-	sensor, ok := pod.Labels[common.LabelKeySensor]
-	if !ok {
-		c.log.Warnf("pod unrelated to any sensor: %s", pod.ObjectMeta.Name)
-		return false
-	}
-
-	// TODO: currently we requeue the sensor on *any* job updates
-	// But this can be made smarter to only requeue on changes we care about
-	c.ssQueue.Add(pod.ObjectMeta.Namespace + "/" + sensor)
-	return true
 }

@@ -17,19 +17,15 @@ limitations under the License.
 package controller
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	"github.com/stretchr/testify/assert"
-	batchv1 "k8s.io/api/batch/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -88,6 +84,7 @@ var sampleSensor = v1alpha1.Sensor{
 	},
 }
 
+/*
 func TestSensorOperateLifecycle(t *testing.T) {
 	fake := newFakeController()
 	defer fake.teardown()
@@ -113,7 +110,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name + "-sensor-123",
 			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
+			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyComplete: "false"},
 		},
 		Spec: apiv1.PodSpec{},
 		Status: apiv1.PodStatus{
@@ -164,18 +161,19 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	err = soc.operate()
 	assert.Nil(t, err)
 }
+*/
 
 func TestReRunSensor(t *testing.T) {
 	fake := newFakeController()
 	defer fake.teardown()
 
 	sampleSensor.Status = v1alpha1.SensorStatus{
-		Phase: v1alpha1.NodePhaseSucceeded,
+		Phase: v1alpha1.NodePhaseComplete,
 		Nodes: map[string]v1alpha1.NodeStatus{
 			"testEntry": v1alpha1.NodeStatus{
 				ID:    "id",
 				Name:  "name",
-				Phase: v1alpha1.NodePhaseSucceeded,
+				Phase: v1alpha1.NodePhaseComplete,
 			},
 		},
 	}
@@ -187,13 +185,12 @@ func TestReRunSensor(t *testing.T) {
 
 	// verify sensor status fields
 	assert.True(t, soc.updated)
-	assert.True(t, soc.needJobCreation)
-	assert.Equal(t, v1alpha1.NodePhaseInit, soc.s.Status.Phase)
+	assert.Equal(t, v1alpha1.NodePhaseNew, soc.s.Status.Phase)
 	assert.Equal(t, 2, len(soc.s.Status.Nodes))
 	natsSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseInit, natsSignalNode.Phase)
+	assert.Equal(t, v1alpha1.NodePhaseNew, natsSignalNode.Phase)
 	resourceSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
-	assert.Equal(t, v1alpha1.NodePhaseInit, resourceSignalNode.Phase)
+	assert.Equal(t, v1alpha1.NodePhaseNew, resourceSignalNode.Phase)
 }
 
 func TestEscalationSent(t *testing.T) {
@@ -244,33 +241,6 @@ func TestEscalationSent(t *testing.T) {
 	assert.Nil(t, err)
 	soc := newSensorOperationCtx(sensor, fake.SensorController)
 
-	// create the executor job
-	executorJob := &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      soc.s.Name + "-sensor",
-			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelKeyResolved: "false"},
-		},
-		Spec: batchv1.JobSpec{},
-	}
-	_, err = fake.kubeClientset.BatchV1().Jobs(fake.Config.Namespace).Create(executorJob)
-	assert.Nil(t, err)
-
-	// create the executor pod
-	executorPod := &apiv1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      soc.s.Name + "-sensor-123",
-			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyResolved: "false"},
-		},
-		Spec: apiv1.PodSpec{},
-		Status: apiv1.PodStatus{
-			Phase: apiv1.PodFailed,
-		},
-	}
-	_, err = fake.kubeClientset.CoreV1().Pods(fake.Config.Namespace).Create(executorPod)
-	assert.Nil(t, err)
-
 	// if sensor not yet escalated, make sure we escalate and update it
 	soc.operate()
 	assert.True(t, soc.s.Status.Escalated)
@@ -281,39 +251,4 @@ func TestEscalationSent(t *testing.T) {
 	soc.operate()
 	assert.True(t, soc.s.Status.Escalated)
 	assert.False(t, soc.updated)
-}
-
-func TestInferFailedPodCause(t *testing.T) {
-	pod := &apiv1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "pod1",
-			Namespace: "testing",
-		},
-		Status: apiv1.PodStatus{
-			Message: "status message failure here",
-		},
-	}
-	// pod message
-	failureCause := inferFailedPodCause(pod)
-	assert.Equal(t, "status message failure here", failureCause)
-
-	// annotations message
-	annotations := make(map[string]string)
-	annotations[common.AnnotationKeyNodeMessage] = "annotation message failure here"
-	pod.ObjectMeta.Annotations = annotations
-	pod.Status.Message = ""
-
-	failureCause = inferFailedPodCause(pod)
-	assert.Equal(t, "annotation message failure here", failureCause)
-
-	// pod status conditions
-	delete(pod.ObjectMeta.Annotations, common.AnnotationKeyNodeMessage)
-	conditions := make([]apiv1.PodCondition, 1)
-	conditions[0] = apiv1.PodCondition{
-		Message: "pod status condition message failure",
-	}
-	pod.Status.Conditions = conditions
-
-	failureCause = inferFailedPodCause(pod)
-	assert.Equal(t, "Pod Conditions: pod status condition message failure. ", failureCause)
 }

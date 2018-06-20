@@ -35,13 +35,14 @@ type fakeController struct {
 }
 
 func (f *fakeController) setup(namespace string) {
-	f.SensorController = NewSensorController(nil, fake.NewSimpleClientset(), fakesensor.NewSimpleClientset(), zap.NewNop().Sugar(), "configmap")
+	f.SensorController = NewSensorController(nil, "configmap", nil, zap.NewNop().Sugar())
+	f.SensorController.kubeClientset = fake.NewSimpleClientset()
+	f.SensorController.sensorClientset = fakesensor.NewSimpleClientset()
 	f.Config = SensorControllerConfig{Namespace: namespace}
 }
 
 func (f *fakeController) teardown() {
-	f.ssQueue.ShutDown()
-	f.podQueue.ShutDown()
+	f.queue.ShutDown()
 }
 
 func newFakeController() *fakeController {
@@ -50,42 +51,28 @@ func newFakeController() *fakeController {
 	return fakeController
 }
 
-func TestProcessNextJob(t *testing.T) {
-	controller := newFakeController()
-	controller.podQueue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	controller.podInformer = controller.newPodInformer()
-
-	controller.podQueue.Add("hi")
-	res := controller.processNextPod()
-	assert.True(t, res)
-
-	controller.podQueue.ShutDown()
-	res = controller.processNextPod()
-	assert.False(t, res)
-}
-
 func TestProcessNextItem(t *testing.T) {
 	controller := newFakeController()
-	controller.ssQueue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	controller.ssInformer = controller.newSensorInformer()
+	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	controller.informer = controller.newSensorInformer()
 
-	controller.ssQueue.Add("hi")
+	controller.queue.Add("hi")
 	res := controller.processNextItem()
 	assert.True(t, res)
 
-	controller.ssQueue.ShutDown()
+	controller.queue.ShutDown()
 	res = controller.processNextItem()
 	assert.False(t, res)
 }
 
 func TestHandleErr(t *testing.T) {
 	controller := newFakeController()
-	controller.ssQueue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
-	controller.ssQueue.Add("hi")
+	controller.queue.Add("hi")
 	controller.handleErr(nil, "hi")
 
-	controller.ssQueue.Add("bye")
+	controller.queue.Add("bye")
 	controller.handleErr(fmt.Errorf("real error"), "bye")
 	controller.handleErr(fmt.Errorf("real error"), "bye")
 	controller.handleErr(fmt.Errorf("real error"), "bye")
