@@ -19,29 +19,16 @@ package job
 import (
 	"fmt"
 	"sync"
-	"time"
 
 	"go.uber.org/zap"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	plugin "github.com/hashicorp/go-plugin"
 )
-
-// Factory declares the interface to create real signals from abstract signals
-type Factory interface {
-	Create(AbstractSignal) (Signal, error)
-}
-
-// the registry is a key-value store that holds the various signal factories
-type registry struct {
-	lock      sync.Mutex
-	factories map[string]Factory
-}
 
 // ExecutorSession is the session for this sensor job executor
 type ExecutorSession struct {
@@ -49,7 +36,6 @@ type ExecutorSession struct {
 	namespace       string
 	kubeConfig      *rest.Config
 	sensorClientset sensorclientset.Interface
-	registry        registry
 	log             *zap.Logger
 	err             error
 }
@@ -59,24 +45,16 @@ func New(kubeConfig *rest.Config, sensorClientset sensorclientset.Interface, log
 	return &ExecutorSession{
 		kubeConfig:      kubeConfig,
 		sensorClientset: sensorClientset,
-		registry: registry{
-			factories: make(map[string]Factory),
-		},
-		log: log,
+		log:             log,
 	}
 }
 
 // Run the executor
-func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, signalRegisters []func(*ExecutorSession)) error {
+func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, plugins plugin.ClientProtocol) error {
 	kubeClientset := kubernetes.NewForConfigOrDie(es.kubeConfig)
 	es.name = sensor.Name
 	es.namespace = sensor.Namespace
 	defer es.handleError(kubeClientset, common.CreateJobPrefix(sensor.Name), sensor.Namespace)
-
-	// register the signal factories with this session
-	for _, register := range signalRegisters {
-		register(es)
-	}
 
 	// the channel for all signals to send their events
 	events := make(chan Event)
@@ -84,68 +62,46 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, signalRegisters []func(*
 
 	var wg sync.WaitGroup
 
-	// create, initialize, and start the signals
+	// start the signals
 	wg.Add(1)
 	go func() {
 		for _, rawSignal := range sensor.Spec.Signals {
-			var registry Factory
-			var ok bool
+			var name string
 			if rawSignal.GetType() == v1alpha1.SignalTypeStream {
-				registry, ok = es.GetStreamFactory(rawSignal.Stream.Type)
-				if !ok {
-					es.err = fmt.Errorf("Failed to instantiate %s registry for signal %s", rawSignal.Stream.Type, rawSignal.Name)
-					panic(es.err)
-				}
+				name = rawSignal.Stream.Type
 			} else {
-				registry, ok = es.GetCoreFactory(rawSignal.GetType())
-				if !ok {
-					es.err = fmt.Errorf("Failed to instantiate %s registry for signal %s", rawSignal.GetType(), rawSignal.Name)
-					panic(es.err)
-				}
+				name = string(rawSignal.GetType())
 			}
-
-			abstractSignal := AbstractSignal{
-				Signal:  rawSignal,
-				id:      sensor.NodeID(rawSignal.Name),
-				Log:     es.log.With(zap.String("signal", rawSignal.Name)),
-				Session: es,
-			}
-			signal, err := registry.Create(abstractSignal)
+			raw, err := plugins.Dispense(name)
 			if err != nil {
 				es.err = err
-				abstractSignal.Log.Panic("failed to create", zap.String("type", string(rawSignal.GetType())), zap.Error(err))
+				es.log.Panic("failed to dispense signal plugin", zap.String("name", name), zap.Error(err))
 			}
+			signaler := raw.(Signaler)
 
-			// start the signals
-			err = signal.Start(events)
+			sigEvents, err := signaler.Start(&rawSignal)
 			if err != nil {
 				es.err = err
-				abstractSignal.Log.Panic("failed to start", zap.String("type", string(rawSignal.GetType())), zap.Error(err))
+				es.log.Panic("failed to start signal", zap.Error(err))
 			}
-		}
-		wg.Done()
-	}()
 
-	// listen for signal events
-	wg.Add(1)
-	go func() {
-		for event := range events {
-			es.log.Info("received event", zap.String("source", event.GetSource()), zap.String("nodeID", event.GetID()))
-			stop, resolved := es.syncNode(event)
-			if stop {
-				err := event.GetSignal().Stop()
-				if err != nil {
-					//todo: is this worthy of a panic?
-					es.log.Warn("failed to stop signal", zap.String("id", event.GetID()))
-					continue
+			// multiplex the sigEvents into events? or just range over sigEvents?
+			wg.Add(1)
+			go func() {
+				for event := range sigEvents {
+					es.log.Info("received event", zap.String("source", event.Context.Source.Host))
+					// todo: add signal processing and sync node
+					es.log.Info("syncing node...")
+
+					err := signaler.Stop()
+					if err != nil {
+						es.log.Warn("failed to stop signal", zap.Error(err))
+					}
+					es.log.Debug("stopped signal")
 				}
-				es.log.Info("stopped signal", zap.String("id", event.GetID()))
-			}
-			if resolved {
-				// need to find better way to signal done of events channel
-				break
-			}
-			es.log.Info("node is still running")
+				es.log.Info("no more events", zap.String("signal", name))
+				wg.Done()
+			}()
 		}
 		wg.Done()
 	}()
@@ -175,6 +131,7 @@ func (es *ExecutorSession) handleError(kubeClient kubernetes.Interface, name, na
 // returns a tuple of booleans
 // first value is if we should stop the signal
 // second value is if the sensor is completely resolved
+/*
 func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
 	ssInterface := es.sensorClientset.ArgoprojV1alpha1().Sensors(es.namespace)
 	s, err := ssInterface.Get(es.name, metav1.GetOptions{})
@@ -221,36 +178,7 @@ func (es *ExecutorSession) syncNode(event Event) (bool, bool) {
 
 	return true, updated.IsResolved(v1alpha1.NodeTypeSignal)
 }
-
-// AddCoreFactory allows access to add a core signal factory to the session registry
-func (es *ExecutorSession) AddCoreFactory(sigType v1alpha1.SignalType, r Factory) {
-	es.registry.lock.Lock()
-	defer es.registry.lock.Unlock()
-	es.registry.factories[string(sigType)] = r
-}
-
-// AddStreamFactory allows access to add a stream signal factory to the session registry
-func (es *ExecutorSession) AddStreamFactory(streamType string, r Factory) {
-	es.registry.lock.Lock()
-	defer es.registry.lock.Unlock()
-	es.registry.factories[streamType] = r
-}
-
-// GetCoreFactory allows access to retrieve a core factory from the session registry
-func (es *ExecutorSession) GetCoreFactory(sigType v1alpha1.SignalType) (Factory, bool) {
-	es.registry.lock.Lock()
-	defer es.registry.lock.Unlock()
-	val, ok := es.registry.factories[string(sigType)]
-	return val, ok
-}
-
-// GetStreamFactory allows access to retrieve a stream factory from the session registry
-func (es *ExecutorSession) GetStreamFactory(streamType string) (Factory, bool) {
-	es.registry.lock.Lock()
-	defer es.registry.lock.Unlock()
-	val, ok := es.registry.factories[streamType]
-	return val, ok
-}
+*/
 
 func (es *ExecutorSession) GetKubeConfig() *rest.Config {
 	return es.kubeConfig

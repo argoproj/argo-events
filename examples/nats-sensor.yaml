@@ -9,15 +9,15 @@ spec:
     - name: hello
       stream:
         type: NATS
-        url: nats://example-nats-cluster:4222
+        url: nats://example-nats-cluster.nats-io:4222
         attributes:
-          subject: hello
+          subject: bucketevents
   triggers:
     - name: "done-nat-stream"
       message:
         body: "this is the message body"
         stream:
           type: NATS
-          url: nats://example-nats-cluster:4222
+          url: nats://example-nats-cluster.nats-io:4222
           attributes:
             subject: gateway-sensor

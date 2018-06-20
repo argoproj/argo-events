@@ -56,8 +56,15 @@ executor-job:
 executor-job-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make executor-job
 
-executor-job-image: executor-job-linux
+executor-job-image: executor-job-linux signal-plugin-linux
 	docker build -t $(IMAGE_PREFIX)sensor-executor:$(IMAGE_TAG) -f ./job/Dockerfile .
+
+# Signal plugins
+signal-plugin:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./job/nats
+
+signal-plugin-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make signal-plugin
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

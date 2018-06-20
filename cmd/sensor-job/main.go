@@ -19,22 +19,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 
 	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/job"
-	"github.com/argoproj/argo-events/job/amqp"
-	"github.com/argoproj/argo-events/job/artifact"
-	"github.com/argoproj/argo-events/job/calendar"
-	"github.com/argoproj/argo-events/job/kafka"
-	"github.com/argoproj/argo-events/job/mqtt"
-	"github.com/argoproj/argo-events/job/nats"
-	"github.com/argoproj/argo-events/job/resource"
-	"github.com/argoproj/argo-events/job/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
+	"github.com/hashicorp/go-plugin"
 )
 
 func main() {
@@ -42,7 +35,7 @@ func main() {
 
 	config, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	sensorClientset := sensorclientset.NewForConfigOrDie(config)
@@ -58,69 +51,34 @@ func main() {
 
 	sensor, err := sensorClientset.ArgoprojV1alpha1().Sensors(namespace).Get(common.ParseJobPrefix(jobName), metav1.GetOptions{})
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
 
 	logger, err := zap.NewDevelopment()
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	}
-	sensorLogger := logger.With(zap.String("sensor", sensor.Name))
+	log := logger.With(zap.String("sensor", sensor.Name))
 
-	// find which signals to run
-	registers, err := getSignalRegisters(sensor.Spec.Signals)
+	// initialize the plugins
+	pluginFile := os.Getenv("SIGNAL_PLUGIN")
+	pluginClient := plugin.NewClient(&plugin.ClientConfig{
+		HandshakeConfig: job.Handshake,
+		Plugins:         job.PluginMap,
+		Cmd:             exec.Command(pluginFile),
+		AllowedProtocols: []plugin.Protocol{
+			plugin.ProtocolNetRPC, plugin.ProtocolGRPC,
+		},
+	})
+	defer pluginClient.Kill()
+
+	streamClient, err := pluginClient.Client()
+	if err != nil {
+		panic(err)
+	}
+
+	err = job.New(config, sensorClientset, log).Run(sensor.DeepCopy(), streamClient)
 	if err != nil {
 		panic(err.Error())
-	}
-
-	err = job.New(config, sensorClientset, sensorLogger).Run(sensor.DeepCopy(), registers)
-	if err != nil {
-		panic(err.Error())
-	}
-}
-
-func getSignalRegisters(signals []v1alpha1.Signal) ([]func(*job.ExecutorSession), error) {
-	var registerFuncs []func(*job.ExecutorSession)
-	for _, signal := range signals {
-		switch signal.GetType() {
-		case v1alpha1.SignalTypeStream:
-			streamFactory, err := resolveSignalStreamFactory(*signal.Stream)
-			if err != nil {
-				return registerFuncs, err
-			}
-			registerFuncs = append(registerFuncs, streamFactory)
-		case v1alpha1.SignalTypeArtifact:
-			registerFuncs = append(registerFuncs, artifact.Artifact)
-			// for artifacts, need to find which stream to use
-			streamFactory, err := resolveSignalStreamFactory(signal.Artifact.NotificationStream)
-			if err != nil {
-				return registerFuncs, err
-			}
-			registerFuncs = append(registerFuncs, streamFactory)
-		case v1alpha1.SignalTypeResource:
-			registerFuncs = append(registerFuncs, resource.Resource)
-		case v1alpha1.SignalTypeCalendar:
-			registerFuncs = append(registerFuncs, calendar.Calendar)
-		case v1alpha1.SignalTypeWebhook:
-			registerFuncs = append(registerFuncs, webhook.Webhook)
-		default:
-			return registerFuncs, fmt.Errorf("%s signal type not supported", signal.GetType())
-		}
-	}
-	return registerFuncs, nil
-}
-
-func resolveSignalStreamFactory(stream v1alpha1.Stream) (func(*job.ExecutorSession), error) {
-	switch stream.Type {
-	case nats.StreamTypeNats:
-		return nats.NATS, nil
-	case mqtt.StreamTypeMqtt:
-		return mqtt.MQTT, nil
-	case amqp.StreamTypeAMQP:
-		return amqp.AMQP, nil
-	case kafka.StreamTypeKafka:
-		return kafka.Kafka, nil
-	default:
-		return nil, fmt.Errorf("unsupported stream type")
 	}
 }
