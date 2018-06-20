@@ -26,7 +26,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 
-	fakesensor "github.com/blackrock/axis/pkg/client/clientset/versioned/fake"
+	fakesensor "github.com/argoproj/argo-events/pkg/client/clientset/versioned/fake"
 )
 
 // fakeController is a wrapper around the sensorController to allow efficient test setup/cleanup

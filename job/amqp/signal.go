@@ -17,7 +17,7 @@ limitations under the License.
 package amqp
 
 import (
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 	"go.uber.org/zap"
 
 	amqplib "github.com/streadway/amqp"

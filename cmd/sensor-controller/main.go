@@ -24,9 +24,9 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/blackrock/axis/common"
-	"github.com/blackrock/axis/controller"
-	sensorclientset "github.com/blackrock/axis/pkg/client/clientset/versioned"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/controller"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 )
 
 func main() {

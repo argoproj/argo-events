@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/blackrock/axis/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"

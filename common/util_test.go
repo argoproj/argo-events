@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestRetryableKubeAPIError(t *testing.T) {

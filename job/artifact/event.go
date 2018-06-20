@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/blackrock/axis/job"
+	"github.com/argoproj/argo-events/job"
 
 	"github.com/minio/minio-go"
 )

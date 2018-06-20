@@ -23,7 +23,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/blackrock/axis/common"
+	"github.com/argoproj/argo-events/common"
 	"github.com/stretchr/testify/assert"
 
 	corev1 "k8s.io/api/core/v1"

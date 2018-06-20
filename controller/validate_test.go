@@ -21,7 +21,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func TestValidateSensor(t *testing.T) {

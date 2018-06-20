@@ -30,7 +30,7 @@ $ eval $(minikube docker-env)
 
 ## 5. Build the Axis project & Docker images
 ```
-$ cd go/src/github.com/blackrock/axis
+$ cd go/src/github.com/argoproj/argo-events
 $ make all
 ```
 

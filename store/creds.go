@@ -19,8 +19,8 @@ package store
 import (
 	"fmt"
 
-	"github.com/blackrock/axis/common"
-	"github.com/blackrock/axis/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
