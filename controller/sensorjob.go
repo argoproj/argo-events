@@ -57,7 +57,7 @@ func (soc *sOperationCtx) createSensorExecutorJob() error {
 		Name:            common.ExecutorContainerName,
 		Image:           soc.controller.Config.ExecutorImage,
 		Env:             envVars,
-		ImagePullPolicy: corev1.PullIfNotPresent,
+		ImagePullPolicy: corev1.PullPolicy(soc.controller.Config.ExecutorImagePullPolicy),
 	}
 	if soc.controller.Config.ExecutorResources != nil {
 		execContainer.Resources = *soc.controller.Config.ExecutorResources
