@@ -17,15 +17,21 @@ limitations under the License.
 package mqtt
 
 import (
-	"time"
+	"fmt"
+	"strconv"
 
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
-	"go.uber.org/zap"
+	"github.com/golang/protobuf/ptypes"
+)
+
+const (
+	topicKey  = "topic"
+	EventType = "mqtt.github.io.msg"
 )
 
 type mqtt struct {
-	job.AbstractSignal
 	client MQTTlib.Client
 	stop   chan struct{}
 	msgCh  chan MQTTlib.Message
@@ -34,31 +40,44 @@ type mqtt struct {
 	topic string
 }
 
-func (m *mqtt) Start(events chan job.Event) error {
-	opts := MQTTlib.NewClientOptions().AddBroker(m.Stream.URL).SetClientID(m.Name)
+// New creates a new mqtt signaler
+func New() shared.Signaler {
+	return &mqtt{
+		msgCh: make(chan MQTTlib.Message),
+		stop:  make(chan struct{}),
+	}
+}
+
+func (m *mqtt) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+	// parse out the attributes
+	var ok bool
+	m.topic, ok = signal.Stream.Attributes[topicKey]
+	if !ok {
+		return nil, shared.ErrMissingRequiredAttribute
+	}
+
+	opts := MQTTlib.NewClientOptions().AddBroker(signal.Stream.URL).SetClientID(signal.Name)
 	m.client = MQTTlib.NewClient(opts)
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
-		m.Log.Warn("failed to connect to mqtt client", zap.String("url", m.Stream.URL))
-		return token.Error()
+		return nil, fmt.Errorf("failed to connect to mqtt client. cause: %s", token.Error())
 	}
 
 	// subscribe to the topic
 	if token := m.client.Subscribe(m.topic, 0, m.handleMsg); token.Wait() && token.Error() != nil {
-		m.Log.Warn("failed to subscribe to mqtt topic", zap.String("topic", m.topic))
-		return token.Error()
+		return nil, fmt.Errorf("failed to subscribe to mqtt topic. cause: %s", token.Error())
 	}
+	events := make(chan shared.Event)
 	go m.listen(events)
-	return nil
+	return events, nil
 }
 
 func (m *mqtt) Stop() error {
 	defer close(m.msgCh)
 	m.stop <- struct{}{}
 	if token := m.client.Unsubscribe(m.topic); token.Wait() && token.Error() != nil {
-		m.Log.Warn("failed to unsubscribe from mqtt", zap.String("topic", m.topic))
-		return token.Error()
+		return fmt.Errorf("failed to unsubscribe from mqtt topic. cause: %s", token.Error())
 	}
-	m.client.Disconnect(250)
+	m.client.Disconnect(0)
 	return nil
 }
 
@@ -69,21 +88,21 @@ func (m *mqtt) handleMsg(client MQTTlib.Client, message MQTTlib.Message) {
 	}
 }
 
-func (m *mqtt) listen(events chan job.Event) {
+func (m *mqtt) listen(events chan shared.Event) {
+	defer close(events)
 	for {
 		select {
 		case msg := <-m.msgCh:
-			event := &event{
-				mqtt:      m,
-				msg:       msg,
-				timestamp: time.Now().UTC(),
+			event := shared.Event{
+				Context: &shared.EventContext{
+					EventID:            strconv.FormatUint(uint64(msg.MessageID()), 16),
+					EventType:          EventType,
+					CloudEventsVersion: shared.CloudEventsVersion,
+					EventTime:          ptypes.TimestampNow(),
+					Extensions:         make(map[string]string),
+				},
+				Data: msg.Payload(),
 			}
-			// perform constraint checks
-			ok := m.CheckConstraints(event.GetTimestamp())
-			if !ok {
-				event.SetError(job.ErrFailedTimeConstraint)
-			}
-			m.Log.Debug("sending mqtt event", zap.String("nodeID", event.GetID()))
 			events <- event
 		case <-m.stop:
 			return

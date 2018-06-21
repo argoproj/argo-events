@@ -1,31 +1,43 @@
-package main
+package nats
 
 import (
 	"fmt"
 	"log"
 	"strconv"
 
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/golang/protobuf/ptypes"
-	plugin "github.com/hashicorp/go-plugin"
 	natsio "github.com/nats-io/go-nats"
 )
 
-// NATS is a plugin for a stream signal
-type NATS struct {
+const (
+	subjectKey = "subject"
+	EventType  = "com.github.nats-io.pub"
+)
+
+// nats is a plugin for a stream signal
+type nats struct {
 	natsConn         *natsio.Conn
 	natsSubscription *natsio.Subscription
 	msgCh            chan *natsio.Msg
 	stop             chan struct{}
 }
 
-// Start NATS signal
-func (n *NATS) Start(signal *v1alpha1.Signal) (<-chan job.Event, error) {
+// New creates a new nats signaler
+func New() shared.Signaler {
+	return &nats{
+		msgCh: make(chan *natsio.Msg),
+		stop:  make(chan struct{}),
+	}
+}
+
+// Start nats signal
+func (n *nats) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	// parse out the attributes
-	subject, ok := signal.Stream.Attributes["subject"]
+	subject, ok := signal.Stream.Attributes[subjectKey]
 	if !ok {
-		return nil, job.ErrMissingRequiredAttribute
+		return nil, shared.ErrMissingRequiredAttribute
 	}
 	var err error
 	n.natsConn, err = natsio.Connect(signal.Stream.URL)
@@ -36,13 +48,13 @@ func (n *NATS) Start(signal *v1alpha1.Signal) (<-chan job.Event, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to subscribe to nats subject %s. Cause: %+v", subject, err.Error())
 	}
-	events := make(chan job.Event)
+	events := make(chan shared.Event)
 	go n.listen(events)
 	return events, nil
 }
 
-// Stop NATS signal
-func (n *NATS) Stop() error {
+// Stop nats signal
+func (n *nats) Stop() error {
 	defer n.natsConn.Close()
 	defer close(n.msgCh)
 	log.Printf("stopping signal")
@@ -50,35 +62,21 @@ func (n *NATS) Stop() error {
 	return n.natsSubscription.Unsubscribe()
 }
 
-func main() {
-	nats := &NATS{
-		msgCh: make(chan *natsio.Msg),
-		stop:  make(chan struct{}),
-	}
-
-	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: job.Handshake,
-		Plugins: map[string]plugin.Plugin{
-			"NATS": &job.SignalPlugin{Impl: nats},
-		},
-		GRPCServer: plugin.DefaultGRPCServer,
-	})
-}
-
-func (n *NATS) listen(events chan job.Event) {
+func (n *nats) listen(events chan shared.Event) {
+	defer close(events)
 	id := 0
 	for {
 		select {
 		case natsMsg := <-n.msgCh:
-			event := &job.Event{
-				Context: &job.EventContext{
-					EventType:          "com.github.nats-io.pub",
+			event := &shared.Event{
+				Context: &shared.EventContext{
+					EventType:          EventType,
 					EventTypeVersion:   "",
-					CloudEventsVersion: "v1.0",
-					Source:             &job.URI{},
+					CloudEventsVersion: shared.CloudEventsVersion,
+					Source:             &shared.URI{},
 					EventID:            natsMsg.Subject + "-" + strconv.Itoa(id),
 					EventTime:          ptypes.TimestampNow(),
-					SchemaURL:          &job.URI{},
+					SchemaURL:          &shared.URI{},
 					ContentType:        "",
 					Extensions:         make(map[string]string),
 				},
@@ -87,7 +85,6 @@ func (n *NATS) listen(events chan job.Event) {
 			log.Printf("sending nat event")
 			events <- *event
 		case <-n.stop:
-			close(events)
 			return
 		}
 	}

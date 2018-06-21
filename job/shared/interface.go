@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package job
+package shared
 
 import (
 	"net/rpc"
@@ -23,6 +23,11 @@ import (
 	plugin "github.com/hashicorp/go-plugin"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
+)
+
+const (
+	CloudEventsVersion       = "v1.0"
+	ContextExtensionErrorKey = "error"
 )
 
 // Handshake is a common handshake that is shared by plugin and host.
@@ -34,7 +39,8 @@ var Handshake = plugin.HandshakeConfig{
 
 // PluginMap is the map of plugins we can dispense.
 var PluginMap = map[string]plugin.Plugin{
-	"NATS": &SignalPlugin{},
+	"NATS":     &signalPlugin{},
+	"Artifact": &signalPlugin{},
 	//todo: add more plugin here for all different types of signals
 }
 
@@ -44,24 +50,43 @@ type Signaler interface {
 	Stop() error
 }
 
-// SignalPlugin is the implementation of plugin.Plugin so we can serve/consume this.
-type SignalPlugin struct {
+// ArtifactSignaler is the interface for signaling with artifacts
+// In addition to including the basic Signaler interface, this also
+// enables access to read an artifact object to include in the event data payload
+type ArtifactSignaler interface {
+	Signaler
+	// todo: change to use io.Reader and io.Closer interfaces?
+	Read(*v1alpha1.ArtifactLocation, string) ([]byte, error)
+}
+
+// NewPlugin creates a base signal plugin
+func NewPlugin(impl Signaler) plugin.Plugin {
+	return &signalPlugin{Impl: impl}
+}
+
+// NewArtifactPlugin creates an artifact plugin
+func NewArtifactPlugin(impl ArtifactSignaler) plugin.Plugin {
+	return &signalPlugin{Impl: impl}
+}
+
+// signalPlugin is the implementation of plugin.Plugin so we can serve/consume this.
+type signalPlugin struct {
 	Impl Signaler
 }
 
-func (p *SignalPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
+func (p *signalPlugin) Server(*plugin.MuxBroker) (interface{}, error) {
 	return &RPCServer{Impl: p.Impl}, nil
 }
 
-func (p *SignalPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
+func (p *signalPlugin) Client(b *plugin.MuxBroker, c *rpc.Client) (interface{}, error) {
 	return &RPCClient{client: c}, nil
 }
 
-func (p *SignalPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
+func (p *signalPlugin) GRPCServer(broker *plugin.GRPCBroker, s *grpc.Server) error {
 	RegisterSignalServer(s, &GRPCServer{Impl: p.Impl})
 	return nil
 }
 
-func (p *SignalPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
+func (p *signalPlugin) GRPCClient(ctx context.Context, broker *plugin.GRPCBroker, c *grpc.ClientConn) (interface{}, error) {
 	return &GRPCClient{client: NewSignalClient(c)}, nil
 }

@@ -26,6 +26,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	"github.com/hashicorp/go-plugin"
 )
@@ -63,8 +64,8 @@ func main() {
 	// initialize the plugins
 	pluginFile := os.Getenv("SIGNAL_PLUGIN")
 	pluginClient := plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: job.Handshake,
-		Plugins:         job.PluginMap,
+		HandshakeConfig: shared.Handshake,
+		Plugins:         shared.PluginMap,
 		Cmd:             exec.Command(pluginFile),
 		AllowedProtocols: []plugin.Protocol{
 			plugin.ProtocolNetRPC, plugin.ProtocolGRPC,

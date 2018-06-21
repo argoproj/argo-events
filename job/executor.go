@@ -28,6 +28,7 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	"github.com/golang/protobuf/ptypes"
@@ -61,7 +62,7 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, plugins plugin.ClientPro
 	defer es.handleError(kubeClientset, common.CreateJobPrefix(sensor.Name), sensor.Namespace)
 
 	// the channel for all signals to send their events
-	events := make(chan Event)
+	events := make(chan shared.Event)
 	defer close(events)
 
 	var wg sync.WaitGroup
@@ -81,7 +82,7 @@ func (es *ExecutorSession) Run(sensor *v1alpha1.Sensor, plugins plugin.ClientPro
 				es.err = err
 				es.log.Panic("failed to dispense signal plugin", zap.String("name", name), zap.Error(err))
 			}
-			signaler := raw.(Signaler)
+			signaler := raw.(shared.Signaler)
 
 			sigEvents, err := signaler.Start(&rawSignal)
 			if err != nil {
@@ -133,7 +134,7 @@ func (es *ExecutorSession) handleError(kubeClient kubernetes.Interface, name, na
 // returns a tuple of booleans
 // first value is if we should stop the signal
 // second value is if the sensor is completely resolved
-func (es *ExecutorSession) syncNode(nodeID string, event Event) (bool, bool) {
+func (es *ExecutorSession) syncNode(nodeID string, event shared.Event) (bool, bool) {
 	log := es.log.With(zap.String("nodeID", nodeID))
 	ssInterface := es.sensorClientset.ArgoprojV1alpha1().Sensors(es.namespace)
 	s, err := ssInterface.Get(es.name, metav1.GetOptions{})

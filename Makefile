@@ -61,7 +61,7 @@ executor-job-image: executor-job-linux signal-plugin-linux
 
 # Signal plugins
 signal-plugin:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./job/nats
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./job/signals
 
 signal-plugin-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make signal-plugin

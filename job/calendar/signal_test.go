@@ -20,140 +20,112 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/job"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	cronlib "github.com/robfig/cron"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 func TestCalendarStartFailures(t *testing.T) {
-	es := job.New(nil, nil, zap.NewNop())
-	Calendar(es)
-	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
-	assert.True(t, ok, "calendar factory is not found")
-	abstractSignal := job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Name: "nats-test",
-			Calendar: &v1alpha1.CalendarSignal{
-				Recurrence: []string{},
-			},
+	signal := v1alpha1.Signal{
+		Name: "nats-test",
+		Calendar: &v1alpha1.CalendarSignal{
+			Recurrence: []string{},
 		},
-		Log:     zap.NewNop(),
-		Session: es,
 	}
-	signal, err := calFactory.Create(abstractSignal)
-	assert.Nil(t, err, "fail to create real calendar signal from abstract recurrence spec")
-
-	testCh := make(chan job.Event)
+	cal := New()
 
 	// test unknown signal
-	err = signal.Start(testCh)
-	assert.NotNil(t, err)
+	_, err := cal.Start(&signal)
+	if err == nil {
+		t.Errorf("expected a non nil error for an unknown calendar signal")
+	}
 
 	// test invalid parsing of schedule
-	abstractSignal = job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Name: "nats-test",
-			Calendar: &v1alpha1.CalendarSignal{
-				Schedule: "this is not a schedule",
-			},
+	signal = v1alpha1.Signal{
+		Name: "nats-test",
+		Calendar: &v1alpha1.CalendarSignal{
+			Schedule: "this is not a schedule",
 		},
-		Log:     zap.NewNop(),
-		Session: es,
 	}
-	signal, err = calFactory.Create(abstractSignal)
-	assert.Nil(t, err, "failed to create real calendar signal from abstract schedule spec")
-	err = signal.Start(testCh)
-	assert.NotNil(t, err)
+	_, err = cal.Start(&signal)
+	if err == nil {
+		t.Errorf("expected a non nil error for invalid parsing of schedule")
+	}
 
 	// test invalid parsing of interval
-	abstractSignal = job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Name: "nats-test",
-			Calendar: &v1alpha1.CalendarSignal{
-				Interval: "this is not a schedule",
-			},
+	signal = v1alpha1.Signal{
+		Name: "nats-test",
+		Calendar: &v1alpha1.CalendarSignal{
+			Interval: "this is not a schedule",
 		},
-		Log:     zap.NewNop(),
-		Session: es,
 	}
-	signal, err = calFactory.Create(abstractSignal)
-	assert.Nil(t, err)
-	err = signal.Start(testCh)
-	assert.NotNil(t, err)
+	_, err = cal.Start(&signal)
+	if err == nil {
+		t.Errorf("expected a non nil error for invalid parsing of interval")
+	}
 }
 
 func TestScheduleCalendar(t *testing.T) {
-	es := job.New(nil, nil, zap.NewNop())
-	Calendar(es)
-	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
-	assert.True(t, ok, "calendar factory is not found")
-	abstractSignal := job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Name: "nats-test",
-			Calendar: &v1alpha1.CalendarSignal{
-				Schedule: "@every 1ms",
-			},
+	cal := New()
+	signal := v1alpha1.Signal{
+		Name: "nats-test",
+		Calendar: &v1alpha1.CalendarSignal{
+			Schedule: "@every 1ms",
 		},
-		Log:     zap.NewNop(),
-		Session: es,
 	}
-	signal, err := calFactory.Create(abstractSignal)
-	assert.Nil(t, err)
-	testCh := make(chan job.Event)
 
-	err = signal.Start(testCh)
-	assert.Nil(t, err)
+	events, err := cal.Start(&signal)
+	if err != nil {
+		t.Error(err)
+	}
 
 	time.Sleep(time.Millisecond)
-	event, ok := <-testCh
-	assert.True(t, ok)
+	event, ok := <-events
+	if !ok {
+		t.Errorf("expected an event but found none")
+	}
 
-	err = signal.Stop()
-	assert.Nil(t, err)
+	err = cal.Stop()
+	if err != nil {
+		t.Error(err)
+	}
 
 	// ensure the event was correct
-	assert.Equal(t, "", event.GetID())
-	assert.Equal(t, "schedule: @every 1ms", event.GetSource())
-	assert.Equal(t, signal, event.GetSignal())
-	assert.True(t, time.Now().After(event.GetTimestamp()))
+	if event.Context.EventType != EventType {
+		t.Errorf("event context EventType\nexpected: %s\nactual: %s", EventType, event.Context.EventType)
+	}
 }
 
 func TestIntervalCalendar(t *testing.T) {
-	es := job.New(nil, nil, zap.NewNop())
-	Calendar(es)
-	calFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeCalendar)
-	assert.True(t, ok, "calendar factory is not found")
-	abstractSignal := job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Name: "nats-test",
-			Calendar: &v1alpha1.CalendarSignal{
-				Interval: "1ms",
-			},
+	cal := New()
+	signal := v1alpha1.Signal{
+		Name: "nats-test",
+		Calendar: &v1alpha1.CalendarSignal{
+			Interval: "1ms",
 		},
-		Log:     zap.NewNop(),
-		Session: es,
 	}
-	signal, err := calFactory.Create(abstractSignal)
-	assert.Nil(t, err)
-	testCh := make(chan job.Event)
 
-	err = signal.Start(testCh)
-	assert.Nil(t, err)
+	events, err := cal.Start(&signal)
+	if err != nil {
+		t.Error(err)
+	}
 
 	time.Sleep(time.Millisecond)
-	event, ok := <-testCh
-	assert.True(t, ok)
+	event, ok := <-events
+	if !ok {
+		t.Errorf("expected an event but found none")
+	}
 
-	err = signal.Stop()
-	assert.Nil(t, err)
+	err = cal.Stop()
+	if err != nil {
+		t.Error(err)
+	}
 
 	// ensure the event was correct
-	assert.Equal(t, "", event.GetID())
-	assert.Equal(t, "interval: 1ms", event.GetSource())
-	assert.Equal(t, signal, event.GetSignal())
-	assert.True(t, time.Now().After(event.GetTimestamp()))
+	// ensure the event was correct
+	if event.Context.EventType != EventType {
+		t.Errorf("event context EventType\nexpected: %s\nactual: %s", EventType, event.Context.EventType)
+	}
 }
 
 func TestGetNextTime(t *testing.T) {
@@ -170,9 +142,4 @@ func TestGetNextTime(t *testing.T) {
 	nextEventTime = c.getNextTime(lastEventTime)
 	expectedNextEventTime = time.Date(2018, time.May, 9, 23, 59, 59, 0, time.UTC)
 	assert.Equal(t, expectedNextEventTime, nextEventTime)
-}
-
-func TestGetUnknownSource(t *testing.T) {
-	c := calendar{tickMethod: 3}
-	assert.Equal(t, "unknown", c.getSource())
 }

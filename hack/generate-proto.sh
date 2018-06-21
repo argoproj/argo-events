@@ -55,7 +55,7 @@ GOPROTOBINARY=go
 #GOPROTOBINARY=gogofast
 
 # Generate job/<service>/(<service>.pb.go)
-PROTO_FILES=$(find $PROJECT_ROOT \( -name "*.proto" -and -path '*/job/*' \))
+PROTO_FILES=$(find $PROJECT_ROOT \( -name "*.proto" -and -path '*/job/shared/*' \))
 for i in ${PROTO_FILES}; do
     protoc \
         -I${PROJECT_ROOT} \
