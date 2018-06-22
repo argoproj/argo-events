@@ -1,0 +1,78 @@
+syntax = "proto3";
+option go_package = "github.com/argoproj/argo-events/job/shared";
+
+package shared;
+
+import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Event is a data record expressing an occurrence and its context.
+// Adheres to the CloudEvents v0.1 specification
+message Event {
+    EventContext context = 1;
+    bytes data = 2;
+}
+
+// URI is a Uniform Resource Identifier based on RFC 3986
+message URI {
+    string scheme = 1;
+    string user = 2;
+    string password = 3;
+    string host = 4;
+    int32 port = 5;
+    string path = 6;
+    string query = 7;
+    string fragment = 8;
+}
+
+// EventContext contains metadata that provides circumstantial information about the occurence.
+message EventContext {
+    // The type of occurrence which has happened. Often this attribute is used for 
+    // routing, observability, policy enforcement, etc.
+    // should be prefixed with a reverse-DNS name. The prefixed domain dictates
+    // the organization which defines the semantics of this event type. ex: com.github.pull.create
+    string eventType = 1;
+
+    // The version of the eventType. Enables the interpretation of data by eventual consumers,
+    // requires the consumer to be knowledgeable about the producer.
+    string eventTypeVersion = 2;
+
+    // The version of the CloudEvents specification which the event uses.
+    // Enables the intepretation of the context.
+    string cloudEventsVersion = 3;
+
+    // This describes the event producer.
+    URI source = 4;
+
+    // ID of the event. The semantics are explicitly undefined to ease the implementation of producers.
+    // Enables deduplication. Must be unique within scope of producer.
+    string eventID = 5;
+
+    // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
+    google.protobuf.Timestamp eventTime = 6;
+
+    // A link to the schema that the data attribute adheres to.
+    // Must adhere to the format specified in RFC 3986.
+    URI schemaURL = 7;
+
+    // Content type of the data attribute value. Enables the data attribute to carry any type of content,
+    // whereby format and encoding might differ from that of the chosen event format.
+    // For example, the data attribute may carry an XML or JSON payload and the consumer is informed
+    // by this attribute being set to "application/xml" or "application/json" respectively.
+    string contentType = 8;
+
+    // This is for additional metadata and does not have a mandated structure.
+    // Enables a place for custom fields a producer or middleware might want to include and provides a place
+    // to test metadata before adding them to the CloudEvents specification.
+    map<string, string> extensions = 9;
+}
+
+// Signal enables communication between signal plugins and the sensor executor.
+service Signal {
+    // Start listening. Events are streamed back to the client.
+    rpc Start(github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Signal) returns (stream Event);
+
+    // Stop listening. This should terminate the above event stream.
+    rpc Stop(google.protobuf.Empty) returns (google.protobuf.Empty);
+}

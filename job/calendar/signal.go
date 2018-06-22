@@ -18,13 +18,17 @@ package calendar
 
 import (
 	"fmt"
-	"sync"
+	"log"
 	"time"
 
-	"go.uber.org/zap"
-
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/golang/protobuf/ptypes"
 	cronlib "github.com/robfig/cron"
+)
+
+const (
+	EventType = "com.github.argoproj.calendar"
 )
 
 const (
@@ -33,61 +37,71 @@ const (
 )
 
 type calendar struct {
-	job.AbstractSignal
 	tickMethod     int
 	schedule       cronlib.Schedule
 	exclusionDates []time.Time
 	stop           chan struct{}
-	wg             sync.WaitGroup
 }
 
-func (c *calendar) Start(events chan job.Event) error {
+// New creates a new calendar signaler
+func New() shared.Signaler {
+	return &calendar{
+		stop: make(chan struct{}),
+	}
+}
+
+func (c *calendar) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	// parse out the calendar configurations
 	var err error
-	if c.AbstractSignal.Calendar.Schedule != "" {
+	if signal.Calendar.Schedule != "" {
 		c.tickMethod = tickMethodSchedule
-		c.schedule, err = cronlib.Parse(c.AbstractSignal.Calendar.Schedule)
+		c.schedule, err = cronlib.Parse(signal.Calendar.Schedule)
 		if err != nil {
-			return fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", c.AbstractSignal.Calendar.Schedule, err.Error())
+			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", signal.Calendar.Schedule, err.Error())
 		}
-	} else if c.AbstractSignal.Calendar.Interval != "" {
+	} else if signal.Calendar.Interval != "" {
 		c.tickMethod = tickMethodInterval
-		intervalDuration, err := time.ParseDuration(c.AbstractSignal.Calendar.Interval)
+		intervalDuration, err := time.ParseDuration(signal.Calendar.Interval)
 		if err != nil {
-			return fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", c.AbstractSignal.Calendar.Interval, err.Error())
+			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", signal.Calendar.Interval, err.Error())
 		}
 		c.schedule = cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 	} else {
-		return fmt.Errorf("calendar signal must contain either a schedule or interval")
+		return nil, fmt.Errorf("calendar signal must contain either a schedule or interval")
 	}
 
-	c.exclusionDates = parseExclusionDates(c.Calendar.Recurrence)
+	c.exclusionDates = parseExclusionDates(signal.Calendar.Recurrence)
 
-	c.wg.Add(1)
+	events := make(chan shared.Event)
 	go c.handleEvents(events)
-	return nil
+	return events, nil
 }
 
 func (c *calendar) Stop() error {
 	c.stop <- struct{}{}
 	close(c.stop)
-	c.wg.Wait()
 	return nil
 }
 
-func (c *calendar) handleEvents(events chan job.Event) {
+func (c *calendar) handleEvents(events chan shared.Event) {
+	defer close(events)
 	eventTimer := c.getEventTimer()
 	for t := range eventTimer {
-		event := &event{
-			calendar:  c,
-			timestamp: t,
+		timestamp, err := ptypes.TimestampProto(t)
+		if err != nil {
+			timestamp = ptypes.TimestampNow()
 		}
-		// perform constraint checks
-		ok := c.CheckConstraints(event.GetTimestamp())
-		if !ok {
-			event.SetError(job.ErrFailedTimeConstraint)
+		event := shared.Event{
+			Context: &shared.EventContext{
+				EventID:            t.String(),
+				EventType:          EventType,
+				CloudEventsVersion: shared.CloudEventsVersion,
+				Source:             &shared.URI{},
+				EventTime:          timestamp,
+				SchemaURL:          &shared.URI{},
+				Extensions:         make(map[string]string),
+			},
 		}
-		c.Log.Debug("sending calendar event", zap.String("nodeID", event.GetID()))
 		events <- event
 	}
 }
@@ -100,13 +114,12 @@ func (c *calendar) getEventTimer() <-chan time.Time {
 		for {
 			t := c.getNextTime(lastT)
 			timer := time.After(time.Until(t))
-			c.Log.Debug("expected next calendar event", zap.Time("t", t))
+			log.Printf("expected next calendar event %s", t)
 			select {
 			case tx := <-timer:
 				eventTimer <- tx
 				lastT = tx
 			case <-c.stop:
-				c.wg.Done()
 				return
 			}
 		}
@@ -126,15 +139,4 @@ func (c *calendar) getNextTime(lastEventTime time.Time) time.Time {
 		}
 	}
 	return nextEventTime
-}
-
-func (c *calendar) getSource() string {
-	switch c.tickMethod {
-	case tickMethodSchedule:
-		return "schedule: " + c.AbstractSignal.Calendar.Schedule
-	case tickMethodInterval:
-		return "interval: " + c.AbstractSignal.Calendar.Interval
-	default:
-		return "unknown"
-	}
 }

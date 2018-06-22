@@ -17,73 +17,89 @@ limitations under the License.
 package webhook
 
 import (
+	"log"
 	"net/http"
 
-	"go.uber.org/zap"
-
 	"fmt"
-	"io"
 	"io/ioutil"
 	"strconv"
-	"time"
 
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/golang/protobuf/ptypes"
+)
+
+const (
+	EventType = "Webhook"
 )
 
 type webhook struct {
-	job.AbstractSignal
-	events  chan job.Event
-	server  *http.Server
-	payload io.ReadCloser
+	method string
+	events chan shared.Event
+	server *http.Server
+}
+
+// New creates a new webhook signaler
+func New() shared.Signaler {
+	return &webhook{}
 }
 
 // Handler for the http rest endpoint
 func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
-	w.Log.Info("received a request from", zap.String("host", request.Host))
-	if request.Method == w.Webhook.Method {
+	log.Printf("received a request from '%s'", request.Host)
+	if request.Method == w.method {
 		payload, err := ioutil.ReadAll(request.Body)
 		if err != nil {
-			w.Log.Warn("unable to process request payload. Cause: %v", zap.Error(err))
+			log.Printf("unable to process request payload. Cause: %s", err)
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		event := &event{
-			webhook:     w,
-			requestHost: request.Host,
-			timestamp:   time.Now().UTC(),
-			payload:     payload,
+		event := shared.Event{
+			Context: &shared.EventContext{
+				EventType:          EventType,
+				EventTypeVersion:   request.Proto,
+				CloudEventsVersion: shared.CloudEventsVersion,
+				Source: &shared.URI{
+					Scheme: request.RequestURI,
+					Host:   request.Host,
+				},
+				EventTime: ptypes.TimestampNow(),
+			},
+			Data: payload,
 		}
 		w.events <- event
 		writer.WriteHeader(http.StatusOK)
 	} else {
-		w.Log.Warn("HTTP method mismatch", zap.String("actual", request.Method), zap.String("expected", w.Webhook.Method))
+		log.Printf("HTTP method of request '%s' does not match expected '%s'", request.Method, w.method)
 		writer.WriteHeader(http.StatusBadRequest)
 	}
 }
 
 // Start signal
-func (w *webhook) Start(events chan job.Event) error {
-	w.events = events
-	port := strconv.Itoa(int(w.AbstractSignal.Webhook.Port))
-	endpoint := w.AbstractSignal.Webhook.Endpoint
+func (w *webhook) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+	w.method = signal.Webhook.Method
+	port := strconv.Itoa(int(signal.Webhook.Port))
+	endpoint := signal.Webhook.Endpoint
 	// Attach handler
 	http.HandleFunc(endpoint, w.handler)
 	w.server = &http.Server{Addr: fmt.Sprintf(":%s", port)}
 
+	w.events = make(chan shared.Event)
 	// Start http server
 	go func() {
 		err := w.server.ListenAndServe()
 		if err == http.ErrServerClosed {
-			w.Log.Info("server successfully shutdown")
+			log.Print("server successfully shutdown")
 		} else {
 			panic(fmt.Errorf("error occurred while server listening. Cause: %v", err))
 		}
 	}()
-	return nil
+	return w.events, nil
 }
 
 // Stop signal
 func (w *webhook) Stop() error {
+	close(w.events)
 	err := w.server.Shutdown(nil)
 	if err != nil {
 		return fmt.Errorf("unable to shutdown server. Cause: %v", err)

@@ -17,10 +17,10 @@ limitations under the License.
 package resource
 
 import (
+	"log"
 	"strings"
-	"time"
+	"sync"
 
-	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -31,40 +31,45 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/golang/protobuf/ptypes"
 )
 
 type resource struct {
-	job.AbstractSignal
 	kubeConfig *rest.Config
 	watches    []watch.Interface
 }
 
-func (r *resource) Start(events chan job.Event) error {
+// New creates a new resource signaler
+func New(kubeConfig *rest.Config) shared.Signaler {
+	return &resource{kubeConfig: kubeConfig}
+}
+
+func (r *resource) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	var err error
 	dynClientPool := dynamic.NewDynamicClientPool(r.kubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(r.kubeConfig)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var groupVersion string
-	if r.Resource.Version == "v1" {
+	if signal.Resource.Version == "v1" {
 		groupVersion = "v1"
 	} else {
-		groupVersion = r.Resource.Group + "/" + r.Resource.Version
+		groupVersion = signal.Resource.Group + "/" + signal.Resource.Version
 	}
 	resourceInterfaces, err := disco.ServerResourcesForGroupVersion(groupVersion)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resources := make([]dynamic.ResourceInterface, 0)
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		r.Log.Info("found API Resource", zap.String("API Group Version", gvk.String()))
-		if apiResource.Kind != r.Resource.Kind {
+		log.Printf("found API Resource %s", gvk.String())
+		if apiResource.Kind != signal.Resource.Kind {
 			continue
 		}
 		canWatch := false
@@ -77,28 +82,37 @@ func (r *resource) Start(events chan job.Event) error {
 		if canWatch {
 			client, err := dynClientPool.ClientForGroupVersionKind(gvk)
 			if err != nil {
-				return err
+				return nil, err
 			}
-			resources = append(resources, client.Resource(&apiResource, r.Resource.Namespace))
+			resources = append(resources, client.Resource(&apiResource, signal.Resource.Namespace))
 		}
 	}
 
 	options := metav1.ListOptions{Watch: true}
-	if r.Resource.Filter != nil {
-		options.LabelSelector = labels.Set(r.Resource.Filter.Labels).AsSelector().String()
+	if signal.Resource.Filter != nil {
+		options.LabelSelector = labels.Set(signal.Resource.Filter.Labels).AsSelector().String()
 	}
 
+	wg := sync.WaitGroup{}
+	events := make(chan shared.Event)
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
 		watch, err := resource.Watch(options)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		r.watches = append(r.watches, watch)
-		go r.listen(events, watch)
+
+		wg.Add(1)
+		go r.listen(events, watch, signal.Resource.Filter, &wg)
 	}
 
-	return nil
+	go func() {
+		wg.Wait()
+		close(events)
+	}()
+
+	return events, nil
 }
 
 func (r *resource) Stop() error {
@@ -108,55 +122,50 @@ func (r *resource) Stop() error {
 	return nil
 }
 
-func (r *resource) listen(events chan job.Event, w watch.Interface) {
+func (r *resource) listen(events chan shared.Event, w watch.Interface, filter *v1alpha1.ResourceFilter, wg *sync.WaitGroup) {
 	for item := range w.ResultChan() {
 		itemObj := item.Object.(*unstructured.Unstructured)
-		event := &event{
-			obj:       itemObj,
-			timestamp: time.Now().UTC(),
-			resource:  r,
+		b, _ := itemObj.MarshalJSON()
+		event := shared.Event{
+			Context: &shared.EventContext{
+				EventTime: ptypes.TimestampNow(),
+			},
+			Data: b,
 		}
-
-		r.Log.Info("processing watch event", zap.ByteString("body", event.GetBody()))
 
 		if item.Type == watch.Error {
 			err := errors.FromObject(item.Object)
-			r.Log.Warn("watch error encountered", zap.Error(err))
-			event.SetError(err)
+			log.Panic(err)
 		}
 
-		ok := r.CheckConstraints(event.GetTimestamp())
-		if !ok {
-			event.SetError(job.ErrFailedTimeConstraint)
-		}
-
-		if r.passFilters(itemObj, r.Resource.Filter) {
+		if r.passFilters(itemObj, filter) {
 			events <- event
 		}
 	}
+	wg.Done()
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
 func (r *resource) passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		r.Log.Debug("FILTERED: resource name does not match prefix", zap.String("name", obj.GetName()), zap.String("prefix", filter.Prefix))
+		log.Printf("FILTERED: resource name '%s' does not match prefix '%s'", obj.GetName(), filter.Prefix)
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		r.Log.Debug("FILTERED: resource creation timestamp is after createdBy", zap.Time("obj creation", created.UTC()), zap.Time("createdBy", filter.CreatedBy.UTC()))
+		log.Printf("FILTERED: resource creation timestamp '%s' is after createdBy '%s'", created.UTC(), filter.CreatedBy.UTC())
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		r.Log.Debug("FILTERED: resource labels do not match filter labels")
+		log.Printf("FILTERED: resource labels '%s' do not match filter labels '%s'", obj.GetLabels(), filter.Labels)
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		r.Log.Debug("FILTERED: resource annotations do not match filter annotations")
+		log.Printf("FILTERED: resource annotations '%s' do not match filter annotations '%s'", obj.GetAnnotations(), filter.Annotations)
 		return false
 	}
 	return true

@@ -32,7 +32,7 @@ type S3Reader struct {
 
 // NewS3Reader creates a new ArtifactReader for an S3 compatible store
 func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, error) {
-	client, err := newMinioClient(s3, *creds)
+	client, err := NewMinioClient(s3, *creds)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (reader *S3Reader) Read() ([]byte, error) {
 	return b, nil
 }
 
-// newMinioClient instantiates a new minio client object to access s3 compatible APIs
-func newMinioClient(s3 *v1alpha1.S3Artifact, creds Credentials) (*minio.Client, error) {
+// NewMinioClient instantiates a new minio client object to access s3 compatible APIs
+func NewMinioClient(s3 *v1alpha1.S3Artifact, creds Credentials) (*minio.Client, error) {
 	var minioClient *minio.Client
 	var err error
 	if s3.Region != "" {

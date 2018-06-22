@@ -23,10 +23,8 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/job"
+	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 )
 
 var (
@@ -34,48 +32,46 @@ var (
 	payload = "{name: x}"
 )
 
-func createWebhookSignal(t *testing.T, httpMethod string, endpoint string) job.Signal {
-	es := job.New(nil, nil, zap.NewNop())
-	Webhook(es)
-	webhookFactory, ok := es.GetCoreFactory(v1alpha1.SignalTypeWebhook)
-	assert.True(t, ok, "webhook factory not found")
-	abstractSignal := job.AbstractSignal{
-		Signal: v1alpha1.Signal{
-			Webhook: &v1alpha1.WebhookSignal{
-				Port:     common.WebhookServiceTargetPort,
-				Endpoint: endpoint,
-				Method:   httpMethod,
-			},
-		},
-		Log:     zap.NewNop(),
-		Session: es,
-	}
-	webhookSignal, err := webhookFactory.Create(abstractSignal)
-	assert.Nil(t, err, "unable to create real webhook signal from abstract spec")
-	return webhookSignal
-}
-
-func handleEvent(t *testing.T, testEventChan chan job.Event) {
+func handleEvent(t *testing.T, testEventChan <-chan shared.Event) {
 	event := <-testEventChan
-	assert.Equal(t, fmt.Sprintf("localhost:%d", common.WebhookServicePort), event.GetSource())
-	assert.Equal(t, payload, string(event.GetBody()))
+
+	if event.Context.Source.Host != fmt.Sprintf("localhost:%d", common.WebhookServicePort) {
+		t.Errorf("event Context SourceHost:\nexpected: %s\nactual: %s", fmt.Sprintf("localhost:%d", common.WebhookServicePort), event.Context.Source.Host)
+	}
+	if string(event.Data) != payload {
+		t.Errorf("event Data:\nexpected: %s\nactual: %s", payload, string(event.Data))
+	}
 }
 
 func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
-	webhookSignal := createWebhookSignal(t, httpMethod, endpoint)
-	testEventChan := make(chan job.Event)
-	webhookSignal.Start(testEventChan)
+	web := New()
+	signal := v1alpha1.Signal{
+		Webhook: &v1alpha1.WebhookSignal{
+			Port:     common.WebhookServiceTargetPort,
+			Endpoint: endpoint,
+			Method:   httpMethod,
+		},
+	}
+	events, err := web.Start(&signal)
 
-	go handleEvent(t, testEventChan)
+	go handleEvent(t, events)
 
 	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", common.WebhookServicePort, endpoint), strings.NewReader(payload))
-	assert.Nil(t, err, "unable to create http request")
+	if err != nil {
+		t.Fatalf("unable to create http request. cause: %s", err)
+	}
 	request.Close = true // do not keep the connection alive
 	resp, err := client.Do(request)
-	assert.Nil(t, err, "failed to perform http request")
-	assert.Equal(t, "200 OK", resp.Status)
-	err = webhookSignal.Stop()
-	assert.Nil(t, err, "failed to stop webhook signal")
+	if err != nil {
+		t.Fatalf("failed to perform http request. cause: %s", err)
+	}
+	if resp.Status != "200 OK" {
+		t.Errorf("response status expected: '200 OK' actual: '%s'", resp.Status)
+	}
+	err = web.Stop()
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func testPostRequest(t *testing.T) {
