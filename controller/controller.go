@@ -43,6 +43,10 @@ type SensorControllerConfig struct {
 	// ExecutorImage is the name of the image to run for the container inside the sensor executor jobs
 	ExecutorImage string `json:"executorImage"`
 
+	// ExecutorImagePullPolicy is the imagePullPolicy for the the executor. If this is empty,
+	// the imagePullPolicy is "Always".
+	ExecutorImagePullPolicy string `json:"executorImagePullPolicy"`
+
 	// InstanceID is a label selector to limit the controller's watch of sensor jobs to a specific instance.
 	// If omitted, the controller watches sensors that *are not* labeled with an instance id.
 	InstanceID string `json:"instanceID,omitempty"`
