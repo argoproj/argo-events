@@ -13,8 +13,8 @@ import (
 // GRPCClient is an implementation of Stream that talks over gRPC.
 type GRPCClient struct{ client SignalClient }
 
-func (c *GRPCClient) Start(signal *v1alpha1.Signal) (<-chan Event, error) {
-	ch := make(chan Event, 32)
+func (c *GRPCClient) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
+	ch := make(chan *v1alpha1.Event, 32)
 	stream, err := c.client.Start(context.Background(), signal)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (c *GRPCClient) Start(signal *v1alpha1.Signal) (<-chan Event, error) {
 				// error during processing - should we use callbacks here?
 				panic(err)
 			}
-			ch <- *event
+			ch <- event
 		}
 	}()
 	return ch, nil
@@ -61,7 +61,7 @@ func (s *GRPCServer) Start(signal *v1alpha1.Signal, stream Signal_StartServer) e
 				// finished
 				return nil
 			}
-			err := stream.Send(&event)
+			err := stream.Send(event)
 			if err != nil {
 				return err
 			}

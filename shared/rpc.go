@@ -8,8 +8,8 @@ import (
 
 type RPCClient struct{ client *rpc.Client }
 
-func (c *RPCClient) Start(signal *v1alpha1.Signal) (<-chan Event, error) {
-	var resp <-chan Event
+func (c *RPCClient) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
+	var resp <-chan *v1alpha1.Event
 	err := c.client.Call("Plugin.Start", map[string]interface{}{
 		"signal": signal,
 	}, &resp)

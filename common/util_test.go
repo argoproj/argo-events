@@ -47,45 +47,6 @@ func TestDefaultConfigMapName(t *testing.T) {
 	assert.Equal(t, "controller-configmap", res)
 }
 
-func TestAddJobAnnotationAndLabels(t *testing.T) {
-	fakeKube := fake.NewSimpleClientset()
-
-	err := AddJobAnnotation(fakeKube, "jobName", "default", "key", "value")
-	assert.Nil(t, err)
-
-	err = AddJobLabel(fakeKube, "JobName", "default", "key", "value")
-	assert.Nil(t, err)
-}
-
-func TestAddPodAnnotationsAndLabels(t *testing.T) {
-	fakeKube := fake.NewSimpleClientset()
-
-	err := AddPodAnnotation(fakeKube, "podName", "default", "key", "value")
-	assert.Nil(t, err)
-
-	err = AddPodLabel(fakeKube, "PodName", "default", "key", "value")
-	assert.Nil(t, err)
-}
-
-func TestCreateJobPrefix(t *testing.T) {
-	prefix := CreateJobPrefix("test")
-	assert.Equal(t, "test-sensor", prefix)
-}
-
-func TestParseJobPrefix(t *testing.T) {
-	name := ParseJobPrefix("test-sensor")
-	assert.Equal(t, "test", name)
-
-	name = ParseJobPrefix("test-sensor-123")
-	assert.Equal(t, "test", name)
-
-	name = ParseJobPrefix("test-unknown")
-	assert.Equal(t, "test", name)
-
-	name = ParseJobPrefix("test-unknown-123")
-	assert.Equal(t, "test-unknown", name)
-}
-
 func TestServerResourceForGroupVersionKind(t *testing.T) {
 	fakeClient := fake.NewSimpleClientset()
 	fakeDisco := fakeClient.Discovery()

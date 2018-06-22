@@ -46,7 +46,7 @@ var PluginMap = map[string]plugin.Plugin{
 
 // Signaler is the interface for signaling
 type Signaler interface {
-	Start(*v1alpha1.Signal) (<-chan Event, error)
+	Start(*v1alpha1.Signal) (<-chan *v1alpha1.Event, error)
 	Stop() error
 }
 

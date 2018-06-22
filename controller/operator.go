@@ -22,26 +22,27 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/clientset/versioned/typed/sensor/v1alpha1"
 )
 
-// the context of an operation on a sensor. the controller creates this context each time it picks a Sensor off its queue
+// the context of an operation on a sensor.
+// the controller creates this context each time it picks a Sensor off its queue.
 type sOperationCtx struct {
 	// s is the sensor object
 	s *v1alpha1.Sensor
 
+	// events contains the latest events for each signal of this sensor
+	// this gets populated during operating
+	// allows passing of events from signals -> triggers
+	events map[string]v1alpha1.Event
+
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
-
-	// needJobCreation indicates if we need to create a new sensor executor job
-	needJobCreation bool
 
 	// log is the log of this context
 	log *zap.SugaredLogger
@@ -54,6 +55,7 @@ type sOperationCtx struct {
 func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sOperationCtx {
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
+		events:     make(map[string]v1alpha1.Event),
 		updated:    false,
 		log:        controller.log.With(zap.String("sensor", s.Name), zap.String("namespace", s.Namespace)),
 		controller: controller,
@@ -72,14 +74,8 @@ func (soc *sOperationCtx) operate() error {
 		}
 	}()
 
-	// first check if sensor is completely done
-	if soc.s.Status.Phase == v1alpha1.NodePhaseSucceeded {
-		soc.log.Debug("sensor already completed successfully")
-		return nil
-	}
-
 	if soc.s.Status.Phase == v1alpha1.NodePhaseNew {
-		// perform one-time sensor validation & job creation
+		// perform one-time sensor validation
 		err := validateSensor(soc.s)
 		if err != nil {
 			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())
@@ -89,25 +85,16 @@ func (soc *sOperationCtx) operate() error {
 
 	// process the sensor's signals
 	for _, signal := range soc.s.Spec.Signals {
-		node := soc.getNodeByName(signal.Name)
-		// if node is resolved, complete it
-		if node != nil && node.Phase == v1alpha1.NodePhaseResolved {
-			soc.markNodePhase(node.Name, v1alpha1.NodePhaseSucceeded)
+		_, err := soc.processSignal(signal)
+		if err != nil {
+			soc.markNodePhase(signal.Name, v1alpha1.NodePhaseError, err.Error())
+			return err
 		}
-		// if node is new, initialize it
-		if node == nil {
-			soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseInit)
-		}
-	}
-
-	err := soc.evaluateSensorPod()
-	if err != nil {
-		return err
 	}
 
 	// process the triggers if all sensor signals are resolved/successful
 	// this means we can start processing triggers when signals are resolved, not completed so may introduce discrepancy if signal fails to complete after being resolved
-	if soc.s.IsResolved(v1alpha1.NodeTypeSignal) {
+	if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) {
 		for _, trigger := range soc.s.Spec.Triggers {
 			_, err := soc.processTrigger(trigger)
 			if err != nil {
@@ -118,13 +105,13 @@ func (soc *sOperationCtx) operate() error {
 			}
 		}
 
-		if soc.s.IsResolved(v1alpha1.NodeTypeTrigger) {
+		if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeTrigger) {
 			// here we need to check if the sensor is repeatable, if so, we should go back to init phase for the sensor & all the nodes
 			// todo: add spec level deadlines here
 			if soc.s.Spec.Repeat {
 				soc.reRunSensor()
 			} else {
-				soc.markSensorPhase(v1alpha1.NodePhaseSucceeded, true)
+				soc.markSensorPhase(v1alpha1.NodePhaseComplete, true)
 			}
 			return nil
 		}
@@ -148,74 +135,6 @@ func (soc *sOperationCtx) operate() error {
 	return nil
 }
 
-// evaluateSensorPod evaluates the associated sensor executor pod and updates the node status
-func (soc *sOperationCtx) evaluateSensorPod() error {
-	if soc.s.Status.Phase == v1alpha1.NodePhaseNew {
-		soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
-		soc.needJobCreation = true
-		return nil
-	}
-
-	// now get the pods for this job
-	podLabels := labels.Set(map[string]string{common.LabelKeySensor: soc.s.Name})
-	listOptions := metav1.ListOptions{LabelSelector: podLabels.AsSelector().String()}
-	pods, err := soc.controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).List(listOptions)
-	if err != nil {
-		// the pod was not found
-		soc.log.Warnf("encountered error attempting to get job's pods with listOpts: %s", listOptions.String())
-		return err
-	}
-
-	numPods := len(pods.Items)
-	if numPods != 1 {
-		if numPods == 0 {
-			soc.log.Warn("failed to find associated pod for executor job")
-			soc.markSensorPhase(v1alpha1.NodePhaseError, false, "failed to find associated pod for executor pod")
-			return nil
-		}
-		soc.log.Warn("found more than 1 associated pod for the executor job")
-	}
-	pod := &pods.Items[0]
-
-	// assess the pod status
-	switch pod.Status.Phase {
-	case apiv1.PodPending:
-		soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
-	case apiv1.PodSucceeded:
-		common.AddPodLabel(soc.controller.kubeClientset, pod.Name, pod.Namespace, common.LabelKeyResolved, "true")
-	case apiv1.PodFailed:
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, inferFailedPodCause(pod))
-	case apiv1.PodRunning:
-		// only update the sensor + signal phases if the sensor is not already in the active phase
-		if soc.s.Status.Phase != v1alpha1.NodePhaseActive {
-			soc.markSensorPhase(v1alpha1.NodePhaseActive, false)
-			// mark all the signal nodes as active
-			for _, signal := range soc.s.Spec.Signals {
-				soc.markNodePhase(signal.Name, v1alpha1.NodePhaseActive)
-			}
-		}
-	default:
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("unexpected pod phase: %s", pod.Status.Phase))
-	}
-	return nil
-}
-
-func inferFailedPodCause(pod *apiv1.Pod) string {
-	if pod.Status.Message != "" {
-		return pod.Status.Message
-	}
-	if annotatedMsg, ok := pod.Annotations[common.AnnotationKeyNodeMessage]; ok {
-		return annotatedMsg
-	}
-	failMsg := "Pod Conditions: "
-	for _, condition := range pod.Status.Conditions {
-		if condition.Message != "" {
-			failMsg += condition.Message + ". "
-		}
-	}
-	return failMsg
-}
-
 func (soc *sOperationCtx) reRunSensor() {
 	// if we get here we know the sensor pod & job is succeeded, the triggers have fired, but the sensor is repeatable
 	// we know have to reset the sensor status
@@ -226,12 +145,11 @@ func (soc *sOperationCtx) reRunSensor() {
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	// re-initialize the signal nodes
 	for _, signal := range soc.s.Spec.Signals {
-		soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseInit)
+		soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseNew)
 	}
 
 	// add a field to status to log # of times this sensor went resolved -> init
-	soc.markSensorPhase(v1alpha1.NodePhaseInit, false)
-	soc.needJobCreation = true
+	soc.markSensorPhase(v1alpha1.NodePhaseNew, false)
 	soc.updated = true
 }
 
@@ -256,16 +174,6 @@ func (soc *sOperationCtx) persistUpdates() {
 		}
 	}
 	soc.log.Info("sensor update successful")
-
-	// we are now safe to create the job if necessary
-	if soc.s.Status.Phase == v1alpha1.NodePhaseInit && soc.needJobCreation {
-		err := soc.createSensorExecutorJob()
-		if err != nil {
-			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())
-			soc.persistUpdates()
-			return
-		}
-	}
 
 	time.Sleep(1 * time.Second)
 }
@@ -326,9 +234,9 @@ func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhas
 		node.Message = message[0]
 		soc.updated = true
 	}
-	if node.IsComplete() && node.ResolvedAt.IsZero() {
-		node.ResolvedAt = metav1.Time{Time: time.Now().UTC()}
-		soc.log.Infof("%s '%s' resolved: %s", node.Type, node.Name, node.ResolvedAt)
+	if node.IsComplete() && node.CompletedAt.IsZero() {
+		node.CompletedAt = metav1.Time{Time: time.Now().UTC()}
+		soc.log.Infof("%s '%s' completed: %s", node.Type, node.Name, node.CompletedAt)
 		soc.updated = true
 	}
 	soc.s.Status.Nodes[node.ID] = *node
@@ -357,14 +265,14 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markResolved
 	}
 
 	switch phase {
-	case v1alpha1.NodePhaseSucceeded, v1alpha1.NodePhaseUnresolved, v1alpha1.NodePhaseError:
+	case v1alpha1.NodePhaseComplete, v1alpha1.NodePhaseError:
 		if markResolved {
-			soc.log.Infof("marking sensor resolved")
-			soc.s.Status.ResolvedAt = metav1.Time{Time: time.Now().UTC()}
+			soc.log.Infof("marking sensor complete")
+			soc.s.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
 			if soc.s.ObjectMeta.Labels == nil {
 				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
-			soc.s.ObjectMeta.Labels[common.LabelKeyResolved] = "true"
+			soc.s.ObjectMeta.Labels[common.LabelKeyComplete] = "true"
 			soc.updated = true
 		}
 	}

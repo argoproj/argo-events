@@ -19,11 +19,12 @@ package mqtt
 import (
 	"fmt"
 	"strconv"
+	"time"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/shared"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/golang/protobuf/ptypes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -48,7 +49,7 @@ func New() shared.Signaler {
 	}
 }
 
-func (m *mqtt) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (m *mqtt) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	// parse out the attributes
 	var ok bool
 	m.topic, ok = signal.Stream.Attributes[topicKey]
@@ -66,7 +67,7 @@ func (m *mqtt) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	if token := m.client.Subscribe(m.topic, 0, m.handleMsg); token.Wait() && token.Error() != nil {
 		return nil, fmt.Errorf("failed to subscribe to mqtt topic. cause: %s", token.Error())
 	}
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go m.listen(events)
 	return events, nil
 }
@@ -88,17 +89,17 @@ func (m *mqtt) handleMsg(client MQTTlib.Client, message MQTTlib.Message) {
 	}
 }
 
-func (m *mqtt) listen(events chan shared.Event) {
+func (m *mqtt) listen(events chan *v1alpha1.Event) {
 	defer close(events)
 	for {
 		select {
 		case msg := <-m.msgCh:
-			event := shared.Event{
-				Context: &shared.EventContext{
+			event := &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
 					EventID:            strconv.FormatUint(uint64(msg.MessageID()), 16),
 					EventType:          EventType,
 					CloudEventsVersion: shared.CloudEventsVersion,
-					EventTime:          ptypes.TimestampNow(),
+					EventTime:          metav1.Time{Time: time.Now().UTC()},
 					Extensions:         make(map[string]string),
 				},
 				Data: msg.Payload(),

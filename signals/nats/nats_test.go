@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/shared"
 	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"

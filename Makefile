@@ -34,9 +34,9 @@ IMAGE_PREFIX=${IMAGE_NAMESPACE}/
 endif
 
 # Build the project
-.PHONY: all controller controller-image executor-job executor-job-image clean test
+.PHONY: all controller controller-image clean test
 
-all: controller-image executor-job-image
+all: controller-image
 
 # Sensor controller
 controller:
@@ -49,19 +49,9 @@ controller-image: controller-linux
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controller/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
-# Sensor executor
-executor-job:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-executor ./cmd/sensor-job
-
-executor-job-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make executor-job
-
-executor-job-image: executor-job-linux signal-plugin-linux
-	docker build -t $(IMAGE_PREFIX)sensor-executor:$(IMAGE_TAG) -f ./job/Dockerfile .
-
 # Signal plugins
 signal-plugin:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./job/signals
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./signals
 
 signal-plugin-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make signal-plugin

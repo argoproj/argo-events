@@ -17,22 +17,16 @@ limitations under the License.
 package common
 
 import (
-	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 // DefaultRetry is a default retry backoff settings when retrying API calls
@@ -52,82 +46,6 @@ func IsRetryableKubeAPIError(err error) bool {
 	return true
 }
 
-// AddJobAnnotation adds an annotation to a job
-func AddJobAnnotation(c kubernetes.Interface, jobName, namespace, key, value string) error {
-	return addJobMetadata(c, "annotations", jobName, namespace, key, value)
-}
-
-// AddJobLabel adds an label to a job
-func AddJobLabel(c kubernetes.Interface, jobName, namespace, key, value string) error {
-	return addJobMetadata(c, "labels", jobName, namespace, key, value)
-}
-
-// addJobMetadata is helper to either add a job label or annotation to the job
-func addJobMetadata(c kubernetes.Interface, field, jobName, namespace, key, value string) error {
-	metadata := map[string]interface{}{
-		"metadata": map[string]interface{}{
-			field: map[string]string{
-				key: value,
-			},
-		},
-	}
-	var err error
-	patch, err := json.Marshal(metadata)
-	if err != nil {
-		return err
-	}
-	for attempt := 0; attempt < 5; attempt++ {
-		_, err = c.BatchV1().Jobs(namespace).Patch(jobName, types.MergePatchType, patch)
-		if err != nil {
-			if !errors.IsConflict(err) {
-				return err
-			}
-		} else {
-			break
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	return err
-}
-
-// AddPodAnnotation adds an annotation to a pod
-func AddPodAnnotation(c kubernetes.Interface, podName, namespace, key, value string) error {
-	return addPodMetadata(c, "annotations", podName, namespace, key, value)
-}
-
-// AddPodLabel adds an label to a pod
-func AddPodLabel(c kubernetes.Interface, podName, namespace, key, value string) error {
-	return addPodMetadata(c, "labels", podName, namespace, key, value)
-}
-
-// addPodMetadata is helper to either add a job label or annotation to the job
-func addPodMetadata(c kubernetes.Interface, field, podName, namespace, key, value string) error {
-	metadata := map[string]interface{}{
-		"metadata": map[string]interface{}{
-			field: map[string]string{
-				key: value,
-			},
-		},
-	}
-	var err error
-	patch, err := json.Marshal(metadata)
-	if err != nil {
-		return err
-	}
-	for attempt := 0; attempt < 5; attempt++ {
-		_, err = c.CoreV1().Pods(namespace).Patch(podName, types.MergePatchType, patch)
-		if err != nil {
-			if !errors.IsConflict(err) {
-				return err
-			}
-		} else {
-			break
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-	return err
-}
-
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
 func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
@@ -141,22 +59,9 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 	return rest.InClusterConfig()
 }
 
-// CreateJobPrefix from the name of the sensor by simply attaching the string '-sensor'
-// job name follows format: {sensorName}-sensor
-func CreateJobPrefix(name string) string {
-	return name + "-" + sensor.Singular
-}
-
 // CreateServiceSuffix formats the service name backed by sensor job
 func CreateServiceSuffix(name string) string {
 	return name + "-svc"
-}
-
-// ParseJobPrefix and return the sensorName
-func ParseJobPrefix(job string) string {
-	// first trim the ID at the end, should be everything after and including the last '-'
-	withoutUniqueID := job[:strings.LastIndex(job, "-")]
-	return strings.TrimSuffix(withoutUniqueID, "-"+sensor.Singular)
 }
 
 // ServerResourceForGroupVersionKind finds the API resources that fit the GroupVersionKind schema

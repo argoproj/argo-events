@@ -19,14 +19,16 @@ package webhook
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"fmt"
 	"io/ioutil"
 	"strconv"
 
-	"github.com/argoproj/argo-events/job/shared"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
 )
 
 const (
@@ -35,7 +37,7 @@ const (
 
 type webhook struct {
 	method string
-	events chan shared.Event
+	events chan *v1alpha1.Event
 	server *http.Server
 }
 
@@ -54,16 +56,16 @@ func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
 			writer.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		event := shared.Event{
-			Context: &shared.EventContext{
+		event := &v1alpha1.Event{
+			Context: v1alpha1.EventContext{
 				EventType:          EventType,
 				EventTypeVersion:   request.Proto,
 				CloudEventsVersion: shared.CloudEventsVersion,
-				Source: &shared.URI{
+				Source: &v1alpha1.URI{
 					Scheme: request.RequestURI,
 					Host:   request.Host,
 				},
-				EventTime: ptypes.TimestampNow(),
+				EventTime: metav1.Time{Time: time.Now().UTC()},
 			},
 			Data: payload,
 		}
@@ -76,7 +78,7 @@ func (w *webhook) handler(writer http.ResponseWriter, request *http.Request) {
 }
 
 // Start signal
-func (w *webhook) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (w *webhook) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	w.method = signal.Webhook.Method
 	port := strconv.Itoa(int(signal.Webhook.Port))
 	endpoint := signal.Webhook.Endpoint
@@ -84,7 +86,7 @@ func (w *webhook) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	http.HandleFunc(endpoint, w.handler)
 	w.server = &http.Server{Addr: fmt.Sprintf(":%s", port)}
 
-	w.events = make(chan shared.Event)
+	w.events = make(chan *v1alpha1.Event)
 	// Start http server
 	go func() {
 		err := w.server.ListenAndServe()

@@ -20,6 +20,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,9 +32,8 @@ import (
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
 )
 
 type resource struct {
@@ -46,7 +46,7 @@ func New(kubeConfig *rest.Config) shared.Signaler {
 	return &resource{kubeConfig: kubeConfig}
 }
 
-func (r *resource) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (r *resource) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	var err error
 	dynClientPool := dynamic.NewDynamicClientPool(r.kubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(r.kubeConfig)
@@ -94,7 +94,7 @@ func (r *resource) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	}
 
 	wg := sync.WaitGroup{}
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
 		watch, err := resource.Watch(options)
@@ -122,13 +122,13 @@ func (r *resource) Stop() error {
 	return nil
 }
 
-func (r *resource) listen(events chan shared.Event, w watch.Interface, filter *v1alpha1.ResourceFilter, wg *sync.WaitGroup) {
+func (r *resource) listen(events chan *v1alpha1.Event, w watch.Interface, filter *v1alpha1.ResourceFilter, wg *sync.WaitGroup) {
 	for item := range w.ResultChan() {
 		itemObj := item.Object.(*unstructured.Unstructured)
 		b, _ := itemObj.MarshalJSON()
-		event := shared.Event{
-			Context: &shared.EventContext{
-				EventTime: ptypes.TimestampNow(),
+		event := &v1alpha1.Event{
+			Context: v1alpha1.EventContext{
+				EventTime: metav1.Time{Time: time.Now().UTC()},
 			},
 			Data: b,
 		}

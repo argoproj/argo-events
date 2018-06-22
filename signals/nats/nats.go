@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
 	natsio "github.com/nats-io/go-nats"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -33,7 +34,7 @@ func New() shared.Signaler {
 }
 
 // Start nats signal
-func (n *nats) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (n *nats) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	// parse out the attributes
 	subject, ok := signal.Stream.Attributes[subjectKey]
 	if !ok {
@@ -48,7 +49,7 @@ func (n *nats) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to subscribe to nats subject %s. Cause: %+v", subject, err.Error())
 	}
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go n.listen(events)
 	return events, nil
 }
@@ -62,28 +63,24 @@ func (n *nats) Stop() error {
 	return n.natsSubscription.Unsubscribe()
 }
 
-func (n *nats) listen(events chan shared.Event) {
+func (n *nats) listen(events chan *v1alpha1.Event) {
 	defer close(events)
 	id := 0
 	for {
 		select {
 		case natsMsg := <-n.msgCh:
-			event := &shared.Event{
-				Context: &shared.EventContext{
+			event := &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
 					EventType:          EventType,
-					EventTypeVersion:   "",
 					CloudEventsVersion: shared.CloudEventsVersion,
-					Source:             &shared.URI{},
 					EventID:            natsMsg.Subject + "-" + strconv.Itoa(id),
-					EventTime:          ptypes.TimestampNow(),
-					SchemaURL:          &shared.URI{},
-					ContentType:        "",
+					EventTime:          metav1.Time{Time: time.Now().UTC()},
 					Extensions:         make(map[string]string),
 				},
 				Data: natsMsg.Data,
 			}
 			log.Printf("sending nat event")
-			events <- *event
+			events <- event
 		case <-n.stop:
 			return
 		}

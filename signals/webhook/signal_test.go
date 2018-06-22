@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -32,7 +31,7 @@ var (
 	payload = "{name: x}"
 )
 
-func handleEvent(t *testing.T, testEventChan <-chan shared.Event) {
+func handleEvent(t *testing.T, testEventChan <-chan *v1alpha1.Event) {
 	event := <-testEventChan
 
 	if event.Context.Source.Host != fmt.Sprintf("localhost:%d", common.WebhookServicePort) {

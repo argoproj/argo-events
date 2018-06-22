@@ -9,13 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/shared"
 	"github.com/argoproj/argo-events/store"
 	"github.com/golang/protobuf/proto"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/timestamp"
 	minio "github.com/minio/minio-go"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -42,7 +41,7 @@ func New(streamSignaler shared.Signaler, kubeClient kubernetes.Interface, nm str
 }
 
 // Start the artifact signal
-func (s *s3) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (s *s3) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	streamSignal, err := extractAndCreateStreamSignal(signal)
 	if err != nil {
 		return nil, err
@@ -51,7 +50,7 @@ func (s *s3) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go s.interceptFilterAndEnhanceEvents(events, streamEvents)
 	return events, nil
 }
@@ -64,11 +63,11 @@ func (s *s3) Stop() error {
 // method should be invoked as a separate go routine within the artifact Start method
 // intercepts the receive-only msgs off the stream, filters them, and writes artifact events
 // to the sendCh.
-func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan shared.Event, recvCh <-chan shared.Event) {
+func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan *v1alpha1.Event, recvCh <-chan *v1alpha1.Event) {
 	defer close(sendCh)
 	for streamEvent := range recvCh {
 		// todo: apply general filtering on cloudEvents
-		event := proto.Clone(&streamEvent).(*shared.Event)
+		event := proto.Clone(streamEvent).(*v1alpha1.Event)
 
 		notification := &minio.NotificationInfo{}
 		err := json.Unmarshal(streamEvent.Data, notification)
@@ -86,15 +85,15 @@ func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan shared.Event, recvCh <-
 			}
 			port, _ := strconv.ParseInt(record.Source.Port, 10, 32)
 			event.Context.EventType = EventType
-			event.Context.EventTime = getProtoTimestamp(record.EventTime)
+			event.Context.EventTime = getMetaTimestamp(record.EventTime)
 			event.Context.EventTypeVersion = record.EventVersion
-			event.Context.Source = &shared.URI{
+			event.Context.Source = &v1alpha1.URI{
 				Scheme: record.EventSource,
 				User:   record.UserIdentity.PrincipalID,
 				Host:   record.Source.Host,
 				Port:   int32(port),
 			}
-			event.Context.SchemaURL = &shared.URI{
+			event.Context.SchemaURL = &v1alpha1.URI{
 				Scheme: record.S3.SchemaVersion,
 			}
 			event.Context.EventID = record.S3.Object.ETag
@@ -105,7 +104,7 @@ func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan shared.Event, recvCh <-
 				event.Context.Extensions[shared.ContextExtensionErrorKey] = err.Error()
 			}
 			event.Data = b
-			sendCh <- *event
+			sendCh <- event
 		}
 	}
 }
@@ -139,13 +138,12 @@ func applyFilter(notification *minio.NotificationEvent, signal *v1alpha1.Artifac
 		notification.EventName == string(signal.S3.Event)
 }
 
-func getProtoTimestamp(tStr string) (timestamp *timestamp.Timestamp) {
-	t, _ := time.Parse(ISO8601, tStr)
-	timestamp, err := ptypes.TimestampProto(t)
+func getMetaTimestamp(tStr string) metav1.Time {
+	t, err := time.Parse(ISO8601, tStr)
 	if err != nil {
-		timestamp = ptypes.TimestampNow()
+		return metav1.Time{Time: time.Now().UTC()}
 	}
-	return
+	return metav1.Time{Time: t}
 }
 
 func (s *s3) Read(loc *v1alpha1.ArtifactLocation, key string) ([]byte, error) {

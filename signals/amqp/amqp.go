@@ -19,9 +19,9 @@ package amqp
 import (
 	"fmt"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	amqplib "github.com/streadway/amqp"
 )
@@ -44,7 +44,7 @@ func New() shared.Signaler {
 	return &amqp{}
 }
 
-func (a *amqp) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (a *amqp) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	// parse out the attributes
 	exchangeName, ok := signal.Stream.Attributes[exchangeNameKey]
 	if !ok {
@@ -89,7 +89,7 @@ func (a *amqp) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 		return nil, fmt.Errorf("failed to begin consuming RabbitMQ messages. cause: %s", err)
 	}
 
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go a.listen(events)
 	return events, nil
 }
@@ -98,21 +98,17 @@ func (a *amqp) Stop() error {
 	return a.conn.Close()
 }
 
-func (a *amqp) listen(events chan shared.Event) {
+func (a *amqp) listen(events chan *v1alpha1.Event) {
 	for msg := range a.delivery {
-		t, err := ptypes.TimestampProto(msg.Timestamp)
-		if err != nil {
-			t = ptypes.TimestampNow()
-		}
-		event := shared.Event{
-			Context: &shared.EventContext{
+		event := &v1alpha1.Event{
+			Context: v1alpha1.EventContext{
 				EventID:            msg.MessageId,
 				EventType:          EventType,
 				EventTypeVersion:   msg.ConsumerTag,
 				CloudEventsVersion: shared.CloudEventsVersion,
-				Source:             &shared.URI{},
-				EventTime:          t,
-				SchemaURL:          &shared.URI{},
+				Source:             &v1alpha1.URI{},
+				EventTime:          metav1.Time{Time: msg.Timestamp},
+				SchemaURL:          &v1alpha1.URI{},
 				ContentType:        msg.ContentType,
 				Extensions:         map[string]string{"content-encoding": msg.ContentEncoding},
 			},

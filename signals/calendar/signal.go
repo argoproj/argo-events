@@ -21,10 +21,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
 	cronlib "github.com/robfig/cron"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -50,7 +50,7 @@ func New() shared.Signaler {
 	}
 }
 
-func (c *calendar) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (c *calendar) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	// parse out the calendar configurations
 	var err error
 	if signal.Calendar.Schedule != "" {
@@ -72,7 +72,7 @@ func (c *calendar) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 
 	c.exclusionDates = parseExclusionDates(signal.Calendar.Recurrence)
 
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go c.handleEvents(events)
 	return events, nil
 }
@@ -83,22 +83,16 @@ func (c *calendar) Stop() error {
 	return nil
 }
 
-func (c *calendar) handleEvents(events chan shared.Event) {
+func (c *calendar) handleEvents(events chan *v1alpha1.Event) {
 	defer close(events)
 	eventTimer := c.getEventTimer()
 	for t := range eventTimer {
-		timestamp, err := ptypes.TimestampProto(t)
-		if err != nil {
-			timestamp = ptypes.TimestampNow()
-		}
-		event := shared.Event{
-			Context: &shared.EventContext{
+		event := &v1alpha1.Event{
+			Context: v1alpha1.EventContext{
 				EventID:            t.String(),
 				EventType:          EventType,
 				CloudEventsVersion: shared.CloudEventsVersion,
-				Source:             &shared.URI{},
-				EventTime:          timestamp,
-				SchemaURL:          &shared.URI{},
+				EventTime:          metav1.Time{Time: t},
 				Extensions:         make(map[string]string),
 			},
 		}

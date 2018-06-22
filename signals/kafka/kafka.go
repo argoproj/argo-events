@@ -21,9 +21,9 @@ import (
 	"strconv"
 
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/job/shared"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/golang/protobuf/ptypes"
+	"github.com/argoproj/argo-events/shared"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -45,7 +45,7 @@ func New() shared.Signaler {
 	}
 }
 
-func (k *kafka) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
+func (k *kafka) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
 	// parse out the attributes
 	topic, ok := signal.Stream.Attributes["topic"]
 	if !ok {
@@ -79,7 +79,7 @@ func (k *kafka) Start(signal *v1alpha1.Signal) (<-chan shared.Event, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create partition consumer for topic '%s' and partition: %v. cause: %s", topic, partition, err.Error())
 	}
-	events := make(chan shared.Event)
+	events := make(chan *v1alpha1.Event)
 	go k.listen(events)
 	return events, nil
 }
@@ -97,20 +97,16 @@ func (k *kafka) Stop() error {
 	return nil
 }
 
-func (k *kafka) listen(events chan shared.Event) {
+func (k *kafka) listen(events chan *v1alpha1.Event) {
 	defer close(events)
 	for {
 		select {
 		case msg := <-k.partitionConsumer.Messages():
-			t, err := ptypes.TimestampProto(msg.Timestamp)
-			if err != nil {
-				t = ptypes.TimestampNow()
-			}
-			event := shared.Event{
-				Context: &shared.EventContext{
+			event := &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
 					EventID:            fmt.Sprintf("partition-%v-offset-%v", msg.Partition, msg.Offset),
 					EventType:          EventType,
-					EventTime:          t,
+					EventTime:          metav1.Time{Time: msg.Timestamp},
 					CloudEventsVersion: shared.CloudEventsVersion,
 					Extensions:         make(map[string]string),
 				},
@@ -118,8 +114,8 @@ func (k *kafka) listen(events chan shared.Event) {
 			}
 			events <- event
 		case err := <-k.partitionConsumer.Errors():
-			event := shared.Event{
-				Context: &shared.EventContext{
+			event := &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
 					EventID:            fmt.Sprintf("partition-%v-", err.Partition),
 					EventType:          EventType,
 					CloudEventsVersion: shared.CloudEventsVersion,
