@@ -7,13 +7,4 @@ metadata:
 data:
   config: |
     namespace: default
-    serviceAccount: argo-events
     instanceID: axis
-    executorImage: argoproj/sensor-executor:latest
-    executorResources:
-      limits:
-        cpu: 150m
-        memory: 100Mi
-      requests:
-        cpu: 50m
-        memory: 50Mi

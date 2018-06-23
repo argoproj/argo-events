@@ -55,6 +55,10 @@ func (soc *sOperationCtx) processSignal(signal v1alpha1.Signal) (*v1alpha1.NodeS
 	// let's check the latest event to see if node has completed?
 	if node.LatestEvent != nil {
 		soc.events[node.ID] = node.LatestEvent.Event
+		if !node.LatestEvent.Seen {
+			soc.s.Status.Nodes[node.ID].LatestEvent.Seen = true
+			soc.updated = true
+		}
 		return soc.markNodePhase(signal.Name, v1alpha1.NodePhaseComplete), nil
 	}
 
@@ -100,7 +104,9 @@ func (soc *sOperationCtx) stopSignal(signal *v1alpha1.Signal) {
 	soc.controller.signalMu.Unlock()
 	if ok {
 		err := signaler.Stop()
-		soc.log.Warnf("failed to stop the signaler '%s'. cause: %s", nodeID, err)
+		if err != nil {
+			soc.log.Warnf("failed to stop the signaler '%s'. cause: %s", nodeID, err)
+		}
 	}
 }
 

@@ -87,6 +87,7 @@ func NewSensorController(rest *rest.Config, configMap string, signalProto plugin
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		signalProto:     signalProto,
+		signals:         make(map[string]shared.Signaler),
 		log:             log,
 	}
 }

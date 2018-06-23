@@ -39,8 +39,8 @@ var Handshake = plugin.HandshakeConfig{
 
 // PluginMap is the map of plugins we can dispense.
 var PluginMap = map[string]plugin.Plugin{
-	"NATS":     &signalPlugin{},
-	"Artifact": &signalPlugin{},
+	"NATS": &signalPlugin{},
+	//"Artifact": &signalPlugin{},
 	//todo: add more plugin here for all different types of signals
 }
 

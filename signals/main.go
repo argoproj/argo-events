@@ -6,14 +6,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/shared"
-	"github.com/argoproj/argo-events/signals/amqp"
-	"github.com/argoproj/argo-events/signals/artifact"
-	"github.com/argoproj/argo-events/signals/calendar"
-	"github.com/argoproj/argo-events/signals/kafka"
-	"github.com/argoproj/argo-events/signals/mqtt"
 	"github.com/argoproj/argo-events/signals/nats"
-	"github.com/argoproj/argo-events/signals/resource"
-	"github.com/argoproj/argo-events/signals/webhook"
 	plugin "github.com/hashicorp/go-plugin"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -44,25 +37,29 @@ func init() {
 func main() {
 	// these are the signals
 	nats := nats.New()
-	mqtt := mqtt.New()
-	kafka := kafka.New()
-	amqp := amqp.New()
-	artifact := artifact.New(nats, kubeClientset, namespace)
-	cal := calendar.New()
-	resource := resource.New(config)
-	web := webhook.New()
+	/*
+		mqtt := mqtt.New()
+		kafka := kafka.New()
+		amqp := amqp.New()
+		artifact := artifact.New(nats, kubeClientset, namespace)
+		cal := calendar.New()
+		resource := resource.New(config)
+		web := webhook.New()
+	*/
 
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: shared.Handshake,
 		Plugins: map[string]plugin.Plugin{
-			"NATS":     shared.NewPlugin(nats),
-			"MQTT":     shared.NewPlugin(mqtt),
-			"KAFKA":    shared.NewPlugin(kafka),
-			"AMQP":     shared.NewPlugin(amqp),
-			"Artifact": shared.NewArtifactPlugin(artifact),
-			"Calendar": shared.NewPlugin(cal),
-			"Resource": shared.NewPlugin(resource),
-			"Webhook":  shared.NewPlugin(web),
+			"NATS": shared.NewPlugin(nats),
+			/*
+				"MQTT":     shared.NewPlugin(mqtt),
+				"KAFKA":    shared.NewPlugin(kafka),
+				"AMQP":     shared.NewPlugin(amqp),
+				"Artifact": shared.NewArtifactPlugin(artifact),
+				"Calendar": shared.NewPlugin(cal),
+				"Resource": shared.NewPlugin(resource),
+				"Webhook":  shared.NewPlugin(web),
+			*/
 		},
 		GRPCServer: plugin.DefaultGRPCServer,
 	})

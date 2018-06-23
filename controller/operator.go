@@ -213,7 +213,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 		node.Message = messages[0]
 	}
 	soc.s.Status.Nodes[nodeID] = node
-	soc.log.Infof("%s '%s' initialized: %s", node.Type, node.DisplayName, node.Message)
+	soc.log.Infof("%s '%s' initialized", node.Type, node.DisplayName)
 	soc.updated = true
 	return &node
 }
@@ -245,7 +245,8 @@ func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhas
 
 // mark the overall sensor phase
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markResolved bool, message ...string) {
-	if soc.s.Status.Phase != phase {
+	phaseChange := soc.s.Status.Phase != phase
+	if phaseChange {
 		soc.log.Infof("sensor phase %s -> %s", soc.s.Status.Phase, phase)
 		soc.s.Status.Phase = phase
 		soc.updated = true
@@ -266,7 +267,7 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markResolved
 
 	switch phase {
 	case v1alpha1.NodePhaseComplete, v1alpha1.NodePhaseError:
-		if markResolved {
+		if markResolved && phaseChange {
 			soc.log.Infof("marking sensor complete")
 			soc.s.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
 			if soc.s.ObjectMeta.Labels == nil {

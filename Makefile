@@ -45,7 +45,7 @@ controller:
 controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make controller
 
-controller-image: controller-linux
+controller-image: controller-linux signal-plugin-linux
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controller/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 

@@ -18,10 +18,15 @@ metadata:
   name: default:argo-events
   namespace: default
 rules:
-# Allow actions on everything
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - '*'
+# Allow everything for sensors
+- apiGroups: ['argoproj.io']
+  resources: ['sensors']
+  verbs: ['*']
+# Allow reading secrets and configmaps
+- apiGroups: ['']
+  resources: ['secrets', 'configmaps']
+  verbs: ['get', 'list', 'watch']
+# Triggering workflows
+- apiGroups: [argoproj.io']
+  resources: ['workflows']
+  verbs: ['create', 'update', 'patch', 'delete']
