@@ -38,10 +38,13 @@ var Handshake = plugin.HandshakeConfig{
 }
 
 // PluginMap is the map of plugins we can dispense.
+// Add entry for enabling access to custom stream plugins
+// Entry key must match the Signal.Stream.Type field from a Sensor definition
 var PluginMap = map[string]plugin.Plugin{
-	"NATS": &signalPlugin{},
-	//"Artifact": &signalPlugin{},
-	//todo: add more plugin here for all different types of signals
+	"NATS":  &signalPlugin{},
+	"MQTT":  &signalPlugin{},
+	"AMQP":  &signalPlugin{},
+	"KAFKA": &signalPlugin{},
 }
 
 // Signaler is the interface for signaling
@@ -61,11 +64,6 @@ type ArtifactSignaler interface {
 
 // NewPlugin creates a base signal plugin
 func NewPlugin(impl Signaler) plugin.Plugin {
-	return &signalPlugin{Impl: impl}
-}
-
-// NewArtifactPlugin creates an artifact plugin
-func NewArtifactPlugin(impl ArtifactSignaler) plugin.Plugin {
 	return &signalPlugin{Impl: impl}
 }
 

@@ -1,3 +1,6 @@
+# This examples demonstrates the use of using NATS as a signal source and message trigger mechanism.
+# This example assumes the following prerequisites:
+# 1. you have a gnats server/cluster up & running
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:

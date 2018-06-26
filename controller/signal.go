@@ -1,9 +1,19 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/signals/artifact"
+	"github.com/argoproj/argo-events/signals/calendar"
+	"github.com/argoproj/argo-events/signals/resource"
+	"github.com/argoproj/argo-events/signals/webhook"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+var (
+	ErrInvalidSignalType = errors.New("signal type unknown")
 )
 
 // signalCtx is the context for handling signal
@@ -75,13 +85,42 @@ func (soc *sOperationCtx) signalIsPresent(name string) bool {
 	return ok
 }
 
+// resolveSignaler is a helper method to find the correct Signaler for this signal definition
+func (soc *sOperationCtx) resolveSignaler(signal *v1alpha1.Signal) (shared.Signaler, error) {
+	var signaler shared.Signaler
+	switch signal.GetType() {
+	case v1alpha1.SignalTypeStream:
+		// these come from plugins
+		plugin, err := soc.controller.streamProto.Dispense(signal.Stream.Type)
+		if err != nil {
+			return nil, err
+		}
+		signaler = plugin.(shared.Signaler)
+	case v1alpha1.SignalTypeArtifact:
+		streamPlugin, err := soc.controller.streamProto.Dispense(signal.Artifact.NotificationStream.Type)
+		if err != nil {
+			return nil, err
+		}
+		streamSignaler := streamPlugin.(shared.Signaler)
+		signaler = artifact.New(streamSignaler, soc.controller.kubeClientset, soc.controller.Config.Namespace)
+	case v1alpha1.SignalTypeCalendar:
+		signaler = calendar.New()
+	case v1alpha1.SignalTypeResource:
+		signaler = resource.New(soc.controller.kubeConfig)
+	case v1alpha1.SignalTypeWebhook:
+		signaler = webhook.New()
+	default:
+		return nil, ErrInvalidSignalType
+	}
+	return signaler, nil
+}
+
 // adds a new signal to the controller's signals
 func (soc *sOperationCtx) watchSignal(signal *v1alpha1.Signal) error {
-	plugin, err := soc.controller.signalProto.Dispense(signal.GetType())
+	signaler, err := soc.resolveSignaler(signal)
 	if err != nil {
 		return err
 	}
-	signaler := plugin.(shared.Signaler)
 
 	events, err := signaler.Start(signal)
 	if err != nil {

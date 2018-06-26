@@ -45,16 +45,16 @@ controller:
 controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make controller
 
-controller-image: controller-linux signal-plugin-linux
+controller-image: controller-linux stream-plugin-linux
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controller/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
-# Signal plugins
-signal-plugin:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/signal-plugin ./signals
+# Stream plugins
+stream-plugin:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/stream-plugin ./signals/stream
 
-signal-plugin-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make signal-plugin
+stream-plugin-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stream-plugin
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

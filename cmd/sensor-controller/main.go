@@ -49,17 +49,17 @@ func main() {
 		panic(err)
 	}
 
-	// signal plugins
-	pluginFile := os.Getenv("SIGNAL_PLUGIN")
+	// stream signal plugins
+	pluginFile := os.Getenv("STREAM_PLUGIN")
 	pluginClient := initPlugins(pluginFile)
 	defer pluginClient.Kill()
 
-	signalClient, err := pluginClient.Client()
+	streamClient, err := pluginClient.Client()
 	if err != nil {
 		panic(err)
 	}
 
-	controller := controller.NewSensorController(restConfig, configMap, signalClient, logger.Sugar())
+	controller := controller.NewSensorController(restConfig, configMap, streamClient, logger.Sugar())
 	err = controller.ResyncConfig()
 	if err != nil {
 		panic(err)

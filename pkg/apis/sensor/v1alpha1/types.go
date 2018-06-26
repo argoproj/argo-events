@@ -423,21 +423,21 @@ func (a *ArtifactLocation) HasLocation() bool {
 }
 
 // GetType returns the type of this signal
-func (signal *Signal) GetType() string {
+func (signal *Signal) GetType() SignalType {
 	if signal.Stream != nil {
-		return signal.Stream.Type
+		return SignalTypeStream
 	}
 	if signal.Resource != nil {
-		return string(SignalTypeResource)
+		return SignalTypeResource
 	}
 	if signal.Artifact != nil {
-		return string(SignalTypeArtifact)
+		return SignalTypeArtifact
 	}
 	if signal.Calendar != nil {
-		return string(SignalTypeCalendar)
+		return SignalTypeCalendar
 	}
 	if signal.Webhook != nil {
-		return string(SignalTypeWebhook)
+		return SignalTypeWebhook
 	}
 	return "Unknown"
 }

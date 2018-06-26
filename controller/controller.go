@@ -68,10 +68,10 @@ type SensorController struct {
 	informer cache.SharedIndexInformer
 	queue    workqueue.RateLimitingInterface
 
-	// plugins
-	signalProto plugin.ClientProtocol
+	// enables access to plugin stream signals
+	streamProto plugin.ClientProtocol
 
-	// inventories
+	// inventory for all types of signal implementations
 	signalMu sync.Mutex
 	signals  map[string]shared.Signaler
 
@@ -79,14 +79,14 @@ type SensorController struct {
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap string, signalProto plugin.ClientProtocol, log *zap.SugaredLogger) *SensorController {
+func NewSensorController(rest *rest.Config, configMap string, streamProto plugin.ClientProtocol, log *zap.SugaredLogger) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		signalProto:     signalProto,
+		streamProto:     streamProto,
 		signals:         make(map[string]shared.Signaler),
 		log:             log,
 	}
@@ -183,7 +183,7 @@ func (c *SensorController) monitorPlugins(done <-chan struct{}) {
 	for {
 		select {
 		case <-timer.C:
-			err := c.signalProto.Ping()
+			err := c.streamProto.Ping()
 			if err != nil {
 				c.log.Fatalf("signal plugin client connection failed")
 			}
