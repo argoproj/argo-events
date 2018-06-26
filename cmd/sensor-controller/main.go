@@ -19,14 +19,11 @@ package main
 import (
 	"context"
 	"os"
-	"os/exec"
 
-	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controller"
-	"github.com/argoproj/argo-events/shared"
 )
 
 func main() {
@@ -50,16 +47,12 @@ func main() {
 	}
 
 	// stream signal plugins
-	pluginFile := os.Getenv("STREAM_PLUGIN")
-	pluginClient := initPlugins(pluginFile)
-	defer pluginClient.Kill()
-
-	streamClient, err := pluginClient.Client()
+	pluginMgr, err := controller.NewPluginManager()
 	if err != nil {
 		panic(err)
 	}
 
-	controller := controller.NewSensorController(restConfig, configMap, streamClient, logger.Sugar())
+	controller := controller.NewSensorController(restConfig, configMap, pluginMgr, logger.Sugar())
 	err = controller.ResyncConfig()
 	if err != nil {
 		panic(err)
@@ -69,15 +62,4 @@ func main() {
 
 	// Wait forever
 	select {}
-}
-
-func initPlugins(pluginFile string) *plugin.Client {
-	return plugin.NewClient(&plugin.ClientConfig{
-		HandshakeConfig: shared.Handshake,
-		Plugins:         shared.PluginMap,
-		Cmd:             exec.Command(pluginFile),
-		AllowedProtocols: []plugin.Protocol{
-			plugin.ProtocolNetRPC, plugin.ProtocolGRPC,
-		},
-	})
 }

@@ -1,12 +1,14 @@
-PACKAGE=github.com/argoproj/argo-events
+
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
+PLUGIN_DIR=${DIST_DIR}/plugins
 
 VERSION=$(shell cat ${CURRENT_DIR}/VERSION)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
+PLUGINS=$(shell find . \( -type d -and -path '*/signals/stream/builtin/*' \))
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -45,16 +47,19 @@ controller:
 controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make controller
 
-controller-image: controller-linux stream-plugin-linux
+controller-image: controller-linux stream-plugins-linux
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controller/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
-# Stream plugins
-stream-plugin:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/stream-plugin ./signals/stream
+# Plugins
+stream-plugins:
+	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/nats ./signals/stream/builtin/nats
+	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/mqtt ./signals/stream/builtin/mqtt
+	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/kafka ./signals/stream/builtin/kafka
+	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/amqp ./signals/stream/builtin/amqp
 
-stream-plugin-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stream-plugin
+stream-plugins-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stream-plugins
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

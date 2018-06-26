@@ -25,7 +25,10 @@ ENV SIGNAL_PLUGIN=/nats-plugin
 ## Build your own
 Building your own stream signal plugin is easy. All you need is a `struct` which implements the `Signaler` interface. You can write your plugin in a number of different languages, however using a language other than `Go` requires a bit more work and is not covered in this. 
 
-If you're using Go, take a look at the `builtin` package for examples on writing your own custom plugin. You'll need to call the `github.com/hashicorp/go-plugin`.`Serve()` method in the main function of your program. You'll also need to append an entry to the `PluginMap` in the `shared` directory. Please, put the new plugin under the `custom` package. You'll then need to compile the program and output it as: `dist/stream-plugin`.
+If you're using Go, take a look at the `builtin` package for examples on writing your own custom plugin. You'll need to call the `github.com/hashicorp/go-plugin`.`Serve()` method in the main function of your program. You'll also need to append an entry to the `PluginMap` in the `shared` directory. Please, put the new plugin under the `custom` package. You'll then need to compile the program and output it as: `dist/stream-plugin`. You can do this using:
+```
+$ go build -o dist/stream-plugin {path to main program}
+```
 
 ## Future work
 It may be desirable to use 2 or more streaming services as signals. In the current implementation, only one stream plugin binary is included in the controller's `Dockerfile`. We can include the ability to add a directory for all the plugin binary files. These files can then be included in the Docker build or injected dynamically into the program through a `PVC`. 

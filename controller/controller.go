@@ -21,7 +21,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hashicorp/go-plugin"
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -68,8 +67,8 @@ type SensorController struct {
 	informer cache.SharedIndexInformer
 	queue    workqueue.RateLimitingInterface
 
-	// enables access to plugin stream signals
-	streamProto plugin.ClientProtocol
+	// enables access to plugin signals
+	pluginMgr *PluginManager
 
 	// inventory for all types of signal implementations
 	signalMu sync.Mutex
@@ -79,14 +78,14 @@ type SensorController struct {
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap string, streamProto plugin.ClientProtocol, log *zap.SugaredLogger) *SensorController {
+func NewSensorController(rest *rest.Config, configMap string, pluginMgr *PluginManager, log *zap.SugaredLogger) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		streamProto:     streamProto,
+		pluginMgr:       pluginMgr,
 		signals:         make(map[string]shared.Signaler),
 		log:             log,
 	}
@@ -146,6 +145,7 @@ func (c *SensorController) handleErr(err error, key interface{}) {
 // Run executes the controller
 func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
 	defer c.queue.ShutDown()
+	defer c.pluginMgr.Close()
 
 	c.log.Infof("sensor controller (version: %s) (instance: %s) starting", axis.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
@@ -156,7 +156,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 
 	c.informer = c.newSensorInformer()
 	go c.informer.Run(ctx.Done())
-	go c.monitorPlugins(ctx.Done())
+	go c.pluginMgr.Monitor(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
 		c.log.Panicf("timed out waiting for the caches to sync")
@@ -172,24 +172,5 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 
 func (c *SensorController) runWorker() {
 	for c.processNextItem() {
-	}
-}
-
-// monitors the plugins to ensure they are all still up & running
-// if a ping fails, we exit the program so k8s can restart the controller
-// and re-initialize a connection to the plugin processes
-func (c *SensorController) monitorPlugins(done <-chan struct{}) {
-	timer := time.NewTimer(pluginHealthCheckPeriod)
-	for {
-		select {
-		case <-timer.C:
-			err := c.streamProto.Ping()
-			if err != nil {
-				c.log.Fatalf("signal plugin client connection failed")
-			}
-		case <-done:
-			timer.Stop()
-			return
-		}
 	}
 }

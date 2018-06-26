@@ -24,6 +24,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/shared"
+	plugin "github.com/hashicorp/go-plugin"
 	natsio "github.com/nats-io/go-nats"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -101,4 +102,15 @@ func (n *nats) listen(events chan *v1alpha1.Event) {
 			return
 		}
 	}
+}
+
+func main() {
+	nats := New()
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: shared.Handshake,
+		Plugins: map[string]plugin.Plugin{
+			"NATS": shared.NewPlugin(nats),
+		},
+		GRPCServer: plugin.DefaultGRPCServer,
+	})
 }

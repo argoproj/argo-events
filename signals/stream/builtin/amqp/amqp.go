@@ -21,6 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/shared"
+	plugin "github.com/hashicorp/go-plugin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	amqplib "github.com/streadway/amqp"
@@ -117,4 +118,15 @@ func (a *amqp) listen(events chan *v1alpha1.Event) {
 		events <- event
 		msg.Ack(false)
 	}
+}
+
+func main() {
+	amqp := New()
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: shared.Handshake,
+		Plugins: map[string]plugin.Plugin{
+			"AMQP": shared.NewPlugin(amqp),
+		},
+		GRPCServer: plugin.DefaultGRPCServer,
+	})
 }

@@ -91,13 +91,13 @@ func (soc *sOperationCtx) resolveSignaler(signal *v1alpha1.Signal) (shared.Signa
 	switch signal.GetType() {
 	case v1alpha1.SignalTypeStream:
 		// these come from plugins
-		plugin, err := soc.controller.streamProto.Dispense(signal.Stream.Type)
+		plugin, err := soc.controller.pluginMgr.Dispense(signal.Stream.Type)
 		if err != nil {
 			return nil, err
 		}
 		signaler = plugin.(shared.Signaler)
 	case v1alpha1.SignalTypeArtifact:
-		streamPlugin, err := soc.controller.streamProto.Dispense(signal.Artifact.NotificationStream.Type)
+		streamPlugin, err := soc.controller.pluginMgr.Dispense(signal.Artifact.NotificationStream.Type)
 		if err != nil {
 			return nil, err
 		}

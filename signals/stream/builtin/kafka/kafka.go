@@ -23,6 +23,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/shared"
+	plugin "github.com/hashicorp/go-plugin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -136,4 +137,15 @@ func (k *kafka) verifyPartitionAvailable(part int32, partitions []int32) bool {
 		}
 	}
 	return false
+}
+
+func main() {
+	kafka := New()
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: shared.Handshake,
+		Plugins: map[string]plugin.Plugin{
+			"KAFKA": shared.NewPlugin(kafka),
+		},
+		GRPCServer: plugin.DefaultGRPCServer,
+	})
 }

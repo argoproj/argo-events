@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/shared"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
+	plugin "github.com/hashicorp/go-plugin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -109,4 +110,15 @@ func (m *mqtt) listen(events chan *v1alpha1.Event) {
 			return
 		}
 	}
+}
+
+func main() {
+	mqtt := New()
+	plugin.Serve(&plugin.ServeConfig{
+		HandshakeConfig: shared.Handshake,
+		Plugins: map[string]plugin.Plugin{
+			"MQTT": shared.NewPlugin(mqtt),
+		},
+		GRPCServer: plugin.DefaultGRPCServer,
+	})
 }
