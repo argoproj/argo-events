@@ -45,23 +45,23 @@ kubectl create -f hack/k8s/manifests/*
 ```
 $ helm init
 ...
-$ helm install stable/minio
+$ helm install stable/minio --name artifacts
 ...
 
 $ #Verify that the minio pod, the minio service and minio secret are present
 $ kubectl get all -n default -l app=minio
 
-NAME                                        READY     STATUS    RESTARTS   AGE
-pod/laughing-llama-minio-6586bf655c-c5wx2   1/1       Running   0          15h
+NAME                                   READY     STATUS    RESTARTS   AGE
+pod/artifacts-minio-85547b6bd9-bhtt8   1/1       Running   0          21m
 
-NAME                           TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-service/laughing-llama-minio   ClusterIP   None         <none>        9000/TCP   15h
+NAME                      TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+service/artifacts-minio   ClusterIP   None         <none>        9000/TCP   21m
 
-NAME                                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/laughing-llama-minio   1         1         1            1           15h
+NAME                              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/artifacts-minio   1         1         1            1           21m
 
-NAME                                              DESIRED   CURRENT   READY     AGE
-replicaset.apps/laughing-llama-minio-6586bf655c   1         1         1         15h
+NAME                                         DESIRED   CURRENT   READY     AGE
+replicaset.apps/artifacts-minio-85547b6bd9   1         1         1         21m
 ```
 
 ## 8. Create a bucket in Minio and upload the hello-world.yaml into that bucket.
@@ -77,12 +77,7 @@ Upload the hello-world.yaml into that bucket
 Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 
 ## 10. Create an example sensor
-The example sensor below expects a secret called `artifacts-minio` in the default namespace. Change the name from `artifacts-minio` to the actual name of the secret created by minio. In the example below, minion created a secret called `laughing-llama-minio`.
 ```
-$ kubectl get secret -l app=minio -n default
-laughing-llama-minio
-
-$ #Replace `artifacts-minio` with `laughing-llama-minio` in the yaml. Then execute the following command.
 $ kubectl create -f examples/calendar-sensor.yaml
 ```
 
