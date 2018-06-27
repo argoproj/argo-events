@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package amqp
+package main
 
 import (
 	"fmt"
@@ -125,7 +125,7 @@ func main() {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: shared.Handshake,
 		Plugins: map[string]plugin.Plugin{
-			"AMQP": shared.NewPlugin(amqp),
+			shared.SignalPluginName: shared.NewPlugin(amqp),
 		},
 		GRPCServer: plugin.DefaultGRPCServer,
 	})

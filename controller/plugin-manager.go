@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/argoproj/argo-events/shared"
@@ -23,7 +25,7 @@ func NewPluginManager() (*PluginManager, error) {
 		dir:     dir,
 		clients: make(map[string]*plugin.Client),
 	}
-	plugins, err := plugin.Discover("", dir)
+	plugins, err := plugin.Discover("*", dir)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +38,10 @@ func NewPluginManager() (*PluginManager, error) {
 				plugin.ProtocolNetRPC, plugin.ProtocolGRPC,
 			},
 		})
-		mgr.clients[pluginFile] = c
+		_, file := filepath.Split(pluginFile)
+		lowerFile := strings.ToLower(file)
+		fmt.Printf("adding plugin '%s'\n", lowerFile)
+		mgr.clients[lowerFile] = c
 	}
 	return &mgr, nil
 }
@@ -44,7 +49,8 @@ func NewPluginManager() (*PluginManager, error) {
 // Dispense the interface with the given name
 // NOTE: assumes the name matches the file name and the plugin name
 func (pm *PluginManager) Dispense(name string) (interface{}, error) {
-	client, ok := pm.clients[name]
+	lowercase := strings.ToLower(name)
+	client, ok := pm.clients[lowercase]
 	if !ok {
 		return nil, fmt.Errorf("unknown plugin '%s'", name)
 	}
@@ -52,7 +58,7 @@ func (pm *PluginManager) Dispense(name string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	iface, err := protocol.Dispense(name)
+	iface, err := protocol.Dispense(shared.SignalPluginName)
 	if err != nil {
 		return nil, err
 	}
@@ -65,14 +71,15 @@ func (pm *PluginManager) Monitor(done <-chan struct{}) {
 	for {
 		select {
 		case <-timer.C:
-			for _, client := range pm.clients {
+			for name, client := range pm.clients {
 				proto, err := client.Client()
 				if err != nil {
-					panic("failed to retrieve the plugin client protocol")
+					panic(fmt.Errorf("failed to retrieve the plugin client protocol. cause: %s", err))
 				}
+				fmt.Printf("pinging plugin '%s'", name)
 				err = proto.Ping()
 				if err != nil {
-					panic("signal plugin client connection failed")
+					panic(fmt.Errorf("signal plugin client connection failed. cause: %s", err))
 				}
 			}
 		case <-done:

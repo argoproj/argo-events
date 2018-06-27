@@ -36,7 +36,7 @@ import (
 
 const (
 	sensorResyncPeriod      = 20 * time.Minute
-	pluginHealthCheckPeriod = 30 * time.Second
+	pluginHealthCheckPeriod = 20 * time.Second
 )
 
 // SensorControllerConfig contain the configuration settings for the sensor controller

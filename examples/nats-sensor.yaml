@@ -11,7 +11,7 @@ spec:
   signals:
     - name: hello
       stream:
-        type: NATS
+        type: nats
         url: nats://example-nats-cluster.nats-io:4222
         attributes:
           subject: bucketevents
@@ -20,7 +20,7 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          type: NATS
+          type: nats
           url: nats://example-nats-cluster.nats-io:4222
           attributes:
             subject: gateway-sensor

@@ -28,6 +28,7 @@ import (
 const (
 	CloudEventsVersion       = "v1.0"
 	ContextExtensionErrorKey = "error"
+	SignalPluginName         = "signaler"
 )
 
 // Handshake is a common handshake that is shared by plugin and host.
@@ -38,13 +39,8 @@ var Handshake = plugin.HandshakeConfig{
 }
 
 // PluginMap is the map of plugins we can dispense.
-// Add entry for enabling access to custom stream plugins
-// Entry key must match the Signal.Stream.Type field from a Sensor definition
 var PluginMap = map[string]plugin.Plugin{
-	"NATS":  &signalPlugin{},
-	"MQTT":  &signalPlugin{},
-	"AMQP":  &signalPlugin{},
-	"KAFKA": &signalPlugin{},
+	SignalPluginName: &signalPlugin{},
 }
 
 // Signaler is the interface for signaling

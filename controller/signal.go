@@ -140,6 +140,7 @@ func (soc *sOperationCtx) stopSignal(signal *v1alpha1.Signal) {
 	soc.controller.signalMu.Lock()
 	signaler, ok := soc.controller.signals[nodeID]
 	soc.controller.signals[nodeID] = nil
+	delete(soc.controller.signals, nodeID)
 	soc.controller.signalMu.Unlock()
 	if ok && signaler != nil {
 		if err := signaler.Stop(); err != nil {

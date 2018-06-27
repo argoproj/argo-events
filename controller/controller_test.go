@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	fakesensor "github.com/argoproj/argo-events/pkg/client/clientset/versioned/fake"
+	"github.com/argoproj/argo-events/shared"
 )
 
 // fakeController is a wrapper around the sensorController to allow efficient test setup/cleanup
@@ -35,10 +36,18 @@ type fakeController struct {
 }
 
 func (f *fakeController) setup(namespace string) {
-	f.SensorController = NewSensorController(nil, "configmap", nil, zap.NewNop().Sugar())
-	f.SensorController.kubeClientset = fake.NewSimpleClientset()
-	f.SensorController.sensorClientset = fakesensor.NewSimpleClientset()
-	f.Config = SensorControllerConfig{Namespace: namespace}
+	f.SensorController = &SensorController{
+		ConfigMap:   "configmap",
+		ConfigMapNS: namespace,
+		Config: SensorControllerConfig{
+			Namespace: namespace,
+		},
+		kubeClientset:   fake.NewSimpleClientset(),
+		sensorClientset: fakesensor.NewSimpleClientset(),
+		log:             zap.NewNop().Sugar(),
+		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		signals:         make(map[string]shared.Signaler),
+	}
 }
 
 func (f *fakeController) teardown() {

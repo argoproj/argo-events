@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqtt
+package main
 
 import (
 	"fmt"
@@ -117,7 +117,7 @@ func main() {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: shared.Handshake,
 		Plugins: map[string]plugin.Plugin{
-			"MQTT": shared.NewPlugin(mqtt),
+			shared.SignalPluginName: shared.NewPlugin(mqtt),
 		},
 		GRPCServer: plugin.DefaultGRPCServer,
 	})

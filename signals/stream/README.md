@@ -15,19 +15,19 @@ type Signaler interface {
 }
 ``` 
 - Use [go-plugin](https://github.com/hashicorp/go-plugin) to register/create all signals. 
-- Plugin must have a `main()` function and use `go-plugin` to serve up the plugin structure/functionality via RPC or gRPC. (One plugin per binary!)
+- Plugin must have a `main` package and a `main()` function and use `go-plugin` to serve up the plugin structure/functionality via RPC or gRPC. (One plugin per binary!)
 - Binaries MUST be included in the sensor-controller's `Dockerfile` as:
 ```
-COPY dist/nats-plugin /
-ENV SIGNAL_PLUGIN=/nats-plugin
+COPY dist/plugins/ /plugins/
 ```
+where the plugin binaries are located in the `dist/plugins` directory.
 
 ## Build your own
 Building your own stream signal plugin is easy. All you need is a `struct` which implements the `Signaler` interface. You can write your plugin in a number of different languages, however using a language other than `Go` requires a bit more work and is not covered in this. 
 
-If you're using Go, take a look at the `builtin` package for examples on writing your own custom plugin. You'll need to call the `github.com/hashicorp/go-plugin`.`Serve()` method in the main function of your program. You'll also need to append an entry to the `PluginMap` in the `shared` directory. Please, put the new plugin under the `custom` package. You'll then need to compile the program and output it as: `dist/stream-plugin`. You can do this using:
+If you're using Go, take a look at the `builtin` package for examples on writing your own custom plugin. You'll need to call the `github.com/hashicorp/go-plugin`.`Serve()` method in the main function of your program. You'll also need to append an entry to the `PluginMap` in the `shared` directory. Please, put the new plugin under the `custom` package. You'll then need to compile the program and output it to the following directory: `dist/plugins`. You can do this using:
 ```
-$ go build -o dist/stream-plugin {path to main program}
+$ go build -o dist/plugins/{plugin-name} {path to main program}
 ```
 
 ## Future work

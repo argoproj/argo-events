@@ -1,3 +1,3 @@
-package mqtt
+package main
 
 //TODO: implement unit test

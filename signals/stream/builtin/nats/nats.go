@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nats
+package main
 
 import (
 	"fmt"
@@ -109,7 +109,7 @@ func main() {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: shared.Handshake,
 		Plugins: map[string]plugin.Plugin{
-			"NATS": shared.NewPlugin(nats),
+			shared.SignalPluginName: shared.NewPlugin(nats),
 		},
 		GRPCServer: plugin.DefaultGRPCServer,
 	})

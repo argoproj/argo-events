@@ -5,7 +5,8 @@ This is a walkthrough for how to plugin different signals. I am leveraging [hash
 
 ## 2. Build a Go binary plugin. See the `signals/stream/builtin/nats` implementation for an example for how to do this.
 
-## 3. Modify the `controller/Dockerfile` to copy the plugin binary and set the `STREAM_PLUGIN` env var to reference the binary name.
+## 3. Modify the `controller/Dockerfile` to copy the plugin binary to the `STREAM_PLUGIN_DIR` directory.
+Note that the binary name should be equal to the Signal.Stream.Type field value.
 
 ## 4. Build the controller Dockerfile
 ```
