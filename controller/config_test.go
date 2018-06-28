@@ -66,7 +66,6 @@ func TestResyncConfig(t *testing.T) {
 	assert.NotNil(t, err)
 
 	os.Setenv(common.EnvVarNamespace, "testing")
-	defer os.Setenv(common.EnvVarJobName, "")
 
 	// fail when the configmap does not have key 'config'
 	configMap := &corev1.ConfigMap{

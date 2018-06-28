@@ -70,6 +70,63 @@ message EscalationPolicy {
   optional Message message = 2;
 }
 
+// Event is a data record expressing an occurrence and its context.
+// Adheres to the CloudEvents v0.1 specification
+message Event {
+  optional EventContext context = 1;
+
+  optional bytes data = 2;
+}
+
+// EventContext contains metadata that provides circumstantial information about the occurence.
+message EventContext {
+  // The type of occurrence which has happened. Often this attribute is used for
+  // routing, observability, policy enforcement, etc.
+  // should be prefixed with a reverse-DNS name. The prefixed domain dictates
+  // the organization which defines the semantics of this event type. ex: com.github.pull.create
+  optional string eventType = 1;
+
+  // The version of the eventType. Enables the interpretation of data by eventual consumers,
+  // requires the consumer to be knowledgeable about the producer.
+  optional string eventTypeVersion = 2;
+
+  // The version of the CloudEvents specification which the event uses.
+  // Enables the intepretation of the context.
+  optional string cloudEventsVersion = 3;
+
+  // This describes the event producer.
+  optional URI source = 4;
+
+  // ID of the event. The semantics are explicitly undefined to ease the implementation of producers.
+  // Enables deduplication. Must be unique within scope of producer.
+  optional string eventID = 5;
+
+  // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time eventTime = 6;
+
+  // A link to the schema that the data attribute adheres to.
+  // Must adhere to the format specified in RFC 3986.
+  optional URI schemaURL = 7;
+
+  // Content type of the data attribute value. Enables the data attribute to carry any type of content,
+  // whereby format and encoding might differ from that of the chosen event format.
+  // For example, the data attribute may carry an XML or JSON payload and the consumer is informed
+  // by this attribute being set to "application/xml" or "application/json" respectively.
+  optional string contentType = 8;
+
+  // This is for additional metadata and does not have a mandated structure.
+  // Enables a place for custom fields a producer or middleware might want to include and provides a place
+  // to test metadata before adding them to the CloudEvents specification.
+  map<string, string> extensions = 9;
+}
+
+// EventWrapper wraps an event with an additional flag to check if we processed this event already
+message EventWrapper {
+  optional Event event = 1;
+
+  optional bool seen = 2;
+}
+
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
 // to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
 message GroupVersionKind {
@@ -110,11 +167,14 @@ message NodeStatus {
   // StartedAt is the time at which this node started
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 6;
 
-  // ResolvedAt is the time at which this node resolved
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time resolvedAt = 7;
+  // CompletedAt is the time at which this node completed
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 7;
 
   // store data or something to save for signal notifications or trigger events
   optional string message = 8;
+
+  // LatestEvent stores the last seen event for this node
+  optional EventWrapper latestEvent = 9;
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
@@ -238,8 +298,8 @@ message SensorStatus {
   // StartedAt is the time at which this sensor was initiated
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
-  // ResolvedAt is the time at which this sensor was resolved
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time resolvedAt = 3;
+  // CompletedAt is the time at which this sensor was completed
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
 
   // Message is a human readable string indicating details about a sensor in its phase
   optional string message = 4;
@@ -321,6 +381,25 @@ message Trigger {
 
   // RetryStrategy is the strategy to retry a trigger if it fails
   optional RetryStrategy replyStrategy = 4;
+}
+
+// URI is a Uniform Resource Identifier based on RFC 3986
+message URI {
+  optional string scheme = 1;
+
+  optional string user = 2;
+
+  optional string password = 3;
+
+  optional string host = 4;
+
+  optional int32 port = 5;
+
+  optional string path = 6;
+
+  optional string query = 7;
+
+  optional string fragment = 8;
 }
 
 // WebhookSignal is a general purpose REST API

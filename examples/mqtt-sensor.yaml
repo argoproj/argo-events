@@ -8,7 +8,7 @@ spec:
   signals:
     - name: hello
       stream:
-        type: MQTT
+        type: mqtt
         url: tcp://localhost:1883
         attributes:
           topic: hello
@@ -17,7 +17,7 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          type: MQTT
+          type: mqtt
           url: tcp://localhost:1883
           attributes:
             topic: gateway

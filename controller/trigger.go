@@ -40,16 +40,16 @@ func (soc *sOperationCtx) processTrigger(trigger v1alpha1.Trigger) (*v1alpha1.No
 	}
 
 	if node == nil {
-		node = soc.initializeNode(trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseActive)
+		node = soc.initializeNode(trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew)
 	}
 
-	if node.Phase != v1alpha1.NodePhaseResolved && node.Phase != v1alpha1.NodePhaseSucceeded {
+	if node.Phase != v1alpha1.NodePhaseComplete {
 		err := soc.executeTrigger(trigger)
 		if err != nil {
 			return soc.markNodePhase(trigger.Name, v1alpha1.NodePhaseError, err.Error()), err
 		}
 	}
-	return soc.markNodePhase(trigger.Name, v1alpha1.NodePhaseSucceeded), nil
+	return soc.markNodePhase(trigger.Name, v1alpha1.NodePhaseComplete), nil
 }
 
 // execute the trigger

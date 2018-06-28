@@ -17,13 +17,10 @@ limitations under the License.
 package controller
 
 import (
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/argoproj/argo-events/common"
@@ -64,71 +61,19 @@ func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
 			AddFunc: func(obj interface{}) {
 				key, err := cache.MetaNamespaceKeyFunc(obj)
 				if err == nil {
-					c.ssQueue.Add(key)
+					c.queue.Add(key)
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				key, err := cache.MetaNamespaceKeyFunc(new)
 				if err == nil {
-					c.ssQueue.Add(key)
+					c.queue.Add(key)
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
 				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 				if err == nil {
-					c.ssQueue.Add(key)
-				}
-			},
-		},
-	)
-	return informer
-}
-
-func (c *SensorController) newPodInformer() cache.SharedIndexInformer {
-	restClient := c.kubeClientset.CoreV1().RESTClient()
-	// selectors
-	fieldSelector := fields.ParseSelectorOrDie("status.phase!=Pending")
-	incompleteReq, _ := labels.NewRequirement(common.LabelKeyResolved, selection.Equals, []string{"false"})
-	labelSelector := labels.NewSelector().Add(*incompleteReq).Add(c.instanceIDReq())
-
-	informer := cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-				options.FieldSelector = fieldSelector.String()
-				options.LabelSelector = labelSelector.String()
-				req := restClient.Get().Namespace(c.Config.Namespace).Resource("pods").VersionedParams(&options, metav1.ParameterCodec)
-				return req.Do().Get()
-			},
-			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-				options.Watch = true
-				options.FieldSelector = fieldSelector.String()
-				options.LabelSelector = labelSelector.String()
-				req := restClient.Get().Namespace(c.Config.Namespace).Resource("pods").VersionedParams(&options, metav1.ParameterCodec)
-				return req.Watch()
-			},
-		},
-		&corev1.Pod{},
-		sensorResyncPeriod,
-		cache.Indexers{},
-	)
-	informer.AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				key, err := cache.MetaNamespaceKeyFunc(obj)
-				if err == nil {
-					c.podQueue.Add(key)
-				}
-			},
-			UpdateFunc: func(old, new interface{}) {
-				key, err := cache.MetaNamespaceKeyFunc(new)
-				if err == nil {
-					c.podQueue.Add(key)
-				}
-			},
-			DeleteFunc: func(obj interface{}) {
-				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-				if err == nil {
-					c.podQueue.Add(key)
+					c.queue.Add(key)
 				}
 			},
 		},
