@@ -8,7 +8,7 @@ spec:
   signals:
     - name: hello
       stream:
-        type: AMQP
+        type: amqp
         url: amqp://localhost:5672
         attributes:
           exchangeName: myExchangeName
@@ -19,7 +19,7 @@ spec:
       message:
         body: "this is the message body"
         stream:
-          type: AMQP
+          type: amqp
           url: amqp://localhost:5672
           attributes:
             exchangeName: doneExchangeName

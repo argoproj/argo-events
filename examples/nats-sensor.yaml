@@ -1,3 +1,6 @@
+# This examples demonstrates the use of using NATS as a signal source and message trigger mechanism.
+# This example assumes the following prerequisites:
+# 1. you have a gnats server/cluster up & running
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -8,16 +11,16 @@ spec:
   signals:
     - name: hello
       stream:
-        type: NATS
-        url: nats://example-nats-cluster:4222
+        type: nats
+        url: nats://example-nats-cluster.nats-io:4222
         attributes:
-          subject: hello
+          subject: bucketevents
   triggers:
     - name: "done-nat-stream"
       message:
         body: "this is the message body"
         stream:
-          type: NATS
-          url: nats://example-nats-cluster:4222
+          type: nats
+          url: nats://example-nats-cluster.nats-io:4222
           attributes:
             subject: gateway-sensor

@@ -38,20 +38,8 @@ const (
 	// LabelKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
 	LabelKeyPhase = sensor.FullName + "/phase"
 
-	// ExecutorContainerName is the name of the sensor executor container
-	ExecutorContainerName = "sensor-executor"
-
-	// LabelKeyResolved is the label to mark sensor jobs as having resolved all dependencies
-	LabelKeyResolved = sensor.FullName + "/resolved"
-
-	// LabelKeySensor is the label to mark sensor pods as associated with a certain sensor
-	LabelKeySensor = sensor.FullName + "/name"
-
-	// AnnotationKeyNodeMessage is the job metadata annotation key the job executor will use to communicate errors during execution
-	AnnotationKeyNodeMessage = sensor.FullName + "/node-message"
-
-	// EnvVarJobName is the name of the job
-	EnvVarJobName = "SENSOR_JOB_NAME"
+	// LabelKeyComplete is the label to mark sensors as complete
+	LabelKeyComplete = sensor.FullName + "/complete"
 
 	// EnvVarNamespace contains the namespace of the controller & jobs
 	EnvVarNamespace = "SENSOR_NAMESPACE"
@@ -61,10 +49,7 @@ const (
 
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
-)
 
-// SENSOR JOB CONSTANTS
-const (
 	// WebhookServicePort is the port of the service
 	WebhookServicePort = 9000
 

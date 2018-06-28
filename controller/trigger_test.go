@@ -66,11 +66,11 @@ func TestProcessTrigger(t *testing.T) {
 	assert.Equal(t, *node, soc.s.Status.Nodes[node.ID])
 
 	// now force node status to resolved
-	node.Phase = v1alpha1.NodePhaseResolved
+	node.Phase = v1alpha1.NodePhaseComplete
 	soc.s.Status.Nodes[node.ID] = *node
 	node, err = soc.processTrigger(sampleTrigger)
 	assert.Nil(t, err)
-	assert.Equal(t, v1alpha1.NodePhaseSucceeded, node.Phase)
+	assert.Equal(t, v1alpha1.NodePhaseComplete, node.Phase)
 }
 
 func TestSendMessage(t *testing.T) {

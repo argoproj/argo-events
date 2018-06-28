@@ -18,41 +18,44 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 
 	"go.uber.org/zap"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controller"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 )
 
 func main() {
+	// kubernetes configuration
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	kubeClientset := kubernetes.NewForConfigOrDie(restConfig)
-	sensorClientset := sensorclientset.NewForConfigOrDie(restConfig)
-
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err.Error())
-	}
-
+	// controller configuration
 	configMap, ok := os.LookupEnv(common.EnvVarConfigMap)
 	if !ok {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
 
-	controller := controller.NewSensorController(restConfig, kubeClientset, sensorClientset, logger.Sugar(), configMap)
+	// logger
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
+
+	// stream signal plugins
+	pluginMgr, err := controller.NewPluginManager()
+	if err != nil {
+		panic(err)
+	}
+
+	controller := controller.NewSensorController(restConfig, configMap, pluginMgr, logger.Sugar())
 	err = controller.ResyncConfig()
 	if err != nil {
-		log.Fatalf("%+v", err)
+		panic(err)
 	}
 
 	go controller.Run(context.Background(), 1, 1)
