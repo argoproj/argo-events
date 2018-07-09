@@ -18,6 +18,7 @@ package controller
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/nats-io/go-nats"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -84,8 +85,8 @@ func (soc *sOperationCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 
 func sendMessage(message *v1alpha1.Message) error {
 	payload := []byte(message.Body)
-	switch message.Stream.Type {
-	case "NATS":
+	switch strings.ToLower(message.Stream.Type) {
+	case "nats":
 		natsConnection, err := nats.Connect(message.Stream.URL)
 		if err != nil {
 			return err
