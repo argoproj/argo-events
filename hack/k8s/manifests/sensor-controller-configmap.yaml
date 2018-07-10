@@ -3,17 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: sensor-controller-configmap
-  namespace: default
 data:
   config: |
-    namespace: default
-    serviceAccount: argo-events
     instanceID: axis
-    executorImage: argoproj/sensor-executor:latest
-    executorResources:
-      limits:
-        cpu: 150m
-        memory: 100Mi
-      requests:
-        cpu: 50m
-        memory: 50Mi
+    namespace: default
