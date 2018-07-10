@@ -3,5 +3,4 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: argo-events
-  namespace: default
+  name: argo-events-sa
