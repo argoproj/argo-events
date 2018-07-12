@@ -7,6 +7,7 @@
 |     k8s.io/apimachinery      |     Apache-2.0          |
 |     k8s.io/code-generator    |     Apache-2.0          |
 |     k8s.io/client-go         |     Apache-2.0          |
+|     micro/go-micro           |     Apache-2.0          |
 |     eclipse/paho.mqtt.golang |     EPL-1.0             |
 |     ghodss/yaml              |     Apache-2.0          |
 |     minio/minio-go           |     Apache-2.0          |

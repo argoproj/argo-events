@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package nats
 
 import (
 	"strconv"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/sdk"
 	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"
@@ -45,16 +45,18 @@ func TestSignal(t *testing.T) {
 		},
 	}
 
+	done := make(chan struct{})
+
 	// start the signal - expect ErrMissingRequiredAttribute
-	_, err := nats.Start(&signal)
-	if err != shared.ErrMissingRequiredAttribute {
-		t.Errorf("expected: %s\n found: %s", shared.ErrMissingRequiredAttribute, err)
+	_, err := nats.Listen(&signal, done)
+	if err != sdk.ErrMissingRequiredAttribute {
+		t.Errorf("expected: %s\n found: %s", sdk.ErrMissingRequiredAttribute, err)
 	}
 
 	// add required attributes
 	subject := "test"
 	signal.Stream.Attributes = map[string]string{"subject": subject}
-	_, err = nats.Start(&signal)
+	_, err = nats.Listen(&signal, done)
 	if err == nil {
 		t.Errorf("expected: failed to connect to nats cluster\nfound: %s", err)
 	}
@@ -62,7 +64,7 @@ func TestSignal(t *testing.T) {
 	// run an embedded gnats server
 	testServer := test.RunServer(&natsEmbeddedServerOpts)
 	defer testServer.Shutdown()
-	events, err := nats.Start(&signal)
+	events, err := nats.Listen(&signal, done)
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,25 +81,22 @@ func TestSignal(t *testing.T) {
 	}
 
 	// now lets get the event
-	nextMsg, ok := <-events
+	e, ok := <-events
 	if !ok {
 		t.Errorf("failed to receive msg from events channel")
 	}
-	if nextMsg.Context.EventID != "test-0" {
-		t.Errorf("event context eventID:\nexpected: %s\nactual: %s", "test-0", nextMsg.Context.EventID)
+	if e.Context.EventID != "test-1" {
+		t.Errorf("event context eventID:\nexpected: %s\nactual: %s", "test-1", e.Context.EventID)
 	}
-	if nextMsg.Context.EventType != EventType {
-		t.Errorf("event context EventType:\nexpected: %s\nactual: %s", EventType, nextMsg.Context.EventID)
+	if e.Context.EventType != EventType {
+		t.Errorf("event context EventType:\nexpected: %s\nactual: %s", EventType, e.Context.EventID)
 	}
-	if nextMsg.Context.CloudEventsVersion != shared.CloudEventsVersion {
-		t.Errorf("event context CloudEventsVersion:\nexpected: %s\nactual: %s", shared.CloudEventsVersion, nextMsg.Context.CloudEventsVersion)
+	if e.Context.CloudEventsVersion != sdk.CloudEventsVersion {
+		t.Errorf("event context CloudEventsVersion:\nexpected: %s\nactual: %s", sdk.CloudEventsVersion, e.Context.CloudEventsVersion)
 	}
 
 	// stop the signal
-	err = nats.Stop()
-	if err != nil {
-		t.Errorf("failed to stop signal. cause: %s", err)
-	}
+	close(done)
 
 	// ensure events channel is closed
 	if _, ok := <-events; ok {

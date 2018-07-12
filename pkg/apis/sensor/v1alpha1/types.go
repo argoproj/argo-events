@@ -276,9 +276,6 @@ type SensorStatus struct {
 	// Nodes is a mapping between a node ID and the node's status
 	// it records the states for the FSM of this sensor.
 	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
-
-	// Escalated is a flag for whether this sensor was escalated
-	Escalated bool `json:"escalated,omitempty" protobuf:"bytes,6,opt,name=escalated"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.

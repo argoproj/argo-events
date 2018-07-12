@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -31,12 +32,11 @@ import (
 	"github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
-	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/sdk"
 )
 
 const (
-	sensorResyncPeriod      = 20 * time.Minute
-	pluginHealthCheckPeriod = 20 * time.Second
+	sensorResyncPeriod = 20 * time.Minute
 )
 
 // SensorControllerConfig contain the configuration settings for the sensor controller
@@ -67,26 +67,26 @@ type SensorController struct {
 	informer cache.SharedIndexInformer
 	queue    workqueue.RateLimitingInterface
 
-	// enables access to plugin signals
-	pluginMgr *PluginManager
+	// enables access to signals micro services
+	signalMgr *SignalManager
 
 	// inventory for all types of signal implementations
-	signalMu sync.Mutex
-	signals  map[string]shared.Signaler
+	signalMu      sync.Mutex
+	signalStreams map[string]sdk.SignalService_ListenService
 
 	log *zap.SugaredLogger
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap string, pluginMgr *PluginManager, log *zap.SugaredLogger) *SensorController {
+func NewSensorController(rest *rest.Config, configMap string, signalMgr *SignalManager, log *zap.SugaredLogger) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		pluginMgr:       pluginMgr,
-		signals:         make(map[string]shared.Signaler),
+		signalMgr:       signalMgr,
+		signalStreams:   make(map[string]sdk.SignalService_ListenService),
 		log:             log,
 	}
 }
@@ -117,35 +117,47 @@ func (c *SensorController) processNextItem() bool {
 	}
 
 	ctx := newSensorOperationCtx(sensor, c)
-	err = ctx.operate()
 
-	c.handleErr(err, key)
+	err = c.handleErr(ctx.operate(), key)
+	if err != nil {
+		// now let's escalate the sensor
+		// the context should have the most up-to-date version
+		c.log.Infof("escalating sensor to level %s via %s message", ctx.s.Spec.Escalation.Level, ctx.s.Spec.Escalation.Message.Stream.Type)
+		err := sendMessage(&ctx.s.Spec.Escalation.Message)
+		if err != nil {
+			c.log.Panicf("failed escalating sensor '%s'", key)
+		}
+	}
 
 	return true
 }
 
-// handleErr checks if an error happened and make sure we will retry later - do we want to retry later? probably
-func (c *SensorController) handleErr(err error, key interface{}) {
+// handleErr checks if an error happened and make sure we will retry later
+// returns an error if unable to handle the error
+func (c *SensorController) handleErr(err error, key interface{}) error {
 	if err == nil {
-		// Forget about the #AddRateLimited history of key on every successful synch
+		// Forget about the #AddRateLimited history of key on every successful sync
 		// Ensure future updates for this key are not delayed because of outdated error history
 		c.queue.Forget(key)
-		return
+		return nil
 	}
 
-	if c.queue.NumRequeues(key) < 3 {
-		c.log.Errorf("Error syncing sensor %v: %v", key, err)
+	// due to the base delay of 5ms of the DefaultControllerRateLimiter
+	// requeues will happen very quickly even after a signal pod goes down
+	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
+	if c.queue.NumRequeues(key) < 20 {
+		c.log.Errorf("Error syncing sensor '%v': %v", key, err)
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
-		return
+		return nil
 	}
+	return errors.New("exceeded max requeues")
 }
 
 // Run executes the controller
 func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
 	defer c.queue.ShutDown()
-	defer c.pluginMgr.Close()
 
 	c.log.Infof("sensor controller (version: %s) (instance: %s) starting", axis.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
@@ -156,7 +168,6 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 
 	c.informer = c.newSensorInformer()
 	go c.informer.Run(ctx.Done())
-	go c.pluginMgr.Monitor(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
 		c.log.Panicf("timed out waiting for the caches to sync")

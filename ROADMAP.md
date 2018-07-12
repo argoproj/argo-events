@@ -11,7 +11,6 @@
 ## Design Phase
 - Pluggable Calendar definitions that extend a common Calendar interface
 - Pass in credentials for connection to various signal sources
-- S3 Bucket Notification Handling
 - Implement GC for old sensors
 
 

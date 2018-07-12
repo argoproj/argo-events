@@ -1,0 +1,31 @@
+syntax = "proto3";
+option go_package = "github.com/argoproj/argo-events/sdk";
+
+package sdk;
+
+import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
+
+message SignalContext {
+    github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Signal signal = 1;
+    bool done = 2;
+}
+
+message EventContext {
+    github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Event event = 1;
+    bool done = 2;
+}
+
+// SignalService enables communication between signal microservices and the sensor controller.
+service SignalService {
+    // Listen to the signal. Events are streamed back to the client.
+    //
+    // The following describes the mechanics for the stream.
+    // The first send MUST contain a non-nil signal. 
+    // This first send MUST be followed by a first receive which contains
+    // a confirmation in the form of done=true to signify that the Signal is set up
+    // correctly.
+    //
+    // Later sends should only signify if the signal is done. Later sends do not
+    // update the signal process attached to this channel.
+    rpc Listen(stream SignalContext) returns (stream EventContext);
+}

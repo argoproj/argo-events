@@ -6,15 +6,15 @@ A `signal` is a dependency, namely:
 - A message on a queue
 - An object created in S3
 - A repeated calendar schedule
-- A kubernetes resource
-- A HTTP notification
+- A Kubernetes resource
+- An HTTP notification
 
 ### Prerequisites
 You need a working Kubernetes cluster at version >= 1.9. You will also need to install the `sensor-controller` into the cluster. This controller is is responsible for managing the `sensor` resources.
-In order to take advantage of the various signal types, you may need to install compatible message platforms (e.g. amqp, mmqp, NATS, etc..) and s3 api compatible object storage servers (e.g. Minio, Rook, CEPH, NetApp). See the [signal guide](signal-guide.md) for more information about installing messaging platforms and [artifact guide](artifact-guide.md) for installing object stores.
+In order to take advantage of the various signal types, you may need to install compatible message platforms (e.g. amqp, mmqp, NATS, etc..) and s3 api compatible object storage servers (e.g. Minio, Rook, CEPH, NetApp). See the  [artifact guide](artifact-guide.md) for installing object stores.
 
 ## Sensor Controller
-The `sensor-controller` is responsible for managing the `Sensor` resources and creating `sensor-executor` jobs. 
+The `sensor-controller` is responsible for managing the `Sensor` resources, listening on sensor signals, and executing sensor triggers.
 The following types of signals are supported:
  - Artifact signals which can include things like S3 Bucket Notifications etc..
  - Stream signals which subscribe to messages on a queue or a topic
@@ -26,11 +26,10 @@ The following types of signals are supported:
  - Resource triggers produce Kubernetes objects
  - Message triggers produce messages on a streaming platform
 
-## Sensor Executor
-The `sensor-executor` is responsible for listening for various signals and updating the sensor resource with updates. There is a one-to-one mapping from sensor resource to executor job. Jobs are named in the following format: `{sensor-name}-sensor` and the associated job's pods are named in the following format: `{sensor-name}-sensor-{id}`. On successful resolution of a sensor, the job terminates and the sensor is marked as `Successful`. If an error occurs during signal processing, the sensor is marked as `Error`.
+## Signal Deployments
+Signals are configured as separate deployments to the main sensor controller. Signals are registered as stateless [micro](https://github.com/micro/go-micro) "microservices". Users can specify in the deployment spec for each signal how many replica pods to run for the particular sensor in order to increase event bandwidth available and also make signals more resilient. For help in building and running these see the [Signals](../signals/README.md) README.
 
-
-## Types of Signal Dependencies
+## Types of Signals
 
 ### Calendar
 Time-based signals can include signals based on a [cron]() schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event. Eventually, we hope to support a calendar-plugin or interface where users can configure special handling calendar/business logic.
@@ -46,7 +45,7 @@ Supports watching Kubernetes resources. Users can specify `group`, `version`, `k
 Supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
 
 ### Message Streams / Brokers
-Supports a generic specification for message stream signals. Currently, there is a push signals toward being extensible and one solution we are investigating is toward classifying signals with common definitions and building a plugin-based architecture for supporting the specific signal implementations. The following defines the currently supported types of stream signals and examples of how to define them.
+Supports a generic specification for messages received on a queue and/or though messaging server. The following are the `builtin` supported stream signals. Users can build their own signals by adding implementations to the `custom` package.
 
 #### NATS
 [Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.

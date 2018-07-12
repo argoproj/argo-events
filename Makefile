@@ -1,14 +1,12 @@
-
+PACKAGE=github.com/argoproj/argo-events
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
-PLUGIN_DIR=${DIST_DIR}/plugins
 
 VERSION=$(shell cat ${CURRENT_DIR}/VERSION)
 BUILD_DATE=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 GIT_COMMIT=$(shell git rev-parse HEAD)
 GIT_TAG=$(shell if [ -z "`git status --porcelain`" ]; then git describe --exact-match --tags HEAD 2>/dev/null; fi)
 GIT_TREE_STATE=$(shell if [ -z "`git status --porcelain`" ]; then echo "clean" ; else echo "dirty"; fi)
-PLUGINS=$(shell find . \( -type d -and -path '*/signals/stream/builtin/*' \))
 
 override LDFLAGS += \
   -X ${PACKAGE}.version=${VERSION} \
@@ -46,10 +44,14 @@ clientgen:
 .PHONY: codegen
 codegen: protogen clientgen
 
-# Build the project
-.PHONY: all controller controller-image clean test
+# this is the default stream service
+STREAM=nats
 
-all: controller-image
+# Build the project images
+.DELETE_ON_ERROR:
+all: controller-image artifact-image calendar-image resource-image webhook-image stream-image
+
+.PHONY: all controller controller-image clean test
 
 # Sensor controller
 controller:
@@ -58,19 +60,46 @@ controller:
 controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make controller
 
-controller-image: controller-linux stream-plugins-linux
+controller-image: controller-linux
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controller/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
-# Plugins
-stream-plugins:
-	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/nats ./signals/stream/builtin/nats
-	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/mqtt ./signals/stream/builtin/mqtt
-	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/kafka ./signals/stream/builtin/kafka
-	go build -v -ldflags '${LDFLAGS}' -o ${PLUGIN_DIR}/amqp ./signals/stream/builtin/amqp
+# signal microservice binaries
+artifact:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-signal ./signals/artifact/micro
 
-stream-plugins-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stream-plugins
+calendar:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-signal ./signals/calendar/micro
+
+resource:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/resource-signal ./signals/resource/micro
+
+webhook:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-signal ./signals/webhook/micro
+
+stream:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/${STREAM}-signal ./signals/stream/builtin/${STREAM}/micro
+
+# signal microservice docker images
+artifact-image: artifact
+	docker build -t $(IMAGE_PREFIX)artifact-signal:$(IMAGE_TAG) -f ./signals/artifact/micro/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)artifact-signal:$(IMAGE_TAG) ; fi
+
+calendar-image: calendar
+	docker build -t $(IMAGE_PREFIX)calendar-signal:$(IMAGE_TAG) -f ./signals/calendar/micro/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)calendar-signal:$(IMAGE_TAG) ; fi
+
+resource-image: resource
+	docker build -t $(IMAGE_PREFIX)resource-signal:$(IMAGE_TAG) -f ./signals/resource/micro/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)resource-signal:$(IMAGE_TAG) ; fi
+
+webhook-image: webhook
+	docker build -t $(IMAGE_PREFIX)webhook-signal:$(IMAGE_TAG) -f ./signals/webhook/micro/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)webhook-signal:$(IMAGE_TAG) ; fi
+
+stream-image: stream
+	docker build -t $(IMAGE_PREFIX)stream-$(STREAM)-signal:$(IMAGE_TAG) -f ./signals/stream/builtin/$(STREAM)/micro/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)stream-$(STREAM)-signal:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

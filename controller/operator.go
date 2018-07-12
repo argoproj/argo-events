@@ -24,6 +24,7 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -117,21 +118,8 @@ func (soc *sOperationCtx) operate() error {
 		}
 	}
 
-	if soc.s.IsComplete() {
-		// escalate
-		if !soc.s.Status.Escalated {
-			soc.log.Warnf("escalating sensor to level %s via %s message", soc.s.Spec.Escalation.Level, soc.s.Spec.Escalation.Message.Stream.Type)
-			err := sendMessage(&soc.s.Spec.Escalation.Message)
-			if err != nil {
-				return err
-			}
-			soc.s.Status.Escalated = true
-			soc.updated = true
-		} else {
-			soc.log.Debug("sensor already escalated")
-		}
-	}
-
+	// if we get here - we know the signals are running
+	soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for signal events")
 	return nil
 }
 
@@ -178,16 +166,24 @@ func (soc *sOperationCtx) persistUpdates() {
 	time.Sleep(1 * time.Second)
 }
 
-// todo: implement me
+// reapplyUpdate by fetching a new version of the sensor and updating the status
+// TODO: use patch here?
 func (soc *sOperationCtx) reapplyUpdate(sensorClient client.SensorInterface) error {
-	attempt := 1
-	for {
-		_, err := sensorClient.Get(soc.s.ObjectMeta.Name, metav1.GetOptions{})
-
-		if attempt > 5 {
-			return err
+	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		s, err := sensorClient.Get(soc.s.Name, metav1.GetOptions{})
+		if err != nil {
+			return false, err
 		}
-	}
+		s.Status = soc.s.Status
+		soc.s, err = sensorClient.Update(s)
+		if err != nil {
+			if !common.IsRetryableKubeAPIError(err) {
+				return false, err
+			}
+			return false, nil
+		}
+		return true, nil
+	})
 }
 
 // create a new node

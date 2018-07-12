@@ -44,24 +44,27 @@ go-to-protobuf \
 # server/*/<service>.pb.go from .proto files. golang/protobuf and gogo/protobuf can be used
 # interchangeably. The difference in the options are:
 # 1. protoc-gen-go - official golang/protobuf
-go build -i -o dist/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
-GOPROTOBINARY=go
+#go build -i -o dist/protoc-gen-go ./vendor/github.com/golang/protobuf/protoc-gen-go
+#GOPROTOBINARY=go
 # 2. protoc-gen-gofast - fork of golang golang/protobuf. Faster code generation
-#go build -i -o dist/protoc-gen-gofast ./vendor/github.com/gogo/protobuf/protoc-gen-gofast
-#GOPROTOBINARY=gofast
+go build -i -o dist/protoc-gen-gofast ./vendor/github.com/gogo/protobuf/protoc-gen-gofast
+GOPROTOBINARY=gofast
 # 3. protoc-gen-gogofast - faster code generation and gogo extensions and flexibility in controlling
 # the generated go code (e.g. customizing field names, nullable fields)
 #go build -i -o dist/protoc-gen-gogofast ./vendor/github.com/gogo/protobuf/protoc-gen-gogofast
 #GOPROTOBINARY=gogofast
 
+go build -i -o dist/protoc-gen-micro ./vendor/github.com/micro/protoc-gen-micro
+
 # Generate job/<service>/(<service>.pb.go)
-PROTO_FILES=$(find $PROJECT_ROOT \( -name "*.proto" -and -path '*/shared/*' \))
+PROTO_FILES=$(find $PROJECT_ROOT \( -name "*.proto" -and -path '*/sdk/*' \))
 for i in ${PROTO_FILES}; do
     protoc \
         -I${PROJECT_ROOT} \
         -I/usr/local/include \
         -I./vendor \
         -I$GOPATH/src \
+        --micro_out=$GOPATH/src \
         --${GOPROTOBINARY}_out=plugins=grpc:$GOPATH/src \
         $i
 done

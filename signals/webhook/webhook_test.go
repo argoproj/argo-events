@@ -22,20 +22,20 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var (
-	client  = &http.Client{}
-	payload = "{name: x}"
+	testingTargetPort = 45678
+	client            = &http.Client{}
+	payload           = "{name: x}"
 )
 
 func handleEvent(t *testing.T, testEventChan <-chan *v1alpha1.Event) {
 	event := <-testEventChan
 
-	if event.Context.Source.Host != fmt.Sprintf("localhost:%d", common.WebhookServicePort) {
-		t.Errorf("event Context SourceHost:\nexpected: %s\nactual: %s", fmt.Sprintf("localhost:%d", common.WebhookServicePort), event.Context.Source.Host)
+	if event.Context.Source.Host != fmt.Sprintf("localhost:%d", testingTargetPort) {
+		t.Errorf("event Context SourceHost:\nexpected: %s\nactual: %s", fmt.Sprintf("localhost:%d", testingTargetPort), event.Context.Source.Host)
 	}
 	if string(event.Data) != payload {
 		t.Errorf("event Data:\nexpected: %s\nactual: %s", payload, string(event.Data))
@@ -46,16 +46,17 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 	web := New()
 	signal := v1alpha1.Signal{
 		Webhook: &v1alpha1.WebhookSignal{
-			Port:     common.WebhookServiceTargetPort,
+			Port:     int32(testingTargetPort),
 			Endpoint: endpoint,
 			Method:   httpMethod,
 		},
 	}
-	events, err := web.Start(&signal)
+	done := make(chan struct{})
+	events, err := web.Listen(&signal, done)
 
 	go handleEvent(t, events)
 
-	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", common.WebhookServicePort, endpoint), strings.NewReader(payload))
+	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", testingTargetPort, endpoint), strings.NewReader(payload))
 	if err != nil {
 		t.Fatalf("unable to create http request. cause: %s", err)
 	}
@@ -67,10 +68,10 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 	if resp.Status != "200 OK" {
 		t.Errorf("response status expected: '200 OK' actual: '%s'", resp.Status)
 	}
-	err = web.Stop()
-	if err != nil {
-		t.Error(err)
-	}
+
+	// stop listening and ensure the events channel is closed
+	done <- struct{}{}
+
 }
 
 func testPostRequest(t *testing.T) {

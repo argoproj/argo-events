@@ -33,43 +33,84 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/sdk"
 )
 
+// Note: micro requires stateless operation so the Listen() method should not use the
+// receive struct to save or modify state.
+// Listen() methods CAN retrieve the kubeConfig from the resource struct.
 type resource struct {
 	kubeConfig *rest.Config
-	watches    []watch.Interface
 }
 
 // New creates a new resource signaler
-func New(kubeConfig *rest.Config) shared.Signaler {
+func New(kubeConfig *rest.Config) sdk.Listener {
 	return &resource{kubeConfig: kubeConfig}
 }
 
-func (r *resource) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
-	var err error
+func (r *resource) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
+	resources, err := r.discoverResources(signal.Resource)
+	if err != nil {
+		return nil, err
+	}
+
+	options := metav1.ListOptions{Watch: true}
+	if signal.Resource.Filter != nil {
+		options.LabelSelector = labels.Set(signal.Resource.Filter.Labels).AsSelector().String()
+	}
+
+	wg := sync.WaitGroup{}
+	watches := make([]watch.Interface, 0)
+	events := make(chan *v1alpha1.Event)
+
+	// start up listeners
+	for i := 0; i < len(resources); i++ {
+		resource := resources[i]
+		watch, err := resource.Watch(options)
+		if err != nil {
+			return nil, err
+		}
+		watches = append(watches, watch)
+
+		wg.Add(1)
+		go r.listen(events, watch, signal.Resource.Filter, &wg)
+	}
+
+	// wait for stop signal
+	go func() {
+		<-done
+		for _, watch := range watches {
+			watch.Stop()
+		}
+	}()
+
+	// wait for all watches to complete, then close the events channel
+	go func() {
+		wg.Wait()
+		close(events)
+	}()
+
+	return events, nil
+}
+
+func (r *resource) discoverResources(obj *v1alpha1.ResourceSignal) ([]dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(r.kubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(r.kubeConfig)
 	if err != nil {
 		return nil, err
 	}
-	var groupVersion string
-	if signal.Resource.Version == "v1" {
-		groupVersion = "v1"
-	} else {
-		groupVersion = signal.Resource.Group + "/" + signal.Resource.Version
-	}
+
+	groupVersion := resolveGroupVersion(obj)
 	resourceInterfaces, err := disco.ServerResourcesForGroupVersion(groupVersion)
 	if err != nil {
 		return nil, err
 	}
-
 	resources := make([]dynamic.ResourceInterface, 0)
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
 		log.Printf("found API Resource %s", gvk.String())
-		if apiResource.Kind != signal.Resource.Kind {
+		if apiResource.Kind != obj.Kind {
 			continue
 		}
 		canWatch := false
@@ -84,42 +125,17 @@ func (r *resource) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error
 			if err != nil {
 				return nil, err
 			}
-			resources = append(resources, client.Resource(&apiResource, signal.Resource.Namespace))
+			resources = append(resources, client.Resource(&apiResource, obj.Namespace))
 		}
 	}
-
-	options := metav1.ListOptions{Watch: true}
-	if signal.Resource.Filter != nil {
-		options.LabelSelector = labels.Set(signal.Resource.Filter.Labels).AsSelector().String()
-	}
-
-	wg := sync.WaitGroup{}
-	events := make(chan *v1alpha1.Event)
-	for i := 0; i < len(resources); i++ {
-		resource := resources[i]
-		watch, err := resource.Watch(options)
-		if err != nil {
-			return nil, err
-		}
-		r.watches = append(r.watches, watch)
-
-		wg.Add(1)
-		go r.listen(events, watch, signal.Resource.Filter, &wg)
-	}
-
-	go func() {
-		wg.Wait()
-		close(events)
-	}()
-
-	return events, nil
+	return resources, nil
 }
 
-func (r *resource) Stop() error {
-	for _, watch := range r.watches {
-		watch.Stop()
+func resolveGroupVersion(obj *v1alpha1.ResourceSignal) string {
+	if obj.Version == "v1" {
+		return obj.Version
 	}
-	return nil
+	return obj.Group + "/" + obj.Version
 }
 
 func (r *resource) listen(events chan *v1alpha1.Event, w watch.Interface, filter *v1alpha1.ResourceFilter, wg *sync.WaitGroup) {
@@ -138,7 +154,7 @@ func (r *resource) listen(events chan *v1alpha1.Event, w watch.Interface, filter
 			log.Panic(err)
 		}
 
-		if r.passFilters(itemObj, filter) {
+		if passFilters(itemObj, filter) {
 			events <- event
 		}
 	}
@@ -146,7 +162,7 @@ func (r *resource) listen(events chan *v1alpha1.Event, w watch.Interface, filter
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func (r *resource) passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) bool {
+func passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
 		log.Printf("FILTERED: resource name '%s' does not match prefix '%s'", obj.GetName(), filter.Prefix)
