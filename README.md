@@ -1,7 +1,7 @@
 # Argo Events - The Event-Based Dependency Manager for Kubernetes
 
 ## What is Argo Events?
-Argo Events is an open source event-based dependency manager for Kubernetes. The core concept of the project are `sensors` which are implemented as Kubernetes-native Custom Resource Definition that define a set of dependencies (signals) and actions (triggers). The sensor's triggers will only be fired after it's signals have been resolved. `Sensors` can trigger once or repeatedly.
+Argo Events is an open source event-based dependency manager for Kubernetes. The core concept of the project are `sensors` which are implemented as Kubernetes-native Custom Resource Definition(CRD) that define a set of dependencies (signals) and actions (triggers). The sensor's triggers will only be fired after it's signals have been resolved. `Sensors` can trigger once or repeatedly.
 - Define multiple dependencies from a variety of signal sources
 - Define dependency constraints and build plugins to support business-level constraint logic
 - Trigger messages and Kubernetes object creation after successful dependency resolution
