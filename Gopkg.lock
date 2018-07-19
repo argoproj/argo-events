@@ -728,7 +728,7 @@
   revision = "e2680bfa771859c129bc5c8413fdb565af2b3dcd"
 
 [[projects]]
-  branch = "release-1.9"
+  branch = "release-1.10"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -740,18 +740,24 @@
     "cmd/client-gen/path",
     "cmd/client-gen/types",
     "cmd/deepcopy-gen",
+    "cmd/deepcopy-gen/args",
     "cmd/defaulter-gen",
+    "cmd/defaulter-gen/args",
     "cmd/go-to-protobuf",
     "cmd/go-to-protobuf/protobuf",
     "cmd/go-to-protobuf/protoc-gen-gogo",
     "cmd/informer-gen",
+    "cmd/informer-gen/args",
     "cmd/informer-gen/generators",
     "cmd/lister-gen",
+    "cmd/lister-gen/args",
     "cmd/lister-gen/generators",
     "cmd/openapi-gen",
+    "cmd/openapi-gen/args",
+    "pkg/util",
     "third_party/forked/golang/reflect"
   ]
-  revision = "0ab89e584187c20cc7c1a3f30db69f3b4ab64196"
+  revision = "9de8e796a74d16d2a285165727d04c185ebca6dc"
 
 [[projects]]
   branch = "master"
@@ -783,6 +789,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ea2e1ed6989ae23f2d1836c9b1e29fe9d70e006bcac1f68c227fbf9552305c74"
+  inputs-digest = "5825a13b72c61f5672319f333388e1823d98f7e8f76a009b50cedcc77fe40436"
   solver-name = "gps-cdcl"
   solver-version = 1

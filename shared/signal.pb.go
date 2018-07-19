@@ -162,9 +162,9 @@ var _Signal_serviceDesc = grpc.ServiceDesc{
 	Metadata: "shared/signal.proto",
 }
 
-func init() { proto.RegisterFile("shared/signal.proto", fileDescriptor_signal_a3f27f690a231233) }
+func init() { proto.RegisterFile("shared/signal.proto", fileDescriptor_signal_9f8b96b2afc4ddad) }
 
-var fileDescriptor_signal_a3f27f690a231233 = []byte{
+var fileDescriptor_signal_9f8b96b2afc4ddad = []byte{
 	// 226 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x90, 0x31, 0x4b, 0xc4, 0x40,
 	0x10, 0x85, 0x09, 0x68, 0x8a, 0x94, 0x2b, 0x58, 0xc4, 0x5e, 0x6c, 0x9c, 0xf1, 0x14, 0x6c, 0x15,
