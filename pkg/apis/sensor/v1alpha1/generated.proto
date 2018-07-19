@@ -37,8 +37,8 @@ message ArtifactLocation {
 message ArtifactSignal {
   optional ArtifactLocation artifactLocation = 2;
 
-  // NotificationStream is the stream to listen for artifact notifications
-  optional Stream stream = 1;
+  // Target is the stream to listen for artifact notifications
+  optional Stream target = 1;
 }
 
 // CalendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -190,12 +190,12 @@ message ResourceFilter {
 
 // ResourceObject is the resource object to create on kubernetes
 message ResourceObject {
+  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+  optional GroupVersionKind groupVersionKind = 4;
+
   // Namespace in which to create this object
   // optional
   optional string namespace = 1;
-
-  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional GroupVersionKind groupVersionKind = 4;
 
   // Location in which the K8 resource file(s) are stored.
   // If omitted, will attempt to use the default artifact location configured in the controller.
@@ -222,7 +222,7 @@ message RetryStrategy {
 
 // S3Artifact contains information about an artifact in S3
 message S3Artifact {
-  optional S3Bucket s3Bucket = 5;
+  optional S3Bucket s3Bucket = 4;
 
   optional string key = 1;
 

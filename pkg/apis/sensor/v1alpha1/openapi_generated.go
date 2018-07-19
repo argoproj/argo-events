@@ -89,14 +89,14 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref common.ReferenceCallback
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"),
 						},
 					},
-					"stream": {
+					"target": {
 						SchemaProps: spec.SchemaProps{
-							Description: "NotificationStream is the stream to listen for artifact notifications",
+							Description: "Target is the stream to listen for artifact notifications",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
 						},
 					},
 				},
-				Required: []string{"stream"},
+				Required: []string{"target"},
 			},
 		},
 		Dependencies: []string{
@@ -499,13 +499,6 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 			SchemaProps: spec.SchemaProps{
 				Description: "ResourceObject is the resource object to create on kubernetes",
 				Properties: map[string]spec.Schema{
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object optional",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"group": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -522,6 +515,13 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace in which to create this object optional",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"artifactLocation": {
