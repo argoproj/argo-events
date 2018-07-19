@@ -128,8 +128,8 @@ type Signal struct {
 type ArtifactSignal struct {
 	ArtifactLocation `json:",inline" protobuf:"bytes,2,opt,name=artifactLocation"`
 
-	// NotificationStream is the stream to listen for artifact notifications
-	NotificationStream Stream `json:"stream" protobuf:"bytes,1,opt,name=stream"`
+	// Target is the stream to listen for artifact notifications
+	Target Stream `json:"target" protobuf:"bytes,1,opt,name=target"`
 }
 
 // CalendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -194,12 +194,12 @@ type Trigger struct {
 
 // ResourceObject is the resource object to create on kubernetes
 type ResourceObject struct {
+	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+	GroupVersionKind `json:",inline" protobuf:"bytes,4,opt,name=groupVersionKind"`
+
 	// Namespace in which to create this object
 	// optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
-
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	GroupVersionKind `json:",inline" protobuf:"bytes,4,opt,name=groupVersionKind"`
 
 	// Location in which the K8 resource file(s) are stored.
 	// If omitted, will attempt to use the default artifact location configured in the controller.
@@ -387,7 +387,7 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	S3Bucket `json:",inline" protobuf:"bytes,5,opt,name=s3Bucket"`
+	S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
 	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
 	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`

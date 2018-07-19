@@ -28,12 +28,8 @@ func (in *ArtifactLocation) DeepCopyInto(out *ArtifactLocation) {
 	*out = *in
 	if in.S3 != nil {
 		in, out := &in.S3, &out.S3
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(S3Artifact)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(S3Artifact)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -52,7 +48,7 @@ func (in *ArtifactLocation) DeepCopy() *ArtifactLocation {
 func (in *ArtifactSignal) DeepCopyInto(out *ArtifactSignal) {
 	*out = *in
 	in.ArtifactLocation.DeepCopyInto(&out.ArtifactLocation)
-	in.NotificationStream.DeepCopyInto(&out.NotificationStream)
+	in.Target.DeepCopyInto(&out.Target)
 	return
 }
 
@@ -131,22 +127,14 @@ func (in *EventContext) DeepCopyInto(out *EventContext) {
 	*out = *in
 	if in.Source != nil {
 		in, out := &in.Source, &out.Source
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(URI)
-			**out = **in
-		}
+		*out = new(URI)
+		**out = **in
 	}
 	in.EventTime.DeepCopyInto(&out.EventTime)
 	if in.SchemaURL != nil {
 		in, out := &in.SchemaURL, &out.SchemaURL
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(URI)
-			**out = **in
-		}
+		*out = new(URI)
+		**out = **in
 	}
 	if in.Extensions != nil {
 		in, out := &in.Extensions, &out.Extensions
@@ -225,12 +213,8 @@ func (in *NodeStatus) DeepCopyInto(out *NodeStatus) {
 	in.CompletedAt.DeepCopyInto(&out.CompletedAt)
 	if in.LatestEvent != nil {
 		in, out := &in.LatestEvent, &out.LatestEvent
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(EventWrapper)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(EventWrapper)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -282,12 +266,8 @@ func (in *ResourceObject) DeepCopyInto(out *ResourceObject) {
 	out.GroupVersionKind = in.GroupVersionKind
 	if in.ArtifactLocation != nil {
 		in, out := &in.ArtifactLocation, &out.ArtifactLocation
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ArtifactLocation)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(ArtifactLocation)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Labels != nil {
 		in, out := &in.Labels, &out.Labels
@@ -315,12 +295,8 @@ func (in *ResourceSignal) DeepCopyInto(out *ResourceSignal) {
 	out.GroupVersionKind = in.GroupVersionKind
 	if in.Filter != nil {
 		in, out := &in.Filter, &out.Filter
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ResourceFilter)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(ResourceFilter)
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }
@@ -357,12 +333,8 @@ func (in *S3Artifact) DeepCopyInto(out *S3Artifact) {
 	in.S3Bucket.DeepCopyInto(&out.S3Bucket)
 	if in.Filter != nil {
 		in, out := &in.Filter, &out.Filter
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(S3Filter)
-			**out = **in
-		}
+		*out = new(S3Filter)
+		**out = **in
 	}
 	return
 }
@@ -512,9 +484,7 @@ func (in *SensorStatus) DeepCopyInto(out *SensorStatus) {
 		in, out := &in.Nodes, &out.Nodes
 		*out = make(map[string]NodeStatus, len(*in))
 		for key, val := range *in {
-			newVal := new(NodeStatus)
-			val.DeepCopyInto(newVal)
-			(*out)[key] = *newVal
+			(*out)[key] = *val.DeepCopy()
 		}
 	}
 	return
@@ -535,48 +505,28 @@ func (in *Signal) DeepCopyInto(out *Signal) {
 	*out = *in
 	if in.Stream != nil {
 		in, out := &in.Stream, &out.Stream
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(Stream)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(Stream)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Artifact != nil {
 		in, out := &in.Artifact, &out.Artifact
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ArtifactSignal)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(ArtifactSignal)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Calendar != nil {
 		in, out := &in.Calendar, &out.Calendar
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(CalendarSignal)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(CalendarSignal)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Resource != nil {
 		in, out := &in.Resource, &out.Resource
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ResourceSignal)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(ResourceSignal)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Webhook != nil {
 		in, out := &in.Webhook, &out.Webhook
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(WebhookSignal)
-			**out = **in
-		}
+		*out = new(WebhookSignal)
+		**out = **in
 	}
 	in.Constraints.DeepCopyInto(&out.Constraints)
 	return
@@ -655,30 +605,18 @@ func (in *Trigger) DeepCopyInto(out *Trigger) {
 	*out = *in
 	if in.Resource != nil {
 		in, out := &in.Resource, &out.Resource
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(ResourceObject)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(ResourceObject)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Message != nil {
 		in, out := &in.Message, &out.Message
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(Message)
-			(*in).DeepCopyInto(*out)
-		}
+		*out = new(Message)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.RetryStrategy != nil {
 		in, out := &in.RetryStrategy, &out.RetryStrategy
-		if *in == nil {
-			*out = nil
-		} else {
-			*out = new(RetryStrategy)
-			**out = **in
-		}
+		*out = new(RetryStrategy)
+		**out = **in
 	}
 	return
 }
