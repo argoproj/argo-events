@@ -19,7 +19,7 @@ spec:
           secretKey:
             key: secretkey
             name: artifacts-minio
-        stream:
+        target:
           type: NATS
           url: nats://example-nats-cluster:4222
           attributes:

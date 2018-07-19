@@ -97,7 +97,7 @@ func (soc *sOperationCtx) resolveSignaler(signal *v1alpha1.Signal) (shared.Signa
 		}
 		signaler = plugin.(shared.Signaler)
 	case v1alpha1.SignalTypeArtifact:
-		streamPlugin, err := soc.controller.pluginMgr.Dispense(signal.Artifact.NotificationStream.Type)
+		streamPlugin, err := soc.controller.pluginMgr.Dispense(signal.Artifact.Target.Type)
 		if err != nil {
 			return nil, err
 		}

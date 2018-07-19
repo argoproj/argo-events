@@ -117,7 +117,7 @@ func extractAndCreateStreamSignal(artifactSignal *v1alpha1.Signal) (*v1alpha1.Si
 	}
 	return &v1alpha1.Signal{
 		Name:        fmt.Sprintf("%s-artifact-stream", artifactSignal.Name),
-		Stream:      &artifactSignal.Artifact.NotificationStream,
+		Stream:      &artifactSignal.Artifact.Target,
 		Constraints: artifactSignal.Constraints,
 	}, nil
 }

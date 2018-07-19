@@ -22,7 +22,7 @@ package v1alpha1
 import (
 	time "time"
 
-	sensor_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	versioned "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/argoproj/argo-events/pkg/client/informers/externalversions/internalinterfaces"
 	v1alpha1 "github.com/argoproj/argo-events/pkg/client/listers/sensor/v1alpha1"
@@ -71,7 +71,7 @@ func NewFilteredSensorInformer(client versioned.Interface, namespace string, res
 				return client.ArgoprojV1alpha1().Sensors(namespace).Watch(options)
 			},
 		},
-		&sensor_v1alpha1.Sensor{},
+		&sensorv1alpha1.Sensor{},
 		resyncPeriod,
 		indexers,
 	)
@@ -82,7 +82,7 @@ func (f *sensorInformer) defaultInformer(client versioned.Interface, resyncPerio
 }
 
 func (f *sensorInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&sensor_v1alpha1.Sensor{}, f.defaultInformer)
+	return f.factory.InformerFor(&sensorv1alpha1.Sensor{}, f.defaultInformer)
 }
 
 func (f *sensorInformer) Lister() v1alpha1.SensorLister {

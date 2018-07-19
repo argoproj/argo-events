@@ -26,7 +26,7 @@ func TestExtractAndCreateStreamSignal(t *testing.T) {
 					},
 				},
 			},
-			NotificationStream: notificationStream,
+			Target: notificationStream,
 		},
 	}
 	_, err := extractAndCreateStreamSignal(&empty)
