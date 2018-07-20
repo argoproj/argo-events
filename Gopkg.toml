@@ -30,7 +30,7 @@ required = [
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.9"
+  branch = "release-1.10"
 
 [[constraint]]
   name = "k8s.io/client-go"
