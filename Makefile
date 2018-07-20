@@ -41,8 +41,12 @@ protogen:
 clientgen:
 	./hack/update-codegen.sh
 
+.PHONY: openapigen
+openapi-gen:
+	./hack/update-openapigen.sh
+
 .PHONY: codegen
-codegen: protogen clientgen
+codegen: clientgen openapigen protogen
 
 # this is the default stream service
 STREAM=nats

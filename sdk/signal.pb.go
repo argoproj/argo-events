@@ -36,7 +36,7 @@ func (m *SignalContext) Reset()         { *m = SignalContext{} }
 func (m *SignalContext) String() string { return proto.CompactTextString(m) }
 func (*SignalContext) ProtoMessage()    {}
 func (*SignalContext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_signal_816554b4b4de9469, []int{0}
+	return fileDescriptor_signal_4408fb801ca10653, []int{0}
 }
 func (m *SignalContext) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -91,7 +91,7 @@ func (m *EventContext) Reset()         { *m = EventContext{} }
 func (m *EventContext) String() string { return proto.CompactTextString(m) }
 func (*EventContext) ProtoMessage()    {}
 func (*EventContext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_signal_816554b4b4de9469, []int{1}
+	return fileDescriptor_signal_4408fb801ca10653, []int{1}
 }
 func (m *EventContext) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -712,9 +712,9 @@ var (
 	ErrIntOverflowSignal   = fmt.Errorf("proto: integer overflow")
 )
 
-func init() { proto.RegisterFile("sdk/signal.proto", fileDescriptor_signal_816554b4b4de9469) }
+func init() { proto.RegisterFile("sdk/signal.proto", fileDescriptor_signal_4408fb801ca10653) }
 
-var fileDescriptor_signal_816554b4b4de9469 = []byte{
+var fileDescriptor_signal_4408fb801ca10653 = []byte{
 	// 288 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0xd1, 0x3f, 0x4b, 0x3b, 0x31,
 	0x18, 0xc0, 0xf1, 0x5f, 0x7e, 0xea, 0x21, 0x51, 0x41, 0x33, 0x95, 0x0e, 0x47, 0xa9, 0xcb, 0x2d,

@@ -71,7 +71,6 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 
 	// stop listening and ensure the events channel is closed
 	done <- struct{}{}
-
 }
 
 func testPostRequest(t *testing.T) {
