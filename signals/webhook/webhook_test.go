@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	testingTargetPort = 45678
+	testingTargetPort = 45677
 	client            = &http.Client{}
 	payload           = "{name: x}"
 )
@@ -52,6 +52,8 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 		},
 	}
 	done := make(chan struct{})
+	// stop listening and ensure the events channel is closed on exit
+	defer func() { done <- struct{}{} }()
 	events, err := web.Listen(&signal, done)
 
 	go handleEvent(t, events)
@@ -68,9 +70,6 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 	if resp.Status != "200 OK" {
 		t.Errorf("response status expected: '200 OK' actual: '%s'", resp.Status)
 	}
-
-	// stop listening and ensure the events channel is closed
-	done <- struct{}{}
 }
 
 func testPostRequest(t *testing.T) {
