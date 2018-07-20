@@ -35,6 +35,17 @@ ifdef IMAGE_NAMESPACE
 IMAGE_PREFIX=${IMAGE_NAMESPACE}/
 endif
 
+.PHONY: protogen
+protogen:
+	./hack/generate-proto.sh
+
+.PHONY: clientgen
+clientgen:
+	./hack/update-codegen.sh
+
+.PHONY: codegen
+codegen: protogen clientgen
+
 # Build the project
 .PHONY: all controller controller-image clean test
 
