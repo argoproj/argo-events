@@ -31,6 +31,8 @@ option go_package = "v1alpha1";
 // ArtifactLocation describes the location for an external artifact
 message ArtifactLocation {
   optional S3Artifact s3 = 1;
+
+  optional string inline = 3;
 }
 
 // ArtifactSignal describes an external object dependency

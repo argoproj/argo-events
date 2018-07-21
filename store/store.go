@@ -55,6 +55,8 @@ func FetchArtifact(reader ArtifactReader, gvk ss_v1alpha1.GroupVersionKind) (*un
 func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
+	} else if loc.Inline != "" {
+		return NewInlineReader(loc.Inline)
 	}
 	return nil, fmt.Errorf(fmt.Sprintf("unknown artifact location: %v", *loc))
 }

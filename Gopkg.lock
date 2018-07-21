@@ -348,7 +348,7 @@
     "selector/static",
     "server/grpc"
   ]
-  revision = "8be6afe2f1228157fc5f0ba608a296a4fd00441d"
+  revision = "4ff3c6956c31bbfb99558f99a87871d60ef198f8"
 
 [[projects]]
   branch = "master"
@@ -369,13 +369,13 @@
     "credentials",
     "encoding",
     "encoding/proto",
-    "grpclog",
     "internal",
     "internal/backoff",
     "internal/channelz",
     "internal/envconfig",
     "internal/grpcrand",
     "keepalive",
+    "logger",
     "metadata",
     "naming",
     "peer",
@@ -384,10 +384,9 @@
     "resolver/passthrough",
     "stats",
     "status",
-    "tap",
     "transport"
   ]
-  revision = "ce3486ae08f0271df80a4c86fd7ca3b006308762"
+  revision = "300b12fe07272f249d08530ac8405891b5743f91"
 
 [[projects]]
   name = "github.com/micro/kubernetes"
@@ -554,8 +553,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -597,8 +596,8 @@
     "internal/exit",
     "zapcore"
   ]
-  revision = "eeedf312bc6c57391d84767a4cd413f02a917974"
-  version = "v1.8.0"
+  revision = "4d45f9617f7d90f7a663ff21c7a4321dbe78098b"
+  version = "v1.9.0"
 
 [[projects]]
   branch = "master"
@@ -612,7 +611,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
 
 [[projects]]
   branch = "master"
@@ -681,13 +680,13 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "4735f53fb37db012e63d1a62914417980fb3c023"
+  revision = "ded554d0681e0cba3cf074977cdc12e2c0906fe6"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "fedd2861243fd1a8152376292b921b394c7bef7e"
+  revision = "02b4e95473316948020af0b7a4f0f22c73929b0e"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -959,7 +958,7 @@
     "pkg/generators/rules",
     "pkg/util/sets"
   ]
-  revision = "0cf8f7e6ed1d2e3d47d02e3b6e559369af24d803"
+  revision = "d8ea2fe547a448256204cfc68dfee7b26c720acb"
 
 [solve-meta]
   analyzer-name = "dep"
