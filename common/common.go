@@ -22,9 +22,6 @@ import (
 
 // SENSOR CONTROLLER CONSTANTS
 const (
-	// DefaultSensorControllerNamespace is the default namespace where the sensor controller is installed
-	DefaultSensorControllerNamespace = "default"
-
 	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor controller
 	DefaultSensorControllerDeploymentName = "sensor-controller"
 
@@ -41,7 +38,7 @@ const (
 	// LabelKeyComplete is the label to mark sensors as complete
 	LabelKeyComplete = sensor.FullName + "/complete"
 
-	// EnvVarNamespace contains the namespace of the controller & jobs
+	// EnvVarNamespace contains the namespace of the controller & services
 	EnvVarNamespace = "SENSOR_NAMESPACE"
 
 	// EnvVarConfigMap is the name of the configmap to use for the controller

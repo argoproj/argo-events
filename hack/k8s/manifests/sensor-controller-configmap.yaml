@@ -6,4 +6,3 @@ metadata:
 data:
   config: |
     instanceID: axis
-    namespace: default

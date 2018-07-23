@@ -45,7 +45,7 @@ kubectl create -f hack/k8s/manifests/*
 ```
 $ helm init
 ...
-$ helm install stable/minio --name artifacts
+$ helm install stable/minio --name artifacts --set service.type=LoadBalancer
 ...
 
 $ #Verify that the minio pod, the minio service and minio secret are present

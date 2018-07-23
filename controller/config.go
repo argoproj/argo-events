@@ -19,7 +19,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
@@ -92,11 +91,7 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 
 // ResyncConfig reloads the controller config from the configmap
 func (c *SensorController) ResyncConfig() error {
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		namespace = common.DefaultSensorControllerNamespace
-	}
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
+	cmClient := c.kubeClientset.CoreV1().ConfigMaps(common.DefaultSensorControllerNamespace)
 	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -114,6 +109,9 @@ func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err
+	}
+	if config.Namespace == "" {
+		config.Namespace = common.DefaultSensorControllerNamespace
 	}
 	c.Config = config
 	return nil

@@ -18,6 +18,7 @@ package common
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -59,4 +60,22 @@ func TestServerResourceForGroupVersionKind(t *testing.T) {
 	fmt.Println(err)
 	assert.NotNil(t, err)
 	assert.Nil(t, apiResource)
+}
+
+func TestResolveNamespace(t *testing.T) {
+	defer os.Unsetenv(EnvVarNamespace)
+
+	RefreshNamespace()
+	assert.Equal(t, "default", DefaultSensorControllerNamespace)
+
+	// TODO: now write the namespace file
+
+	// now set the env variable
+	err := os.Setenv(EnvVarNamespace, "test")
+	if err != nil {
+		t.Error(err)
+	}
+
+	RefreshNamespace()
+	assert.Equal(t, "test", DefaultSensorControllerNamespace)
 }

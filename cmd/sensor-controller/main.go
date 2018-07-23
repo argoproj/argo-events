@@ -46,13 +46,13 @@ func main() {
 		panic(err)
 	}
 
-	// stream signal plugins
-	pluginMgr, err := controller.NewPluginManager()
+	// stream signal micro services
+	signalMgr, err := controller.NewSignalManager(logger.Sugar())
 	if err != nil {
 		panic(err)
 	}
 
-	controller := controller.NewSensorController(restConfig, configMap, pluginMgr, logger.Sugar())
+	controller := controller.NewSensorController(restConfig, configMap, signalMgr, logger.Sugar())
 	err = controller.ResyncConfig()
 	if err != nil {
 		panic(err)

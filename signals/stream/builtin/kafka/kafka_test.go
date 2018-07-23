@@ -14,66 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package kafka
 
-/*
-func TestSignal(t *testing.T) {
-	consumer := mocks.NewConsumer(t, sarama.NewConfig())
-	consumer.SetTopicMetadata(map[string][]int32{"test": []int32{0}})
-	expectedPartitionConsumer := consumer.ExpectConsumePartition("test", 0, -1)
-	expectedPartitionConsumer.ExpectMessagesDrainedOnClose()
-	expectedPartitionConsumer.ExpectErrorsDrainedOnClose()
-
-	kafka := &kafka{
-		consumer:       consumer,
-		stop:           make(chan struct{}),
-	}
-	testCh := make(chan job.Event)
-
-	// unable to get available partitions
-	err := signal.Start(testCh)
-	assert.NotNil(t, err)
-
-	// partition not available
-	consumer.SetTopicMetadata(map[string][]int32{"unknown": []int32{1}})
-	err = signal.Start(testCh)
-	assert.NotNil(t, err)
-
-	// success
-	consumer.SetTopicMetadata(map[string][]int32{"test": []int32{0}})
-	signal.topic = "test"
-	signal.partition = 0
-
-	err = signal.Start(testCh)
-	assert.Nil(t, err)
-
-	// send message
-	testMsg := &sarama.ConsumerMessage{
-		Topic:     "test",
-		Partition: 0,
-		Offset:    1,
-		Timestamp: time.Now(),
-		Key:       []byte("key"),
-		Value:     []byte("hello, world"),
-	}
-	expectedPartitionConsumer.YieldMessage(testMsg)
-
-	// verify the message
-	event := <-testCh
-	assert.Equal(t, "", event.GetID())
-	assert.Equal(t, "test", event.GetSource())
-	assert.Equal(t, []byte("hello, world"), event.GetBody())
-	assert.Equal(t, signal, event.GetSignal())
-
-	// send an error
-	err = fmt.Errorf("this is a test error")
-	expectedPartitionConsumer.YieldError(err)
-
-	// verify the error
-	event = <-testCh
-	assert.Equal(t, err, event.GetError())
-
-	err = signal.Stop()
-	assert.Nil(t, err)
-}
-*/
+// TODO: implement e2e test
+// the github.com/Shopify/sarama/mocks doesn't work because we
+// can't pass the mock Consumer to the kafka struct

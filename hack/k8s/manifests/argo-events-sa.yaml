@@ -1,4 +1,4 @@
-# All argoe-events services are bound to the "argo-events" service account. 
+# All argo-events services are bound to the "argo-events" service account. 
 # In RBAC enabled setups, this SA is bound to specific roles.
 apiVersion: v1
 kind: ServiceAccount

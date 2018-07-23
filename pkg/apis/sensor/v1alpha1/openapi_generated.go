@@ -937,13 +937,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							},
 						},
 					},
-					"escalated": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Escalated is a flag for whether this sensor was escalated",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 				},
 				Required: []string{"phase"},
 			},
