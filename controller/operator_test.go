@@ -17,11 +17,8 @@ limitations under the License.
 package controller
 
 import (
-	"strconv"
 	"testing"
 
-	"github.com/nats-io/gnatsd/server"
-	"github.com/nats-io/gnatsd/test"
 	"github.com/stretchr/testify/assert"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -191,64 +188,4 @@ func TestReRunSensor(t *testing.T) {
 	assert.Equal(t, v1alpha1.NodePhaseNew, natsSignalNode.Phase)
 	resourceSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
 	assert.Equal(t, v1alpha1.NodePhaseNew, resourceSignalNode.Phase)
-}
-
-func TestEscalationSent(t *testing.T) {
-	fake := newFakeController()
-	defer fake.teardown()
-
-	natsEmbeddedServerOpts := server.Options{
-		Host:           "localhost",
-		Port:           4225,
-		NoLog:          true,
-		NoSigs:         true,
-		MaxControlLine: 256,
-	}
-	testServer := test.RunServer(&natsEmbeddedServerOpts)
-	defer testServer.Shutdown()
-
-	sampleSensor.Spec.Escalation = v1alpha1.EscalationPolicy{
-		Level: "High",
-		Message: v1alpha1.Message{
-			Body: "esclating this sensor on failure",
-			Stream: v1alpha1.Stream{
-				Type:       "NATS",
-				URL:        "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
-				Attributes: map[string]string{"subject": "escalation"},
-			},
-		},
-	}
-
-	sampleSensor.Status = v1alpha1.SensorStatus{
-		Escalated: false,
-		Phase:     v1alpha1.NodePhaseError,
-		Nodes:     make(map[string]v1alpha1.NodeStatus),
-	}
-	for _, signal := range sampleSensor.Spec.Signals {
-		nodeID := sampleSensor.NodeID(signal.Name)
-		sampleSensor.Status.Nodes[nodeID] = v1alpha1.NodeStatus{
-			ID:          nodeID,
-			Name:        signal.Name,
-			DisplayName: signal.Name,
-			Type:        v1alpha1.NodeTypeSignal,
-			Phase:       v1alpha1.NodePhaseError,
-			StartedAt:   metav1.Time{},
-			Message:     "failed node reason",
-		}
-	}
-
-	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
-	assert.Nil(t, err)
-	soc := newSensorOperationCtx(sensor, fake.SensorController)
-
-	// if sensor not yet escalated, make sure we escalate and update it
-	soc.operate()
-	assert.True(t, soc.s.Status.Escalated)
-	assert.True(t, soc.updated)
-
-	// second pass through, verify we don't escalate and update
-	soc.updated = false // reset this field
-	soc.operate()
-	assert.True(t, soc.s.Status.Escalated)
-	assert.False(t, soc.updated)
 }

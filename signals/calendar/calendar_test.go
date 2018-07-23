@@ -21,11 +21,9 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cronlib "github.com/robfig/cron"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestCalendarStartFailures(t *testing.T) {
+func TestCalendarListenFailures(t *testing.T) {
 	signal := v1alpha1.Signal{
 		Name: "nats-test",
 		Calendar: &v1alpha1.CalendarSignal{
@@ -33,9 +31,10 @@ func TestCalendarStartFailures(t *testing.T) {
 		},
 	}
 	cal := New()
+	done := make(chan struct{})
 
 	// test unknown signal
-	_, err := cal.Start(&signal)
+	_, err := cal.Listen(&signal, done)
 	if err == nil {
 		t.Errorf("expected a non nil error for an unknown calendar signal")
 	}
@@ -47,7 +46,7 @@ func TestCalendarStartFailures(t *testing.T) {
 			Schedule: "this is not a schedule",
 		},
 	}
-	_, err = cal.Start(&signal)
+	_, err = cal.Listen(&signal, done)
 	if err == nil {
 		t.Errorf("expected a non nil error for invalid parsing of schedule")
 	}
@@ -59,14 +58,18 @@ func TestCalendarStartFailures(t *testing.T) {
 			Interval: "this is not a schedule",
 		},
 	}
-	_, err = cal.Start(&signal)
+	_, err = cal.Listen(&signal, done)
 	if err == nil {
 		t.Errorf("expected a non nil error for invalid parsing of interval")
 	}
+
+	close(done)
 }
 
 func TestScheduleCalendar(t *testing.T) {
 	cal := New()
+	done := make(chan struct{})
+
 	signal := v1alpha1.Signal{
 		Name: "nats-test",
 		Calendar: &v1alpha1.CalendarSignal{
@@ -74,7 +77,7 @@ func TestScheduleCalendar(t *testing.T) {
 		},
 	}
 
-	events, err := cal.Start(&signal)
+	events, err := cal.Listen(&signal, done)
 	if err != nil {
 		t.Error(err)
 	}
@@ -85,10 +88,7 @@ func TestScheduleCalendar(t *testing.T) {
 		t.Errorf("expected an event but found none")
 	}
 
-	err = cal.Stop()
-	if err != nil {
-		t.Error(err)
-	}
+	close(done)
 
 	// ensure the event was correct
 	if event.Context.EventType != EventType {
@@ -98,6 +98,8 @@ func TestScheduleCalendar(t *testing.T) {
 
 func TestIntervalCalendar(t *testing.T) {
 	cal := New()
+	done := make(chan struct{})
+
 	signal := v1alpha1.Signal{
 		Name: "nats-test",
 		Calendar: &v1alpha1.CalendarSignal{
@@ -105,7 +107,7 @@ func TestIntervalCalendar(t *testing.T) {
 		},
 	}
 
-	events, err := cal.Start(&signal)
+	events, err := cal.Listen(&signal, done)
 	if err != nil {
 		t.Error(err)
 	}
@@ -116,30 +118,11 @@ func TestIntervalCalendar(t *testing.T) {
 		t.Errorf("expected an event but found none")
 	}
 
-	err = cal.Stop()
-	if err != nil {
-		t.Error(err)
-	}
+	close(done)
 
 	// ensure the event was correct
 	// ensure the event was correct
 	if event.Context.EventType != EventType {
 		t.Errorf("event context EventType\nexpected: %s\nactual: %s", EventType, event.Context.EventType)
 	}
-}
-
-func TestGetNextTime(t *testing.T) {
-	c := calendar{
-		schedule:       cronlib.ConstantDelaySchedule{Delay: time.Minute},
-		exclusionDates: []time.Time{time.Date(2018, time.May, 10, 0, 0, 0, 0, time.UTC)},
-	}
-	lastEventTime := time.Date(2018, time.May, 9, 23, 59, 0, 0, time.UTC)
-	nextEventTime := c.getNextTime(lastEventTime)
-	expectedNextEventTime := time.Date(2018, time.May, 11, 0, 0, 0, 0, time.UTC)
-	assert.Equal(t, expectedNextEventTime, nextEventTime)
-
-	lastEventTime = time.Date(2018, time.May, 9, 23, 58, 59, 0, time.UTC)
-	nextEventTime = c.getNextTime(lastEventTime)
-	expectedNextEventTime = time.Date(2018, time.May, 9, 23, 59, 59, 0, time.UTC)
-	assert.Equal(t, expectedNextEventTime, nextEventTime)
 }

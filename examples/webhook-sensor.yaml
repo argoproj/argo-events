@@ -1,18 +1,16 @@
-apiVersion: core.events/v1alpha1
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-example
-  namespace: cloud-native-scheduler
   labels:
     sensors.argoproj.io/controller-instanceid: axis
 spec:
-  repeat: true
   signals:
     - name: webhook
       webhook:
         port: 9000
-        endpoint: "/app"
-        method: "POST"
+        endpoint: /app
+        method: POST
   triggers:
     - name: done-workflow
       resource:

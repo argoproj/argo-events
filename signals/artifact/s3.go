@@ -1,16 +1,35 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package artifact
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/sdk"
 	"github.com/argoproj/argo-events/store"
 	"github.com/golang/protobuf/proto"
 	minio "github.com/minio/minio-go"
@@ -23,47 +42,77 @@ const (
 	ISO8601   = "2006-01-02T15:04:05:07Z"
 )
 
-// s3 is a plugin for an S3 artifact signal
+// Note: micro requires stateless operation so the Listen() method should not use the
+// receive struct to save or modify state.
+// Listen() methods CAN retrieve fields from the s3 struct.
 type s3 struct {
-	kubeClient     kubernetes.Interface
-	namespace      string
-	signal         *v1alpha1.Signal
-	streamSignaler shared.Signaler
+	kubeClient   kubernetes.Interface
+	namespace    string
+	streamClient sdk.SignalClient
 }
 
 // New creates a new S3 signal
-func New(streamSignaler shared.Signaler, kubeClient kubernetes.Interface, nm string) shared.ArtifactSignaler {
+func New(client sdk.SignalClient, kubeClient kubernetes.Interface, nm string) sdk.ArtifactListener {
 	return &s3{
-		streamSignaler: streamSignaler,
-		kubeClient:     kubeClient,
-		namespace:      nm,
+		streamClient: client,
+		kubeClient:   kubeClient,
+		namespace:    nm,
 	}
 }
 
-// Start the artifact signal
-func (s *s3) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
+func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
+	ctx := context.TODO()
 	streamSignal, err := extractAndCreateStreamSignal(signal)
 	if err != nil {
 		return nil, err
 	}
-	streamEvents, err := s.streamSignaler.Start(streamSignal)
+	stream, err := s.streamClient.Listen(ctx, streamSignal)
 	if err != nil {
 		return nil, err
 	}
-	events := make(chan *v1alpha1.Event)
-	go s.interceptFilterAndEnhanceEvents(events, streamEvents)
-	return events, nil
-}
 
-// Stop the artifact signal
-func (s *s3) Stop() error {
-	return s.streamSignaler.Stop()
+	// read from stream & write to streamEvents
+	streamEvents := make(chan *v1alpha1.Event)
+	go func() {
+		defer close(streamEvents)
+		for {
+			in, err := stream.Recv()
+			if err == io.EOF {
+				return
+			}
+			if err != nil {
+				log.Panicf("signal target stream received error: %s", err)
+			}
+			streamEvents <- in.Event
+		}
+	}()
+
+	events := make(chan *v1alpha1.Event)
+
+	// start stream receiver
+	go s.interceptFilterAndEnhanceEvents(signal, events, streamEvents)
+
+	// wait for stop signal
+	go func() {
+		<-done
+		close(events)
+		// TODO: should we cancel or gracefully shutdown and first send Terminate msg
+		err := stream.Send(sdk.Terminate)
+		if err != nil {
+			log.Panicf("failed to terminate stream signal: %s", err)
+		}
+		err = stream.Close()
+		if err != nil {
+			log.Panicf("failed to close stream: %s", err)
+		}
+	}()
+	return events, nil
 }
 
 // method should be invoked as a separate go routine within the artifact Start method
 // intercepts the receive-only msgs off the stream, filters them, and writes artifact events
 // to the sendCh.
-func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan *v1alpha1.Event, recvCh <-chan *v1alpha1.Event) {
+func (s *s3) interceptFilterAndEnhanceEvents(sig *v1alpha1.Signal, sendCh chan *v1alpha1.Event, recvCh <-chan *v1alpha1.Event) {
 	defer close(sendCh)
 	for streamEvent := range recvCh {
 		// todo: apply general filtering on cloudEvents
@@ -76,10 +125,10 @@ func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan *v1alpha1.Event, recvCh
 			continue
 		}
 		if notification.Err != nil {
-			event.Context.Extensions[shared.ContextExtensionErrorKey] = notification.Err.Error()
+			event.Context.Extensions[sdk.ContextExtensionErrorKey] = notification.Err.Error()
 		}
 		for _, record := range notification.Records {
-			if ok := applyFilter(&record, s.signal.Artifact); !ok {
+			if ok := applyFilter(&record, sig.Artifact.ArtifactLocation); !ok {
 				// this record failed to pass the filter so we ignore it
 				continue
 			}
@@ -99,9 +148,9 @@ func (s *s3) interceptFilterAndEnhanceEvents(sendCh chan *v1alpha1.Event, recvCh
 			event.Context.EventID = record.S3.Object.ETag
 
 			// read the actual s3 artifact to put into the event data
-			b, err := s.Read(&s.signal.Artifact.ArtifactLocation, record.S3.Object.Key)
+			b, err := s.Read(&sig.Artifact.ArtifactLocation, record.S3.Object.Key)
 			if err != nil {
-				event.Context.Extensions[shared.ContextExtensionErrorKey] = err.Error()
+				event.Context.Extensions[sdk.ContextExtensionErrorKey] = err.Error()
 			}
 			event.Data = b
 			sendCh <- event
@@ -117,6 +166,7 @@ func extractAndCreateStreamSignal(artifactSignal *v1alpha1.Signal) (*v1alpha1.Si
 	}
 	return &v1alpha1.Signal{
 		Name:        fmt.Sprintf("%s-artifact-stream", artifactSignal.Name),
+		Deadline:    artifactSignal.Deadline,
 		Stream:      &artifactSignal.Artifact.Target,
 		Constraints: artifactSignal.Constraints,
 	}, nil
@@ -127,15 +177,15 @@ func extractAndCreateStreamSignal(artifactSignal *v1alpha1.Signal) (*v1alpha1.Si
 // 1. notification bucket name must equal the S3 bucket
 // 2. notification event name must equal the signal S3 event
 // 3. notification object must pass the prefix and suffix string literals
-func applyFilter(notification *minio.NotificationEvent, signal *v1alpha1.ArtifactSignal) bool {
-	if signal.S3.Filter != nil {
-		return notification.S3.Bucket.Name == signal.S3.Bucket &&
-			notification.EventName == string(signal.S3.Event) &&
-			strings.HasPrefix(notification.S3.Object.Key, signal.S3.Filter.Prefix) &&
-			strings.HasSuffix(notification.S3.Object.Key, signal.S3.Filter.Suffix)
+func applyFilter(notification *minio.NotificationEvent, loc v1alpha1.ArtifactLocation) bool {
+	if loc.S3.Filter != nil {
+		return notification.S3.Bucket.Name == loc.S3.Bucket &&
+			notification.EventName == string(loc.S3.Event) &&
+			strings.HasPrefix(notification.S3.Object.Key, loc.S3.Filter.Prefix) &&
+			strings.HasSuffix(notification.S3.Object.Key, loc.S3.Filter.Suffix)
 	}
-	return notification.S3.Bucket.Name == signal.S3.Bucket &&
-		notification.EventName == string(signal.S3.Event)
+	return notification.S3.Bucket.Name == loc.S3.Bucket &&
+		notification.EventName == string(loc.S3.Event)
 }
 
 func getMetaTimestamp(tStr string) metav1.Time {
@@ -151,7 +201,7 @@ func (s *s3) Read(loc *v1alpha1.ArtifactLocation, key string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	client, err := store.NewMinioClient(s.signal.Artifact.S3, *creds)
+	client, err := store.NewMinioClient(loc.S3, *creds)
 	if err != nil {
 		return nil, err
 	}

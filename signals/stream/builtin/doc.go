@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package builtin contains builtin stream plugins
+// Package builtin contains builtin stream microservices
 package builtin

@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package custom contains custom user built stream plugins
+// Package custom contains custom user built stream microservices
 package custom

@@ -10,6 +10,7 @@ required = [
   "github.com/golang/protobuf/protoc-gen-go",
   "github.com/gogo/protobuf/protoc-gen-gofast",
   "github.com/gogo/protobuf/protoc-gen-gogofast",
+  "github.com/micro/protoc-gen-micro",
 ]
 
 [[constraint]]
@@ -76,9 +77,9 @@ required = [
   name = "github.com/Shopify/sarama"
   version = "1.16.0"
 
-[[constraint]]
+[[override]]
+  name = "github.com/micro/go-plugins"
   branch = "master"
-  name = "github.com/hashicorp/go-plugin"
 
 [prune]
   go-tests = true

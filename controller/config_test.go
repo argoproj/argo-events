@@ -56,6 +56,7 @@ func TestNewControllerConfigMapWatch(t *testing.T) {
 }
 
 func TestResyncConfig(t *testing.T) {
+	defer os.Unsetenv(common.EnvVarNamespace)
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
 		ConfigMapNS:   "testing",
@@ -66,6 +67,9 @@ func TestResyncConfig(t *testing.T) {
 	assert.NotNil(t, err)
 
 	os.Setenv(common.EnvVarNamespace, "testing")
+
+	// Note: need to refresh the namespace
+	common.RefreshNamespace()
 
 	// fail when the configmap does not have key 'config'
 	configMap := &corev1.ConfigMap{

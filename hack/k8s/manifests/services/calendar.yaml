@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: signal-calendar
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: calendar
+    spec:
+      serviceAccountName: argo-events-sa
+      containers:
+        - name: calendar
+          image: argoproj/calendar-signal:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MICRO_SERVER_ADDRESS
+              value: 0.0.0.0:8080
+            - name: MICRO_BROKER_ADDRESS
+              value: 0.0.0.0:10001
+          ports:
+          - containerPort: 8080
+            name: micro-port
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calendar
+  labels:
+    app: calendar
+spec:
+  ports:
+  - name: micro-port
+    port: 8080
+  selector:
+    app: calendar

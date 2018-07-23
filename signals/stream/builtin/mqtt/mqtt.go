@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package mqtt
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/shared"
+	"github.com/argoproj/argo-events/sdk"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
-	plugin "github.com/hashicorp/go-plugin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -33,92 +33,60 @@ const (
 	EventType = "mqtt.github.io.msg"
 )
 
-type mqtt struct {
-	client MQTTlib.Client
-	stop   chan struct{}
-	msgCh  chan MQTTlib.Message
+// Note: micro requires stateless operation so the Listen() method should not use the
+// receive struct to save or modify state.
+type mqtt struct{}
 
-	//attribute fields
-	topic string
+// New creates a new mqtt listener
+func New() sdk.Listener {
+	return new(mqtt)
 }
 
-// New creates a new mqtt signaler
-func New() shared.Signaler {
-	return &mqtt{
-		msgCh: make(chan MQTTlib.Message),
-		stop:  make(chan struct{}),
-	}
-}
-
-func (m *mqtt) Start(signal *v1alpha1.Signal) (<-chan *v1alpha1.Event, error) {
+func (*mqtt) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
 	// parse out the attributes
-	var ok bool
-	m.topic, ok = signal.Stream.Attributes[topicKey]
+	topic, ok := signal.Stream.Attributes[topicKey]
 	if !ok {
-		return nil, shared.ErrMissingRequiredAttribute
+		return nil, sdk.ErrMissingRequiredAttribute
+	}
+
+	events := make(chan *v1alpha1.Event)
+
+	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
+		event := &v1alpha1.Event{
+			Context: v1alpha1.EventContext{
+				EventID:            strconv.FormatUint(uint64(msg.MessageID()), 10),
+				EventType:          EventType,
+				CloudEventsVersion: sdk.CloudEventsVersion,
+				EventTime:          metav1.Time{Time: time.Now().UTC()},
+				Extensions:         make(map[string]string),
+			},
+			Data: msg.Payload(),
+		}
+		log.Printf("signal '%s' received msg", signal.Name)
+		events <- event
 	}
 
 	opts := MQTTlib.NewClientOptions().AddBroker(signal.Stream.URL).SetClientID(signal.Name)
-	m.client = MQTTlib.NewClient(opts)
-	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
-		return nil, fmt.Errorf("failed to connect to mqtt client. cause: %s", token.Error())
+	client := MQTTlib.NewClient(opts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		return nil, fmt.Errorf("failed to connect to client: %s", token.Error())
 	}
 
-	// subscribe to the topic
-	if token := m.client.Subscribe(m.topic, 0, m.handleMsg); token.Wait() && token.Error() != nil {
-		return nil, fmt.Errorf("failed to subscribe to mqtt topic. cause: %s", token.Error())
+	if token := client.Subscribe(topic, 0, handler); token.Wait() && token.Error() != nil {
+		return nil, fmt.Errorf("failed to subscribe to topic: %s", token.Error())
 	}
-	events := make(chan *v1alpha1.Event)
-	go m.listen(events)
-	return events, nil
-}
 
-func (m *mqtt) Stop() error {
-	defer close(m.msgCh)
-	m.stop <- struct{}{}
-	if token := m.client.Unsubscribe(m.topic); token.Wait() && token.Error() != nil {
-		return fmt.Errorf("failed to unsubscribe from mqtt topic. cause: %s", token.Error())
-	}
-	m.client.Disconnect(0)
-	return nil
-}
-
-// callback message handler passes the message to the mqtt message channel
-func (m *mqtt) handleMsg(client MQTTlib.Client, message MQTTlib.Message) {
-	if !message.Duplicate() {
-		m.msgCh <- message
-	}
-}
-
-func (m *mqtt) listen(events chan *v1alpha1.Event) {
-	defer close(events)
-	for {
-		select {
-		case msg := <-m.msgCh:
-			event := &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
-					EventID:            strconv.FormatUint(uint64(msg.MessageID()), 16),
-					EventType:          EventType,
-					CloudEventsVersion: shared.CloudEventsVersion,
-					EventTime:          metav1.Time{Time: time.Now().UTC()},
-					Extensions:         make(map[string]string),
-				},
-				Data: msg.Payload(),
-			}
-			events <- event
-		case <-m.stop:
-			return
+	// wait for done signal
+	go func() {
+		defer close(events)
+		<-done
+		if token := client.Unsubscribe(topic); token.Wait() && token.Error() != nil {
+			log.Printf("failed to unsubscribe from topic: %s", token.Error())
 		}
-	}
-}
+		client.Disconnect(0)
+		log.Printf("shut down signal '%s'", signal.Name)
+	}()
 
-func main() {
-	mqtt := New()
-	plugin.Serve(&plugin.ServeConfig{
-		HandshakeConfig: shared.Handshake,
-		Plugins: map[string]plugin.Plugin{
-			shared.SignalPluginName: shared.NewPlugin(mqtt),
-		},
-		GRPCServer: plugin.DefaultGRPCServer,
-	})
+	log.Printf("signal '%s' listening for mqtt msgs on topic [%s]...", signal.Name, topic)
+	return events, nil
 }
