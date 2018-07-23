@@ -20,7 +20,6 @@ Argo Events is an open source event-based dependency manager for Kubernetes. The
 Argo Events is a Kubernetes CRD which can manage dependencies using kubectl commands.
 - [Learn about signals](./docs/signal-guide.md)
 - [Learn about triggers](./docs/trigger-guide.md)
-- [Review Sensor API](./docs/sensor-api.md)
 - [Getting started](./docs/quickstart.md)
 - [Want to contribute?](./CONTRIBUTING.md)
 - See where the project is headed in the [roadmap](./ROADMAP.md)
