@@ -49,8 +49,8 @@ func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1al
 			secretKey: secretKey,
 		}, nil
 	}
-	// this should never happen
-	return nil, fmt.Errorf("artifact is not an S3 artifact")
+
+	return nil, nil
 }
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
