@@ -40,10 +40,11 @@ func TestGetCredentials(t *testing.T) {
 	_, err := fakeClient.CoreV1().Secrets("testing").Create(mySecretCredentials)
 	assert.Nil(t, err)
 
-	// fail for an unknown artifact type
+	// creds should be nil for unknown artifact type
 	unknownArtifact := &v1alpha1.ArtifactLocation{}
-	_, err = GetCredentials(fakeClient, "testing", unknownArtifact)
-	assert.NotNil(t, err)
+	creds, err := GetCredentials(fakeClient, "testing", unknownArtifact)
+	assert.Nil(t, creds)
+	assert.Nil(t, err)
 
 	// succeed for S3 artifact type
 	s3Artifact := &v1alpha1.ArtifactLocation{
@@ -60,7 +61,7 @@ func TestGetCredentials(t *testing.T) {
 			},
 		},
 	}
-	creds, err := GetCredentials(fakeClient, "testing", s3Artifact)
+	creds, err = GetCredentials(fakeClient, "testing", s3Artifact)
 	assert.Nil(t, err)
 	assert.NotNil(t, creds)
 	assert.Equal(t, "token", creds.accessKey)

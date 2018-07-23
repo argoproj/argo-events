@@ -379,7 +379,8 @@ type URI struct {
 
 // ArtifactLocation describes the location for an external artifact
 type ArtifactLocation struct {
-	S3 *S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	S3     *S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	Inline string      `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 }
 
 // S3Artifact contains information about an artifact in S3
