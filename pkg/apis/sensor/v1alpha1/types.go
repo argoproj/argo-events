@@ -120,8 +120,8 @@ type Signal struct {
 	// Webhook defines a HTTP notification dependency
 	Webhook *WebhookSignal `json:"webhook,omitempty" protobuf:"bytes,7,opt,name=webhook"`
 
-	// Constraints and rules governing tolerations of success and overrides
-	Constraints SignalConstraints `json:"constraints,omitempty" protobuf:"bytes,8,opt,name=constraints"`
+	// Filters and rules governing tolerations of success and constraints on the context and data of an event
+	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,8,opt,name=filters"`
 }
 
 // ArtifactSignal describes an external object dependency
@@ -165,16 +165,52 @@ type ResourceSignal struct {
 	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 }
 
-// SignalConstraints defines constraints for a dependent signal.
-type SignalConstraints struct {
-	// Time constraints on the signal
-	Time TimeConstraints `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
+// SignalFilter defines filters and constraints for a signal.
+type SignalFilter struct {
+	// Time filter on the signal
+	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
+
+	// Context filter constraints
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,2,opt,name=context"`
+
+	// Data filter constraints
+	Data []*DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 }
 
-// TimeConstraints describes constraints in time
-type TimeConstraints struct {
+// TimeFilter describes a window in time
+type TimeFilter struct {
 	Start v1.Time `json:"start" protobuf:"bytes,1,opt,name=start"`
 	Stop  v1.Time `json:"stop" protobuf:"bytes,2,opt,name=stop"`
+}
+
+// JSONType contains the supported JSON types for data filtering
+type JSONType string
+
+// the various supported JSONTypes
+const (
+	JSONTypeBool   JSONType = "bool"
+	JSONTypeNumber JSONType = "number"
+	JSONTypeString JSONType = "string"
+)
+
+// DataFilter describes constraints and filters for event data
+// Regular Expressions are purposefully not a feature as they are overkill for our uses here
+// See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
+type DataFilter struct {
+	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
+
+	// Type contains the JSON type of the data
+	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type"`
+
+	// Value is the expected string value for this key
+	// Booleans are pased using strconv.ParseBool()
+	// Numbers are parsed using as float64 using strconv.ParseFloat()
+	// Strings are taken as is
+	// Nils this value is ignored
+	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent

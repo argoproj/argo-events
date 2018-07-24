@@ -1,3 +1,3 @@
-FROM alpine:3.7
+FROM scratch
 COPY dist/sensor-controller /
 CMD [ "/sensor-controller" ]

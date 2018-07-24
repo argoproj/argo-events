@@ -61,6 +61,26 @@ message CalendarSignal {
   repeated string recurrence = 3;
 }
 
+// DataFilter describes constraints and filters for event data
+// Regular Expressions are purposefully not a feature as they are overkill for our uses here
+// See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
+message DataFilter {
+  // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+  // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+  optional string path = 1;
+
+  // Type contains the JSON type of the data
+  optional string type = 2;
+
+  // Value is the expected string value for this key
+  // Booleans are pased using strconv.ParseBool()
+  // Numbers are parsed using as float64 using strconv.ParseFloat()
+  // Strings are taken as is
+  // Nils this value is ignored
+  optional string value = 3;
+}
+
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
 // NOTE: this functionality is currently experimental, but we believe serves as an
 // important future enhancement around handling lifecycle error conditions of a sensor.
@@ -338,14 +358,20 @@ message Signal {
   // Webhook defines a HTTP notification dependency
   optional WebhookSignal webhook = 7;
 
-  // Constraints and rules governing tolerations of success and overrides
-  optional SignalConstraints constraints = 8;
+  // Filters and rules governing tolerations of success and constraints on the context and data of an event
+  optional SignalFilter filters = 8;
 }
 
-// SignalConstraints defines constraints for a dependent signal.
-message SignalConstraints {
-  // Time constraints on the signal
-  optional TimeConstraints time = 1;
+// SignalFilter defines filters and constraints for a signal.
+message SignalFilter {
+  // Time filter on the signal
+  optional TimeFilter time = 1;
+
+  // Context filter constraints
+  optional EventContext context = 2;
+
+  // Data filter constraints
+  repeated DataFilter data = 3;
 }
 
 // Stream describes a queue stream resource
@@ -360,8 +386,8 @@ message Stream {
   map<string, string> attributes = 3;
 }
 
-// TimeConstraints describes constraints in time
-message TimeConstraints {
+// TimeFilter describes a window in time
+message TimeFilter {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time start = 1;
 
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time stop = 2;

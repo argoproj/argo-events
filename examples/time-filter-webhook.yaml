@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-example
+  labels:
+    sensors.argoproj.io/controller-instanceid: axis
+spec:
+  signals:
+    - name: webhook
+      webhook:
+        endpoint: /app
+        method: POST
+      filters:
+        time:
+          start: "2016-05-10T15:04:05Z07:00"
+          stop: "2020-01-02T15:04:05Z07:00"
+  triggers:
+    - name: done-workflow
+      resource:
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        artifactLocation:
+          s3:
+            bucket: workflows
+            key: hello-world.yaml
+            endpoint: minio-service.default:9000
+            insecure: true
+            accessKey:
+              key: accesskey
+              name: artifacts-minio
+            secretKey:
+              key: secretkey
+              name: artifacts-minio
