@@ -17,12 +17,13 @@ limitations under the License.
 package controller
 
 import (
+	"context"
+	"fmt"
 	"strings"
-	"sync"
+	"time"
 
 	"github.com/argoproj/argo-events/sdk"
 	"github.com/argoproj/argo-events/shared"
-	"go.uber.org/zap"
 )
 
 // SignalManager helps manage the various signals microservices
@@ -30,34 +31,40 @@ import (
 // this can be accomplished through a health-checking routine
 type SignalManager struct {
 	microClient *shared.MicroSignalClient
-	sync.Mutex
-	clients map[string]sdk.SignalClient
-	log     *zap.SugaredLogger
 }
 
 // NewSignalManager creates a new SignalManager
-func NewSignalManager(log *zap.SugaredLogger) (*SignalManager, error) {
-	mgr := SignalManager{
-		microClient: shared.NewMicroSignalClient(),
-		clients:     make(map[string]sdk.SignalClient),
-		log:         log,
+// This produces an error on 2 conditions:
+// 1. the microClient fails in listing services
+// 2. there are no registered signal services
+func NewSignalManager() (*SignalManager, error) {
+	c := shared.NewMicroSignalClient()
+	services, err := c.DiscoverSignals()
+	if err != nil {
+		return nil, err
 	}
-	// TODO: add to cache of the builtin signal services
-	return &mgr, nil
+	if len(services) == 0 {
+		return nil, fmt.Errorf("signal manager found 0 registered signals! you must deploy a registered Micro signal service. see: https://github.com/argoproj/argo-events/blob/master/docs/quickstart.md for getting started")
+	}
+	return &SignalManager{microClient: c}, nil
 }
 
 // Dispense the signal client with the given name
-// NOTE: assumes the name matches the service name
+// 3 conditions apply which generate errors
+// 1. the microClient fails in listing services
+// 2. the name is not a discoverable signal service
+// 3. the service client ping fails
 func (pm *SignalManager) Dispense(name string) (sdk.SignalClient, error) {
-	pm.Lock()
-	defer pm.Unlock()
+	services, err := pm.microClient.DiscoverSignals()
+	if err != nil {
+		return nil, err
+	}
 	lowercase := strings.ToLower(name)
-	//client, ok := pm.clients[lowercase]
-	//if !ok {
+	if !contains(services, lowercase) {
+		return nil, fmt.Errorf("the signal '%s' does not exist with the signal universe. please choose one from: %s", lowercase, services)
+	}
 	c := pm.microClient.NewSignalService(lowercase)
-	pm.log.Debugf("Dispensed '%s' signal service", lowercase)
-	pm.clients[name] = c
-	return c, nil
-	//}
-	//return client, nil
+	ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second)
+	defer cancel()
+	return c, c.Ping(ctx)
 }

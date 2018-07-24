@@ -38,3 +38,19 @@ func NewMicroSignalClient() *MicroSignalClient {
 func (m *MicroSignalClient) NewSignalService(name string) sdk.SignalClient {
 	return sdk.NewMicroSignalClient(name, m.client)
 }
+
+// DiscoverSignals returns all the registered signal microservices
+// TODO: add svc Debug.Health check
+func (m *MicroSignalClient) DiscoverSignals() ([]string, error) {
+	svcs, err := m.client.Options().Registry.ListServices()
+	if err != nil {
+		return nil, err
+	}
+	svcNames := make([]string, 0)
+	for _, svc := range svcs {
+		if val := svc.Metadata[sdk.MetadataKey]; val == sdk.MetadataValue {
+			svcNames = append(svcNames, svc.Name)
+		}
+	}
+	return svcNames, nil
+}

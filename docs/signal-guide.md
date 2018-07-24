@@ -1,51 +1,38 @@
 # Signal Guide
-Signals are the sensor's dependencies. To take advantage of the certain signal sources, you can follow this guide to help you getting started installing these other services on your kubernetes cluster. If you need to reference the underlying sensor api, please use the [api-guide](sensor-api.md).
+Conceptually, signals are the sensor's dependencies. In implementation, signals are separate microservice deployments that expose a `Listen()` gRPC API. To take advantage of the certain signal sources, you can follow this guide to help you get started installing these other services on your kubernetes cluster as well as the compatible microservices to transform events from these services into actionable signals.
 
 ## What is a signal?
-A `signal` is a dependency, namely:
-- A message on a queue
-- An object created in S3
-- A repeated calendar schedule
-- A Kubernetes resource
-- An HTTP notification
+A signal is a dependency, namely these come in 5 types:
+- `Stream` - messages on a queue/topic
+- `Artifact` - S3 Bucket Notifications
+- `Calendar` - date/time schedules or intervals
+- `Resource` - Kubernetes resources
+- `Webhook` - HTTP webhook notifications (Git, JIRA, Trello etc.)
 
-### Prerequisites
-You need a working Kubernetes cluster at version >= 1.9. You will also need to install the `sensor-controller` into the cluster. This controller is is responsible for managing the `sensor` resources.
 In order to take advantage of the various signal types, you may need to install compatible message platforms (e.g. amqp, mmqp, NATS, etc..) and s3 api compatible object storage servers (e.g. Minio, Rook, CEPH, NetApp). See the  [artifact guide](artifact-guide.md) for installing object stores.
 
 ## Sensor Controller
 The `sensor-controller` is responsible for managing the `Sensor` resources, listening on sensor signals, and executing sensor triggers.
-The following types of signals are supported:
- - Artifact signals which can include things like S3 Bucket Notifications etc..
- - Stream signals which subscribe to messages on a queue or a topic
- - Calendar signals which contain time constraints and calendar events
- - Resource signals watch changes to Kubernetes resources
- - Webhook signals which can include things like Git, JIRA, Trello etc. webhook notifications
-
- The following types of triggers are supported:
- - Resource triggers produce Kubernetes objects
- - Message triggers produce messages on a streaming platform
 
 ## Signal Deployments
-Signals are configured as separate deployments to the main sensor controller. Signals are registered as stateless [micro](https://github.com/micro/go-micro) "microservices". Users can specify in the deployment spec for each signal how many replica pods to run for the particular sensor in order to increase event bandwidth available and also make signals more resilient. For help in building and running these see the [Signals](../signals/README.md) README.
+Signals are configured as separate deployments to the main sensor controller. Signals are registered as stateless [micro](https://github.com/micro/go-micro) "microservices". Users can specify in the deployment spec for each signal how many replica pods to run for the particular sensor in order to increase event bandwidth available and also make signals more resilient.
 
-## Types of Signals
+## Types of Signals & their deployments
 
-### Calendar
-Time-based signals can include signals based on a [cron]() schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event. Eventually, we hope to support a calendar-plugin or interface where users can configure special handling calendar/business logic.
+### Calendars
+Time-based signals can include signals based on a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar signals currently support a `recurrence` field in which to specify special exclusion dates for which this signal will not produce an event.
 
-### Webhook
-Webhook offers a basic HTTP server. User can provide the server port and register the REST API endpoint.
-See Request Methods in RFC7231 to define the HTTP REST endpoint.  
+### Webhooks
+Webhook signals exposes a basic HTTP server endpoint. Users can register a REST API endpoint. See Request Methods in RFC7231 to define the HTTP REST endpoint.
 
 ### Kubernetes Resources
-Supports watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy.
+Resource signals support watching Kubernetes resources. Users can specify `group`, `version`, `kind`, and filters including prefix of the object name, labels, annotations, and createdBy time.
 
-### S3
-Supports S3 artifact signals in the form of `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
+### Artifacts
+Artifact signals support S3 `bucket-notifications` via [Minio](https://docs.minio.io/docs/minio-bucket-notification-guide). Note that a supported notification target must be running, exposed, and configured in the Minio server. For more information, please refer to the [artifact guide](artifact-guide.md).
 
-### Message Streams / Brokers
-Supports a generic specification for messages received on a queue and/or though messaging server. The following are the `builtin` supported stream signals. Users can build their own signals by adding implementations to the `custom` package.
+### Streams
+Stream signals contain a generic specification for messages received on a queue and/or though messaging server. The following are the `builtin` supported stream signals. Users can build their own signals by adding implementations to the [custom](../signals/stream/custom/doc.go) package.
 
 #### NATS
 [Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for signals (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.

@@ -19,4 +19,3 @@ Argo Events is an open source event-based dependency manager for Kubernetes. The
 ## Learn More
 - [Signals](signal-guide.md)
 - [Triggers](trigger-guide.md)
-- [Sensor API](sensor-api.md)

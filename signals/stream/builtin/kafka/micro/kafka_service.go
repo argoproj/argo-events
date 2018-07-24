@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	svc := k8s.NewService(micro.Name("kafka"))
+	svc := k8s.NewService(micro.Name("kafka"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
 	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(kafka.New()))

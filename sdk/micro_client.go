@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	google_protobuf "github.com/golang/protobuf/ptypes/empty"
 	client "github.com/micro/go-micro/client"
 	context "golang.org/x/net/context"
 )
@@ -18,6 +19,12 @@ var Terminate = &SignalContext{Done: true}
 // NewMicroSignalClient creates a Micro compatible SignalClient from a micro.Client
 func NewMicroSignalClient(name string, c client.Client) SignalClient {
 	return &microSignalClient{impl: NewSignalService(name, c)}
+}
+
+// Ping the signal service
+func (m *microSignalClient) Ping(ctx context.Context) error {
+	_, err := m.impl.Ping(ctx, &google_protobuf.Empty{})
+	return err
 }
 
 // Listen to the signal

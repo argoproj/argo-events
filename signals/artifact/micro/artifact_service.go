@@ -28,7 +28,7 @@ import (
 )
 
 func main() {
-	svc := k8s.NewService(micro.Name("artifact"))
+	svc := k8s.NewService(micro.Name("artifact"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
 	// kubernetes configuration
