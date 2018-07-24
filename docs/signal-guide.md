@@ -1,5 +1,5 @@
 # Signal Guide
-Signals are the sensor's dependencies. To take advantage of the certain signal sources, you can follow this guide to help you getting started installing these other services on your kubernetes cluster. If you need to reference the underlying sensor api, please use the [api-guide](sensor-api.md).
+Signals are the sensor's dependencies. To take advantage of the certain signal sources, you can follow this guide to help you getting started installing these other services on your kubernetes cluster.
 
 ## What is a signal?
 A `signal` is a dependency, namely:
@@ -18,7 +18,7 @@ The `sensor-controller` is responsible for managing the `Sensor` resources, list
 The following types of signals are supported:
  - Artifact signals which can include things like S3 Bucket Notifications etc..
  - Stream signals which subscribe to messages on a queue or a topic
- - Calendar signals which contain time constraints and calendar events
+ - Calendar signals which contain time schedules and calendar events
  - Resource signals watch changes to Kubernetes resources
  - Webhook signals which can include things like Git, JIRA, Trello etc. webhook notifications
 

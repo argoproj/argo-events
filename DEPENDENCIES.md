@@ -18,3 +18,4 @@
 |     nats-io/gnatsd           |     Apache-2.0          |
 |     Shopify/sarama           |     MIT                 |
 |     stretchr/testify         |     https://github.com/stretchr/testify/blob/master/LICENSE |
+|     tidwall/gjson            |     MIT                 |
