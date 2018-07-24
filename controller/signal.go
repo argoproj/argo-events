@@ -130,11 +130,21 @@ func (soc *sOperationCtx) watchSignal(signal *v1alpha1.Signal) error {
 		return err
 	}
 	nodeID := soc.s.NodeID(signal.Name)
+
+	streamCtx := streamCtx{
+		ctx:    ctx,
+		cancel: cancel,
+		sensor: soc.s.Name,
+		nodeID: nodeID,
+		signal: signal,
+		stream: stream,
+	}
+
 	soc.controller.signalMu.Lock()
 	soc.controller.signalStreams[nodeID] = stream
 	soc.controller.signalMu.Unlock()
 
-	go soc.controller.listenOnStream(soc.s.Name, signal.Name, nodeID, stream, cancel)
+	go soc.controller.listenOnStream(&streamCtx)
 	return nil
 }
 
@@ -159,66 +169,86 @@ func (c *SensorController) stopSignal(nodeID string) error {
 	return nil
 }
 
+// streamCtx contains the relevant context data for processing the signal event stream
+type streamCtx struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+	sensor string
+	nodeID string
+	signal *v1alpha1.Signal
+	stream sdk.SignalService_ListenService
+}
+
 // listens for events on the event stream. meant to be run as a separate goroutine
 // this will terminate once the stream receives an EOF indicating it has completed or it encounters a stream error.
 // NOTE: this is a method on the controller
-func (c *SensorController) listenOnStream(sensor, signal, nodeID string, stream sdk.SignalService_ListenService, cancel context.CancelFunc) {
+func (c *SensorController) listenOnStream(streamCtx *streamCtx) {
 	// TODO: possible context leak if we don't utilize cancel
 	//defer cancel()
 	sensors := c.sensorClientset.ArgoprojV1alpha1().Sensors(c.Config.Namespace)
 	for {
-		in, streamErr := stream.Recv()
+		in, streamErr := streamCtx.stream.Recv()
 		if streamErr == io.EOF {
 			return
 		}
 
 		// retrieve the sensor & node as this will be needed to update accordingly
-		s, err := sensors.Get(sensor, metav1.GetOptions{})
+		s, err := sensors.Get(streamCtx.sensor, metav1.GetOptions{})
 		if err != nil {
 			// we can get here if the sensor was deleted and the stream was not closed
 			// we should attempt to log a warning and stop & close the signal stream
 			// TODO: why call stopSignal() when we have access to the stream within this func?
-			c.log.Warnf("sensor '%s' cannot be found due to: %s. Stopping signal '%s' event stream...", sensor, err, signal)
-			err := c.stopSignal(nodeID)
+			c.log.Warnf("Event Stream (%s/%s) Error: %s. Terminating event stream...", streamCtx.sensor, streamCtx.signal.Name, err)
+			err := c.stopSignal(streamCtx.nodeID)
 			if err != nil {
-				c.log.Panicf("failed to stop signal stream '%s': %s", nodeID, err)
+				c.log.Panicf("failed to stop signal stream '%s': %s", streamCtx.nodeID, err)
 			}
 		}
 		phase := s.Status.Phase
 		msg := s.Status.Message
-		node, ok := s.Status.Nodes[nodeID]
+		node, ok := s.Status.Nodes[streamCtx.nodeID]
 		if !ok {
 			// TODO: should we re-initialize this node?
-			c.log.Panicf("'%s' node is missing from sensor's nodes", nodeID)
+			c.log.Panicf("Event Stream (%s/%s) Fatal: '%s' node is missing from sensor's nodes", streamCtx.sensor, streamCtx.signal.Name, streamCtx.nodeID)
 		}
 
 		if streamErr != nil {
-			c.log.Infof("ERROR: sensor '%s' signal '%s' stream failed: %s", sensor, signal, streamErr)
+			c.log.Infof("Event Stream (%s/%s) Error: removing & terminating stream due to: %s", streamCtx.sensor, streamCtx.signal.Name, streamErr)
 			// error received from the stream
 			// remove the stream from the signalStreams map
 			c.signalMu.Lock()
-			c.signalStreams[nodeID] = nil
-			delete(c.signalStreams, nodeID)
+			c.signalStreams[streamCtx.nodeID] = nil
+			delete(c.signalStreams, streamCtx.nodeID)
 			c.signalMu.Unlock()
 
 			// mark the sensor & node as error phase
 			phase = v1alpha1.NodePhaseError
-			msg = fmt.Sprintf("signal '%s' encountered stream err: %s", signal, streamErr)
+			msg = fmt.Sprintf("Event Stream encountered err: %s", streamErr)
 			node.Phase = v1alpha1.NodePhaseError
 			node.Message = streamErr.Error()
 		} else {
-			c.log.Debugf("sensor '%s' received event for signal '%s'", sensor, signal)
-			node.LatestEvent = &v1alpha1.EventWrapper{Event: *in.Event}
+			ok, err := filterEvent(streamCtx.signal.Filters, in.Event)
+			if err != nil {
+				c.log.Infof("Event Stream (%s/%s) Msg: (Action:IGNORED) - Failed to filter event: %s", streamCtx.sensor, streamCtx.signal.Name, err)
+				continue
+			}
+			if ok {
+				c.log.Debugf("Event Stream (%s/%s) Msg: (Action:ACCEPTED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
+				node.LatestEvent = &v1alpha1.EventWrapper{Event: *in.Event}
+			} else {
+				c.log.Debugf("Event Stream (%s/%s) Msg: (Action:FILTERED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
+				continue
+			}
 		}
 
 		// TODO: perform a Patch here instead as the sensor could become stale
 		// and this exponential backoff is slow
 		err = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-			s, err := sensors.Get(sensor, metav1.GetOptions{})
+			s, err := sensors.Get(streamCtx.sensor, metav1.GetOptions{})
 			if err != nil {
 				return false, err
 			}
-			s.Status.Nodes[nodeID] = node
+			s.Status.Nodes[streamCtx.nodeID] = node
 			s.Status.Phase = phase
 			s.Status.Message = msg
 			_, err = sensors.Update(s)
@@ -231,7 +261,7 @@ func (c *SensorController) listenOnStream(sensor, signal, nodeID string, stream 
 			return true, nil
 		})
 		if err != nil {
-			c.log.Panicf("failed to update sensor: %s", err)
+			c.log.Panicf("Event Stream (%s/%s) Update Resource Failed: %s", streamCtx.sensor, streamCtx.signal.Name, err)
 		}
 
 		// finally check if there was a streamErr, we must return

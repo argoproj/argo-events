@@ -575,6 +575,18 @@
   version = "v1.2.2"
 
 [[projects]]
+  name = "github.com/tidwall/gjson"
+  packages = ["."]
+  revision = "f123b340873a0084cb27267eddd8ff615115fbff"
+  version = "v1.1.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/tidwall/match"
+  packages = ["."]
+  revision = "1731857f09b1f38450e2c12409748407822dc6be"
+
+[[projects]]
   name = "go.uber.org/atomic"
   packages = ["."]
   revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
@@ -963,6 +975,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "444489fe54d843be31d012830ae9c72c25e0c116de569adddd5e7287368d6170"
+  inputs-digest = "52356c07a7011f2d35e4e3ec2a64a04043afa82ba82df4ebc3617b40ff1543f8"
   solver-name = "gps-cdcl"
   solver-version = 1

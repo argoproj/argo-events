@@ -165,10 +165,10 @@ func extractAndCreateStreamSignal(artifactSignal *v1alpha1.Signal) (*v1alpha1.Si
 		return nil, errors.New("undefined artifact signal")
 	}
 	return &v1alpha1.Signal{
-		Name:        fmt.Sprintf("%s-artifact-stream", artifactSignal.Name),
-		Deadline:    artifactSignal.Deadline,
-		Stream:      &artifactSignal.Artifact.Target,
-		Constraints: artifactSignal.Constraints,
+		Name:     fmt.Sprintf("%s-artifact-stream", artifactSignal.Name),
+		Deadline: artifactSignal.Deadline,
+		Stream:   &artifactSignal.Artifact.Target,
+		Filters:  artifactSignal.Filters,
 	}, nil
 }
 
