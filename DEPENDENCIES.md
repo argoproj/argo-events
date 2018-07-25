@@ -19,3 +19,4 @@
 |     Shopify/sarama           |     MIT                 |
 |     stretchr/testify         |     https://github.com/stretchr/testify/blob/master/LICENSE |
 |     tidwall/gjson            |     MIT                 |
+|     tidwall/sjson            |     MIT                 |
