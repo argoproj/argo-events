@@ -32,7 +32,8 @@ import (
 )
 
 const (
-	EventType = "Webhook"
+	EventType            string = "Webhook"
+	HeaderKeyContentType string = "Content-Type"
 )
 
 // Note: micro requires stateless operation so the Listen() method should not use the
@@ -69,7 +70,8 @@ func (*webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v
 						Scheme: req.RequestURI,
 						Host:   req.Host,
 					},
-					EventTime: metav1.Time{Time: time.Now().UTC()},
+					ContentType: req.Header.Get(HeaderKeyContentType),
+					EventTime:   metav1.Time{Time: time.Now().UTC()},
 				},
 				Data: payload,
 			}

@@ -57,6 +57,9 @@ func TestGetArtifactReader(t *testing.T) {
 func TestDecodeAndUnstructure(t *testing.T) {
 	t.Run("sensor", decodeSensor)
 	t.Run("workflow", decodeWorkflow)
+	// Note that since #16 - Restrict ResourceObject creation via RBAC roles
+	// decoding&converting to unstructure objects should pass fine for any valid objects
+	// the store no longer should control restrictions around object creation
 	t.Run("unsupported", decodeUnsupported)
 	t.Run("unknown", decodeUnknown)
 }
@@ -188,7 +191,7 @@ func decodeUnsupported(t *testing.T) {
 		Kind:    "Job",
 	}
 	_, err := decodeAndUnstructure([]byte(unsupportedType), gvk)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 var unsupportedType = `
@@ -225,5 +228,5 @@ func decodeUnknown(t *testing.T) {
 		Kind:    "What??",
 	}
 	_, err := decodeAndUnstructure([]byte(unsupportedType), gvk)
-	assert.NotNil(t, err)
+	assert.Nil(t, err, "expected nil error but got", err)
 }

@@ -28,7 +28,7 @@ import "k8s.io/apimachinery/pkg/util/intstr/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1alpha1";
 
-// ArtifactLocation describes the location for an external artifact
+// ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
   optional S3Artifact s3 = 1;
 
@@ -65,6 +65,7 @@ message CalendarSignal {
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
 message DataFilter {
+  // Path is the JSONPath of the event's (JSON decoded) data key
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
   // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
@@ -213,19 +214,51 @@ message ResourceFilter {
 // ResourceObject is the resource object to create on kubernetes
 message ResourceObject {
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional GroupVersionKind groupVersionKind = 4;
+  optional GroupVersionKind groupVersionKind = 5;
 
   // Namespace in which to create this object
   // optional
+  // defaults to the service account namespace
   optional string namespace = 1;
 
-  // Location in which the K8 resource file(s) are stored.
-  // If omitted, will attempt to use the default artifact location configured in the controller.
-  optional ArtifactLocation artifactLocation = 2;
+  // Source of the K8 resource file(s)
+  optional ArtifactLocation source = 6;
 
   // Map of string keys and values that can be used to organize and categorize
   // (scope and select) objects. This overrides any labels in the unstructured object with the same key.
   map<string, string> labels = 3;
+
+  // Parameters is the list of resource parameters to pass in the object
+  repeated ResourceParameter parameters = 4;
+}
+
+// ResourceParameter indicates a passed parameter to a service template
+message ResourceParameter {
+  // Src contains a source reference to the value of the resource parameter from a signal event
+  optional ResourceParameterSource src = 1;
+
+  // Dest is the JSONPath of a resource key.
+  // A path is a series of keys separated by a dot. The colon character can be escaped with '.'
+  // The -1 key can be used to append a value to an existing array.
+  // See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.
+  optional string dest = 2;
+}
+
+// ResourceParameterSource defines the source for a resource parameter from a signal event
+message ResourceParameterSource {
+  // Signal is the name of the signal for which to retrieve this event
+  optional string signal = 1;
+
+  // Path is the JSONPath of the event's (JSON decoded) data key
+  // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+  // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+  optional string path = 2;
+
+  // Value is the default literal value to use for this parameter source
+  // This is only used if the path is invalid.
+  // If the path is invalid and this is not defined, this param source will produce an error.
+  optional string value = 3;
 }
 
 // ResourceSignal refers to a dependency on a k8s resource.

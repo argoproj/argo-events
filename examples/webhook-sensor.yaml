@@ -9,6 +9,7 @@ spec:
     - name: webhook
       webhook:
         endpoint: /app
+        port: 7070
         method: POST
   triggers:
     - name: hello-world-workflow-trigger
@@ -17,7 +18,7 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        artifactLocation:
+        source:
           inline: |
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow

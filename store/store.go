@@ -68,19 +68,9 @@ func decodeAndUnstructure(b []byte, gvk ss_v1alpha1.GroupVersionKind) (*unstruct
 		Kind:    gvk.Kind,
 	}
 
-	object, _, err := scheme.Codecs.UniversalDeserializer().Decode(b, gvk1, nil)
+	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(b, gvk1, nil)
 	if err != nil {
 		return nil, err
-	}
-
-	var obj interface{}
-	switch object.GetObjectKind().GroupVersionKind() {
-	case ss_v1alpha1.SchemaGroupVersionKind:
-		obj = object.(*ss_v1alpha1.Sensor)
-	case wf_v1alpha1.SchemaGroupVersionKind:
-		obj = object.(*wf_v1alpha1.Workflow)
-	default:
-		return nil, fmt.Errorf("unsupported object kind %s", object.GetObjectKind())
 	}
 
 	uObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)

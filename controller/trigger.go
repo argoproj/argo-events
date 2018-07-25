@@ -63,11 +63,11 @@ func (soc *sOperationCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		}
 	}
 	if trigger.Resource != nil {
-		creds, err := store.GetCredentials(soc.controller.kubeClientset, soc.controller.Config.Namespace, trigger.Resource.ArtifactLocation)
+		creds, err := store.GetCredentials(soc.controller.kubeClientset, soc.controller.Config.Namespace, &trigger.Resource.Source)
 		if err != nil {
 			return err
 		}
-		reader, err := store.GetArtifactReader(trigger.Resource.ArtifactLocation, creds)
+		reader, err := store.GetArtifactReader(&trigger.Resource.Source, creds)
 		if err != nil {
 			return err
 		}
@@ -115,6 +115,27 @@ func (soc *sOperationCtx) createResourceObject(resource *v1alpha1.ResourceObject
 		obj.SetLabels(resource.Labels)
 	}
 
+	// passing parameters to the resource object requires 4 steps
+	// 1. marshaling the obj to JSON
+	// 2. extract the appropriate signal events based on the resource params
+	// 3. apply the params to the JSON object
+	// 4. unmarshal the obj from the updated JSON
+	if len(resource.Parameters) > 0 {
+		jObj, err := obj.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		events := soc.extractSignalEvents(resource.Parameters)
+		jUpdatedObj, err := applyParams(jObj, resource.Parameters, events)
+		if err != nil {
+			return err
+		}
+		err = obj.UnmarshalJSON(jUpdatedObj)
+		if err != nil {
+			return err
+		}
+	}
+
 	gvk := obj.GroupVersionKind()
 	clientPool := dynamic.NewDynamicClientPool(soc.controller.kubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(soc.controller.kubeConfig)
@@ -148,4 +169,25 @@ func (soc *sOperationCtx) createResourceObject(resource *v1alpha1.ResourceObject
 	//todo: implement a diff between obj and liveObj
 	soc.log.Info("%s '%s' already exists", liveObj.GetKind(), liveObj.GetName())
 	return nil
+}
+
+// helper method to extract the events from the signals associated with the resource params
+// returns a map of the events keyed by the signal name
+func (soc *sOperationCtx) extractSignalEvents(params []v1alpha1.ResourceParameter) map[string]v1alpha1.Event {
+	events := make(map[string]v1alpha1.Event)
+	for _, param := range params {
+		if param.Src != nil {
+			node := soc.getNodeByName(param.Src.Signal)
+			if node == nil {
+				soc.log.Warnf("WARNING: signal node for '%s' does not exist, cannot apply parameter '%s'", param.Src.Signal, param.Dest)
+				continue
+			}
+			if node.LatestEvent == nil {
+				soc.log.Warnf("WARNING: signal node for '%s' contains nil Event. cannot apply parameter '%s'", param.Src.Signal, param.Dest)
+				continue
+			}
+			events[param.Src.Signal] = node.LatestEvent.Event
+		}
+	}
+	return events
 }
