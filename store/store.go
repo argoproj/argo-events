@@ -57,6 +57,8 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (A
 		return NewS3Reader(loc.S3, creds)
 	} else if loc.Inline != "" {
 		return NewInlineReader(loc.Inline)
+	} else if loc.File != nil {
+		return NewFileReader(loc.File)
 	}
 	return nil, fmt.Errorf(fmt.Sprintf("unknown artifact location: %v", *loc))
 }

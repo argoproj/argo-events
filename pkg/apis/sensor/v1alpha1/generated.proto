@@ -33,6 +33,8 @@ message ArtifactLocation {
   optional S3Artifact s3 = 1;
 
   optional string inline = 2;
+
+  optional FileArtifact file = 3;
 }
 
 // ArtifactSignal describes an external object dependency
@@ -148,6 +150,11 @@ message EventWrapper {
   optional Event event = 1;
 
   optional bool seen = 2;
+}
+
+// FileArtifact contains information about an artifact in a filesystem
+message FileArtifact {
+  optional string path = 1;
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
