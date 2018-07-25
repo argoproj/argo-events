@@ -8,24 +8,29 @@ spec:
   signals:
     - name: webhook
       webhook:
-        port: 9000
         endpoint: /app
         method: POST
   triggers:
-    - name: done-workflow
+    - name: hello-world-workflow-trigger
       resource:
+        namespace: default
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
         artifactLocation:
-          s3:
-            bucket: workflows
-            key: hello-world.yaml
-            endpoint: minio-service.default:9000
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

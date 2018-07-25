@@ -47,7 +47,7 @@ func main() {
 	}
 
 	// stream signal micro services
-	signalMgr, err := controller.NewSignalManager(logger.Sugar())
+	signalMgr, err := controller.NewSignalManager()
 	if err != nil {
 		panic(err)
 	}

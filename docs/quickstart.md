@@ -34,51 +34,29 @@ $ cd go/src/github.com/argoproj/argo-events
 $ make all
 ```
 
-## 6. Deploy to Minikube
-Note: This process is manual right now, but we're working on providing a Helm chart or integrating as a Ksonnet application
+## 6. Deploy Argo Events SA, ClusterRoles, ConfigMap, and Sensor Controller
+Note 1: This process is manual right now, but we're working on providing a Helm chart or integrating as a Ksonnet application
+Note 2: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-events-cluster-roles.yaml) file to use the correct namespace that you wish to deploy the sensor controller + signal microservices.
 ```
-kubectl create -f hack/k8s/manifests/*
-```
-
-## 7. Install minio
-
-```
-$ helm init
-...
-$ helm install stable/minio --name artifacts --set service.type=LoadBalancer
-...
-
-$ #Verify that the minio pod, the minio service and minio secret are present
-$ kubectl get all -n default -l app=minio
-
-NAME                                   READY     STATUS    RESTARTS   AGE
-pod/artifacts-minio-85547b6bd9-bhtt8   1/1       Running   0          21m
-
-NAME                      TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
-service/artifacts-minio   ClusterIP   None         <none>        9000/TCP   21m
-
-NAME                              DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/artifacts-minio   1         1         1            1           21m
-
-NAME                                         DESIRED   CURRENT   READY     AGE
-replicaset.apps/artifacts-minio-85547b6bd9   1         1         1         21m
+$ k apply -f hack/k8s/manifests/argo-events-sa.yaml
+$ k apply -f hack/k8s/manifests/argo-events-cluster-roles.yaml
+$ k apply -f hack/k8s/manifests/sensor-crd.yaml
+$ k apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
+$ k apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
 ```
 
-## 8. Create a bucket in Minio and upload the hello-world.yaml into that bucket.
-Download the hello-world.yaml from https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml
+## 7. Deploy Argo Events Webhook Signal Microservice
+Note: You will need to separately deploy the various signal services that you wish to support.
 ```
-$ kubectl port-forward `kubectl get pod -l app=minio -o name` 9000:9000
+$ k apply -f hack/k8s/manifests/services/webhook.yaml
 ```
-Open the browser at http://localhost:9000
-Create a new bucket called 'workflows'.
-Upload the hello-world.yaml into that bucket
 
-## 9. Install Argo
+## 8. Install Argo
 Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 
-## 10. Create an example sensor
+## 9. Create a webhook sensor
 ```
-$ kubectl create -f examples/calendar-sensor.yaml
+$ k apply -f examples/webhook-sensor.yaml
 ```
 
 Verify that the sensor was created.
@@ -86,10 +64,14 @@ Verify that the sensor was created.
 $ kubectl get sensors -n default
 ```
 
-Verify that the job associated with this sensor was run
+Verify that the signal microservice is listening for signals and the sensor is active.
 ```
-$ kubectl get jobs -n default
+$ kubectl logs signal-webhook-xxx -f
+$ kubectl get sensor webhook-example -n default -o yaml
 ```
+
+## 10. Trigger the webhook & corresponding Argo workflow
+Trigger the webhook using [Postman](https://www.getpostman.com/) or curl by send a POST request to the webhook service.
 
 Verify that the Argo workflow was run when the trigger was executed.
 ```
@@ -98,7 +80,7 @@ $ argo list
 
 Verify that the sensor was updated correctly
 ```
-$ kubectl get sensors cal-example -n default -o yaml
+$ kubectl get sensor webhook-example -n default -o yaml
 ```
 
-Check the logs of the sensor-controller pod if there are problems.
+Check the logs of the sensor-controller pod or the associated signal microservice if there are problems.

@@ -30,6 +30,15 @@ const (
 	ContextExtensionErrorKey string = "error"
 )
 
+const (
+	MetadataKey   string = "type"
+	MetadataValue string = "signal"
+)
+
+// SignalMetadata is a map of metadata that must be included
+// for micro services to be discoverable as signals.
+var SignalMetadata = map[string]string{MetadataKey: MetadataValue}
+
 // Listener handles signal lifecycle
 // Must be implemented by all signal service providers
 // TODO: this should be the interface implemented by all the signal sources to be a signal provider
@@ -48,6 +57,7 @@ type ArtifactListener interface {
 
 // SignalClient is the interface for signal clients
 type SignalClient interface {
+	Ping(context.Context) error
 	Listen(context.Context, *v1alpha1.Signal, ...client.CallOption) (SignalService_ListenService, error)
 	handshake(*v1alpha1.Signal, SignalService_ListenService) error
 }
