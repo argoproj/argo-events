@@ -3,6 +3,7 @@ option go_package = "github.com/argoproj/argo-events/sdk";
 
 package sdk;
 
+import "google/protobuf/empty.proto";
 import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
 
 message SignalContext {
@@ -28,4 +29,8 @@ service SignalService {
     // Later sends should only signify if the signal is done. Later sends do not
     // update the signal process attached to this channel.
     rpc Listen(stream SignalContext) returns (stream EventContext);
+
+    // Ping the signal service. 
+    // This is used on the client-side to monitor the presence of signal services.
+    rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
 }

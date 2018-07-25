@@ -30,3 +30,12 @@ func (soc *sOperationCtx) getNodeByName(nodename string) *v1alpha1.NodeStatus {
 	}
 	return node.DeepCopy()
 }
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}

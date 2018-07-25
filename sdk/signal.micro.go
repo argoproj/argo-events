@@ -16,6 +16,7 @@ package sdk
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import google_protobuf "github.com/golang/protobuf/ptypes/empty"
 import _ "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 
 import (
@@ -28,6 +29,7 @@ import (
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = google_protobuf.Empty{}
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -54,6 +56,9 @@ type SignalService interface {
 	// Later sends should only signify if the signal is done. Later sends do not
 	// update the signal process attached to this channel.
 	Listen(ctx context.Context, opts ...client.CallOption) (SignalService_ListenService, error)
+	// Ping the signal service.
+	// This is used on the client-side to monitor the presence of signal services.
+	Ping(ctx context.Context, in *google_protobuf.Empty, opts ...client.CallOption) (*google_protobuf.Empty, error)
 }
 
 type signalService struct {
@@ -120,6 +125,16 @@ func (x *signalServiceListen) Recv() (*EventContext, error) {
 	return m, nil
 }
 
+func (c *signalService) Ping(ctx context.Context, in *google_protobuf.Empty, opts ...client.CallOption) (*google_protobuf.Empty, error) {
+	req := c.c.NewRequest(c.name, "SignalService.Ping", in)
+	out := new(google_protobuf.Empty)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for SignalService service
 
 type SignalServiceHandler interface {
@@ -134,11 +149,15 @@ type SignalServiceHandler interface {
 	// Later sends should only signify if the signal is done. Later sends do not
 	// update the signal process attached to this channel.
 	Listen(context.Context, SignalService_ListenStream) error
+	// Ping the signal service.
+	// This is used on the client-side to monitor the presence of signal services.
+	Ping(context.Context, *google_protobuf.Empty, *google_protobuf.Empty) error
 }
 
 func RegisterSignalServiceHandler(s server.Server, hdlr SignalServiceHandler, opts ...server.HandlerOption) {
 	type signalService interface {
 		Listen(ctx context.Context, stream server.Stream) error
+		Ping(ctx context.Context, in *google_protobuf.Empty, out *google_protobuf.Empty) error
 	}
 	type SignalService struct {
 		signalService
@@ -189,4 +208,8 @@ func (x *signalServiceListenStream) Recv() (*SignalContext, error) {
 		return nil, err
 	}
 	return m, nil
+}
+
+func (h *signalServiceHandler) Ping(ctx context.Context, in *google_protobuf.Empty, out *google_protobuf.Empty) error {
+	return h.SignalServiceHandler.Ping(ctx, in, out)
 }

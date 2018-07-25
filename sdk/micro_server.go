@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	google_protobuf "github.com/golang/protobuf/ptypes/empty"
 )
 
 type microSignalServer struct {
@@ -18,6 +19,12 @@ var ack = &EventContext{Done: true}
 // NewMicroSignalServer creates a Micro compatible SignalServer from the Listener implementation
 func NewMicroSignalServer(lis Listener) SignalServer {
 	return &microSignalServer{impl: lis}
+}
+
+// Ping implements the SignalServiceHandler interface
+func (m *microSignalServer) Ping(ctx context.Context, in *google_protobuf.Empty, out *google_protobuf.Empty) error {
+	out = in
+	return ctx.Err()
 }
 
 // Listen implements the SignalServiceHandler interface

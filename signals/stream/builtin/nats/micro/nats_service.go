@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	svc := k8s.NewService(micro.Name("nats"))
+	svc := k8s.NewService(micro.Name("nats"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
 	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(nats.New()))

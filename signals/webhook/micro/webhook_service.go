@@ -24,7 +24,7 @@ import (
 )
 
 func main() {
-	svc := k8s.NewService(micro.Name("webhook"))
+	svc := k8s.NewService(micro.Name("webhook"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
 	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(webhook.New()))

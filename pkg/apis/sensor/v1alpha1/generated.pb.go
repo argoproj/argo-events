@@ -915,7 +915,7 @@ func (m *ArtifactLocation) MarshalTo(dAtA []byte) (int, error) {
 		}
 		i += n1
 	}
-	dAtA[i] = 0x1a
+	dAtA[i] = 0x12
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Inline)))
 	i += copy(dAtA[i:], m.Inline)
@@ -3208,7 +3208,7 @@ func (m *ArtifactLocation) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Inline", wireType)
 			}
