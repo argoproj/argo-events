@@ -26,39 +26,35 @@ import (
 )
 
 var (
-	testingTargetPort = 45677
-	client            = &http.Client{}
-	payload           = "{name: x}"
+	client  = &http.Client{}
+	payload = "{name: x}"
 )
 
 func handleEvent(t *testing.T, testEventChan <-chan *v1alpha1.Event) {
 	event := <-testEventChan
 
-	if event.Context.Source.Host != fmt.Sprintf("localhost:%d", testingTargetPort) {
-		t.Errorf("event Context SourceHost:\nexpected: %s\nactual: %s", fmt.Sprintf("localhost:%d", testingTargetPort), event.Context.Source.Host)
-	}
 	if string(event.Data) != payload {
 		t.Errorf("event Data:\nexpected: %s\nactual: %s", payload, string(event.Data))
 	}
 }
 
-func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
+func makeAPIRequest(t *testing.T, httpMethod string, endpoint string, port int32) {
 	web := New()
 	signal := v1alpha1.Signal{
 		Webhook: &v1alpha1.WebhookSignal{
-			Port:     int32(testingTargetPort),
+			Port:     port,
 			Endpoint: endpoint,
 			Method:   httpMethod,
 		},
 	}
 	done := make(chan struct{})
 	// stop listening and ensure the events channel is closed on exit
-	defer func() { done <- struct{}{} }()
+	defer close(done)
 	events, err := web.Listen(&signal, done)
 
 	go handleEvent(t, events)
 
-	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", testingTargetPort, endpoint), strings.NewReader(payload))
+	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", port, endpoint), strings.NewReader(payload))
 	if err != nil {
 		t.Fatalf("unable to create http request. cause: %s", err)
 	}
@@ -73,15 +69,15 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 }
 
 func testPostRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodPost, "/post")
+	makeAPIRequest(t, http.MethodPost, "/post", 5677)
 }
 
 func testPutRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodPut, "/put")
+	makeAPIRequest(t, http.MethodPut, "/put", 5678)
 }
 
 func testDeleteRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodDelete, "/delete")
+	makeAPIRequest(t, http.MethodDelete, "/delete", 5679)
 }
 
 func TestSignal(t *testing.T) {
