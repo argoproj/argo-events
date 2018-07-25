@@ -56,7 +56,7 @@ Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 
 ## 9. Create a webhook sensor
 ```
-$ k apply -f examples/webhook-sensor.yaml
+$ k apply -f examples/webhook-with-resource-param.yaml
 ```
 
 Verify that the sensor was created.
@@ -67,20 +67,29 @@ $ kubectl get sensors -n default
 Verify that the signal microservice is listening for signals and the sensor is active.
 ```
 $ kubectl logs signal-webhook-xxx -f
-$ kubectl get sensor webhook-example -n default -o yaml
+$ kubectl get sensor webhook-with-resource-param -n default -o yaml
 ```
 
 ## 10. Trigger the webhook & corresponding Argo workflow
-Trigger the webhook using [Postman](https://www.getpostman.com/) or curl by send a POST request to the webhook service.
+Trigger the webhook via sending a POST with a JSON with a "message" key and value. 
+Ensure that you set the header "Content-Type" to "application/json" or this event will be ignored.
+```
+$ curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $(minikube service --url webhook)
+```
 
 Verify that the Argo workflow was run when the trigger was executed.
 ```
 $ argo list
 ```
 
-Verify that the sensor was updated correctly
+Verify that the sensor was updated correctly and moved to a "Complete" phase
 ```
-$ kubectl get sensor webhook-example -n default -o yaml
+$ kubectl get sensor webhook-with-resource-param -n default -o yaml
+```
+
+Check the logs of the Argo workflow pod for the message you posted.
+```
+$ k logs arguments-via-webhook-event main
 ```
 
 Check the logs of the sensor-controller pod or the associated signal microservice if there are problems.

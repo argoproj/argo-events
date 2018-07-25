@@ -48,9 +48,11 @@ func (m *MicroSignalClient) DiscoverSignals() ([]string, error) {
 	}
 	svcNames := make([]string, 0)
 	for _, svc := range svcs {
-		if val := svc.Metadata[sdk.MetadataKey]; val == sdk.MetadataValue {
-			svcNames = append(svcNames, svc.Name)
-		}
+		// Due to https://github.com/micro/go-plugins/issues/206, we can't use the metadata to filter services
+		//if svc.Metadata[sdk.MetadataKey] == sdk.MetadataValue {
+		//	svcNames = append(svcNames, svc.Name)
+		//}
+		svcNames = append(svcNames, svc.Name)
 	}
 	return svcNames, nil
 }

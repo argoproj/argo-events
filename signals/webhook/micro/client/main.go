@@ -34,7 +34,7 @@ func main() {
 	signal := &v1alpha1.Signal{
 		Name: "webhook-1",
 		Webhook: &v1alpha1.WebhookSignal{
-			Endpoint: "/app",
+			Endpoint: "/hello",
 			Port:     7070,
 			Method:   "POST",
 		},
@@ -61,7 +61,7 @@ func main() {
 	}()
 
 	client := &http.Client{}
-	req, _ := http.NewRequest("POST", "http://webhook:7070/app", bytes.NewBuffer([]byte(`{"title":"Buy cheese and bread for breakfast."}`)))
+	req, _ := http.NewRequest("POST", "http://webhook:7070/hello", bytes.NewBuffer([]byte(`{"message":"Buy cheese and bread for breakfast"}`)))
 	_, err = client.Do(req)
 	if err != nil {
 		log.Panicf("failed to post http: %s", err)

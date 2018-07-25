@@ -71,7 +71,7 @@ var sampleSensor = v1alpha1.Sensor{
 						Version: "v1alpha1",
 						Kind:    "workflow",
 					},
-					ArtifactLocation: &v1alpha1.ArtifactLocation{
+					Source: v1alpha1.ArtifactLocation{
 						S3: &v1alpha1.S3Artifact{},
 					},
 					Labels: map[string]string{"test-label": "test-value"},
