@@ -1,14 +1,27 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,6 +47,12 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) bool {
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
 func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
+	if expected == nil {
+		return true
+	}
+	if actual == nil {
+		return false
+	}
 	res := true
 	if expected.EventType != "" {
 		res = res && expected.EventType == actual.EventType
@@ -57,14 +76,6 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 	return res && eExtensionRes
 }
 
-// various supported media types
-// TODO: add support for XML
-const (
-	MediaTypeJSON string = "application/json"
-	//MediaTypeXML  string = "application/xml"
-	MediaTypeYAML string = "application/yaml"
-)
-
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
@@ -77,38 +88,12 @@ func filterData(dataFilters []*v1alpha1.DataFilter, event *v1alpha1.Event) (bool
 	if event.Data == nil || len(event.Data) == 0 {
 		return true, nil
 	}
-	raw := event.Data
-	var data map[string]interface{}
-	// contentType is formatted as: '{type}; charset="xxx"'
-	contents := strings.Split(event.Context.ContentType, ";")
-	if len(contents) < 1 {
-		return false, fmt.Errorf("event context ContentType not found: %s", contents)
-	}
-	switch contents[0] {
-	case MediaTypeJSON:
-		if err := json.Unmarshal(raw, &data); err != nil {
-			return false, err
-		}
-		/*
-			case MediaTypeXML:
-				if err := xml.Unmarshal(raw, &data); err != nil {
-					return false, err
-				}
-		*/
-	case MediaTypeYAML:
-		if err := yaml.Unmarshal(raw, &data); err != nil {
-			return false, err
-		}
-	default:
-		return false, fmt.Errorf("unsupported event content type: %s", event.Context.ContentType)
-	}
-	// now let's marshal the data back into json in order to do gjson processing
-	json, err := json.Marshal(data)
+	js, err := renderEventDataAsJSON(event)
 	if err != nil {
 		return false, err
 	}
 	for _, f := range dataFilters {
-		res := gjson.Get(string(json), f.Path)
+		res := gjson.GetBytes(js, f.Path)
 		if !res.Exists() {
 			return false, nil
 		}

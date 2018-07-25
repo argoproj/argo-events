@@ -197,6 +197,7 @@ const (
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
 type DataFilter struct {
+	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
@@ -228,22 +229,54 @@ type Trigger struct {
 	RetryStrategy *RetryStrategy `json:"retryStrategy" protobuf:"bytes,4,opt,name=replyStrategy"`
 }
 
+// ResourceParameter indicates a passed parameter to a service template
+type ResourceParameter struct {
+	// Src contains a source reference to the value of the resource parameter from a signal event
+	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,opt,name=src"`
+
+	// Dest is the JSONPath of a resource key.
+	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
+	// The -1 key can be used to append a value to an existing array.
+	// See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.
+	Dest string `json:"dest" protobuf:"bytes,2,opt,name=dest"`
+}
+
+// ResourceParameterSource defines the source for a resource parameter from a signal event
+type ResourceParameterSource struct {
+	// Signal is the name of the signal for which to retrieve this event
+	Signal string `json:"signal" protobuf:"bytes,1,opt,name=signal"`
+
+	// Path is the JSONPath of the event's (JSON decoded) data key
+	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+	Path string `json:"path" protobuf:"bytes,2,opt,name=path"`
+
+	// Value is the default literal value to use for this parameter source
+	// This is only used if the path is invalid.
+	// If the path is invalid and this is not defined, this param source will produce an error.
+	Value *string `json:"default,omitempty" protobuf:"bytes,3,opt,name=value"`
+}
+
 // ResourceObject is the resource object to create on kubernetes
 type ResourceObject struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	GroupVersionKind `json:",inline" protobuf:"bytes,4,opt,name=groupVersionKind"`
+	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
 
 	// Namespace in which to create this object
 	// optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
+	// defaults to the service account namespace
+	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
 
-	// Location in which the K8 resource file(s) are stored.
-	// If omitted, will attempt to use the default artifact location configured in the controller.
-	ArtifactLocation *ArtifactLocation `json:"artifactLocation,omitempty" protobuf:"bytes,2,opt,name=artifactLocation"`
+	// Source of the K8 resource file(s)
+	Source ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
 
 	// Map of string keys and values that can be used to organize and categorize
 	// (scope and select) objects. This overrides any labels in the unstructured object with the same key.
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,3,rep,name=labels"`
+
+	// Parameters is the list of resource parameters to pass in the object
+	Parameters []ResourceParameter `json:"parameters" protobuf:"bytes,4,rep,name=parameters"`
 }
 
 // Stream describes a queue stream resource
@@ -413,7 +446,7 @@ type URI struct {
 	Fragment string `json:"fragment" protobuf:"bytes,8,opt,name=fragment"`
 }
 
-// ArtifactLocation describes the location for an external artifact
+// ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
 	S3     *S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	Inline string      `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`

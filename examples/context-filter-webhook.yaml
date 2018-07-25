@@ -9,6 +9,7 @@ spec:
     - name: webhook
       webhook:
         endpoint: /app
+        port: 7070
         method: POST
       filters:
         context:
@@ -21,7 +22,7 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        artifactLocation:
+        source:
           s3:
             bucket: workflows
             key: hello-world.yaml
