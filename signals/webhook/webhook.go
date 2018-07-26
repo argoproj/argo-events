@@ -17,12 +17,11 @@ limitations under the License.
 package webhook
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
+	"sync"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,27 +37,67 @@ const (
 
 // Note: micro requires stateless operation so the Listen() method should not use the
 // receive struct to save or modify state.
-type webhook struct{}
-
-// New creates a new webhook listener
-func New() sdk.Listener {
-	return new(webhook)
+// webhooks are special in that they should only have one http Server since the port is fixed at runtime
+// this means that webhook signals are stateful, however losing this state is not a concern since
+// the connections will be re-initialized by the SignalClient
+type webhook struct {
+	srv *http.Server
+	sync.RWMutex
+	inactiveEndpoints map[string]struct{}
 }
 
-func (*webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
-	method := signal.Webhook.Method
-	port := strconv.Itoa(int(signal.Webhook.Port))
-	endpoint := signal.Webhook.Endpoint
+// New creates a new webhook listener for the specified port
+func New(port int) sdk.Listener {
+	srv := &http.Server{
+		Addr: fmt.Sprintf(":%v", port),
+		// Good practice to enforce timeouts to avoid Slowloris attacks
+		WriteTimeout: time.Second * 5,
+		ReadTimeout:  time.Second * 5,
+		IdleTimeout:  time.Second * 30,
+	}
+	// Start http server
+	go func() {
+		log.Printf("starting http server listening on: %s", srv.Addr)
+		err := srv.ListenAndServe()
+		if err == http.ErrServerClosed {
+			log.Printf("successfully shutdown http server")
+		} else {
+			log.Panicf("http server encountered error listening: %v", err)
+		}
+	}()
+	return &webhook{
+		srv:               srv,
+		inactiveEndpoints: make(map[string]struct{}),
+	}
+}
 
+// this is a helper middleware to allow "deregistering" http routes
+// todo: make sure that this map lookup doesn't hurt performance if there are many inactive routes
+func (web *webhook) checkActiveEndpoint(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		web.RLock()
+		if _, inactive := web.inactiveEndpoints[r.URL.Path]; inactive {
+			web.RUnlock()
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		web.RUnlock()
+		h.ServeHTTP(w, r)
+	})
+}
+
+func (web *webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
+	method := signal.Webhook.Method
+	endpoint := signal.Webhook.Endpoint
 	events := make(chan *v1alpha1.Event)
 
 	handler := func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("signal '%s' received a request from '%s'", signal.Name, req.Host)
+		log.Printf("signal '%s' received a %s request from '%s'", signal.Name, req.Method, req.Host)
 		if req.Method == method {
 			payload, err := ioutil.ReadAll(req.Body)
 			if err != nil {
 				log.Printf("unable to process request payload: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
+				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			event := &v1alpha1.Event{
@@ -88,31 +127,18 @@ func (*webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v
 	// TODO: use github.com/gorilla/mux
 	// - pattern matching specifics
 	// - same endpoint resolution - are both signals resolved?
-	mux := http.NewServeMux()
-	mux.HandleFunc(endpoint, handler)
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
-		Handler: mux,
-	}
-
-	// Start http server
-	go func() {
-		err := srv.ListenAndServe()
-		if err == http.ErrServerClosed {
-			log.Printf("successfully shutdown http server for signal '%s'", signal.Name)
-		} else {
-			log.Panicf("http server encountered error listening for signal '%s': %v", signal.Name, err)
-		}
-	}()
+	h := http.HandlerFunc(handler)
+	http.Handle(endpoint, web.checkActiveEndpoint(h))
 
 	// wait for stop signal
 	go func() {
 		defer close(events)
 		<-done
-		err := srv.Shutdown(context.TODO())
-		if err != nil {
-			log.Panicf("failed to gracefully shutdown http server for signal '%s': %s", signal.Name, err)
-		}
+		// "deregister" the handler by modifying the inactive map
+		web.Lock()
+		web.inactiveEndpoints[endpoint] = struct{}{}
+		web.Unlock()
+		log.Printf("signal '%s' stopped listening at [%s]", signal.Name, signal.Webhook.Endpoint)
 	}()
 	log.Printf("signal '%s' listening for webhooks at [%s]...", signal.Name, signal.Webhook.Endpoint)
 	return events, nil

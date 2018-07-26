@@ -17,17 +17,34 @@ limitations under the License.
 package main
 
 import (
+	"os"
+	"strconv"
+
 	"github.com/argoproj/argo-events/sdk"
 	"github.com/argoproj/argo-events/signals/webhook"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
 )
 
+const (
+	// EnvVarWebhookPort is the Env Var Key for the webhook port
+	EnvVarWebhookPort string = "WEBHOOK_PORT"
+
+	// DefaultWebhookPort is the default port to use if the EnvVarWebhookPort is not set
+	DefaultWebhookPort int = 7070
+)
+
 func main() {
 	svc := k8s.NewService(micro.Name("webhook"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
-	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(webhook.New()))
+	// get the container port from container
+	port := DefaultWebhookPort
+	if strPort, ok := os.LookupEnv(EnvVarWebhookPort); ok {
+		port, _ = strconv.Atoi(strPort)
+	}
+
+	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(webhook.New(port)))
 
 	if err := svc.Run(); err != nil {
 		panic(err)

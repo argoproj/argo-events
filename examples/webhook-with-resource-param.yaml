@@ -9,7 +9,6 @@ spec:
     - name: webhook
       webhook:
         endpoint: /hello
-        port: 7070
         method: POST
   triggers:
     - name: argo-workflow

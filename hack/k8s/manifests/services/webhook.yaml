@@ -19,6 +19,8 @@ spec:
               value: 0.0.0.0:8080
             - name: MICRO_BROKER_ADDRESS
               value: 0.0.0.0:10001
+            - name: WEBHOOK_PORT
+              value: 7070
           ports:
           - containerPort: 8080
             name: micro-port
