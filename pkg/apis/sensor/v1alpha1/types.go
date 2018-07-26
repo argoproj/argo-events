@@ -177,10 +177,22 @@ type SignalFilter struct {
 	Data []*DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
 }
 
-// TimeFilter describes a window in time
+// TimeFilter describes a window in time.
+// Filters out signal events that occur outside the time limits.
+// In other words, only events that occur after Start and before Stop
+// will pass this filter.
 type TimeFilter struct {
-	Start v1.Time `json:"start" protobuf:"bytes,1,opt,name=start"`
-	Stop  v1.Time `json:"stop" protobuf:"bytes,2,opt,name=stop"`
+	// Start is the beginning of a time window.
+	// Before this time, events for this signal are ignored and
+	// do not contribute to resolving the signal.
+	// A nil value represents -∞
+	Start *v1.Time `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
+
+	// Stop is the end of a time window.
+	// After this time, events for this signal are ignored and
+	// do not contribute to resolving the signal.
+	// A nil value represents ∞
+	Stop *v1.Time `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
 }
 
 // JSONType contains the supported JSON types for data filtering
@@ -447,7 +459,7 @@ type URI struct {
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
 	S3     *S3Artifact   `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
-	Inline string        `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
+	Inline *string       `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	File   *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
 	URL    *URLArtifact  `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 }
@@ -497,7 +509,7 @@ type ResourceFilter struct {
 
 // HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
-	return a.S3 != nil
+	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
 }
 
 // GetType returns the type of this signal

@@ -38,7 +38,16 @@ func filterEvent(f v1alpha1.SignalFilter, event *v1alpha1.Event) (bool, error) {
 // returns true if 1 and 2 are true and false otherwise
 func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) bool {
 	if timeFilter != nil && eventTime != nil {
-		return (timeFilter.Start.Before(eventTime) || timeFilter.Start.Equal(eventTime)) && eventTime.Before(&timeFilter.Stop)
+		if timeFilter.Start != nil && timeFilter.Stop != nil {
+			return (timeFilter.Start.Before(eventTime) || timeFilter.Start.Equal(eventTime)) && eventTime.Before(timeFilter.Stop)
+		}
+		if timeFilter.Start != nil {
+			// stop is nil - does not have an end
+			return timeFilter.Start.Before(eventTime) || timeFilter.Start.Equal(eventTime)
+		}
+		if timeFilter.Stop != nil {
+			return eventTime.Before(timeFilter.Stop)
+		}
 	}
 	return true
 }

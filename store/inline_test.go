@@ -8,7 +8,7 @@ import (
 
 func TestInlineReader(t *testing.T) {
 	myStr := "myStr"
-	inlineReader, err := NewInlineReader(myStr)
+	inlineReader, err := NewInlineReader(&myStr)
 	assert.NotNil(t, inlineReader)
 	assert.Nil(t, err)
 	data, err := inlineReader.Read()

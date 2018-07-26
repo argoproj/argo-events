@@ -21,6 +21,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
 	cronlib "github.com/robfig/cron"
@@ -48,7 +49,10 @@ func (c *calendar) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan
 	if err != nil {
 		return nil, err
 	}
-	exclusionDates := parseExclusionDates(signal.Calendar.Recurrence)
+	exDates, err := common.ParseExclusionDates(signal.Calendar.Recurrence)
+	if err != nil {
+		return nil, err
+	}
 
 	events := make(chan *v1alpha1.Event)
 
@@ -58,7 +62,7 @@ func (c *calendar) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan
 		nextYear := nextT.Year()
 		nextMonth := nextT.Month()
 		nextDay := nextT.Day()
-		for _, exDate := range exclusionDates {
+		for _, exDate := range exDates {
 			// if exDate == nextEvent, then we need to skip this and get the next
 			if exDate.Year() == nextYear && exDate.Month() == nextMonth && exDate.Day() == nextDay {
 				return next(nextT)

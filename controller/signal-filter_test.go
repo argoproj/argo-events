@@ -39,12 +39,44 @@ func Test_filterTime(t *testing.T) {
 			want: true,
 		},
 		{
+			name: "-∞ start and ∞ stop",
+			args: args{
+				timeFilter: &v1alpha1.TimeFilter{},
+				eventTime: &metav1.Time{
+					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			want: true,
+		},
+		{
+			name: "-∞ start and finite stop",
+			args: args{timeFilter: &v1alpha1.TimeFilter{
+				Stop: &metav1.Time{
+					Time: time.Date(2018, time.May, 10, 0, 0, 0, 0, time.UTC),
+				},
+			}, eventTime: &metav1.Time{
+				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
+			}},
+			want: true,
+		},
+		{
+			name: "finite start and ∞ stop",
+			args: args{timeFilter: &v1alpha1.TimeFilter{
+				Start: &metav1.Time{
+					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
+				},
+			}, eventTime: &metav1.Time{
+				Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
+			}},
+			want: true,
+		},
+		{
 			name: "event > start && event > stop",
 			args: args{timeFilter: &v1alpha1.TimeFilter{
-				Start: metav1.Time{
+				Start: &metav1.Time{
 					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
-				Stop: metav1.Time{
+				Stop: &metav1.Time{
 					Time: time.Date(2015, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
 			}, eventTime: &metav1.Time{
@@ -55,10 +87,10 @@ func Test_filterTime(t *testing.T) {
 		{
 			name: "event > start && event == stop",
 			args: args{timeFilter: &v1alpha1.TimeFilter{
-				Start: metav1.Time{
+				Start: &metav1.Time{
 					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
-				Stop: metav1.Time{
+				Stop: &metav1.Time{
 					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
 			}, eventTime: &metav1.Time{
@@ -69,10 +101,10 @@ func Test_filterTime(t *testing.T) {
 		{
 			name: "event > start && event < stop",
 			args: args{timeFilter: &v1alpha1.TimeFilter{
-				Start: metav1.Time{
+				Start: &metav1.Time{
 					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
-				Stop: metav1.Time{
+				Stop: &metav1.Time{
 					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
 			}, eventTime: &metav1.Time{
@@ -83,10 +115,10 @@ func Test_filterTime(t *testing.T) {
 		{
 			name: "event == start && event < stop",
 			args: args{timeFilter: &v1alpha1.TimeFilter{
-				Start: metav1.Time{
+				Start: &metav1.Time{
 					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
-				Stop: metav1.Time{
+				Stop: &metav1.Time{
 					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
 			}, eventTime: &metav1.Time{
@@ -97,10 +129,10 @@ func Test_filterTime(t *testing.T) {
 		{
 			name: "event < start && event < stop",
 			args: args{timeFilter: &v1alpha1.TimeFilter{
-				Start: metav1.Time{
+				Start: &metav1.Time{
 					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
-				Stop: metav1.Time{
+				Stop: &metav1.Time{
 					Time: time.Date(2018, time.May, 10, 0, 0, 0, 0, time.UTC),
 				},
 			}, eventTime: &metav1.Time{

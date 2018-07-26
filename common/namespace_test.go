@@ -13,33 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package common
 
 import (
-	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
-func TestDefaultConfigMapName(t *testing.T) {
-	res := DefaultConfigMapName("controller")
-	assert.Equal(t, "controller-configmap", res)
-}
+func TestResolveNamespace(t *testing.T) {
+	defer os.Unsetenv(EnvVarNamespace)
 
-func TestServerResourceForGroupVersionKind(t *testing.T) {
-	fakeClient := fake.NewSimpleClientset()
-	fakeDisco := fakeClient.Discovery()
-	gvk := schema.GroupVersionKind{
-		Group:   "",
-		Version: "v1",
-		Kind:    "Pod",
+	RefreshNamespace()
+	assert.Equal(t, "default", DefaultSensorControllerNamespace)
+
+	// TODO: now write the namespace file
+
+	// now set the env variable
+	err := os.Setenv(EnvVarNamespace, "test")
+	if err != nil {
+		t.Error(err)
 	}
-	apiResource, err := ServerResourceForGroupVersionKind(fakeDisco, gvk)
-	fmt.Println(err)
-	assert.NotNil(t, err)
-	assert.Nil(t, apiResource)
+
+	RefreshNamespace()
+	assert.Equal(t, "test", DefaultSensorControllerNamespace)
 }
