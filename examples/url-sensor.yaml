@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: url-example
+  generateName: url-example-
   labels:
     sensors.argoproj.io/controller-instanceid: axis
 spec:
@@ -19,3 +19,4 @@ spec:
         source:
           url:
             path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"
+            verifycert: false

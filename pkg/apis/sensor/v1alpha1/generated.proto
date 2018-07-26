@@ -472,6 +472,8 @@ message URI {
 // URLArtifact contains information about an artifact at an http endpoint.
 message URLArtifact {
   optional string path = 1;
+
+  optional bool verifycert = 2;
 }
 
 // WebhookSignal is a general purpose REST API

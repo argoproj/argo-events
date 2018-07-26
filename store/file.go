@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 
@@ -16,7 +17,7 @@ type FileReader struct {
 func NewFileReader(fileArtifact *v1alpha1.FileArtifact) (ArtifactReader, error) {
 	// This should never happen!
 	if fileArtifact == nil {
-		panic("FileArtifact cannot be empty!")
+		return nil, errors.New("FileArtifact cannot be empty")
 	}
 	log.Printf("Creating fileReader from %s!\n", fileArtifact.Path)
 	return &FileReader{fileArtifact}, nil

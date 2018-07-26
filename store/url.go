@@ -18,14 +18,15 @@ type URLReader struct {
 // NewURLReader creates a new ArtifactReader for workflows at URL endpoints.
 func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 	if urlArtifact == nil {
-		panic("URLArtifact cannot be empty")
+		return nil, errors.New("URLArtifact cannot be empty")
 	}
 	return &URLReader{urlArtifact}, nil
 }
 
 func (reader *URLReader) Read() ([]byte, error) {
+	insecureSkipVerify := !reader.urlArtifact.VerifyCert
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Get(reader.urlArtifact.Path)

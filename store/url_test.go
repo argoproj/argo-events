@@ -9,6 +9,7 @@ import (
 
 func TestURLReader(t *testing.T) {
 	urlArtifact := v1alpha1.URLArtifact{Path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"}
+	assert.False(t, urlArtifact.VerifyCert)
 	urlReader, err := NewURLReader(&urlArtifact)
 	assert.NotNil(t, urlReader)
 	assert.Nil(t, err)
