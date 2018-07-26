@@ -33,21 +33,6 @@ ifdef IMAGE_NAMESPACE
 IMAGE_PREFIX=${IMAGE_NAMESPACE}/
 endif
 
-.PHONY: protogen
-protogen:
-	./hack/generate-proto.sh
-
-.PHONY: clientgen
-clientgen:
-	./hack/update-codegen.sh
-
-.PHONY: openapigen
-openapi-gen:
-	./hack/update-openapigen.sh
-
-.PHONY: codegen
-codegen: clientgen openapigen protogen
-
 # this is the default stream service
 STREAM=nats
 
@@ -114,3 +99,18 @@ coverage:
 
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
+
+.PHONY: protogen
+protogen:
+	./hack/generate-proto.sh
+
+.PHONY: clientgen
+clientgen:
+	./hack/update-codegen.sh
+
+.PHONY: openapigen
+openapi-gen:
+	./hack/update-openapigen.sh
+
+.PHONY: codegen
+codegen: clientgen openapigen protogen
