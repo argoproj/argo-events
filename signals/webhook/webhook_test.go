@@ -17,6 +17,7 @@ limitations under the License.
 package webhook
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -25,24 +26,18 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-var (
-	client  = &http.Client{}
-	payload = "{name: x}"
-)
-
-func handleEvent(t *testing.T, testEventChan <-chan *v1alpha1.Event) {
+func (tw *testWeb) handleEvent(t *testing.T, testEventChan <-chan *v1alpha1.Event) {
 	event := <-testEventChan
 
-	if string(event.Data) != payload {
-		t.Errorf("event Data:\nexpected: %s\nactual: %s", payload, string(event.Data))
+	if string(event.Data) != tw.payload {
+		t.Errorf("event Data:\nexpected: %s\nactual: %s", tw.payload, string(event.Data))
 	}
 }
 
-func makeAPIRequest(t *testing.T, httpMethod string, endpoint string, port int32) {
-	web := New()
+func (tw *testWeb) makeAPIRequest(t *testing.T, httpMethod string, endpoint string) {
 	signal := v1alpha1.Signal{
+		Name: "test",
 		Webhook: &v1alpha1.WebhookSignal{
-			Port:     port,
 			Endpoint: endpoint,
 			Method:   httpMethod,
 		},
@@ -50,16 +45,16 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string, port int32
 	done := make(chan struct{})
 	// stop listening and ensure the events channel is closed on exit
 	defer close(done)
-	events, err := web.Listen(&signal, done)
+	events, err := tw.listener.Listen(&signal, done)
 
-	go handleEvent(t, events)
+	go tw.handleEvent(t, events)
 
-	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", port, endpoint), strings.NewReader(payload))
+	request, err := http.NewRequest(httpMethod, fmt.Sprintf("http://localhost:%d%s", tw.port, endpoint), strings.NewReader(tw.payload))
 	if err != nil {
 		t.Fatalf("unable to create http request. cause: %s", err)
 	}
 	request.Close = true // do not keep the connection alive
-	resp, err := client.Do(request)
+	resp, err := tw.client.Do(request)
 	if err != nil {
 		t.Fatalf("failed to perform http request. cause: %s", err)
 	}
@@ -68,20 +63,42 @@ func makeAPIRequest(t *testing.T, httpMethod string, endpoint string, port int32
 	}
 }
 
-func testPostRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodPost, "/post", 5677)
+func (tw *testWeb) testPostRequest(t *testing.T) {
+	tw.makeAPIRequest(t, http.MethodPost, "/post")
 }
 
-func testPutRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodPut, "/put", 5678)
+func (tw *testWeb) testPutRequest(t *testing.T) {
+	tw.makeAPIRequest(t, http.MethodPut, "/put")
 }
 
-func testDeleteRequest(t *testing.T) {
-	makeAPIRequest(t, http.MethodDelete, "/delete", 5679)
+func (tw *testWeb) testDeleteRequest(t *testing.T) {
+	tw.makeAPIRequest(t, http.MethodDelete, "/delete")
+}
+
+type testWeb struct {
+	// we need to use the actual implementation to ultimately stop the server after tests are done
+	port     int
+	listener *webhook
+	client   *http.Client
+	payload  string
 }
 
 func TestSignal(t *testing.T) {
-	t.Run("post", testPostRequest)
-	t.Run("put", testPutRequest)
-	t.Run("delete", testDeleteRequest)
+	tw := &testWeb{
+		port:     5677,
+		listener: New(5677).(*webhook),
+		client:   &http.Client{},
+		payload:  "{name: x}",
+	}
+	defer func() {
+		tw.listener.srv.SetKeepAlivesEnabled(false)
+		testCtx := context.TODO()
+		err := tw.listener.srv.Shutdown(testCtx)
+		if err != nil {
+			t.Fatalf("failed to shutdown the http server: %s", err)
+		}
+	}()
+	t.Run("post", tw.testPostRequest)
+	t.Run("put", tw.testPutRequest)
+	t.Run("delete", tw.testDeleteRequest)
 }

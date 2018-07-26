@@ -8,7 +8,7 @@ spec:
   signals:
     - name: webhook
       webhook:
-        endpoint: /app
+        endpoint: /filter/time
         method: POST
       filters:
         time:

@@ -488,15 +488,13 @@ message URLArtifact {
 }
 
 // WebhookSignal is a general purpose REST API
+// Due to https://github.com/argoproj/argo-events/issues/59 - the port is no longer part of the api
 message WebhookSignal {
   // REST API endpoint
   optional string endpoint = 1;
 
-  // Port to listen on
-  optional int32 port = 2;
-
   // Method is HTTP request method that indicates the desired action to be performed for a given resource.
   // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-  optional string method = 3;
+  optional string method = 2;
 }
 

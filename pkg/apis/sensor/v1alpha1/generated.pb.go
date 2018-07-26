@@ -2473,10 +2473,7 @@ func (m *WebhookSignal) MarshalTo(dAtA []byte) (int, error) {
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Endpoint)))
 	i += copy(dAtA[i:], m.Endpoint)
-	dAtA[i] = 0x10
-	i++
-	i = encodeVarintGenerated(dAtA, i, uint64(m.Port))
-	dAtA[i] = 0x1a
+	dAtA[i] = 0x12
 	i++
 	i = encodeVarintGenerated(dAtA, i, uint64(len(m.Method)))
 	i += copy(dAtA[i:], m.Method)
@@ -3022,7 +3019,6 @@ func (m *WebhookSignal) Size() (n int) {
 	_ = l
 	l = len(m.Endpoint)
 	n += 1 + l + sovGenerated(uint64(l))
-	n += 1 + sovGenerated(uint64(m.Port))
 	l = len(m.Method)
 	n += 1 + l + sovGenerated(uint64(l))
 	return n
@@ -3510,7 +3506,6 @@ func (this *WebhookSignal) String() string {
 	}
 	s := strings.Join([]string{`&WebhookSignal{`,
 		`Endpoint:` + fmt.Sprintf("%v", this.Endpoint) + `,`,
-		`Port:` + fmt.Sprintf("%v", this.Port) + `,`,
 		`Method:` + fmt.Sprintf("%v", this.Method) + `,`,
 		`}`,
 	}, "")
@@ -9123,25 +9118,6 @@ func (m *WebhookSignal) Unmarshal(dAtA []byte) error {
 			m.Endpoint = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Port", wireType)
-			}
-			m.Port = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenerated
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Port |= (int32(b) & 0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Method", wireType)
 			}
