@@ -451,6 +451,7 @@ type ArtifactLocation struct {
 	S3     *S3Artifact   `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	Inline string        `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	File   *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
+	URL    *URLArtifact  `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 }
 
 // S3Artifact contains information about an artifact in S3
@@ -463,6 +464,11 @@ type S3Artifact struct {
 
 // FileArtifact contains information about an artifact in a filesystem
 type FileArtifact struct {
+	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+}
+
+// URLArtifact contains information about an artifact at an http endpoint.
+type URLArtifact struct {
 	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
 }
 
