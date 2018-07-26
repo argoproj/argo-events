@@ -286,7 +286,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "efc7eb8984d6655c26b5c9d2e65c024e5767c37c"
+  revision = "d5012789d6659eeed305f54c1b1542e7b65829e6"
 
 [[projects]]
   branch = "master"
@@ -349,7 +349,7 @@
     "selector/static",
     "server/grpc"
   ]
-  revision = "4ff3c6956c31bbfb99558f99a87871d60ef198f8"
+  revision = "76b04f83b00b82565aa57f19d4821b369091fa0c"
 
 [[projects]]
   branch = "master"
@@ -387,7 +387,7 @@
     "status",
     "transport"
   ]
-  revision = "300b12fe07272f249d08530ac8405891b5743f91"
+  revision = "1b992c755a7b4a0ff84978ba56f7cf5944938135"
 
 [[projects]]
   name = "github.com/micro/kubernetes"
@@ -652,7 +652,7 @@
     "trace",
     "websocket"
   ]
-  revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
+  revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
 
 [[projects]]
   branch = "master"
@@ -667,7 +667,7 @@
     "windows/svc/eventlog",
     "windows/svc/mgr"
   ]
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "e072cadbbdc8dd3d3ffa82b8b4b9304c261d9311"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -699,7 +699,7 @@
     "imports",
     "internal/fastwalk"
   ]
-  revision = "ded554d0681e0cba3cf074977cdc12e2c0906fe6"
+  revision = "b1e4acd68ab67534bb0d0aea1080e6f27c9f3032"
 
 [[projects]]
   branch = "master"
