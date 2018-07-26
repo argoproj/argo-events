@@ -18,7 +18,7 @@ type URLReader struct {
 // NewURLReader creates a new ArtifactReader for workflows at URL endpoints.
 func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 	if urlArtifact == nil {
-		panic("URLArtifact cannot be empty")
+		return nil, errors.New("URLArtifact cannot be empty")
 	}
 	return &URLReader{urlArtifact}, nil
 }
