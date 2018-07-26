@@ -24,8 +24,9 @@ func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 }
 
 func (reader *URLReader) Read() ([]byte, error) {
+	insecureSkipVerify := !reader.urlArtifact.VerifyCert
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
 	}
 	client := &http.Client{Transport: tr}
 	resp, err := client.Get(reader.urlArtifact.Path)
