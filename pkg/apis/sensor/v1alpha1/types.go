@@ -469,7 +469,8 @@ type FileArtifact struct {
 
 // URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
-	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+	Path       string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+	VerifyCert bool   `json:"verifycert,omitempty" protobuf:"bytes,2,opt,name=verifycert"`
 }
 
 // S3Bucket contains information for an S3 Bucket
