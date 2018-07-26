@@ -292,16 +292,14 @@ type Stream struct {
 }
 
 // WebhookSignal is a general purpose REST API
+// Due to https://github.com/argoproj/argo-events/issues/59 - the port is no longer part of the api
 type WebhookSignal struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
 
-	// Port to listen on
-	Port int32 `json:"port" protobuf:"bytes,2,opt,name=port"`
-
 	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
 	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string `json:"method" protobuf:"bytes,3,opt,name=method"`
+	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
 }
 
 // Message represents a message on a queue

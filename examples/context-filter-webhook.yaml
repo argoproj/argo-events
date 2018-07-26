@@ -8,8 +8,7 @@ spec:
   signals:
     - name: webhook
       webhook:
-        endpoint: /app
-        port: 7070
+        endpoint: /filter/context
         method: POST
       filters:
         context:

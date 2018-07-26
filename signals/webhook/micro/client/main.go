@@ -35,7 +35,6 @@ func main() {
 		Name: "webhook-1",
 		Webhook: &v1alpha1.WebhookSignal{
 			Endpoint: "/hello",
-			Port:     7070,
 			Method:   "POST",
 		},
 	}
