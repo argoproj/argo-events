@@ -35,6 +35,8 @@ message ArtifactLocation {
   optional string inline = 2;
 
   optional FileArtifact file = 3;
+
+  optional URLArtifact url = 4;
 }
 
 // ArtifactSignal describes an external object dependency
@@ -465,6 +467,11 @@ message URI {
   optional string query = 7;
 
   optional string fragment = 8;
+}
+
+// URLArtifact contains information about an artifact at an http endpoint.
+message URLArtifact {
+  optional string path = 1;
 }
 
 // WebhookSignal is a general purpose REST API
