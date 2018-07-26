@@ -17,7 +17,6 @@ limitations under the License.
 package controller
 
 import (
-	"fmt"
 	"runtime/debug"
 	"time"
 
@@ -77,10 +76,13 @@ func (soc *sOperationCtx) operate() error {
 
 	if soc.s.Status.Phase == v1alpha1.NodePhaseNew {
 		// perform one-time sensor validation
+		// non nil err indicates failed validation
+		// we do not want to requeue a sensor in this case
+		// since validation will fail every time
 		err := validateSensor(soc.s)
 		if err != nil {
 			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())
-			return fmt.Errorf("validation failed due to %s", err.Error())
+			return nil
 		}
 	}
 
