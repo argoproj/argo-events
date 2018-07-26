@@ -24,10 +24,9 @@ import (
 	"sync"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -41,9 +40,8 @@ const (
 // this means that webhook signals are stateful, however losing this state is not a concern since
 // the connections will be re-initialized by the SignalClient
 type webhook struct {
-	srv *http.Server
-	sync.RWMutex
-	inactiveEndpoints map[string]struct{}
+	srv               *http.Server
+	inactiveEndpoints sync.Map
 }
 
 // New creates a new webhook listener for the specified port
@@ -67,7 +65,7 @@ func New(port int) sdk.Listener {
 	}()
 	return &webhook{
 		srv:               srv,
-		inactiveEndpoints: make(map[string]struct{}),
+		inactiveEndpoints: sync.Map{},
 	}
 }
 
@@ -75,13 +73,10 @@ func New(port int) sdk.Listener {
 // todo: make sure that this map lookup doesn't hurt performance if there are many inactive routes
 func (web *webhook) checkActiveEndpoint(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		web.RLock()
-		if _, inactive := web.inactiveEndpoints[r.URL.Path]; inactive {
-			web.RUnlock()
+		if _, inactive := web.inactiveEndpoints.Load(r.URL.Path); inactive {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		web.RUnlock()
 		h.ServeHTTP(w, r)
 	})
 }
@@ -135,9 +130,7 @@ func (web *webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-cha
 		defer close(events)
 		<-done
 		// "deregister" the handler by modifying the inactive map
-		web.Lock()
-		web.inactiveEndpoints[endpoint] = struct{}{}
-		web.Unlock()
+		web.inactiveEndpoints.Store(endpoint, struct{}{})
 		log.Printf("signal '%s' stopped listening at [%s]", signal.Name, signal.Webhook.Endpoint)
 	}()
 	log.Printf("signal '%s' listening for webhooks at [%s]...", signal.Name, signal.Webhook.Endpoint)
