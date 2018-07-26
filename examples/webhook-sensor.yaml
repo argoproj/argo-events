@@ -9,7 +9,6 @@ spec:
     - name: webhook
       webhook:
         endpoint: /app
-        port: 7070
         method: POST
   triggers:
     - name: hello-world-workflow-trigger
