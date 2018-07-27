@@ -10,6 +10,7 @@ Argo Events is an open source event-based dependency manager for Kubernetes. The
 - Easily leverage Kubernetes-native APIs to monitor dependencies
 
 ## Why Argo Events?
+- Runtime agnostic. The first runtime and package agnostic event framework for Kubernetes.
 - Containers. Designed from the ground-up as Kubernetes-native. 
 - Extremely lightweight. All signals, with the exception of calendar-based signals, are event-driven, meaning that there is no polling involved.
 - Configurable. Choose which signals to support and only deploy those you want to Kubernetes.
