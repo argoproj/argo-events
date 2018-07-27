@@ -22,6 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	log "github.com/sirupsen/logrus"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -31,7 +32,7 @@ import (
 )
 
 func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
-	c.log.Info("watching sensor controller config map updates")
+	log.Info("watching sensor controller config map updates")
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
 		source,
@@ -40,19 +41,19 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected ConfigMap update. Updating the controller config.")
+					log.Info("detected ConfigMap update. updating the controller config.")
 					err := c.updateConfig(cm)
 					if err != nil {
-						c.log.Errorf("update of config failed due to: %v", err)
+						log.Errorf("update of config failed due to: %v", err)
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected ConfigMap update. Updating the controller config.")
+					log.Info("detected ConfigMap update. updating the controller config.")
 					err := c.updateConfig(newCm)
 					if err != nil {
-						c.log.Errorf("update of config failed due to: %v", err)
+						log.Errorf("update of config failed due to: %v", err)
 					}
 				}
 			},

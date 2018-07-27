@@ -21,6 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	minio "github.com/minio/minio-go"
+	log "github.com/sirupsen/logrus"
 )
 
 // S3Reader implements the ArtifactReader interface and allows reading artifacts from S3 compatible API store
@@ -44,6 +45,7 @@ func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, e
 }
 
 func (reader *S3Reader) Read() ([]byte, error) {
+	log.Debugf("reading s3Artifact from %s/%s", reader.s3.Bucket, reader.s3.Key)
 	obj, err := reader.client.GetObject(reader.s3.Bucket, reader.s3.Key, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err

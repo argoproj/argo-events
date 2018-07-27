@@ -18,13 +18,13 @@ package calendar
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
 	cronlib "github.com/robfig/cron"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

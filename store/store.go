@@ -62,7 +62,7 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (A
 	} else if loc.URL != nil {
 		return NewURLReader(loc.URL)
 	}
-	return nil, fmt.Errorf(fmt.Sprintf("unknown artifact location: %v", *loc))
+	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
 func decodeAndUnstructure(b []byte, gvk ss_v1alpha1.GroupVersionKind) (*unstructured.Unstructured, error) {

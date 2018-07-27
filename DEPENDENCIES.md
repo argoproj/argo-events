@@ -14,7 +14,7 @@
 |     nats-io/go-nats          |     Apache-2.0          |
 |     robfig/cron              |     MIT                 |
 |     streadway/amqp           |     BSD-2-Clause        |
-|     go.uber.org/zap          |     MIT                 |
+|     sirupsen/logrus          |     MIT                 |
 |     nats-io/gnatsd           |     Apache-2.0          |
 |     Shopify/sarama           |     MIT                 |
 |     stretchr/testify         |     https://github.com/stretchr/testify/blob/master/LICENSE |
