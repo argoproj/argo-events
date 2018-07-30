@@ -20,7 +20,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"go.uber.org/zap"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -36,16 +36,11 @@ type sOperationCtx struct {
 	// s is the sensor object
 	s *v1alpha1.Sensor
 
-	// events contains the latest events for each signal of this sensor
-	// this gets populated during operating
-	// allows passing of events from signals -> triggers
-	events map[string]v1alpha1.Event
-
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
 
-	// log is the log of this context
-	log *zap.SugaredLogger
+	// log is the logrus logging context to correlate logs with a sensor
+	log *log.Entry
 
 	// reference to the sensor controller
 	controller *SensorController
@@ -54,10 +49,12 @@ type sOperationCtx struct {
 // newSensorOperationCtx creates and initializes a new sOperationCtx object
 func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sOperationCtx {
 	return &sOperationCtx{
-		s:          s.DeepCopy(),
-		events:     make(map[string]v1alpha1.Event),
-		updated:    false,
-		log:        controller.log.With(zap.String("sensor", s.Name), zap.String("namespace", s.Namespace)),
+		s:       s.DeepCopy(),
+		updated: false,
+		log: log.WithFields(log.Fields{
+			"sensor":    s.Name,
+			"namespace": s.Namespace,
+		}),
 		controller: controller,
 	}
 }
@@ -101,7 +98,7 @@ func (soc *sOperationCtx) operate() error {
 		for _, trigger := range soc.s.Spec.Triggers {
 			_, err := soc.processTrigger(trigger)
 			if err != nil {
-				soc.log.Errorf("trigger %s failed to execute. %s", trigger.Name, err.Error())
+				soc.log.Errorf("trigger %s failed to execute: %s", trigger.Name, err)
 				soc.markNodePhase(trigger.Name, v1alpha1.NodePhaseError, err.Error())
 				soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 				return err
@@ -152,18 +149,18 @@ func (soc *sOperationCtx) persistUpdates() {
 	sensorClient := soc.controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.ObjectMeta.Namespace)
 	soc.s, err = sensorClient.Update(soc.s)
 	if err != nil {
-		soc.log.Warnf("error updating sensor: %v", err)
+		soc.log.Warnf("error updating sensor: %s", err)
 		if errors.IsConflict(err) {
 			return
 		}
 		soc.log.Info("re-applying updates on latest version and retrying update")
 		err = soc.reapplyUpdate(sensorClient)
 		if err != nil {
-			soc.log.Infof("failed to re-apply update: %+v", err)
+			soc.log.Infof("failed to re-apply update: %s", err)
 			return
 		}
 	}
-	soc.log.Info("sensor update successful")
+	soc.log.Debug("sensor update successful")
 
 	time.Sleep(1 * time.Second)
 }

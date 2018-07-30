@@ -22,14 +22,14 @@ import (
 	"sync"
 	"time"
 
-	"go.uber.org/zap"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/argoproj/argo-events"
+	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/clientset/versioned"
 	"github.com/argoproj/argo-events/sdk"
@@ -73,12 +73,10 @@ type SensorController struct {
 	// inventory for all types of signal implementations
 	signalMu      sync.Mutex
 	signalStreams map[string]sdk.SignalService_ListenService
-
-	log *zap.SugaredLogger
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap string, signalMgr *SignalManager, log *zap.SugaredLogger) *SensorController {
+func NewSensorController(rest *rest.Config, configMap string, signalMgr *SignalManager) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
 		kubeConfig:      rest,
@@ -87,7 +85,6 @@ func NewSensorController(rest *rest.Config, configMap string, signalMgr *SignalM
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		signalMgr:       signalMgr,
 		signalStreams:   make(map[string]sdk.SignalService_ListenService),
-		log:             log,
 	}
 }
 
@@ -101,7 +98,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.Warnf("failed to get sensor '%s' from informer index: %+v", key, err)
+		log.Warnf("failed to get sensor '%s' from informer index: %+v", key, err)
 		return true
 	}
 
@@ -112,7 +109,7 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		c.log.Warnf("key '%s' in index is not a sensor", key)
+		log.Warnf("key '%s' in index is not a sensor", key)
 		return true
 	}
 
@@ -122,10 +119,10 @@ func (c *SensorController) processNextItem() bool {
 	if err != nil {
 		// now let's escalate the sensor
 		// the context should have the most up-to-date version
-		c.log.Infof("escalating sensor to level %s via %s message", ctx.s.Spec.Escalation.Level, ctx.s.Spec.Escalation.Message.Stream.Type)
+		log.Infof("escalating sensor to level %s via %s message", ctx.s.Spec.Escalation.Level, ctx.s.Spec.Escalation.Message.Stream.Type)
 		err := sendMessage(&ctx.s.Spec.Escalation.Message)
 		if err != nil {
-			c.log.Panicf("failed escalating sensor '%s'", key)
+			log.Panicf("failed escalating sensor '%s'", key)
 		}
 	}
 
@@ -146,7 +143,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a signal pod goes down
 	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.log.Errorf("Error syncing sensor '%v': %v", key, err)
+		log.Errorf("Error syncing sensor '%v': %v", key, err)
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -159,10 +156,10 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
 	defer c.queue.ShutDown()
 
-	c.log.Infof("sensor controller (version: %s) (instance: %s) starting", axis.GetVersion(), c.Config.InstanceID)
+	log.Infof("sensor controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.Errorf("failed to register watch for controller config map: %v", err)
+		log.Errorf("failed to register watch for controller config map: %v", err)
 		return
 	}
 
@@ -170,7 +167,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panicf("timed out waiting for the caches to sync")
+		log.Panicf("timed out waiting for the caches to sync")
 		return
 	}
 

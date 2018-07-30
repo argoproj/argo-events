@@ -20,8 +20,6 @@ import (
 	"context"
 	"os"
 
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controller"
 )
@@ -40,19 +38,13 @@ func main() {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
 
-	// logger
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-
 	// stream signal micro services
 	signalMgr, err := controller.NewSignalManager()
 	if err != nil {
 		panic(err)
 	}
 
-	controller := controller.NewSensorController(restConfig, configMap, signalMgr, logger.Sugar())
+	controller := controller.NewSensorController(restConfig, configMap, signalMgr)
 	err = controller.ResyncConfig()
 	if err != nil {
 		panic(err)

@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
@@ -44,7 +43,6 @@ func (f *fakeController) setup(namespace string) {
 		},
 		kubeClientset:   fake.NewSimpleClientset(),
 		sensorClientset: fakesensor.NewSimpleClientset(),
-		log:             zap.NewNop().Sugar(),
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		signalStreams:   make(map[string]sdk.SignalService_ListenService),
 	}

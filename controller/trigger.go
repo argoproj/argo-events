@@ -58,7 +58,7 @@ func (soc *sOperationCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 	if trigger.Message != nil {
 		err := sendMessage(trigger.Message)
 		if err != nil {
-			soc.log.Warn("failed to send message. cause: %s", err.Error())
+			soc.log.Warn("failed to send message: %s", err)
 			return err
 		}
 	}
@@ -167,7 +167,7 @@ func (soc *sOperationCtx) createResourceObject(resource *v1alpha1.ResourceObject
 		return err
 	}
 	//todo: implement a diff between obj and liveObj
-	soc.log.Info("%s '%s' already exists", liveObj.GetKind(), liveObj.GetName())
+	soc.log.Warnf("%s '%s' already exists", liveObj.GetKind(), liveObj.GetName())
 	return nil
 }
 

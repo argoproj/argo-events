@@ -21,8 +21,6 @@ import (
 	"os"
 	"testing"
 
-	"go.uber.org/zap"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/stretchr/testify/assert"
 
@@ -34,15 +32,12 @@ import (
 func TestWatchControllerConfigMap(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	logger, err := zap.NewDevelopment()
-	assert.Nil(t, err)
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
 		ConfigMapNS:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
-		log:           logger.Sugar(),
 	}
-	_, err = controller.watchControllerConfigMap(ctx)
+	_, err := controller.watchControllerConfigMap(ctx)
 	assert.Nil(t, err)
 }
 
