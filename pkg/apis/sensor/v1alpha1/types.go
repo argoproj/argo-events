@@ -466,7 +466,7 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
+	S3Bucket `json:",inline"`
 	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
 	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`

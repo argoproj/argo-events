@@ -19,38 +19,26 @@ package main
 import (
 	"os"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/sdk"
 	"github.com/argoproj/argo-events/signals/artifact"
 	"github.com/micro/go-micro"
 	k8s "github.com/micro/kubernetes/go/micro"
-	"k8s.io/client-go/kubernetes"
 )
 
 func main() {
 	svc := k8s.NewService(micro.Name("artifact"), micro.Metadata(sdk.SignalMetadata))
 	svc.Init()
 
-	// kubernetes configuration
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	rest, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	kubeclient := kubernetes.NewForConfigOrDie(rest)
-
-	// namespace configuration
-	nm := common.DefaultSensorControllerNamespace
-
 	// stream configuration
 	// TODO: make this configurable while running through github.com/micro/go-config
+	// or use google/go-cloud runtimeVars
 	stream, ok := os.LookupEnv("stream-signal")
 	if !ok {
 		stream = "nats"
 	}
 	streamClient := sdk.NewMicroSignalClient(stream, svc.Client())
 
-	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(artifact.New(streamClient, kubeclient, nm)))
+	sdk.RegisterSignalServiceHandler(svc.Server(), sdk.NewMicroSignalServer(artifact.New(streamClient)))
 
 	if err := svc.Run(); err != nil {
 		panic(err)

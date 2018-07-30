@@ -35,7 +35,7 @@ func (m *microSignalClient) Listen(ctx context.Context, signal *v1alpha1.Signal,
 	if err != nil {
 		return nil, err
 	}
-	err = m.handshake(signal, stream)
+	err = m.Handshake(signal, stream)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (m *microSignalClient) Listen(ctx context.Context, signal *v1alpha1.Signal,
 }
 
 // Handshake performs the initial signal handshaking with the server
-func (m *microSignalClient) handshake(signal *v1alpha1.Signal, stream SignalService_ListenService) error {
+func (m *microSignalClient) Handshake(signal *v1alpha1.Signal, stream SignalService_ListenService) error {
 	err := stream.Send(&SignalContext{Signal: signal})
 	if err != nil {
 		return err
