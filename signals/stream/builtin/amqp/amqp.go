@@ -18,10 +18,10 @@ package amqp
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	amqplib "github.com/streadway/amqp"

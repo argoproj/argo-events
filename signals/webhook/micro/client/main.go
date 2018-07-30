@@ -20,12 +20,12 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"log"
 	"net/http"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
 	"github.com/argoproj/argo-events/shared"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {

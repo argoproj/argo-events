@@ -3,9 +3,9 @@ package store
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	log "github.com/sirupsen/logrus"
 )
 
 // FileReader implements the ArtifactReader interface for file artifacts
@@ -19,15 +19,14 @@ func NewFileReader(fileArtifact *v1alpha1.FileArtifact) (ArtifactReader, error) 
 	if fileArtifact == nil {
 		return nil, errors.New("FileArtifact cannot be empty")
 	}
-	log.Printf("Creating fileReader from %s!\n", fileArtifact.Path)
 	return &FileReader{fileArtifact}, nil
 }
 
 func (reader *FileReader) Read() ([]byte, error) {
 	content, err := ioutil.ReadFile(reader.fileArtifact.Path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	log.Printf("Reading fileArtifact from %s!\n", reader.fileArtifact.Path)
+	log.Debugf("reading fileArtifact from %s", reader.fileArtifact.Path)
 	return content, nil
 }

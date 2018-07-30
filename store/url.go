@@ -4,10 +4,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	log "github.com/sirupsen/logrus"
 )
 
 // URLReader implements the ArtifactReader interface for urls
@@ -24,26 +24,28 @@ func NewURLReader(urlArtifact *v1alpha1.URLArtifact) (ArtifactReader, error) {
 }
 
 func (reader *URLReader) Read() ([]byte, error) {
+	log.Debugf("reading urlArtifact from %s", reader.urlArtifact.Path)
 	insecureSkipVerify := !reader.urlArtifact.VerifyCert
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSkipVerify},
+		},
 	}
-	client := &http.Client{Transport: tr}
 	resp, err := client.Get(reader.urlArtifact.Path)
 	if err != nil {
-		log.Printf("Failed to read url %s. Err: %s\n", reader.urlArtifact.Path, err)
+		log.Warnf("failed to read url %s: %s", reader.urlArtifact.Path, err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Failed to read %s. Status code: %d\n", reader.urlArtifact.Path, resp.StatusCode)
-		return nil, errors.New("Status code " + string(resp.StatusCode))
+		log.Warnf("failed to read %s. status code: %d", reader.urlArtifact.Path, resp.StatusCode)
+		return nil, errors.New("status code " + string(resp.StatusCode))
 	}
 
 	content, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Printf("Failed to read url body for %s. Err %s\n", reader.urlArtifact.Path, err)
+		log.Warnf("failed to read url body for %s: %s", reader.urlArtifact.Path, err)
 		return nil, err
 	}
 	return content, nil

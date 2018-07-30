@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	io "io"
-	"log"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	google_protobuf "github.com/golang/protobuf/ptypes/empty"
@@ -46,7 +45,7 @@ func (m *microSignalServer) Listen(ctx context.Context, stream SignalService_Lis
 				return
 			}
 			if err != nil {
-				log.Panicf("encountered error on stream recv: %s", err)
+				panic(err)
 			}
 			if sigCtx.Done {
 				close(done)
@@ -62,7 +61,6 @@ func (m *microSignalServer) Listen(ctx context.Context, stream SignalService_Lis
 			}
 			err := stream.Send(&EventContext{Event: event})
 			if err != nil {
-				log.Printf("microSignalServer failed to send event: %s", err)
 				return err
 			}
 		case <-ctx.Done():

@@ -18,13 +18,13 @@ package mqtt
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

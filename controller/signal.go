@@ -25,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
+	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -54,7 +55,7 @@ func (soc *sOperationCtx) processSignal(signal v1alpha1.Signal) (*v1alpha1.NodeS
 			// this can happen if the sensor was deleted and re-created.
 			// let's log a warning but let's keep the stream running to receive events.
 			// TODO: add check to see if service is running and we're reading from the stream?
-			soc.log.Info("WARNING: signal '%s' is new however signal stream is already present", signal.Name)
+			soc.log.Warnf("WARNING: signal '%s' is new however signal stream is already present", signal.Name)
 		}
 	} else {
 		if !soc.signalIsPresent(node.ID) {
@@ -62,7 +63,7 @@ func (soc *sOperationCtx) processSignal(signal v1alpha1.Signal) (*v1alpha1.NodeS
 			// this means that we had down-time for this signal - we could have missed events.
 			// this can happen if the controller or a signal pod serving the stream goes down.
 			// let's log a warning and attempt to re-establish a stream and watch for events.
-			soc.log.Infof("WARNING: event stream for signal '%s' is missing - could have missed events! reconnecting stream...", signal.Name)
+			soc.log.Warnf("WARNING: event stream for signal '%s' is missing - could have missed events! reconnecting stream...", signal.Name)
 			err := soc.watchSignal(&signal)
 			if err != nil {
 				return nil, err
@@ -72,7 +73,6 @@ func (soc *sOperationCtx) processSignal(signal v1alpha1.Signal) (*v1alpha1.NodeS
 
 	// let's check the latest event to see if node has completed?
 	if node.LatestEvent != nil {
-		soc.events[node.ID] = node.LatestEvent.Event
 		if !node.LatestEvent.Seen {
 			soc.s.Status.Nodes[node.ID].LatestEvent.Seen = true
 			soc.updated = true
@@ -198,10 +198,10 @@ func (c *SensorController) listenOnStream(streamCtx *streamCtx) {
 			// we can get here if the sensor was deleted and the stream was not closed
 			// we should attempt to log a warning and stop & close the signal stream
 			// TODO: why call stopSignal() when we have access to the stream within this func?
-			c.log.Warnf("Event Stream (%s/%s) Error: %s. Terminating event stream...", streamCtx.sensor, streamCtx.signal.Name, err)
+			log.Warnf("Event Stream (%s/%s) Error: %s. Terminating event stream...", streamCtx.sensor, streamCtx.signal.Name, err)
 			err := c.stopSignal(streamCtx.nodeID)
 			if err != nil {
-				c.log.Panicf("failed to stop signal stream '%s': %s", streamCtx.nodeID, err)
+				log.Panicf("failed to stop signal stream '%s': %s", streamCtx.nodeID, err)
 			}
 		}
 		phase := s.Status.Phase
@@ -209,11 +209,11 @@ func (c *SensorController) listenOnStream(streamCtx *streamCtx) {
 		node, ok := s.Status.Nodes[streamCtx.nodeID]
 		if !ok {
 			// TODO: should we re-initialize this node?
-			c.log.Panicf("Event Stream (%s/%s) Fatal: '%s' node is missing from sensor's nodes", streamCtx.sensor, streamCtx.signal.Name, streamCtx.nodeID)
+			log.Errorf("Event Stream (%s/%s) Fatal: '%s' node is missing from sensor's nodes", streamCtx.sensor, streamCtx.signal.Name, streamCtx.nodeID)
 		}
 
 		if streamErr != nil {
-			c.log.Infof("Event Stream (%s/%s) Error: removing & terminating stream due to: %s", streamCtx.sensor, streamCtx.signal.Name, streamErr)
+			log.Errorf("Event Stream (%s/%s) Error: removing & terminating stream due to: %s", streamCtx.sensor, streamCtx.signal.Name, streamErr)
 			// error received from the stream
 			// remove the stream from the signalStreams map
 			c.signalMu.Lock()
@@ -229,14 +229,14 @@ func (c *SensorController) listenOnStream(streamCtx *streamCtx) {
 		} else {
 			ok, err := filterEvent(streamCtx.signal.Filters, in.Event)
 			if err != nil {
-				c.log.Infof("Event Stream (%s/%s) Msg: (Action:IGNORED) - Failed to filter event: %s", streamCtx.sensor, streamCtx.signal.Name, err)
+				log.Errorf("Event Stream (%s/%s) Msg: (Action:IGNORED) - Failed to filter event: %s", streamCtx.sensor, streamCtx.signal.Name, err)
 				continue
 			}
 			if ok {
-				c.log.Debugf("Event Stream (%s/%s) Msg: (Action:ACCEPTED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
+				log.Infof("Event Stream (%s/%s) Msg: (Action:ACCEPTED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
 				node.LatestEvent = &v1alpha1.EventWrapper{Event: *in.Event}
 			} else {
-				c.log.Debugf("Event Stream (%s/%s) Msg: (Action:FILTERED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
+				log.Debugf("Event Stream (%s/%s) Msg: (Action:FILTERED) - Context: %s", streamCtx.sensor, streamCtx.signal.Name, in.Event.Context)
 				continue
 			}
 		}
@@ -261,7 +261,7 @@ func (c *SensorController) listenOnStream(streamCtx *streamCtx) {
 			return true, nil
 		})
 		if err != nil {
-			c.log.Panicf("Event Stream (%s/%s) Update Resource Failed: %s", streamCtx.sensor, streamCtx.signal.Name, err)
+			log.Panicf("Event Stream (%s/%s) Update Resource Failed: %s", streamCtx.sensor, streamCtx.signal.Name, err)
 		}
 
 		// finally check if there was a streamErr, we must return

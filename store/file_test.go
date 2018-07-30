@@ -2,7 +2,6 @@ package store
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"testing"
 
@@ -14,16 +13,16 @@ func TestFileReader(t *testing.T) {
 	content := []byte("temp content")
 	tmpfile, err := ioutil.TempFile("", "argo-events-temp")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	defer os.Remove(tmpfile.Name())
 
 	if _, err := tmpfile.Write(content); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 	if err := tmpfile.Close(); err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	fileArtifact := v1alpha1.FileArtifact{Path: tmpfile.Name()}
