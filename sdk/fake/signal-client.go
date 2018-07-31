@@ -31,6 +31,7 @@ func (*simpleLoopListenService) RecvMsg(interface{}) error {
 }
 
 func (f *simpleLoopListenService) Close() error {
+	close(f.events)
 	return nil
 }
 

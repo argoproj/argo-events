@@ -85,7 +85,6 @@ func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1al
 	// wait for stop signal
 	go func() {
 		<-done
-		close(events)
 		// TODO: should we cancel or gracefully shutdown and first send Terminate msg
 		err := stream.Send(sdk.Terminate)
 		if err != nil {
@@ -95,7 +94,9 @@ func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1al
 		if err != nil {
 			log.Panicf("failed to close stream: %s", err)
 		}
+		log.Printf("shut down signal '%s'", signal.Name)
 	}()
+	log.Printf("signal '%s' listening for S3 [%s] for bucket [%s]...", signal.Name, signal.Artifact.S3.Event, signal.Artifact.S3.Bucket)
 	return events, nil
 }
 
@@ -143,6 +144,7 @@ func (s *s3) interceptFilterAndEnhanceEvents(sig *v1alpha1.Signal, sendCh chan *
 				Scheme: record.S3.SchemaVersion,
 			}
 			event.Context.EventID = record.S3.Object.ETag
+			event.Context.ContentType = "application/json"
 
 			// re-marshal each record back into json
 			recordEvent := new(minio.NotificationEvent)
