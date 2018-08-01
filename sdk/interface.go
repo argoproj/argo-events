@@ -46,20 +46,11 @@ type Listener interface {
 	Listen(*v1alpha1.Signal, <-chan struct{}) (<-chan *v1alpha1.Event, error)
 }
 
-// ArtifactListener is the interface for listening with artifacts
-// In addition to including the basic Listener interface, this also
-// enables access to read an artifact object to include in the event data payload
-type ArtifactListener interface {
-	Listener
-	// TODO: change to use io.Reader and io.Closer interfaces?
-	Read(loc *v1alpha1.ArtifactLocation, key string) ([]byte, error)
-}
-
 // SignalClient is the interface for signal clients
 type SignalClient interface {
 	Ping(context.Context) error
 	Listen(context.Context, *v1alpha1.Signal, ...client.CallOption) (SignalService_ListenService, error)
-	handshake(*v1alpha1.Signal, SignalService_ListenService) error
+	Handshake(*v1alpha1.Signal, SignalService_ListenService) error
 }
 
 // SignalServer is the interface for signal servers

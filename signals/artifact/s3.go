@@ -22,19 +22,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sdk"
-	"github.com/argoproj/argo-events/store"
-	"github.com/golang/protobuf/proto"
 	minio "github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -46,18 +42,12 @@ const (
 // receive struct to save or modify state.
 // Listen() methods CAN retrieve fields from the s3 struct.
 type s3 struct {
-	kubeClient   kubernetes.Interface
-	namespace    string
 	streamClient sdk.SignalClient
 }
 
 // New creates a new S3 signal
-func New(client sdk.SignalClient, kubeClient kubernetes.Interface, nm string) sdk.ArtifactListener {
-	return &s3{
-		streamClient: client,
-		kubeClient:   kubeClient,
-		namespace:    nm,
-	}
+func New(client sdk.SignalClient) sdk.Listener {
+	return &s3{streamClient: client}
 }
 
 func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
@@ -95,7 +85,6 @@ func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1al
 	// wait for stop signal
 	go func() {
 		<-done
-		close(events)
 		// TODO: should we cancel or gracefully shutdown and first send Terminate msg
 		err := stream.Send(sdk.Terminate)
 		if err != nil {
@@ -105,7 +94,9 @@ func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1al
 		if err != nil {
 			log.Panicf("failed to close stream: %s", err)
 		}
+		log.Printf("shut down signal '%s'", signal.Name)
 	}()
+	log.Printf("signal '%s' listening for S3 [%s] for bucket [%s]...", signal.Name, signal.Artifact.S3.Event, signal.Artifact.S3.Bucket)
 	return events, nil
 }
 
@@ -113,23 +104,30 @@ func (s *s3) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1al
 // intercepts the receive-only msgs off the stream, filters them, and writes artifact events
 // to the sendCh.
 func (s *s3) interceptFilterAndEnhanceEvents(sig *v1alpha1.Signal, sendCh chan *v1alpha1.Event, recvCh <-chan *v1alpha1.Event) {
+	loc := sig.Artifact.ArtifactLocation
 	defer close(sendCh)
 	for streamEvent := range recvCh {
-		// todo: apply general filtering on cloudEvents
-		event := proto.Clone(streamEvent).(*v1alpha1.Event)
-
 		notification := &minio.NotificationInfo{}
 		err := json.Unmarshal(streamEvent.Data, notification)
 		if err != nil {
 			// we ignore this - as this stream could be in use by another publisher of different notifications
+			log.Warnf("failed to unmarshal notification %s: %s", streamEvent.Data, err)
 			continue
 		}
 		if notification.Err != nil {
+			event := streamEvent.DeepCopy()
 			event.Context.Extensions[sdk.ContextExtensionErrorKey] = notification.Err.Error()
+			sendCh <- event
 		}
 		for _, record := range notification.Records {
-			if ok := applyFilter(&record, sig.Artifact.ArtifactLocation); !ok {
+			event := streamEvent.DeepCopy()
+
+			if ok := applyFilter(&record, loc); !ok {
 				// this record failed to pass the filter so we ignore it
+				log.Debugf("filtered event - record metadata [bucket: %s, event: %s, key: %s] "+
+					"does not match expected s3 [bucket: %s, event: %s, filter: %v]",
+					record.S3.Bucket.Name, record.EventName, record.S3.Object.Key,
+					loc.S3.Bucket, loc.S3.Event, loc.S3.Filter)
 				continue
 			}
 			port, _ := strconv.ParseInt(record.Source.Port, 10, 32)
@@ -146,13 +144,17 @@ func (s *s3) interceptFilterAndEnhanceEvents(sig *v1alpha1.Signal, sendCh chan *
 				Scheme: record.S3.SchemaVersion,
 			}
 			event.Context.EventID = record.S3.Object.ETag
+			event.Context.ContentType = "application/json"
 
-			// read the actual s3 artifact to put into the event data
-			b, err := s.Read(&sig.Artifact.ArtifactLocation, record.S3.Object.Key)
+			// re-marshal each record back into json
+			recordEvent := new(minio.NotificationEvent)
+			recordEventBytes, err := json.Marshal(recordEvent)
 			if err != nil {
-				event.Context.Extensions[sdk.ContextExtensionErrorKey] = err.Error()
+				log.Warnf("failed to re-marshal notification event into json: %s. falling back to the stream event's original data", err)
+				event.Data = streamEvent.Data
+			} else {
+				event.Data = recordEventBytes
 			}
-			event.Data = b
 			sendCh <- event
 		}
 	}
@@ -194,26 +196,4 @@ func getMetaTimestamp(tStr string) metav1.Time {
 		return metav1.Time{Time: time.Now().UTC()}
 	}
 	return metav1.Time{Time: t}
-}
-
-func (s *s3) Read(loc *v1alpha1.ArtifactLocation, key string) ([]byte, error) {
-	creds, err := store.GetCredentials(s.kubeClient, s.namespace, loc)
-	if err != nil {
-		return nil, err
-	}
-	client, err := store.NewMinioClient(loc.S3, *creds)
-	if err != nil {
-		return nil, err
-	}
-
-	obj, err := client.GetObject(loc.S3.Bucket, key, minio.GetObjectOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer obj.Close()
-	b, err := ioutil.ReadAll(obj)
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
 }
