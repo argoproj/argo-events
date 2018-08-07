@@ -91,6 +91,10 @@ func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContex
 func filterData(dataFilters []*v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
+	if dataFilters == nil {
+		return true, nil
+	}
+
 	if event == nil {
 		return false, fmt.Errorf("nil event")
 	}
