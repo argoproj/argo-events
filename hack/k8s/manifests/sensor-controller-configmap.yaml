@@ -1,8 +1,9 @@
-# The sensor controller configmap includes configuration information for the sensor controller
+# The sensor sensor-controller configmap includes configuration information for the sensor sensor-controller
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: sensor-controller-configmap
+  namespace: argo-events
 data:
   config: |
     instanceID: axis

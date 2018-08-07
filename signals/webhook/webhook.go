@@ -14,125 +14,75 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package webhook
+package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"sync"
-	"time"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
-	log "github.com/sirupsen/logrus"
+	"github.com/argoproj/argo-events/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"log"
+	"net/http"
+	"os"
 )
 
-const (
-	EventType            string = "Webhook"
-	HeaderKeyContentType string = "Content-Type"
-)
-
-// Note: micro requires stateless operation so the Listen() method should not use the
-// receive struct to save or modify state.
-// webhooks are special in that they should only have one http Server since the port is fixed at runtime
-// this means that webhook signals are stateful, however losing this state is not a concern since
-// the connections will be re-initialized by the SignalClient
 type webhook struct {
-	srv               *http.Server
-	inactiveEndpoints sync.Map
+	srv        *http.Server
+	clientset  *kubernetes.Clientset
+	config     string
+	namespace  string
+	targetPort string
 }
 
-// New creates a new webhook listener for the specified port
-func New(port int) sdk.Listener {
-	srv := &http.Server{
-		Addr: fmt.Sprintf(":%v", port),
-		// Good practice to enforce timeouts to avoid Slowloris attacks
-		WriteTimeout: time.Second * 5,
-		ReadTimeout:  time.Second * 5,
-		IdleTimeout:  time.Second * 30,
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
 	}
-	// Start http server
-	go func() {
-		log.Printf("starting http server listening on: %s", srv.Addr)
-		err := srv.ListenAndServe()
-		if err == http.ErrServerClosed {
-			log.Printf("successfully shutdown http server")
+
+	// Todo: hardcoded for now, move it to constants
+	config := "webhook-gateway-configmap"
+
+	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
+	if namespace == "" {
+		panic("no namespace provided")
+	}
+
+	targetPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	if !ok {
+		panic("gateway transformer port is not provided")
+	}
+
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+
+	w := &webhook{
+		clientset:  clientset,
+		config:     config,
+		namespace:  namespace,
+		targetPort: targetPort,
+	}
+
+	configmap, err := w.clientset.CoreV1().ConfigMaps(w.namespace).Get(w.config, metav1.GetOptions{})
+	if err != nil {
+		panic(fmt.Errorf("failed to get webhook configuration. Err: %+v", err))
+	}
+
+	port := configmap.Data["port"]
+	url := configmap.Data["endpointURL"]
+	method := configmap.Data["method"]
+
+	log.Printf("port %s, url %s, method %s", port, url, method)
+
+	http.HandleFunc(url, func(writer http.ResponseWriter, request *http.Request) {
+		if request.Method == method {
+			log.Printf("recieved a request, forwarding it to http://localhost:%s", w.targetPort)
+			http.Post(fmt.Sprintf("http://localhost:%s", w.targetPort), "application/octet-stream", request.Body)
 		} else {
-			log.Panicf("http server encountered error listening: %v", err)
+			fmt.Errorf("http method is not supported")
 		}
-	}()
-	return &webhook{
-		srv:               srv,
-		inactiveEndpoints: sync.Map{},
-	}
-}
-
-// this is a helper middleware to allow "deregistering" http routes
-// todo: make sure that this map lookup doesn't hurt performance if there are many inactive routes
-func (web *webhook) checkActiveEndpoint(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if _, inactive := web.inactiveEndpoints.Load(r.URL.Path); inactive {
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		h.ServeHTTP(w, r)
 	})
-}
 
-func (web *webhook) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
-	method := signal.Webhook.Method
-	endpoint := signal.Webhook.Endpoint
-	events := make(chan *v1alpha1.Event)
-
-	handler := func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("signal '%s' received a %s request from '%s'", signal.Name, req.Method, req.Host)
-		if req.Method == method {
-			payload, err := ioutil.ReadAll(req.Body)
-			if err != nil {
-				log.Printf("unable to process request payload: %s", err)
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-			event := &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
-					EventType:          EventType,
-					EventTypeVersion:   req.Proto,
-					CloudEventsVersion: sdk.CloudEventsVersion,
-					Source: &v1alpha1.URI{
-						Scheme: req.RequestURI,
-						Host:   req.Host,
-					},
-					ContentType: req.Header.Get(HeaderKeyContentType),
-					EventTime:   metav1.Time{Time: time.Now().UTC()},
-				},
-				Data: payload,
-			}
-			events <- event
-			w.WriteHeader(http.StatusOK)
-		} else {
-			log.Printf("http method '%s' does not match expected method '%s' for signal '%s'", req.Method, method, signal.Name)
-			w.WriteHeader(http.StatusBadRequest)
-		}
-	}
-
-	// Attach new mux handler
-	// TODO: explore in tests how listening on multiple webhook signals fares...
-	// TODO: use github.com/gorilla/mux
-	// - pattern matching specifics
-	// - same endpoint resolution - are both signals resolved?
-	h := http.HandlerFunc(handler)
-	http.Handle(endpoint, web.checkActiveEndpoint(h))
-
-	// wait for stop signal
-	go func() {
-		defer close(events)
-		<-done
-		// "deregister" the handler by modifying the inactive map
-		web.inactiveEndpoints.Store(endpoint, struct{}{})
-		log.Printf("signal '%s' stopped listening at [%s]", signal.Name, signal.Webhook.Endpoint)
-	}()
-	log.Printf("signal '%s' listening for webhooks at [%s]...", signal.Name, signal.Webhook.Endpoint)
-	return events, nil
+	log.Println(fmt.Sprintf("server started listening on port %s", port))
+	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", port), nil))
 }

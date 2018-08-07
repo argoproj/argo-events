@@ -1,0 +1,9 @@
+# The gateway-controller configmap includes configuration information for the gateway-controller
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-controller-configmap
+  namespace: argo-events
+data:
+  config: |
+    instanceID: axis

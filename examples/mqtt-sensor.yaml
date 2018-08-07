@@ -20,4 +20,4 @@ spec:
           type: mqtt
           url: tcp://localhost:1883
           attributes:
-            topic: gateway
+            topic: gateway-controller

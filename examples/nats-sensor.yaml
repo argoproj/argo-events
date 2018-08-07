@@ -23,4 +23,4 @@ spec:
           type: nats
           url: nats://example-nats-cluster.nats-io:4222
           attributes:
-            subject: gateway-sensor
+            subject: gateway-controller-sensor

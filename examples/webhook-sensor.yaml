@@ -2,18 +2,17 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-example
+  namespace: argo-events
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
+  serviceAccountName: argo-events-sa
   signals:
-    - name: webhook
-      webhook:
-        endpoint: /app
-        method: POST
+    - name: webhook-example-gateway
   triggers:
     - name: hello-world-workflow-trigger
       resource:
-        namespace: default
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

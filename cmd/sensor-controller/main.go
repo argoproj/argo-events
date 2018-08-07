@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controller"
+	"github.com/argoproj/argo-events/sensor-controller"
 )
 
 func main() {
@@ -32,19 +32,13 @@ func main() {
 		panic(err)
 	}
 
-	// controller configuration
+	// sensor-controller configuration
 	configMap, ok := os.LookupEnv(common.EnvVarConfigMap)
 	if !ok {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
 
-	// stream signal micro services
-	signalMgr, err := controller.NewSignalManager()
-	if err != nil {
-		panic(err)
-	}
-
-	controller := controller.NewSensorController(restConfig, configMap, signalMgr)
+	controller := sensor_controller.NewSensorController(restConfig, configMap)
 	err = controller.ResyncConfig()
 	if err != nil {
 		panic(err)

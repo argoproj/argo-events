@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webhook-gateway-configmap
+  namespace: argo-events
+data:
+  port: "12000"
+  endpointURL: "/app"
+  method: "POST"

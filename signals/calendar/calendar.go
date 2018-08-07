@@ -14,47 +14,47 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package calendar
+package main
 
 import (
 	"fmt"
 	"time"
 
+	"bytes"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
 	cronlib "github.com/robfig/cron"
+	zlog "github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-const (
-	EventType = "com.github.argoproj.calendar"
+	"k8s.io/client-go/kubernetes"
+	"net/http"
+	"os"
+	"strings"
 )
 
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
-// Note: micro requires stateless operation so the Listen() method should not use the
-// receive struct to save or modify state.
-type calendar struct{}
-
-// New creates a new calendar listener
-func New() sdk.Listener {
-	return new(calendar)
+type calendar struct {
+	events          chan metav1.Time
+	transformerPort string
+	namespace       string
+	log             zlog.Logger
+	clientset       *kubernetes.Clientset
+	schedule        string
+	interval        string
+	recurrences     []string
 }
 
-func (c *calendar) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
-	schedule, err := resolveSchedule(signal.Calendar)
+func (c *calendar) startCalender() {
+	schedule, err := c.resolveSchedule()
 	if err != nil {
-		return nil, err
+		panic("failed to resolve calendar schedule")
 	}
-	exDates, err := common.ParseExclusionDates(signal.Calendar.Recurrence)
+	exDates, err := common.ParseExclusionDates(c.recurrences)
 	if err != nil {
-		return nil, err
+		panic("failed to resolve calendar schedule")
 	}
-
-	events := make(chan *v1alpha1.Event)
 
 	var next Next
 	next = func(last time.Time) time.Time {
@@ -71,29 +71,51 @@ func (c *calendar) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan
 		return nextT
 	}
 
-	// start handling events
-	go c.handleEvents(events, next, done)
-	return events, nil
+	lastT := time.Now()
+	for {
+		t := next(lastT)
+		timer := time.After(time.Until(t))
+		log.Printf("expected next calendar event %s", t)
+		select {
+		case tx := <-timer:
+			lastT = tx
+			c.log.Info().Msg("event sending")
+			event := metav1.Time{Time: t}
+			payload, err := event.Marshal()
+			if err != nil {
+				c.log.Warn().Err(err).Msg("failed to get event bytes")
+			} else {
+				// dispatch the event to gateway transformer
+				_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.transformerPort), "application/octet-stream", bytes.NewReader(payload))
+				if err != nil {
+					c.log.Warn().Err(err).Msg("failed to dispatch the event")
+				}
+				c.log.Info().Msg("event sent")
+			}
+		}
+	}
 }
 
-func (c *calendar) handleEvents(events chan *v1alpha1.Event, next Next, done <-chan struct{}) {
+func (c *calendar) handleEvents(events chan metav1.Time, next Next) {
 	defer close(events)
-	eventTimer := c.getEventTimer(next, done)
+	eventTimer := c.getEventTimer(next)
 	for t := range eventTimer {
-		event := &v1alpha1.Event{
-			Context: v1alpha1.EventContext{
-				EventID:            t.String(),
-				EventType:          EventType,
-				CloudEventsVersion: sdk.CloudEventsVersion,
-				EventTime:          metav1.Time{Time: t},
-				Extensions:         make(map[string]string),
-			},
+		event := metav1.Time{Time: t}
+		payload, err := event.Marshal()
+		if err != nil {
+			c.log.Warn().Err(err).Msg("failed to get event bytes")
+		} else {
+			// dispatch the event to gateway transformer
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.transformerPort), "application/octet-stream", bytes.NewReader(payload))
+			if err != nil {
+				c.log.Warn().Err(err).Msg("failed to dispatch the event")
+			}
 		}
 		events <- event
 	}
 }
 
-func (c *calendar) getEventTimer(next Next, done <-chan struct{}) <-chan time.Time {
+func (c *calendar) getEventTimer(next Next) <-chan time.Time {
 	lastT := time.Now()
 	eventTimer := make(chan time.Time)
 	go func() {
@@ -106,29 +128,82 @@ func (c *calendar) getEventTimer(next Next, done <-chan struct{}) <-chan time.Ti
 			case tx := <-timer:
 				eventTimer <- tx
 				lastT = tx
-			case <-done:
-				return
 			}
 		}
 	}()
 	return eventTimer
 }
 
-func resolveSchedule(cal *v1alpha1.CalendarSignal) (cronlib.Schedule, error) {
-	if cal.Schedule != "" {
-		schedule, err := cronlib.Parse(cal.Schedule)
+func (cal *calendar) resolveSchedule() (cronlib.Schedule, error) {
+	if cal.schedule != "" {
+		schedule, err := cronlib.Parse(cal.schedule)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.Schedule, err.Error())
+			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.schedule, err.Error())
 		}
 		return schedule, nil
-	} else if cal.Interval != "" {
-		intervalDuration, err := time.ParseDuration(cal.Interval)
+	} else if cal.interval != "" {
+		intervalDuration, err := time.ParseDuration(cal.interval)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", cal.Interval, err.Error())
+			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", cal.interval, err.Error())
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
 	} else {
 		return nil, fmt.Errorf("calendar signal must contain either a schedule or interval")
 	}
+}
+
+// validate the calender configuration
+func (c *calendar) validate(configMapName string) (*map[string]string, error) {
+	configmap, err := c.clientset.CoreV1().ConfigMaps(c.namespace).Get(configMapName, metav1.GetOptions{})
+	if err != nil {
+		c.log.Panic().Str("configmap", configMapName).Err(err).Msg("failed to get configmap")
+	}
+	configData := configmap.Data
+	if configData["interval"] != "" && configData["scheduler"] != "" {
+		c.log.Error().Msg("invalid configuration. can't have both interval and schedule set")
+	}
+	if configData["interval"] == "" && configData["scheduler"] == "" {
+		c.log.Error().Msg("invalid configuration. either interval or schedule set")
+	}
+	return &configData, err
+}
+
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	// Todo: hardcoded for now, move it to constants
+	config := "calendar-gateway-configmap"
+	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
+	if namespace == "" {
+		panic("no namespace provided")
+	}
+	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	if !ok {
+		panic("gateway transformer port is not provided")
+	}
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+	events := make(chan metav1.Time)
+
+	cal := &calendar{
+		transformerPort: transformerPort,
+		clientset:       clientset,
+		events:          events,
+		namespace:       namespace,
+		log:             zlog.New(os.Stdout).With().Logger(),
+	}
+
+	// validate the configuration
+	configData, err := cal.validate(config)
+	if err != nil {
+		panic("invalid configuration")
+	}
+	cal.schedule = (*configData)["schedule"]
+	cal.interval = (*configData)["interval"]
+	cal.recurrences = strings.Split((*configData)["recurrences"], ",")
+	cal.startCalender()
 }

@@ -16,7 +16,7 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        # The following requires that the sensor-controller be run with a
+        # The following requires that the sensor-sensor-controller be run with a
         # volume mount that has the workflow yamls in it.
         source:
           file:

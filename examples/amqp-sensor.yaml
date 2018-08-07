@@ -23,4 +23,4 @@ spec:
           url: amqp://localhost:5672
           attributes:
             exchangeName: doneExchangeName
-            routingKey: gateway-sensor
+            routingKey: gateway-controller-sensor

@@ -526,7 +526,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					},
 					"artifactLocation": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Location in which the K8 resource file(s) are stored. If omitted, will attempt to use the default artifact location configured in the controller.",
+							Description: "Location in which the K8 resource file(s) are stored. If omitted, will attempt to use the default artifact location configured in the sensor-controller.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},

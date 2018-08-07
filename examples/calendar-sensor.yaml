@@ -1,30 +1,37 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: cal-example
+  name: calendar-example
+  namespace: argo-events
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
+  serviceAccountName: argo-events-sa
+  imagePullPolicy: Always
+  repeat: true
   signals:
-    - name: time
-      calendar:
-        interval: 10s
+    - name: calendar-example-gateway
   triggers:
-    - name: done-workflow
+    - name: hello-world-workflow-trigger
       resource:
-        namespace: default
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
         source:
-          s3:
-            bucket: workflows
-            key: hello-world.yaml
-            endpoint: artifacts-minio.default:9000
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

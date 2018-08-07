@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calendar-gateway-configmap
+  namespace: argo-events
+data:
+  interval: 10s

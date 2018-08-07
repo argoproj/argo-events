@@ -35,4 +35,4 @@ spec:
           type: nats
           url: nats://example-nats-cluster:4222
           attributes:
-            subject: gateway
+            subject: gateway-controller
