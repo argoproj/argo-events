@@ -231,14 +231,14 @@ func Test_filterData(t *testing.T) {
 		{
 			name:    "nil event",
 			args:    args{dataFilters: nil, event: nil},
-			want:    false,
-			wantErr: true,
+			want:    true,
+			wantErr: false,
 		},
 		{
 			name:    "unsupported content type",
 			args:    args{dataFilters: nil, event: &v1alpha1.Event{Data: []byte("a")}},
-			want:    false,
-			wantErr: true,
+			want:    true,
+			wantErr: false,
 		},
 		{
 			name: "empty data",
