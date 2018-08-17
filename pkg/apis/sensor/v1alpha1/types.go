@@ -85,7 +85,7 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// Escalation describes the policy for signal failures and violations of the dependency's constraints.
-	Escalation EscalationPolicy `json:"escalation,omitempty" protobuf:"bytes,3,opt,name=escalation"`
+	Escalation *EscalationPolicy `json:"escalation,omitempty" protobuf:"bytes,3,opt,name=escalation"`
 
 	// Repeat is a flag that determines if the sensor status should be reset after completion.
 	// NOTE: functionality is currently expiremental and part of an initiative to define
@@ -466,7 +466,7 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	S3Bucket `json:",inline"`
+	S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
 	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
 	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
