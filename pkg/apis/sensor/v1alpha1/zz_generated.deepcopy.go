@@ -553,7 +553,11 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	in.Escalation.DeepCopyInto(&out.Escalation)
+	if in.Escalation != nil {
+		in, out := &in.Escalation, &out.Escalation
+		*out = new(EscalationPolicy)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

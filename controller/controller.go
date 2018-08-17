@@ -116,7 +116,7 @@ func (c *SensorController) processNextItem() bool {
 	ctx := newSensorOperationCtx(sensor, c)
 
 	err = c.handleErr(ctx.operate(), key)
-	if err != nil {
+	if err != nil && ctx.s.Spec.Escalation != nil {
 		// now let's escalate the sensor
 		// the context should have the most up-to-date version
 		log.Infof("escalating sensor to level %s via %s message", ctx.s.Spec.Escalation.Level, ctx.s.Spec.Escalation.Message.Stream.Type)
