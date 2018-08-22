@@ -16,6 +16,14 @@ kind: ClusterRole
 metadata:
   name: argo-events-cluster-role
 rules:
-- apiGroups: ["", "apps", "autoscaling", "batch", "extensions", "policy", "rbac.authorization.k8s.io", "argoproj.io"]
-  resources: ["*"]
-  verbs: ["*"]
+- apiGroups: ["argoproj.io"]
+  resources: ["sensors"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["argoproj.io"]
+  resources: ["gateways"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+- apiGroups: ["argoproj.io"]
+  resources: ["workflows"]
+- apiGroups: ["", "batch"]
+  resources: ["configmaps", "secrets", "pods", "services", "jobs"]
+  verbs: ["get", "watch", "list", "patch"]
