@@ -1,0 +1,16 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: artifact-example-gateway
+  namespace: argo-events
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: axis
+    gateway-name: "artifact-example-gateway"
+spec:
+  image: "metalgearsolid/artifact-gateway"
+  imagePullPolicy: "Always"
+  command: "/bin/artifact-gateway"
+  type: "artifact"
+  version: "1.0"
+  serviceAccountName: "argo-events-sa"
+  sensors: ["artifact-example"]

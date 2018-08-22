@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: artifact-gateway-configmap
+  namespace: argo-events
+data:
+  s3.yaml: |-
+    s3EventConfig:
+      bucket: mybucket
+      endpoint: minio.argo-events:9000
+      event: s3:ObjectCreated:Put
+      filter:
+        prefix: ""
+        suffix: ""
+    insecure: true
+    accessKey:
+      key: accesskey
+      name: minio
+    secretKey:
+      key: secretkey
+      name: minio

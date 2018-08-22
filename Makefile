@@ -112,6 +112,18 @@ calendar-image: calendar-linux
 	docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./signals/calendar/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) ; fi
 
+
+artifact:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./signals/artifact/
+
+artifact-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
+
+artifact-image: artifact-linux
+	docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./signals/artifact/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
+
+
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
 
