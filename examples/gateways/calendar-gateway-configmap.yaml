@@ -4,4 +4,5 @@ metadata:
   name: calendar-gateway-configmap
   namespace: argo-events
 data:
-  interval: 10s
+  calendar.myConfig: |-
+    interval: 10s

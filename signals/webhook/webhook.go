@@ -36,7 +36,7 @@ import (
 )
 
 // hook is a general purpose REST API
-type hook struct {
+type webhookSignal struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
 
@@ -53,7 +53,7 @@ type webhook struct {
 	log zlog.Logger
 	serverPort string
 	transformerPort string
-	registeredWebhooks []hook
+	registeredWebhooks []webhookSignal
 }
 
 func (w *webhook) WatchGatewayTransformerConfigMap(ctx context.Context, name string) (cache.Controller, error) {
@@ -118,7 +118,7 @@ func (w *webhook) parseWebhooks(cm *apiv1.ConfigMap) (error) {
 	delete(cm.Data, "port")
 CheckAlreadyRegistered:
 	for hookKey, hookValue := range cm.Data {
-		var h *hook
+		var h *webhookSignal
 		err := yaml.Unmarshal([]byte(hookValue), &h)
 		if err != nil {
 			return err
@@ -137,7 +137,7 @@ CheckAlreadyRegistered:
 }
 
 // registers a http endpoint
-func (w *webhook) registerWebhook(h *hook) {
+func (w *webhook) registerWebhook(h *webhookSignal) {
 	http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 		if request.Method == h.Method {
 			w.log.Info().Msg("received a request, forwarding it to gateway transformer")

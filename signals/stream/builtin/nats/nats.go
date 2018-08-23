@@ -23,32 +23,22 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
 	natsio "github.com/nats-io/go-nats"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const (
-	subjectKey = "subject"
-	EventType  = "com.github.nats-io.pub"
-)
+type nats struct{
+	// URL is the exposed endpoint for client connections to this service
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 
-// Note: micro requires stateless operation so the Listen() method should not use the
-// receive struct to save or modify state.
-type nats struct{}
-
-// New creates a new nats signaler
-func New() sdk.Listener {
-	return new(nats)
+	// Subject is subject to subscribe to
+	Subject string `json:"subject" protobuf:"bytes,2,opt,name=subject"`
 }
 
-func (*nats) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
+func (*nats) subscribe() {
 	// parse out the attributes
 	subject, ok := signal.Stream.Attributes[subjectKey]
-	if !ok {
-		return nil, sdk.ErrMissingRequiredAttribute
-	}
 
 	events := make(chan *v1alpha1.Event)
 

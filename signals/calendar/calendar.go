@@ -26,34 +26,136 @@ import (
 	zlog "github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"os"
+	"context"
+	"github.com/google/go-cmp/cmp"
+	"github.com/ghodss/yaml"
 	"strings"
 )
 
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
+// calendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
+// Schedule takes precedence over interval; interval takes precedence over recurrence
+type calendarSignal struct {
+	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
+	Schedule string `json:"schedule" protobuf:"bytes,1,opt,name=schedule"`
+
+	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
+	Interval string `json:"interval" protobuf:"bytes,2,opt,name=interval"`
+
+	// List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
+	// RRULE is a recurrence rule which defines a repeating pattern for recurring events.
+	// RDATE defines the list of DATE-TIME values for recurring events.
+	// EXDATE defines the list of DATE-TIME exceptions for recurring events.
+	// the combination of these rules and dates combine to form a set of date times.
+	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
+	Recurrence []string `json:"recurrence,omitempty" protobuf:"bytes,3,rep,name=recurrence"`
+}
+
 type calendar struct {
-	events          chan metav1.Time
 	transformerPort string
 	namespace       string
 	log             zlog.Logger
 	clientset       *kubernetes.Clientset
-	schedule        string
-	interval        string
-	recurrences     []string
+	registeredCalendarSignals []calendarSignal
 }
 
-func (c *calendar) startCalender() {
-	schedule, err := c.resolveSchedule()
-	if err != nil {
-		panic("failed to resolve calendar schedule")
+
+func (c *calendar) WatchGatewayTransformerConfigMap(ctx context.Context, name string) (cache.Controller, error) {
+	source := c.newStoreConfigMapWatch(name)
+	_, controller := cache.NewInformer(
+		source,
+		&apiv1.ConfigMap{},
+		0,
+		cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj interface{}) {
+				if cm, ok := obj.(*apiv1.ConfigMap); ok {
+					c.log.Info().Str("config-map", name).Msg("detected ConfigMap update. Updating the controller config.")
+					err := c.parseCalendars(cm)
+					if err != nil {
+						c.log.Error().Err(err).Msg("update of config failed")
+					}
+				}
+			},
+			UpdateFunc: func(old, new interface{}) {
+				if newCm, ok := new.(*apiv1.ConfigMap); ok {
+					c.log.Info().Msg("detected ConfigMap update. Updating the controller config.")
+					err := c.parseCalendars(newCm)
+					if err != nil {
+						c.log.Error().Err(err).Msg("update of config failed")
+					}
+				}
+			},
+		})
+
+	go controller.Run(ctx.Done())
+	return controller, nil
+}
+
+func (c *calendar) newStoreConfigMapWatch(name string) *cache.ListWatch {
+	x := c.clientset.CoreV1().RESTClient()
+	resource := "configmaps"
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
+
+	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(c.namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Do().Get()
 	}
-	exDates, err := common.ParseExclusionDates(c.recurrences)
+	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
+		options.Watch = true
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(c.namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Watch()
+	}
+	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
+}
+
+func (c *calendar) parseCalendars(cm *apiv1.ConfigMap) error {
+	CheckAlreadyRegistered:
+		for scheduleKey, scheduleValue := range cm.Data {
+			var cal *calendarSignal
+			err := yaml.Unmarshal([]byte(scheduleValue), &cal)
+			if err != nil {
+				c.log.Error().Str("artifact", scheduleKey).Err(err).Msg("failed to parse calendar schedule")
+				return err
+			}
+			c.log.Info().Interface("artifact", *cal).Msg("calendar schedule")
+			for _, registeredCalendarSignal := range c.registeredCalendarSignals {
+				if cmp.Equal(registeredCalendarSignal, cal) {
+					c.log.Warn().Str("schedule", cal.Schedule).Str("interval", string(cal.Interval)).Str("recurrences", strings.Join(cal.Recurrence, ",")).Msg("calendar schedule is already registered")
+					goto CheckAlreadyRegistered
+				}
+			}
+			c.registeredCalendarSignals = append(c.registeredCalendarSignals, *cal)
+			go c.startCalenderSchedule(cal)
+		}
+	return nil
+}
+
+func (c *calendar) startCalenderSchedule(cal *calendarSignal) error {
+	schedule, err := c.resolveSchedule(cal)
 	if err != nil {
-		panic("failed to resolve calendar schedule")
+		return fmt.Errorf("failed to resolve calendar schedule. Err: %+v", err)
+	}
+	exDates, err := common.ParseExclusionDates(cal.Recurrence)
+	if err != nil {
+		return fmt.Errorf("failed to resolve calendar schedule. Err: %+v", err)
 	}
 
 	var next Next
@@ -83,35 +185,16 @@ func (c *calendar) startCalender() {
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				c.log.Warn().Err(err).Msg("failed to get event bytes")
+				return fmt.Errorf("failed to marshal event. Err: %+v", err)
 			} else {
 				// dispatch the event to gateway transformer
 				_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.transformerPort), "application/octet-stream", bytes.NewReader(payload))
 				if err != nil {
-					c.log.Warn().Err(err).Msg("failed to dispatch the event")
+					return fmt.Errorf("failed to dispatch the event. Err: %+v", err)
 				}
-				c.log.Info().Msg("event sent")
+				c.log.Info().Msg("event dispatched to gateway transformer")
 			}
 		}
-	}
-}
-
-func (c *calendar) handleEvents(events chan metav1.Time, next Next) {
-	defer close(events)
-	eventTimer := c.getEventTimer(next)
-	for t := range eventTimer {
-		event := metav1.Time{Time: t}
-		payload, err := event.Marshal()
-		if err != nil {
-			c.log.Warn().Err(err).Msg("failed to get event bytes")
-		} else {
-			// dispatch the event to gateway transformer
-			_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.transformerPort), "application/octet-stream", bytes.NewReader(payload))
-			if err != nil {
-				c.log.Warn().Err(err).Msg("failed to dispatch the event")
-			}
-		}
-		events <- event
 	}
 }
 
@@ -134,39 +217,23 @@ func (c *calendar) getEventTimer(next Next) <-chan time.Time {
 	return eventTimer
 }
 
-func (cal *calendar) resolveSchedule() (cronlib.Schedule, error) {
-	if cal.schedule != "" {
-		schedule, err := cronlib.Parse(cal.schedule)
+func (c *calendar) resolveSchedule(cal *calendarSignal) (cronlib.Schedule, error) {
+	if cal.Schedule != "" {
+		schedule, err := cronlib.Parse(cal.Schedule)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.schedule, err.Error())
+			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.Schedule, err.Error())
 		}
 		return schedule, nil
-	} else if cal.interval != "" {
-		intervalDuration, err := time.ParseDuration(cal.interval)
+	} else if cal.Interval != "" {
+		intervalDuration, err := time.ParseDuration(cal.Interval)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", cal.interval, err.Error())
+			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", cal.Interval, err.Error())
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
 	} else {
 		return nil, fmt.Errorf("calendar signal must contain either a schedule or interval")
 	}
-}
-
-// validate the calender configuration
-func (c *calendar) validate(configMapName string) (*map[string]string, error) {
-	configmap, err := c.clientset.CoreV1().ConfigMaps(c.namespace).Get(configMapName, metav1.GetOptions{})
-	if err != nil {
-		c.log.Panic().Str("configmap", configMapName).Err(err).Msg("failed to get configmap")
-	}
-	configData := configmap.Data
-	if configData["interval"] != "" && configData["scheduler"] != "" {
-		c.log.Error().Msg("invalid configuration. can't have both interval and schedule set")
-	}
-	if configData["interval"] == "" && configData["scheduler"] == "" {
-		c.log.Error().Msg("invalid configuration. either interval or schedule set")
-	}
-	return &configData, err
 }
 
 func main() {
@@ -187,23 +254,17 @@ func main() {
 		panic("gateway transformer port is not provided")
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	events := make(chan metav1.Time)
 
 	cal := &calendar{
 		transformerPort: transformerPort,
 		clientset:       clientset,
-		events:          events,
 		namespace:       namespace,
 		log:             zlog.New(os.Stdout).With().Logger(),
 	}
-
-	// validate the configuration
-	configData, err := cal.validate(config)
+	_, err = cal.WatchGatewayTransformerConfigMap(context.Background(), config)
 	if err != nil {
-		panic("invalid configuration")
+		panic(fmt.Errorf("failed to watch calendar schedules. Err: %+v", err))
 	}
-	cal.schedule = (*configData)["schedule"]
-	cal.interval = (*configData)["interval"]
-	cal.recurrences = strings.Split((*configData)["recurrences"], ",")
-	cal.startCalender()
+	// wait forever
+	select {}
 }
