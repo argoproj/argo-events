@@ -4,7 +4,7 @@ metadata:
   name: artifact-gateway-configmap
   namespace: argo-events
 data:
-  s3.yaml: |-
+  s3.myartifact: |-
     s3EventConfig:
       bucket: mybucket
       endpoint: minio.argo-events:9000

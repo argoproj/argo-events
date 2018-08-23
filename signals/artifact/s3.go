@@ -19,7 +19,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
@@ -35,6 +34,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"net/http"
 	"os"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 type s3 struct {
@@ -68,28 +68,44 @@ type S3Filter struct {
 	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
+// getSecrets retrieves the secret value from the secret in namespace with name and key
+func (s *s3) getSecrets(client *kubernetes.Clientset, namespace string, name, key string) (string, error) {
+	secretsIf := client.CoreV1().Secrets(namespace)
+	var secret *apiv1.Secret
+	var err error
+	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		secret, err = secretsIf.Get(name, metav1.GetOptions{})
+		if err != nil {
+			if !common.IsRetryableKubeAPIError(err) {
+				return false, err
+			}
+			return false, nil
+		}
+		return true, nil
+	})
+	if err != nil {
+		return "", err
+	}
+	val, ok := secret.Data[key]
+	if !ok {
+		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
+	}
+	return string(val), nil
+}
+
 func (s *s3) listenToNotifications(artifact *S3Artifact) {
 	// retrieve access key id and secret access key
-	s3Secret, err := s.clientset.CoreV1().Secrets(s.namespace).Get(artifact.AccessKey.Name, metav1.GetOptions{})
+	accessKey, err := s.getSecrets(s.clientset, s.namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
 		panic(fmt.Errorf("failed to retrieve access key id %s", artifact.AccessKey))
 	}
-
-	s.log.Info().Str("accesskey", string(string(s3Secret.Data[artifact.AccessKey.Name]))).Str("secretaccess", string(string(s3Secret.Data[artifact.SecretKey.Name]))).Msg("minio secs")
-
-	accessKey, err := base64.StdEncoding.DecodeString(string(s3Secret.Data[artifact.AccessKey.Name]))
-	if err != nil {
-		panic(fmt.Errorf("failed to retrieve access key id %s", artifact.AccessKey))
-	}
-
-	secretAccessKey, err := base64.StdEncoding.DecodeString(string(s3Secret.Data[artifact.SecretKey.Name]))
+	secretKey, err := s.getSecrets(s.clientset, s.namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
 		panic(fmt.Errorf("failed to retrieve access key id %s", artifact.SecretKey))
 	}
+	s.log.Info().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secs")
 
-	s.log.Info().Str("accesskey", string(accessKey)).Str("secretaccess", string(secretAccessKey)).Msg("minio secrets")
-
-	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, string(accessKey), string(secretAccessKey), artifact.Insecure)
+	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
 
 	if err != nil {
 		panic(err)

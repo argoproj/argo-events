@@ -24,14 +24,128 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"github.com/google/go-cmp/cmp"
+	"context"
+	zlog "github.com/rs/zerolog"
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/tools/cache"
+	"github.com/ghodss/yaml"
 )
+
+// hook is a general purpose REST API
+type hook struct {
+	// REST API endpoint
+	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+
+	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
+	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
+	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
+}
 
 type webhook struct {
 	srv        *http.Server
 	clientset  *kubernetes.Clientset
 	config     string
 	namespace  string
-	targetPort string
+	log zlog.Logger
+	serverPort string
+	transformerPort string
+	registeredWebhooks []hook
+}
+
+func (w *webhook) WatchGatewayTransformerConfigMap(ctx context.Context, name string) (cache.Controller, error) {
+	source := w.newStoreConfigMapWatch(name)
+	_, controller := cache.NewInformer(
+		source,
+		&apiv1.ConfigMap{},
+		0,
+		cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj interface{}) {
+				if cm, ok := obj.(*apiv1.ConfigMap); ok {
+					w.log.Info().Str("config-map", name).Msg("detected ConfigMap update. Updating the controller config.")
+					err := w.parseWebhooks(cm)
+					if err != nil {
+						w.log.Error().Err(err).Msg("update of config failed")
+					}
+				}
+			},
+			UpdateFunc: func(old, new interface{}) {
+				if newCm, ok := new.(*apiv1.ConfigMap); ok {
+					w.log.Info().Msg("detected ConfigMap update. Updating the controller config.")
+					err := w.parseWebhooks(newCm)
+					if err != nil {
+						w.log.Error().Err(err).Msg("update of config failed")
+					}
+				}
+			},
+		})
+
+	go controller.Run(ctx.Done())
+	return controller, nil
+}
+
+func (w *webhook) newStoreConfigMapWatch(name string) *cache.ListWatch {
+	x := w.clientset.CoreV1().RESTClient()
+	resource := "configmaps"
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
+
+	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(w.namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Do().Get()
+	}
+	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
+		options.Watch = true
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(w.namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Watch()
+	}
+	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
+}
+
+// parses webhooks from gateway configuration
+func (w *webhook) parseWebhooks(cm *apiv1.ConfigMap) (error) {
+	// remove server port key
+	delete(cm.Data, "port")
+CheckAlreadyRegistered:
+	for hookKey, hookValue := range cm.Data {
+		var h *hook
+		err := yaml.Unmarshal([]byte(hookValue), &h)
+		if err != nil {
+			return err
+		}
+		for _, registeredWebhook := range w.registeredWebhooks {
+			if cmp.Equal(registeredWebhook, h) {
+				w.log.Warn().Interface("registered-webhook", registeredWebhook).Str("hook-name", hookKey).Msg("duplicate endpoint")
+				goto CheckAlreadyRegistered
+			}
+		}
+		w.registerWebhook(h)
+		w.log.Info().Str("hook-name", hookKey).Msg("webhook configured")
+		w.registeredWebhooks = append(w.registeredWebhooks, *h)
+	}
+	return nil
+}
+
+// registers a http endpoint
+func (w *webhook) registerWebhook(h *hook) {
+	http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+		if request.Method == h.Method {
+			w.log.Info().Msg("received a request, forwarding it to gateway transformer")
+			http.Post(fmt.Sprintf("http://localhost:%s", w.transformerPort), "application/octet-stream", request.Body)
+		} else {
+			w.log.Warn().Str("expected", h.Method).Str("actual", request.Method).Msg("http method mismatch")
+		}
+	})
 }
 
 func main() {
@@ -49,7 +163,7 @@ func main() {
 		panic("no namespace provided")
 	}
 
-	targetPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
 	}
@@ -60,29 +174,20 @@ func main() {
 		clientset:  clientset,
 		config:     config,
 		namespace:  namespace,
-		targetPort: targetPort,
+		log:        zlog.New(os.Stdout).With().Logger(),
+		transformerPort: transformerPort,
 	}
 
 	configmap, err := w.clientset.CoreV1().ConfigMaps(w.namespace).Get(w.config, metav1.GetOptions{})
 	if err != nil {
 		panic(fmt.Errorf("failed to get webhook configuration. Err: %+v", err))
 	}
+	w.serverPort = configmap.Data["port"]
+	_, err = w.WatchGatewayTransformerConfigMap(context.Background(), w.config)
+	if err != nil {
+		panic("failed to retrieve webhook configuration")
+	}
 
-	port := configmap.Data["port"]
-	url := configmap.Data["endpointURL"]
-	method := configmap.Data["method"]
-
-	log.Printf("port %s, url %s, method %s", port, url, method)
-
-	http.HandleFunc(url, func(writer http.ResponseWriter, request *http.Request) {
-		if request.Method == method {
-			log.Printf("recieved a request, forwarding it to http://localhost:%s", w.targetPort)
-			http.Post(fmt.Sprintf("http://localhost:%s", w.targetPort), "application/octet-stream", request.Body)
-		} else {
-			fmt.Errorf("http method is not supported")
-		}
-	})
-
-	log.Println(fmt.Sprintf("server started listening on port %s", port))
-	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", port), nil))
+	log.Println(fmt.Sprintf("server started listening on port %s", w.serverPort))
+	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", w.serverPort), nil))
 }
