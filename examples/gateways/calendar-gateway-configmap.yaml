@@ -7,5 +7,5 @@ data:
   calendar.myConfig: |-
     interval: 10s
   calendar.myOtherConfig : |-
-    cronSchedule: "@schedule 30s"
+    schedule: "@schedule 30s"
 
