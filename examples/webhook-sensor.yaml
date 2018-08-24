@@ -10,7 +10,6 @@ spec:
   serviceAccountName: argo-events-sa
   signals:
     - name: webhook-example-gateway
-    - name: mycustom
   triggers:
     - name: hello-world-workflow-trigger
       resource:

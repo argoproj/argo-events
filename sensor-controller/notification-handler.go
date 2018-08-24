@@ -56,6 +56,7 @@ func (se *sensorExecutor) watchSensorUpdates() {
 	}
 	for update := range watcher.ResultChan() {
 		se.sensor = update.Object.(*v1alpha1.Sensor).DeepCopy()
+		se.log.Info().Msg("sensor state updated")
 		if se.sensor.Status.Phase == v1alpha1.NodePhaseError {
 			se.log.Error().Msg("sensor is in error phase, stopping the server...")
 			// Shutdown server as sensor should not process any event in error state
@@ -93,88 +94,95 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// validate the signal is from gateway of interest
+	var validSignal bool
 	for _, signal := range se.sensor.Spec.Signals {
-		if signal.Name != gatewaySignal.Context.Source.Host {
-			se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("unknown signal source")
-			common.SendErrorResponse(&w)
-			return
+		if signal.Name == gatewaySignal.Context.Source.Host {
+			validSignal = true
+			break
 		}
 	}
 
-	// if signal is already completed, don't process the new event.
-	// Todo: what should be done when rate of signals received exceeds the complete sensor processing time?
-	// maybe add queueing logic
-	if getNodeByName(se.sensor, gatewaySignal.Context.Source.Host).Phase == v1alpha1.NodePhaseComplete {
-		se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal is already completed")
-		common.SendErrorResponse(&w)
-		return
-	}
+	if validSignal{
+		// if signal is already completed, don't process the new event.
+		// Todo: what should be done when rate of signals received exceeds the complete sensor processing time?
+		// maybe add queueing logic
+		if getNodeByName(se.sensor, gatewaySignal.Context.Source.Host).Phase == v1alpha1.NodePhaseComplete {
+			se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal is already completed")
+			common.SendErrorResponse(&w)
+			return
+		}
 
-	// process the signal
-	se.log.Info().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("processing the signal")
-	node := getNodeByName(se.sensor, gatewaySignal.Context.Source.Host)
-	node.LatestEvent = &v1alpha1.EventWrapper{
-		Event: gatewaySignal,
-		Seen:  true,
-	}
-	se.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
+		// process the signal
+		se.log.Info().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("processing the signal")
+		node := getNodeByName(se.sensor, gatewaySignal.Context.Source.Host)
+		node.LatestEvent = &v1alpha1.EventWrapper{
+			Event: gatewaySignal,
+			Seen:  true,
+		}
+		se.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
 
-	se.sensor, err = se.updateSensor()
-	if err != nil {
-		err = se.reapplyUpdate()
+		se.sensor, err = se.updateSensor()
 		if err != nil {
-			se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("failed to update signal node state")
-			common.SendErrorResponse(&w)
-			return
-		}
-	}
-
-	// to trigger the sensor action/s we first need to check if all signals are completed and sensor is active
-	completed := se.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) && se.sensor.Status.Phase == v1alpha1.NodePhaseActive
-	if completed {
-		se.log.Info().Msg("all signals are processed")
-
-		// trigger action/s
-		for _, trigger := range se.sensor.Spec.Triggers {
-			se.markNodePhase(trigger.Name, v1alpha1.NodePhaseActive, "trigger is about to run")
-			// update the sensor for marking trigger as active
-			se.sensor, err = se.updateSensor()
-			err := se.executeTrigger(trigger)
+			err = se.reapplyUpdate()
 			if err != nil {
-				// Todo: should we let other triggers to run?
-				se.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
-				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseError, err.Error())
-				se.sensor.Status.Phase = v1alpha1.NodePhaseError
-				// update the sensor object with error state
+				se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("failed to update signal node state")
+				common.SendErrorResponse(&w)
+				return
+			}
+		}
+
+		// to trigger the sensor action/s we first need to check if all signals are completed and sensor is active
+		completed := se.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) && se.sensor.Status.Phase == v1alpha1.NodePhaseActive
+		if completed {
+			se.log.Info().Msg("all signals are processed")
+
+			// trigger action/s
+			for _, trigger := range se.sensor.Spec.Triggers {
+				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseActive, "trigger is about to run")
+				// update the sensor for marking trigger as active
+				se.sensor, err = se.updateSensor()
+				err := se.executeTrigger(trigger)
+				if err != nil {
+					// Todo: should we let other triggers to run?
+					se.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
+					se.markNodePhase(trigger.Name, v1alpha1.NodePhaseError, err.Error())
+					se.sensor.Status.Phase = v1alpha1.NodePhaseError
+					// update the sensor object with error state
+					se.sensor, err = se.updateSensor()
+					if err != nil {
+						err = se.reapplyUpdate()
+						if err != nil {
+							se.log.Error().Err(err).Msg("failed to update sensor phase")
+							common.SendErrorResponse(&w)
+							return
+						}
+					}
+				}
+				// mark trigger as complete.
+				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseComplete, "trigger completed successfully")
 				se.sensor, err = se.updateSensor()
 				if err != nil {
 					err = se.reapplyUpdate()
 					if err != nil {
-						se.log.Error().Err(err).Msg("failed to update sensor phase")
+						se.log.Error().Err(err).Msg("failed to update trigger completion state")
 						common.SendErrorResponse(&w)
 						return
 					}
 				}
 			}
-			// mark trigger as complete.
-			se.markNodePhase(trigger.Name, v1alpha1.NodePhaseComplete, "trigger completed successfully")
-			se.sensor, err = se.updateSensor()
-			if err != nil {
-				err = se.reapplyUpdate()
-				if err != nil {
-					se.log.Error().Err(err).Msg("failed to update trigger completion state")
-					common.SendErrorResponse(&w)
-					return
-				}
+
+			if !se.sensor.Spec.Repeat {
+				common.SendSuccessResponse(&w)
+				// todo: unsubscribe from pub-sub system
+				se.server.Shutdown(context.Background())
 			}
 		}
-
-		if !se.sensor.Spec.Repeat {
-			common.SendSuccessResponse(&w)
-			// todo: unsubscribe from pub-sub system
-			se.server.Shutdown(context.Background())
-		}
+	} else {
+		se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("unknown signal source")
+		common.SendErrorResponse(&w)
+		return
 	}
+
 }
 
 // update sensor resource

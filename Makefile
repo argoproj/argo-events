@@ -41,7 +41,7 @@ all-images: sensor-image sensor-controller-image gateway-controller-image gatewa
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
-all-gateway-images: webhook-image calendar-image
+all-gateway-images: webhook-image calendar-image artifact-image nats-image
 
 .PHONY: all sensor-controller sensor-controller-image gateway-controller gateway-controller-image clean test
 
@@ -92,46 +92,46 @@ gateway-transformer-image: gateway-transformer-linux
 
 # gateway binaries
 webhook:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./signals/webhook/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/
 
 webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
 
 webhook-image: webhook-linux
-	docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./signals/webhook/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/core/webhook/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
 
 
 calendar:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./signals/calendar/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./gateways/core/calendar/
 
 calendar-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar
 
 calendar-image: calendar-linux
-	docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./signals/calendar/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./gateways/core/calendar/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) ; fi
 
 
 artifact:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./signals/artifact/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/
 
 artifact-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
 
 artifact-image: artifact-linux
-	docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./signals/artifact/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
 nats:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./signals/core/stream/nats/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/
 
 nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
 
 nats-image: nats-linux
-	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./signals/core/stream/nats/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/nats/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
 
 

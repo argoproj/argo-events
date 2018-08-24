@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"k8s.io/client-go/kubernetes"
-	"log"
 	"net/http"
 	"os"
 	"github.com/google/go-cmp/cmp"
@@ -29,6 +28,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	"github.com/ghodss/yaml"
 	"github.com/argoproj/argo-events/gateways"
+	"log"
 )
 
 const (
@@ -56,6 +56,10 @@ type webhook struct {
 func (w *webhook) RunGateway(cm *apiv1.ConfigMap) (error) {
 	if w.serverPort == "" {
 		w.serverPort = cm.Data["port"]
+		go func() {
+			log.Println(fmt.Sprintf("server started listening on port %s", w.serverPort))
+			log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", w.serverPort), nil))
+		}()
 	}
 	// remove server port key
 	delete(cm.Data, "port")
@@ -125,6 +129,5 @@ func main() {
 		panic("failed to retrieve webhook configuration")
 	}
 
-	log.Println(fmt.Sprintf("server started listening on port %s", w.serverPort))
-	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", w.serverPort), nil))
+	select {}
 }
