@@ -124,6 +124,17 @@ artifact-image: artifact-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
+nats:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./signals/core/stream/nats/
+
+nats-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
+
+nats-image: nats-linux
+	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./signals/core/stream/nats/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
+
+
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
 

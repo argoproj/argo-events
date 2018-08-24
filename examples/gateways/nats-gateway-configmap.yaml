@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-gateway-configmap
+  namespace: argo-events
+data:
+  nats.myConfig: |-
+    url: nats://nats.argo-events:4222
+    attributes:
+      subject: mysubject
