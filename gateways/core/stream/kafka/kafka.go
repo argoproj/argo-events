@@ -14,121 +14,103 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kafka
+package main
 
 import (
 	"fmt"
 	"strconv"
 
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
-	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core/stream"
+	"github.com/google/go-cmp/cmp"
+	"github.com/ghodss/yaml"
+	"net/http"
+	"bytes"
+	"os"
+	zlog "github.com/rs/zerolog"
+	"github.com/argoproj/argo-events/common"
+	"context"
 )
 
 const (
 	topicKey     = "topic"
 	partitionKey = "partition"
-	EventType    = "org.apache.kafka.pub"
+	configName = "kafka-gateway-configmap"
 )
 
-// Note: micro requires stateless operation so the Listen() method should not use the
-// receive struct to save or modify state.
-type kafka struct{}
-
-// New creates a new kafka signaler
-func New() sdk.Listener {
-	return new(kafka)
+type kafka struct {
+	gatewayConfig *gateways.GatewayConfig
+	registeredKafkaConfigs []stream.Stream
 }
 
-func (*kafka) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
-	// parse out the attributes
-	topic, partition, err := parseAttributes(signal.Stream.Attributes)
+func (k *kafka) listen(s *stream.Stream) {
+	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
 	if err != nil {
-		return nil, err
+		k.gatewayConfig.Log.Error().Str("url",  s.URL).Err(err).Msg("failed to connect to cluster")
+		return
 	}
 
-	consumer, err := sarama.NewConsumer([]string{signal.Stream.URL}, nil)
+	topic := s.Attributes[topicKey]
+	pString := s.Attributes[partitionKey]
+	pInt, err := strconv.ParseInt(pString, 10, 32)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to cluster at %s", signal.Stream.URL)
+		k.gatewayConfig.Log.Error().Str("partition", pString).Err(err).Msg("failed to parse partition key")
+		return
 	}
+	partition := int32(pInt)
 
 	availablePartitions, err := consumer.Partitions(topic)
 	if err != nil {
-		return nil, fmt.Errorf("unable to get available partitions for kafka topic '%s'. cause: %s", topic, err.Error())
+		k.gatewayConfig.Log.Error().Str("topic",  topic).Err(err).Msg("unable to get available partitions for kafka topic")
+		return
 	}
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		return nil, fmt.Errorf("partition %v does not exist for topic '%s'", partition, topic)
+		k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("partition does not exist for topic")
+		return
 	}
 
 	partitionConsumer, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create partition consumer for topic '%s' and partition: %v. cause: %s", topic, partition, err.Error())
+		k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("failed to create partition consumer for topic")
+		return
 	}
 
-	events := make(chan *v1alpha1.Event)
-
-	// start listening for messages
-	go func() {
-		defer close(events)
-		for {
-			select {
-			case msg := <-partitionConsumer.Messages():
-				event := &v1alpha1.Event{
-					Context: v1alpha1.EventContext{
-						EventID:            fmt.Sprintf("partition-%v-offset-%v", msg.Partition, msg.Offset),
-						EventType:          EventType,
-						EventTime:          metav1.Time{Time: msg.Timestamp},
-						CloudEventsVersion: sdk.CloudEventsVersion,
-						Extensions:         make(map[string]string),
-					},
-					Data: msg.Value,
-				}
-				log.Printf("signal '%s' received msg", signal.Name)
-				events <- event
-			case err := <-partitionConsumer.Errors():
-				event := &v1alpha1.Event{
-					Context: v1alpha1.EventContext{
-						EventID:            fmt.Sprintf("partition-%v-", err.Partition),
-						EventType:          EventType,
-						CloudEventsVersion: sdk.CloudEventsVersion,
-						Extensions:         map[string]string{sdk.ContextExtensionErrorKey: err.Err.Error()},
-					},
-				}
-				log.Printf("signal '%s' received error", signal.Name)
-				events <- event
-			case <-done:
-				if err := partitionConsumer.Close(); err != nil {
-					log.Printf("failed to close partition consumer for signal '%s': %s", signal.Name, err)
-				}
-				if err := consumer.Close(); err != nil {
-					log.Panicf("failed to close consumer for signal '%s': %s", signal.Name, err)
-				}
-				log.Printf("shut down signal '%s'", signal.Name)
-				return
-			}
+	// start listening to messages
+	for {
+		select {
+		case msg := <-partitionConsumer.Messages():
+			k.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
+			http.Post(fmt.Sprintf("http://localhost:%s", k.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Value))
+		case err := <-partitionConsumer.Errors():
+			k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("received an error")
+			return
 		}
-	}()
-
-	return events, nil
+	}
 }
 
-func parseAttributes(attr map[string]string) (string, int32, error) {
-	topic, ok := attr["topic"]
-	if !ok {
-		return "", 0, sdk.ErrMissingRequiredAttribute
+func (k *kafka) RunGateway(cm *apiv1.ConfigMap) error {
+CheckAlreadyRegistered:
+	for kConfigkey, kConfigVal := range cm.Data {
+		var s *stream.Stream
+		err := yaml.Unmarshal([]byte(kConfigVal), &s)
+		if err != nil {
+			k.gatewayConfig.Log.Error().Str("config", kConfigkey).Err(err).Msg("failed to parse kafka config")
+			return err
+		}
+		k.gatewayConfig.Log.Info().Interface("stream", *s).Msg("kafka configuration")
+		for _, streamConfig := range k.registeredKafkaConfigs {
+			if cmp.Equal(streamConfig, s) {
+				k.gatewayConfig.Log.Warn().Str("url", s.URL).Str("topic", s.Attributes[topicKey]).Str("partition", s.Attributes[partitionKey]).Msg("duplicate configuration")
+				goto CheckAlreadyRegistered
+			}
+		}
+		k.registeredKafkaConfigs = append(k.registeredKafkaConfigs, *s)
+		go k.listen(s)
 	}
-	var pString string
-	if pString, ok = attr[partitionKey]; !ok {
-		return topic, 0, fmt.Errorf(sdk.ErrMissingAttribute, partitionKey)
-	}
-	pInt, err := strconv.ParseInt(pString, 10, 32)
-	if err != nil {
-		return topic, 0, err
-	}
-	partition := int32(pInt)
-	return topic, partition, nil
+	return nil
 }
 
 func verifyPartitionAvailable(part int32, partitions []int32) bool {
@@ -138,4 +120,38 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 		}
 	}
 	return false
+}
+
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
+	}
+	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
+	if namespace == "" {
+		panic("no namespace provided")
+	}
+	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	if !ok {
+		panic("gateway transformer port is not provided")
+	}
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+	gatewayConfig := &gateways.GatewayConfig{
+		Log: zlog.New(os.Stdout).With().Logger(),
+		Namespace: namespace,
+		Clientset: clientset,
+		TransformerPort: transformerPort,
+	}
+	k := &kafka{
+		gatewayConfig: gatewayConfig,
+		registeredKafkaConfigs: []stream.Stream{},
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(k, context.Background(), configName)
+	if err != nil {
+		k.gatewayConfig.Log.Error().Err(err).Msg("failed to update kafka configuration")
+	}
+
+	// run forever
+	select {}
 }

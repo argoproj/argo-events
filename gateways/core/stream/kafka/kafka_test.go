@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kafka
+package main
 
 // TODO: implement e2e test
 // the github.com/Shopify/sarama/mocks doesn't work because we
