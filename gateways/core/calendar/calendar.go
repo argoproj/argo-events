@@ -21,20 +21,23 @@ import (
 	"time"
 
 	"bytes"
+	"context"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+	hs "github.com/mitchellh/hashstructure"
 	cronlib "github.com/robfig/cron"
 	zlog "github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"os"
-	"context"
-	"github.com/google/go-cmp/cmp"
-	"github.com/ghodss/yaml"
-	"strings"
-	"github.com/argoproj/argo-events/gateways"
+)
+
+const (
+	config = "calendar-gateway-configmap"
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -59,29 +62,32 @@ type calSchedule struct {
 }
 
 type calendar struct {
-	gatewayConfig *gateways.GatewayConfig
-	registeredCalendarSignals []calSchedule
+	gatewayConfig             *gateways.GatewayConfig
+	registeredCalendarSignals map[uint64]*calSchedule
 }
 
 func (c *calendar) RunGateway(cm *apiv1.ConfigMap) error {
-	CheckAlreadyRegistered:
-		for scheduleKey, scheduleValue := range cm.Data {
-			var cal *calSchedule
-			err := yaml.Unmarshal([]byte(scheduleValue), &cal)
-			if err != nil {
-				c.gatewayConfig.Log.Error().Str("artifact", scheduleKey).Err(err).Msg("failed to parse calendar schedule")
-				return err
-			}
-			c.gatewayConfig.Log.Info().Interface("artifact", *cal).Msg("calendar schedule")
-			for _, registeredCalendarSignal := range c.registeredCalendarSignals {
-				if cmp.Equal(registeredCalendarSignal, cal) {
-					c.gatewayConfig.Log.Warn().Str("schedule", cal.Schedule).Str("interval", string(cal.Interval)).Str("recurrences", strings.Join(cal.Recurrence, ",")).Msg("calendar schedule is already registered")
-					goto CheckAlreadyRegistered
-				}
-			}
-			c.registeredCalendarSignals = append(c.registeredCalendarSignals, *cal)
-			go c.startCalenderSchedule(cal)
+	for scheduleKey, scheduleValue := range cm.Data {
+		var cal *calSchedule
+		err := yaml.Unmarshal([]byte(scheduleValue), &cal)
+		if err != nil {
+			c.gatewayConfig.Log.Error().Str("artifact", scheduleKey).Err(err).Msg("failed to parse calendar schedule")
+			return err
 		}
+		key, err := hs.Hash(cal, &hs.HashOptions{})
+		if err != nil {
+			c.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
+			continue
+		}
+
+		if _, ok := c.registeredCalendarSignals[key]; ok {
+			c.gatewayConfig.Log.Info().Interface("config", *cal).Msg("duplicate configuration")
+			continue
+		}
+
+		c.registeredCalendarSignals[key] = cal
+		go c.startCalenderSchedule(cal)
+	}
 	return nil
 }
 
@@ -181,7 +187,7 @@ func main() {
 	}
 
 	// Todo: hardcoded for now, move it to constants
-	config := "calendar-gateway-configmap"
+
 	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
@@ -193,14 +199,14 @@ func main() {
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 
 	gatewayConfig := &gateways.GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
 	cal := &calendar{
-		registeredCalendarSignals: []calSchedule{},
-		gatewayConfig: gatewayConfig,
+		registeredCalendarSignals: make(map[uint64]*calSchedule),
+		gatewayConfig:             gatewayConfig,
 	}
 
 	_, err = gatewayConfig.WatchGatewayConfigMap(cal, context.Background(), config)

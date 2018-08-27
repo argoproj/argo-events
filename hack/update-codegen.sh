@@ -24,12 +24,11 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 CODEGEN_PKG="../vendor/k8s.io/code-generator"
 
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/sensor-client github.com/argoproj/argo-events/pkg/apis \
+  github.com/argoproj/argo-events/pkg/client/sensor github.com/argoproj/argo-events/pkg/apis \
   "sensor:v1alpha1" \
   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt
 
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/gateway-client github.com/argoproj/argo-events/pkg/apis \
+  github.com/argoproj/argo-events/pkg/client/gateway github.com/argoproj/argo-events/pkg/apis \
   "gateway:v1alpha1" \
   --go-header-file ${SCRIPT_ROOT}/hack/custom-boilerplate.go.txt
-

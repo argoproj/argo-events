@@ -10,7 +10,6 @@ required = [
   "github.com/golang/protobuf/protoc-gen-go",
   "github.com/gogo/protobuf/protoc-gen-gofast",
   "github.com/gogo/protobuf/protoc-gen-gogofast",
-  "github.com/micro/protoc-gen-micro",
 ]
 
 [[constraint]]
@@ -72,10 +71,6 @@ required = [
 [[override]]
   branch = "release-7.0"
   name = "k8s.io/client-go"
-
-[[override]]
-  name = "github.com/micro/go-plugins"
-  branch = "master"
 
 [prune]
   go-tests = true

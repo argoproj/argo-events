@@ -1,16 +1,16 @@
 package gateways
 
 import (
+	"context"
+	"fmt"
+	"github.com/rs/zerolog"
 	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/tools/cache"
-	"fmt"
-	"context"
-	"github.com/rs/zerolog"
 	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/cache"
 )
 
 // GatewayConfig provides a generic configuration for a gateway
@@ -29,8 +29,9 @@ type GatewayExecutor interface {
 	RunGateway(cm *apiv1.ConfigMap) error
 }
 
+// Watches change in configuration for the gateway
 func (gc *GatewayConfig) WatchGatewayConfigMap(gtEx GatewayExecutor, ctx context.Context, name string) (cache.Controller, error) {
-	source := gc.newStoreConfigMapWatch(name)
+	source := gc.newConfigMapWatch(name)
 	_, controller := cache.NewInformer(
 		source,
 		&apiv1.ConfigMap{},
@@ -60,7 +61,8 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(gtEx GatewayExecutor, ctx context
 	return controller, nil
 }
 
-func (gc *GatewayConfig) newStoreConfigMapWatch(name string) *cache.ListWatch {
+// creates a new configmap watch
+func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))

@@ -21,17 +21,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
-	"github.com/google/go-cmp/cmp"
 	"github.com/minio/minio-go"
+	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"os"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"github.com/argoproj/argo-events/gateways"
 )
 
 const (
@@ -40,18 +40,24 @@ const (
 
 type s3 struct {
 	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig *gateways.GatewayConfig
-	registeredArtifacts []S3Artifact
+	gatewayConfig       *gateways.GatewayConfig
+	// registeredArtifacts contains map of registered s3 artifacts
+	registeredArtifacts map[uint64]*S3Artifact
 }
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
+	// S3EventConfig contains configuration for bucket notification
 	S3EventConfig S3EventConfig           `json:"s3EventConfig" protobuf:"bytes,1,opt,name=s3EventConfig"`
+	// Mode of operation for s3 client
 	Insecure      bool                    `json:"insecure,omitempty" protobuf:"bytes,2,opt,name=insecure"`
+	// AccessKey
 	AccessKey     apiv1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
+	// SecretKey
 	SecretKey     apiv1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
 }
 
+// S3EventConfig contains configuration for bucket notification
 type S3EventConfig struct {
 	Endpoint string                      `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
 	Bucket   string                      `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
@@ -91,7 +97,8 @@ func (s *s3) getSecrets(client *kubernetes.Clientset, namespace string, name, ke
 	return string(val), nil
 }
 
-func (s *s3) listenToNotifications(artifact *S3Artifact) {
+// listens to s3 bucket notifications
+func (s *s3) listen(artifact *S3Artifact) {
 	// retrieve access key id and secret access key
 	accessKey, err := s.getSecrets(s.gatewayConfig.Clientset, s.gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
@@ -128,24 +135,22 @@ func (s *s3) listenToNotifications(artifact *S3Artifact) {
 }
 
 func (s *s3) RunGateway(cm *apiv1.ConfigMap) error {
-CheckAlreadyRegistered:
 	for s3ArtifactKey, s3ArtifactDataStr := range cm.Data {
 		var artifact *S3Artifact
 		err := yaml.Unmarshal([]byte(s3ArtifactDataStr), &artifact)
 		if err != nil {
-			// fail silently
 			s.gatewayConfig.Log.Warn().Str("artifact", s3ArtifactKey).Err(err).Msg("failed to parse artifact data")
-			break
+			return err
 		}
 		s.gatewayConfig.Log.Info().Interface("artifact", *artifact).Msg("artifact")
-		for _, registeredArtifact := range s.registeredArtifacts {
-			if cmp.Equal(registeredArtifact.S3EventConfig, artifact.S3EventConfig) {
-				s.gatewayConfig.Log.Warn().Str("bucket", artifact.S3EventConfig.Bucket).Str("event", string(artifact.S3EventConfig.Event)).Msg("event is already registered")
-				goto CheckAlreadyRegistered
-			}
+
+		key, err := hs.Hash(s, &hs.HashOptions{})
+
+		if _, ok := s.registeredArtifacts[key]; ok {
+			s.gatewayConfig.Log.Warn().Interface("config", artifact).Msg("duplicate configuration")
+			continue
 		}
-		s.registeredArtifacts = append(s.registeredArtifacts, *artifact)
-		go s.listenToNotifications(artifact)
+		go s.listen(artifact)
 	}
 	return nil
 }
@@ -168,14 +173,14 @@ func main() {
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
 	s3 := &s3{
-		gatewayConfig: gatewayConfig,
-		registeredArtifacts: []S3Artifact{},
+		gatewayConfig:       gatewayConfig,
+		registeredArtifacts: make(map[uint64]*S3Artifact),
 	}
 
 	_, err = gatewayConfig.WatchGatewayConfigMap(s3, context.Background(), configName)

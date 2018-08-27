@@ -17,22 +17,22 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"k8s.io/client-go/kubernetes"
-	"net/http"
-	"os"
-	"github.com/google/go-cmp/cmp"
-	"context"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
 	apiv1 "k8s.io/api/core/v1"
-	"github.com/ghodss/yaml"
-	"github.com/argoproj/argo-events/gateways"
+	"k8s.io/client-go/kubernetes"
 	"log"
+	"net/http"
+	"os"
 )
 
 const (
-	configName  = "webhook-gateway-configmap"
+	configName = "webhook-gateway-configmap"
 )
 
 // hook is a general purpose REST API
@@ -45,15 +45,20 @@ type hook struct {
 	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
 }
 
+// webhook contains gateway configuration and registered endpoints
 type webhook struct {
-	gatewayConfig *gateways.GatewayConfig
-	srv        *http.Server
-	serverPort string
-	registeredWebhooks []hook
+	// gatewayConfig contains general configuration for gateway
+	gatewayConfig      *gateways.GatewayConfig
+	// srv is reference to http server
+	srv                *http.Server
+	// serverPort is port on which server is listening
+	serverPort         string
+	// registeredWebhooks contains map of registered http endpoints
+	registeredWebhooks map[uint64]*hook
 }
 
 // parses webhooks from gateway configuration
-func (w *webhook) RunGateway(cm *apiv1.ConfigMap) (error) {
+func (w *webhook) RunGateway(cm *apiv1.ConfigMap) error {
 	if w.serverPort == "" {
 		w.serverPort = cm.Data["port"]
 		go func() {
@@ -63,22 +68,25 @@ func (w *webhook) RunGateway(cm *apiv1.ConfigMap) (error) {
 	}
 	// remove server port key
 	delete(cm.Data, "port")
-CheckAlreadyRegistered:
 	for hookKey, hookValue := range cm.Data {
 		var h *hook
 		err := yaml.Unmarshal([]byte(hookValue), &h)
 		if err != nil {
 			return err
 		}
-		for _, registeredWebhook := range w.registeredWebhooks {
-			if cmp.Equal(registeredWebhook, h) {
-				w.gatewayConfig.Log.Warn().Interface("registered-webhook", registeredWebhook).Str("hook-name", hookKey).Msg("duplicate endpoint")
-				goto CheckAlreadyRegistered
-			}
+		key, err := hs.Hash(h, &hs.HashOptions{})
+		if err != nil {
+			w.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
+			continue
 		}
+
+		if _, ok := w.registeredWebhooks[key]; ok {
+			w.gatewayConfig.Log.Warn().Interface("config", h).Msg("duplicate configuration")
+			continue
+		}
+		w.registeredWebhooks[key] = h
 		w.registerWebhook(h)
 		w.gatewayConfig.Log.Info().Str("hook-name", hookKey).Msg("webhook configured")
-		w.registeredWebhooks = append(w.registeredWebhooks, *h)
 	}
 	return nil
 }
@@ -115,14 +123,14 @@ func main() {
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 
 	gatewayConfig := &gateways.GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
 	w := &webhook{
-		gatewayConfig: gatewayConfig,
-		registeredWebhooks: []hook{},
+		gatewayConfig:      gatewayConfig,
+		registeredWebhooks: make(map[uint64]*hook),
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(w, context.Background(), configName)
 	if err != nil {

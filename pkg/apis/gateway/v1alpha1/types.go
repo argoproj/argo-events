@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package v1alpha1
 
 import (
@@ -7,13 +23,12 @@ import (
 
 // Gateway is the definition of a gateway-controller resource
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type Gateway struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Status            NodePhase   `json:"type" protobuf:"bytes,2,opt,name=type"`
-	Spec              GatewaySpec `json:"spec" protobuf:"bytes,3,opt,name=spec"`
+	Status            GatewayStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
+	Spec              GatewaySpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
 }
 
 // GatewayList is the list of Gateway resources
@@ -65,16 +80,13 @@ const (
 	NodePhaseNew     NodePhase = ""        // the node is new
 )
 
-// SensorStatus contains information about the status of a gateway-controller.
+// GatewayStatus contains information about the status of a gateway-controller.
 type GatewayStatus struct {
 	// Phase is the high-level summary of the gateway-controller
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this gateway-controller was initiated
 	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
-
-	// CompletedAt is the time at which this gateway-controller was completed
-	CompletedAt metav1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// Message is a human readable string indicating details about a gateway-controller in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`

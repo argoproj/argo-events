@@ -20,36 +20,36 @@ import (
 	"fmt"
 	"strconv"
 
+	"bytes"
+	"context"
 	"github.com/Shopify/sarama"
-	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/stream"
-	"github.com/google/go-cmp/cmp"
 	"github.com/ghodss/yaml"
-	"net/http"
-	"bytes"
-	"os"
+	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
-	"github.com/argoproj/argo-events/common"
-	"context"
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"net/http"
+	"os"
 )
 
 const (
 	topicKey     = "topic"
 	partitionKey = "partition"
-	configName = "kafka-gateway-configmap"
+	configName   = "kafka-gateway-configmap"
 )
 
 type kafka struct {
-	gatewayConfig *gateways.GatewayConfig
-	registeredKafkaConfigs []stream.Stream
+	gatewayConfig          *gateways.GatewayConfig
+	registeredKafkaConfigs map[uint64]*stream.Stream
 }
 
 func (k *kafka) listen(s *stream.Stream) {
 	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
 	if err != nil {
-		k.gatewayConfig.Log.Error().Str("url",  s.URL).Err(err).Msg("failed to connect to cluster")
+		k.gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("failed to connect to cluster")
 		return
 	}
 
@@ -64,17 +64,17 @@ func (k *kafka) listen(s *stream.Stream) {
 
 	availablePartitions, err := consumer.Partitions(topic)
 	if err != nil {
-		k.gatewayConfig.Log.Error().Str("topic",  topic).Err(err).Msg("unable to get available partitions for kafka topic")
+		k.gatewayConfig.Log.Error().Str("topic", topic).Err(err).Msg("unable to get available partitions for kafka topic")
 		return
 	}
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("partition does not exist for topic")
+		k.gatewayConfig.Log.Error().Str("partition", pString).Str("topic", topic).Err(err).Msg("partition does not exist for topic")
 		return
 	}
 
 	partitionConsumer, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("failed to create partition consumer for topic")
+		k.gatewayConfig.Log.Error().Str("partition", pString).Str("topic", topic).Err(err).Msg("failed to create partition consumer for topic")
 		return
 	}
 
@@ -85,14 +85,13 @@ func (k *kafka) listen(s *stream.Stream) {
 			k.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
 			http.Post(fmt.Sprintf("http://localhost:%s", k.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Value))
 		case err := <-partitionConsumer.Errors():
-			k.gatewayConfig.Log.Error().Str("partition",  pString).Str("topic", topic).Err(err).Msg("received an error")
+			k.gatewayConfig.Log.Error().Str("partition", pString).Str("topic", topic).Err(err).Msg("received an error")
 			return
 		}
 	}
 }
 
 func (k *kafka) RunGateway(cm *apiv1.ConfigMap) error {
-CheckAlreadyRegistered:
 	for kConfigkey, kConfigVal := range cm.Data {
 		var s *stream.Stream
 		err := yaml.Unmarshal([]byte(kConfigVal), &s)
@@ -101,13 +100,16 @@ CheckAlreadyRegistered:
 			return err
 		}
 		k.gatewayConfig.Log.Info().Interface("stream", *s).Msg("kafka configuration")
-		for _, streamConfig := range k.registeredKafkaConfigs {
-			if cmp.Equal(streamConfig, s) {
-				k.gatewayConfig.Log.Warn().Str("url", s.URL).Str("topic", s.Attributes[topicKey]).Str("partition", s.Attributes[partitionKey]).Msg("duplicate configuration")
-				goto CheckAlreadyRegistered
-			}
+		key, err := hs.Hash(s, &hs.HashOptions{})
+		if err != nil {
+			k.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
+			continue
 		}
-		k.registeredKafkaConfigs = append(k.registeredKafkaConfigs, *s)
+		if _, ok := k.registeredKafkaConfigs[key]; ok {
+			k.gatewayConfig.Log.Warn().Interface("config", s).Msg("duplicate configuration")
+			continue
+		}
+		k.registeredKafkaConfigs[key] = s
 		go k.listen(s)
 	}
 	return nil
@@ -138,14 +140,14 @@ func main() {
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
 	k := &kafka{
-		gatewayConfig: gatewayConfig,
-		registeredKafkaConfigs: []stream.Stream{},
+		gatewayConfig:          gatewayConfig,
+		registeredKafkaConfigs: make(map[uint64]*stream.Stream),
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(k, context.Background(), configName)
 	if err != nil {

@@ -31,27 +31,35 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
+	"github.com/argoproj/argo-events/gateways"
 )
 
-// Note: micro requires stateless operation so the Listen() method should not use the
-// receive struct to save or modify state.
-// Listen() methods CAN retrieve the kubeConfig from the resource struct.
 type resource struct {
 	kubeConfig *rest.Config
+	gatewayConfig gateways.GatewayConfig
+	registeredResources map[uint64]*Resource
 }
 
-// New creates a new resource signaler
-func New(kubeConfig *rest.Config) sdk.Listener {
-	return &resource{kubeConfig: kubeConfig}
+// Resource refers to a dependency on a k8s resource.
+type Resource struct {
+	Namespace        string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
+	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
+	metav1.GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
 }
 
-func (r *resource) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan *v1alpha1.Event, error) {
-	resources, err := r.discoverResources(signal.Resource)
+// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
+type ResourceFilter struct {
+	Prefix      string            `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
+	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,3,rep,name=annotations"`
+	CreatedBy   metav1.Time           `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+}
+
+func (r *resource) listen(resource *Resource) {
+	resources, err := r.discoverResources(resource)
 	if err != nil {
-		return nil, err
+		r.
 	}
 
 	options := metav1.ListOptions{Watch: true}
@@ -73,7 +81,7 @@ func (r *resource) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan
 		watches = append(watches, watch)
 
 		wg.Add(1)
-		go r.listen(events, watch, signal.Resource.Filter, &wg)
+		go r.watch(events, watch, r.Filter, &wg)
 	}
 
 	// wait for stop signal
@@ -93,7 +101,7 @@ func (r *resource) Listen(signal *v1alpha1.Signal, done <-chan struct{}) (<-chan
 	return events, nil
 }
 
-func (r *resource) discoverResources(obj *v1alpha1.ResourceSignal) ([]dynamic.ResourceInterface, error) {
+func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(r.kubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(r.kubeConfig)
 	if err != nil {
@@ -138,7 +146,7 @@ func resolveGroupVersion(obj *v1alpha1.ResourceSignal) string {
 	return obj.Group + "/" + obj.Version
 }
 
-func (r *resource) listen(events chan *v1alpha1.Event, w watch.Interface, filter *v1alpha1.ResourceFilter, wg *sync.WaitGroup) {
+func (r *resource) watch() {
 	for item := range w.ResultChan() {
 		itemObj := item.Object.(*unstructured.Unstructured)
 		b, _ := itemObj.MarshalJSON()

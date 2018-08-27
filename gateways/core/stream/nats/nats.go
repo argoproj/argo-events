@@ -17,21 +17,21 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	natsio "github.com/nats-io/go-nats"
-	"k8s.io/client-go/kubernetes"
-	apiv1 "k8s.io/api/core/v1"
-	"github.com/google/go-cmp/cmp"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
-	"net/http"
-	"bytes"
-	"os"
-	"github.com/argoproj/argo-events/common"
+	hs "github.com/mitchellh/hashstructure"
+	natsio "github.com/nats-io/go-nats"
 	zlog "github.com/rs/zerolog"
-	"context"
+	apiv1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"net/http"
+	"os"
 	"strings"
-	"github.com/argoproj/argo-events/gateways"
 )
 
 const (
@@ -40,11 +40,11 @@ const (
 )
 
 // Contains configuration for nats gateway
-type nats struct{
+type nats struct {
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig *gateways.GatewayConfig
 	// registeredNATS is list of registered stream configurations
-	registeredNATS []stream.Stream
+	registeredNATS map[uint64]*stream.Stream
 }
 
 // listens to messages published to subject of interest
@@ -54,9 +54,10 @@ func (n *nats) listen(s *stream.Stream) {
 		n.gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
 		return
 	}
-	n.gatewayConfig.Log.Info().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Msg("connected")
+	n.gatewayConfig.Log.Info().Interface("config", s).Msg("connected")
 	n.gatewayConfig.Log.Info().Str("server id", conn.ConnectedServerId()).Str("connected url", conn.ConnectedUrl()).
 		Str("servers", strings.Join(conn.DiscoveredServers(), ",")).Msg("nats connection")
+
 	_, err = conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
 		n.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
 		http.Post(fmt.Sprintf("http://localhost:%s", n.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Data))
@@ -68,22 +69,24 @@ func (n *nats) listen(s *stream.Stream) {
 }
 
 func (n *nats) RunGateway(cm *apiv1.ConfigMap) error {
-CheckAlreadyRegistered:
-	for nkey, nval := range cm.Data {
+	for nConfigkey, nConfigval := range cm.Data {
 		var s *stream.Stream
-		err := yaml.Unmarshal([]byte(nval), &s)
+		err := yaml.Unmarshal([]byte(nConfigval), &s)
 		if err != nil {
-			n.gatewayConfig.Log.Error().Str("artifact", nkey).Err(err).Msg("failed to parse calendar schedule")
+			n.gatewayConfig.Log.Error().Str("config", nConfigkey).Err(err).Msg("failed to parse nats config")
 			return err
 		}
-		n.gatewayConfig.Log.Info().Interface("stream", *s).Msg("stream configuration")
-		for _, rnats := range n.registeredNATS {
-			if cmp.Equal(rnats, s) {
-				n.gatewayConfig.Log.Warn().Str("url", s.URL).Str("subject-key", s.Attributes[subjectKey]).Msg("duplicate configuration")
-				goto CheckAlreadyRegistered
-			}
+		n.gatewayConfig.Log.Info().Interface("stream", *s).Msg("nats configuration")
+		key, err := hs.Hash(s, &hs.HashOptions{})
+		if err != nil {
+			n.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
+			continue
 		}
-		n.registeredNATS = append(n.registeredNATS, *s)
+		if _, ok := n.registeredNATS[key]; ok {
+			n.gatewayConfig.Log.Warn().Interface("config", s).Msg("duplicate configuration")
+			continue
+		}
+		n.registeredNATS[key] = s
 		go n.listen(s)
 	}
 	return nil
@@ -105,14 +108,14 @@ func main() {
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
 	n := &nats{
-		gatewayConfig: gatewayConfig,
-		registeredNATS: []stream.Stream{},
+		gatewayConfig:  gatewayConfig,
+		registeredNATS: make(map[uint64]*stream.Stream),
 	}
 
 	_, err = gatewayConfig.WatchGatewayConfigMap(n, context.Background(), configName)

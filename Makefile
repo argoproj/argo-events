@@ -37,56 +37,59 @@ endif
 .DELETE_ON_ERROR:
 all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-transformer-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
-all-gateway-images: webhook-image calendar-image artifact-image nats-image
+all-gateway-images: webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image
 
 .PHONY: all sensor-controller sensor-controller-image gateway-controller gateway-controller-image clean test
 
 # Sensor
 sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensor-controller/cmd/
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./controllers/sensor/cmd/
 
 sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image: sensor-linux
-	docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./sensor-controller/cmd/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./controllers/sensor/cmd/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
+
 
 # Sensor controller
 sensor-controller:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./cmd/sensor-controller
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor-controller ./cmd/controllers/sensor
 
 sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image: sensor-controller-linux
-	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./sensor-controller/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
+
 
 # Gateway controller
 gateway-controller:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-controller ./cmd/gateway-controller/main.go
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-controller ./cmd/controllers/gateway/main.go
 
 gateway-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-controller
 
 gateway-controller-image: gateway-controller-linux
-	docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./gateway-controller/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./controllers/gateway/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
+
 
 # Gateway transformer
 gateway-transformer:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-transformer ./cmd/gateway-controller/transform/main.go
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-transformer ./cmd/controllers/gateway/transform/main.go
 
 gateway-transformer-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-transformer
 
 gateway-transformer-image: gateway-transformer-linux
-	docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./gateway-controller/transform/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) ; fi
 
 
@@ -134,6 +137,7 @@ nats-image: nats-linux
 	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/nats/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
 
+
 kafka:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/core/stream/kafka/
 
@@ -143,6 +147,29 @@ kafka-linux:
 kafka-image: kafka-linux
 	docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/kafka/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
+
+
+amqp:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/
+
+amqp-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
+
+amqp-image: amqp-linux
+	docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/amqp/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) ; fi
+
+
+mqtt:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/core/stream/mqtt/
+
+mqtt-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
+
+mqtt-image: mqtt-linux
+	docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/mqtt/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
+
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

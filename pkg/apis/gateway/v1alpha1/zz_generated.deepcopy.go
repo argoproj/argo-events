@@ -28,6 +28,7 @@ func (in *Gateway) DeepCopyInto(out *Gateway) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
 	in.ObjectMeta.DeepCopyInto(&out.ObjectMeta)
+	in.Status.DeepCopyInto(&out.Status)
 	in.Spec.DeepCopyInto(&out.Spec)
 	return
 }
@@ -109,7 +110,6 @@ func (in *GatewaySpec) DeepCopy() *GatewaySpec {
 func (in *GatewayStatus) DeepCopyInto(out *GatewayStatus) {
 	*out = *in
 	in.StartedAt.DeepCopyInto(&out.StartedAt)
-	in.CompletedAt.DeepCopyInto(&out.CompletedAt)
 	return
 }
 
