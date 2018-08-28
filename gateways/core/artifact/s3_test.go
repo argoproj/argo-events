@@ -17,102 +17,15 @@ limitations under the License.
 package main
 
 import (
-	"reflect"
 	"testing"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk/fake"
-	minio "github.com/minio/minio-go"
 )
 
-func TestExtractAndCreateStreamSignal(t *testing.T) {
-	empty := v1alpha1.Signal{
-		Name: "empty",
-	}
-	notificationStream := v1alpha1.Stream{
-		Type:       "NATS",
-		URL:        "nats://localhost:4222",
-		Attributes: map[string]string{"subject": "test"},
-	}
-	signal := v1alpha1.Signal{
-		Name: "s3-test",
-		Artifact: &v1alpha1.ArtifactSignal{
-			ArtifactLocation: v1alpha1.ArtifactLocation{
-				S3: &v1alpha1.S3Artifact{
-					S3Bucket: v1alpha1.S3Bucket{
-						Bucket: "bucket",
-					},
-				},
-			},
-			Target: notificationStream,
-		},
-	}
-	_, err := extractAndCreateStreamSignal(&empty)
-	if err == nil {
-		t.Errorf("expected error for undefined artifact signal but found none")
-	}
-	streamSignal, err := extractAndCreateStreamSignal(&signal)
-	if err != nil {
-		t.Error(err)
-	}
+// Todo: implement the tests
 
-	if streamSignal.Stream == nil {
-		t.Fatalf("signal stream is undefined")
-	}
-	if !reflect.DeepEqual(notificationStream, *streamSignal.Stream) {
-		t.Errorf("stream defs are not equal\nexpected: %v\nactual: %v", notificationStream, streamSignal.Stream)
-	}
+func TestExtractAndCreateStreamSignal(t *testing.T) {
 }
 
 func TestSignal(t *testing.T) {
-	fakeClient := fake.NewClient()
-	s3 := New(fakeClient)
-
-	signal := v1alpha1.Signal{
-		Name: "s3-test",
-		Artifact: &v1alpha1.ArtifactSignal{
-			ArtifactLocation: v1alpha1.ArtifactLocation{
-				S3: &v1alpha1.S3Artifact{
-					S3Bucket: v1alpha1.S3Bucket{
-						Bucket: "images",
-					},
-					Key:   "myObj.txt",
-					Event: minio.ObjectCreatedPut,
-				},
-			},
-			Target: v1alpha1.Stream{
-				Type: "TEST",
-				URL:  "http://unit-tests-are-awesome.com",
-			},
-		},
-	}
-
-	done := make(chan struct{})
-	events, err := s3.Listen(&signal, done)
-	if err != nil {
-		t.Error(err)
-	}
-
-	// send a proper notification
-	notificationEvent := v1alpha1.Event{
-		Context: v1alpha1.EventContext{},
-		Data:    []byte(notificationInfo),
-	}
-	fakeClient.Generate(&notificationEvent)
-	event, ok := <-events
-	if !ok {
-		t.Errorf("expected an event but found none")
-	}
-	// verify the event data
-	if event.Context.EventType != EventType {
-		t.Errorf("event context EventType:\nexpected: %s\nactual: %s", EventType, event.Context.EventID)
-	}
-
-	close(done)
-	// ensure events channel is closed
-	if _, ok := <-events; ok {
-		t.Errorf("expected read-only events channel to be closed after signal stop")
-	}
 }
 
 var notificationInfo = `

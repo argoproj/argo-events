@@ -89,15 +89,6 @@
   version = "v1.38.1"
 
 [[projects]]
-  name = "github.com/go-log/log"
-  packages = [
-    ".",
-    "log"
-  ]
-  revision = "37e2e1f19306361e1fc152a1839f1236149cb4e4"
-  version = "v0.1.0"
-
-[[projects]]
   name = "github.com/go-openapi/jsonpointer"
   packages = ["."]
   revision = "3a0015ad55fa9873f41605d3e8f28cd279c32ab2"
@@ -203,27 +194,6 @@
   version = "v0.2.0"
 
 [[projects]]
-  name = "github.com/hashicorp/consul"
-  packages = [
-    "api",
-    "watch"
-  ]
-  revision = "39f93f011e591c842acc8053a7f5972aa6e592fd"
-  version = "v1.2.1"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-cleanhttp"
-  packages = ["."]
-  revision = "d5fe4b57a186c716b0e00b8c301cbd9b4182694d"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/go-rootcerts"
-  packages = ["."]
-  revision = "6bb64b370b90e7ef1fa532be9e591a81c3493e00"
-
-[[projects]]
   branch = "master"
   name = "github.com/hashicorp/golang-lru"
   packages = [
@@ -231,12 +201,6 @@
     "simplelru"
   ]
   revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
-
-[[projects]]
-  name = "github.com/hashicorp/serf"
-  packages = ["coordinate"]
-  revision = "d6574a5bb1226678d7010325fb6c985db20ee458"
-  version = "v0.8.1"
 
 [[projects]]
   branch = "master"
@@ -267,146 +231,6 @@
   revision = "d5012789d6659eeed305f54c1b1542e7b65829e6"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/micro/cli"
-  packages = ["."]
-  revision = "3d2263bb092286dde294a31049c92665f8373820"
-
-[[projects]]
-  name = "github.com/micro/go-grpc"
-  packages = ["."]
-  revision = "52024085c07e420ed8795c95006255a75feb500e"
-  version = "v0.3.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/go-log"
-  packages = ["."]
-  revision = "cbfa9447f9b655f8e66583237e51f40ca9bff860"
-
-[[projects]]
-  name = "github.com/micro/go-micro"
-  packages = [
-    ".",
-    "broker",
-    "broker/codec",
-    "broker/codec/json",
-    "broker/http",
-    "client",
-    "cmd",
-    "codec",
-    "codec/jsonrpc",
-    "codec/protorpc",
-    "errors",
-    "metadata",
-    "registry",
-    "registry/consul",
-    "registry/mdns",
-    "selector",
-    "selector/cache",
-    "server",
-    "server/debug",
-    "server/debug/proto",
-    "transport",
-    "transport/codec",
-    "transport/http"
-  ]
-  revision = "88505388c1d32136d5203876218f5f54d53a0e46"
-  version = "v0.10.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/go-plugins"
-  packages = [
-    "client/grpc",
-    "registry/kubernetes",
-    "registry/kubernetes/client",
-    "registry/kubernetes/client/api",
-    "registry/kubernetes/client/watch",
-    "selector/cache",
-    "selector/static",
-    "server/grpc"
-  ]
-  revision = "76b04f83b00b82565aa57f19d4821b369091fa0c"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/go-rcache"
-  packages = ["."]
-  revision = "a581a57b513351792b9f21fc8b95d87b1c5a95da"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/grpc-go"
-  packages = [
-    ".",
-    "balancer",
-    "balancer/base",
-    "balancer/roundrobin",
-    "codes",
-    "connectivity",
-    "credentials",
-    "encoding",
-    "encoding/proto",
-    "internal",
-    "internal/backoff",
-    "internal/channelz",
-    "internal/envconfig",
-    "internal/grpcrand",
-    "keepalive",
-    "logger",
-    "metadata",
-    "naming",
-    "peer",
-    "resolver",
-    "resolver/dns",
-    "resolver/passthrough",
-    "stats",
-    "status",
-    "transport"
-  ]
-  revision = "1b992c755a7b4a0ff84978ba56f7cf5944938135"
-
-[[projects]]
-  name = "github.com/micro/kubernetes"
-  packages = ["go/micro"]
-  revision = "1b3cb85ccc7a367049117e263edc1a26a98b20b5"
-  version = "v0.1.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/mdns"
-  packages = ["."]
-  revision = "cdf30746f9f70dc7a366d3d885792a092fd83102"
-
-[[projects]]
-  name = "github.com/micro/protoc-gen-micro"
-  packages = [
-    ".",
-    "generator",
-    "plugin/micro"
-  ]
-  revision = "656f330b069fe6ea1ce5013282e5914d6a1c3719"
-  version = "v0.4.0"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/micro/util"
-  packages = [
-    "go/lib/addr",
-    "go/lib/grpc",
-    "go/lib/net",
-    "go/lib/tls"
-  ]
-  revision = "4b7ed83e8520ab8fe6e5ef61fa2ede94b32f8602"
-
-[[projects]]
-  name = "github.com/miekg/dns"
-  packages = ["."]
-  revision = "5a2b9fab83ff0f8bfc99684bd5f43a37abe560f1"
-  version = "v1.0.8"
-
-[[projects]]
   name = "github.com/minio/minio-go"
   packages = [
     ".",
@@ -430,12 +254,6 @@
   name = "github.com/mitchellh/hashstructure"
   packages = ["."]
   revision = "2bca23e0e452137f789efbc8610126fd8b94f73b"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/mapstructure"
-  packages = ["."]
-  revision = "f15292f7a699fcc1a38a80977f80a046874ba8ac"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -479,12 +297,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  name = "github.com/pborman/uuid"
-  packages = ["."]
-  revision = "e790cca94e6cc75c7064b1332e63811d4aae1a53"
-  version = "v1.1"
-
-[[projects]]
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
@@ -492,12 +304,6 @@
   ]
   revision = "1958fd8fff7f115e79725b1288e0b878b3e06b00"
   version = "v2.0.3"
-
-[[projects]]
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -522,8 +328,7 @@
   packages = [
     ".",
     "internal/cbor",
-    "internal/json",
-    "log"
+    "internal/json"
   ]
   revision = "77db4b4f350e31be66a57c332acb7721cf9ff9bb"
   version = "v1.8.0"
@@ -584,8 +389,6 @@
     "bcrypt",
     "blake2b",
     "blowfish",
-    "ed25519",
-    "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
   revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
@@ -594,20 +397,13 @@
   branch = "master"
   name = "golang.org/x/net"
   packages = [
-    "bpf",
     "context",
     "http/httpguts",
     "http2",
     "http2/hpack",
     "idna",
-    "internal/iana",
-    "internal/socket",
     "internal/socks",
-    "internal/timeseries",
-    "ipv4",
-    "ipv6",
     "proxy",
-    "trace",
     "websocket"
   ]
   revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
@@ -664,12 +460,6 @@
     "internal/fastwalk"
   ]
   revision = "bfb5194568d3c40db30de765edc44cae9fc94671"
-
-[[projects]]
-  branch = "master"
-  name = "google.golang.org/genproto"
-  packages = ["googleapis/rpc/status"]
-  revision = "2a72893556e4d1f6c795a4c039314c9fa751eedb"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -918,6 +708,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "195b9f7df0cda49c133ecc29b05a34e3f0e4390665c9e9f5b789254b14dfe12c"
+  inputs-digest = "2d2f4cadd663275a93c793a35d909fad11ab07189dbb4ff0cd82573bb1c9c478"
   solver-name = "gps-cdcl"
   solver-version = 1

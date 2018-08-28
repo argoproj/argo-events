@@ -19,7 +19,6 @@ package sensor
 import (
 	"context"
 	"errors"
-	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -65,9 +64,6 @@ type SensorController struct {
 	// sensor informer and queue
 	informer cache.SharedIndexInformer
 	queue    workqueue.RateLimitingInterface
-
-	// mutex for sensor channels
-	sMux sync.Mutex
 }
 
 // NewSensorController creates a new Controller

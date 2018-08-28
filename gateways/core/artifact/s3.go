@@ -135,14 +135,14 @@ func (s *s3) listen(artifact *S3Artifact) {
 }
 
 func (s *s3) RunGateway(cm *apiv1.ConfigMap) error {
-	for s3ArtifactKey, s3ArtifactDataStr := range cm.Data {
+	for s3ConfigKey, s3ConfigData := range cm.Data {
 		var artifact *S3Artifact
-		err := yaml.Unmarshal([]byte(s3ArtifactDataStr), &artifact)
+		err := yaml.Unmarshal([]byte(s3ConfigData), &artifact)
 		if err != nil {
-			s.gatewayConfig.Log.Warn().Str("artifact", s3ArtifactKey).Err(err).Msg("failed to parse artifact data")
+			s.gatewayConfig.Log.Warn().Str("artifact", s3ConfigKey).Err(err).Msg("failed to parse configuration")
 			return err
 		}
-		s.gatewayConfig.Log.Info().Interface("artifact", *artifact).Msg("artifact")
+		s.gatewayConfig.Log.Info().Interface("artifact", *artifact)
 
 		key, err := hs.Hash(s, &hs.HashOptions{})
 

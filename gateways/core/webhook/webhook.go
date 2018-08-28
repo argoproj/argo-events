@@ -66,11 +66,11 @@ func (w *webhook) RunGateway(cm *apiv1.ConfigMap) error {
 			log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", w.serverPort), nil))
 		}()
 	}
-	// remove server port key
+	// remove server port key, if already removed its a no-op
 	delete(cm.Data, "port")
-	for hookKey, hookValue := range cm.Data {
+	for hookConfigKey, hookConfigValue := range cm.Data {
 		var h *hook
-		err := yaml.Unmarshal([]byte(hookValue), &h)
+		err := yaml.Unmarshal([]byte(hookConfigValue), &h)
 		if err != nil {
 			return err
 		}
@@ -86,7 +86,7 @@ func (w *webhook) RunGateway(cm *apiv1.ConfigMap) error {
 		}
 		w.registeredWebhooks[key] = h
 		w.registerWebhook(h)
-		w.gatewayConfig.Log.Info().Str("hook-name", hookKey).Msg("webhook configured")
+		w.gatewayConfig.Log.Info().Str("hook-name", hookConfigKey).Msg("configured")
 	}
 	return nil
 }

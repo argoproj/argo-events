@@ -61,12 +61,7 @@ func (goc *gwOperationCtx) operate() error {
 	// manages states of a gateway
 	switch goc.gw.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-
-		goc.markGatewayPhase(v1alpha1.NodePhaseNew, "new")
-
-		// Update node phase to running
-		goc.gw.Status.Phase = v1alpha1.NodePhaseRunning
-
+		// todo: maybe update gateway state as pending
 		// declare the configuration map for gateway transformer
 		gatewayConfigMap := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -88,7 +83,7 @@ func (goc *gwOperationCtx) operate() error {
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed to create transformer gateway configuration")
 			// mark gateway as failed
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, "failed to create transformer gateway configuration")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create transformer gateway configuration. err: %s", err))
 		}
 
 		// set the image policy to Always if not specified
@@ -168,7 +163,7 @@ func (goc *gwOperationCtx) operate() error {
 		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Create(gatewayDeployment)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, "failed gateway deployment")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
 		} else {
 			// expose gateway if service is configured
 			if goc.gw.Spec.Service.Port != 0 {
@@ -224,7 +219,7 @@ func (goc *gwOperationCtx) createGatewayService() {
 			Ports: []corev1.ServicePort{
 				{
 					Port:       goc.gw.Spec.Service.Port,
-					TargetPort: intstr.FromInt(goc.gw.Spec.Service.TargetPort),
+					TargetPort: intstr.FromInt(int(goc.gw.Spec.Service.TargetPort)),
 				},
 			},
 			Type: corev1.ServiceType(goc.gw.Spec.Service.Type),
@@ -291,7 +286,12 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message ..
 		if goc.gw.ObjectMeta.Labels == nil {
 			goc.gw.ObjectMeta.Labels = make(map[string]string)
 		}
+		if goc.gw.ObjectMeta.Annotations == nil {
+			goc.gw.ObjectMeta.Annotations = make(map[string]string)
+		}
 		goc.gw.ObjectMeta.Labels[common.LabelKeyPhase] = string(phase)
+		// add annotations so a resource sensor can watch this gateway.
+		goc.gw.ObjectMeta.Annotations[common.GatewayLabelKeyPhase] = string(phase)
 	}
 	if goc.gw.Status.StartedAt.IsZero() {
 		goc.gw.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}

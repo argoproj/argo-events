@@ -14,6 +14,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/tools/cache"
+	"k8s.io/apimachinery/pkg/labels"
 	"net/http"
 	"sync"
 	"time"
@@ -49,26 +53,68 @@ func NewSensorExecutor(sensorClient sv1.ArgoprojV1alpha1Interface, kubeClient ku
 }
 
 // resyncs the sensor object for status updates
-func (se *sensorExecutor) watchSensorUpdates() {
-	watcher, err := se.sensorClient.Sensors(se.sensor.Namespace).Watch(metav1.ListOptions{})
+func (se *sensorExecutor) resyncSensor(ctx context.Context) (cache.Controller, error) {
+	se.log.Info().Msg("watching sensor updates")
+	source := se.newSensorWatch()
+	_, controller := cache.NewInformer(
+		source,
+		&v1alpha1.Sensor{},
+		0,
+		cache.ResourceEventHandlerFuncs{
+			UpdateFunc: func(old, new interface{}) {
+				if newSensor, ok := new.(*v1alpha1.Sensor); ok {
+					se.log.Info().Msg("detected Sensor update.")
+					se.sensor = newSensor
+					if se.sensor.Status.Phase == v1alpha1.NodePhaseError {
+						se.log.Error().Msg("sensor is in error phase, stopping the server...")
+						// Shutdown server as sensor should not process any event in error state
+						se.server.Shutdown(context.Background())
+					}
+				}
+			},
+		})
+
+	go controller.Run(ctx.Done())
+	return controller, nil
+}
+
+func (se *sensorExecutor) newSensorWatch() *cache.ListWatch {
+	x := se.sensorClient.RESTClient()
+	resource := "sensors"
+	name := se.sensor.Name
+	namespace := se.sensor.Namespace
+	labelSelector, err := labels.Parse(fmt.Sprintf("job-name=%s", name))
 	if err != nil {
-		se.log.Panic().Err(err).Msg("failed to get sensor updates")
+		se.log.Error().Err(err).Msg("unable to watch sensor updates, stopping the server...")
+		// Shutdown server as sensor should not process any event in error state
+		se.server.Shutdown(context.Background())
+		return nil
 	}
-	for update := range watcher.ResultChan() {
-		se.sensor = update.Object.(*v1alpha1.Sensor).DeepCopy()
-		se.log.Info().Msg("sensor state updated")
-		if se.sensor.Status.Phase == v1alpha1.NodePhaseError {
-			se.log.Error().Msg("sensor is in error phase, stopping the server...")
-			// Shutdown server as sensor should not process any event in error state
-			se.server.Shutdown(context.Background())
-		}
+
+	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
+		options.LabelSelector = labelSelector.String()
+		req := x.Get().
+			Namespace(namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Do().Get()
 	}
+	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
+		options.Watch = true
+		options.LabelSelector = labelSelector.String()
+		req := x.Get().
+			Namespace(namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Watch()
+	}
+	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
 // WatchNotifications watches and handles signals sent by the gateway the sensor is interested in.
 func (se *sensorExecutor) WatchSignalNotifications() {
 	// watch sensor updates
-	go se.watchSensorUpdates()
+	go se.resyncSensor(context.Background())
 	srv := &http.Server{Addr: fmt.Sprintf(":%d", common.SensorServicePort)}
 	http.HandleFunc("/", se.handleSignals)
 	go func() {
@@ -106,6 +152,14 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 		// if signal is already completed, don't process the new event.
 		// Todo: what should be done when rate of signals received exceeds the complete sensor processing time?
 		// maybe add queueing logic
+		// get latest sensor updates. the resync called
+		se.sensor, err = se.sensorClient.Sensors(se.sensor.Namespace).Get(se.sensor.Name, metav1.GetOptions{})
+		if err != nil {
+			node := getNodeByName(se.sensor, gatewaySignal.Context.Source.Host)
+			se.markNodePhase(node.Name, v1alpha1.NodePhaseError, fmt.Sprintf("failed to get sensor object. err: %s", err))
+			common.SendErrorResponse(&w)
+			return
+		}
 		if getNodeByName(se.sensor, gatewaySignal.Context.Source.Host).Phase == v1alpha1.NodePhaseComplete {
 			se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal is already completed")
 			common.SendErrorResponse(&w)

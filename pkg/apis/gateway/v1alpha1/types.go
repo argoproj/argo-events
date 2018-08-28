@@ -23,7 +23,9 @@ import (
 
 // Gateway is the definition of a gateway-controller resource
 // +genclient
+// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
 type Gateway struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
@@ -45,14 +47,14 @@ type GatewaySpec struct {
 	Image string `json:"image" protobuf:"bytes,1,opt,name=image"`
 
 	// ImagePullPolicy for pulling the image
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,10,opt,name=imagePullPolicy,casttype=k8s.io/api/core/v1.PullPolicy"`
 
 	// Command is command to run user's image
 	Command string `json:"command" protobuf:"bytes,2,opt,name=command"`
 
 	// Todo: does this needed to specified separately?
 	// ConfigMap is name of the configmap user code can access if required
-	ConfigMap string `json:"configmap,omitempty" protobuf:"bytes,3,opt,name=configmap"`
+	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,3,opt,name=configmap"`
 
 	// Type is type of the gateway used as event type
 	Type string `json:"type" protobuf:"bytes,5,opt,name=type"`
@@ -67,7 +69,7 @@ type GatewaySpec struct {
 	Sensors []string `json:"sensors" protobuf:"bytes,8,opt,name=sensors"`
 
 	// ServiceAccountName is name of service account to run the gateway
-	ServiceAccountName string `json:"serviceAccountName" protobuf:"bytes,9,opt,name=service_account_name"`
+	ServiceAccountName string `json:"serviceAccountName" protobuf:"bytes,9,opt,name=serviceAccountName"`
 }
 
 // NodePhase is the label for the condition of a node
@@ -102,5 +104,5 @@ type Service struct {
 	Port int32 `json:"port" protobuf:"bytes,2,opt,name=port"`
 
 	// TargetPort is the gateway http server port
-	TargetPort int `json:"targetPort" protobuf:"bytes,3,opt,name=target_port"`
+	TargetPort int32 `json:"targetPort" protobuf:"bytes,3,opt,name=targetPort"`
 }

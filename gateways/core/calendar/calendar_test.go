@@ -18,111 +18,15 @@ package main
 
 import (
 	"testing"
-	"time"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
+// Todo: write tests
+
 func TestCalendarListenFailures(t *testing.T) {
-	signal := v1alpha1.Signal{
-		Name: "nats-test",
-		Calendar: &v1alpha1.CalendarSignal{
-			Recurrence: []string{},
-		},
-	}
-	cal := New()
-	done := make(chan struct{})
-
-	// test unknown signal
-	_, err := cal.Listen(&signal, done)
-	if err == nil {
-		t.Errorf("expected a non nil error for an unknown calendar signal")
-	}
-
-	// test invalid parsing of schedule
-	signal = v1alpha1.Signal{
-		Name: "nats-test",
-		Calendar: &v1alpha1.CalendarSignal{
-			Schedule: "this is not a schedule",
-		},
-	}
-	_, err = cal.Listen(&signal, done)
-	if err == nil {
-		t.Errorf("expected a non nil error for invalid parsing of schedule")
-	}
-
-	// test invalid parsing of interval
-	signal = v1alpha1.Signal{
-		Name: "nats-test",
-		Calendar: &v1alpha1.CalendarSignal{
-			Interval: "this is not a schedule",
-		},
-	}
-	_, err = cal.Listen(&signal, done)
-	if err == nil {
-		t.Errorf("expected a non nil error for invalid parsing of interval")
-	}
-
-	close(done)
 }
 
 func TestScheduleCalendar(t *testing.T) {
-	cal := New()
-	done := make(chan struct{})
-
-	signal := v1alpha1.Signal{
-		Name: "nats-test",
-		Calendar: &v1alpha1.CalendarSignal{
-			Schedule: "@every 1ms",
-		},
-	}
-
-	events, err := cal.Listen(&signal, done)
-	if err != nil {
-		t.Error(err)
-	}
-
-	time.Sleep(time.Millisecond)
-	event, ok := <-events
-	if !ok {
-		t.Errorf("expected an event but found none")
-	}
-
-	close(done)
-
-	// ensure the event was correct
-	if event.Context.EventType != EventType {
-		t.Errorf("event context EventType\nexpected: %s\nactual: %s", EventType, event.Context.EventType)
-	}
 }
 
 func TestIntervalCalendar(t *testing.T) {
-	cal := New()
-	done := make(chan struct{})
-
-	signal := v1alpha1.Signal{
-		Name: "nats-test",
-		Calendar: &v1alpha1.CalendarSignal{
-			Interval: "1ms",
-		},
-	}
-
-	events, err := cal.Listen(&signal, done)
-	if err != nil {
-		t.Error(err)
-	}
-
-	time.Sleep(time.Millisecond)
-	event, ok := <-events
-	if !ok {
-		t.Errorf("expected an event but found none")
-	}
-
-	close(done)
-
-	// ensure the event was correct
-	// ensure the event was correct
-	if event.Context.EventType != EventType {
-		t.Errorf("event context EventType\nexpected: %s\nactual: %s", EventType, event.Context.EventType)
-	}
 }

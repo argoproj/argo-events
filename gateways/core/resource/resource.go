@@ -14,13 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package resource
+package main
 
 import (
 	"strings"
 	"sync"
-	"time"
-
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,13 +29,27 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/gateways"
+	"k8s.io/client-go/kubernetes"
+	"net/http"
+	"fmt"
+	"bytes"
+	"os"
+	zlog "github.com/rs/zerolog"
+	hs "github.com/mitchellh/hashstructure"
+	apiv1 "k8s.io/api/core/v1"
+	"github.com/argoproj/argo-events/common"
+	"context"
+	"github.com/ghodss/yaml"
+)
+
+const (
+	configName = "resource-gateway-configmap"
 )
 
 type resource struct {
 	kubeConfig *rest.Config
-	gatewayConfig gateways.GatewayConfig
+	gatewayConfig *gateways.GatewayConfig
 	registeredResources map[uint64]*Resource
 }
 
@@ -56,49 +68,31 @@ type ResourceFilter struct {
 	CreatedBy   metav1.Time           `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
 
-func (r *resource) listen(resource *Resource) {
-	resources, err := r.discoverResources(resource)
+// listens for resource of interest.
+func (r *resource) listen(res *Resource) {
+	resources, err := r.discoverResources(res)
 	if err != nil {
-		r.
+		r.gatewayConfig.Log.Error().Err(err).Msg("failed to discover resource")
+		return
 	}
 
 	options := metav1.ListOptions{Watch: true}
-	if signal.Resource.Filter != nil {
-		options.LabelSelector = labels.Set(signal.Resource.Filter.Labels).AsSelector().String()
+	if res.Filter != nil {
+		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
 	wg := sync.WaitGroup{}
-	watches := make([]watch.Interface, 0)
-	events := make(chan *v1alpha1.Event)
 
 	// start up listeners
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
 		watch, err := resource.Watch(options)
 		if err != nil {
-			return nil, err
+			r.gatewayConfig.Log.Error().Err(err).Msg("failed to watch the resource")
+			return
 		}
-		watches = append(watches, watch)
-
-		wg.Add(1)
-		go r.watch(events, watch, r.Filter, &wg)
+		go r.watch(watch, res.Filter, &wg)
 	}
-
-	// wait for stop signal
-	go func() {
-		<-done
-		for _, watch := range watches {
-			watch.Stop()
-		}
-	}()
-
-	// wait for all watches to complete, then close the events channel
-	go func() {
-		wg.Wait()
-		close(events)
-	}()
-
-	return events, nil
 }
 
 func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
@@ -139,23 +133,19 @@ func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface
 	return resources, nil
 }
 
-func resolveGroupVersion(obj *v1alpha1.ResourceSignal) string {
+func resolveGroupVersion(obj *Resource) string {
 	if obj.Version == "v1" {
 		return obj.Version
 	}
 	return obj.Group + "/" + obj.Version
 }
 
-func (r *resource) watch() {
+func (r *resource) watch(w watch.Interface, filter *ResourceFilter, wg *sync.WaitGroup) {
 	for item := range w.ResultChan() {
 		itemObj := item.Object.(*unstructured.Unstructured)
 		b, _ := itemObj.MarshalJSON()
-		event := &v1alpha1.Event{
-			Context: v1alpha1.EventContext{
-				EventTime: metav1.Time{Time: time.Now().UTC()},
-			},
-			Data: b,
-		}
+		r.gatewayConfig.Log.Info().Msg("received a request, forwarding it to gateway transformer")
+		http.Post(fmt.Sprintf("http://localhost:%s", r.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(b))
 
 		if item.Type == watch.Error {
 			err := errors.FromObject(item.Object)
@@ -163,14 +153,14 @@ func (r *resource) watch() {
 		}
 
 		if passFilters(itemObj, filter) {
-			events <- event
+
 		}
 	}
 	wg.Done()
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) bool {
+func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
 		log.Printf("FILTERED: resource name '%s' does not match prefix '%s'", obj.GetName(), filter.Prefix)
@@ -209,4 +199,65 @@ func checkMap(expected, actual map[string]string) bool {
 		return false
 	}
 	return true
+}
+
+// RunGateway parses and runs each gateway configuration into separate go routines
+func (r *resource) RunGateway(cm *apiv1.ConfigMap) error {
+	for resourceConfigKey, resourceConfigData := range cm.Data {
+		var res *Resource
+		err := yaml.Unmarshal([]byte(resourceConfigData), &res)
+		if err != nil {
+			r.gatewayConfig.Log.Warn().Str("resource-config", resourceConfigKey).Err(err).Msg("failed to parse resource configuration")
+			return err
+		}
+		r.gatewayConfig.Log.Info().Interface("resource", *res)
+
+		key, err := hs.Hash(res, &hs.HashOptions{})
+
+		// check if the gateway is already running this configuration
+		if _, ok := r.registeredResources[key]; ok {
+			r.gatewayConfig.Log.Warn().Interface("config", res).Msg("duplicate configuration")
+			continue
+		}
+		go r.listen(res)
+	}
+	return nil
+}
+
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
+	if namespace == "" {
+		panic("no namespace provided")
+	}
+	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	if !ok {
+		panic("gateway transformer port is not provided")
+	}
+
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+
+	gatewayConfig := &gateways.GatewayConfig{
+		Log:             zlog.New(os.Stdout).With().Logger(),
+		Namespace:       namespace,
+		Clientset:       clientset,
+		TransformerPort: transformerPort,
+	}
+
+	res := &resource{
+		gatewayConfig:       gatewayConfig,
+		registeredResources: make(map[uint64]*Resource),
+	}
+
+	// watch the gateway configuration updates
+	_, err = gatewayConfig.WatchGatewayConfigMap(res, context.Background(), configName)
+	if err != nil {
+		res.gatewayConfig.Log.Error().Err(err).Msg("failed to update nats gateway confimap")
+	}
+	select {}
 }

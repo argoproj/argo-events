@@ -67,11 +67,11 @@ type calendar struct {
 }
 
 func (c *calendar) RunGateway(cm *apiv1.ConfigMap) error {
-	for scheduleKey, scheduleValue := range cm.Data {
+	for scheduleConfigKey, scheduleConfigValue := range cm.Data {
 		var cal *calSchedule
-		err := yaml.Unmarshal([]byte(scheduleValue), &cal)
+		err := yaml.Unmarshal([]byte(scheduleConfigValue), &cal)
 		if err != nil {
-			c.gatewayConfig.Log.Error().Str("artifact", scheduleKey).Err(err).Msg("failed to parse calendar schedule")
+			c.gatewayConfig.Log.Error().Str("schedule-key", scheduleConfigKey).Err(err).Msg("failed to parse configuration")
 			return err
 		}
 		key, err := hs.Hash(cal, &hs.HashOptions{})

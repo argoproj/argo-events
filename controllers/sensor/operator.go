@@ -23,13 +23,14 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
-	log "github.com/sirupsen/logrus"
 	batchv1 "k8s.io/api/batch/v1"
+	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"os"
 )
 
 // the context of an operation on a sensor.
@@ -40,7 +41,7 @@ type sOperationCtx struct {
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
 	// log is the logrus logging context to correlate logs with a sensor
-	log *log.Entry
+	log zlog.Logger
 	// reference to the sensor sensor-controller
 	controller *SensorController
 }
@@ -50,10 +51,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:       s.DeepCopy(),
 		updated: false,
-		log: log.WithFields(log.Fields{
-			"sensor":    s.Name,
-			"namespace": s.Namespace,
-		}),
+		log: zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.Namespace).Logger(),
 		controller: controller,
 	}
 }
@@ -64,9 +62,9 @@ func (soc *sOperationCtx) operate() error {
 		if r := recover(); r != nil {
 			if rerr, ok := r.(error); ok {
 				soc.markSensorPhase(v1alpha1.NodePhaseError, true, rerr.Error())
-				soc.log.Error(rerr)
+				soc.log.Error().Err(rerr)
 			}
-			soc.log.Errorf("recovered from panic: %+v\n%s", r, debug.Stack())
+			soc.log.Error().Interface("recover", r).Str("stack", string(debug.Stack())).Msg("recovered from panic")
 		}
 	}()
 
@@ -169,17 +167,17 @@ func (soc *sOperationCtx) operate() error {
 			_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
 			if err != nil {
 				// fail silently
-				soc.log.Errorf("failed to create sensor job. Err: %+v", err)
+				soc.log.Error().Err(err).Msg("failed to create sensor job")
 			}
 			_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
 			if err != nil {
 				// fail silently
-				soc.log.Errorf("failed to create sensor service. Err: %+v", err)
+				soc.log.Error().Err(err).Msg("failed to create sensor service")
 			}
 		}
 
 		// if we get here - we know the signals are running
-		soc.log.Info("marking sensor as active")
+		soc.log.Info().Msg("marking sensor as active")
 		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for signal events")
 
 	case v1alpha1.NodePhaseActive:
@@ -193,9 +191,9 @@ func (soc *sOperationCtx) operate() error {
 	case v1alpha1.NodePhaseError:
 		// todo: handle this
 	case v1alpha1.NodePhaseComplete:
-		soc.log.Info("sensor %s is completed", soc.s.Name)
+		soc.log.Info().Msg("sensor is completed")
 		if soc.s.Spec.Repeat {
-			soc.log.Info("sensor is configured in repeat mode")
+			soc.log.Info().Msg("sensor is configured in repeat mode")
 			soc.reRunSensor()
 		}
 	}
@@ -207,7 +205,7 @@ func (soc *sOperationCtx) reRunSensor() {
 	// we know have to reset the sensor status
 	// todo: persist changes in a transaction store somewhere, is it reasonable to put in the sensor object? probably not for scale
 
-	soc.log.Info("resetting nodes and re-running sensor")
+	soc.log.Info().Msg("resetting nodes and re-running sensor")
 	// reset the nodes
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	// re-initialize the signal nodes
@@ -229,18 +227,18 @@ func (soc *sOperationCtx) persistUpdates() {
 	sensorClient := soc.controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.ObjectMeta.Namespace)
 	soc.s, err = sensorClient.Update(soc.s)
 	if err != nil {
-		soc.log.Warnf("error updating sensor: %s", err)
+		soc.log.Warn().Err(err).Msg("error updating sensor")
 		if errors.IsConflict(err) {
 			return
 		}
-		soc.log.Info("re-applying updates on latest version and retrying update")
+		soc.log.Info().Msg("re-applying updates on latest version and retrying update")
 		err = soc.reapplyUpdate(sensorClient)
 		if err != nil {
-			soc.log.Infof("failed to re-apply update: %s", err)
+			soc.log.Error().Err(err).Msg("failed to re-apply update")
 			return
 		}
 	}
-	soc.log.Infof("sensor state %s updated successfully", soc.s.Status.Phase)
+	soc.log.Info().Str("phase", string(soc.s.Status.Phase)).Msg("sensor state updated successfully")
 
 	time.Sleep(1 * time.Second)
 }
@@ -273,7 +271,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 	nodeID := soc.s.NodeID(nodeName)
 	oldNode, ok := soc.s.Status.Nodes[nodeID]
 	if ok {
-		soc.log.Infof("node %s already initialized", nodeName)
+		soc.log.Info().Str("node-name", nodeName).Msg( "node already initialized")
 		return &oldNode
 	}
 	node := v1alpha1.NodeStatus{
@@ -288,7 +286,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 		node.Message = messages[0]
 	}
 	soc.s.Status.Nodes[nodeID] = node
-	soc.log.Infof("%s '%s' initialized: %s", node.Type, node.DisplayName, node.Message)
+	soc.log.Info().Str("node-type", string(node.Type)).Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg ("node is initialized")
 	soc.updated = true
 	return &node
 }
@@ -297,20 +295,25 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
 	justCompleted := soc.s.Status.Phase != phase
 	if justCompleted {
-		soc.log.Infof("sensor phase %s -> %s", soc.s.Status.Phase, phase)
+		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg ("sensor phase updated")
 		soc.s.Status.Phase = phase
 		soc.updated = true
 		if soc.s.ObjectMeta.Labels == nil {
 			soc.s.ObjectMeta.Labels = make(map[string]string)
 		}
+		if soc.s.ObjectMeta.Annotations == nil {
+			soc.s.ObjectMeta.Annotations = make(map[string]string)
+		}
 		soc.s.ObjectMeta.Labels[common.LabelKeyPhase] = string(phase)
+		// add annotations so a resource sensor can watch this sensor.
+		soc.s.ObjectMeta.Annotations[common.LabelKeyPhase] = string(phase)
 	}
 	if soc.s.Status.StartedAt.IsZero() {
 		soc.s.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 		soc.updated = true
 	}
 	if len(message) > 0 && soc.s.Status.Message != message[0] {
-		soc.log.Infof("sensor message %s -> %s", soc.s.Status.Message, message[0])
+		soc.log.Info().Str("old-message", soc.s.Status.Message).Str("new-message", message[0]).Msg("sensor message updated")
 		soc.s.Status.Message = message[0]
 		soc.updated = true
 	}
@@ -318,12 +321,13 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 	switch phase {
 	case v1alpha1.NodePhaseComplete, v1alpha1.NodePhaseError:
 		if markComplete && justCompleted {
-			soc.log.Infof("marking sensor complete")
+			soc.log.Info().Msg("marking sensor complete")
 			soc.s.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
 			if soc.s.ObjectMeta.Labels == nil {
 				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
 			soc.s.ObjectMeta.Labels[common.LabelKeyComplete] = "true"
+			soc.s.ObjectMeta.Annotations[common.LabelKeyComplete] = string(phase)
 			soc.updated = true
 		}
 	}

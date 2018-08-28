@@ -34,36 +34,16 @@ var sampleSensor = v1alpha1.Sensor{
 	Spec: v1alpha1.SensorSpec{
 		Signals: []v1alpha1.Signal{
 			{
-				Name: "nats-test",
-				Stream: &v1alpha1.Stream{
-					Type:       "NATS",
-					URL:        "nats://sample-test:4222",
-					Attributes: map[string]string{"subject": "testing-in"},
-				},
+				Name: "webhook-test",
 			},
 			{
 				Name: "resource-test",
-				Resource: &v1alpha1.ResourceSignal{
-					GroupVersionKind: v1alpha1.GroupVersionKind{
-						Group:   "argoproj.io",
-						Version: "v1alpha1",
-						Kind:    "workflow",
-					},
-					Namespace: apiv1.NamespaceDefault,
-				},
 			},
 		},
 		Triggers: []v1alpha1.Trigger{
 			{
 				Name: "test-trigger",
-				Message: &v1alpha1.Message{
-					Body: "this is where the message body goes",
-					Stream: v1alpha1.Stream{
-						Type:       "NATS",
-						URL:        "nats://sample-test:4222",
-						Attributes: map[string]string{"subject": "testing-out"},
-					},
-				},
+				Message: "boy of message",
 				Resource: &v1alpha1.ResourceObject{
 					Namespace: apiv1.NamespaceDefault,
 					GroupVersionKind: v1alpha1.GroupVersionKind{

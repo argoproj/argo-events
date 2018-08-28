@@ -35,7 +35,7 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-transformer-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-transformer-linux webhook-linux calendar-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux
 
 all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image
 
@@ -43,7 +43,7 @@ all-controller-images: sensor-controller-image gateway-controller-image
 
 all-gateway-images: webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image
 
-.PHONY: all sensor-controller sensor-controller-image gateway-controller gateway-controller-image clean test
+.PHONY: all clean test
 
 # Sensor
 sensor:
@@ -153,7 +153,7 @@ amqp:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/
 
 amqp-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
 
 amqp-image: amqp-linux
 	docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/amqp/Dockerfile .

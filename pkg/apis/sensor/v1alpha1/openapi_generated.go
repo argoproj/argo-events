@@ -28,34 +28,32 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":  schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal":    schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal":    schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy":  schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":             schema_pkg_apis_sensor_v1alpha1_Event(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":      schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper":      schema_pkg_apis_sensor_v1alpha1_EventWrapper(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":  schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message":           schema_pkg_apis_sensor_v1alpha1_Message(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":        schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter":    schema_pkg_apis_sensor_v1alpha1_ResourceFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":    schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal":    schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy":     schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact":        schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Bucket":          schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter":          schema_pkg_apis_sensor_v1alpha1_S3Filter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":            schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":        schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":        schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":      schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal":            schema_pkg_apis_sensor_v1alpha1_Signal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints": schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream":            schema_pkg_apis_sensor_v1alpha1_Stream(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints":   schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":           schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI":               schema_pkg_apis_sensor_v1alpha1_URI(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal":     schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":        schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":              schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy":        schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                   schema_pkg_apis_sensor_v1alpha1_Event(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":            schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper":            schema_pkg_apis_sensor_v1alpha1_EventWrapper(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":        schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":              schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":          schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter":       schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource": schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy":           schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact":              schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Bucket":                schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter":                schema_pkg_apis_sensor_v1alpha1_S3Filter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                  schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal":                  schema_pkg_apis_sensor_v1alpha1_Signal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter":            schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI":                     schema_pkg_apis_sensor_v1alpha1_URI(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":             schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
 }
 
@@ -63,83 +61,66 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ArtifactLocation describes the location for an external artifact",
+				Description: "ArtifactLocation describes the source location for an external artifact",
 				Properties: map[string]spec.Schema{
 					"s3": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"),
 						},
 					},
+					"inline": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"file": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact"),
+						},
+					},
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_ArtifactSignal(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ArtifactSignal describes an external object dependency",
+				Description: "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
 				Properties: map[string]spec.Schema{
-					"s3": {
+					"path": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact"),
-						},
-					},
-					"target": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Target is the stream to listen for artifact notifications",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
-						},
-					},
-				},
-				Required: []string{"target"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_CalendarSignal(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "CalendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed. Schedule takes precedence over interval; interval takes precedence over recurrence",
-				Properties: map[string]spec.Schema{
-					"schedule": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron",
+							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"interval": {
+					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...",
+							Description: "Type contains the JSON type of the data",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"recurrence": {
+					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545. RRULE is a recurrence rule which defines a repeating pattern for recurring events. RDATE defines the list of DATE-TIME values for recurring events. EXDATE defines the list of DATE-TIME exceptions for recurring events. the combination of these rules and dates combine to form a set of date times. NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
+							Description: "Value is the expected string value for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
-				Required: []string{"schedule", "interval", "recurrence"},
+				Required: []string{"path", "type", "value"},
 			},
 		},
 		Dependencies: []string{},
@@ -162,15 +143,15 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "need someway to progressively get more serious notifications",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"),
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
 				Required: []string{"level", "message"},
 			},
 		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"},
+		Dependencies: []string{},
 	}
 }
 
@@ -185,14 +166,14 @@ func schema_pkg_apis_sensor_v1alpha1_Event(ref common.ReferenceCallback) common.
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
 						},
 					},
-					"data": {
+					"payload": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "byte",
 						},
 					},
 				},
-				Required: []string{"context", "data"},
+				Required: []string{"context", "payload"},
 			},
 		},
 		Dependencies: []string{
@@ -308,6 +289,25 @@ func schema_pkg_apis_sensor_v1alpha1_EventWrapper(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "FileArtifact contains information about an artifact in a filesystem",
+				Properties: map[string]spec.Schema{
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -337,33 +337,6 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_Message(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Message represents a message on a queue",
-				Properties: map[string]spec.Schema{
-					"body": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"stream": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Stream descibes queue resources to send the message on",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
-						},
-					},
-				},
-				Required: []string{"body"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"},
 	}
 }
 
@@ -442,57 +415,6 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_ResourceFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects",
-				Properties: map[string]spec.Schema{
-					"prefix": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"labels": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"annotations": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"createdBy": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -519,14 +441,14 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object optional",
+							Description: "Namespace in which to create this object optional defaults to the service account namespace",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"artifactLocation": {
+					"source": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Location in which the K8 resource file(s) are stored. If omitted, will attempt to use the default artifact location configured in the sensor-controller.",
+							Description: "Source of the K8 resource file(s)",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},
@@ -544,56 +466,88 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 							},
 						},
 					},
+					"parameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of resource parameters to pass in the object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"),
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"group", "version", "kind"},
+				Required: []string{"group", "version", "kind", "namespace", "source", "parameters"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_ResourceSignal(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ResourceSignal refers to a dependency on a k8s resource.",
+				Description: "ResourceParameter indicates a passed parameter to a service template",
 				Properties: map[string]spec.Schema{
-					"group": {
+					"src": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Src contains a source reference to the value of the resource parameter from a signal event",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource"),
 						},
 					},
-					"version": {
+					"dest": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter"),
+							Description: "Dest is the JSONPath of a resource key. A path is a series of keys separated by a dot. The colon character can be escaped with '.' The -1 key can be used to append a value to an existing array. See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
-				Required: []string{"group", "version", "kind", "namespace"},
+				Required: []string{"src", "dest"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ResourceParameterSource defines the source for a resource parameter from a signal event",
+				Properties: map[string]spec.Schema{
+					"signal": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Signal is the name of the signal for which to retrieve this event",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Value is the default literal value to use for this parameter source This is only used if the path is invalid. If the path is invalid and this is not defined, this param source will produce an error.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"signal", "path"},
+			},
+		},
+		Dependencies: []string{},
 	}
 }
 
@@ -883,6 +837,20 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"imagePullPolicy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ImagePullPolicy determines the when the image should be pulled from docker repository",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"serviceAccountName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAccountName required for role based access",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"signals", "triggers"},
 			},
@@ -966,40 +934,10 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 							Format:      "int64",
 						},
 					},
-					"stream": {
+					"filters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Stream defines a message stream dependency",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream"),
-						},
-					},
-					"artifact": {
-						SchemaProps: spec.SchemaProps{
-							Description: "artifact defines an external file dependency",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal"),
-						},
-					},
-					"calendar": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Calendar defines a time based dependency",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal"),
-						},
-					},
-					"resource": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal"),
-						},
-					},
-					"webhook": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Webhook defines a HTTP notification dependency",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal"),
-						},
-					},
-					"constraints": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Constraints and rules governing tolerations of success and overrides",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints"),
+							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter"),
 						},
 					},
 				},
@@ -1007,90 +945,68 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CalendarSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceSignal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalConstraints", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Stream", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.WebhookSignal"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_SignalConstraints(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SignalConstraints defines constraints for a dependent signal.",
+				Description: "SignalFilter defines filters and constraints for a signal.",
 				Properties: map[string]spec.Schema{
 					"time": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Time constraints on the signal",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints"),
+							Description: "Time filter on the signal",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"),
 						},
 					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeConstraints"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_Stream(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Stream describes a queue stream resource",
-				Properties: map[string]spec.Schema{
-					"type": {
+					"context": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type of the stream resource",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Context filter constraints",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
 						},
 					},
-					"url": {
+					"data": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL is the exposed endpoint for client connections to this service",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"attributes": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Attributes contains additional fields specific to each service implementation",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
+							Description: "Data filter constraints",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"),
 									},
 								},
 							},
 						},
 					},
 				},
-				Required: []string{"type", "url"},
 			},
 		},
-		Dependencies: []string{},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_TimeConstraints(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TimeConstraints describes constraints in time",
+				Description: "TimeFilter describes a window in time. Filters out signal events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
 				Properties: map[string]spec.Schema{
 					"start": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Description: "Start is the beginning of a time window. Before this time, events for this signal are ignored and do not contribute to resolving the signal. A nil value represents -∞",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"stop": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Description: "Stop is the end of a time window. After this time, events for this signal are ignored and do not contribute to resolving the signal. A nil value represents ∞",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 				},
-				Required: []string{"start", "stop"},
 			},
 		},
 		Dependencies: []string{
@@ -1120,7 +1036,8 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Message describes a message that will be sent on a queue",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message"),
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"retryStrategy": {
@@ -1134,7 +1051,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Message", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"},
 	}
 }
 
@@ -1200,35 +1117,25 @@ func schema_pkg_apis_sensor_v1alpha1_URI(ref common.ReferenceCallback) common.Op
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_WebhookSignal(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "WebhookSignal is a general purpose REST API",
+				Description: "URLArtifact contains information about an artifact at an http endpoint.",
 				Properties: map[string]spec.Schema{
-					"endpoint": {
+					"path": {
 						SchemaProps: spec.SchemaProps{
-							Description: "REST API endpoint",
-							Type:        []string{"string"},
-							Format:      "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
-					"port": {
+					"verifyCert": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Port to listen on",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"method": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Method is HTTP request method that indicates the desired action to be performed for a given resource. See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content",
-							Type:        []string{"string"},
-							Format:      "",
+							Type:   []string{"boolean"},
+							Format: "",
 						},
 					},
 				},
-				Required: []string{"endpoint", "port", "method"},
 			},
 		},
 		Dependencies: []string{},

@@ -49,6 +49,7 @@ const (
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
 type Sensor struct {
 	v1.TypeMeta   `json:",inline"`
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
@@ -111,13 +112,6 @@ type GroupVersionKind struct {
 	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
 }
 
-// ResourceSignal refers to a dependency on a k8s resource.
-type ResourceSignal struct {
-	GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
-	Namespace        string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
-}
-
 // SignalFilter defines filters and constraints for a signal.
 type SignalFilter struct {
 	// Time filter on the signal
@@ -164,7 +158,7 @@ const (
 type DataFilter struct {
 	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 
@@ -213,14 +207,14 @@ type ResourceParameterSource struct {
 
 	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	Path string `json:"path" protobuf:"bytes,2,opt,name=path"`
 
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the path is invalid.
 	// If the path is invalid and this is not defined, this param source will produce an error.
-	Value *string `json:"default,omitempty" protobuf:"bytes,3,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
 }
 
 // ResourceObject is the resource object to create on kubernetes
@@ -242,17 +236,6 @@ type ResourceObject struct {
 
 	// Parameters is the list of resource parameters to pass in the object
 	Parameters []ResourceParameter `json:"parameters" protobuf:"bytes,4,rep,name=parameters"`
-}
-
-// WebhookSignal is a general purpose REST API
-// Due to https://github.com/argoproj/argo-events/issues/59 - the port is no longer part of the api
-type WebhookSignal struct {
-	// REST API endpoint
-	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
-
-	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
-	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
 }
 
 // RetryStrategy represents a strategy for retrying operations
@@ -399,7 +382,7 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	S3Bucket `json:",inline"`
+	S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
 	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
 	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
@@ -413,7 +396,7 @@ type FileArtifact struct {
 // URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
 	Path       string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
-	VerifyCert bool   `json:"verifycert,omitempty" protobuf:"bytes,2,opt,name=verifycert"`
+	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
 }
 
 // S3Bucket contains information for an S3 Bucket
@@ -430,14 +413,6 @@ type S3Bucket struct {
 type S3Filter struct {
 	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
 	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
-}
-
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
-type ResourceFilter struct {
-	Prefix      string            `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,3,rep,name=annotations"`
-	CreatedBy   v1.Time           `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
 
 // HasLocation whether or not an artifact has a location defined

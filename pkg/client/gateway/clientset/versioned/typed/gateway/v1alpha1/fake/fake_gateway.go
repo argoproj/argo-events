@@ -99,18 +99,6 @@ func (c *FakeGateways) Update(gateway *v1alpha1.Gateway) (result *v1alpha1.Gatew
 	return obj.(*v1alpha1.Gateway), err
 }
 
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeGateways) UpdateStatus(gateway *v1alpha1.Gateway) (*v1alpha1.Gateway, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(gatewaysResource, "status", c.ns, gateway), &v1alpha1.Gateway{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Gateway), err
-}
-
 // Delete takes name of the gateway and deletes it. Returns an error if one occurs.
 func (c *FakeGateways) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

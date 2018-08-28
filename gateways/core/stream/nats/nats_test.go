@@ -20,14 +20,39 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sdk"
 	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"
+	apiv1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"fmt"
+	"github.com/argoproj/argo-events/gateways/core/stream"
+	"net/http"
+	"io/ioutil"
+	"github.com/argoproj/argo-events/common"
+	"log"
 )
 
+const (
+	subject = "mysubject"
+	msg = "hello there"
+)
+
+func startHttpServer(t *testing.T) {
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		m, err := ioutil.ReadAll(request.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		if msg != string(m) {
+			t.Error("received message doesn't match sent message")
+		}
+	})
+	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%d", common.GatewayTransformerPort), nil))
+}
+
 func TestSignal(t *testing.T) {
+	startHttpServer(t)
 	natsEmbeddedServerOpts := server.Options{
 		Host:           "localhost",
 		Port:           4222,
@@ -35,71 +60,38 @@ func TestSignal(t *testing.T) {
 		NoSigs:         true,
 		MaxControlLine: 256,
 	}
-	nats := New()
+	natsServer := test.RunServer(&natsEmbeddedServerOpts)
+	defer natsServer.Shutdown()
 
-	signal := v1alpha1.Signal{
-		Name: "nats-test",
-		Stream: &v1alpha1.Stream{
-			Type: "URL",
-			URL:  "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port),
+	natsConfig := &apiv1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "nats-gateway-config",
+		},
+		Data: map[string]string{
+			"nats-config": fmt.Sprintf(`|-
+							url: %s
+							attributes:
+								subject: %s`, "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port), subject),
 		},
 	}
 
-	done := make(chan struct{})
-
-	// start the signal - expect ErrMissingRequiredAttribute
-	_, err := nats.Listen(&signal, done)
-	if err != sdk.ErrMissingRequiredAttribute {
-		t.Errorf("expected: %s\n found: %s", sdk.ErrMissingRequiredAttribute, err)
+	n := &nats{
+		registeredNATS: make(map[uint64]*stream.Stream),
 	}
+	err := n.RunGateway(natsConfig)
 
-	// add required attributes
-	subject := "test"
-	signal.Stream.Attributes = map[string]string{"subject": subject}
-	_, err = nats.Listen(&signal, done)
-	if err == nil {
-		t.Errorf("expected: failed to connect to nats cluster\nfound: %s", err)
-	}
-
-	// run an embedded gnats server
-	testServer := test.RunServer(&natsEmbeddedServerOpts)
-	defer testServer.Shutdown()
-	events, err := nats.Listen(&signal, done)
 	if err != nil {
 		t.Error(err)
 	}
 
 	// publish a message
-	conn, err := natsio.Connect(signal.Stream.URL)
+	conn, err := natsio.Connect("nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port))
 	if err != nil {
 		t.Fatalf("failed to connect to embedded nats server. cause: %s", err)
 	}
 	defer conn.Close()
-	err = conn.Publish(subject, []byte("hello, world"))
+	err = conn.Publish("mysubject", []byte(msg))
 	if err != nil {
 		t.Fatalf("failed to publish test msg. cause: %s", err)
-	}
-
-	// now lets get the event
-	e, ok := <-events
-	if !ok {
-		t.Errorf("failed to receive msg from events channel")
-	}
-	if e.Context.EventID != "test-1" {
-		t.Errorf("event context eventID:\nexpected: %s\nactual: %s", "test-1", e.Context.EventID)
-	}
-	if e.Context.EventType != EventType {
-		t.Errorf("event context EventType:\nexpected: %s\nactual: %s", EventType, e.Context.EventID)
-	}
-	if e.Context.CloudEventsVersion != sdk.CloudEventsVersion {
-		t.Errorf("event context CloudEventsVersion:\nexpected: %s\nactual: %s", sdk.CloudEventsVersion, e.Context.CloudEventsVersion)
-	}
-
-	// stop the signal
-	close(done)
-
-	// ensure events channel is closed
-	if _, ok := <-events; ok {
-		t.Errorf("expected read-only events channel to be closed after signal stop")
 	}
 }

@@ -12,3 +12,6 @@ data:
   webhook.myOtherConfig: |-
     endpoint: "/other"
     method: "POST"
+  webhook.myNewConfig: |-
+      endpoint: "/xo"
+      method: "POST"
