@@ -33,7 +33,7 @@ func TestWatchControllerConfigMap(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	controller := SensorController{
-		ConfigMap:     "sensor-sensor-controller-configmap",
+		ConfigMap:     "sensor-controller-configmap",
 		ConfigMapNS:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
@@ -43,7 +43,7 @@ func TestWatchControllerConfigMap(t *testing.T) {
 
 func TestNewControllerConfigMapWatch(t *testing.T) {
 	controller := SensorController{
-		ConfigMap:     "sensor-sensor-controller-configmap",
+		ConfigMap:     "sensor-controller-configmap",
 		ConfigMapNS:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
@@ -53,7 +53,7 @@ func TestNewControllerConfigMapWatch(t *testing.T) {
 func TestResyncConfig(t *testing.T) {
 	defer os.Unsetenv(common.EnvVarNamespace)
 	controller := SensorController{
-		ConfigMap:     "sensor-sensor-controller-configmap",
+		ConfigMap:     "sensor-controller-configmap",
 		ConfigMapNS:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
@@ -69,7 +69,7 @@ func TestResyncConfig(t *testing.T) {
 	// fail when the configmap does not have key 'config'
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "sensor-sensor-controller-configmap",
+			Name:      "sensor-controller-configmap",
 			Namespace: "testing",
 		},
 		Data: map[string]string{},
@@ -88,6 +88,6 @@ func TestResyncConfig(t *testing.T) {
 }
 
 var controllerConfig = `
-instanceID: axis
-executorImage: axis/sensor-executor:latest
+instanceID: argoproj
+executorImage: argoproj/sensor:latest
 `

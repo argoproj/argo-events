@@ -20,22 +20,22 @@ import (
 	"strconv"
 	"testing"
 
+	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/nats-io/gnatsd/server"
 	"github.com/nats-io/gnatsd/test"
 	natsio "github.com/nats-io/go-nats"
+	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"fmt"
-	"github.com/argoproj/argo-events/gateways/core/stream"
-	"net/http"
-	"io/ioutil"
-	"github.com/argoproj/argo-events/common"
 	"log"
+	"net/http"
 )
 
 const (
 	subject = "mysubject"
-	msg = "hello there"
+	msg     = "hello there"
 )
 
 func startHttpServer(t *testing.T) {
@@ -71,7 +71,7 @@ func TestSignal(t *testing.T) {
 			"nats-config": fmt.Sprintf(`|-
 							url: %s
 							attributes:
-								subject: %s`, "nats://" + natsEmbeddedServerOpts.Host + ":" + strconv.Itoa(natsEmbeddedServerOpts.Port), subject),
+								subject: %s`, "nats://"+natsEmbeddedServerOpts.Host+":"+strconv.Itoa(natsEmbeddedServerOpts.Port), subject),
 		},
 	}
 

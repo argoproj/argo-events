@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: nats-example-gateway
+  name: mqtt-example-gateway
   namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: axis
-    gateway-name: "nats-example-gateway"
+    gateway-name: "mqtt-example-gateway"
 spec:
-  image: "metalgearsolid/nats-gateway"
+  image: "metalgearsolid/mqtt-gateway"
   imagePullPolicy: "Always"
-  command: "/bin/nats-gateway"
-  type: "nats"
+  command: "/bin/mqtt-gateway"
+  type: "mqtt"
   version: "1.0"
   serviceAccountName: "argo-events-sa"
-  sensors: ["nats-example"]
+  sensors: ["mqtt-example"]

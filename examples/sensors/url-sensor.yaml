@@ -3,12 +3,10 @@ kind: Sensor
 metadata:
   generateName: url-example-
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: time
-      calendar:
-        interval: 10s
   triggers:
     - name: url-workflow-trigger
       resource:

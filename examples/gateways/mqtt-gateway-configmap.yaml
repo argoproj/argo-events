@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mqtt-gateway-configmap
+  namespace: argo-events
+data:
+  mqtt.fooConfig: |-
+    url: tcp://mqtt.argo-events:1883
+    attributes:
+      topic: foo
+  mqtt.barConfig: |-
+    url: tcp://mqtt.argo-events:1883
+    attributes:
+      topic: bar

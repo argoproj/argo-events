@@ -17,9 +17,16 @@ limitations under the License.
 package main
 
 import (
-	"strings"
-	"sync"
+	"bytes"
+	"context"
+	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+	hs "github.com/mitchellh/hashstructure"
+	zlog "github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
+	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,19 +35,12 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
-	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"net/http"
-	"fmt"
-	"bytes"
 	"os"
-	zlog "github.com/rs/zerolog"
-	hs "github.com/mitchellh/hashstructure"
-	apiv1 "k8s.io/api/core/v1"
-	"github.com/argoproj/argo-events/common"
-	"context"
-	"github.com/ghodss/yaml"
+	"strings"
+	"sync"
 )
 
 const (
@@ -48,15 +48,15 @@ const (
 )
 
 type resource struct {
-	kubeConfig *rest.Config
-	gatewayConfig *gateways.GatewayConfig
+	kubeConfig          *rest.Config
+	gatewayConfig       *gateways.GatewayConfig
 	registeredResources map[uint64]*Resource
 }
 
 // Resource refers to a dependency on a k8s resource.
 type Resource struct {
-	Namespace        string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
+	Namespace               string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
+	Filter                  *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	metav1.GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
 }
 
@@ -65,7 +65,7 @@ type ResourceFilter struct {
 	Prefix      string            `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
 	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
 	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,3,rep,name=annotations"`
-	CreatedBy   metav1.Time           `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+	CreatedBy   metav1.Time       `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
 
 // listens for resource of interest.

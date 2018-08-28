@@ -21,7 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Gateway is the definition of a gateway-controller resource
+// Gateway is the definition of a gateway resource
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -41,22 +41,22 @@ type GatewayList struct {
 	Items           []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
-// GatewaySpec represents gateway-controller specifications
+// GatewaySpec represents gateway specifications
 type GatewaySpec struct {
-	// Image is the image provided by user
+	// Image is the gateway processor image
 	Image string `json:"image" protobuf:"bytes,1,opt,name=image"`
 
 	// ImagePullPolicy for pulling the image
 	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,10,opt,name=imagePullPolicy,casttype=k8s.io/api/core/v1.PullPolicy"`
 
-	// Command is command to run user's image
+	// Command is command to run gateway processor image
 	Command string `json:"command" protobuf:"bytes,2,opt,name=command"`
 
 	// Todo: does this needed to specified separately?
-	// ConfigMap is name of the configmap user code can access if required
+	// ConfigMap is name of the configmap gateway processor can access if required
 	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,3,opt,name=configmap"`
 
-	// Type is type of the gateway used as event type
+	// Type is type of the gateway
 	Type string `json:"type" protobuf:"bytes,5,opt,name=type"`
 
 	// Version is used for marking event version
@@ -82,15 +82,15 @@ const (
 	NodePhaseNew     NodePhase = ""        // the node is new
 )
 
-// GatewayStatus contains information about the status of a gateway-controller.
+// GatewayStatus contains information about the status of a gateway.
 type GatewayStatus struct {
-	// Phase is the high-level summary of the gateway-controller
+	// Phase is the high-level summary of the gateway
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
-	// StartedAt is the time at which this gateway-controller was initiated
+	// StartedAt is the time at which this gateway was initiated
 	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
-	// Message is a human readable string indicating details about a gateway-controller in its phase
+	// Message is a human readable string indicating details about a gateway in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 }
 

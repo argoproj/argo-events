@@ -1,15 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-example
+  name: webhook-with-data-filterexample
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: webhook
-      webhook:
-        endpoint: /filter/data
-        method: POST
       filters:
         data:
             - path: bucket

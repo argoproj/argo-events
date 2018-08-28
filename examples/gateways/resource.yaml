@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: resource-example-gateway
+  namespace: argo-events
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: axis
+    gateway-name: "resource-example-gateway"
+spec:
+  image: "metalgearsolid/resource-gateway"
+  imagePullPolicy: "Always"
+  command: "/bin/resource-gateway"
+  type: "resource"
+  version: "1.0"
+  service:
+    type: "LoadBalancer"
+    port: 12000
+    targetPort: 12000
+  serviceAccountName: "argo-events-sa"
+  sensors: ["resource-example"]

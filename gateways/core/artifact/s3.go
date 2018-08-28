@@ -40,7 +40,7 @@ const (
 
 type s3 struct {
 	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig       *gateways.GatewayConfig
+	gatewayConfig *gateways.GatewayConfig
 	// registeredArtifacts contains map of registered s3 artifacts
 	registeredArtifacts map[uint64]*S3Artifact
 }
@@ -48,13 +48,13 @@ type s3 struct {
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
-	S3EventConfig S3EventConfig           `json:"s3EventConfig" protobuf:"bytes,1,opt,name=s3EventConfig"`
+	S3EventConfig S3EventConfig `json:"s3EventConfig" protobuf:"bytes,1,opt,name=s3EventConfig"`
 	// Mode of operation for s3 client
-	Insecure      bool                    `json:"insecure,omitempty" protobuf:"bytes,2,opt,name=insecure"`
+	Insecure bool `json:"insecure,omitempty" protobuf:"bytes,2,opt,name=insecure"`
 	// AccessKey
-	AccessKey     apiv1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
+	AccessKey apiv1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
 	// SecretKey
-	SecretKey     apiv1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
+	SecretKey apiv1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
 }
 
 // S3EventConfig contains configuration for bucket notification

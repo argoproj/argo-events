@@ -3,17 +3,10 @@ kind: Sensor
 metadata:
   name: amqp-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      stream:
-        type: amqp
-        url: amqp://localhost:5672
-        attributes:
-          exchangeName: myExchangeName
-          exchangeType: fanout
-          routingKey: myRoutingKey
   triggers:
     - name: "done-amqp-message"
       message:

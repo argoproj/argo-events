@@ -1,17 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: nats-example
+  name: nats-multi-trigger-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      stream:
-        type: nats
-        url: nats://example-nats-cluster:4222
-        attributes:
-          subject: hello
   triggers:
     - name: "workflow"
       resource:

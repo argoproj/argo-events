@@ -40,7 +40,7 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Gateway is the definition of a gateway-controller resource",
+				Description: "Gateway is the definition of a gateway resource",
 				Properties: map[string]spec.Schema{
 					"kind": {
 						SchemaProps: spec.SchemaProps{
@@ -130,7 +130,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GatewaySpec represents gateway-controller specifications",
+				Description: "GatewaySpec represents gateway specifications",
 				Properties: map[string]spec.Schema{
 					"image": {
 						SchemaProps: spec.SchemaProps{
@@ -214,24 +214,24 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GatewayStatus contains information about the status of a gateway-controller.",
+				Description: "GatewayStatus contains information about the status of a gateway.",
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Phase is the high-level summary of the gateway-controller",
+							Description: "Phase is the high-level summary of the gateway",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"startedAt": {
 						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this gateway-controller was initiated",
+							Description: "StartedAt is the time at which this gateway was initiated",
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Message is a human readable string indicating details about a gateway-controller in its phase",
+							Description: "Message is a human readable string indicating details about a gateway in its phase",
 							Type:        []string{"string"},
 							Format:      "",
 						},

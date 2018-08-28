@@ -6,12 +6,9 @@ metadata:
 data:
   # port can't be reconfigured.
   port: "12000"
-  webhook.myConfig: |-
-    endpoint: "/app"
+  webhook.fooConfig: |-
+    endpoint: "/foo"
     method: "POST"
-  webhook.myOtherConfig: |-
-    endpoint: "/other"
+  webhook.barConfig: |-
+    endpoint: "/bar"
     method: "POST"
-  webhook.myNewConfig: |-
-      endpoint: "/xo"
-      method: "POST"

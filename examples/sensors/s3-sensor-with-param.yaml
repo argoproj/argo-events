@@ -3,20 +3,10 @@ kind: Sensor
 metadata:
   name: artifact-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: minioS3
-      artifact:
-        s3:
-          bucket: hello
-          event: s3:ObjectCreated:Put
-          endpoint: artifacts-minio.default:9000
-        target:
-          type: NATS
-          url: nats://example-nats-cluster:4222
-          attributes:
-            subject: hello
   triggers:
     - name: argo-workflow
       resource:

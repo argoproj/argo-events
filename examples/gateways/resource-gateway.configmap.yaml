@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resource-gateway-configmap
+  namespace: argo-events
+data:
+  resource.fooConfig: |-
+    namespace: default
+    group: "argoproj.io"
+    version: "v1alpha1"
+    kind: "Workflow"
+    filter:
+      prefix: scripts-bash
+      labels:
+        workflows.argoproj.io/phase: Succeeded

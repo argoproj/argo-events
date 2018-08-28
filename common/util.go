@@ -80,13 +80,13 @@ func ServerResourceForGroupVersionKind(disco discovery.DiscoveryInterface, gvk s
 }
 
 // SendSuccessResponse sends http success response
-func SendSuccessResponse(writer *http.ResponseWriter) {
-	(*writer).WriteHeader(http.StatusOK)
-	(*writer).Write([]byte(SuccessResponse))
+func SendSuccessResponse(writer http.ResponseWriter) {
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte(SuccessResponse))
 }
 
 // SendErrorResponse sends http error response
-func SendErrorResponse(writer *http.ResponseWriter) {
-	(*writer).WriteHeader(http.StatusOK)
-	(*writer).Write([]byte(SuccessResponse))
+func SendErrorResponse(writer http.ResponseWriter) {
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte(SuccessResponse))
 }

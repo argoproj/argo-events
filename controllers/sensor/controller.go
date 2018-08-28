@@ -37,7 +37,7 @@ const (
 	sensorResyncPeriod = 20 * time.Minute
 )
 
-// SensorControllerConfig contain the configuration settings for the sensor sensor-controller
+// SensorControllerConfig contain the configuration settings for the sensor-controller
 type SensorControllerConfig struct {
 	// InstanceID is a label selector to limit the sensor-controller's watch of sensor jobs to a specific instance.
 	// If omitted, the sensor-controller watches sensors that *are not* labeled with an instance id.

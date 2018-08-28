@@ -12,9 +12,5 @@ spec:
   command: "/bin/calendar-gateway"
   type: "calendar"
   version: "1.0"
-  service:
-    type: "LoadBalancer"
-    port: 12000
-    targetPort: 12000
   serviceAccountName: "argo-events-sa"
   sensors: ["calendar-example"]

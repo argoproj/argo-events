@@ -10,14 +10,15 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/net/context"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
-	"k8s.io/apimachinery/pkg/labels"
 	"net/http"
 	"sync"
 	"time"
@@ -130,6 +131,7 @@ func (se *sensorExecutor) WatchSignalNotifications() {
 
 // Handles signals received from gateway/s
 func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) {
+	defer se.persistUpdates()
 	body, err := ioutil.ReadAll(r.Body)
 	gatewaySignal := sv1alpha.Event{}
 	err = json.Unmarshal(body, &gatewaySignal)
@@ -140,29 +142,23 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// validate the signal is from gateway of interest
-	var validSignal bool
+	var isSignalValid bool
 	for _, signal := range se.sensor.Spec.Signals {
 		if signal.Name == gatewaySignal.Context.Source.Host {
-			validSignal = true
+			isSignalValid = true
 			break
 		}
 	}
 
-	if validSignal {
+	if isSignalValid {
+		// send success response back to gateway as it is a valid notification
+		common.SendSuccessResponse(&w)
+
 		// if signal is already completed, don't process the new event.
 		// Todo: what should be done when rate of signals received exceeds the complete sensor processing time?
 		// maybe add queueing logic
-		// get latest sensor updates. the resync called
-		se.sensor, err = se.sensorClient.Sensors(se.sensor.Namespace).Get(se.sensor.Name, metav1.GetOptions{})
-		if err != nil {
-			node := getNodeByName(se.sensor, gatewaySignal.Context.Source.Host)
-			se.markNodePhase(node.Name, v1alpha1.NodePhaseError, fmt.Sprintf("failed to get sensor object. err: %s", err))
-			common.SendErrorResponse(&w)
-			return
-		}
 		if getNodeByName(se.sensor, gatewaySignal.Context.Source.Host).Phase == v1alpha1.NodePhaseComplete {
 			se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal is already completed")
-			common.SendErrorResponse(&w)
 			return
 		}
 
@@ -175,58 +171,27 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 		}
 		se.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
 
-		se.sensor, err = se.updateSensor()
-		if err != nil {
-			err = se.reapplyUpdate()
-			if err != nil {
-				se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("failed to update signal node state")
-				common.SendErrorResponse(&w)
-				return
-			}
-		}
-
-		// to trigger the sensor action/s we first need to check if all signals are completed and sensor is active
+		// to trigger the sensor action/s we need to check if all signals are completed and sensor is active
 		completed := se.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) && se.sensor.Status.Phase == v1alpha1.NodePhaseActive
 		if completed {
-			se.log.Info().Msg("all signals are processed")
+			se.log.Info().Msg("all signals are marked completed")
 
 			// trigger action/s
 			for _, trigger := range se.sensor.Spec.Triggers {
-				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseActive, "trigger is about to run")
-				// update the sensor for marking trigger as active
-				se.sensor, err = se.updateSensor()
+				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseActive, "active")
+				// execute trigger action
 				err := se.executeTrigger(trigger)
 				if err != nil {
-					// Todo: should we let other triggers to run?
 					se.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
 					se.markNodePhase(trigger.Name, v1alpha1.NodePhaseError, err.Error())
 					se.sensor.Status.Phase = v1alpha1.NodePhaseError
-					// update the sensor object with error state
-					se.sensor, err = se.updateSensor()
-					if err != nil {
-						err = se.reapplyUpdate()
-						if err != nil {
-							se.log.Error().Err(err).Msg("failed to update sensor phase")
-							common.SendErrorResponse(&w)
-							return
-						}
-					}
+					return
 				}
 				// mark trigger as complete.
 				se.markNodePhase(trigger.Name, v1alpha1.NodePhaseComplete, "trigger completed successfully")
-				se.sensor, err = se.updateSensor()
-				if err != nil {
-					err = se.reapplyUpdate()
-					if err != nil {
-						se.log.Error().Err(err).Msg("failed to update trigger completion state")
-						common.SendErrorResponse(&w)
-						return
-					}
-				}
 			}
 
 			if !se.sensor.Spec.Repeat {
-				common.SendSuccessResponse(&w)
 				// todo: unsubscribe from pub-sub system
 				se.server.Shutdown(context.Background())
 			}
@@ -239,9 +204,26 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 
 }
 
-// update sensor resource
-func (se *sensorExecutor) updateSensor() (*v1alpha1.Sensor, error) {
-	return se.sensorClient.Sensors(se.sensor.Namespace).Update(se.sensor)
+// persist the updates to the Sensor resource
+func (se *sensorExecutor) persistUpdates() {
+	var err error
+	sensorClient := se.sensorClient.Sensors(se.sensor.ObjectMeta.Namespace)
+	// no need to reassign the sensor object here as resyncSensor method will take care of that
+	_, err = sensorClient.Update(se.sensor)
+	if err != nil {
+		se.log.Warn().Err(err).Msg("error updating sensor")
+		if errors.IsConflict(err) {
+			return
+		}
+		se.log.Info().Msg("re-applying updates on latest version and retrying update")
+		err = se.reapplyUpdate()
+		if err != nil {
+			se.log.Error().Err(err).Msg("failed to re-apply update")
+			return
+		}
+	}
+	se.log.Info().Msg("sensor updated successfully")
+	time.Sleep(1 * time.Second)
 }
 
 // reapply the update to sensor

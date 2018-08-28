@@ -48,11 +48,11 @@ type hook struct {
 // webhook contains gateway configuration and registered endpoints
 type webhook struct {
 	// gatewayConfig contains general configuration for gateway
-	gatewayConfig      *gateways.GatewayConfig
+	gatewayConfig *gateways.GatewayConfig
 	// srv is reference to http server
-	srv                *http.Server
+	srv *http.Server
 	// serverPort is port on which server is listening
-	serverPort         string
+	serverPort string
 	// registeredWebhooks contains map of registered http endpoints
 	registeredWebhooks map[uint64]*hook
 }

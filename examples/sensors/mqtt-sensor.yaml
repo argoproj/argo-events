@@ -3,15 +3,10 @@ kind: Sensor
 metadata:
   name: mqtt-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      stream:
-        type: mqtt
-        url: tcp://localhost:1883
-        attributes:
-          topic: hello
   triggers:
     - name: "done-mqtt-stream"
       message:

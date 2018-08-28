@@ -3,19 +3,10 @@ kind: Sensor
 metadata:
   name: resource-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: worklow-1
-      resource:
-        namespace: default
-        group: "argoproj.io"
-        version: "v1alpha1"
-        kind: "Workflow"
-        filter:
-          prefix: scripts-bash
-          labels:
-            workflows.argoproj.io/phase: Succeeded
   triggers:
     - name: argo-workflow
       resource:

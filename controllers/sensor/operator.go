@@ -23,8 +23,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
-	batchv1 "k8s.io/api/batch/v1"
 	zlog "github.com/rs/zerolog"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,9 +49,9 @@ type sOperationCtx struct {
 // newSensorOperationCtx creates and initializes a new sOperationCtx object
 func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sOperationCtx {
 	return &sOperationCtx{
-		s:       s.DeepCopy(),
-		updated: false,
-		log: zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.Namespace).Logger(),
+		s:          s.DeepCopy(),
+		updated:    false,
+		log:        zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.Namespace).Logger(),
 		controller: controller,
 	}
 }
@@ -271,7 +271,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 	nodeID := soc.s.NodeID(nodeName)
 	oldNode, ok := soc.s.Status.Nodes[nodeID]
 	if ok {
-		soc.log.Info().Str("node-name", nodeName).Msg( "node already initialized")
+		soc.log.Info().Str("node-name", nodeName).Msg("node already initialized")
 		return &oldNode
 	}
 	node := v1alpha1.NodeStatus{
@@ -286,7 +286,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 		node.Message = messages[0]
 	}
 	soc.s.Status.Nodes[nodeID] = node
-	soc.log.Info().Str("node-type", string(node.Type)).Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg ("node is initialized")
+	soc.log.Info().Str("node-type", string(node.Type)).Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is initialized")
 	soc.updated = true
 	return &node
 }
@@ -295,7 +295,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
 	justCompleted := soc.s.Status.Phase != phase
 	if justCompleted {
-		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg ("sensor phase updated")
+		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg("sensor phase updated")
 		soc.s.Status.Phase = phase
 		soc.updated = true
 		if soc.s.ObjectMeta.Labels == nil {

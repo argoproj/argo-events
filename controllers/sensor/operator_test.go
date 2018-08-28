@@ -42,7 +42,7 @@ var sampleSensor = v1alpha1.Sensor{
 		},
 		Triggers: []v1alpha1.Trigger{
 			{
-				Name: "test-trigger",
+				Name:    "test-trigger",
 				Message: "boy of message",
 				Resource: &v1alpha1.ResourceObject{
 					Namespace: apiv1.NamespaceDefault,

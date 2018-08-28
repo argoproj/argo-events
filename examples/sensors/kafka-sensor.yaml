@@ -3,16 +3,10 @@ kind: Sensor
 metadata:
   name: kafka-example
   labels:
-    sensors.argoproj.io/controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: axis
 spec:
   signals:
     - name: hello
-      stream:
-        type: kafka
-        url: localhost:9092
-        attributes:
-          topic: hello
-          partition: "0"
   triggers:
     - name: "done-kafka-stream"
       message:

@@ -4,13 +4,28 @@ metadata:
   name: artifact-gateway-configmap
   namespace: argo-events
 data:
-  s3.myartifact: |-
+  s3.fooConfig: |-
     s3EventConfig:
-      bucket: mybucket
+      bucket: foo
       endpoint: minio.argo-events:9000
       event: s3:ObjectCreated:Put
       filter:
         prefix: ""
+        suffix: ""
+    insecure: true
+    accessKey:
+      key: accesskey
+      name: minio
+    secretKey:
+      key: secretkey
+      name: minio
+  s3.barConfig: |-
+    s3EventConfig:
+      bucket: bar
+      endpoint: minio.argo-events:9000
+      event: s3:ObjectCreated:Get
+      filter:
+        prefix: "xyz"
         suffix: ""
     insecure: true
     accessKey:
