@@ -134,7 +134,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"image": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the image provided by user",
+							Description: "Image is the gateway processor image",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -148,21 +148,21 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"command": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Command is command to run user's image",
+							Description: "Command is command to run gateway processor image",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Todo: does this needed to specified separately? ConfigMap is name of the configmap user code can access if required",
+							Description: "Todo: does this needed to specified separately? ConfigMap is name of the configmap gateway processor can access if required",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type is type of the gateway used as event type",
+							Description: "Type is type of the gateway",
 							Type:        []string{"string"},
 							Format:      "",
 						},

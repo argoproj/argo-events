@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: webhook-example-gateway
+  name: webhook-gateway
   namespace: argo-events
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: axis
-    gateway-name: "webhook-example-gateway"
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "webhook-gateway"
 spec:
   image: "metalgearsolid/webhook-gateway"
   imagePullPolicy: "Always"
@@ -17,4 +17,4 @@ spec:
     port: 12000
     targetPort: 12000
   serviceAccountName: "argo-events-sa"
-  sensors: ["webhook-example"]
+  sensors: ["webhook-sensor"]

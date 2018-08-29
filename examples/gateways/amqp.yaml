@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: amqp-example-gateway
+  name: amqp-gateway
   namespace: argo-events
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: axis
-    gateway-name: "amqp-example-gateway"
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "amqp-gateway"
 spec:
   image: "metalgearsolid/amqp-gateway"
   imagePullPolicy: "Always"
@@ -13,4 +13,4 @@ spec:
   type: "amqp"
   version: "1.0"
   serviceAccountName: "argo-events-sa"
-  sensors: ["amqp-example"]
+  sensors: ["amqp-sensor"]

@@ -86,9 +86,14 @@ func (goc *gwOperationCtx) operate() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create transformer gateway configuration. err: %s", err))
 		}
 
-		// set the image policy to Always if not specified
+		// set the image policy to Always if unspecified
 		if goc.gw.Spec.ImagePullPolicy == "" {
 			goc.gw.Spec.ImagePullPolicy = corev1.PullAlways
+		}
+
+		//set service account to default if unspecified
+		if goc.gw.Spec.ServiceAccountName == "" {
+			goc.gw.Spec.ServiceAccountName = "default"
 		}
 
 		// declare the gateway deployment. The deployment has two components,
@@ -233,7 +238,7 @@ func (goc *gwOperationCtx) createGatewayService() {
 	}
 }
 
-// persist the updates to the Sensor resource
+// persist the updates to the gateway resource
 func (goc *gwOperationCtx) persistUpdates() {
 	var err error
 	if !goc.updated {

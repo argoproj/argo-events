@@ -23,7 +23,6 @@ import (
 
 // Gateway is the definition of a gateway resource
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Gateway struct {

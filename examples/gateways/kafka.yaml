@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: kafka-example-gateway
+  name: kafka-gateway
   namespace: argo-events
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: axis
-    gateway-name: "kafka-example-gateway"
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "kafka-gateway"
 spec:
   image: "metalgearsolid/kafka-gateway"
   imagePullPolicy: "Always"
@@ -13,4 +13,4 @@ spec:
   type: "kafka"
   version: "1.0"
   serviceAccountName: "argo-events-sa"
-  sensors: ["kafka-example"]
+  sensors: ["kafka-sensor"]

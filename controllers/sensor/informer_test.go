@@ -36,10 +36,10 @@ func TestInstanceIDReq(t *testing.T) {
 	assert.Equal(t, common.LabelKeySensorControllerInstanceID, req.Key())
 	assert.Equal(t, selection.DoesNotExist, req.Operator())
 
-	controller.Config.InstanceID = "axis"
+	controller.Config.InstanceID = "argo-events"
 	req = controller.instanceIDReq()
 	assert.Equal(t, selection.Equals, req.Operator())
-	assert.True(t, req.Values().Has("axis"))
+	assert.True(t, req.Values().Has("argo-events"))
 }
 
 func TestNewSensorInformer(t *testing.T) {

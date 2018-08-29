@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: artifact-example
+  name: artifact-with-param-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: minioS3
+    - name: artifact-gateway
   triggers:
     - name: argo-workflow
       resource:

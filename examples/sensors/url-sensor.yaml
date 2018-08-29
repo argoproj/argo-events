@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  generateName: url-example-
+  name: url-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: time
+    - name: calendar-gateway
   triggers:
     - name: url-workflow-trigger
       resource:

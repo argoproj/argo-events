@@ -1,95 +1,68 @@
 # Getting Started - Quickstart
-This is a guide to getting started with Argo Events using Minikube.
+This is a guide to getting started with Argo Events.
 
 ## Requirements
+* Kubernetes cluster >v1.9
 * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
-* Have a [kubeconfig](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/) file (default location is `~/.kube/config`).
-* Installed Minikube >v0.26.1
-* Installed Go >1.9 and properly setup the [GOPATH](https://golang.org/doc/install)
+* Installed Go >1.9 and properly setup the [GOPATH](https://golang.org/doc/install) environment variable
 * Installed [dep](https://golang.github.io/dep/docs/installation.html), Go's dependency tool
 
-## 1. Checkout project's master branch
+## 1. Get the project
 ```
-$ git clone git@github.com:argoproj/argo-events.git
-```
-
-## 2. Install vendor dependencies
-```
-$ dep ensure -vendor-only
+go get github.com/argoproj/argo-events
+cd $GOPATH/src/github.com/argoproj/argo-events
 ```
 
-## 3. Start Minikube
-```
-$ minikube start
-```
-
-## 4. Point Docker Client to Minikube's Docker Daemon
-```
-$ eval $(minikube docker-env)
-```
-
-## 5. Build the project & Docker images
-```
-$ cd go/src/github.com/argoproj/argo-events
-$ make all
-```
-
-## 6. Deploy Argo Events SA, ClusterRoles, ConfigMap, and Sensor Controller
-Note 1: This process is manual right now, but we're working on providing a Helm chart or integrating as a Ksonnet application
+## 2. Deploy Argo Events SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller
+Note 1: This process is manual right now, but we're working on providing a Helm chart or integrating as a Ksonnet application.
 Note 2: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-events-cluster-roles.yaml) file to use the correct namespace that you wish to deploy the sensor controller + signal microservices.
 ```
-$ k apply -f hack/k8s/manifests/argo-events-sa.yaml
-$ k apply -f hack/k8s/manifests/argo-events-cluster-roles.yaml
-$ k apply -f hack/k8s/manifests/sensor-crd.yaml
-$ k apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
-$ k apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
+kubectl apply -f hack/k8s/manifests/argo-events-sa.yaml
+kubectl apply -f hack/k8s/manifests/argo-events-cluster-roles.yaml
+kubectl apply -f hack/k8s/manifests/sensor-crd.yaml
+kubectl apply -f hack/k8s/manifests/gateway-crd.yaml
+kubectl apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
+kubectl apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
+kubectl apply -f hack/k8s/manifests/gateway-controller-configmap.yaml
+kubectl apply -f hack/k8s/manifests/gateway-controller-deployment.yaml
 ```
 
-## 7. Deploy Argo Events Webhook Signal Microservice
-Note: You will need to separately deploy the various signal services that you wish to support.
-```
-$ k apply -f hack/k8s/manifests/services/webhook.yaml
-```
-
-## 8. Install Argo
+## 3. Install Argo
 Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 
-## 9. Create a webhook sensor
+## 4. Create a webhook gateway
 ```
-$ k apply -f examples/webhook-with-resource-param.yaml
-```
-
-Verify that the sensor was created.
-```
-$ kubectl get sensors -n default
+kubectl apply -f examples/gateways/webhook-gateway-configmap.yaml
+kubectl apply -f examples/gateways/webhook.yaml
 ```
 
-Verify that the signal microservice is listening for signals and the sensor is active.
+## 5. Create a webhook sensor
 ```
-$ kubectl logs signal-webhook-xxx -f
-$ kubectl get sensor webhook-with-resource-param -n default -o yaml
+kubectl apply -f examples/sensors/webhook.yaml
 ```
 
-## 10. Trigger the webhook & corresponding Argo workflow
-Trigger the webhook via sending a POST with a JSON with a "message" key and value. 
-Ensure that you set the header "Content-Type" to "application/json" or this event will be ignored.
+## 6. Trigger the webhook & corresponding Argo workflow
+Trigger the webhook via sending a http POST request to `\app` endpoint. You can add different endpoint to 
+gateway configuration at run time as well.
+Note: the `WEBHOOK_SERVICE_URL` will differ based on the Kubernetes cluster.
 ```
-$ curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $(minikube service --url webhook)
+export WEBHOOK_SERVICE_URL=$(minikube service --url webhook-svc)
+curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/app
 ```
 
 Verify that the Argo workflow was run when the trigger was executed.
 ```
-$ argo list
+argo list
 ```
 
-Verify that the sensor was updated correctly and moved to a "Complete" phase
+Verify that the sensor was updated correctly and moved to a "Complete" phase.
 ```
-$ kubectl get sensor webhook-with-resource-param -n default -o yaml
+kubectl get sensor webhook -n default -o yaml
 ```
 
 Check the logs of the Argo workflow pod for the message you posted.
 ```
-$ k logs arguments-via-webhook-event main
+kubectl logs arguments-via-webhook-event main
 ```
 
-Check the logs of the sensor-controller pod or the associated signal microservice if there are problems.
+Check the logs of the sensor-controller pod, gateway-controller, associated gateway and sensor if there are problems.

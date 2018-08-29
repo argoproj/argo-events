@@ -6,4 +6,4 @@ metadata:
   namespace: argo-events
 data:
   config: |
-    instanceID: axis
+    instanceID: argo-events

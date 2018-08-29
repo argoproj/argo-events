@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: resource-example
+  name: resource-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: worklow-1
+    - name: resource-gateway
   triggers:
     - name: argo-workflow
       resource:

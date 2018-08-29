@@ -27,12 +27,14 @@ import (
 	// import packages for the universal deserializer
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 // NOTE: custom resources must be manually added here
 func init() {
 	wf_v1alpha1.AddToScheme(scheme.Scheme)
 	ss_v1alpha1.AddToScheme(scheme.Scheme)
+	gw_v1alpha1.AddToScheme(scheme.Scheme)
 }
 
 // ArtifactReader enables reading artifacts from an external store

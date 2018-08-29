@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: mqtt-example
+  name: mqtt-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: hello
+    - name: mqtt-gateway
   triggers:
     - name: "done-mqtt-stream"
       message:

@@ -4,14 +4,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: nats-example
+  name: nats-sensor
   namespace: argo-events
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   serviceAccountName: argo-events-sa
   signals:
-    - name: nats-example-gateway
+    - name: nats-gateway
   triggers:
     - name: hello-world-workflow-trigger
       resource:

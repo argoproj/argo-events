@@ -1,12 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: inline-example
+  name: inline-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: axis
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: time
+    - name: calendar-gateway
   triggers:
     - name: inline-workflow-trigger
       resource:

@@ -13,8 +13,5 @@ func (goc *gwOperationCtx) validate() error {
 	if len(goc.gw.Spec.Sensors) <= 0 {
 		return fmt.Errorf("no associated sensor with gateway")
 	}
-	if goc.gw.Spec.ServiceAccountName == "" {
-		return fmt.Errorf("no service account specified")
-	}
 	return nil
 }

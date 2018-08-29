@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: calendar-example-gateway
+  name: calendar-gateway
   namespace: argo-events
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: axis
-    gateway-name: "calendar-example-gateway"
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "calendar-gateway"
 spec:
   image: "metalgearsolid/calendar-gateway"
   imagePullPolicy: "Always"
@@ -13,4 +13,4 @@ spec:
   type: "calendar"
   version: "1.0"
   serviceAccountName: "argo-events-sa"
-  sensors: ["calendar-example"]
+  sensors: ["calendar-sensor"]
