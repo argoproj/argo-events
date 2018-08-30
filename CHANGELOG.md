@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.6-alpha
+## v0.6
 + Introduce gateways as event generators. [#92](https://github.com/argoproj/argo-events/pull/92)
 + Remove signal deployments as microservices. [#92](https://github.com/argoproj/argo-events/pull/92)
 

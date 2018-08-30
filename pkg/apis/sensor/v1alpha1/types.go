@@ -265,6 +265,9 @@ type SensorStatus struct {
 	// CompletedAt is the time at which this sensor was completed
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
+	// CompletionCount is the count of sensor's successful runs.
+	CompletionCount int32 `json:"completionCount,omitempty" protobuf:"varint,6,opt,name=completionCount"`
+
 	// Message is a human readable string indicating details about a sensor in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 

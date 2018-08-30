@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,6 +21,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"k8s.io/apimachinery/pkg/fields"
 )
 
 // sensorExecutor contains execution context for sensor operation
@@ -84,16 +84,10 @@ func (se *sensorExecutor) newSensorWatch() *cache.ListWatch {
 	resource := "sensors"
 	name := se.sensor.Name
 	namespace := se.sensor.Namespace
-	labelSelector, err := labels.Parse(fmt.Sprintf("job-name=%s", name))
-	if err != nil {
-		se.log.Error().Err(err).Msg("unable to watch sensor updates, stopping the server...")
-		// Shutdown server as sensor should not process any event in error state
-		se.server.Shutdown(context.Background())
-		return nil
-	}
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
-		options.LabelSelector = labelSelector.String()
+		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
 			Namespace(namespace).
 			Resource(resource).
@@ -102,7 +96,7 @@ func (se *sensorExecutor) newSensorWatch() *cache.ListWatch {
 	}
 	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
 		options.Watch = true
-		options.LabelSelector = labelSelector.String()
+		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
 			Namespace(namespace).
 			Resource(resource).
@@ -137,7 +131,7 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 	err = json.Unmarshal(body, &gatewaySignal)
 	if err != nil {
 		se.log.Error().Err(err).Msg("failed to decode notification")
-		common.SendErrorResponse(&w)
+		common.SendErrorResponse(w)
 		return
 	}
 
@@ -152,11 +146,9 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 
 	if isSignalValid {
 		// send success response back to gateway as it is a valid notification
-		common.SendSuccessResponse(&w)
+		common.SendSuccessResponse(w)
 
 		// if signal is already completed, don't process the new event.
-		// Todo: what should be done when rate of signals received exceeds the complete sensor processing time?
-		// maybe add queueing logic
 		if getNodeByName(se.sensor, gatewaySignal.Context.Source.Host).Phase == v1alpha1.NodePhaseComplete {
 			se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal is already completed")
 			return
@@ -198,7 +190,7 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 		}
 	} else {
 		se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("unknown signal source")
-		common.SendErrorResponse(&w)
+		common.SendErrorResponse(w)
 		return
 	}
 

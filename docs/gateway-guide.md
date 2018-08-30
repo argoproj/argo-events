@@ -59,7 +59,9 @@ each configuration will run in a separate go routine. The gateway watches update
 
 ### Custom
 Although users are free to write a gateway processor in any language and in any manner, we do recommend users to follow the pattern found in core gateways.
-The only requirement is gateway-processor must dispatch the event to gateway-transformer using a http post request on `9000` port. 
+The namespace where the gateway will be deployed and the port to forward the events to are made available via environment variables `EnvVarNamespace` and `GatewayTransformerPortEnvVar` respectively.
+The only requirement is gateway-processor must dispatch the event to gateway-transformer using a http post request to `localhost` on `GatewayTransformerPortEnvVar` port. 
+ 
 
 ## Types of Gateways & their configurations
 

@@ -42,7 +42,7 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 func (m *Gateway) Reset()      { *m = Gateway{} }
 func (*Gateway) ProtoMessage() {}
 func (*Gateway) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_7404452f511ff415, []int{0}
+	return fileDescriptor_generated_b44222da7f4ff163, []int{0}
 }
 func (m *Gateway) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -70,7 +70,7 @@ var xxx_messageInfo_Gateway proto.InternalMessageInfo
 func (m *GatewayList) Reset()      { *m = GatewayList{} }
 func (*GatewayList) ProtoMessage() {}
 func (*GatewayList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_7404452f511ff415, []int{1}
+	return fileDescriptor_generated_b44222da7f4ff163, []int{1}
 }
 func (m *GatewayList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -98,7 +98,7 @@ var xxx_messageInfo_GatewayList proto.InternalMessageInfo
 func (m *GatewaySpec) Reset()      { *m = GatewaySpec{} }
 func (*GatewaySpec) ProtoMessage() {}
 func (*GatewaySpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_7404452f511ff415, []int{2}
+	return fileDescriptor_generated_b44222da7f4ff163, []int{2}
 }
 func (m *GatewaySpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -126,7 +126,7 @@ var xxx_messageInfo_GatewaySpec proto.InternalMessageInfo
 func (m *GatewayStatus) Reset()      { *m = GatewayStatus{} }
 func (*GatewayStatus) ProtoMessage() {}
 func (*GatewayStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_7404452f511ff415, []int{3}
+	return fileDescriptor_generated_b44222da7f4ff163, []int{3}
 }
 func (m *GatewayStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -154,7 +154,7 @@ var xxx_messageInfo_GatewayStatus proto.InternalMessageInfo
 func (m *Service) Reset()      { *m = Service{} }
 func (*Service) ProtoMessage() {}
 func (*Service) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_7404452f511ff415, []int{4}
+	return fileDescriptor_generated_b44222da7f4ff163, []int{4}
 }
 func (m *Service) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -1492,10 +1492,10 @@ var (
 )
 
 func init() {
-	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_7404452f511ff415)
+	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_b44222da7f4ff163)
 }
 
-var fileDescriptor_generated_7404452f511ff415 = []byte{
+var fileDescriptor_generated_b44222da7f4ff163 = []byte{
 	// 777 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x54, 0xcf, 0x6e, 0xd3, 0x48,
 	0x18, 0x8f, 0xdb, 0xb8, 0x89, 0x27, 0xdb, 0xed, 0xee, 0x9c, 0xac, 0x48, 0xeb, 0x44, 0x59, 0x21,

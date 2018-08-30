@@ -28,9 +28,8 @@ import "k8s.io/apimachinery/pkg/util/intstr/generated.proto";
 // Package-wide variables from generator "generated".
 option go_package = "v1alpha1";
 
-// Gateway is the definition of a gateway-controller resource
+// Gateway is the definition of a gateway resource
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Gateway {
@@ -49,22 +48,22 @@ message GatewayList {
   repeated Gateway items = 2;
 }
 
-// GatewaySpec represents gateway-controller specifications
+// GatewaySpec represents gateway specifications
 message GatewaySpec {
-  // Image is the image provided by user
+  // Image is the gateway processor image
   optional string image = 1;
 
   // ImagePullPolicy for pulling the image
   optional string imagePullPolicy = 10;
 
-  // Command is command to run user's image
+  // Command is command to run gateway processor image
   optional string command = 2;
 
   // Todo: does this needed to specified separately?
-  // ConfigMap is name of the configmap user code can access if required
+  // ConfigMap is name of the configmap gateway processor can access if required
   optional string configmap = 3;
 
-  // Type is type of the gateway used as event type
+  // Type is type of the gateway
   optional string type = 5;
 
   // Version is used for marking event version
@@ -80,15 +79,15 @@ message GatewaySpec {
   optional string serviceAccountName = 9;
 }
 
-// GatewayStatus contains information about the status of a gateway-controller.
+// GatewayStatus contains information about the status of a gateway.
 message GatewayStatus {
-  // Phase is the high-level summary of the gateway-controller
+  // Phase is the high-level summary of the gateway
   optional string phase = 1;
 
-  // StartedAt is the time at which this gateway-controller was initiated
+  // StartedAt is the time at which this gateway was initiated
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
-  // Message is a human readable string indicating details about a gateway-controller in its phase
+  // Message is a human readable string indicating details about a gateway in its phase
   optional string message = 4;
 }
 

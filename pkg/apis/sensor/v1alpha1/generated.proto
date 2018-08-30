@@ -318,6 +318,9 @@ message SensorStatus {
   // CompletedAt is the time at which this sensor was completed
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
 
+  // CompletionCount is the count of sensor's successful runs.
+  optional int32 completionCount = 6;
+
   // Message is a human readable string indicating details about a sensor in its phase
   optional string message = 4;
 

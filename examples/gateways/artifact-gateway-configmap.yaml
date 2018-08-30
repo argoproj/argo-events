@@ -7,7 +7,7 @@ data:
   s3.fooConfig: |-
     s3EventConfig:
       bucket: foo
-      endpoint: minio.argo-events:9000
+      endpoint: minio-service.argo-events:9000
       event: s3:ObjectCreated:Put
       filter:
         prefix: ""
@@ -15,22 +15,22 @@ data:
     insecure: true
     accessKey:
       key: accesskey
-      name: minio
+      name: artifacts-minio
     secretKey:
       key: secretkey
-      name: minio
+      name: artifacts-minio
   s3.barConfig: |-
     s3EventConfig:
       bucket: bar
-      endpoint: minio.argo-events:9000
-      event: s3:ObjectCreated:Get
+      endpoint: minio-service.argo-events:9000
+      event: s3:ObjectRemoved:Delete
       filter:
-        prefix: "xyz"
+        prefix: ""
         suffix: ""
     insecure: true
     accessKey:
       key: accesskey
-      name: minio
+      name: artifacts-minio
     secretKey:
       key: secretkey
-      name: minio
+      name: artifacts-minio

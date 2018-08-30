@@ -131,7 +131,7 @@ func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Reques
 	ce, err := toc.transform(r)
 	if err != nil {
 		toc.log.Error().Err(err).Msg("failed to transform user event into CloudEvent")
-		common.SendErrorResponse(&w)
+		common.SendErrorResponse(w)
 		return
 	}
 
@@ -139,8 +139,8 @@ func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Reques
 	err = toc.dispatchTransformedEvent(ce)
 	if err != nil {
 		toc.log.Error().Err(err).Str("event-id", ce.Context.EventID).Msg("failed to send the event to sensor")
-		common.SendErrorResponse(&w)
+		common.SendErrorResponse(w)
 		return
 	}
-	common.SendSuccessResponse(&w)
+	common.SendSuccessResponse(w)
 }

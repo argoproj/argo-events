@@ -885,6 +885,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
+					"completionCount": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CompletionCount is the count of sensor's successful runs.",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Message is a human readable string indicating details about a sensor in its phase",

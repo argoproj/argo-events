@@ -192,6 +192,7 @@ func (soc *sOperationCtx) operate() error {
 		// todo: handle this
 	case v1alpha1.NodePhaseComplete:
 		soc.log.Info().Msg("sensor is completed")
+		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
 		if soc.s.Spec.Repeat {
 			soc.log.Info().Msg("sensor is configured in repeat mode")
 			soc.reRunSensor()

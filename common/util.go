@@ -87,6 +87,6 @@ func SendSuccessResponse(writer http.ResponseWriter) {
 
 // SendErrorResponse sends http error response
 func SendErrorResponse(writer http.ResponseWriter) {
-	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte(SuccessResponse))
+	writer.WriteHeader(http.StatusBadRequest)
+	writer.Write([]byte(ErrorResponse))
 }
