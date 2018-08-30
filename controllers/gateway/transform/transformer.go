@@ -38,6 +38,13 @@ type tOperationCtx struct {
 	kubeClientset kubernetes.Interface
 }
 
+type TransformerPayload struct {
+	// Src contains information about which specific configuration in gateway generated the event
+	Src string `json:"src"`
+	// Payload is event data
+	Payload []byte `json:"payload"`
+}
+
 func NewTransformerConfig(eventType string, eventTypeVersion string, eventSource string, sensors []string) *tConfig {
 	return &tConfig{
 		EventType:        eventType,
@@ -66,6 +73,16 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 		return nil, err
 	}
 
+	var tp TransformerPayload
+	err = json.Unmarshal(payload, &tp)
+
+	if err != nil {
+		fmt.Errorf("failed to convert request payload into transformer payload. Err %+v", err)
+		return nil, err
+	}
+
+	toc.log.Debug().Str("source", tp.Src).Msg("received an event")
+
 	// Create an CloudEvent
 	ce := &sv1alpha.Event{
 		Context: sv1alpha.EventContext{
@@ -76,10 +93,10 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 			EventType:          toc.Config.EventType,
 			EventTypeVersion:   toc.Config.EventTypeVersion,
 			Source: &sv1alpha.URI{
-				Host: toc.Config.EventSource,
+				Host: toc.Config.EventSource + "/" + tp.Src,
 			},
 		},
-		Payload: payload,
+		Payload: tp.Payload,
 	}
 	return ce, nil
 }
@@ -90,19 +107,20 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 		sensorService, err := toc.kubeClientset.CoreV1().Services(toc.Namespace).Get(common.DefaultSensorServiceName(sensor), metav1.GetOptions{})
 		if err != nil {
 			toc.log.Error().Str("sensor-service-name", sensorService.Name).Err(err).Msg("failed to connect to sensor service")
-			return err
+			// maybe sensor is not created
+			continue
 		}
 
 		// the sensor service exposed as intra cluster service
 		if sensorService.Spec.ClusterIP == "" {
 			toc.log.Error().Str("sensor-service", sensorService.Name).Err(err).Msg("failed to connect to sensor service")
-			return err
+			continue
 		}
 
 		// get the byte array from cloudevent to dispatch to sensor service
 		eventBytes, err := json.Marshal(ce)
 		if err != nil {
-			toc.log.Error().Err(err).Msg("failed to get byte array from cloudevent")
+			toc.log.Warn().Err(err).Msg("failed to marshal event")
 			return err
 		}
 
@@ -110,14 +128,14 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 		toc.log.Info().Str("sensor-service-name", sensorService.Name).Str("sensor-name", sensor).Msg("dispatching cloudevent to sensor")
 		req, err := http.NewRequest("POST", fmt.Sprintf("http://%s:%d", sensorService.Spec.ClusterIP, common.SensorServicePort), bytes.NewBuffer(eventBytes))
 		if err != nil {
-			toc.log.Error().Msg("unable to create a http request")
-			return err
+			toc.log.Warn().Msg("unable to create a http request")
+			continue
 		}
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
 		_, err = client.Do(req)
 		if err != nil {
-			return err
+			toc.log.Warn().Err(err).Msg("failed to dispatch event to sensor")
 		}
 	}
 	return nil

@@ -10,7 +10,7 @@ spec:
   imagePullPolicy: Always
   repeat: true
   signals:
-    - name: calendar-gateway
+    - name: calendar-gateway/calendar.fooConfig
   triggers:
     - name: hello-world-workflow-trigger
       resource:

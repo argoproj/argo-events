@@ -9,6 +9,7 @@ metadata:
 spec:
   image: "metalgearsolid/kafka-gateway"
   imagePullPolicy: "Always"
+  configMap: "kafka-gateway-configmap"
   command: "/bin/kafka-gateway"
   type: "kafka"
   version: "1.0"

@@ -25,7 +25,6 @@ import (
 	"github.com/ghodss/yaml"
 	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
-	log "github.com/sirupsen/logrus"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,10 +40,6 @@ import (
 	"os"
 	"strings"
 	"sync"
-)
-
-const (
-	configName = "resource-gateway-configmap"
 )
 
 type resource struct {
@@ -69,7 +64,7 @@ type ResourceFilter struct {
 }
 
 // listens for resource of interest.
-func (r *resource) listen(res *Resource) {
+func (r *resource) listen(res *Resource, source string) {
 	resources, err := r.discoverResources(res)
 	if err != nil {
 		r.gatewayConfig.Log.Error().Err(err).Msg("failed to discover resource")
@@ -91,7 +86,7 @@ func (r *resource) listen(res *Resource) {
 			r.gatewayConfig.Log.Error().Err(err).Msg("failed to watch the resource")
 			return
 		}
-		go r.watch(watch, res.Filter, &wg)
+		go r.watch(watch, res.Filter, &wg, source)
 	}
 }
 
@@ -111,7 +106,7 @@ func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		log.Printf("found API Resource %s", gvk.String())
+		r.gatewayConfig.Log.Info().Str("api-resource", gvk.String())
 		if apiResource.Kind != obj.Kind {
 			continue
 		}
@@ -140,46 +135,51 @@ func resolveGroupVersion(obj *Resource) string {
 	return obj.Group + "/" + obj.Version
 }
 
-func (r *resource) watch(w watch.Interface, filter *ResourceFilter, wg *sync.WaitGroup) {
+func (r *resource) watch(w watch.Interface, filter *ResourceFilter, wg *sync.WaitGroup, source string) {
 	for item := range w.ResultChan() {
 		itemObj := item.Object.(*unstructured.Unstructured)
 		b, _ := itemObj.MarshalJSON()
-		r.gatewayConfig.Log.Info().Msg("received a request, forwarding it to gateway transformer")
-		http.Post(fmt.Sprintf("http://localhost:%s", r.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(b))
-
+		payload, err := gateways.CreateTransformPayload(b, source)
+		if err != nil {
+			r.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+		}
 		if item.Type == watch.Error {
 			err := errors.FromObject(item.Object)
-			log.Panic(err)
+			r.gatewayConfig.Log.Panic().Err(err)
 		}
 
-		if passFilters(itemObj, filter) {
-
+		if r.passFilters(itemObj, filter) {
+			r.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
+			_, err := http.Post(fmt.Sprintf("http://localhost:%s", r.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+			if err != nil {
+				r.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
+			}
 		}
 	}
 	wg.Done()
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func (r *resource) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		log.Printf("FILTERED: resource name '%s' does not match prefix '%s'", obj.GetName(), filter.Prefix)
+		r.gatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Printf("FILTERED: resource creation timestamp '%s' is after createdBy '%s'", created.UTC(), filter.CreatedBy.UTC())
+		r.gatewayConfig.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		log.Printf("FILTERED: resource labels '%s' do not match filter labels '%s'", obj.GetLabels(), filter.Labels)
+		r.gatewayConfig.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		log.Printf("FILTERED: resource annotations '%s' do not match filter annotations '%s'", obj.GetAnnotations(), filter.Annotations)
+		r.gatewayConfig.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
 		return false
 	}
 	return true
@@ -219,7 +219,7 @@ func (r *resource) RunGateway(cm *apiv1.ConfigMap) error {
 			r.gatewayConfig.Log.Warn().Interface("config", res).Msg("duplicate configuration")
 			continue
 		}
-		go r.listen(res)
+		go r.listen(res, resourceConfigKey)
 	}
 	return nil
 }
@@ -254,10 +254,15 @@ func main() {
 		registeredResources: make(map[uint64]*Resource),
 	}
 
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	// watch the gateway configuration updates
 	_, err = gatewayConfig.WatchGatewayConfigMap(res, context.Background(), configName)
 	if err != nil {
-		res.gatewayConfig.Log.Error().Err(err).Msg("failed to update nats gateway confimap")
+		gatewayConfig.Log.Error().Err(err).Msg("failed to update resource gateway confimap")
 	}
 	select {}
 }

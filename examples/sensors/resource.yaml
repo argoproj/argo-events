@@ -6,7 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: resource-gateway
+    - name: resource-gateway/resource.fooConfig
   triggers:
     - name: argo-workflow
       resource:

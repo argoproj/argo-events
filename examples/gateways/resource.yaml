@@ -9,12 +9,9 @@ metadata:
 spec:
   image: "metalgearsolid/resource-gateway"
   imagePullPolicy: "Always"
+  configMap: "resource-gateway-configmap"
   command: "/bin/resource-gateway"
   type: "resource"
   version: "1.0"
-  service:
-    type: "LoadBalancer"
-    port: 12000
-    targetPort: 12000
   serviceAccountName: "argo-events-sa"
   sensors: ["resource-sensor"]

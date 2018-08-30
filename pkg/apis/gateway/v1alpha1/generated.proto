@@ -53,14 +53,11 @@ message GatewaySpec {
   // Image is the gateway processor image
   optional string image = 1;
 
-  // ImagePullPolicy for pulling the image
-  optional string imagePullPolicy = 10;
-
   // Command is command to run gateway processor image
   optional string command = 2;
 
-  // Todo: does this needed to specified separately?
-  // ConfigMap is name of the configmap gateway processor can access if required
+  // Todo: maybe add support for inline configmap
+  // ConfigMap is name of the configmap for gateway-processor
   optional string configmap = 3;
 
   // Type is type of the gateway
@@ -69,14 +66,24 @@ message GatewaySpec {
   // Version is used for marking event version
   optional string version = 6;
 
-  // Service is the name of the service to expose the gateway
-  optional Service service = 7;
+  // ServiceSpec is the specifications of the service to expose the gateway
+  optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 7;
 
   // Sensors are list of sensors to dispatch events to
   repeated string sensors = 8;
 
   // ServiceAccountName is name of service account to run the gateway
   optional string serviceAccountName = 9;
+
+  // Affinity for scheduling
+  optional k8s.io.api.core.v1.Affinity affinity = 10;
+
+  // ImagePullPolicy for pulling the image
+  optional string imagePullPolicy = 11;
+
+  // todo: do we need separate labels or just use same labels defined on gateway resource?
+  // Labels for gateway deployment
+  map<string, string> labels = 12;
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -89,18 +96,5 @@ message GatewayStatus {
 
   // Message is a human readable string indicating details about a gateway in its phase
   optional string message = 4;
-}
-
-// Service exposed gateway to outside cluster or in cluster components depending on it's type.
-message Service {
-  // Type is type of the service. Either ClusterIP, NodePort, LoadBalancer or ExternalName
-  // See https://kubernetes.io/docs/concepts/services-networking/service/
-  optional string type = 1;
-
-  // Port is port exposed to components outside cluster
-  optional int32 port = 2;
-
-  // TargetPort is the gateway http server port
-  optional int32 targetPort = 3;
 }
 

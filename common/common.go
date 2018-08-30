@@ -91,6 +91,11 @@ const (
 	LabelGatewayName = "gateway-name"
 )
 
+// Gateway Processor constants
+const (
+	GatewayProcessorConfigMapEnvVar = "GATEWAY_PROCESSOR_CONFIG_MAP"
+)
+
 // Gateway Transformer constants
 const (
 	// GatewayConfigMapEnvVar is used for gateway  configuration

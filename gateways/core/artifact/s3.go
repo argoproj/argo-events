@@ -34,10 +34,6 @@ import (
 	"os"
 )
 
-const (
-	configName = "artifact-gateway-configmap"
-)
-
 type s3 struct {
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig *gateways.GatewayConfig
@@ -98,7 +94,7 @@ func (s *s3) getSecrets(client *kubernetes.Clientset, namespace string, name, ke
 }
 
 // listens to s3 bucket notifications
-func (s *s3) listen(artifact *S3Artifact) {
+func (s *s3) listen(artifact *S3Artifact, source string) {
 	// retrieve access key id and secret access key
 	accessKey, err := s.getSecrets(s.gatewayConfig.Clientset, s.gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
@@ -128,9 +124,18 @@ func (s *s3) listen(artifact *S3Artifact) {
 		if notificationInfo.Err != nil {
 			panic(notificationInfo.Err)
 		}
+
+		// create a gateway-transformer payload
 		notificationBytes := []byte(fmt.Sprintf("%v", notificationInfo))
-		s.gatewayConfig.Log.Info().Msg("forwarding the request")
-		http.Post(fmt.Sprintf("http://localhost:%s", s.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(notificationBytes))
+		payload, err := gateways.CreateTransformPayload(notificationBytes, source)
+		if err != nil {
+			s.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+		}
+		s.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
+		_, err = http.Post(fmt.Sprintf("http://localhost:%s", s.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+		if err != nil {
+			s.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
+		}
 	}
 }
 
@@ -150,7 +155,7 @@ func (s *s3) RunGateway(cm *apiv1.ConfigMap) error {
 			s.gatewayConfig.Log.Warn().Interface("config", artifact).Msg("duplicate configuration")
 			continue
 		}
-		go s.listen(artifact)
+		go s.listen(artifact, s3ConfigKey)
 	}
 	return nil
 }
@@ -171,6 +176,11 @@ func main() {
 		panic("gateway transformer port is not provided")
 	}
 
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
 		Log:             zlog.New(os.Stdout).With().Logger(),
@@ -185,7 +195,7 @@ func main() {
 
 	_, err = gatewayConfig.WatchGatewayConfigMap(s3, context.Background(), configName)
 	if err != nil {
-		s3.gatewayConfig.Log.Error().Err(err).Msg("failed to update nats gateway confimap")
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to update s3 gateway confimap")
 	}
 	select {}
 }

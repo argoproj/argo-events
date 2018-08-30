@@ -52,15 +52,16 @@ The `gateway-controller` is responsible for managing the `Gateway` resources.
 
 ## Gateway Deployment
 
-### Core
 All core gateways use kubernetes configmap to keep track of current gateway configurations. Multiple configurations can be defined for a single gateway and
 each configuration will run in a separate go routine. The gateway watches updates to configmap which let us add new configuration at run time.
 [Checkout core gateways.](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
 
-### Custom
-Although users are free to write a gateway processor in any language and in any manner, we do recommend users to follow the pattern found in core gateways.
-The namespace where the gateway will be deployed and the port to forward the events to are made available via environment variables `EnvVarNamespace` and `GatewayTransformerPortEnvVar` respectively.
-The only requirement is gateway-processor must dispatch the event to gateway-transformer using a http post request to `localhost` on `GatewayTransformerPortEnvVar` port. 
+### How to write a custom gateway?
+ - Although users are free to write a gateway processor in any language and in any manner, we do recommend users to follow the pattern found in core gateways.
+ - The namespace where the gateway will be deployed and the port to forward the events to are made available via environment variables `ARGO_EVENTS_NAMESPACE` and `TRANSFORMER_PORT` respectively.
+ - The only requirement is gateway-processor must dispatch the event to gateway-transformer using a http post request to `localhost` on `TRANSFORMER_PORT` port. 
+ - The ConfigMap name if required for gateway configuration is made available through environment variable `GATEWAY_PROCESSOR_CONFIG_MAP`
+
  
 
 ## Types of Gateways & their configurations

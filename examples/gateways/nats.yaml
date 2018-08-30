@@ -9,6 +9,7 @@ metadata:
 spec:
   image: "metalgearsolid/nats-gateway"
   imagePullPolicy: "Always"
+  configMap: "nats-gateway-configmap"
   command: "/bin/nats-gateway"
   type: "nats"
   version: "1.0"

@@ -11,7 +11,7 @@ metadata:
 spec:
   serviceAccountName: argo-events-sa
   signals:
-    - name: nats-gateway
+    - name: nats-gateway/nats.fooConfig
   triggers:
     - name: hello-world-workflow-trigger
       resource:

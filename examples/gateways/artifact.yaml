@@ -9,6 +9,7 @@ metadata:
 spec:
   image: "metalgearsolid/artifact-gateway"
   imagePullPolicy: "Always"
+  configMap: "artifact-gateway-configmap"
   command: "/bin/artifact-gateway"
   type: "artifact"
   version: "1.0"

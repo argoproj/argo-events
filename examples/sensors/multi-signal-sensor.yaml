@@ -1,16 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: inline-sensor
+  name: multi-signal-sensor
+  namespace: argo-events
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  repeat: true
+  serviceAccountName: argo-events-sa
   signals:
-    - name: calendar-gateway/calendar.barConfig
+    - name: webhook-gateway/webhook.fooConfig
+    - name: calendar-gateway/calendar.fooConfig
   triggers:
-    - name: inline-workflow-trigger
+    - name: hello-world-workflow-trigger
       resource:
-        namespace: default
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

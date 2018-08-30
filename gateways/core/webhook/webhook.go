@@ -29,6 +29,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"io/ioutil"
+	"bytes"
 )
 
 const (
@@ -85,18 +87,32 @@ func (w *webhook) RunGateway(cm *apiv1.ConfigMap) error {
 			continue
 		}
 		w.registeredWebhooks[key] = h
-		w.registerWebhook(h)
+		w.registerWebhook(h, hookConfigKey)
 		w.gatewayConfig.Log.Info().Str("hook-name", hookConfigKey).Msg("configured")
 	}
 	return nil
 }
 
 // registers a http endpoint
-func (w *webhook) registerWebhook(h *hook) {
+func (w *webhook) registerWebhook(h *hook, source string) {
 	http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+		w.gatewayConfig.Log.Info().Msg("received a request. wtf!!!")
 		if request.Method == h.Method {
-			w.gatewayConfig.Log.Info().Msg("received a request, forwarding it to gateway transformer")
-			http.Post(fmt.Sprintf("http://localhost:%s", w.gatewayConfig.TransformerPort), "application/octet-stream", request.Body)
+			body, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				w.gatewayConfig.Log.Panic().Err(err).Msg("failed to parse request body")
+			}
+
+			payload, err := gateways.CreateTransformPayload(body, source)
+			if err != nil {
+				w.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform request body")
+			}
+
+			w.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s", w.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+			if err != nil {
+				w.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
+			}
 		} else {
 			w.gatewayConfig.Log.Warn().Str("expected", h.Method).Str("actual", request.Method).Msg("http method mismatch")
 		}

@@ -36,7 +36,6 @@ import (
 
 const (
 	subjectKey = "subject"
-	configName = "nats-gateway-configmap"
 )
 
 // Contains configuration for nats gateway
@@ -48,7 +47,7 @@ type nats struct {
 }
 
 // listens to messages published to subject of interest
-func (n *nats) listen(s *stream.Stream) {
+func (n *nats) listen(s *stream.Stream, source string) {
 	conn, err := natsio.Connect(s.URL)
 	if err != nil {
 		n.gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
@@ -59,8 +58,15 @@ func (n *nats) listen(s *stream.Stream) {
 		Str("servers", strings.Join(conn.DiscoveredServers(), ",")).Msg("nats connection")
 
 	_, err = conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
-		n.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
-		http.Post(fmt.Sprintf("http://localhost:%s", n.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Data))
+		payload, err := gateways.CreateTransformPayload(msg.Data, source)
+		if err != nil {
+			n.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+		}
+		n.gatewayConfig.Log.Info().Msg("dispatching event to gateway-transformer")
+		_, err = http.Post(fmt.Sprintf("http://localhost:%s", n.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+		if err != nil {
+			n.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
+		}
 	})
 	if err != nil {
 		n.gatewayConfig.Log.Error().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Err(err).Msg("failed to subscribe to subject")
@@ -87,7 +93,7 @@ func (n *nats) RunGateway(cm *apiv1.ConfigMap) error {
 			continue
 		}
 		n.registeredNATS[key] = s
-		go n.listen(s)
+		go n.listen(s, nConfigkey)
 	}
 	return nil
 }
@@ -98,14 +104,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
 	}
+
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
 	}
+
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
 		Log:             zlog.New(os.Stdout).With().Logger(),
@@ -113,6 +127,7 @@ func main() {
 		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
+
 	n := &nats{
 		gatewayConfig:  gatewayConfig,
 		registeredNATS: make(map[uint64]*stream.Stream),
@@ -120,7 +135,7 @@ func main() {
 
 	_, err = gatewayConfig.WatchGatewayConfigMap(n, context.Background(), configName)
 	if err != nil {
-		n.gatewayConfig.Log.Error().Err(err).Msg("failed to update nats gateway confimap")
+		n.gatewayConfig.Log.Panic().Err(err).Msg("failed to update nats gateway confimap")
 	}
 	select {}
 }

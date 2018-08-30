@@ -9,6 +9,7 @@ metadata:
 spec:
   image: "metalgearsolid/amqp-gateway"
   imagePullPolicy: "Always"
+  configMap: "amqp-gateway-configmap"
   command: "/bin/amqp-gateway"
   type: "amqp"
   version: "1.0"

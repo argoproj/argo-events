@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"strings"
 	"time"
@@ -96,6 +95,13 @@ func (goc *gwOperationCtx) operate() error {
 			goc.gw.Spec.ServiceAccountName = "default"
 		}
 
+		if goc.gw.Spec.Labels == nil {
+			goc.gw.Spec.Labels = make(map[string]string)
+		}
+
+		// add gateway name to label
+		goc.gw.Spec.Labels[common.LabelGatewayName] = goc.gw.Name
+
 		// declare the gateway deployment. The deployment has two components,
 		// 1) Gateway Processor   - Either generates events internally or listens to outside world events.
 		//                          and dispatches the event to gateway transformer
@@ -114,15 +120,11 @@ func (goc *gwOperationCtx) operate() error {
 			},
 			Spec: appv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
-					MatchLabels: map[string]string{
-						common.LabelGatewayName: goc.gw.Name,
-					},
+					MatchLabels: goc.gw.Spec.Labels,
 				},
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: map[string]string{
-							common.LabelGatewayName: goc.gw.Name,
-						},
+						Labels: goc.gw.Spec.Labels,
 					},
 					Spec: corev1.PodSpec{
 						ServiceAccountName: goc.gw.Spec.ServiceAccountName,
@@ -139,6 +141,10 @@ func (goc *gwOperationCtx) operate() error {
 									{
 										Name:  common.EnvVarNamespace,
 										Value: goc.gw.Namespace,
+									},
+									{
+										Name: common.GatewayProcessorConfigMapEnvVar,
+										Value: goc.gw.Spec.ConfigMap,
 									},
 								},
 							},
@@ -171,7 +177,7 @@ func (goc *gwOperationCtx) operate() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
 		} else {
 			// expose gateway if service is configured
-			if goc.gw.Spec.Service.Port != 0 {
+			if goc.gw.Spec.ServiceSpec != nil {
 				goc.createGatewayService()
 			}
 			goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
@@ -198,8 +204,7 @@ func (goc *gwOperationCtx) operate() error {
 
 		// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
-		// Todo: if the sensor to which event should be dispatched changes then update the configmap for gateway pod
-		goc.log.Warn().Msg("gateway is already running")
+		goc.log.Info().Msg("gateway is running")
 
 	default:
 		goc.log.Panic().Str("phase", string(goc.gw.Status.Phase)).Msg("unknown gateway phase.")
@@ -217,18 +222,12 @@ func (goc *gwOperationCtx) createGatewayService() {
 				*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 			},
 		},
-		Spec: corev1.ServiceSpec{
-			Selector: map[string]string{
-				common.LabelGatewayName: goc.gw.Name,
-			},
-			Ports: []corev1.ServicePort{
-				{
-					Port:       goc.gw.Spec.Service.Port,
-					TargetPort: intstr.FromInt(int(goc.gw.Spec.Service.TargetPort)),
-				},
-			},
-			Type: corev1.ServiceType(goc.gw.Spec.Service.Type),
-		},
+		Spec: *goc.gw.Spec.ServiceSpec,
+	}
+
+	// if selector is not provided
+	if gatewayService.Spec.Selector == nil {
+		gatewayService.Spec.Selector = goc.gw.Spec.Labels
 	}
 
 	_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)

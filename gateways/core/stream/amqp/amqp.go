@@ -38,7 +38,6 @@ const (
 	exchangeNameKey = "exchangeName"
 	exchangeTypeKey = "exchangeType"
 	routingKey      = "routingKey"
-	configName      = "amqp-gateway-configmap"
 )
 
 type amqp struct {
@@ -47,11 +46,11 @@ type amqp struct {
 }
 
 func (a *amqp) RunGateway(cm *apiv1.ConfigMap) error {
-	for kConfigkey, kConfigVal := range cm.Data {
+	for aConfigkey, aConfigVal := range cm.Data {
 		var s *stream.Stream
-		err := yaml.Unmarshal([]byte(kConfigVal), &s)
+		err := yaml.Unmarshal([]byte(aConfigVal), &s)
 		if err != nil {
-			a.gatewayConfig.Log.Error().Str("config", kConfigkey).Err(err).Msg("failed to parse amqp config")
+			a.gatewayConfig.Log.Error().Str("config", aConfigkey).Err(err).Msg("failed to parse amqp config")
 			return err
 		}
 		a.gatewayConfig.Log.Info().Interface("stream", *s).Msg("amqp configuration")
@@ -65,12 +64,12 @@ func (a *amqp) RunGateway(cm *apiv1.ConfigMap) error {
 			continue
 		}
 		a.registeredAMQPConfigs[key] = s
-		go a.listen(s)
+		go a.listen(s, aConfigkey)
 	}
 	return nil
 }
 
-func (a *amqp) listen(s *stream.Stream) {
+func (a *amqp) listen(s *stream.Stream, source string) {
 	conn, err := amqplib.Dial(s.URL)
 	if err != nil {
 		a.gatewayConfig.Log.Error().Err(err).Msg("failed to connect to server")
@@ -93,8 +92,15 @@ func (a *amqp) listen(s *stream.Stream) {
 	for {
 		select {
 		case msg := <-delivery:
-			a.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
-			http.Post(fmt.Sprintf("http://localhost:%s", a.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Body))
+			payload, err := gateways.CreateTransformPayload(msg.Body, source)
+			if err != nil {
+				a.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+			}
+			a.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s", a.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+			if err != nil {
+				a.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
+			}
 		}
 	}
 }
@@ -150,14 +156,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
 	}
+
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
 	}
+
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
 		Log:             zlog.New(os.Stdout).With().Logger(),
@@ -171,7 +185,7 @@ func main() {
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(a, context.Background(), configName)
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to update amqp configuration")
+		a.gatewayConfig.Log.Panic().Err(err).Msg("failed to update amqp configuration")
 	}
 
 	// run forever

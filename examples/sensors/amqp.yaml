@@ -6,7 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: hello
+    - name: amqp-gateway/amqp.fooConfig
   triggers:
     - name: "done-amqp-message"
       message:

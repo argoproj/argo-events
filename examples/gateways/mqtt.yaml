@@ -9,6 +9,7 @@ metadata:
 spec:
   image: "metalgearsolid/mqtt-gateway"
   imagePullPolicy: "Always"
+  configMap: "mqtt-gateway-configmap"
   command: "/bin/mqtt-gateway"
   type: "mqtt"
   version: "1.0"

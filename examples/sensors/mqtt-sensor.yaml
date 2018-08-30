@@ -6,7 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: mqtt-gateway
+    - name: mqtt-gateway/mqtt.fooConfig
   triggers:
     - name: "done-mqtt-stream"
       message:

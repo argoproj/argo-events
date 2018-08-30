@@ -36,10 +36,6 @@ import (
 	"os"
 )
 
-const (
-	config = "calendar-gateway-configmap"
-)
-
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
@@ -86,12 +82,12 @@ func (c *calendar) RunGateway(cm *apiv1.ConfigMap) error {
 		}
 
 		c.registeredCalendarSignals[key] = cal
-		go c.startCalenderSchedule(cal)
+		go c.startCalenderSchedule(cal, scheduleConfigKey)
 	}
 	return nil
 }
 
-func (c *calendar) startCalenderSchedule(cal *calSchedule) error {
+func (c *calendar) startCalenderSchedule(cal *calSchedule, source string) error {
 	schedule, err := c.resolveSchedule(cal)
 	if err != nil {
 		return fmt.Errorf("failed to resolve calendar schedule. Err: %+v", err)
@@ -124,16 +120,20 @@ func (c *calendar) startCalenderSchedule(cal *calSchedule) error {
 		select {
 		case tx := <-timer:
 			lastT = tx
-			c.gatewayConfig.Log.Info().Msg("event sending")
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				return fmt.Errorf("failed to marshal event. Err: %+v", err)
+				c.gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
 			} else {
+				payload, err := gateways.CreateTransformPayload(payload, source)
+				if err != nil {
+					c.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+				}
+				c.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
 				// dispatch the event to gateway transformer
 				_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
 				if err != nil {
-					return fmt.Errorf("failed to dispatch the event. Err: %+v", err)
+					c.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
 				}
 				c.gatewayConfig.Log.Info().Msg("event dispatched to gateway transformer")
 			}
@@ -209,9 +209,14 @@ func main() {
 		gatewayConfig:             gatewayConfig,
 	}
 
-	_, err = gatewayConfig.WatchGatewayConfigMap(cal, context.Background(), config)
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
+	_, err = gatewayConfig.WatchGatewayConfigMap(cal, context.Background(), configName)
 	if err != nil {
-		panic(fmt.Errorf("failed to watch calendar schedules. Err: %+v", err))
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to update calendar gateway confimap")
 	}
 	// wait forever
 	select {}

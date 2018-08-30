@@ -9,12 +9,14 @@ metadata:
 spec:
   image: "metalgearsolid/webhook-gateway"
   imagePullPolicy: "Always"
+  configMap: "webhook-gateway-configmap"
   command: "/bin/webhook-gateway"
   type: "webhook"
   version: "1.0"
-  service:
-    type: "LoadBalancer"
-    port: 12000
-    targetPort: 12000
+  serviceSpec:
+    ports:
+      - port: 12000
+        targetPort: 12000
+    type: LoadBalancer
   serviceAccountName: "argo-events-sa"
-  sensors: ["webhook-sensor"]
+  sensors: ["webhook-sensor", "multi-signal-sensor"]

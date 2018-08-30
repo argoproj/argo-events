@@ -35,7 +35,6 @@ import (
 
 const (
 	topicKey   = "topic"
-	configName = "mqtt-gateway-configmap"
 	clientID   = "clientID"
 )
 
@@ -44,7 +43,7 @@ type mqtt struct {
 	registeredMQTTConfigs map[uint64]*stream.Stream
 }
 
-func (m *mqtt) listen(s *stream.Stream) {
+func (m *mqtt) listen(s *stream.Stream, source string) {
 	// parse out the attributes
 	topic, ok := s.Attributes[topicKey]
 	if !ok {
@@ -57,8 +56,15 @@ func (m *mqtt) listen(s *stream.Stream) {
 	}
 
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
-		m.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
-		http.Post(fmt.Sprintf("http://localhost:%s", m.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Payload()))
+		payload, err := gateways.CreateTransformPayload(msg.Payload(), source)
+		if err != nil {
+			m.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+		}
+		m.gatewayConfig.Log.Info().Msg("dispatching event to gateway-transformer...")
+		_, err = http.Post(fmt.Sprintf("http://localhost:%s", m.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+		if err != nil {
+			m.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
+		}
 	}
 
 	opts := MQTTlib.NewClientOptions().AddBroker(s.URL).SetClientID(clientID)
@@ -76,11 +82,11 @@ func (m *mqtt) listen(s *stream.Stream) {
 }
 
 func (m *mqtt) RunGateway(cm *apiv1.ConfigMap) error {
-	for kConfigkey, kConfigVal := range cm.Data {
+	for mConfigkey, mConfigVal := range cm.Data {
 		var s *stream.Stream
-		err := yaml.Unmarshal([]byte(kConfigVal), &s)
+		err := yaml.Unmarshal([]byte(mConfigVal), &s)
 		if err != nil {
-			m.gatewayConfig.Log.Error().Str("config", kConfigkey).Err(err).Msg("failed to parse mqtt config")
+			m.gatewayConfig.Log.Error().Str("config", mConfigkey).Err(err).Msg("failed to parse mqtt config")
 			return err
 		}
 		m.gatewayConfig.Log.Info().Interface("stream", *s).Msg("mqtt configuration")
@@ -94,7 +100,7 @@ func (m *mqtt) RunGateway(cm *apiv1.ConfigMap) error {
 			continue
 		}
 		m.registeredMQTTConfigs[key] = s
-		go m.listen(s)
+		go m.listen(s, mConfigkey)
 	}
 	return nil
 }
@@ -105,14 +111,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
 	}
+
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
 	}
+
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
 		Log:             zlog.New(os.Stdout).With().Logger(),
@@ -120,13 +134,15 @@ func main() {
 		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
+
 	m := &mqtt{
 		gatewayConfig:         gatewayConfig,
 		registeredMQTTConfigs: make(map[uint64]*stream.Stream),
 	}
+
 	_, err = gatewayConfig.WatchGatewayConfigMap(m, context.Background(), configName)
 	if err != nil {
-		m.gatewayConfig.Log.Error().Err(err).Msg("failed to update mqtt configuration")
+		m.gatewayConfig.Log.Panic().Err(err).Msg("failed to update mqtt configuration")
 	}
 
 	// run forever

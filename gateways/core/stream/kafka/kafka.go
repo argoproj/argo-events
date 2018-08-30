@@ -38,7 +38,6 @@ import (
 const (
 	topicKey     = "topic"
 	partitionKey = "partition"
-	configName   = "kafka-gateway-configmap"
 )
 
 type kafka struct {
@@ -46,7 +45,7 @@ type kafka struct {
 	registeredKafkaConfigs map[uint64]*stream.Stream
 }
 
-func (k *kafka) listen(s *stream.Stream) {
+func (k *kafka) listen(s *stream.Stream, source string) {
 	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
 	if err != nil {
 		k.gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("failed to connect to cluster")
@@ -82,8 +81,15 @@ func (k *kafka) listen(s *stream.Stream) {
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			k.gatewayConfig.Log.Info().Msg("received a msg, forwarding it to gateway transformer")
-			http.Post(fmt.Sprintf("http://localhost:%s", k.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(msg.Value))
+			payload, err := gateways.CreateTransformPayload(msg.Value, source)
+			if err != nil {
+				k.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
+			}
+			k.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s", k.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
+			if err != nil {
+				k.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
+			}
 		case err := <-partitionConsumer.Errors():
 			k.gatewayConfig.Log.Error().Str("partition", pString).Str("topic", topic).Err(err).Msg("received an error")
 			return
@@ -110,7 +116,7 @@ func (k *kafka) RunGateway(cm *apiv1.ConfigMap) error {
 			continue
 		}
 		k.registeredKafkaConfigs[key] = s
-		go k.listen(s)
+		go k.listen(s, kConfigkey)
 	}
 	return nil
 }
@@ -130,14 +136,22 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
 	}
+
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
 	}
+
+	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	if !ok {
+		panic("gateway processor configmap is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayConfig := &gateways.GatewayConfig{
 		Log:             zlog.New(os.Stdout).With().Logger(),
@@ -145,13 +159,15 @@ func main() {
 		Clientset:       clientset,
 		TransformerPort: transformerPort,
 	}
+
 	k := &kafka{
 		gatewayConfig:          gatewayConfig,
 		registeredKafkaConfigs: make(map[uint64]*stream.Stream),
 	}
+
 	_, err = gatewayConfig.WatchGatewayConfigMap(k, context.Background(), configName)
 	if err != nil {
-		k.gatewayConfig.Log.Error().Err(err).Msg("failed to update kafka configuration")
+		k.gatewayConfig.Log.Panic().Err(err).Msg("failed to update kafka configuration")
 	}
 
 	// run forever

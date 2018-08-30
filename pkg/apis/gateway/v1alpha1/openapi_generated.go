@@ -32,7 +32,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":   schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":   schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus": schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service":       schema_pkg_apis_gateway_v1alpha1_Service(ref),
 	}
 }
 
@@ -155,7 +154,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Todo: does this needed to specified separately? ConfigMap is name of the configmap gateway processor can access if required",
+							Description: "Todo: maybe add support for inline configmap ConfigMap is name of the configmap for gateway-processor",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -174,10 +173,10 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"service": {
+					"serviceSpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Service is the name of the service to expose the gateway",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service"),
+							Description: "ServiceSpec is the specifications of the service to expose the gateway",
+							Ref:         ref("k8s.io/api/core/v1.ServiceSpec"),
 						},
 					},
 					"sensors": {
@@ -201,12 +200,32 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"affinity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Affinity for scheduling",
+							Ref:         ref("k8s.io/api/core/v1.Affinity"),
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "todo: do we need separate labels or just use same labels defined on gateway resource? Labels for gateway deployment",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"image", "command", "type", "version", "sensors", "serviceAccountName"},
+				Required: []string{"image", "command", "type", "version", "sensors"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service"},
+			"k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.ServiceSpec"},
 	}
 }
 
@@ -242,40 +261,5 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
-	}
-}
-
-func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Service exposed gateway to outside cluster or in cluster components depending on it's type.",
-				Properties: map[string]spec.Schema{
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type is type of the service. Either ClusterIP, NodePort, LoadBalancer or ExternalName See https://kubernetes.io/docs/concepts/services-networking/service/",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"port": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Port is port exposed to components outside cluster",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-					"targetPort": {
-						SchemaProps: spec.SchemaProps{
-							Description: "TargetPort is the gateway http server port",
-							Type:        []string{"integer"},
-							Format:      "int32",
-						},
-					},
-				},
-				Required: []string{"type", "port", "targetPort"},
-			},
-		},
-		Dependencies: []string{},
 	}
 }

@@ -6,7 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   signals:
-    - name: webhook-gateway
+    - name: webhook-gateway/webhook.barConfig
       filters:
         time:
           start: "2016-05-10T15:04:05Z07:00"

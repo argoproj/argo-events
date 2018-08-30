@@ -9,7 +9,7 @@ spec:
   repeat: true
   serviceAccountName: argo-events-sa
   signals:
-    - name: artifact-gateway
+    - name: artifact-gateway/s3.fooConfig
   triggers:
     - name: hello-world-workflow-trigger
       resource:

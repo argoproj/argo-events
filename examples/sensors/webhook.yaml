@@ -9,7 +9,8 @@ spec:
   repeat: true
   serviceAccountName: argo-events-sa
   signals:
-    - name: webhook-gateway
+    - name: webhook-gateway/webhook.fooConfig
+    - name: webhook-gateway/webhook.barConfig
   triggers:
     - name: hello-world-workflow-trigger
       resource:
