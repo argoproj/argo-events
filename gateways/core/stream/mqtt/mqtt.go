@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	topicKey   = "topic"
-	clientID   = "clientID"
+	topicKey = "topic"
+	clientID = "clientID"
 )
 
 type mqtt struct {

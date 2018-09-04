@@ -25,9 +25,9 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 
 	// import packages for the universal deserializer
+	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 // NOTE: custom resources must be manually added here

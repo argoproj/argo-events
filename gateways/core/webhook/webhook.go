@@ -17,141 +17,147 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
+	gwProto "github.com/argoproj/argo-events/gateways/proto"
 	"github.com/ghodss/yaml"
-	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
-	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
+	"google.golang.org/grpc"
 	"log"
+	"net"
 	"net/http"
 	"os"
+	"sync"
 	"io/ioutil"
-	"bytes"
 )
 
-const (
-	configName = "webhook-gateway-configmap"
+var (
+	hasServerStarted = false
+	// as http package does not provide method for unregistering routes,
+	// this keeps track of configured http routes and their methods.
+	// keeps endpoints as keys and corresponding http methods as a map
+	activeRoutes = make(map[string]map[string]gwProto.GatewayExecutor_RunGatewayServer)
+	mut          sync.Mutex
 )
 
 // hook is a general purpose REST API
 type hook struct {
 	// REST API endpoint
-	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+	Endpoint string `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
 
 	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
 	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
+	Method string `json:"method,omitempty" protobuf:"bytes,2,opt,name=method"`
+
+	// Port on which HTTP server is listening for incoming events.
+	Port string `json:"port,omitempty" protobuf:"bytes,3,opt,name=port"`
 }
 
 // webhook contains gateway configuration and registered endpoints
 type webhook struct {
-	// gatewayConfig contains general configuration for gateway
-	gatewayConfig *gateways.GatewayConfig
-	// srv is reference to http server
-	srv *http.Server
 	// serverPort is port on which server is listening
 	serverPort string
-	// registeredWebhooks contains map of registered http endpoints
-	registeredWebhooks map[uint64]*hook
+	// log is json output logger for gateway
+	log zlog.Logger
 }
 
 // parses webhooks from gateway configuration
-func (w *webhook) RunGateway(cm *apiv1.ConfigMap) error {
-	if w.serverPort == "" {
-		w.serverPort = cm.Data["port"]
+func (w *webhook) RunGateway(config *gwProto.GatewayConfig, eventStream gwProto.GatewayExecutor_RunGatewayServer) error {
+	w.log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+
+	var h *hook
+	err := yaml.Unmarshal([]byte(config.Config), &h)
+	if err != nil {
+		w.log.Error().Err(err).Msg("failed to parse configuration")
+		return err
+	}
+
+	w.log.Info().Interface("config", config.Config).Interface("hook", h).Msg("running configuration")
+
+	if h.Port != "" && !hasServerStarted {
+		hasServerStarted = true
 		go func() {
-			log.Println(fmt.Sprintf("server started listening on port %s", w.serverPort))
-			log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", w.serverPort), nil))
+			w.log.Info().Str("http-port", h.Port).Msg("http server started listening...")
+			log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil))
 		}()
 	}
-	// remove server port key, if already removed its a no-op
-	delete(cm.Data, "port")
-	for hookConfigKey, hookConfigValue := range cm.Data {
-		var h *hook
-		err := yaml.Unmarshal([]byte(hookConfigValue), &h)
-		if err != nil {
-			return err
-		}
-		key, err := hs.Hash(h, &hs.HashOptions{})
-		if err != nil {
-			w.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
-			continue
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// waits till disconnection from client.
+	go func() {
+		<-eventStream.Context().Done()
+		w.log.Info().Str("config", config.Src).Msg("client disconnected. stopping the configuration...")
+		// remove the endpoint and http method configuration.
+		mut.Lock()
+		activeHTTPMethods := activeRoutes[h.Endpoint]
+		delete(activeHTTPMethods, h.Method)
+		mut.Unlock()
+		wg.Done()
+	}()
+
+	// configure endpoint and http method
+	if h.Endpoint != "" && h.Method != "" {
+		if _, ok := activeRoutes[h.Endpoint]; !ok {
+			mut.Lock()
+			activeRoutes[h.Endpoint] = make(map[string]gwProto.GatewayExecutor_RunGatewayServer)
+			activeRoutes[h.Endpoint][h.Method] = eventStream
+			mut.Unlock()
+			http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+				// check if http methods match and route and http method is registered.
+				if _, ok := activeRoutes[h.Endpoint]; ok {
+					if _, isActive := activeRoutes[h.Endpoint][request.Method]; isActive {
+						w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
+						body, err := ioutil.ReadAll(request.Body)
+						if err != nil {
+							w.log.Panic().Err(err).Msg("failed to parse request body")
+						}
+
+						w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("sending event to gateway processor")
+						es := activeRoutes[h.Endpoint][h.Method]
+						es.Send(&gwProto.Event{
+							Data: body,
+						})
+					} else {
+						w.log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
+						common.SendErrorResponse(writer)
+					}
+				} else {
+					w.log.Warn().Str("endpoint", h.Endpoint).Msg("endpoint is not active")
+					common.SendErrorResponse(writer)
+				}
+			})
+		} else {
+			mut.Lock()
+			activeRoutes[h.Endpoint][h.Method] = eventStream
+			mut.Unlock()
 		}
 
-		if _, ok := w.registeredWebhooks[key]; ok {
-			w.gatewayConfig.Log.Warn().Interface("config", h).Msg("duplicate configuration")
-			continue
-		}
-		w.registeredWebhooks[key] = h
-		w.registerWebhook(h, hookConfigKey)
-		w.gatewayConfig.Log.Info().Str("hook-name", hookConfigKey).Msg("configured")
+		w.log.Info().Str("config-name", config.Src).Msg("configured!!")
+		wg.Wait()
 	}
+
 	return nil
 }
 
-// registers a http endpoint
-func (w *webhook) registerWebhook(h *hook, source string) {
-	http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-		w.gatewayConfig.Log.Info().Msg("received a request. wtf!!!")
-		if request.Method == h.Method {
-			body, err := ioutil.ReadAll(request.Body)
-			if err != nil {
-				w.gatewayConfig.Log.Panic().Err(err).Msg("failed to parse request body")
-			}
-
-			payload, err := gateways.CreateTransformPayload(body, source)
-			if err != nil {
-				w.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform request body")
-			}
-
-			w.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
-			_, err = http.Post(fmt.Sprintf("http://localhost:%s", w.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
-			if err != nil {
-				w.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
-			}
-		} else {
-			w.gatewayConfig.Log.Warn().Str("expected", h.Method).Str("actual", request.Method).Msg("http method mismatch")
-		}
-	})
-}
-
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		panic("no namespace provided")
-	}
-
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorServerPort)
 	if !ok {
-		panic("gateway transformer port is not provided")
+		panic("gateway rpc server port is not provided")
 	}
 
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-
-	gatewayConfig := &gateways.GatewayConfig{
-		Log:             zlog.New(os.Stdout).With().Logger(),
-		Namespace:       namespace,
-		Clientset:       clientset,
-		TransformerPort: transformerPort,
-	}
 	w := &webhook{
-		gatewayConfig:      gatewayConfig,
-		registeredWebhooks: make(map[uint64]*hook),
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(w, context.Background(), configName)
-	if err != nil {
-		panic("failed to retrieve webhook configuration")
+		log: zlog.New(os.Stdout).With().Logger(),
 	}
 
-	select {}
+	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", rpcServerPort))
+	if err != nil {
+		w.log.Fatal().Err(err).Msg("server failed to listen")
+	}
+	opts := []grpc.ServerOption{}
+	grpcServer := grpc.NewServer(opts...)
+	gwProto.RegisterGatewayExecutorServer(grpcServer, w)
+	w.log.Info().Str("port", rpcServerPort).Msg("gRPC server started listening...")
+	grpcServer.Serve(lis)
 }

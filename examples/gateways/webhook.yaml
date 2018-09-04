@@ -20,3 +20,4 @@ spec:
     type: LoadBalancer
   serviceAccountName: "argo-events-sa"
   sensors: ["webhook-sensor", "multi-signal-sensor"]
+  port: "9898"

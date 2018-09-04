@@ -77,6 +77,9 @@ type GatewaySpec struct {
 	// todo: do we need separate labels or just use same labels defined on gateway resource?
 	// Labels for gateway deployment
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,12,opt,name=labels"`
+
+	// Port is server port for rpc communication between user gateway code and internal gateway client
+	Port string `json:"port" protobuf:"bytes,13,opt,name=port"`
 }
 
 // NodePhase is the label for the condition of a node

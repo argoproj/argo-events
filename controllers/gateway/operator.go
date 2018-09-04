@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	gatewayProcessor   = "gateway-processor"
-	gatewayTransformer = "gateway-transformer"
+	gatewayProcessorClient = "gateway-processor-client"
+	gatewayProcessorServer = "gateway-processor-server"
+	gatewayTransformer     = "gateway-transformer"
 )
 
 // the context of an operation on a gateway-controller.
@@ -130,9 +131,20 @@ func (goc *gwOperationCtx) operate() error {
 						ServiceAccountName: goc.gw.Spec.ServiceAccountName,
 						Containers: []corev1.Container{
 							{
-								Name:            gatewayProcessor,
-								ImagePullPolicy: goc.gw.Spec.ImagePullPolicy,
+								Name:            gatewayProcessorServer,
 								Image:           goc.gw.Spec.Image,
+								ImagePullPolicy: goc.gw.Spec.ImagePullPolicy,
+								Env: []corev1.EnvVar{
+									{
+										Name:  common.GatewayProcessorServerPort,
+										Value: goc.gw.Spec.Port,
+									},
+								},
+							},
+							{
+								Name:            gatewayProcessorClient,
+								ImagePullPolicy: corev1.PullAlways,
+								Image:           common.GatewayProcessorClientImage,
 								Env: []corev1.EnvVar{
 									{
 										Name:  common.GatewayTransformerPortEnvVar,
@@ -143,8 +155,16 @@ func (goc *gwOperationCtx) operate() error {
 										Value: goc.gw.Namespace,
 									},
 									{
-										Name: common.GatewayProcessorConfigMapEnvVar,
+										Name:  common.GatewayProcessorConfigMapEnvVar,
 										Value: goc.gw.Spec.ConfigMap,
+									},
+									{
+										Name:  common.GatewayProcessorServerPort,
+										Value: goc.gw.Spec.Port,
+									},
+									{
+										Name:  common.GatewayName,
+										Value: goc.gw.Name,
 									},
 								},
 							},

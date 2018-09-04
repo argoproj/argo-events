@@ -89,11 +89,18 @@ const (
 
 	// LabelGatewayName is the label for gateway name
 	LabelGatewayName = "gateway-name"
+
+	// GatewayName refers env var for name of gateway
+	GatewayName = "GATEWAY_NAME"
 )
 
 // Gateway Processor constants
 const (
 	GatewayProcessorConfigMapEnvVar = "GATEWAY_PROCESSOR_CONFIG_MAP"
+
+	GatewayProcessorServerPort = "GATEWAY_PROCESSOR_SERVER_PORT"
+
+	GatewayProcessorClientImage = "metalgearsolid/gateway-processor-client"
 )
 
 // Gateway Transformer constants

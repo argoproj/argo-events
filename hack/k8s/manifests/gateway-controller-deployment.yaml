@@ -3,6 +3,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: gateway-controller
+  namespace: argo-events
 spec:
   replicas: 1
   template:
