@@ -60,7 +60,6 @@ func (goc *gwOperationCtx) operate() error {
 	// manages states of a gateway
 	switch goc.gw.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		// todo: maybe update gateway state as pending
 		// declare the configuration map for gateway transformer
 		gatewayConfigMap := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -85,22 +84,8 @@ func (goc *gwOperationCtx) operate() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create transformer gateway configuration. err: %s", err))
 		}
 
-		// set the image policy to Always if unspecified
-		if goc.gw.Spec.ImagePullPolicy == "" {
-			goc.gw.Spec.ImagePullPolicy = corev1.PullAlways
-		}
-
-		//set service account to default if unspecified
-		if goc.gw.Spec.ServiceAccountName == "" {
-			goc.gw.Spec.ServiceAccountName = "default"
-		}
-
-		if goc.gw.Spec.Labels == nil {
-			goc.gw.Spec.Labels = make(map[string]string)
-		}
-
-		// add gateway name to label
-		goc.gw.Spec.Labels[common.LabelGatewayName] = goc.gw.Name
+		// add gateway name to gateway label
+		goc.gw.ObjectMeta.Labels[common.LabelGatewayName] = goc.gw.Name
 
 		// declare the gateway deployment. The deployment has two components,
 		// 1) Gateway Processor   - Either generates events internally or listens to outside world events.
@@ -111,67 +96,22 @@ func (goc *gwOperationCtx) operate() error {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      common.DefaultGatewayDeploymentName(goc.gw.Name),
 				Namespace: goc.gw.Namespace,
-				Labels: map[string]string{
-					common.LabelGatewayName: goc.gw.Name,
-				},
+				Labels: goc.gw.ObjectMeta.Labels,
 				OwnerReferences: []metav1.OwnerReference{
 					*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 				},
 			},
 			Spec: appv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
-					MatchLabels: goc.gw.Spec.Labels,
+					MatchLabels: goc.gw.ObjectMeta.Labels,
 				},
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: goc.gw.Spec.Labels,
+						Labels: goc.gw.ObjectMeta.Labels,
 					},
 					Spec: corev1.PodSpec{
-						ServiceAccountName: goc.gw.Spec.ServiceAccountName,
-						Containers: []corev1.Container{
-							{
-								Name:            gatewayProcessor,
-								ImagePullPolicy: goc.gw.Spec.ImagePullPolicy,
-								Image:           goc.gw.Spec.Image,
-								Env: []corev1.EnvVar{
-									{
-										Name:  common.GatewayTransformerPortEnvVar,
-										Value: fmt.Sprintf("%d", common.GatewayTransformerPort),
-									},
-									{
-										Name:  common.EnvVarNamespace,
-										Value: goc.gw.Namespace,
-									},
-									{
-										Name:  common.GatewayProcessorConfigMapEnvVar,
-										Value: goc.gw.Spec.ConfigMap,
-									},
-									{
-										Name:  common.GatewayProcessorServerPort,
-										Value: goc.gw.Spec.Port,
-									},
-									{
-										Name:  common.GatewayName,
-										Value: goc.gw.Name,
-									},
-								},
-							},
-							{
-								Name:            gatewayTransformer,
-								ImagePullPolicy: corev1.PullAlways,
-								Image:           common.GatewayEventTransformerImage,
-								Env: []corev1.EnvVar{
-									{
-										Name:  common.GatewayTransformerConfigMapEnvVar,
-										Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
-									},
-									{
-										Name:  common.EnvVarNamespace,
-										Value: goc.gw.Namespace,
-									},
-								},
-							},
-						},
+						ServiceAccountName: goc.gw.Spec.DeploySpec.ServiceAccountName,
+						Containers:         *goc.getContainersForGatewayPod(),
 					},
 				},
 			},
@@ -186,7 +126,12 @@ func (goc *gwOperationCtx) operate() error {
 		} else {
 			// expose gateway if service is configured
 			if goc.gw.Spec.ServiceSpec != nil {
-				goc.createGatewayService()
+				err = goc.createGatewayService()
+				if err != nil {
+					goc.log.Error().Err(err).Msg("failed to create service for gateway")
+					goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, "failed to create service", err.Error())
+					return err
+				}
 			}
 			goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 		}
@@ -199,8 +144,8 @@ func (goc *gwOperationCtx) operate() error {
 			return err
 		}
 
-		// If image has been updated
-		gDeployment.Spec.Template.Spec.Containers[0].Image = goc.gw.Spec.Image
+		// self heal by updating container images if any
+		gDeployment.Spec.Template.Spec.Containers = *goc.getContainersForGatewayPod()
 		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Update(gDeployment)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("error occurred updating gateway deployment")
@@ -213,7 +158,16 @@ func (goc *gwOperationCtx) operate() error {
 		// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Msg("gateway is running")
-
+		// Failed to expose gateway through a service.
+	case v1alpha1.NodePhaseServiceError:
+		// check whether service is now created successfully. service's name must be gateway name followed by "-gateway-svc".
+		_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Get(common.DefaultGatewayServiceName(goc.gw.Name), metav1.GetOptions{})
+		if err != nil {
+			goc.log.Warn().Str("expected-service", common.DefaultGatewayServiceName(goc.gw.Name)).Err(err).Msg("no service found")
+			return err
+		}
+		// Update node phase to running
+		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	default:
 		goc.log.Panic().Str("phase", string(goc.gw.Status.Phase)).Msg("unknown gateway phase.")
 	}
@@ -221,7 +175,7 @@ func (goc *gwOperationCtx) operate() error {
 }
 
 // Creates a service that exposes gateway outside the cluster
-func (goc *gwOperationCtx) createGatewayService() {
+func (goc *gwOperationCtx) createGatewayService() error {
 	gatewayService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      common.DefaultGatewayServiceName(goc.gw.Name),
@@ -233,16 +187,13 @@ func (goc *gwOperationCtx) createGatewayService() {
 		Spec: *goc.gw.Spec.ServiceSpec,
 	}
 
-	// if selector is not provided
+	// if selector is not provided, override selectors with gateway labels
 	if gatewayService.Spec.Selector == nil {
-		gatewayService.Spec.Selector = goc.gw.Spec.Labels
+		gatewayService.Spec.Selector = goc.gw.ObjectMeta.Labels
 	}
 
 	_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
-	// Fail silently
-	if err != nil {
-		goc.log.Error().Err(err).Msg("failed to create service for gateway deployment")
-	}
+	return err
 }
 
 // persist the updates to the gateway resource
@@ -314,4 +265,82 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message ..
 		goc.gw.Status.Message = message[0]
 		goc.updated = true
 	}
+}
+
+// creates a list of containers required for gateway deployment
+func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
+	// env variables for gateway processor
+	envVars := []corev1.EnvVar{
+		{
+			Name:  common.GatewayTransformerPortEnvVar,
+			Value: fmt.Sprintf("%d", common.GatewayTransformerPort),
+		},
+		{
+			Name:  common.EnvVarNamespace,
+			Value: goc.gw.Namespace,
+		},
+		{
+			Name:  common.GatewayProcessorConfigMapEnvVar,
+			Value: goc.gw.Spec.ConfigMap,
+		},
+		{
+			Name:  common.GatewayName,
+			Value: goc.gw.Name,
+		},
+	}
+
+	var containers []corev1.Container
+	// check if gateway deployment is a gRPC server
+	// deploySpec contains list of containers as user may choose to have multiple containers acting as event generators
+	// Multiple containers can act as supporting containers helping to generate events
+	if goc.gw.Spec.RPCPort != "" {
+		// in case of gRPC gateway, gateway processor client(eventProcessor) will connect with container that has rpc server running
+		// on RPCPort.
+		eventGeneratorContainers := goc.gw.Spec.DeploySpec.Containers
+		eventProcessorContainer := corev1.Container{
+			Name:            gatewayProcessor,
+			Image:           common.GatewayProcessorClientImage,
+			ImagePullPolicy: corev1.PullAlways,
+		}
+
+		rpcGatewayEnvVars := append(envVars, corev1.EnvVar{
+			Name:  common.GatewayProcessorServerPort,
+			Value: goc.gw.Spec.RPCPort,
+		})
+
+		containers = append(containers, eventGeneratorContainers...)
+		containers = append(containers,  eventProcessorContainer)
+
+		for i, container := range containers {
+			containers[i].Env = append(container.Env, rpcGatewayEnvVars...)
+		}
+	} else {
+		// this is when user is deploying gateway by either following core gateways or writing a completely custom gateway
+		eventGeneratorAndProcessorContainers := goc.gw.Spec.DeploySpec.Containers
+		containers = append(containers, eventGeneratorAndProcessorContainers...)
+		for i, container := range containers {
+			containers[i].Env = append(container.Env, envVars...)
+		}
+	}
+
+	// create container for gateway transformer
+	gatewayTransformerContainer := corev1.Container{
+		Name:            gatewayTransformer,
+		ImagePullPolicy: corev1.PullAlways,
+		Image:           common.GatewayEventTransformerImage,
+		Env: []corev1.EnvVar{
+			{
+				Name:  common.GatewayTransformerConfigMapEnvVar,
+				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
+			},
+			{
+				Name:  common.EnvVarNamespace,
+				Value: goc.gw.Namespace,
+			},
+		},
+	}
+
+	containers = append(containers, gatewayTransformerContainer)
+
+	return &containers
 }

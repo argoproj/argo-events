@@ -73,14 +73,14 @@ func (a *amqp) RunConfiguration(config *gateways.ConfigData) error {
 	a.log.Info().Str("config-name", config.Src).Msg("running...")
 	config.Active = true
 	// start listening for messages
-	amqpConfigRunner:
+amqpConfigRunner:
 	for {
 		select {
 		case msg := <-delivery:
 			a.log.Info().Msg("dispatching the event to gateway-transformer")
 			a.gatewayConfig.DispatchEvent(msg.Body, config.Src)
-			case <- config.StopCh:
-				break amqpConfigRunner
+		case <-config.StopCh:
+			break amqpConfigRunner
 		}
 	}
 	return nil
@@ -133,7 +133,7 @@ func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.De
 
 func main() {
 	a := &amqp{
-		log:       zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
 		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
 	a.gatewayConfig.WatchGatewayConfigMap(a, context.Background())

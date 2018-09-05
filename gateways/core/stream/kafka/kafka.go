@@ -17,14 +17,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/gateways/core/stream"
 	gateways "github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
 	zlog "github.com/rs/zerolog"
 	"os"
 	"strconv"
-	"context"
 )
 
 const (
@@ -83,7 +83,7 @@ func (k *kafka) RunConfiguration(config *gateways.ConfigData) error {
 	config.Active = true
 
 	// start listening to messages
-	kafkaConfigRunner:
+kafkaConfigRunner:
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -114,7 +114,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 func main() {
 	k := &kafka{
-		log:       zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
 		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
 	k.gatewayConfig.WatchGatewayConfigMap(k, context.Background())

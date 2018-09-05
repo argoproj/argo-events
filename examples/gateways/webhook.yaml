@@ -7,17 +7,21 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "webhook-gateway"
 spec:
-  image: "metalgearsolid/webhook-gateway"
-  imagePullPolicy: "Always"
   configMap: "webhook-gateway-configmap"
-  command: "/bin/webhook-gateway"
   type: "webhook"
   version: "1.0"
+  deploySpec:
+    containers:
+    - name: webhook-events
+      image: "metalgearsolid/webhook-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/webhook-gateway"]
+    serviceAccountName: "argo-events-sa"
   serviceSpec:
+    selector:
+      gateway-name: "webhook-gateway"
     ports:
       - port: 12000
         targetPort: 12000
     type: LoadBalancer
-  serviceAccountName: "argo-events-sa"
   sensors: ["webhook-sensor", "multi-signal-sensor"]
-  port: "9898"

@@ -131,30 +131,15 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 			SchemaProps: spec.SchemaProps{
 				Description: "GatewaySpec represents gateway specifications",
 				Properties: map[string]spec.Schema{
-					"image": {
+					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Image is the gateway processor image",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"imagePullPolicy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ImagePullPolicy for pulling the image",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"command": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Command is command to run gateway processor image",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "DeploySpec is description of gateway",
+							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
 						},
 					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Todo: maybe add support for inline configmap ConfigMap is name of the configmap for gateway-processor",
+							Description: "ConfigMap is name of the configmap for gateway-processor",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -193,39 +178,19 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							},
 						},
 					},
-					"serviceAccountName": {
+					"rpcPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceAccountName is name of service account to run the gateway",
+							Description: "RPCPort if provided deploys gateway-processor as gRPC client",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"affinity": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Affinity for scheduling",
-							Ref:         ref("k8s.io/api/core/v1.Affinity"),
-						},
-					},
-					"labels": {
-						SchemaProps: spec.SchemaProps{
-							Description: "todo: do we need separate labels or just use same labels defined on gateway resource? Labels for gateway deployment",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
 				},
-				Required: []string{"image", "command", "type", "version", "sensors"},
+				Required: []string{"deploySpec", "type", "version", "sensors"},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.ServiceSpec"},
+			"k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.ServiceSpec"},
 	}
 }
 

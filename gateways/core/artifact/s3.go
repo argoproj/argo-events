@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	gateways "github.com/argoproj/argo-events/gateways/core"
@@ -29,7 +30,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"os"
 	"sync"
-	"context"
 )
 
 type s3 struct {
@@ -162,7 +162,7 @@ func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
 
 func main() {
 	s := &s3{
-		log:       zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
 		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
 	s.gatewayConfig.WatchGatewayConfigMap(s, context.Background())

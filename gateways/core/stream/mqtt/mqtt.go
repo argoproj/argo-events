@@ -89,7 +89,7 @@ func (m *mqtt) RunConfiguration(config *gateways.ConfigData) error {
 
 func main() {
 	a := &mqtt{
-		log:       zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
 		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
 	a.gatewayConfig.WatchGatewayConfigMap(a, context.Background())

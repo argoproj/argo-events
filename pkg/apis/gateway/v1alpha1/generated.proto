@@ -50,40 +50,26 @@ message GatewayList {
 
 // GatewaySpec represents gateway specifications
 message GatewaySpec {
-  // Image is the gateway processor image
-  optional string image = 1;
+  // DeploySpec is description of gateway
+  optional k8s.io.api.core.v1.PodSpec deploySpec = 1;
 
-  // Command is command to run gateway processor image
-  optional string command = 2;
-
-  // Todo: maybe add support for inline configmap
   // ConfigMap is name of the configmap for gateway-processor
-  optional string configmap = 3;
+  optional string configmap = 2;
 
   // Type is type of the gateway
-  optional string type = 5;
+  optional string type = 3;
 
   // Version is used for marking event version
-  optional string version = 6;
+  optional string version = 4;
 
   // ServiceSpec is the specifications of the service to expose the gateway
-  optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 7;
+  optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 5;
 
   // Sensors are list of sensors to dispatch events to
-  repeated string sensors = 8;
+  repeated string sensors = 6;
 
-  // ServiceAccountName is name of service account to run the gateway
-  optional string serviceAccountName = 9;
-
-  // Affinity for scheduling
-  optional k8s.io.api.core.v1.Affinity affinity = 10;
-
-  // ImagePullPolicy for pulling the image
-  optional string imagePullPolicy = 11;
-
-  // todo: do we need separate labels or just use same labels defined on gateway resource?
-  // Labels for gateway deployment
-  map<string, string> labels = 12;
+  // RPCPort if provided deploys gateway-processor as gRPC client
+  optional string rpcPort = 7;
 }
 
 // GatewayStatus contains information about the status of a gateway.

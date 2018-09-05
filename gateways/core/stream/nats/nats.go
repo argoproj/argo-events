@@ -17,14 +17,14 @@ limitations under the License.
 package main
 
 import (
-	"github.com/argoproj/argo-events/gateways/core/stream"
+	"context"
 	gateways "github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
 	natsio "github.com/nats-io/go-nats"
 	zlog "github.com/rs/zerolog"
 	"os"
 	"strings"
-	"context"
 	"sync"
 )
 
@@ -71,7 +71,7 @@ func (n *nats) RunConfiguration(config *gateways.ConfigData) error {
 	}()
 
 	n.log.Info().Str("config-name", config.Src).Msg("running...")
-	config.Active  = true
+	config.Active = true
 
 	sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
 		n.log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
@@ -94,7 +94,7 @@ func (n *nats) RunConfiguration(config *gateways.ConfigData) error {
 
 func main() {
 	n := &nats{
-		log:       zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
 		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
 	n.gatewayConfig.WatchGatewayConfigMap(n, context.Background())

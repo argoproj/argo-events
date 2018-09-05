@@ -92,20 +92,6 @@ gateway-transformer-image: gateway-transformer-linux
 	 docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) ; fi
 
-
-# Gateway processor client
-gateway-processor-client:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/core/gateway.go
-
-gateway-processor-client-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-processor-client
-
-gateway-processor-client-image: gateway-processor-client-linux
-	 docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/core/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) ; fi
-
-
-
 # gateway binaries
 webhook:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/
@@ -183,6 +169,32 @@ mqtt-image: mqtt-linux
 	 docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/mqtt/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
 
+
+# gRPC gateway binaries
+# Gateway processor client
+gateway-processor-client:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/core/grpc/gateway.go
+
+gateway-processor-client-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-processor-client
+
+gateway-processor-client-image: gateway-processor-client-linux
+	 docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/core/grpc/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) ; fi
+
+# gRPC gateway server binaries
+calendar-grpc:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/core/grpc/calendar/
+
+calendar-grpc-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-grpc
+
+calendar-grpc-image: calendar-grpc-linux
+	 docker build -t $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) -f ./gateways/core/grpc/calendar/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) ; fi
+
+
+# Todo: Add more gRPC gateway binaries
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

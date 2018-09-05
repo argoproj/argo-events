@@ -42,44 +42,26 @@ type GatewayList struct {
 
 // GatewaySpec represents gateway specifications
 type GatewaySpec struct {
+	// DeploySpec is description of gateway
+	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
 
-	// Image is the gateway processor image
-	Image string `json:"image" protobuf:"bytes,1,opt,name=image"`
-
-	// Command is command to run gateway processor image
-	Command string `json:"command" protobuf:"bytes,2,opt,name=command"`
-
-	// Todo: maybe add support for inline configmap
 	// ConfigMap is name of the configmap for gateway-processor
-	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,3,opt,name=configmap"`
+	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
 
 	// Type is type of the gateway
-	Type string `json:"type" protobuf:"bytes,5,opt,name=type"`
+	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 
 	// Version is used for marking event version
-	Version string `json:"version" protobuf:"bytes,6,opt,name=version"`
+	Version string `json:"version" protobuf:"bytes,4,opt,name=version"`
 
 	// ServiceSpec is the specifications of the service to expose the gateway
-	ServiceSpec *corev1.ServiceSpec `json:"serviceSpec,omitempty" protobuf:"bytes,7,opt,name=serviceSpec"`
+	ServiceSpec *corev1.ServiceSpec `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
 
 	// Sensors are list of sensors to dispatch events to
-	Sensors []string `json:"sensors" protobuf:"bytes,8,opt,name=sensors"`
+	Sensors []string `json:"sensors" protobuf:"bytes,6,opt,name=sensors"`
 
-	// ServiceAccountName is name of service account to run the gateway
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,9,opt,name=serviceAccountName"`
-
-	// Affinity for scheduling
-	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,10,opt,name=affinity"`
-
-	// ImagePullPolicy for pulling the image
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,11,opt,name=imagePullPolicy,casttype=k8s.io/api/core/v1.PullPolicy"`
-
-	// todo: do we need separate labels or just use same labels defined on gateway resource?
-	// Labels for gateway deployment
-	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,12,opt,name=labels"`
-
-	// Port is server port for rpc communication between user gateway code and internal gateway client
-	Port string `json:"port" protobuf:"bytes,13,opt,name=port"`
+	// RPCPort if provided deploys gateway-processor as gRPC client
+	RPCPort string `json:"rpcPort,omitempty" protobuf:"bytes,7,opt,name=rpcPort"`
 }
 
 // NodePhase is the label for the condition of a node
@@ -87,9 +69,10 @@ type NodePhase string
 
 // possible types of node phases
 const (
-	NodePhaseRunning NodePhase = "Running" // the node is running
-	NodePhaseError   NodePhase = "Error"   // the node has encountered an error in processing
-	NodePhaseNew     NodePhase = ""        // the node is new
+	NodePhaseRunning      NodePhase = "Running"      // the node is running
+	NodePhaseError        NodePhase = "Error"        // the node has encountered an error in processing
+	NodePhaseNew          NodePhase = ""             // the node is new
+	NodePhaseServiceError NodePhase = "ServiceError" // failed to expose gateway using a service
 )
 
 // GatewayStatus contains information about the status of a gateway.
