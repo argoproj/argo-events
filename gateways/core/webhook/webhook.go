@@ -17,27 +17,29 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	gwProto "github.com/argoproj/argo-events/gateways/proto"
+	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
 	zlog "github.com/rs/zerolog"
-	"google.golang.org/grpc"
-	"log"
-	"net"
+	"go.uber.org/atomic"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"sync"
-	"io/ioutil"
 )
 
 var (
-	hasServerStarted = false
+	// whether http server has started or not
+	hasServerStarted atomic.Bool
+
 	// as http package does not provide method for unregistering routes,
 	// this keeps track of configured http routes and their methods.
 	// keeps endpoints as keys and corresponding http methods as a map
-	activeRoutes = make(map[string]map[string]gwProto.GatewayExecutor_RunGatewayServer)
-	mut          sync.Mutex
+	activeRoutes = make(map[string]map[string]struct{})
+
+	mut sync.Mutex
 )
 
 // hook is a general purpose REST API
@@ -53,16 +55,19 @@ type hook struct {
 	Port string `json:"port,omitempty" protobuf:"bytes,3,opt,name=port"`
 }
 
-// webhook contains gateway configuration and registered endpoints
 type webhook struct {
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig *gateways.GatewayConfig
+
 	// serverPort is port on which server is listening
 	serverPort string
+
 	// log is json output logger for gateway
 	log zlog.Logger
 }
 
-// parses webhooks from gateway configuration
-func (w *webhook) RunGateway(config *gwProto.GatewayConfig, eventStream gwProto.GatewayExecutor_RunGatewayServer) error {
+// Runs a gateway configuration
+func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
 	w.log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
 
 	var h *hook
@@ -71,39 +76,47 @@ func (w *webhook) RunGateway(config *gwProto.GatewayConfig, eventStream gwProto.
 		w.log.Error().Err(err).Msg("failed to parse configuration")
 		return err
 	}
+	w.log.Info().Interface("config", config.Config).Interface("hook", h).Msg("configuring...")
 
-	w.log.Info().Interface("config", config.Config).Interface("hook", h).Msg("running configuration")
-
-	if h.Port != "" && !hasServerStarted {
-		hasServerStarted = true
+	// start a http server only if given configuration contains port information and no other
+	// configuration previously started the server
+	if h.Port != "" && !hasServerStarted.Load() {
+		// mark http server as started
+		hasServerStarted.Store(true)
 		go func() {
 			w.log.Info().Str("http-port", h.Port).Msg("http server started listening...")
-			log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil))
+			w.log.Fatal().Err(http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil)).Msg("failed to start http server")
 		}()
 	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// waits till disconnection from client.
+	// waits till disconnection from client. perform cleanup.
 	go func() {
-		<-eventStream.Context().Done()
-		w.log.Info().Str("config", config.Src).Msg("client disconnected. stopping the configuration...")
+		<-config.StopCh
+		w.log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+
 		// remove the endpoint and http method configuration.
 		mut.Lock()
 		activeHTTPMethods := activeRoutes[h.Endpoint]
 		delete(activeHTTPMethods, h.Method)
 		mut.Unlock()
+
 		wg.Done()
 	}()
 
+	config.Active = true
 	// configure endpoint and http method
 	if h.Endpoint != "" && h.Method != "" {
 		if _, ok := activeRoutes[h.Endpoint]; !ok {
 			mut.Lock()
-			activeRoutes[h.Endpoint] = make(map[string]gwProto.GatewayExecutor_RunGatewayServer)
-			activeRoutes[h.Endpoint][h.Method] = eventStream
+			activeRoutes[h.Endpoint] = make(map[string]struct{})
+			// save event channel for this connection/configuration
+			activeRoutes[h.Endpoint][h.Method] = struct{}{}
 			mut.Unlock()
+
+			// add a handler for endpoint if not already added.
 			http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 				// check if http methods match and route and http method is registered.
 				if _, ok := activeRoutes[h.Endpoint]; ok {
@@ -111,14 +124,14 @@ func (w *webhook) RunGateway(config *gwProto.GatewayConfig, eventStream gwProto.
 						w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
 						body, err := ioutil.ReadAll(request.Body)
 						if err != nil {
-							w.log.Panic().Err(err).Msg("failed to parse request body")
+							w.log.Error().Err(err).Msg("failed to parse request body")
+							common.SendErrorResponse(writer)
+						} else {
+							w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
+							common.SendSuccessResponse(writer)
+							// dispatch event to gateway transformer
+							w.gatewayConfig.DispatchEvent(body, config.Src)
 						}
-
-						w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("sending event to gateway processor")
-						es := activeRoutes[h.Endpoint][h.Method]
-						es.Send(&gwProto.Event{
-							Data: body,
-						})
 					} else {
 						w.log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
 						common.SendErrorResponse(writer)
@@ -130,34 +143,21 @@ func (w *webhook) RunGateway(config *gwProto.GatewayConfig, eventStream gwProto.
 			})
 		} else {
 			mut.Lock()
-			activeRoutes[h.Endpoint][h.Method] = eventStream
+			activeRoutes[h.Endpoint][h.Method] = struct{}{}
 			mut.Unlock()
 		}
 
-		w.log.Info().Str("config-name", config.Src).Msg("configured!!")
+		w.log.Info().Str("config-name", config.Src).Msg("running...")
 		wg.Wait()
 	}
-
 	return nil
 }
 
 func main() {
-	rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorServerPort)
-	if !ok {
-		panic("gateway rpc server port is not provided")
-	}
-
 	w := &webhook{
-		log: zlog.New(os.Stdout).With().Logger(),
+		log:           zlog.New(os.Stdout).With().Logger(),
+		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
-
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", rpcServerPort))
-	if err != nil {
-		w.log.Fatal().Err(err).Msg("server failed to listen")
-	}
-	opts := []grpc.ServerOption{}
-	grpcServer := grpc.NewServer(opts...)
-	gwProto.RegisterGatewayExecutorServer(grpcServer, w)
-	w.log.Info().Str("port", rpcServerPort).Msg("gRPC server started listening...")
-	grpcServer.Serve(lis)
+	w.gatewayConfig.WatchGatewayConfigMap(w, context.Background())
+	select {}
 }

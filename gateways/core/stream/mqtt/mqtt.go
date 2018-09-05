@@ -17,20 +17,14 @@ limitations under the License.
 package mqtt
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
+	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
-	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
-	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
-	"net/http"
 	"os"
+	"sync"
 )
 
 const (
@@ -39,112 +33,65 @@ const (
 )
 
 type mqtt struct {
-	gatewayConfig         *gateways.GatewayConfig
-	registeredMQTTConfigs map[uint64]*stream.Stream
+	// log is json output logger for gateway
+	log zlog.Logger
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig *gateways.GatewayConfig
 }
 
-func (m *mqtt) listen(s *stream.Stream, source string) {
+func (m *mqtt) RunConfiguration(config *gateways.ConfigData) error {
+	m.log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+
+	var s *stream.Stream
+	err := yaml.Unmarshal([]byte(config.Config), &s)
+	if err != nil {
+		m.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse mqtt config")
+		return err
+	}
 	// parse out the attributes
 	topic, ok := s.Attributes[topicKey]
 	if !ok {
-		m.gatewayConfig.Log.Error().Msg("failed to get topic key")
+		m.log.Error().Msg("failed to get topic key")
 	}
 
 	clientID, ok := s.Attributes[clientID]
 	if !ok {
-		m.gatewayConfig.Log.Error().Msg("failed to get client id")
+		m.log.Error().Msg("failed to get client id")
 	}
 
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
-		payload, err := gateways.CreateTransformPayload(msg.Payload(), source)
-		if err != nil {
-			m.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
-		}
-		m.gatewayConfig.Log.Info().Msg("dispatching event to gateway-transformer...")
-		_, err = http.Post(fmt.Sprintf("http://localhost:%s", m.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
-		if err != nil {
-			m.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
-		}
+		m.gatewayConfig.DispatchEvent(msg.Payload(), config.Src)
 	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	// waits till disconnection from client.
+	go func() {
+		<-config.StopCh
+		m.log.Info().Str("config", config.Src).Msg("stopping the configuration...")
+		wg.Done()
+	}()
 
 	opts := MQTTlib.NewClientOptions().AddBroker(s.URL).SetClientID(clientID)
 	client := MQTTlib.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		m.gatewayConfig.Log.Error().Str("client", clientID).Err(token.Error()).Msg("failed to connect to client")
-		return
+		m.log.Error().Str("config-key", config.Src).Str("client", clientID).Err(token.Error()).Msg("failed to connect to client")
 	}
 	if token := client.Subscribe(topic, 0, handler); token.Wait() && token.Error() != nil {
-		m.gatewayConfig.Log.Error().Str("topic", topic).Err(token.Error()).Msg("failed to subscribe to topic")
-		return
+		m.log.Error().Str("config-key", config.Src).Str("topic", topic).Err(token.Error()).Msg("failed to subscribe to topic")
 	}
 
-	m.gatewayConfig.Log.Info().Interface("mqtt-config", s).Msg("started listening to topic")
-}
-
-func (m *mqtt) RunGateway(cm *apiv1.ConfigMap) error {
-	for mConfigkey, mConfigVal := range cm.Data {
-		var s *stream.Stream
-		err := yaml.Unmarshal([]byte(mConfigVal), &s)
-		if err != nil {
-			m.gatewayConfig.Log.Error().Str("config", mConfigkey).Err(err).Msg("failed to parse mqtt config")
-			return err
-		}
-		m.gatewayConfig.Log.Info().Interface("stream", *s).Msg("mqtt configuration")
-		key, err := hs.Hash(s, &hs.HashOptions{})
-		if err != nil {
-			m.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
-			continue
-		}
-		if _, ok := m.registeredMQTTConfigs[key]; ok {
-			m.gatewayConfig.Log.Warn().Interface("config", s).Msg("duplicate configuration")
-			continue
-		}
-		m.registeredMQTTConfigs[key] = s
-		go m.listen(s, mConfigkey)
-	}
+	m.log.Info().Str("config-key", config.Src).Msg("running...")
+	wg.Wait()
 	return nil
 }
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
+	a := &mqtt{
+		log:       zlog.New(os.Stdout).With().Logger(),
+		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
-
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		panic("no namespace provided")
-	}
-
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
-	if !ok {
-		panic("gateway transformer port is not provided")
-	}
-
-	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
-	if !ok {
-		panic("gateway processor configmap is not provided")
-	}
-
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	gatewayConfig := &gateways.GatewayConfig{
-		Log:             zlog.New(os.Stdout).With().Logger(),
-		Namespace:       namespace,
-		Clientset:       clientset,
-		TransformerPort: transformerPort,
-	}
-
-	m := &mqtt{
-		gatewayConfig:         gatewayConfig,
-		registeredMQTTConfigs: make(map[uint64]*stream.Stream),
-	}
-
-	_, err = gatewayConfig.WatchGatewayConfigMap(m, context.Background(), configName)
-	if err != nil {
-		m.gatewayConfig.Log.Panic().Err(err).Msg("failed to update mqtt configuration")
-	}
-
-	// run forever
+	a.gatewayConfig.WatchGatewayConfigMap(a, context.Background())
 	select {}
 }

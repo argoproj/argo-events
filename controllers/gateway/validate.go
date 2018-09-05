@@ -13,8 +13,5 @@ func (goc *gwOperationCtx) validate() error {
 	if len(goc.gw.Spec.Sensors) <= 0 {
 		return fmt.Errorf("no associated sensor with gateway")
 	}
-	if goc.gw.Spec.Port == "" {
-		return fmt.Errorf("gateway rpc port is not specified")
-	}
 	return nil
 }

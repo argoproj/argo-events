@@ -17,23 +17,17 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
-	"time"
-
-	"bytes"
 	"context"
+	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
+	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
-	hs "github.com/mitchellh/hashstructure"
 	cronlib "github.com/robfig/cron"
 	zlog "github.com/rs/zerolog"
 	log "github.com/sirupsen/logrus"
-	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"net/http"
 	"os"
+	"time"
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -58,43 +52,30 @@ type calSchedule struct {
 }
 
 type calendar struct {
-	gatewayConfig             *gateways.GatewayConfig
-	registeredCalendarSignals map[uint64]*calSchedule
+	// log is json output logger for gateway
+	log zlog.Logger
+
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig *gateways.GatewayConfig
 }
 
-func (c *calendar) RunGateway(cm *apiv1.ConfigMap) error {
-	for scheduleConfigKey, scheduleConfigValue := range cm.Data {
-		var cal *calSchedule
-		err := yaml.Unmarshal([]byte(scheduleConfigValue), &cal)
-		if err != nil {
-			c.gatewayConfig.Log.Error().Str("schedule-key", scheduleConfigKey).Err(err).Msg("failed to parse configuration")
-			return err
-		}
-		key, err := hs.Hash(cal, &hs.HashOptions{})
-		if err != nil {
-			c.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
-			continue
-		}
-
-		if _, ok := c.registeredCalendarSignals[key]; ok {
-			c.gatewayConfig.Log.Info().Interface("config", *cal).Msg("duplicate configuration")
-			continue
-		}
-
-		c.registeredCalendarSignals[key] = cal
-		go c.startCalenderSchedule(cal, scheduleConfigKey)
+func (c *calendar) RunConfiguration(config *gateways.ConfigData) error {
+	var cal *calSchedule
+	err := yaml.Unmarshal([]byte(config.Config), &cal)
+	if err != nil {
+		c.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		return err
 	}
-	return nil
-}
 
-func (c *calendar) startCalenderSchedule(cal *calSchedule, source string) error {
 	schedule, err := c.resolveSchedule(cal)
 	if err != nil {
-		return fmt.Errorf("failed to resolve calendar schedule. Err: %+v", err)
+		c.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		return fmt.Errorf("failed to resolve calendar schedule. Err: %+v", err)
+		c.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		return err
 	}
 
 	var next Next
@@ -112,7 +93,10 @@ func (c *calendar) startCalenderSchedule(cal *calSchedule, source string) error 
 		return nextT
 	}
 
+	c.log.Info().Str("config-name", config.Src).Msg("running...")
+	config.Active = true
 	lastT := time.Now()
+calendarLoop:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
@@ -123,22 +107,18 @@ func (c *calendar) startCalenderSchedule(cal *calSchedule, source string) error 
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				c.gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
+				c.log.Error().Err(err).Msg("failed to marshal event")
+				return err
 			} else {
-				payload, err := gateways.CreateTransformPayload(payload, source)
-				if err != nil {
-					c.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
-				}
-				c.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
-				// dispatch the event to gateway transformer
-				_, err = http.Post(fmt.Sprintf("http://localhost:%s", c.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
-				if err != nil {
-					c.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
-				}
-				c.gatewayConfig.Log.Info().Msg("event dispatched to gateway transformer")
+				c.log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+				c.gatewayConfig.DispatchEvent(payload, config.Src)
 			}
+		case <-config.StopCh:
+			c.log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+			break calendarLoop
 		}
 	}
+	return nil
 }
 
 func (c *calendar) getEventTimer(next Next) <-chan time.Time {
@@ -180,44 +160,10 @@ func (c *calendar) resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
+	c := &calendar{
+		log:           zlog.New(os.Stdout).With().Logger(),
+		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
-
-	// Todo: hardcoded for now, move it to constants
-
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		panic("no namespace provided")
-	}
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
-	if !ok {
-		panic("gateway transformer port is not provided")
-	}
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-
-	gatewayConfig := &gateways.GatewayConfig{
-		Log:             zlog.New(os.Stdout).With().Logger(),
-		Namespace:       namespace,
-		Clientset:       clientset,
-		TransformerPort: transformerPort,
-	}
-	cal := &calendar{
-		registeredCalendarSignals: make(map[uint64]*calSchedule),
-		gatewayConfig:             gatewayConfig,
-	}
-
-	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
-	if !ok {
-		panic("gateway processor configmap is not provided")
-	}
-
-	_, err = gatewayConfig.WatchGatewayConfigMap(cal, context.Background(), configName)
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to update calendar gateway confimap")
-	}
-	// wait forever
+	c.gatewayConfig.WatchGatewayConfigMap(c, context.Background())
 	select {}
 }

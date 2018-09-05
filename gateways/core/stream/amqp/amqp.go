@@ -19,18 +19,12 @@ package main
 import (
 	"fmt"
 
-	"bytes"
 	"context"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
+	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
-	hs "github.com/mitchellh/hashstructure"
 	zlog "github.com/rs/zerolog"
 	amqplib "github.com/streadway/amqp"
-	apiv1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
-	"net/http"
 	"os"
 )
 
@@ -41,68 +35,55 @@ const (
 )
 
 type amqp struct {
-	gatewayConfig         *gateways.GatewayConfig
-	registeredAMQPConfigs map[uint64]*stream.Stream
+	// log is json output logger for gateway
+	log zlog.Logger
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig *gateways.GatewayConfig
 }
 
-func (a *amqp) RunGateway(cm *apiv1.ConfigMap) error {
-	for aConfigkey, aConfigVal := range cm.Data {
-		var s *stream.Stream
-		err := yaml.Unmarshal([]byte(aConfigVal), &s)
-		if err != nil {
-			a.gatewayConfig.Log.Error().Str("config", aConfigkey).Err(err).Msg("failed to parse amqp config")
-			return err
-		}
-		a.gatewayConfig.Log.Info().Interface("stream", *s).Msg("amqp configuration")
-		key, err := hs.Hash(s, &hs.HashOptions{})
-		if err != nil {
-			a.gatewayConfig.Log.Warn().Err(err).Msg("failed to get hash of configuration")
-			continue
-		}
-		if _, ok := a.registeredAMQPConfigs[key]; ok {
-			a.gatewayConfig.Log.Warn().Interface("config", s).Msg("duplicate configuration")
-			continue
-		}
-		a.registeredAMQPConfigs[key] = s
-		go a.listen(s, aConfigkey)
+func (a *amqp) RunConfiguration(config *gateways.ConfigData) error {
+	a.log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+
+	var s *stream.Stream
+	err := yaml.Unmarshal([]byte(config.Config), &s)
+	if err != nil {
+		a.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse amqp config")
+		return err
 	}
-	return nil
-}
 
-func (a *amqp) listen(s *stream.Stream, source string) {
 	conn, err := amqplib.Dial(s.URL)
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to connect to server")
-		return
+		a.log.Error().Err(err).Msg("failed to connect to server")
+		return err
 	}
+
 	ch, err := conn.Channel()
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to open channel")
-		return
+		a.log.Error().Err(err).Msg("failed to open channel")
+		return err
 	}
 
 	delivery, err := getDelivery(ch, s.Attributes)
 
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to get message delivery")
-		return
+		a.log.Error().Err(err).Msg("failed to get message delivery")
+		return err
 	}
 
+	a.log.Info().Str("config-name", config.Src).Msg("running...")
+	config.Active = true
 	// start listening for messages
+	amqpConfigRunner:
 	for {
 		select {
 		case msg := <-delivery:
-			payload, err := gateways.CreateTransformPayload(msg.Body, source)
-			if err != nil {
-				a.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
-			}
-			a.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
-			_, err = http.Post(fmt.Sprintf("http://localhost:%s", a.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
-			if err != nil {
-				a.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event to gateway-transformer")
-			}
+			a.log.Info().Msg("dispatching the event to gateway-transformer")
+			a.gatewayConfig.DispatchEvent(msg.Body, config.Src)
+			case <- config.StopCh:
+				break amqpConfigRunner
 		}
 	}
+	return nil
 }
 
 func parseAttributes(attr map[string]string) (string, string, string, error) {
@@ -151,43 +132,10 @@ func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.De
 }
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		panic("no namespace provided")
-	}
-
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
-	if !ok {
-		panic("gateway transformer port is not provided")
-	}
-
-	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
-	if !ok {
-		panic("gateway processor configmap is not provided")
-	}
-
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	gatewayConfig := &gateways.GatewayConfig{
-		Log:             zlog.New(os.Stdout).With().Logger(),
-		Namespace:       namespace,
-		Clientset:       clientset,
-		TransformerPort: transformerPort,
-	}
 	a := &amqp{
-		gatewayConfig:         gatewayConfig,
-		registeredAMQPConfigs: make(map[uint64]*stream.Stream),
+		log:       zlog.New(os.Stdout).With().Logger(),
+		gatewayConfig: gateways.NewGatewayConfiguration(),
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(a, context.Background(), configName)
-	if err != nil {
-		a.gatewayConfig.Log.Panic().Err(err).Msg("failed to update amqp configuration")
-	}
-
-	// run forever
+	a.gatewayConfig.WatchGatewayConfigMap(a, context.Background())
 	select {}
 }

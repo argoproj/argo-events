@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
 )
 
+// TransformerPayload creates a new payload from input data and adds source information
 func TransformerPayload(b []byte, source string) ([]byte, error) {
 	tp := &transform.TransformerPayload{
 		Src:     source,

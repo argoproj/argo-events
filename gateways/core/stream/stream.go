@@ -1,5 +1,6 @@
 package stream
 
+
 // Stream describes a queue stream resource
 type Stream struct {
 	// Type of the stream resource

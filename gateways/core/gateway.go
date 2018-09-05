@@ -14,20 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package core
 
 import (
 	"bytes"
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	gwProto "github.com/argoproj/argo-events/gateways/proto"
 	"github.com/argoproj/argo-events/gateways/utils"
 	hs "github.com/mitchellh/hashstructure"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog"
-	"google.golang.org/grpc"
-	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -39,35 +36,36 @@ import (
 	"os"
 )
 
-const (
-	serverAddr = "localhost:%s"
-)
-
 // gatewayConfig provides a generic configuration for a gateway
-type gatewayConfig struct {
-	// Log provides fast and simple logger dedicated to JSON output
+type GatewayConfig struct {
+	// log provides fast and simple logger dedicated to JSON output
 	log zerolog.Logger
 	// Clientset is client for kubernetes API
-	clientset *kubernetes.Clientset
+	Clientset *kubernetes.Clientset
 	// Namespace is namespace for the gateway to run inside
-	namespace string
-	// TransformerPort is gateway transformer port to dispatch event to
+	Namespace string
+	// transformerPort is gateway transformer port to dispatch event to
 	transformerPort string
 	// registeredConfigs stores information about current configurations that are running in the gateway
-	registeredConfigs map[uint64]*configData
-
-	rpcPort string
+	registeredConfigs map[uint64]*ConfigData
+	// configName is name of configmap that contains run configuration/s for the gateway
+	configName string
 }
 
-type configData struct {
-	src    string
-	config string
-	conn   *grpc.ClientConn
+type ConfigData struct {
+	Src    string
+	Config string
+	StopCh chan struct{}
+	Active bool
+}
+
+type GatewayExecutor interface {
+	RunConfiguration(config *ConfigData) error
 }
 
 // Watches change in configuration for the gateway
-func (gc *gatewayConfig) WatchGatewayConfigMap(ctx context.Context, name string) (cache.Controller, error) {
-	source := gc.newConfigMapWatch(name)
+func (gc *GatewayConfig) WatchGatewayConfigMap(gtEx GatewayExecutor, ctx context.Context) (cache.Controller, error) {
+	source := gc.newConfigMapWatch(gc.configName)
 	_, controller := cache.NewInformer(
 		source,
 		&corev1.ConfigMap{},
@@ -75,19 +73,19 @@ func (gc *gatewayConfig) WatchGatewayConfigMap(ctx context.Context, name string)
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
-					gc.log.Info().Str("config-map", name).Msg("detected ConfigMap addition. Updating the controller config.")
-					err := gc.manageConfigurations(cm)
+					gc.log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
+					err := gc.manageConfigurations(gtEx, cm)
 					if err != nil {
-						gc.log.Error().Err(err).Msg("update of config failed")
+						gc.log.Error().Err(err).Msg("update of run config failed")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
-					gc.log.Info().Msg("detected ConfigMap update. Updating the controller config.")
-					err := gc.manageConfigurations(newCm)
+					gc.log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
+					err := gc.manageConfigurations(gtEx, newCm)
 					if err != nil {
-						gc.log.Error().Err(err).Msg("update of config failed")
+						gc.log.Error().Err(err).Msg("update of run config failed")
 					}
 				}
 			},
@@ -98,15 +96,15 @@ func (gc *gatewayConfig) WatchGatewayConfigMap(ctx context.Context, name string)
 }
 
 // creates a new configmap watch
-func (gc *gatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
-	x := gc.clientset.CoreV1().RESTClient()
+func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
+	x := gc.Clientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.namespace).
+			Namespace(gc.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -115,7 +113,7 @@ func (gc *gatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.namespace).
+			Namespace(gc.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -124,86 +122,56 @@ func (gc *gatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 }
 
 // syncs registered configurations and updated gateway configmap
-func (gc *gatewayConfig) manageConfigurations(cm *corev1.ConfigMap) error {
+func (gc *GatewayConfig) manageConfigurations(gtEx GatewayExecutor, cm *corev1.ConfigMap) error {
 	newConfigs, err := gc.createInternalConfigs(cm)
 	if err != nil {
 		return err
 	}
 	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
 
-	gc.log.Info().Interface("stale-config-keys", staleConfigKeys).Msg("stale config")
-	gc.log.Info().Interface("new-config-keys", newConfigKeys).Msg("new config")
+	gc.log.Debug().Interface("stale-config-keys", staleConfigKeys).Msg("stale config")
+	gc.log.Debug().Interface("new-config-keys", newConfigKeys).Msg("new config")
 
 	// run new configurations
 	for _, newConfigKey := range newConfigKeys {
 		newConfig := newConfigs[newConfigKey]
 		gc.registeredConfigs[newConfigKey] = newConfig
-		go gc.runConfig(newConfigKey, newConfig)
+		// run configuration
+		gc.log.Info().Str("config-key", newConfig.Src).Msg("running gateway...")
+		go gtEx.RunConfiguration(newConfig)
 	}
-
-	gc.log.Info().Interface("registered-configs", gc.registeredConfigs).Msg("registered configs")
 
 	// remove stale configurations
 	for _, staleConfigKey := range staleConfigKeys {
 		staleConfig := gc.registeredConfigs[staleConfigKey]
-		gc.log.Info().Str("config", staleConfig.src).Msg("deleting config")
-		staleConfig.conn.Close()
+
+		// send a stop signal to configuration.
+		// it is run a separate go routine because in event of RunConfiguration throwing an exception, we have
+		// already closed the configuration, so there is no listening on other end of channel.
+		if staleConfig.Active {
+			staleConfig.StopCh <- struct{}{}
+		}
+
+		gc.log.Info().Str("config", staleConfig.Src).Msg("deleting configuration...")
 		delete(gc.registeredConfigs, staleConfigKey)
 	}
 	return nil
 }
 
-// runConfig establishes connection with gateway server and sends new configurations to run.
-// also disconnect the clients for stale configurations
-func (gc *gatewayConfig) runConfig(hash uint64, config *configData) error {
-
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
-	conn, err := grpc.Dial(fmt.Sprintf(serverAddr, gc.rpcPort), opts...)
+// DispatchEvent dispatches event to gateway transformer for further processing
+func (gc *GatewayConfig) DispatchEvent(event []byte, src string) error {
+	payload, err := utils.TransformerPayload(event, src)
 	if err != nil {
-		gc.log.Fatal().Str("config-key", config.src).Err(err).Msg("failed to dial")
-	}
-	defer conn.Close()
-
-	// create a client for gateway server
-	client := gwProto.NewGatewayExecutorClient(conn)
-
-	eventStream, err := client.RunGateway(context.Background(), &gwProto.GatewayConfig{
-		Config: config.config,
-		Src:    config.src,
-	})
-
-	gc.log.Info().Str("config-key", config.src).Msg("connected with server and got a event stream")
-
-	if err != nil {
-		gc.log.Error().Str("config-key", config.src).Err(err).Msg("failed to get event stream")
+		gc.log.Warn().Str("config-key", src).Err(err).Msg("failed to transform request body.")
 		return err
-	}
+	} else {
+		gc.log.Info().Str("config-key", src).Msg("dispatching the event to gateway-transformer...")
 
-	config.conn = conn
-
-	for {
-		event, err := eventStream.Recv()
-		if err == io.EOF {
-			gc.log.Info().Str("config-key", config.src).Msg("event stream stopped")
-			return nil
-		}
+		_, err = http.Post(fmt.Sprintf("http://localhost:%s", gc.transformerPort), "application/octet-stream", bytes.NewReader(payload))
 		if err != nil {
-			gc.log.Warn().Str("config-key", config.src).Err(err).Msg("failed to receive events on stream")
-			return nil
-		}
-		// event should never be nil
-		if event == nil {
-			break
-		}
-		payload, err := utils.TransformerPayload(event.Data, config.src)
-		if err != nil {
-			gc.log.Error().Str("config-key", config.src).Err(err).Msg("failed to transform request body")
+			gc.log.Warn().Str("config-key", src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
 			return err
 		}
-
-		gc.log.Info().Str("config-key", config.src).Msg("dispatching the event to gateway-transformer...")
-		_, err = http.Post(fmt.Sprintf("http://localhost:%s", gc.transformerPort), "application/octet-stream", bytes.NewReader(payload))
 	}
 	return nil
 }
@@ -211,17 +179,21 @@ func (gc *gatewayConfig) runConfig(hash uint64, config *configData) error {
 // creates an internal representation of configuration declared in the gateway configmap.
 // returned configurations are map of hash of configuration and configuration itself.
 // Creating a hash of configuration makes it easy to check equality of two configurations.
-func (gc *gatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[uint64]*configData, error) {
-	configs := make(map[uint64]*configData)
+func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[uint64]*ConfigData, error) {
+	configs := make(map[uint64]*ConfigData)
 	for configKey, configValue := range cm.Data {
-		hasKey, err := hs.Hash(configValue, &hs.HashOptions{})
+		hashKey, err := hs.Hash(configKey+configValue, &hs.HashOptions{})
 		if err != nil {
 			gc.log.Warn().Str("config-key", configKey).Str("config-value", configValue).Err(err).Msg("failed to hash configuration")
 			return nil, err
 		}
-		configs[hasKey] = &configData{
-			src:    configKey,
-			config: configValue,
+
+		gc.log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
+
+		configs[hashKey] = &ConfigData{
+			Src:    configKey,
+			Config: configValue,
+			StopCh: make(chan struct{}),
 		}
 	}
 	return configs, nil
@@ -230,7 +202,7 @@ func (gc *gatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[uint64
 // diffConfig diffs currently registered configurations and the configurations in the gateway configmap
 // retunrs staleConfig - configurations to be removed from gateway
 // newConfig - new configurations to run
-func (gc *gatewayConfig) diffConfigurations(newConfigs map[uint64]*configData) (staleConfigKeys []uint64, newConfigKeys []uint64) {
+func (gc *GatewayConfig) diffConfigurations(newConfigs map[uint64]*ConfigData) (staleConfigKeys []uint64, newConfigKeys []uint64) {
 	var currentConfigKeys []uint64
 	var updatedConfigKeys []uint64
 
@@ -271,11 +243,11 @@ func (gc *gatewayConfig) diffConfigurations(newConfigs map[uint64]*configData) (
 			swapped = true
 		}
 	}
-
 	return
 }
 
-func main() {
+// NewGatewayConfiguration returns a new gateway configuration
+func NewGatewayConfiguration() *GatewayConfig {
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
@@ -292,11 +264,6 @@ func main() {
 		panic("no namespace provided")
 	}
 
-	rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorServerPort)
-	if !ok {
-		panic("gateway rpc server port is not provided")
-	}
-
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
 		panic("gateway transformer port is not provided")
@@ -310,16 +277,12 @@ func main() {
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
 
-	gc := &gatewayConfig{
+	return &GatewayConfig{
 		log:               log,
-		registeredConfigs: make(map[uint64]*configData),
-		clientset:         clientset,
-		namespace:         namespace,
+		registeredConfigs: make(map[uint64]*ConfigData),
+		Clientset:         clientset,
+		Namespace:         namespace,
 		transformerPort:   transformerPort,
-		rpcPort:           rpcServerPort,
+		configName:        configName,
 	}
-
-	gc.WatchGatewayConfigMap(context.Background(), configName)
-
-	select {}
 }

@@ -14,7 +14,7 @@ override LDFLAGS += \
   -X ${PACKAGE}.gitCommit=${GIT_COMMIT} \
   -X ${PACKAGE}.gitTreeState=${GIT_TREE_STATE}
 
-# sudo docker image publishing options
+#  docker image publishing options
 DOCKER_PUSH=true
 IMAGE_NAMESPACE=metalgearsolid
 IMAGE_TAG=latest
@@ -53,8 +53,8 @@ sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image: sensor-linux
-	sudo docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./controllers/sensor/cmd/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./controllers/sensor/cmd/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
 
 # Sensor controller
@@ -65,8 +65,8 @@ sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image: sensor-controller-linux
-	sudo docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
 
 # Gateway controller
@@ -77,8 +77,8 @@ gateway-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-controller
 
 gateway-controller-image: gateway-controller-linux
-	sudo docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./controllers/gateway/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./controllers/gateway/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
 
 
 # Gateway transformer
@@ -89,20 +89,20 @@ gateway-transformer-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-transformer
 
 gateway-transformer-image: gateway-transformer-linux
-	sudo docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) ; fi
 
 
 # Gateway processor client
 gateway-processor-client:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/gateway.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/core/gateway.go
 
 gateway-processor-client-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-processor-client
 
 gateway-processor-client-image: gateway-processor-client-linux
-	sudo docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/core/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) ; fi
 
 
 
@@ -114,8 +114,8 @@ webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
 
 webhook-image: webhook-linux
-	sudo docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/core/webhook/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/core/webhook/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
 
 
 calendar:
@@ -125,8 +125,8 @@ calendar-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar
 
 calendar-image: calendar-linux
-	sudo docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./gateways/core/calendar/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./gateways/core/calendar/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) ; fi
 
 
 artifact:
@@ -136,8 +136,8 @@ artifact-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
 
 artifact-image: artifact-linux
-	sudo docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
 nats:
@@ -147,8 +147,8 @@ nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
 
 nats-image: nats-linux
-	sudo docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/nats/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/nats/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
 
 
 kafka:
@@ -158,8 +158,8 @@ kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
 
 kafka-image: kafka-linux
-	sudo docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/kafka/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/kafka/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
 
 
 amqp:
@@ -169,8 +169,8 @@ amqp-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
 
 amqp-image: amqp-linux
-	sudo docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/amqp/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/amqp/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) ; fi
 
 
 mqtt:
@@ -180,8 +180,8 @@ mqtt-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
 
 mqtt-image: mqtt-linux
-	sudo docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/mqtt/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then sudo docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
+	 docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/mqtt/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
 
 
 test:

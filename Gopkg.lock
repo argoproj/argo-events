@@ -403,7 +403,9 @@
     "http2/hpack",
     "idna",
     "internal/socks",
+    "internal/timeseries",
     "proxy",
+    "trace",
     "websocket"
   ]
   revision = "3673e40ba22529d22c3fd7c93e97b0ce50fa7bdd"
@@ -460,6 +462,45 @@
     "internal/fastwalk"
   ]
   revision = "bfb5194568d3c40db30de765edc44cae9fc94671"
+
+[[projects]]
+  branch = "master"
+  name = "google.golang.org/genproto"
+  packages = ["googleapis/rpc/status"]
+  revision = "11092d34479b07829b72e10713b159248caf5dad"
+
+[[projects]]
+  name = "google.golang.org/grpc"
+  packages = [
+    ".",
+    "balancer",
+    "balancer/base",
+    "balancer/roundrobin",
+    "codes",
+    "connectivity",
+    "credentials",
+    "encoding",
+    "encoding/proto",
+    "grpclog",
+    "internal",
+    "internal/backoff",
+    "internal/channelz",
+    "internal/envconfig",
+    "internal/grpcrand",
+    "internal/transport",
+    "keepalive",
+    "metadata",
+    "naming",
+    "peer",
+    "resolver",
+    "resolver/dns",
+    "resolver/passthrough",
+    "stats",
+    "status",
+    "tap"
+  ]
+  revision = "32fb0ac620c32ba40a4626ddf94d90d12cce3455"
+  version = "v1.14.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -708,6 +749,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2d2f4cadd663275a93c793a35d909fad11ab07189dbb4ff0cd82573bb1c9c478"
+  inputs-digest = "de8efb807fa3afeab0c0792aa1006739e66f38f20c956c978ad24022f5a52a4e"
   solver-name = "gps-cdcl"
   solver-version = 1
