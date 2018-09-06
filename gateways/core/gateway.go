@@ -53,9 +53,13 @@ type GatewayConfig struct {
 }
 
 type ConfigData struct {
+	// Src contains name of the configuration
 	Src    string
+	// Config contains the configuration
 	Config string
+	// StopCh is used to send a stop signal to configuration runner/executor
 	StopCh chan struct{}
+	// Active tracks configuration state as running or stopped
 	Active bool
 }
 

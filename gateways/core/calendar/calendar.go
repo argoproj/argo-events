@@ -105,7 +105,6 @@ calendarLoop:
 			payload, err := event.Marshal()
 			if err != nil {
 				c.gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
-				return err
 			} else {
 				c.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 				c.gatewayConfig.DispatchEvent(payload, config.Src)

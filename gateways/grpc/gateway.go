@@ -190,15 +190,15 @@ func (gc *gatewayConfig) runConfig(hash uint64, config *configData) error {
 		event, err := eventStream.Recv()
 		if err == io.EOF {
 			gc.log.Info().Str("config-key", config.src).Msg("event stream stopped")
-			return nil
+			return err
 		}
 		if err != nil {
 			gc.log.Warn().Str("config-key", config.src).Err(err).Msg("failed to receive events on stream")
-			return nil
+			return err
 		}
 		// event should never be nil
 		if event == nil {
-			break
+			return nil
 		}
 		payload, err := utils.TransformerPayload(event.Data, config.src)
 		if err != nil {
