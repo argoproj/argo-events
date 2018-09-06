@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "amqp-gateway"
 spec:
-  image: "metalgearsolid/amqp-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: webhook-events
+      image: "metalgearsolid/amqp-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/amqp-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "amqp-gateway-configmap"
-  command: "/bin/amqp-gateway"
   type: "amqp"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["amqp-sensor"]

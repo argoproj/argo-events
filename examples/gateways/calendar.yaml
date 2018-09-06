@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "calendar-gateway"
 spec:
-  image: "metalgearsolid/calendar-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "calendar-events"
+      image: "metalgearsolid/calendar-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/calendar-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
-  command: "/bin/calendar-gateway"
   type: "calendar"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["calendar-sensor", "multi-signal-sensor"]

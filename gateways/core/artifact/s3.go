@@ -23,19 +23,14 @@ import (
 	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
-	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	"os"
 	"sync"
 )
 
 type s3 struct {
-	// log is json output logger for gateway
-	log zlog.Logger
-
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig *gateways.GatewayConfig
 }
@@ -96,16 +91,16 @@ func (s *s3) getSecrets(client *kubernetes.Clientset, namespace string, name, ke
 }
 
 func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
-	s.log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+	s.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
 
 	var artifact *S3Artifact
 	err := yaml.Unmarshal([]byte(config.Config), &artifact)
 	if err != nil {
-		s.log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		s.gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
 		return err
 	}
 
-	s.log.Debug().Str("config-key", config.Config).Interface("artifact", *artifact).Msg("s3 artifact")
+	s.gatewayConfig.Log.Debug().Str("config-key", config.Config).Interface("artifact", *artifact).Msg("s3 artifact")
 
 	// retrieve access key id and secret access key
 	accessKey, err := s.getSecrets(s.gatewayConfig.Clientset, s.gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
@@ -117,7 +112,7 @@ func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
 		return fmt.Errorf("failed to retrieve access key id %s", artifact.SecretKey.Name)
 	}
 
-	s.log.Debug().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secrets")
+	s.gatewayConfig.Log.Debug().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secrets")
 
 	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
 	if err != nil {
@@ -136,11 +131,11 @@ func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		s.log.Info().Str("config", config.Src).Msg("stopping the configuration...")
+		s.gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
 		wg.Done()
 	}()
 
-	s.log.Info().Str("config-name", config.Src).Msg("running...")
+	s.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
 	config.Active = true
 
 	// Listen for bucket notifications
@@ -148,9 +143,9 @@ func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
 		string(artifact.S3EventConfig.Event),
 	}, doneCh) {
 		if notificationInfo.Err != nil {
-			s.log.Error().Str("config", config.Src).Err(err).Msg("notification error")
+			s.gatewayConfig.Log.Error().Str("config", config.Src).Err(err).Msg("notification error")
 		} else {
-			s.log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+			s.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 			payload := []byte(fmt.Sprintf("%v", notificationInfo))
 			s.gatewayConfig.DispatchEvent(payload, config.Src)
 		}
@@ -161,10 +156,10 @@ func (s *s3) RunConfiguration(config *gateways.ConfigData) error {
 }
 
 func main() {
+	gatewayConfig := gateways.NewGatewayConfiguration()
 	s := &s3{
-		log:           zlog.New(os.Stdout).With().Logger(),
-		gatewayConfig: gateways.NewGatewayConfiguration(),
+		gatewayConfig,
 	}
-	s.gatewayConfig.WatchGatewayConfigMap(s, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(s, context.Background())
 	select {}
 }

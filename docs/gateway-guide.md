@@ -40,15 +40,13 @@ The `gateway-controller` is responsible for managing the `Gateway` resources.
 
 |  Field               |  Description |
 |----------------------|--------------|
-|  Image               | Gateway processor image which contains business logic of generating events |
-|  ImagePullPolicy     | Image pull policy  |
-|  Command             | Command to run the gateway processor  |
-|  ConfigMap           | Name of the configmap gateway processor to configure gateway    |
+| DeploySpec           | Pod specification for gateway
+|  ConfigMap           | Name of the configmap containing gateway configuration/s    |
 |  Type                | Type of gateway |
 |  Version             | To mark event version  |
 |  Service             | Name of the service to expose the gateway |
 |  Sensors             | List of sensors to dispatch events to  |
-|  ServiceAccountName  | Name of service account to run the gateway  |
+
 
 ## Gateway Deployment
 
@@ -56,13 +54,10 @@ All core gateways use kubernetes configmap to keep track of current gateway conf
 each configuration will run in a separate go routine. The gateway watches updates to configmap which let us add new configuration at run time.
 [Checkout core gateways.](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
 
-### How to write a custom gateway?
- - Although users are free to write a gateway processor in any language and in any manner, we do recommend users to follow the pattern found in core gateways.
- - The namespace where the gateway will be deployed and the port to forward the events to are made available via environment variables `ARGO_EVENTS_NAMESPACE` and `TRANSFORMER_PORT` respectively.
- - The only requirement is gateway-processor must dispatch the event to gateway-transformer using a http post request to `localhost` on `TRANSFORMER_PORT` port. 
- - The ConfigMap name if required for gateway configuration is made available through environment variable `GATEWAY_PROCESSOR_CONFIG_MAP`
+## How to write a custom gateway?
+Follow the gateway tutorial
+[Custom Gateways](custom-gateway.md)
 
- 
 
 ## Types of Gateways & their configurations
 
@@ -208,3 +203,6 @@ Stream signals contain a generic specification for messages received on a queue 
       topic: bar
       partition: "1"
 ```
+
+### Examples
+[Gateway Examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)

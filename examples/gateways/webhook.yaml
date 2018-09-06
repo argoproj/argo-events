@@ -12,7 +12,7 @@ spec:
   version: "1.0"
   deploySpec:
     containers:
-    - name: webhook-events
+    - name: "webhook-events"
       image: "metalgearsolid/webhook-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/webhook-gateway"]

@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "kafka-gateway"
 spec:
-  image: "metalgearsolid/kafka-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "kafka-events"
+      image: "metalgearsolid/kafka-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/kafka-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "kafka-gateway-configmap"
-  command: "/bin/kafka-gateway"
   type: "kafka"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["kafka-sensor"]

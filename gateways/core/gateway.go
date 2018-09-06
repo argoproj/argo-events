@@ -39,7 +39,7 @@ import (
 // gatewayConfig provides a generic configuration for a gateway
 type GatewayConfig struct {
 	// log provides fast and simple logger dedicated to JSON output
-	log zerolog.Logger
+	Log zerolog.Logger
 	// Clientset is client for kubernetes API
 	Clientset *kubernetes.Clientset
 	// Namespace is namespace for the gateway to run inside
@@ -73,19 +73,19 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(gtEx GatewayExecutor, ctx context
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
-					gc.log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
+					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
 					err := gc.manageConfigurations(gtEx, cm)
 					if err != nil {
-						gc.log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("update of run config failed")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
-					gc.log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
+					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
 					err := gc.manageConfigurations(gtEx, newCm)
 					if err != nil {
-						gc.log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("update of run config failed")
 					}
 				}
 			},
@@ -129,15 +129,15 @@ func (gc *GatewayConfig) manageConfigurations(gtEx GatewayExecutor, cm *corev1.C
 	}
 	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
 
-	gc.log.Debug().Interface("stale-config-keys", staleConfigKeys).Msg("stale config")
-	gc.log.Debug().Interface("new-config-keys", newConfigKeys).Msg("new config")
+	gc.Log.Debug().Interface("stale-config-keys", staleConfigKeys).Msg("stale config")
+	gc.Log.Debug().Interface("new-config-keys", newConfigKeys).Msg("new config")
 
 	// run new configurations
 	for _, newConfigKey := range newConfigKeys {
 		newConfig := newConfigs[newConfigKey]
 		gc.registeredConfigs[newConfigKey] = newConfig
 		// run configuration
-		gc.log.Info().Str("config-key", newConfig.Src).Msg("running gateway...")
+		gc.Log.Info().Str("config-key", newConfig.Src).Msg("running gateway...")
 		go gtEx.RunConfiguration(newConfig)
 	}
 
@@ -152,7 +152,7 @@ func (gc *GatewayConfig) manageConfigurations(gtEx GatewayExecutor, cm *corev1.C
 			staleConfig.StopCh <- struct{}{}
 		}
 
-		gc.log.Info().Str("config", staleConfig.Src).Msg("deleting configuration...")
+		gc.Log.Info().Str("config", staleConfig.Src).Msg("deleting configuration...")
 		delete(gc.registeredConfigs, staleConfigKey)
 	}
 	return nil
@@ -162,14 +162,14 @@ func (gc *GatewayConfig) manageConfigurations(gtEx GatewayExecutor, cm *corev1.C
 func (gc *GatewayConfig) DispatchEvent(event []byte, src string) error {
 	payload, err := utils.TransformerPayload(event, src)
 	if err != nil {
-		gc.log.Warn().Str("config-key", src).Err(err).Msg("failed to transform request body.")
+		gc.Log.Warn().Str("config-key", src).Err(err).Msg("failed to transform request body.")
 		return err
 	} else {
-		gc.log.Info().Str("config-key", src).Msg("dispatching the event to gateway-transformer...")
+		gc.Log.Info().Str("config-key", src).Msg("dispatching the event to gateway-transformer...")
 
 		_, err = http.Post(fmt.Sprintf("http://localhost:%s", gc.transformerPort), "application/octet-stream", bytes.NewReader(payload))
 		if err != nil {
-			gc.log.Warn().Str("config-key", src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
+			gc.Log.Warn().Str("config-key", src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
 			return err
 		}
 	}
@@ -184,11 +184,11 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[uint64
 	for configKey, configValue := range cm.Data {
 		hashKey, err := hs.Hash(configKey+configValue, &hs.HashOptions{})
 		if err != nil {
-			gc.log.Warn().Str("config-key", configKey).Str("config-value", configValue).Err(err).Msg("failed to hash configuration")
+			gc.Log.Warn().Str("config-key", configKey).Str("config-value", configValue).Err(err).Msg("failed to hash configuration")
 			return nil, err
 		}
 
-		gc.log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
+		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 
 		configs[hashKey] = &ConfigData{
 			Src:    configKey,
@@ -214,8 +214,8 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[uint64]*ConfigData) (
 		updatedConfigKeys = append(updatedConfigKeys, updatedConfigKey)
 	}
 
-	gc.log.Debug().Interface("current-config-keys", currentConfigKeys).Msg("hashes")
-	gc.log.Debug().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
+	gc.Log.Debug().Interface("current-config-keys", currentConfigKeys).Msg("hashes")
+	gc.Log.Debug().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
 
 	swapped := false
 	// iterates over current configurations and updated configurations
@@ -278,7 +278,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
 
 	return &GatewayConfig{
-		log:               log,
+		Log:               log,
 		registeredConfigs: make(map[uint64]*ConfigData),
 		Clientset:         clientset,
 		Namespace:         namespace,

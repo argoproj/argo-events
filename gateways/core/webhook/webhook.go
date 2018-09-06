@@ -22,11 +22,9 @@ import (
 	"github.com/argoproj/argo-events/common"
 	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
-	zlog "github.com/rs/zerolog"
 	"go.uber.org/atomic"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"sync"
 )
 
@@ -58,25 +56,19 @@ type hook struct {
 type webhook struct {
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig *gateways.GatewayConfig
-
-	// serverPort is port on which server is listening
-	serverPort string
-
-	// log is json output logger for gateway
-	log zlog.Logger
 }
 
 // Runs a gateway configuration
 func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
-	w.log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+	w.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
 
 	var h *hook
 	err := yaml.Unmarshal([]byte(config.Config), &h)
 	if err != nil {
-		w.log.Error().Err(err).Msg("failed to parse configuration")
+		w.gatewayConfig.Log.Error().Err(err).Msg("failed to parse configuration")
 		return err
 	}
-	w.log.Info().Interface("config", config.Config).Interface("hook", h).Msg("configuring...")
+	w.gatewayConfig.Log.Info().Interface("config", config.Config).Interface("hook", h).Msg("configuring...")
 
 	// start a http server only if given configuration contains port information and no other
 	// configuration previously started the server
@@ -84,8 +76,8 @@ func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
 		// mark http server as started
 		hasServerStarted.Store(true)
 		go func() {
-			w.log.Info().Str("http-port", h.Port).Msg("http server started listening...")
-			w.log.Fatal().Err(http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil)).Msg("failed to start http server")
+			w.gatewayConfig.Log.Info().Str("http-port", h.Port).Msg("http server started listening...")
+			w.gatewayConfig.Log.Fatal().Err(http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil)).Msg("failed to start http server")
 		}()
 	}
 
@@ -95,7 +87,7 @@ func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
 	// waits till disconnection from client. perform cleanup.
 	go func() {
 		<-config.StopCh
-		w.log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+		w.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
 
 		// remove the endpoint and http method configuration.
 		mut.Lock()
@@ -121,23 +113,23 @@ func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
 				// check if http methods match and route and http method is registered.
 				if _, ok := activeRoutes[h.Endpoint]; ok {
 					if _, isActive := activeRoutes[h.Endpoint][request.Method]; isActive {
-						w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
+						w.gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
 						body, err := ioutil.ReadAll(request.Body)
 						if err != nil {
-							w.log.Error().Err(err).Msg("failed to parse request body")
+							w.gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
 							common.SendErrorResponse(writer)
 						} else {
-							w.log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
+							w.gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
 							common.SendSuccessResponse(writer)
 							// dispatch event to gateway transformer
 							w.gatewayConfig.DispatchEvent(body, config.Src)
 						}
 					} else {
-						w.log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
+						w.gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
 						common.SendErrorResponse(writer)
 					}
 				} else {
-					w.log.Warn().Str("endpoint", h.Endpoint).Msg("endpoint is not active")
+					w.gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Msg("endpoint is not active")
 					common.SendErrorResponse(writer)
 				}
 			})
@@ -147,17 +139,17 @@ func (w *webhook) RunConfiguration(config *gateways.ConfigData) error {
 			mut.Unlock()
 		}
 
-		w.log.Info().Str("config-name", config.Src).Msg("running...")
+		w.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
 		wg.Wait()
 	}
 	return nil
 }
 
 func main() {
+	gatewayConfig := gateways.NewGatewayConfiguration()
 	w := &webhook{
-		log:           zlog.New(os.Stdout).With().Logger(),
-		gatewayConfig: gateways.NewGatewayConfiguration(),
+		gatewayConfig,
 	}
-	w.gatewayConfig.WatchGatewayConfigMap(w, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(w, context.Background())
 	select {}
 }

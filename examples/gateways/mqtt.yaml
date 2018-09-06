@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "mqtt-gateway"
 spec:
-  image: "metalgearsolid/mqtt-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "mqtt-events"
+      image: "metalgearsolid/mqtt-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/mqtt-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "mqtt-gateway-configmap"
-  command: "/bin/mqtt-gateway"
   type: "mqtt"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["mqtt-sensor"]

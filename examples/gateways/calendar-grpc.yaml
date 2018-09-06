@@ -7,16 +7,15 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "calendar-gateway"
 spec:
-  image: "metalgearsolid/calendar-gateway"
-  imagePullPolicy: "Always"
   configMap: "calendar-gateway-configmap"
-  command: "/bin/calendar-gateway"
   type: "calendar"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   deploySpec:
     containers:
-    - name:
-
+    - name: "calendar-events"
+      image: "metalgearsolid/calendar-grpc-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/calendar-grpc-gateway"]
+    serviceAccountName: "argo-events-sa"
   sensors: ["calendar-sensor"]
   rpcPort: "9898"

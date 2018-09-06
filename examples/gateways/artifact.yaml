@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "artifact-gateway"
 spec:
-  image: "metalgearsolid/artifact-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "artifact-events"
+      image: "metalgearsolid/artifact-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/artifact-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
-  command: "/bin/artifact-gateway"
   type: "artifact"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["artifact-sensor"]

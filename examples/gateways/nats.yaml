@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "nats-gateway"
 spec:
-  image: "metalgearsolid/nats-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "nats-events"
+      image: "metalgearsolid/nats-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/nats-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "nats-gateway-configmap"
-  command: "/bin/nats-gateway"
   type: "nats"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["nats-sensor"]

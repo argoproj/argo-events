@@ -22,8 +22,6 @@ import (
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
 	natsio "github.com/nats-io/go-nats"
-	zlog "github.com/rs/zerolog"
-	"os"
 	"strings"
 	"sync"
 )
@@ -34,29 +32,27 @@ const (
 
 // Contains configuration for nats gateway
 type nats struct {
-	// log is json output logger for gateway
-	log zlog.Logger
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig *gateways.GatewayConfig
 }
 
 func (n *nats) RunConfiguration(config *gateways.ConfigData) error {
-	n.log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+	n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
 
 	var s *stream.Stream
 	err := yaml.Unmarshal([]byte(config.Config), &s)
 	if err != nil {
-		n.log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		n.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
 		return err
 	}
-	n.log.Info().Str("config-key", config.Src).Interface("stream", *s).Msg("configuring...")
+	n.gatewayConfig.Log.Info().Str("config-key", config.Src).Interface("stream", *s).Msg("configuring...")
 
 	conn, err := natsio.Connect(s.URL)
 	if err != nil {
-		n.log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
+		n.gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
 		return err
 	}
-	n.log.Debug().Str("server id", conn.ConnectedServerId()).Str("connected url", conn.ConnectedUrl()).
+	n.gatewayConfig.Log.Debug().Str("server id", conn.ConnectedServerId()).Str("connected url", conn.ConnectedUrl()).
 		Str("servers", strings.Join(conn.DiscoveredServers(), ",")).Msg("nats connection")
 
 	var wg sync.WaitGroup
@@ -65,38 +61,38 @@ func (n *nats) RunConfiguration(config *gateways.ConfigData) error {
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		n.log.Info().Str("config", config.Src).Msg("stopping the configuration...")
-		n.log.Info().Str("config-key", config.Src).Msg("client disconnected. stopping the configuration...")
+		n.gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
+		n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("client disconnected. stopping the configuration...")
 		wg.Done()
 	}()
 
-	n.log.Info().Str("config-name", config.Src).Msg("running...")
+	n.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
 	config.Active = true
 
 	sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
-		n.log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+		n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 		n.gatewayConfig.DispatchEvent(msg.Data, config.Src)
 	})
 	if err != nil {
-		n.log.Error().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Err(err).Msg("failed to subscribe to subject")
+		n.gatewayConfig.Log.Error().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Err(err).Msg("failed to subscribe to subject")
 	} else {
-		n.log.Info().Str("config-key", config.Src).Msg("running...")
+		n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("running...")
 	}
 
 	wg.Wait()
 	err = sub.Unsubscribe()
 	if err != nil {
-		n.log.Info().Str("config-key", config.Src).Msg("failed to unsubscribe")
+		n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("failed to unsubscribe")
 		return err
 	}
 	return nil
 }
 
 func main() {
+	gatewayConfig := gateways.NewGatewayConfiguration()
 	n := &nats{
-		log:           zlog.New(os.Stdout).With().Logger(),
-		gatewayConfig: gateways.NewGatewayConfiguration(),
+		gatewayConfig,
 	}
-	n.gatewayConfig.WatchGatewayConfigMap(n, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(n, context.Background())
 	select {}
 }

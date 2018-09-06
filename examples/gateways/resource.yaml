@@ -7,11 +7,14 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "resource-gateway"
 spec:
-  image: "metalgearsolid/resource-gateway"
-  imagePullPolicy: "Always"
+  deploySpec:
+    containers:
+    - name: "resource-events"
+      image: "metalgearsolid/resource-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/resource-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "resource-gateway-configmap"
-  command: "/bin/resource-gateway"
   type: "resource"
   version: "1.0"
-  serviceAccountName: "argo-events-sa"
   sensors: ["resource-sensor"]

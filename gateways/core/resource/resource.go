@@ -17,27 +17,18 @@ limitations under the License.
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
+	gateways "github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
-	hs "github.com/mitchellh/hashstructure"
-	zlog "github.com/rs/zerolog"
-	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
-	"net/http"
-	"os"
 	"strings"
 	"sync"
 )
@@ -64,11 +55,20 @@ type ResourceFilter struct {
 }
 
 // listens for resource of interest.
-func (r *resource) listen(res *Resource, source string) {
+func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
+	r.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+
+	var res *Resource
+	err := yaml.Unmarshal([]byte(config.Config), &res)
+	if err != nil {
+		r.gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse resource configuration")
+		return err
+	}
+
 	resources, err := r.discoverResources(res)
 	if err != nil {
-		r.gatewayConfig.Log.Error().Err(err).Msg("failed to discover resource")
-		return
+		r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to discover resource")
+		return err
 	}
 
 	options := metav1.ListOptions{Watch: true}
@@ -76,18 +76,43 @@ func (r *resource) listen(res *Resource, source string) {
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
+	wg.Add(1)
 
+	// waits till disconnection from client.
+	go func() {
+		<-config.StopCh
+		r.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+		wg.Done()
+	}()
+
+	config.Active = true
 	// start up listeners
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
-		watch, err := resource.Watch(options)
+		w, err := resource.Watch(options)
 		if err != nil {
-			r.gatewayConfig.Log.Error().Err(err).Msg("failed to watch the resource")
-			return
+			r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch the resource")
+			return err
 		}
-		go r.watch(watch, res.Filter, &wg, source)
+
+		go func() {
+			for item := range w.ResultChan() {
+				itemObj := item.Object.(*unstructured.Unstructured)
+				b, _ := itemObj.MarshalJSON()
+				if item.Type == watch.Error {
+					err := errors.FromObject(item.Object)
+					r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch resource")
+				}
+				if r.passFilters(itemObj, res.Filter) {
+					r.gatewayConfig.DispatchEvent(b, config.Src)
+				}
+			}
+		}()
 	}
+
+	wg.Wait()
+	return nil
 }
 
 func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
@@ -135,30 +160,6 @@ func resolveGroupVersion(obj *Resource) string {
 	return obj.Group + "/" + obj.Version
 }
 
-func (r *resource) watch(w watch.Interface, filter *ResourceFilter, wg *sync.WaitGroup, source string) {
-	for item := range w.ResultChan() {
-		itemObj := item.Object.(*unstructured.Unstructured)
-		b, _ := itemObj.MarshalJSON()
-		payload, err := gateways.CreateTransformPayload(b, source)
-		if err != nil {
-			r.gatewayConfig.Log.Panic().Err(err).Msg("failed to transform event payload")
-		}
-		if item.Type == watch.Error {
-			err := errors.FromObject(item.Object)
-			r.gatewayConfig.Log.Panic().Err(err)
-		}
-
-		if r.passFilters(itemObj, filter) {
-			r.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer...")
-			_, err := http.Post(fmt.Sprintf("http://localhost:%s", r.gatewayConfig.TransformerPort), "application/octet-stream", bytes.NewReader(payload))
-			if err != nil {
-				r.gatewayConfig.Log.Warn().Err(err).Msg("failed to dispatch the event.")
-			}
-		}
-	}
-	wg.Done()
-}
-
 // helper method to return a flag indicating if the object passed the client side filters
 func (r *resource) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// check prefix
@@ -201,68 +202,11 @@ func checkMap(expected, actual map[string]string) bool {
 	return true
 }
 
-// RunGateway parses and runs each gateway configuration into separate go routines
-func (r *resource) RunGateway(cm *apiv1.ConfigMap) error {
-	for resourceConfigKey, resourceConfigData := range cm.Data {
-		var res *Resource
-		err := yaml.Unmarshal([]byte(resourceConfigData), &res)
-		if err != nil {
-			r.gatewayConfig.Log.Warn().Str("resource-config", resourceConfigKey).Err(err).Msg("failed to parse resource configuration")
-			return err
-		}
-		r.gatewayConfig.Log.Info().Interface("resource", *res)
-
-		key, err := hs.Hash(res, &hs.HashOptions{})
-
-		// check if the gateway is already running this configuration
-		if _, ok := r.registeredResources[key]; ok {
-			r.gatewayConfig.Log.Warn().Interface("config", res).Msg("duplicate configuration")
-			continue
-		}
-		go r.listen(res, resourceConfigKey)
-	}
-	return nil
-}
-
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
+	gatewayConfig := gateways.NewGatewayConfiguration()
+	r := &resource{
+		gatewayConfig: gatewayConfig,
 	}
-
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
-	if namespace == "" {
-		panic("no namespace provided")
-	}
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
-	if !ok {
-		panic("gateway transformer port is not provided")
-	}
-
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-
-	gatewayConfig := &gateways.GatewayConfig{
-		Log:             zlog.New(os.Stdout).With().Logger(),
-		Namespace:       namespace,
-		Clientset:       clientset,
-		TransformerPort: transformerPort,
-	}
-
-	res := &resource{
-		gatewayConfig:       gatewayConfig,
-		registeredResources: make(map[uint64]*Resource),
-	}
-
-	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
-	if !ok {
-		panic("gateway processor configmap is not provided")
-	}
-
-	// watch the gateway configuration updates
-	_, err = gatewayConfig.WatchGatewayConfigMap(res, context.Background(), configName)
-	if err != nil {
-		gatewayConfig.Log.Error().Err(err).Msg("failed to update resource gateway confimap")
-	}
+	gatewayConfig.WatchGatewayConfigMap(r, context.Background())
 	select {}
 }
