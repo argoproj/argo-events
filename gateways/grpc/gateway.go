@@ -37,6 +37,10 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"net/http"
 	"os"
+	"google.golang.org/grpc/keepalive"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"time"
+	"google.golang.org/grpc/connectivity"
 )
 
 const (
@@ -159,33 +163,55 @@ func (gc *gatewayConfig) manageConfigurations(cm *corev1.ConfigMap) error {
 // runConfig establishes connection with gateway server and sends new configurations to run.
 // also disconnect the clients for stale configurations
 func (gc *gatewayConfig) runConfig(hash uint64, config *configData) error {
+	opts := []grpc.DialOption{
+		grpc.WithKeepaliveParams(
+			keepalive.ClientParameters{
+				PermitWithoutStream: true,
+			},
+		),
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+	}
 
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithInsecure())
 	conn, err := grpc.Dial(fmt.Sprintf(serverAddr, gc.rpcPort), opts...)
 	if err != nil {
 		gc.log.Fatal().Str("config-key", config.src).Err(err).Msg("failed to dial")
 	}
 
+	err = wait.ExponentialBackoff(wait.Backoff{
+		Steps:    10,
+		Duration: 1 * time.Minute,
+		Factor:   1.0,
+		Jitter:   0.1,
+	}, func() (bool, error) {
+		if conn.GetState().String() == connectivity.Ready.String() {
+			gc.log.Info().Str("config-key", config.src).Msg("gRPC connection is ready")
+			return true, nil
+		} else {
+			return false, fmt.Errorf("gRPC connection is not ready. state %s", conn.GetState())
+		}
+	})
+
+	if err != nil {
+		gc.log.Error().Str("config-key", config.src).Msg("gRPC failed. connection is not ready. exiting...")
+	}
+
 	// create a client for gateway server
 	client := gwProto.NewGatewayExecutorClient(conn)
-
 	ctx, cancel := context.WithCancel(context.Background())
+	config.cancel = cancel
+	defer cancel()
 
 	eventStream, err := client.RunGateway(ctx, &gwProto.GatewayConfig{
 		Config: config.config,
 		Src:    config.src,
 	})
-
 	gc.log.Info().Str("config-key", config.src).Msg("connected with server and got a event stream")
 
 	if err != nil {
 		gc.log.Error().Str("config-key", config.src).Err(err).Msg("failed to get event stream")
 		return err
 	}
-
-	config.cancel = cancel
-
 	for {
 		event, err := eventStream.Recv()
 		if err == io.EOF {
@@ -198,6 +224,7 @@ func (gc *gatewayConfig) runConfig(hash uint64, config *configData) error {
 		}
 		// event should never be nil
 		if event == nil {
+			gc.log.Warn().Str("config-key", config.src).Err(err).Msg("event can't be nil")
 			return nil
 		}
 		payload, err := utils.TransformerPayload(event.Data, config.src)

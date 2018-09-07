@@ -68,4 +68,4 @@ kubectl logs arguments-via-webhook-event main
 Check the logs of the sensor-controller pod, gateway-controller, associated gateway and sensor if there are problems.
 
 ## 7. Write your own gateway
-Now its time to write your first gateway. Follow the tutorial [Custom Gateways](custom-gateway.md)
+Now, its time to write your first gateway. Follow the tutorial [Custom Gateways](custom-gateway.md)

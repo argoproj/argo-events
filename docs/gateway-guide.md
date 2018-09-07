@@ -52,7 +52,7 @@ The `gateway-controller` is responsible for managing the `Gateway` resources.
 
 All core gateways use kubernetes configmap to keep track of current gateway configurations. Multiple configurations can be defined for a single gateway and
 each configuration will run in a separate go routine. The gateway watches updates to configmap which let us add new configuration at run time.
-[Checkout core gateways.](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+[Checkout core gateways specs.](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
 
 ## How to write a custom gateway?
 Follow the gateway tutorial
@@ -60,6 +60,8 @@ Follow the gateway tutorial
 
 
 ## Types of Gateways & their configurations
+
+###### Gateway can have zero configuration(won't be doing anything useful) to multiple configurations. A configuration can be added or removed during the runtime. 
 
 ### Calendars
 Events produced can be based on a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar gateway currently supports a `recurrence` field in which to specify special exclusion dates for which this gateway will not produce an event.

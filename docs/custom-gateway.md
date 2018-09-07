@@ -10,10 +10,9 @@ Difference between first two options and third is that in both option 1 and 2, f
 to watch configuration updates, start/stop a configuration dynamically. In option 3, its up to
 user to watch configuration updates and take actions.
 
-Let's start with first option.
 
 ## Core Gateway Style
-It is the most straightforward option. Two main components of this kind of gateway are
+It is the most straightforward option. The gateway consists of two components,
 
 1. Gateway Processor: either generates events internally or listens for external events and then 
 passes those events to gateway-transformer
@@ -79,11 +78,6 @@ First we create a wait-group and wait for stop signal. We mark configuration as 
 and listens to incoming messages. As soon as message is consumed, we dispatch the event to framwork code
 which takes further actions.
 
-* To send events back to framework code for further processing, use
-```go
-DispatchEvent(event []byte, src string) error
-```
-
 GatewayConfig contains generic configuration for a gateway
 ```go
 type GatewayConfig struct {
@@ -109,6 +103,12 @@ c := &calendar{
 gatewayConfig.WatchGatewayConfigMap(c, context.Background())
 select {}
 ```
+
+* To send events back to framework code for further processing, use
+```go
+gatewayConfig.DispatchEvent(event []byte, src string) error
+```
+
 
 For detailed implementation, check core gateways [Core Gateways](https://github.com/argoproj/argo-events/tree/eventing/gateways/core)
 

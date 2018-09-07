@@ -173,24 +173,24 @@ mqtt-image: mqtt-linux
 # gRPC gateway binaries
 # Gateway processor client
 gateway-processor-client:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/core/grpc/gateway.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/grpc/gateway.go
 
 gateway-processor-client-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-processor-client
 
 gateway-processor-client-image: gateway-processor-client-linux
-	 docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/core/grpc/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) -f ./gateways/grpc/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-processor-client:$(IMAGE_TAG) ; fi
 
 # gRPC gateway server binaries
 calendar-grpc:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/core/grpc/calendar/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/grpc/calendar/calendar.go
 
 calendar-grpc-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-grpc
 
 calendar-grpc-image: calendar-grpc-linux
-	 docker build -t $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) -f ./gateways/core/grpc/calendar/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) -f ./gateways/grpc/calendar/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) ; fi
 
 
