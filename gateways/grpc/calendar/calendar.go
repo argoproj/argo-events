@@ -25,11 +25,14 @@ import (
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	zlog "github.com/rs/zerolog"
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net"
 	"os"
+)
+
+var (
+	log = zlog.New(os.Stdout).With().Logger()
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -98,7 +101,7 @@ calendarConfigRunner:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		log.Printf("expected next calendar event %s", t)
+		log.Info().Str("config-key", config.Src).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
@@ -116,25 +119,6 @@ calendarConfigRunner:
 		}
 	}
 	return nil
-}
-
-func (c *calendar) getEventTimer(next Next) <-chan time.Time {
-	lastT := time.Now()
-	eventTimer := make(chan time.Time)
-	go func() {
-		defer close(eventTimer)
-		for {
-			t := next(lastT)
-			timer := time.After(time.Until(t))
-			log.Printf("expected next calendar event %s", t)
-			select {
-			case tx := <-timer:
-				eventTimer <- tx
-				lastT = tx
-			}
-		}
-	}()
-	return eventTimer
 }
 
 func (c *calendar) resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
@@ -157,22 +141,22 @@ func (c *calendar) resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorServerPort)
+	rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorGRPCServerPort)
 	if !ok {
 		panic("gateway rpc server port is not provided")
 	}
 
-	w := &calendar{
+	c := &calendar{
 		log: zlog.New(os.Stdout).With().Logger(),
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", rpcServerPort))
 	if err != nil {
-		w.log.Fatal().Err(err).Msg("server failed to listen")
+		c.log.Fatal().Err(err).Msg("server failed to listen")
 	}
 	opts := []grpc.ServerOption{}
 	grpcServer := grpc.NewServer(opts...)
-	gwProto.RegisterGatewayExecutorServer(grpcServer, w)
-	w.log.Info().Str("port", rpcServerPort).Msg("gRPC server started listening...")
+	gwProto.RegisterGatewayExecutorServer(grpcServer, c)
+	c.log.Info().Str("port", rpcServerPort).Msg("gRPC server started listening...")
 	grpcServer.Serve(lis)
 }

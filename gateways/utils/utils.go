@@ -19,6 +19,9 @@ package utils
 import (
 	"encoding/json"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
+	zlog "github.com/rs/zerolog"
+	hs "github.com/mitchellh/hashstructure"
+	"os"
 )
 
 // TransformerPayload creates a new payload from input data and adds source information
@@ -32,4 +35,13 @@ func TransformerPayload(b []byte, source string) ([]byte, error) {
 		return nil, err
 	}
 	return payload, nil
+}
+
+// Logger returns a JSON output logger.
+func Logger(name string) zlog.Logger {
+	return zlog.New(os.Stdout).With().Str("name", name).Logger()
+}
+
+func Hasher(key string, value string) (uint64, error) {
+	return hs.Hash(key+value, &hs.HashOptions{})
 }

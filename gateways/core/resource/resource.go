@@ -18,26 +18,25 @@ package main
 
 import (
 	"context"
-	gateways "github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/rest"
 	"strings"
 	"sync"
 )
 
-type resource struct {
-	kubeConfig          *rest.Config
-	gatewayConfig       *gateways.GatewayConfig
-	registeredResources map[uint64]*Resource
-}
+var (
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig = gateways.NewGatewayConfiguration()
+)
 
 // Resource refers to a dependency on a k8s resource.
 type Resource struct {
@@ -54,20 +53,20 @@ type ResourceFilter struct {
 	CreatedBy   metav1.Time       `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
 
-// listens for resource of interest.
-func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
-	r.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+// Runs a configuration
+var configRunner = func(config *gateways.ConfigData) error {
+	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
 
 	var res *Resource
 	err := yaml.Unmarshal([]byte(config.Config), &res)
 	if err != nil {
-		r.gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse resource configuration")
+		gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse resource configuration")
 		return err
 	}
 
-	resources, err := r.discoverResources(res)
+	resources, err := discoverResources(res)
 	if err != nil {
-		r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to discover resource")
+		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to discover resource")
 		return err
 	}
 
@@ -82,7 +81,7 @@ func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		r.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
 		wg.Done()
 	}()
 
@@ -92,7 +91,7 @@ func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
 		resource := resources[i]
 		w, err := resource.Watch(options)
 		if err != nil {
-			r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch the resource")
+			gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch the resource")
 			return err
 		}
 
@@ -102,10 +101,13 @@ func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
 				b, _ := itemObj.MarshalJSON()
 				if item.Type == watch.Error {
 					err := errors.FromObject(item.Object)
-					r.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch resource")
+					gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch resource")
 				}
-				if r.passFilters(itemObj, res.Filter) {
-					r.gatewayConfig.DispatchEvent(b, config.Src)
+				if passFilters(itemObj, res.Filter) {
+					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+						Src: config.Src,
+						Payload: b,
+					})
 				}
 			}
 		}()
@@ -115,9 +117,9 @@ func (r *resource) RunConfiguration(config *gateways.ConfigData) error {
 	return nil
 }
 
-func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
-	dynClientPool := dynamic.NewDynamicClientPool(r.kubeConfig)
-	disco, err := discovery.NewDiscoveryClientForConfig(r.kubeConfig)
+func discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
+	dynClientPool := dynamic.NewDynamicClientPool(gatewayConfig.KubeConfig)
+	disco, err := discovery.NewDiscoveryClientForConfig(gatewayConfig.KubeConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +133,7 @@ func (r *resource) discoverResources(obj *Resource) ([]dynamic.ResourceInterface
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		r.gatewayConfig.Log.Info().Str("api-resource", gvk.String())
+		gatewayConfig.Log.Info().Str("api-resource", gvk.String())
 		if apiResource.Kind != obj.Kind {
 			continue
 		}
@@ -161,26 +163,26 @@ func resolveGroupVersion(obj *Resource) string {
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func (r *resource) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		r.gatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
+		gatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		r.gatewayConfig.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
+		gatewayConfig.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		r.gatewayConfig.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
+		gatewayConfig.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		r.gatewayConfig.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
+		gatewayConfig.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
 		return false
 	}
 	return true
@@ -203,10 +205,6 @@ func checkMap(expected, actual map[string]string) bool {
 }
 
 func main() {
-	gatewayConfig := gateways.NewGatewayConfiguration()
-	r := &resource{
-		gatewayConfig: gatewayConfig,
-	}
-	gatewayConfig.WatchGatewayConfigMap(r, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	select {}
 }

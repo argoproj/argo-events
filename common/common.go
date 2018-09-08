@@ -98,9 +98,29 @@ const (
 const (
 	GatewayProcessorConfigMapEnvVar = "GATEWAY_PROCESSOR_CONFIG_MAP"
 
-	GatewayProcessorServerPort = "GATEWAY_PROCESSOR_SERVER_PORT"
+	GatewayProcessorGRPCServerPort = "GATEWAY_PROCESSOR_GRPC_SERVER_PORT"
 
-	GatewayProcessorClientImage = "metalgearsolid/gateway-processor-client"
+	GatewayProcessorClientHTTPPortEnvVar = "GATEWAY_PROCESSOR_CLIENT_HTTP_PORT"
+
+	GatewayProcessorClientHTTPPort = "9393"
+
+	GatewayProcessorServerHTTPPortEnvVar = "GATEWAY_PROCESSOR_SERVER_HTTP_PORT"
+
+	GatewayProcessorHTTPServerConfigStartEndpointEnvVar = "GATEWAY_HTTP_CONFIG_START"
+
+	GatewayProcessorHTTPServerConfigStartEndpoint = "/start"
+
+	GatewayProcessorHTTPServerConfigStopEndpointEnvVar = "GATEWAY_HTTP_CONFIG_STOP"
+
+	GatewayProcessorHTTPServerConfigStopEndpoint = "/stop"
+
+	GatewayProcessorHTTPServerEventEndpointEnvVar = "GATEWAY_HTTP_CONFIG_EVENT"
+
+	GatewayProcessorHTTPServerEventEndpoint = "/event"
+
+	GatewayProcessorGRPCClientImage = "metalgearsolid/gateway-processor-grpc-client"
+
+	GatewayProcessorHTTPClientImage = "metalgearsolid/gateway-processor-http-client"
 )
 
 // Gateway Transformer constants

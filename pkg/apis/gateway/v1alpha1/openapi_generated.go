@@ -180,7 +180,14 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"rpcPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RPCPort if provided deploys gateway-processor as gRPC client",
+							Description: "RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"httpServerPort": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HTTPServerPort if provided is used to communicate between gateway client and server over http",
 							Type:        []string{"string"},
 							Format:      "",
 						},

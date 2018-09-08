@@ -20,7 +20,8 @@ import (
 	"fmt"
 
 	"context"
-	gateways "github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
 	amqplib "github.com/streadway/amqp"
@@ -32,49 +33,53 @@ const (
 	routingKey      = "routingKey"
 )
 
-type amqp struct {
+var (
 	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig *gateways.GatewayConfig
-}
+	gatewayConfig = gateways.NewGatewayConfiguration()
+)
 
-func (a *amqp) RunConfiguration(config *gateways.ConfigData) error {
-	a.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+// Runs a configuration
+func configRunner(config *gateways.ConfigData) error {
+	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
 
 	var s *stream.Stream
 	err := yaml.Unmarshal([]byte(config.Config), &s)
 	if err != nil {
-		a.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse amqp config")
+		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse amqp config")
 		return err
 	}
 
 	conn, err := amqplib.Dial(s.URL)
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to connect to server")
+		gatewayConfig.Log.Error().Err(err).Msg("failed to connect to server")
 		return err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to open channel")
+		gatewayConfig.Log.Error().Err(err).Msg("failed to open channel")
 		return err
 	}
 
 	delivery, err := getDelivery(ch, s.Attributes)
 
 	if err != nil {
-		a.gatewayConfig.Log.Error().Err(err).Msg("failed to get message delivery")
+		gatewayConfig.Log.Error().Err(err).Msg("failed to get message delivery")
 		return err
 	}
 
-	a.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
 	config.Active = true
 	// start listening for messages
 amqpConfigRunner:
 	for {
 		select {
 		case msg := <-delivery:
-			a.gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer")
-			a.gatewayConfig.DispatchEvent(msg.Body, config.Src)
+			gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer")
+			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+				Src: config.Src,
+				Payload: msg.Body,
+			})
 		case <-config.StopCh:
 			break amqpConfigRunner
 		}
@@ -128,10 +133,6 @@ func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.De
 }
 
 func main() {
-	gatewayConfig := gateways.NewGatewayConfiguration()
-	a := &amqp{
-		gatewayConfig,
-	}
-	gatewayConfig.WatchGatewayConfigMap(a, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	select {}
 }

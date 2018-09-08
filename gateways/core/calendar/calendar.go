@@ -20,12 +20,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	gateways "github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
-	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
+)
+
+var (
+	// gatewayConfig provides a generic configuration for a gateway
+	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -49,29 +54,25 @@ type calSchedule struct {
 	Recurrence []string `json:"recurrence,omitempty" protobuf:"bytes,3,rep,name=recurrence"`
 }
 
-type calendar struct {
-	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig *gateways.GatewayConfig
-}
-
-func (c *calendar) RunConfiguration(config *gateways.ConfigData) error {
-	c.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+// Runs a configuration
+func configRunner(config *gateways.ConfigData) error {
+	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
 
 	var cal *calSchedule
 	err := yaml.Unmarshal([]byte(config.Config), &cal)
 	if err != nil {
-		c.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
 		return err
 	}
 
-	schedule, err := c.resolveSchedule(cal)
+	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		c.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
 		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		c.gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
 		return err
 	}
 
@@ -90,53 +91,37 @@ func (c *calendar) RunConfiguration(config *gateways.ConfigData) error {
 		return nextT
 	}
 
-	c.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
 	config.Active = true
 	lastT := time.Now()
 calendarLoop:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		log.Printf("expected next calendar event %s", t)
+		gatewayConfig.Log.Info().Str("config-name", config.Src).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				c.gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
+				gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
 			} else {
-				c.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
-				c.gatewayConfig.DispatchEvent(payload, config.Src)
+				gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src: config.Src,
+					Payload: payload,
+				})
 			}
 		case <-config.StopCh:
-			c.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
 			break calendarLoop
 		}
 	}
 	return nil
 }
 
-func (c *calendar) getEventTimer(next Next) <-chan time.Time {
-	lastT := time.Now()
-	eventTimer := make(chan time.Time)
-	go func() {
-		defer close(eventTimer)
-		for {
-			t := next(lastT)
-			timer := time.After(time.Until(t))
-			log.Printf("expected next calendar event %s", t)
-			select {
-			case tx := <-timer:
-				eventTimer <- tx
-				lastT = tx
-			}
-		}
-	}()
-	return eventTimer
-}
-
-func (c *calendar) resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
+func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		schedule, err := cronlib.Parse(cal.Schedule)
 		if err != nil {
@@ -156,10 +141,6 @@ func (c *calendar) resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	gatewayConfig := gateways.NewGatewayConfiguration()
-	c := &calendar{
-		gatewayConfig,
-	}
-	gatewayConfig.WatchGatewayConfigMap(c, context.Background())
+	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	select {}
 }

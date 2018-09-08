@@ -96,7 +96,7 @@ func (goc *gwOperationCtx) operate() error {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      common.DefaultGatewayDeploymentName(goc.gw.Name),
 				Namespace: goc.gw.Namespace,
-				Labels: goc.gw.ObjectMeta.Labels,
+				Labels:    goc.gw.ObjectMeta.Labels,
 				OwnerReferences: []metav1.OwnerReference{
 					*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 				},
@@ -299,20 +299,59 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		eventGeneratorContainers := goc.gw.Spec.DeploySpec.Containers
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           common.GatewayProcessorClientImage,
+			Image:           common.GatewayProcessorGRPCClientImage,
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
 		rpcGatewayEnvVars := append(envVars, corev1.EnvVar{
-			Name:  common.GatewayProcessorServerPort,
+			Name:  common.GatewayProcessorGRPCServerPort,
 			Value: goc.gw.Spec.RPCPort,
 		})
 
 		containers = append(containers, eventGeneratorContainers...)
-		containers = append(containers,  eventProcessorContainer)
+		containers = append(containers, eventProcessorContainer)
 
 		for i, container := range containers {
 			containers[i].Env = append(container.Env, rpcGatewayEnvVars...)
+		}
+	} else if goc.gw.Spec.HTTPServerPort != "" {
+		eventGeneratorContainers := goc.gw.Spec.DeploySpec.Containers
+		eventProcessorContainer := corev1.Container{
+			Name:            gatewayProcessor,
+			Image:           common.GatewayProcessorHTTPClientImage,
+			ImagePullPolicy: corev1.PullAlways,
+		}
+
+		httpEnvVars := []corev1.EnvVar{
+			{
+				Name:  common.GatewayProcessorServerHTTPPortEnvVar,
+				Value: goc.gw.Spec.HTTPServerPort,
+			},
+			{
+				Name: common.GatewayProcessorClientHTTPPortEnvVar,
+				Value: common.GatewayProcessorClientHTTPPort,
+			},
+			{
+				Name: common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar,
+				Value: common.GatewayProcessorHTTPServerConfigStartEndpoint,
+			},
+			{
+				Name: common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar,
+				Value: common.GatewayProcessorHTTPServerConfigStopEndpoint,
+			},
+			{
+				Name: common.GatewayProcessorHTTPServerEventEndpointEnvVar,
+				Value: common.GatewayProcessorHTTPServerEventEndpoint,
+			},
+		}
+
+		httpGatewayEnvVars := append(envVars, httpEnvVars...)
+
+		containers = append(containers, eventGeneratorContainers...)
+		containers = append(containers, eventProcessorContainer)
+
+		for i, container := range containers {
+			containers[i].Env = append(container.Env, httpGatewayEnvVars...)
 		}
 	} else {
 		// this is when user is deploying gateway by either following core gateways or writing a completely custom gateway

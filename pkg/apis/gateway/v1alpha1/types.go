@@ -60,8 +60,11 @@ type GatewaySpec struct {
 	// Sensors are list of sensors to dispatch events to
 	Sensors []string `json:"sensors" protobuf:"bytes,6,opt,name=sensors"`
 
-	// RPCPort if provided deploys gateway-processor as gRPC client
+	// RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server
 	RPCPort string `json:"rpcPort,omitempty" protobuf:"bytes,7,opt,name=rpcPort"`
+
+	// HTTPServerPort if provided is used to communicate between gateway client and server over http
+	HTTPServerPort string `json:"httpServerPort,omitempty" protobuf:"bytes,8,opt,name=httpServerPort"`
 }
 
 // NodePhase is the label for the condition of a node
