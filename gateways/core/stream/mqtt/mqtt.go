@@ -59,7 +59,7 @@ func configRunner(config *gateways.ConfigData) error {
 
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
 		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-			Src: config.Src,
+			Src:     config.Src,
 			Payload: msg.Payload(),
 		})
 	}

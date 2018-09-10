@@ -86,7 +86,7 @@ kafkaConfigRunner:
 		case msg := <-partitionConsumer.Messages():
 			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src: config.Src,
+				Src:     config.Src,
 				Payload: msg.Value,
 			})
 		case err := <-partitionConsumer.Errors():

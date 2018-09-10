@@ -122,7 +122,7 @@ func configRunner(config *gateways.ConfigData) error {
 							common.SendSuccessResponse(writer)
 							// dispatch event to gateway transformer
 							gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-								Src: config.Src,
+								Src:     config.Src,
 								Payload: body,
 							})
 						}

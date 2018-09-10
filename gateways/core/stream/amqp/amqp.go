@@ -77,7 +77,7 @@ amqpConfigRunner:
 		case msg := <-delivery:
 			gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer")
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src: config.Src,
+				Src:     config.Src,
 				Payload: msg.Body,
 			})
 		case <-config.StopCh:

@@ -328,19 +328,19 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 				Value: goc.gw.Spec.HTTPServerPort,
 			},
 			{
-				Name: common.GatewayProcessorClientHTTPPortEnvVar,
+				Name:  common.GatewayProcessorClientHTTPPortEnvVar,
 				Value: common.GatewayProcessorClientHTTPPort,
 			},
 			{
-				Name: common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar,
+				Name:  common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar,
 				Value: common.GatewayProcessorHTTPServerConfigStartEndpoint,
 			},
 			{
-				Name: common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar,
+				Name:  common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar,
 				Value: common.GatewayProcessorHTTPServerConfigStopEndpoint,
 			},
 			{
-				Name: common.GatewayProcessorHTTPServerEventEndpointEnvVar,
+				Name:  common.GatewayProcessorHTTPServerEventEndpointEnvVar,
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
 		}

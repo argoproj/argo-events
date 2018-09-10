@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways/utils"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -42,6 +41,8 @@ type GatewayConfig struct {
 	Log zerolog.Logger
 	// Clientset is client for kubernetes API
 	Clientset *kubernetes.Clientset
+	// Name is gateway name
+	Name string
 	// Namespace is namespace for the gateway to run inside
 	Namespace string
 	// Kubernetes rest client config
@@ -173,7 +174,7 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 
 // DispatchEvent dispatches event to gateway transformer for further processing
 func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
-	payload, err := utils.TransformerPayload(gatewayEvent.Payload, gatewayEvent.Src)
+	payload, err := TransformerPayload(gatewayEvent.Payload, gatewayEvent.Src)
 	if err != nil {
 		gc.Log.Warn().Str("config-key", gatewayEvent.Src).Err(err).Msg("failed to transform request body.")
 		return err
@@ -195,7 +196,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[uint64]*ConfigData, error) {
 	configs := make(map[uint64]*ConfigData)
 	for configKey, configValue := range cm.Data {
-		hashKey, err := utils.Hasher(configKey, configValue)
+		hashKey, err := Hasher(configKey, configValue)
 		if err != nil {
 			gc.Log.Warn().Str("config-key", configKey).Str("config-value", configValue).Err(err).Msg("failed to hash configuration")
 			return nil, err
@@ -295,6 +296,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 		registeredConfigs: make(map[uint64]*ConfigData),
 		Clientset:         clientset,
 		Namespace:         namespace,
+		Name: name,
 		KubeConfig:        restConfig,
 		transformerPort:   transformerPort,
 		configName:        configName,

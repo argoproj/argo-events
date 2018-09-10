@@ -20,68 +20,28 @@ import (
 	"fmt"
 	"time"
 
+	"bytes"
+	"encoding/json"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
-	zlog "github.com/rs/zerolog"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/argoproj/argo-events/gateways"
-	"net/http"
-	"bytes"
-	"os"
-	"sync"
-	"encoding/json"
-	"io/ioutil"
-	"github.com/argoproj/argo-events/gateways/utils"
 	"io"
+	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
+	"sync"
 )
 
 var (
-	log = zlog.New(os.Stdout).With().Str("gateway", "calendar").Logger()
+	// gateway http server configurations
+	httpGatewayServerConfig = gateways.NewHTTPGatewayServerConfig()
+)
 
-	httpServerPort = func() string {
-		httpServerPort, ok := os.LookupEnv(common.GatewayProcessorServerHTTPPortEnvVar)
-		if !ok {
-			panic("gateway server http port is not provided")
-		}
-		return httpServerPort
-	}()
-
-	httpClientPort = func() string {
-		httpClientPort, ok := os.LookupEnv(common.GatewayProcessorClientHTTPPortEnvVar)
-		if !ok {
-			panic("gateway client http port is not provided")
-		}
-		return httpClientPort
-	}()
-
-	configStartEndpoint = func() string {
-		configStartEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar)
-		if !ok {
-			panic("gateway config start endpoint is not provided")
-		}
-		return configStartEndpoint
-	}()
-
-	configStopEndpoint = func() string {
-		configStopEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar)
-		if !ok {
-			panic("gateway config stop endpoint is not provided")
-		}
-		return configStopEndpoint
-	}()
-
-	eventEndpoint = func() string {
-		eventEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerEventEndpointEnvVar)
-		if !ok {
-			panic("gateway event post endpoint is not provided")
-		}
-		return eventEndpoint
-	}()
-
-	activeConfigs = make(map[uint64]*gateways.ConfigData)
-
+var (
 	mut sync.Mutex
+	// activeConfigs keeps track of configurations that are running in gateway.
+	activeConfigs = make(map[uint64]*gateways.ConfigData)
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -105,23 +65,25 @@ type calSchedule struct {
 	Recurrence []string
 }
 
+// runs given configuration and sends event back to gateway processor client
 func runGateway(config *gateways.ConfigData) error {
-	log.Info().Str("config-name", config.Src).Msg("parsing calendar schedule...")
+	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Src).Msg("parsing calendar schedule...")
+
 	var cal *calSchedule
 	err := yaml.Unmarshal([]byte(config.Config), &cal)
 	if err != nil {
-		log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse calendar schedule")
+		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse calendar schedule")
 		return err
 	}
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
 		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
 		return err
 	}
 
@@ -145,31 +107,35 @@ calendarConfigRunner:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		log.Info().Str("config-key", config.Src).Str("time", t.String()).Msg("expected next calendar event")
+		httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				log.Error().Err(err).Msg("failed to marshal event")
+				httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to marshal event")
 			} else {
 				re := gateways.GatewayEvent{
-					Src: config.Src,
+					Src:     config.Src,
 					Payload: payload,
 				}
 				payload, err = json.Marshal(re)
+
 				if err != nil {
-					log.Error().Err(err).Msg("failed to marshal payload into gateway event")
+					httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to marshal payload into gateway event")
+					// todo: mark gateway status as error
 					continue
 				}
-				_, err := http.Post(fmt.Sprintf("http://localhost:%s%s", httpClientPort, eventEndpoint), "application/octet-stream", bytes.NewReader(payload))
+				httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway processor client")
+				httpGatewayServerConfig.GwConfig.Log.Info().Str("url", fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint)).Msg("client url")
+				_, err := http.Post(fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
 				if err != nil {
-					log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to dispatch event to gateway-processor.")
+					httpGatewayServerConfig.GwConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to dispatch event to gateway-processor.")
 				}
 			}
 		case <-config.StopCh:
-			log.Info().Str("config-key", config.Src).Msg("stopping configuration")
+			httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("stopping configuration")
 			break calendarConfigRunner
 		}
 	}
@@ -195,6 +161,7 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	}
 }
 
+// returns a gateway configuration and its hash
 func getConfiguration(body io.ReadCloser) (*gateways.ConfigData, *uint64, error) {
 	var configData gateways.HTTPGatewayConfig
 	config, err := ioutil.ReadAll(body)
@@ -208,10 +175,10 @@ func getConfiguration(body io.ReadCloser) (*gateways.ConfigData, *uint64, error)
 	// register configuration
 	gatewayConfig := &gateways.ConfigData{
 		Config: configData.Config,
-		Src: configData.Src,
+		Src:    configData.Src,
 		StopCh: make(chan struct{}),
 	}
-	hash, err := utils.Hasher(gatewayConfig.Src, gatewayConfig.Config)
+	hash, err := gateways.Hasher(gatewayConfig.Src, gatewayConfig.Config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to hash configuration. err %+v", err)
 	}
@@ -219,22 +186,28 @@ func getConfiguration(body io.ReadCloser) (*gateways.ConfigData, *uint64, error)
 }
 
 func main() {
-	http.HandleFunc(configStartEndpoint, func(writer http.ResponseWriter, request *http.Request) {
+	// handles new configuration. adds a stop channel to configuration, so we can pass stop signal
+	// in the event of configuration deactivation
+	http.HandleFunc(httpGatewayServerConfig.ConfigActivateEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		config, hash, err := getConfiguration(request.Body)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to start configuration")
+			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to start configuration")
 			common.SendErrorResponse(writer)
 			return
 		}
 		mut.Lock()
 		activeConfigs[*hash] = config
 		mut.Unlock()
+		common.SendSuccessResponse(writer)
 		go runGateway(config)
 	})
-	http.HandleFunc(configStopEndpoint, func(writer http.ResponseWriter, request *http.Request) {
+
+	// handles configuration deactivation. no need to remove the configuration from activeConfigs as we are
+	// always overriding configurations in configuration activation.
+	http.HandleFunc(httpGatewayServerConfig.ConfigurationDeactivateEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		_, hash, err := getConfiguration(request.Body)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to stop configuration")
+			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to stop configuration")
 			common.SendErrorResponse(writer)
 			return
 		}
@@ -243,6 +216,9 @@ func main() {
 		config.StopCh <- struct{}{}
 		delete(activeConfigs, *hash)
 		mut.Unlock()
+		common.SendSuccessResponse(writer)
 	})
-	log.Fatal().Str("port", httpServerPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s",  httpServerPort), nil)).Msg("gateway server started listening")
+
+	// start http server
+	httpGatewayServerConfig.GwConfig.Log.Fatal().Str("port", httpGatewayServerConfig.HTTPServerPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", httpGatewayServerConfig.HTTPServerPort), nil)).Msg("gateway server started listening")
 }

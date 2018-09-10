@@ -105,7 +105,7 @@ var configRunner = func(config *gateways.ConfigData) error {
 				}
 				if passFilters(itemObj, res.Filter) {
 					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-						Src: config.Src,
+						Src:     config.Src,
 						Payload: b,
 					})
 				}

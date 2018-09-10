@@ -150,7 +150,7 @@ func configRunner(config *gateways.ConfigData) error {
 			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 			payload := []byte(fmt.Sprintf("%v", notificationInfo))
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src: config.Src,
+				Src:     config.Src,
 				Payload: payload,
 			})
 		}

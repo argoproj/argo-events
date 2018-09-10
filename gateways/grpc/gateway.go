@@ -86,7 +86,7 @@ func configRunner(config *gateways.ConfigData) error {
 			gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("event can't be nil")
 		} else {
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src: config.Src,
+				Src:     config.Src,
 				Payload: event.Data,
 			})
 		}

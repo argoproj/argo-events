@@ -73,7 +73,7 @@ func configRunner(config *gateways.ConfigData) error {
 	sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
 		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-			Src: config.Src,
+			Src:     config.Src,
 			Payload: msg.Data,
 		})
 	})

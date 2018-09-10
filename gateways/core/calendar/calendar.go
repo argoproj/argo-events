@@ -109,7 +109,7 @@ calendarLoop:
 			} else {
 				gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
 				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-					Src: config.Src,
+					Src:     config.Src,
 					Payload: payload,
 				})
 			}

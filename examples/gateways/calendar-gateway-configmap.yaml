@@ -6,5 +6,3 @@ metadata:
 data:
   calendar.fooConfig: |-
     interval: 13s
-  calendar.barConfig: |-
-    interval: 20s
