@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	"io"
@@ -41,7 +42,7 @@ var (
 var (
 	mut sync.Mutex
 	// activeConfigs keeps track of configurations that are running in gateway.
-	activeConfigs = make(map[uint64]*gateways.ConfigData)
+	activeConfigs = make(map[string]*gateways.ConfigContext)
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -66,24 +67,39 @@ type calSchedule struct {
 }
 
 // runs given configuration and sends event back to gateway processor client
-func runGateway(config *gateways.ConfigData) error {
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Src).Msg("parsing calendar schedule...")
+func runGateway(config *gateways.ConfigContext) error {
+	var err error
+	var errMsg string
+
+	defer func() {
+		config.Active = false
+		if err != nil {
+			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(errMsg)
+			httpGatewayServerConfig.GwConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
+		} else {
+			httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")
+			httpGatewayServerConfig.GwConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, "configuration completed")
+		}
+		httpGatewayServerConfig.GwConfig.PersistUpdates()
+	}()
+
+	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing calendar schedule...")
 
 	var cal *calSchedule
-	err := yaml.Unmarshal([]byte(config.Config), &cal)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &cal)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse calendar schedule")
+		errMsg = "failed to parse calendar schedule"
 		return err
 	}
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		errMsg = "failed to resolve calendar schedule."
 		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		errMsg = "failed to resolve calendar schedule."
 		return err
 	}
 
@@ -107,7 +123,7 @@ calendarConfigRunner:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Str("time", t.String()).Msg("expected next calendar event")
+		httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
@@ -117,25 +133,25 @@ calendarConfigRunner:
 				httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to marshal event")
 			} else {
 				re := gateways.GatewayEvent{
-					Src:     config.Src,
+					Src:     config.Data.Src,
 					Payload: payload,
 				}
 				payload, err = json.Marshal(re)
 
 				if err != nil {
-					httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to marshal payload into gateway event")
-					// todo: mark gateway status as error
-					continue
+					errMsg = "failed to marshal payload into gateway event"
+					return err
 				}
-				httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway processor client")
+				httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway processor client")
 				httpGatewayServerConfig.GwConfig.Log.Info().Str("url", fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint)).Msg("client url")
 				_, err := http.Post(fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
 				if err != nil {
-					httpGatewayServerConfig.GwConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to dispatch event to gateway-processor.")
+					errMsg = "failed to dispatch event to gateway-processor."
+					return err
 				}
 			}
 		case <-config.StopCh:
-			httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("stopping configuration")
+			httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
 			break calendarConfigRunner
 		}
 	}
@@ -162,8 +178,8 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 // returns a gateway configuration and its hash
-func getConfiguration(body io.ReadCloser) (*gateways.ConfigData, *uint64, error) {
-	var configData gateways.HTTPGatewayConfig
+func getConfiguration(body io.ReadCloser) (*gateways.ConfigContext, *string, error) {
+	var configData gateways.ConfigData
 	config, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to read requested config to run. err %+v", err)
@@ -173,12 +189,14 @@ func getConfiguration(body io.ReadCloser) (*gateways.ConfigData, *uint64, error)
 		return nil, nil, fmt.Errorf("failed to parse config. err %+v", err)
 	}
 	// register configuration
-	gatewayConfig := &gateways.ConfigData{
-		Config: configData.Config,
-		Src:    configData.Src,
+	gatewayConfig := &gateways.ConfigContext{
+		Data: &gateways.ConfigData{
+			Config: configData.Config,
+			Src:    configData.Src,
+		},
 		StopCh: make(chan struct{}),
 	}
-	hash, err := gateways.Hasher(gatewayConfig.Src, gatewayConfig.Config)
+	hash := gateways.Hasher(configData.Config)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to hash configuration. err %+v", err)
 	}

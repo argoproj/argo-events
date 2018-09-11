@@ -76,6 +76,8 @@ const (
 	NodePhaseError        NodePhase = "Error"        // the node has encountered an error in processing
 	NodePhaseNew          NodePhase = ""             // the node is new
 	NodePhaseServiceError NodePhase = "ServiceError" // failed to expose gateway using a service
+	NodePhaseCompleted    NodePhase = "Completed"    // node has completed running
+	NodePhaseInitialized  NodePhase = "Initialized"  // node has been initialized
 )
 
 // GatewayStatus contains information about the status of a gateway.
@@ -88,4 +90,33 @@ type GatewayStatus struct {
 
 	// Message is a human readable string indicating details about a gateway in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+
+	// Nodes is a mapping between a node ID and the node's status
+	// it records the states for the configurations of gateway.
+	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
+}
+
+// NodeStatus describes the status for an individual node in the gateway configurations.
+// A single node can represent one configuration.
+type NodeStatus struct {
+	// ID is a unique identifier of a node within a sensor
+	// It is a hash of the node name
+	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
+
+	// Name is a unique name in the node tree used to generate the node ID
+	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
+
+	// DisplayName is the human readable representation of the node
+	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
+
+	// Phase of the node
+	Phase NodePhase `json:"phase" protobuf:"bytes,4,opt,name=phase"`
+
+	// StartedAt is the time at which this node started
+	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,5,opt,name=startedAt"`
+
+	// Message store data or something to save for configuration
+	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
+
+	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,7,opt,name=updateTime"`
 }

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 )
 
 var (
@@ -16,23 +16,23 @@ var (
 	httpGatewayServerConfig = gateways.NewHTTPGatewayServerConfig()
 )
 
-func configRunner(config *gateways.ConfigData) error {
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("start configuration")
-	return sendHTTPRequest(&gateways.HTTPGatewayConfig{
-		Src:    config.Src,
-		Config: config.Config,
+func configRunner(config *gateways.ConfigContext) error {
+	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("start configuration")
+	return sendHTTPRequest(&gateways.ConfigData{
+		Src:    config.Data.Src,
+		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigActivateEndpoint)
 }
 
-func configStopper(config *gateways.ConfigData) error {
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Src).Msg("stopping configuration")
-	return sendHTTPRequest(&gateways.HTTPGatewayConfig{
-		Src:    config.Src,
-		Config: config.Config,
+func configStopper(config *gateways.ConfigContext) error {
+	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
+	return sendHTTPRequest(&gateways.ConfigData{
+		Src:    config.Data.Src,
+		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigurationDeactivateEndpoint)
 }
 
-func sendHTTPRequest(config *gateways.HTTPGatewayConfig, endpoint string) error {
+func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 	payload, err := json.Marshal(config)
 	if err != nil {
 		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to marshal configuration")

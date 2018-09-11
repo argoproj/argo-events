@@ -17,13 +17,15 @@ limitations under the License.
 package mqtt
 
 import (
-	"context"
+	"fmt"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"sync"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/gateways/core"
+	"context"
 )
 
 const (
@@ -37,58 +39,89 @@ var (
 )
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
 
-	var s *stream.Stream
-	err := yaml.Unmarshal([]byte(config.Config), &s)
-	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse mqtt config")
-		return err
-	}
-	// parse out the attributes
-	topic, ok := s.Attributes[topicKey]
-	if !ok {
-		gatewayConfig.Log.Error().Msg("failed to get topic key")
-	}
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
 
-	clientID, ok := s.Attributes[clientID]
-	if !ok {
-		gatewayConfig.Log.Error().Msg("failed to get client id")
-	}
 
-	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
-		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-			Src:     config.Src,
-			Payload: msg.Payload(),
-		})
-	}
-
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
 	var wg sync.WaitGroup
 	wg.Add(1)
 
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
+		config.Active = false
+		gatewayConfig.Log.Info().Str("config", config.Data.Src).Msg("stopping the configuration...")
 		wg.Done()
 	}()
 
+	var s *stream.Stream
+	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
+	if err != nil {
+		errMessage = "failed to parse mqtt config"
+		config.StopCh <- struct{}{}
+		return err
+	}
+	// parse out the attributes
+	topic, ok := s.Attributes[topicKey]
+	if !ok {
+		errMessage = "failed to get topic key"
+		err = fmt.Errorf(errMessage)
+		return err
+	}
+
+	clientID, ok := s.Attributes[clientID]
+	if !ok {
+		errMessage = "failed to get client id"
+		err = fmt.Errorf(errMessage)
+		return err
+	}
+
+	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
+		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+			Src:     config.Data.Src,
+			Payload: msg.Payload(),
+		})
+	}
 	opts := MQTTlib.NewClientOptions().AddBroker(s.URL).SetClientID(clientID)
 	client := MQTTlib.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("client", clientID).Err(token.Error()).Msg("failed to connect to client")
+		errMessage = "failed to connect to client"
+		config.StopCh <- struct{}{}
+		err = token.Error()
+		return err
 	}
 	if token := client.Subscribe(topic, 0, handler); token.Wait() && token.Error() != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("topic", topic).Err(token.Error()).Msg("failed to subscribe to topic")
+		errMessage = "failed to subscribe to topic"
+		err = token.Error()
+		return err
 	}
 
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("configuration is running...")
+	config.Active = true
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
 	wg.Wait()
 	return nil
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

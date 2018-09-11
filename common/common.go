@@ -92,6 +92,12 @@ const (
 
 	// GatewayName refers env var for name of gateway
 	GatewayName = "GATEWAY_NAME"
+
+	// LabelGatewayConfigurationName is the label for a configuration in gateway
+	LabelGatewayConfigurationName = "config-name"
+
+	// LabelGatewayEventSeen is the label for already seen gateway event
+	LabelGatewayEventSeen = "event-seen"
 )
 
 // Gateway Processor constants

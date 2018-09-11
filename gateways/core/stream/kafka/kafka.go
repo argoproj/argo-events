@@ -17,13 +17,14 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"strconv"
+	"github.com/argoproj/argo-events/gateways/core"
+	"context"
 )
 
 const (
@@ -37,17 +38,24 @@ var (
 )
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+
 	var s *stream.Stream
-	err := yaml.Unmarshal([]byte(config.Config), &s)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse kafka config")
+		errMessage = "failed to parse kafka config"
 		return err
 	}
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Interface("stream", *s).Msg("kafka configuration")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("stream", *s).Msg("kafka configuration")
 	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("url", s.URL).Err(err).Msg("failed to connect to cluster")
+		errMessage = "failed to connect to cluster"
 		return err
 	}
 
@@ -55,51 +63,58 @@ func configRunner(config *gateways.ConfigData) error {
 	pString := s.Attributes[partitionKey]
 	pInt, err := strconv.ParseInt(pString, 10, 32)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("partition", pString).Err(err).Msg("failed to parse partition key")
+
 		return err
 	}
 	partition := int32(pInt)
 
 	availablePartitions, err := consumer.Partitions(topic)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("topic", topic).Err(err).Msg("unable to get available partitions for kafka topic")
+		errMessage = "unable to get available partitions for kafka topic"
 		return err
 	}
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("partition does not exist for topic")
+		errMessage = "partition does not exist for topic"
 		return err
 	}
 
 	partitionConsumer, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("failed to create partition consumer for topic")
+		errMessage = "failed to create partition consumer for topic"
 		return err
 	}
 
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
 
 	// start listening to messages
 kafkaConfigRunner:
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Src,
+				Src:     config.Data.Src,
 				Payload: msg.Value,
 			})
 		case err := <-partitionConsumer.Errors():
-			gatewayConfig.Log.Error().Str("config-key", config.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("received an error")
+			gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("received an error")
+			config.StopCh <- struct{}{}
 		case <-config.StopCh:
 			err = partitionConsumer.Close()
 			if err != nil {
-				gatewayConfig.Log.Error().Str("config-key", config.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("failed to close partition")
+				errMessage = "failed to close partition"
 			}
 			break kafkaConfigRunner
 		}
 	}
-
 	return nil
 }
 
@@ -113,6 +128,13 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

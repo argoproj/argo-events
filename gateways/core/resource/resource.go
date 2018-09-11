@@ -31,6 +31,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"strings"
 	"sync"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -54,22 +55,26 @@ type ResourceFilter struct {
 }
 
 // Runs a configuration
-var configRunner = func(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+var configRunner = func(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
 
 	var res *Resource
-	err := yaml.Unmarshal([]byte(config.Config), &res)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &res)
 	if err != nil {
-		gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse resource configuration")
+		errMessage = "failed to parse resource configuration"
 		return err
 	}
-
 	resources, err := discoverResources(res)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to discover resource")
+		errMessage = "failed to discover resource"
 		return err
 	}
-
 	options := metav1.ListOptions{Watch: true}
 	if res.Filter != nil {
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
@@ -77,42 +82,53 @@ var configRunner = func(config *gateways.ConfigData) error {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+		config.Active = false
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
 		wg.Done()
 	}()
 
 	config.Active = true
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
 	// start up listeners
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
 		w, err := resource.Watch(options)
 		if err != nil {
-			gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch the resource")
+			errMessage = "failed to watch the resource"
 			return err
 		}
-
 		go func() {
 			for item := range w.ResultChan() {
 				itemObj := item.Object.(*unstructured.Unstructured)
-				b, _ := itemObj.MarshalJSON()
+				b, err := itemObj.MarshalJSON()
+				if err != nil {
+					errMessage = "failed to marshal resource"
+					return
+				}
 				if item.Type == watch.Error {
-					err := errors.FromObject(item.Object)
-					gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to watch resource")
+					err = errors.FromObject(item.Object)
+					errMessage = "failed to watch resource"
+					return
 				}
 				if passFilters(itemObj, res.Filter) {
 					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-						Src:     config.Src,
+						Src:     config.Data.Src,
 						Payload: b,
 					})
 				}
 			}
 		}()
 	}
-
 	wg.Wait()
 	return nil
 }
@@ -205,6 +221,13 @@ func checkMap(expected, actual map[string]string) bool {
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

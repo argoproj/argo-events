@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -55,24 +56,30 @@ type calSchedule struct {
 }
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 
 	var cal *calSchedule
-	err := yaml.Unmarshal([]byte(config.Config), &cal)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &cal)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		errMessage = "failed to parse configuration"
 		return err
 	}
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		errMessage = "failed to resolve calendar schedule."
 		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to resolve calendar schedule.")
+		errMessage = "failed to resolve calendar schedule."
 		return err
 	}
 
@@ -91,30 +98,41 @@ func configRunner(config *gateways.ConfigData) error {
 		return nextT
 	}
 
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
 	lastT := time.Now()
 calendarLoop:
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		gatewayConfig.Log.Info().Str("config-name", config.Src).Str("time", t.String()).Msg("expected next calendar event")
+		gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				gatewayConfig.Log.Error().Err(err).Msg("failed to marshal event")
+				errMessage = "failed to marshal event"
+				config.StopCh <- struct{}{}
+				break calendarLoop
 			} else {
-				gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-					Src:     config.Src,
+					Src:     config.Data.Src,
 					Payload: payload,
 				})
 			}
 		case <-config.StopCh:
-			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("stopping the configuration...")
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
+			config.Active = false
 			break calendarLoop
 		}
 	}
@@ -141,6 +159,13 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

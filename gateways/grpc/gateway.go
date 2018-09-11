@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwProto "github.com/argoproj/argo-events/gateways/grpc/proto"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"io"
 	"os"
@@ -43,9 +44,10 @@ var (
 	}()
 )
 
-// runConfig establishes connection with gateway server and sends new configurations to run.
+// configRunner establishes connection with gateway server and sends new configurations to run.
 // also disconnect the clients for stale configurations
-func configRunner(config *gateways.ConfigData) error {
+func configRunner(config *gateways.ConfigContext) error {
+	defer gatewayConfig.PersistUpdates()
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithWaitForHandshake(),
@@ -53,7 +55,9 @@ func configRunner(config *gateways.ConfigData) error {
 
 	conn, err := grpc.Dial(fmt.Sprintf(serverAddr, rpcServerPort), opts...)
 	if err != nil {
-		gatewayConfig.Log.Fatal().Str("config-key", config.Src).Err(err).Msg("failed to dial")
+		gatewayConfig.Log.Fatal().Str("config-key", config.Data.Src).Err(err).Msg("failed to dial")
+		gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
+		return err
 	}
 
 	// create a client for gateway server
@@ -62,31 +66,34 @@ func configRunner(config *gateways.ConfigData) error {
 	config.Cancel = cancel
 
 	eventStream, err := client.RunGateway(ctx, &gwProto.GatewayConfig{
-		Config: config.Config,
-		Src:    config.Src,
+		Config: config.Data.Config,
+		Src:    config.Data.Src,
 	})
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("connected with server and got a event stream")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("connected with server and got a event stream")
 
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to get event stream")
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to get event stream")
+		gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 	for {
 		event, err := eventStream.Recv()
 		if err == io.EOF {
-			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("event stream stopped")
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("event stream stopped")
+			gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, "completed")
 			return err
 		}
 		if err != nil {
-			gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to receive events on stream")
+			gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Err(err).Msg("failed to receive events on stream")
+			gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, err.Error())
 			return err
 		}
 		// event should never be nil
 		if event == nil {
-			gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("event can't be nil")
+			gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Err(err).Msg("event can't be nil")
 		} else {
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Src,
+				Src:     config.Data.Src,
 				Payload: event.Data,
 			})
 		}
@@ -94,7 +101,7 @@ func configRunner(config *gateways.ConfigData) error {
 	return nil
 }
 
-func configDeactivator(config *gateways.ConfigData) error {
+func configDeactivator(config *gateways.ConfigContext) error {
 	config.Cancel()
 	return nil
 }

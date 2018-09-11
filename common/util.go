@@ -25,6 +25,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
+	"time"
+	"math/rand"
 )
 
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
@@ -89,4 +91,23 @@ func SendSuccessResponse(writer http.ResponseWriter) {
 func SendErrorResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(ErrorResponse))
+}
+
+
+// RandomStringGenerator generates a random string
+func RandomStringGenerator() string {
+	var n int
+	for {
+		n = rand.Intn(10)
+		if n != 0 {
+			break
+		}
+	}
+	rand.Seed(time.Now().UnixNano())
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }

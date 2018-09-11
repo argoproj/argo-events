@@ -20,7 +20,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 )
 
-func ConfigDeactivator(config *gateways.ConfigData) error {
+func ConfigDeactivator(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
 	}

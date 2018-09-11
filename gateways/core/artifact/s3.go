@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
@@ -92,32 +93,41 @@ func getSecrets(client *kubernetes.Clientset, namespace string, name, key string
 }
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("parsing configuration...")
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 
 	var artifact *S3Artifact
-	err := yaml.Unmarshal([]byte(config.Config), &artifact)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &artifact)
 	if err != nil {
-		gatewayConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		errMessage = "failed to parse configuration"
 		return err
 	}
 
-	gatewayConfig.Log.Debug().Str("config-key", config.Config).Interface("artifact", *artifact).Msg("s3 artifact")
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Config).Interface("artifact", *artifact).Msg("s3 artifact")
 
 	// retrieve access key id and secret access key
 	accessKey, err := getSecrets(gatewayConfig.Clientset, gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve access key id %s", artifact.AccessKey.Name)
+		errMessage = fmt.Sprintf("failed to retrieve access key id %s", artifact.AccessKey.Name)
+		return err
 	}
 	secretKey, err := getSecrets(gatewayConfig.Clientset, gatewayConfig.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
-		return fmt.Errorf("failed to retrieve access key id %s", artifact.SecretKey.Name)
+		errMessage = fmt.Sprintf("failed to retrieve access key id %s", artifact.SecretKey.Name)
+		return err
 	}
 
 	gatewayConfig.Log.Debug().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secrets")
 
 	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
 	if err != nil {
+		errMessage = "failed to get minio client"
 		return err
 	}
 
@@ -133,34 +143,50 @@ func configRunner(config *gateways.ConfigData) error {
 	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
-		gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
+		config.Active = false
+		gatewayConfig.Log.Info().Str("config", config.Data.Src).Msg("stopping the configuration...")
 		wg.Done()
 	}()
 
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
 
 	// Listen for bucket notifications
 	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.filter.Prefix, artifact.S3EventConfig.filter.Suffix, []string{
 		string(artifact.S3EventConfig.Event),
 	}, doneCh) {
 		if notificationInfo.Err != nil {
-			gatewayConfig.Log.Error().Str("config", config.Src).Err(err).Msg("notification error")
+			errMessage = "notification error"
+			config.StopCh <- struct{}{}
+			break
 		} else {
-			gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			payload := []byte(fmt.Sprintf("%v", notificationInfo))
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Src,
+				Src:     config.Data.Src,
 				Payload: payload,
 			})
 		}
 	}
-
 	wg.Wait()
 	return nil
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

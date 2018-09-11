@@ -3,8 +3,9 @@
 You can write a gateway in 3 different ways,
 
 1. Core gateway style.
-2. Implement a gRPC server in any language of your choice.
-3. Write your own implementation completely independent of framework.
+2. Implement gateway as a gRPC server.
+3. Implement gateway as a HTTP server.
+4. Write your own implementation completely independent of framework.
 
 Difference between first two options and third is that in both option 1 and 2, framework provides a mechanism
 to watch configuration updates, start/stop a configuration dynamically. In option 3, its up to
@@ -121,9 +122,7 @@ external events and streams them back to gateway-processor-client
 
 3. Gateway Transformer: transforms incoming events into cloudevents specification compliant events 
    and dispatches them to interested sensors. 
-   
- ###### Advantage of writing a gRPC gateway is that you can use other languages supported by protobuf for implementation of gRPC server.
-   
+
 ### Architecture
  ![](grpc-gateway.png)
  
@@ -143,13 +142,46 @@ For detailed implementation, check out [Calendar gRPC gateway](https://github.co
 * To write gateway gRPC server using other languages than go, generate server interfaces using protoc.
 Follow protobuf tutorials []()https://developers.google.com/protocol-buffers/docs/tutorials
 
+## HTTP Gateway
+A gRPC gateway has 3 components, 
+1.  Gateway Processor Server - your implementation of HTTP streaming server, either generates events or listens to 
+external events and streams them back to gateway-processor-client. User code must accept POST requests on `/start` and `/stop`
+endpoints.
+
+2. Gateway Processor Client - sends configuration to gateway-processor-server on either `/start` endpoint for
+a new configuration or `/stop` endpoint to stop a configuration. Processor client itself has a HTTP server 
+running internally listening for events from gateway-processor-server.
+
+3. Gateway Transformer: transforms incoming events into cloudevents specification compliant events 
+   and dispatches them to interested sensors. 
+
+
+### Architecture
+![](http-gateway.png)
+
+List of environment variables available to user code
+
+|  Field               |  Description |
+|----------------------|--------------|
+| GATEWAY_PROCESSOR_SERVER_HTTP_PORT     | Gateway processor server HTTP server port |
+|  GATEWAY_PROCESSOR_CLIENT_HTTP_PORT | Gateway processor client HTTP server port  |
+|  GATEWAY_HTTP_CONFIG_START            | REST endpoint to post new configuration |
+|  GATEWAY_HTTP_CONFIG_STOP             | REST endpoint to make configuration to stop |
+|  GATEWAY_HTTP_CONFIG_EVENT             | REST endpoint to send events to |
+
+
+For detailed implementation, check out [Calendar HTTP gateway](https://github.com/argoproj/argo-events/tree/eventing/gateways/rest/calendar)
+
+###### Advantage of writing a gRPC or http gateway is that you can use other languages for implementation of gateway processor server.   
+
+
 ## No framework gateway code
 The third option is you provide gateway implementation from scratch, watch the configuration
 updates,  start/stop configuration if needed. Only requirement is that events must be 
 dispatched to gateway-transformer using HTTP post request. The port to dispatch the request
 is made available through environment variable `TRANSFORMER_PORT`.
 
-List of environment variables available to your code
+List of environment variables available to user code
  
 |  Field               |  Description |
 |----------------------|--------------|
@@ -157,7 +189,6 @@ List of environment variables available to your code
 |  ARGO_EVENTS_NAMESPACE | Namespace where gateway is deployed  |
 |  GATEWAY_PROCESSOR_CONFIG_MAP                | Name of ConfigMap for gateway configuration |
 |  GATEWAY_NAME             | Gateway name  |
-
 
 ### Gateway Specs
 * Example gateway specs is available at [gateway examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)

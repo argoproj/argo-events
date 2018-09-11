@@ -17,14 +17,15 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/ghodss/yaml"
 	natsio "github.com/nats-io/go-nats"
 	"strings"
 	"sync"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/gateways/core"
+	"context"
 )
 
 const (
@@ -37,62 +38,85 @@ var (
 )
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	// waits till disconnection from client.
+	go func() {
+		<-config.StopCh
+		config.Active = false
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("client disconnected. stopping the configuration...")
+		wg.Done()
+	}()
 
 	var s *stream.Stream
-	err := yaml.Unmarshal([]byte(config.Config), &s)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse configuration")
+		errMessage = "failed to parse configuration"
+		config.StopCh <- struct{}{}
 		return err
 	}
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Interface("stream", *s).Msg("configuring...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("stream", *s).Msg("configuring...")
 
 	conn, err := natsio.Connect(s.URL)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
+		config.StopCh <- struct{}{}
 		return err
 	}
 	gatewayConfig.Log.Debug().Str("server id", conn.ConnectedServerId()).Str("connected url", conn.ConnectedUrl()).
 		Str("servers", strings.Join(conn.DiscoveredServers(), ",")).Msg("nats connection")
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	// waits till disconnection from client.
-	go func() {
-		<-config.StopCh
-		gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
-		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("client disconnected. stopping the configuration...")
-		wg.Done()
-	}()
-
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("running...")
 	config.Active = true
 
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
 	sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
-		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-			Src:     config.Src,
+			Src:     config.Data.Src,
 			Payload: msg.Data,
 		})
 	})
 	if err != nil {
-		gatewayConfig.Log.Error().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Err(err).Msg("failed to subscribe to subject")
+		errMessage = "failed to subscribe to subject"
+		config.StopCh <- struct{}{}
+		return err
 	} else {
-		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("configuration is running...")
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
 	}
 
 	wg.Wait()
 	err = sub.Unsubscribe()
 	if err != nil {
-		gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("failed to unsubscribe")
+		errMessage = "failed to unsubscribe"
 		return err
 	}
 	return nil
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

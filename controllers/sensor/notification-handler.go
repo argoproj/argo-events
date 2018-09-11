@@ -238,7 +238,7 @@ func (se *sensorExecutor) reapplyUpdate() error {
 	})
 }
 
-// mark the node with a phase, retuns the node
+// markNodePhase marks the node with a phase, returns the node
 func (se *sensorExecutor) markNodePhase(nodeName string, phase v1alpha1.NodePhase, message ...string) *v1alpha1.NodeStatus {
 	node := getNodeByName(se.sensor, nodeName)
 	if node == nil {

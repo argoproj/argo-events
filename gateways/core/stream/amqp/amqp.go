@@ -19,12 +19,13 @@ package main
 import (
 	"fmt"
 
-	"context"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	amqplib "github.com/streadway/amqp"
+	"github.com/argoproj/argo-events/gateways/core"
+	"context"
 )
 
 const (
@@ -39,37 +40,50 @@ var (
 )
 
 // Runs a configuration
-func configRunner(config *gateways.ConfigData) error {
-	gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("parsing configuration...")
+func configRunner(config *gateways.ConfigContext) error {
+	var err error
+	var errMessage string
+
+	// mark final gateway state
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
 
 	var s *stream.Stream
-	err := yaml.Unmarshal([]byte(config.Config), &s)
+	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to parse amqp config")
+		errMessage = "failed to parse amqp config"
 		return err
 	}
 
 	conn, err := amqplib.Dial(s.URL)
 	if err != nil {
-		gatewayConfig.Log.Error().Err(err).Msg("failed to connect to server")
+		errMessage = "failed to connect to server"
 		return err
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		gatewayConfig.Log.Error().Err(err).Msg("failed to open channel")
+		errMessage = "failed to open channel"
 		return err
 	}
 
 	delivery, err := getDelivery(ch, s.Attributes)
-
 	if err != nil {
-		gatewayConfig.Log.Error().Err(err).Msg("failed to get message delivery")
+		errMessage = "failed to get message delivery"
 		return err
 	}
 
-	gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("configuration is running...")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
 	// start listening for messages
 amqpConfigRunner:
 	for {
@@ -77,7 +91,7 @@ amqpConfigRunner:
 		case msg := <-delivery:
 			gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer")
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Src,
+				Src:     config.Data.Src,
 				Payload: msg.Body,
 			})
 		case <-config.StopCh:
@@ -133,6 +147,13 @@ func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.De
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }
