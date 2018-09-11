@@ -37,7 +37,7 @@ endif
 .DELETE_ON_ERROR:
 all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-transformer-linux webhook-linux calendar-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -171,6 +171,8 @@ mqtt-image: mqtt-linux
 
 
 # gRPC gateway binary
+grpc-gateway-images:  gateway-processor-grpc-client-image calendar-grpc-image
+
 # Gateway processor client
 gateway-processor-grpc-client:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-client ./gateways/grpc/gateway.go
@@ -196,6 +198,8 @@ calendar-grpc-image: calendar-grpc-linux
 
 
 # HTTP gateway client binary
+http-gateway-images: gateway-processor-http-client-image calendar-http-image
+
 # Gateway processor client
 gateway-processor-http-client:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-processor-http-client ./gateways/rest/gateway.go

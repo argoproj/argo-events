@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +32,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	"strings"
 	"sync"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -223,7 +223,7 @@ func checkMap(expected, actual map[string]string) bool {
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	if err != nil {

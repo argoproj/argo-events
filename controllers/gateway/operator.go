@@ -287,6 +287,14 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Name:  common.GatewayName,
 			Value: goc.gw.Name,
 		},
+		{
+			Name: common.GatewayControllerInstanceIDEnvVar,
+			Value: goc.controller.Config.InstanceID,
+		},
+		{
+			Name: common.GatewayControllerNameEnvVar,
+			Value: common.DefaultGatewayControllerDeploymentName,
+		},
 	}
 
 	var containers []corev1.Container

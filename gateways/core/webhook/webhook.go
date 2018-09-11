@@ -22,12 +22,12 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"go.uber.org/atomic"
 	"io/ioutil"
 	"net/http"
 	"sync"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -172,7 +172,7 @@ func configRunner(config *gateways.ConfigContext) error {
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	if err != nil {

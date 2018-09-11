@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	"io"
@@ -32,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"sync"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -69,37 +69,29 @@ type calSchedule struct {
 // runs given configuration and sends event back to gateway processor client
 func runGateway(config *gateways.ConfigContext) error {
 	var err error
-	var errMsg string
+	var errMessage string
 
-	defer func() {
-		config.Active = false
-		if err != nil {
-			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(errMsg)
-			httpGatewayServerConfig.GwConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
-		} else {
-			httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")
-			httpGatewayServerConfig.GwConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, "configuration completed")
-		}
-		httpGatewayServerConfig.GwConfig.PersistUpdates()
-	}()
+	// mark final gateway state
+	defer httpGatewayServerConfig.GwConfig.GatewayCleanup(config, errMessage, err)
+
 
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing calendar schedule...")
 
 	var cal *calSchedule
 	err = yaml.Unmarshal([]byte(config.Data.Config), &cal)
 	if err != nil {
-		errMsg = "failed to parse calendar schedule"
+		errMessage = "failed to parse calendar schedule"
 		return err
 	}
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		errMsg = "failed to resolve calendar schedule."
+		errMessage = "failed to resolve calendar schedule."
 		return err
 	}
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		errMsg = "failed to resolve calendar schedule."
+		errMessage = "failed to resolve calendar schedule."
 		return err
 	}
 
@@ -116,6 +108,13 @@ func runGateway(config *gateways.ConfigContext) error {
 			}
 		}
 		return nextT
+	}
+
+	event := httpGatewayServerConfig.GwConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = httpGatewayServerConfig.GwConfig.CreateK8Event(event)
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
 	}
 
 	lastT := time.Now()
@@ -139,14 +138,19 @@ calendarConfigRunner:
 				payload, err = json.Marshal(re)
 
 				if err != nil {
-					errMsg = "failed to marshal payload into gateway event"
+					errMessage = "failed to marshal payload into gateway event"
 					return err
 				}
 				httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway processor client")
 				httpGatewayServerConfig.GwConfig.Log.Info().Str("url", fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint)).Msg("client url")
-				_, err := http.Post(fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
+				res, err := http.Post(fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPClientPort, httpGatewayServerConfig.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
 				if err != nil {
-					errMsg = "failed to dispatch event to gateway-processor."
+					errMessage = "failed to dispatch event to gateway-processor."
+					return err
+				}
+				if res.StatusCode == http.StatusBadRequest {
+					errMessage = "gateway processor client failed to process event."
+					err = fmt.Errorf(errMessage)
 					return err
 				}
 			}

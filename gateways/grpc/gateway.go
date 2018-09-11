@@ -22,10 +22,10 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwProto "github.com/argoproj/argo-events/gateways/grpc/proto"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"io"
 	"os"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 const (
@@ -47,7 +47,11 @@ var (
 // configRunner establishes connection with gateway server and sends new configurations to run.
 // also disconnect the clients for stale configurations
 func configRunner(config *gateways.ConfigContext) error {
-	defer gatewayConfig.PersistUpdates()
+	var err error
+	var errMessage string
+
+	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithWaitForHandshake(),
@@ -55,8 +59,7 @@ func configRunner(config *gateways.ConfigContext) error {
 
 	conn, err := grpc.Dial(fmt.Sprintf(serverAddr, rpcServerPort), opts...)
 	if err != nil {
-		gatewayConfig.Log.Fatal().Str("config-key", config.Data.Src).Err(err).Msg("failed to dial")
-		gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
+		errMessage = "failed to dial"
 		return err
 	}
 
@@ -72,25 +75,32 @@ func configRunner(config *gateways.ConfigContext) error {
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("connected with server and got a event stream")
 
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to get event stream")
-		gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseError, err.Error())
+		errMessage = "failed to get event stream"
 		return err
 	}
+
+	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = gatewayConfig.CreateK8Event(event)
+	if err != nil {
+		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		return err
+	}
+
 	for {
 		event, err := eventStream.Recv()
 		if err == io.EOF {
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("event stream stopped")
-			gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, "completed")
-			return err
+			return nil
 		}
 		if err != nil {
-			gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Err(err).Msg("failed to receive events on stream")
-			gatewayConfig.MarkGatewayNodePhase(config.Data.Src, v1alpha1.NodePhaseCompleted, err.Error())
+			errMessage = "failed to receive events on stream"
 			return err
 		}
 		// event should never be nil
 		if event == nil {
-			gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Err(err).Msg("event can't be nil")
+			errMessage = "event can't be nil"
+			err = fmt.Errorf(errMessage)
+			return err
 		} else {
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
@@ -107,6 +117,13 @@ func configDeactivator(config *gateways.ConfigContext) error {
 }
 
 func main() {
-	gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, configDeactivator)
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, configDeactivator)
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
 	select {}
 }

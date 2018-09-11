@@ -17,8 +17,8 @@ limitations under the License.
 package common
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 )
 
 const (
@@ -63,6 +63,7 @@ const (
 	// SensorName refers env var for name of sensor
 	SensorName = "SENSOR_NAME"
 
+	// SensorNamespace is used to get namespace where sensors are deployed
 	SensorNamespace = "SENSOR_NAMESPACE"
 
 	// LabelJobName is label for job name
@@ -98,34 +99,53 @@ const (
 
 	// LabelGatewayEventSeen is the label for already seen gateway event
 	LabelGatewayEventSeen = "event-seen"
+
+	// GatewayControllerInstanceIDEnvVar is used to get controller instance id
+	GatewayControllerInstanceIDEnvVar = "GATEWAY_CONTROLLER_INSTANCE_ID"
+
+	// GatewayControllerNameEnvVar is used to get name of gateway controller
+	GatewayControllerNameEnvVar = "GATEWAY_CONTROLLER_NAME"
 )
 
 // Gateway Processor constants
 const (
+	// GatewayProcessorConfigMapEnvVar is used to get map containing configurations to run in a gateway
 	GatewayProcessorConfigMapEnvVar = "GATEWAY_PROCESSOR_CONFIG_MAP"
 
+	// GatewayProcessorGRPCServerPort is used to get grpc server port for gateway processor server
 	GatewayProcessorGRPCServerPort = "GATEWAY_PROCESSOR_GRPC_SERVER_PORT"
 
+	// GatewayProcessorClientHTTPPortEnvVar is used to get http server port for gateway processor client
 	GatewayProcessorClientHTTPPortEnvVar = "GATEWAY_PROCESSOR_CLIENT_HTTP_PORT"
 
+	// GatewayProcessorClientHTTPPort is gateway processor client http server port
 	GatewayProcessorClientHTTPPort = "9393"
 
+	// GatewayProcessorServerHTTPPortEnvVar is used get http server port for gateway processor server
 	GatewayProcessorServerHTTPPortEnvVar = "GATEWAY_PROCESSOR_SERVER_HTTP_PORT"
 
+	// GatewayProcessorHTTPServerConfigStartEndpointEnvVar is used to get REST endpoint to post new configuration to
 	GatewayProcessorHTTPServerConfigStartEndpointEnvVar = "GATEWAY_HTTP_CONFIG_START"
 
+	// GatewayProcessorHTTPServerConfigStartEndpoint is REST endpoint to post new configuration to
 	GatewayProcessorHTTPServerConfigStartEndpoint = "/start"
 
+	// GatewayProcessorHTTPServerConfigStopEndpointEnvVar is used to get REST endpoint to post to stop a configuration
 	GatewayProcessorHTTPServerConfigStopEndpointEnvVar = "GATEWAY_HTTP_CONFIG_STOP"
 
+	// GatewayProcessorHTTPServerConfigStopEndpoint is REST endpoint to post to stop a configuration
 	GatewayProcessorHTTPServerConfigStopEndpoint = "/stop"
 
+	// GatewayProcessorHTTPServerEventEndpointEnvVar is used to get the REST endpoint to send event to for gateway processor server
 	GatewayProcessorHTTPServerEventEndpointEnvVar = "GATEWAY_HTTP_CONFIG_EVENT"
 
+	// GatewayProcessorHTTPServerEventEndpoint is REST endpoint to send event to for gateway processor server
 	GatewayProcessorHTTPServerEventEndpoint = "/event"
 
+	// GatewayProcessorGRPCClientImage is gRPC gateway processor client image
 	GatewayProcessorGRPCClientImage = "metalgearsolid/gateway-processor-grpc-client"
 
+	// GatewayProcessorHTTPClientImage is HTTP gateway processor client image
 	GatewayProcessorHTTPClientImage = "metalgearsolid/gateway-processor-http-client"
 )
 

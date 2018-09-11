@@ -17,15 +17,15 @@ limitations under the License.
 package mqtt
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"sync"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/gateways/core"
-	"context"
 )
 
 const (
@@ -45,7 +45,6 @@ func configRunner(config *gateways.ConfigContext) error {
 
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
-
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
 	var wg sync.WaitGroup
@@ -117,7 +116,7 @@ func configRunner(config *gateways.ConfigContext) error {
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	if err != nil {

@@ -48,7 +48,7 @@ type GatewayControllerConfig struct {
 	Namespace string `json:"namespace"`
 }
 
-// gatewayController listens for new gateways and hands off handling of each gateway-controller on the queue to the operator
+// GatewayController listens for new gateways and hands off handling of each gateway-controller on the queue to the operator
 type GatewayController struct {
 	// ConfigMap is the name of the config map in which to derive configuration of the contoller
 	ConfigMap string

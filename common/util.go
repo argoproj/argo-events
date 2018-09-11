@@ -24,9 +24,9 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"math/rand"
 	"net/http"
 	"time"
-	"math/rand"
 )
 
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
@@ -92,7 +92,6 @@ func SendErrorResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(ErrorResponse))
 }
-
 
 // RandomStringGenerator generates a random string
 func RandomStringGenerator() string {

@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	gwv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwClientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
@@ -38,7 +39,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 )
 
 // GatewayConfig provides a generic configuration for a gateway
@@ -64,6 +64,10 @@ type GatewayConfig struct {
 	registeredConfigs map[string]*ConfigContext
 	// configName is name of configmap that contains run configuration/s for the gateway
 	configName string
+	// controllerName is the name of gateway controller
+	controllerName string
+	// controllerInstanceId is instance ID of the gateway controller
+	controllerInstanceID string
 }
 
 // ConfigData contains information of a configuration for gateway to run.
@@ -177,11 +181,15 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 	}
 }
 
+// filters unwanted events
 func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
-	if event.Type == gateway.Kind && event.Source.Component == gc.Name && event.ObjectMeta.Labels[common.LabelGatewayEventSeen] == "" {
+	if event.Type == gateway.Kind && event.Source.Component == gc.Name &&
+		event.ObjectMeta.Labels[common.LabelGatewayEventSeen] == "" &&
+		event.ReportingInstance == gc.controllerInstanceID &&
+		event.ReportingController == gc.controllerName {
+		gc.Log.Debug().Str("event-name", event.ObjectMeta.Name).Msg("processing gateway k8 event")
 		return true
 	}
-	gc.Log.Debug().Str("event-name", event.ObjectMeta.Name).Msg("ignoring event")
 	return false
 }
 
@@ -424,19 +432,28 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		panic("gateway name not provided")
 	}
+	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
 	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
 	if !ok {
-		panic("no namespace provided")
+		log.Panic().Str("gateway-name", name).Err(err).Msg("no namespace provided")
 	}
 	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
 	if !ok {
-		panic("gateway transformer port is not provided")
+		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway transformer port is not provided")
 	}
 	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
 	if !ok {
-		panic("gateway processor configmap is not provided")
+		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway processor configmap is not provided")
 	}
-	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
+	controllerName, ok := os.LookupEnv(common.GatewayControllerNameEnvVar)
+	if !ok {
+		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller name is not provided")
+	}
+	controllerInstanceID, ok := os.LookupEnv(common.GatewayControllerInstanceIDEnvVar)
+	if !ok {
+		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller instance ID is not provided")
+	}
+
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gwcs := gwClientset.NewForConfigOrDie(restConfig)
 	gw, err := gwcs.ArgoprojV1alpha1().Gateways(namespace).Get(name, metav1.GetOptions{})
@@ -454,6 +471,8 @@ func NewGatewayConfiguration() *GatewayConfig {
 		configName:        configName,
 		gwcs:              gwcs,
 		gw:                gw,
+		controllerName: controllerName,
+		controllerInstanceID: controllerInstanceID,
 	}
 }
 
@@ -596,30 +615,30 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 func (gc *GatewayConfig) K8Event(reason string, action gwv1alpha1.NodePhase, configName string) *corev1.Event {
 	return &corev1.Event{
 		Reason: reason,
-		Type: gateway.Kind,
+		Type:   gateway.Kind,
 		Action: string(action),
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: gc.Namespace,
-			Name: gc.Name + "-" + common.RandomStringGenerator(),
+			Name:      gc.Name + "-" + common.RandomStringGenerator(),
 			Labels: map[string]string{
 				common.LabelGatewayConfigurationName: configName,
-				common.LabelGatewayEventSeen : "",
-				common.LabelGatewayName: gc.Name,
+				common.LabelGatewayEventSeen:         "",
+				common.LabelGatewayName:              gc.Name,
 			},
 		},
 		InvolvedObject: corev1.ObjectReference{
 			Namespace: gc.Namespace,
-			Name: gc.Name,
-			Kind: gateway.Kind,
+			Name:      gc.Name,
+			Kind:      gateway.Kind,
 		},
 		Source: corev1.EventSource{
 			Component: gc.Name,
 		},
-		ReportingInstance: "argo-events",
-		ReportingController: common.DefaultGatewayControllerDeploymentName,
+		ReportingInstance:   gc.controllerInstanceID,
+		ReportingController: gc.controllerName,
 	}
 }
 

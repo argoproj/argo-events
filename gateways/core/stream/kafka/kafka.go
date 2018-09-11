@@ -17,14 +17,14 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"strconv"
-	"github.com/argoproj/argo-events/gateways/core"
-	"context"
 )
 
 const (
@@ -44,7 +44,6 @@ func configRunner(config *gateways.ConfigContext) error {
 
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
-
 
 	var s *stream.Stream
 	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
@@ -130,7 +129,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
 	if err != nil {

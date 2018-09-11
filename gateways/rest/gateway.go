@@ -18,18 +18,26 @@ var (
 
 func configRunner(config *gateways.ConfigContext) error {
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("start configuration")
-	return sendHTTPRequest(&gateways.ConfigData{
+	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigActivateEndpoint)
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, "failed to send new configuration to gateway processor server", err)
+	}
+	return err
 }
 
 func configStopper(config *gateways.ConfigContext) error {
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
-	return sendHTTPRequest(&gateways.ConfigData{
+	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigurationDeactivateEndpoint)
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, "failed to send configuration to stop to gateway processor server", err)
+	}
+	return err
 }
 
 func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
@@ -47,8 +55,8 @@ func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 }
 
 func main() {
+	httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
 	httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), configRunner, configStopper)
-
 	// handle events from gateway processor server
 	http.HandleFunc(httpGatewayServerConfig.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		httpGatewayServerConfig.GwConfig.Log.Info().Msg("received an event. processing...")
@@ -69,7 +77,6 @@ func main() {
 		httpGatewayServerConfig.GwConfig.DispatchEvent(&event)
 	})
 
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("endpoint", httpGatewayServerConfig.EventEndpoint).Msg("event endpoint")
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("port", httpGatewayServerConfig.HTTPClientPort).Msg("gateway processor client is now listening for events.")
 	httpGatewayServerConfig.GwConfig.Log.Fatal().Str("port", httpGatewayServerConfig.HTTPClientPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", httpGatewayServerConfig.HTTPClientPort), nil)).Msg("")
 }
