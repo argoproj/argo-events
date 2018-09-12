@@ -21,8 +21,13 @@ func main() {
 		configMap = common.DefaultConfigMapName(common.DefaultGatewayControllerDeploymentName)
 	}
 
+	namespace, ok := os.LookupEnv(common.GatewayNamespace)
+	if !ok {
+		namespace = common.DefaultGatewayControllerNamespace
+	}
+
 	controller := gateway.NewGatewayController(restConfig, configMap)
-	err = controller.ResyncConfig()
+	err = controller.ResyncConfig(namespace)
 	if err != nil {
 		panic(err)
 	}

@@ -22,10 +22,10 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwProto "github.com/argoproj/argo-events/gateways/grpc/proto"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"io"
 	"os"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 const (

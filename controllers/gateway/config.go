@@ -76,8 +76,8 @@ func (c *GatewayController) newControllerConfigMapWatch() *cache.ListWatch {
 }
 
 // ResyncConfig reloads the gateway-controller config from the configmap
-func (c *GatewayController) ResyncConfig() error {
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(common.DefaultGatewayControllerNamespace)
+func (c *GatewayController) ResyncConfig(namespace string) error {
+	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
 	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err

@@ -1,3 +1,3 @@
 FROM centos:7
-COPY dist/gateway-transformer /bin/
-ENTRYPOINT [ "/bin/gateway-transformer" ]
+COPY dist/gateway-http-transformer /bin/
+ENTRYPOINT [ "/bin/gateway-http-transformer" ]

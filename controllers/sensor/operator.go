@@ -153,8 +153,8 @@ func (soc *sOperationCtx) operate() error {
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
 						{
-							Port:       common.SensorServicePort,
-							TargetPort: intstr.FromInt(common.SensorServicePort),
+							Port:       intstr.Parse(common.SensorServicePort).IntVal,
+							TargetPort: intstr.FromInt(int(intstr.Parse(common.SensorServicePort).IntVal)),
 						},
 					},
 					Type: corev1.ServiceTypeClusterIP,

@@ -11,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 	"strings"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 func (t *tOperationCtx) WatchGatewayTransformerConfigMap(ctx context.Context, name string) (cache.Controller, error) {
@@ -78,10 +80,41 @@ func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
 	if !ok {
 		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventTypeVersion)
 	}
-	sensors, ok := cm.Data[common.SensorList]
-	if !ok {
-		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.SensorList)
+
+	// parse sensor watchers and gateway watchers if any
+	var sensorWatchers []v1alpha1.SensorNotificationWatcher
+	var gatewayWatchers []v1alpha1.GatewayNotificationWatcher
+
+	sensorWatchersStr := cm.Data[common.SensorWatchers]
+	gatewayWatchersStr := cm.Data[common.GatewayWatchers]
+
+	fmt.Sprintf("sensor watchers: %s", sensorWatchersStr)
+	fmt.Sprintf("gateway watchers: %s", gatewayWatchersStr)
+
+	if sensorWatchersStr != "" {
+		for _, sensorWatcherStr := range strings.Split(sensorWatchersStr, ",") {
+			fmt.Sprintf("unmarshalling sensor watcher: %s", sensorWatcherStr)
+			var sensorWatcher v1alpha1.SensorNotificationWatcher
+			err := yaml.Unmarshal([]byte(sensorWatcherStr), &sensorWatcher)
+			if err != nil {
+				panic(fmt.Errorf("failed to unmarshal sensor watcher string. Err: %+v", err))
+			}
+			sensorWatchers = append(sensorWatchers, sensorWatcher)
+		}
 	}
+
+	if gatewayWatchersStr != "" {
+		for _, gatewayWatcherStr := range strings.Split(gatewayWatchersStr, ",") {
+			fmt.Sprintf("unmarshalling gateway watcher: %s", gatewayWatcherStr)
+			var gatewayWatcher v1alpha1.GatewayNotificationWatcher
+			err := yaml.Unmarshal([]byte(gatewayWatcherStr), &gatewayWatcher)
+			if err != nil {
+				panic(fmt.Errorf("failed to unmarshal gateway watcher string. Err: %+v", err))
+			}
+			gatewayWatchers = append(gatewayWatchers, gatewayWatcher)
+		}
+	}
+
 	eventSource, ok := cm.Data[common.EventSource]
 	if !ok {
 		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventSource)
@@ -90,7 +123,8 @@ func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
 	t.Config = &tConfig{
 		EventType:        eventType,
 		EventTypeVersion: eventTypeVersion,
-		Sensors:          strings.Split(sensors, ","),
+		Gateways: gatewayWatchers,
+		Sensors: sensorWatchers,
 		EventSource:      eventSource,
 	}
 	return nil

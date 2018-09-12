@@ -48,6 +48,19 @@ message GatewayList {
   repeated Gateway items = 2;
 }
 
+// GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway
+message GatewayNotificationWatcher {
+  // Name is the gateway name
+  optional string name = 1;
+
+  // Port is http server port on which gateway is running
+  optional string port = 2;
+
+  // Endpoint is REST API endpoint to post event to.
+  // Events are sent using HTTP POST method to this endpoint.
+  optional string endpoint = 3;
+}
+
 // GatewaySpec represents gateway specifications
 message GatewaySpec {
   // DeploySpec is description of gateway
@@ -65,8 +78,11 @@ message GatewaySpec {
   // ServiceSpec is the specifications of the service to expose the gateway
   optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 5;
 
-  // Sensors are list of sensors to dispatch events to
-  repeated string sensors = 6;
+  // Watchers are components which are interested listening to notifications from this gateway
+  // These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
+  // In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
+  // specifying watchers would be unnecessary.
+  optional NotificationWatchers watchers = 6;
 
   // RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server
   optional string rpcPort = 7;
@@ -113,6 +129,22 @@ message NodeStatus {
   // Message store data or something to save for configuration
   optional string message = 6;
 
+  // UpdateTime is the time when node(gateway configuration) was updated
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updateTime = 7;
+}
+
+// NotificationWatchers are components which are interested listening to notifications from this gateway
+message NotificationWatchers {
+  // Gateways is the list of gateways interested in listening to notifications from this gateway
+  repeated GatewayNotificationWatcher gateways = 1;
+
+  // Sensors is the list of sensors interested in listening to notifications from this gateway
+  repeated SensorNotificationWatcher sensors = 2;
+}
+
+// SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway
+message SensorNotificationWatcher {
+  // Name is name of the sensor
+  optional string name = 1;
 }
 

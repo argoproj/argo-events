@@ -15,6 +15,13 @@ spec:
       command: ["/bin/calendar-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
-  type: "calendar"
+  type: "HTTP"
   version: "1.0"
-  sensors: ["calendar-sensor", "multi-signal-sensor"]
+  watchers:
+      gateways:
+      - name: "webhook-gateway-2"
+        port: "9070"
+        endpoint: "/notifications"
+      sensors:
+      - name: "calendar-sensor"
+      - name: "multi-signal-sensor"

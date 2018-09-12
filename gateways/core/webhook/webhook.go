@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
@@ -28,6 +27,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"fmt"
 )
 
 var (
@@ -97,17 +97,18 @@ func configRunner(config *gateways.ConfigContext) error {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// waits till disconnection from client. perform cleanup.
+	// waits till disconnection from client and perform cleanup.
 	go func() {
 		<-config.StopCh
 		config.Active = false
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
 		// remove the endpoint and http method configuration.
 		mutex.Lock()
-		activeHTTPMethods := activeRoutes[h.Endpoint]
-		delete(activeHTTPMethods, h.Method)
+		activeHTTPMethods, ok := activeRoutes[h.Endpoint]
+		if ok {
+			delete(activeHTTPMethods, h.Method)
+		}
 		mutex.Unlock()
-
 		wg.Done()
 	}()
 

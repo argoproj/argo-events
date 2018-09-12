@@ -8,7 +8,7 @@ metadata:
     gateway-name: "webhook-gateway"
 spec:
   configMap: "webhook-gateway-configmap"
-  type: "webhook"
+  type: "HTTP"
   version: "1.0"
   deploySpec:
     containers:
@@ -24,4 +24,11 @@ spec:
       - port: 12000
         targetPort: 12000
     type: LoadBalancer
-  sensors: ["webhook-sensor", "multi-signal-sensor"]
+  watchers:
+    gateways:
+    - name: "webhook-gateway-2"
+      port: "9070"
+      endpoint: "/notifications"
+    sensors:
+    - name: "webhook-sensor"
+    - name: "multi-signal-sensor"

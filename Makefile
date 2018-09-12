@@ -37,7 +37,7 @@ endif
 .DELETE_ON_ERROR:
 all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-transformer-linux webhook-linux calendar-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-http-transformer-image webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -81,16 +81,16 @@ gateway-controller-image: gateway-controller-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
 
 
-# Gateway transformer
-gateway-transformer:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-transformer ./cmd/controllers/gateway/transform/main.go
+# Gateway transformers
+gateway-http-transformer:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gateway-http-transformer ./cmd/controllers/gateway/transform/http/main.go
 
-gateway-transformer-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-transformer
+gateway-http-transformer-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-http-transformer
 
-gateway-transformer-image: gateway-transformer-linux
-	 docker build -t $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-transformer:$(IMAGE_TAG) ; fi
+gateway-http-transformer-image: gateway-http-transformer-linux
+	 docker build -t $(IMAGE_PREFIX)gateway-http-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-http-transformer:$(IMAGE_TAG) ; fi
 
 # gateway binaries
 webhook:

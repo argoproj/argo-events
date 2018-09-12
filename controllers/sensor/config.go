@@ -91,8 +91,8 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 }
 
 // ResyncConfig reloads the sensor-controller config from the configmap
-func (c *SensorController) ResyncConfig() error {
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(common.DefaultSensorControllerNamespace)
+func (c *SensorController) ResyncConfig(namespace string) error {
+	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
 	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err

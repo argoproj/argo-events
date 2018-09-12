@@ -48,7 +48,7 @@ func startHttpServer(t *testing.T) {
 			t.Error("received message doesn't match sent message")
 		}
 	})
-	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%d", common.GatewayTransformerPort), nil))
+	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", common.GatewayTransformerPort), nil))
 }
 
 func TestSignal(t *testing.T) {

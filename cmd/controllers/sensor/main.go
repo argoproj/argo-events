@@ -37,8 +37,13 @@ func main() {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
 
+	namespace, ok := os.LookupEnv(common.SensorNamespace)
+	if !ok {
+		namespace = common.DefaultGatewayControllerNamespace
+	}
+
 	controller := sensor.NewSensorController(restConfig, configMap)
-	err = controller.ResyncConfig()
+	err = controller.ResyncConfig(namespace)
 	if err != nil {
 		panic(err)
 	}

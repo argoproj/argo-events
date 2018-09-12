@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	"io"
@@ -31,7 +32,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"sync"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -73,7 +73,6 @@ func runGateway(config *gateways.ConfigContext) error {
 
 	// mark final gateway state
 	defer httpGatewayServerConfig.GwConfig.GatewayCleanup(config, errMessage, err)
-
 
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing calendar schedule...")
 

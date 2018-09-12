@@ -13,8 +13,9 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"strings"
 	"time"
+	"strings"
+	"github.com/ghodss/yaml"
 )
 
 const (
@@ -60,6 +61,34 @@ func (goc *gwOperationCtx) operate() error {
 	// manages states of a gateway
 	switch goc.gw.Status.Phase {
 	case v1alpha1.NodePhaseNew:
+		// check if the type of the gateway is http
+		var sensorWatchers []string
+		var gatewayWatchers []string
+		if goc.gw.Spec.Type == v1alpha1.HTTPGateway {
+			if goc.gw.Spec.Watchers.Sensors != nil {
+				for _, sensor := range goc.gw.Spec.Watchers.Sensors {
+					b, err := yaml.Marshal(sensor)
+					if err != nil {
+						goc.log.Error().Str("sensor-watcher", sensor.Name).Err(err).Msg("failed to parse sensor watcher")
+						goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to parse sensor watcher. Sensor Watcher: %s Err: %+v", sensor.Name, err))
+						return err
+					}
+					sensorWatchers = append(sensorWatchers, string(b))
+				}
+			}
+			if goc.gw.Spec.Watchers.Gateways != nil {
+				for _, gateway := range goc.gw.Spec.Watchers.Gateways {
+					b, err := yaml.Marshal(gateway)
+					if err != nil {
+						goc.log.Error().Str("gateway-watcher", gateway.Name).Err(err).Msg("failed to parse gateway watcher")
+						goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to parse gateway watcher. gateway Watcher: %s Err: %+v", gateway.Name, err))
+						return err
+					}
+					gatewayWatchers = append(gatewayWatchers, string(b))
+				}
+			}
+		}
+
 		// declare the configuration map for gateway transformer
 		gatewayConfigMap := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -72,8 +101,9 @@ func (goc *gwOperationCtx) operate() error {
 			Data: map[string]string{
 				common.EventSource:      goc.gw.Name,
 				common.EventTypeVersion: goc.gw.Spec.Version,
-				common.EventType:        goc.gw.Spec.Type,
-				common.SensorList:       strings.Join(goc.gw.Spec.Sensors, ","),
+				common.EventType:        string(goc.gw.Spec.Type),
+				common.SensorWatchers:       strings.Join(sensorWatchers, ","),
+				common.GatewayWatchers: strings.Join(gatewayWatchers, ","),
 			},
 		}
 		// create gateway transformer configmap
@@ -273,7 +303,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.GatewayTransformerPortEnvVar,
-			Value: fmt.Sprintf("%d", common.GatewayTransformerPort),
+			Value: common.GatewayTransformerPort,
 		},
 		{
 			Name:  common.EnvVarNamespace,
@@ -288,11 +318,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: goc.gw.Name,
 		},
 		{
-			Name: common.GatewayControllerInstanceIDEnvVar,
+			Name:  common.GatewayControllerInstanceIDEnvVar,
 			Value: goc.controller.Config.InstanceID,
 		},
 		{
-			Name: common.GatewayControllerNameEnvVar,
+			Name:  common.GatewayControllerNameEnvVar,
 			Value: common.DefaultGatewayControllerDeploymentName,
 		},
 	}
@@ -370,11 +400,24 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		}
 	}
 
+	var transformerImage string
+
+	switch goc.gw.Spec.Type {
+	case v1alpha1.HTTPGateway:
+		transformerImage = common.GatewayHTTPEventTransformerImage
+	case v1alpha1.KafkaGateway:
+		transformerImage = common.GatewayKafkaEventTransformerImage
+	case v1alpha1.NATSGateway:
+		transformerImage = common.GatewayNATSEventTransformerImage
+	default:
+		transformerImage = common.GatewayHTTPEventTransformerImage
+	}
+
 	// create container for gateway transformer
 	gatewayTransformerContainer := corev1.Container{
 		Name:            gatewayTransformer,
 		ImagePullPolicy: corev1.PullAlways,
-		Image:           common.GatewayEventTransformerImage,
+		Image:           transformerImage,
 		Env: []corev1.EnvVar{
 			{
 				Name:  common.GatewayTransformerConfigMapEnvVar,

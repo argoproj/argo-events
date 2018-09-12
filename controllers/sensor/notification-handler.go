@@ -110,7 +110,7 @@ func (se *sensorExecutor) newSensorWatch() *cache.ListWatch {
 func (se *sensorExecutor) WatchSignalNotifications() {
 	// watch sensor updates
 	go se.resyncSensor(context.Background())
-	srv := &http.Server{Addr: fmt.Sprintf(":%d", common.SensorServicePort)}
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", common.SensorServicePort)}
 	http.HandleFunc("/", se.handleSignals)
 	go func() {
 		se.log.Info().Str("port", string(common.SensorServicePort)).Msg("sensor started listening")

@@ -145,6 +145,15 @@ func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 
 // updateGatewayResource updates gateway resource
 func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
+	defer func() {
+		gc.Log.Info().Str("event-name", event.Name).Msg("marking gateway k8 event as seen")
+		// mark event as seen
+		event.ObjectMeta.Labels[common.LabelGatewayEventSeen] = "true"
+		_, err := gc.Clientset.CoreV1().Events(gc.Namespace).Update(event)
+		if err != nil {
+			gc.Log.Error().Err(err).Str("event-name", event.ObjectMeta.Name).Msg("failed to mark event as seen")
+		}
+	}()
 	// get node/configuration to update
 	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
 	if !ok {
@@ -165,12 +174,6 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 		case gwv1alpha1.NodePhaseInitialized, gwv1alpha1.NodePhaseRunning, gwv1alpha1.NodePhaseCompleted, gwv1alpha1.NodePhaseError:
 			gc.gw.Status.Nodes[nodeID] = node
 			gc.MarkGatewayNodePhase(nodeID, gwv1alpha1.NodePhase(event.Action), event.Reason)
-			// mark event as seen
-			event.ObjectMeta.Labels[common.LabelGatewayEventSeen] = "true"
-			_, err := gc.Clientset.CoreV1().Events(gc.Namespace).Update(event)
-			if err != nil {
-				gc.Log.Error().Err(err).Str("event-name", event.ObjectMeta.Name).Msg("failed to mark event as seen")
-			}
 			return gc.PersistUpdates()
 		default:
 			return fmt.Errorf("invalid gateway k8 event. unknown gateway phase, %s", event.Action)
@@ -461,17 +464,17 @@ func NewGatewayConfiguration() *GatewayConfig {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("failed to get gateway resource")
 	}
 	return &GatewayConfig{
-		Log:               log,
-		Clientset:         clientset,
-		Namespace:         namespace,
-		Name:              name,
-		KubeConfig:        restConfig,
-		registeredConfigs: make(map[string]*ConfigContext),
-		transformerPort:   transformerPort,
-		configName:        configName,
-		gwcs:              gwcs,
-		gw:                gw,
-		controllerName: controllerName,
+		Log:                  log,
+		Clientset:            clientset,
+		Namespace:            namespace,
+		Name:                 name,
+		KubeConfig:           restConfig,
+		registeredConfigs:    make(map[string]*ConfigContext),
+		transformerPort:      transformerPort,
+		configName:           configName,
+		gwcs:                 gwcs,
+		gw:                   gw,
+		controllerName:       controllerName,
 		controllerInstanceID: controllerInstanceID,
 	}
 }

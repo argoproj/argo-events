@@ -17,8 +17,8 @@ limitations under the License.
 package common
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 const (
@@ -58,7 +58,10 @@ const (
 	SensorImage = "metalgearsolid/sensor"
 
 	// Sensor service port
-	SensorServicePort = 9300
+	SensorServicePort = "9300"
+
+	// SensorServiceEndpoint is the endpoint to dispatch the event to
+	SensorServiceEndpoint = "/"
 
 	// SensorName refers env var for name of sensor
 	SensorName = "SENSOR_NAME"
@@ -93,6 +96,9 @@ const (
 
 	// GatewayName refers env var for name of gateway
 	GatewayName = "GATEWAY_NAME"
+
+	// GatewayNamespace is namespace where gateway controller is deployed
+	GatewayNamespace = "GATEWAY_NAMESPACE"
 
 	// LabelGatewayConfigurationName is the label for a configuration in gateway
 	LabelGatewayConfigurationName = "config-name"
@@ -154,14 +160,20 @@ const (
 	// GatewayConfigMapEnvVar is used for gateway  configuration
 	GatewayTransformerConfigMapEnvVar = "GATEWAY_TRANSFORMER_CONFIG_MAP"
 
-	// GatewayEventTransformerImage is image for gateway event transformer
-	GatewayEventTransformerImage = "metalgearsolid/gateway-transformer"
+	// GatewayHTTPEventTransformerImage is image for gateway http event transformer
+	GatewayHTTPEventTransformerImage = "metalgearsolid/gateway-http-transformer"
+
+	// GatewayNATSEventTransformerImage is image for gateway nats event transformer
+	GatewayNATSEventTransformerImage = "metalgearsolid/gateway-nats-transformer"
+
+	// GatewayKafkaEventTransformerImage is image for gateway kafka event transformer
+	GatewayKafkaEventTransformerImage = "metalgearsolid/gateway-kafka-transformer"
 
 	//  TransformerPortEnvVar is the env var for http server port
 	GatewayTransformerPortEnvVar = "TRANSFORMER_PORT"
 
 	// TransformerPort is http server port where transformer service is running
-	GatewayTransformerPort = 9300
+	GatewayTransformerPort = "9300"
 
 	// EventTypeEnvVar contains the type of event
 	EventType = "EVENT_TYPE"
@@ -172,13 +184,16 @@ const (
 	// EnvVarEventSource contains the name of the gateway
 	EventSource = "EVENT_SOURCE"
 
-	// SensorList is list of sensor to dispatch message to
-	SensorList = "SENSOR_LIST"
+	// SensorWatchers is the list of sensors interested in listening to gateway notifications
+	SensorWatchers = "SENSOR_WATCHERS"
+
+	// GatewayWatchers is the list of gateways interested in listening to gateway notifications
+	GatewayWatchers = "GATEWAY_WATCHERS"
 )
 
 // CloudEvents constants
 const (
-	// CloudEventsVersion is the version of the CloudEvents spec targeted
+	// CloudEventsVersion is the version of the CloudEvents spec targeted+
 	// by this library.
 	CloudEventsVersion = "0.1"
 
