@@ -26,6 +26,7 @@ import (
 	natsio "github.com/nats-io/go-nats"
 	"strings"
 	"sync"
+	"github.com/argoproj/argo-events/common"
 )
 
 const (
@@ -78,8 +79,8 @@ func configRunner(config *gateways.ConfigContext) error {
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("running...")
 	config.Active = true
 
-	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
-	err = gatewayConfig.CreateK8Event(event)
+	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err

@@ -31,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 )
 
 // the context of an operation on a sensor.
@@ -76,6 +77,7 @@ func (soc *sOperationCtx) operate() error {
 		// since validation will fail every time
 		err := validateSensor(soc.s)
 		if err != nil {
+			soc.log.Error().Err(err).Msg("failed to validate sensor")
 			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())
 			return nil
 		}
@@ -189,7 +191,7 @@ func (soc *sOperationCtx) operate() error {
 			}
 		}
 	case v1alpha1.NodePhaseError:
-		// todo: handle this
+		// trigger escalation for all signals in error state
 	case v1alpha1.NodePhaseComplete:
 		soc.log.Info().Msg("sensor is completed")
 		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
@@ -332,4 +334,23 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			soc.updated = true
 		}
 	}
+}
+
+// createK8Event creates a kubernetes event.
+func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, eventType string) *corev1.Event {
+	event := &common.K8Event{
+		Name: soc.s.Name,
+		Namespace: soc.s.Namespace,
+		Type: eventType,
+		Reason: reason,
+		Action: string(action),
+		Kind: gateway.Kind,
+		ReportingController: common.DefaultSensorControllerDeploymentName,
+		ReportingInstance: soc.controller.Config.InstanceID,
+		Labels: map[string]string{
+			common.LabelEventSeen:         "",
+			common.LabelSensorName:              soc.s.Name,
+		},
+	}
+	return common.GetK8Event(event)
 }

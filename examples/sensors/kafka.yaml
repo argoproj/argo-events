@@ -8,12 +8,25 @@ spec:
   signals:
     - name: kafka-gateway/kafka.fooConfig
   triggers:
-    - name: "done-kafka-stream"
-      message:
-        body: "this is the message body"
-        stream:
-          type: kafka
-          url: localhost:9092
-          attributes:
-            topic: gateway-controller
-            partition: "1"
+    - name: kafka-workflow-trigger
+      resource:
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

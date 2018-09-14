@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
-	gwv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	gwClientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -46,7 +46,7 @@ type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
 	Log zerolog.Logger
 	// Clientset is client for kubernetes API
-	Clientset *kubernetes.Clientset
+	Clientset kubernetes.Interface
 	// Name is gateway name
 	Name string
 	// Namespace is namespace for the gateway to run inside
@@ -55,9 +55,9 @@ type GatewayConfig struct {
 	KubeConfig *rest.Config
 
 	// gateway holds Gateway custom resource
-	gw *gwv1alpha1.Gateway
+	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
-	gwcs gwClientset.Interface
+	gwcs gwclientset.Interface
 	// transformerPort is gateway transformer port to dispatch event to
 	transformerPort string
 	// registeredConfigs stores information about current configurations that are running in the gateway
@@ -117,6 +117,8 @@ type HTTPGatewayServerConfig struct {
 	Data *ConfigData
 }
 
+// add a gateway resource watcher.
+
 // newEventWatcher creates a new event watcher.
 func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
@@ -148,12 +150,13 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 	defer func() {
 		gc.Log.Info().Str("event-name", event.Name).Msg("marking gateway k8 event as seen")
 		// mark event as seen
-		event.ObjectMeta.Labels[common.LabelGatewayEventSeen] = "true"
+		event.ObjectMeta.Labels[common.LabelEventSeen] = "true"
 		_, err := gc.Clientset.CoreV1().Events(gc.Namespace).Update(event)
 		if err != nil {
 			gc.Log.Error().Err(err).Str("event-name", event.ObjectMeta.Name).Msg("failed to mark event as seen")
 		}
 	}()
+
 	// get node/configuration to update
 	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
 	if !ok {
@@ -161,19 +164,26 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 	}
 	node, ok := gc.gw.Status.Nodes[nodeID]
 	// initialize the configuration
-	if !ok {
+	if !ok && v1alpha1.NodePhase(event.Action) == v1alpha1.NodePhaseInitialized {
 		gc.Log.Warn().Str("config-name", nodeID).Msg("configuration not registered with gateway resource. initializing configuration...")
 		gc.initializeNode(nodeID, "initialized")
 		return gc.PersistUpdates()
 	}
+
 	gc.Log.Warn().Str("config-name", nodeID).Msg("updating gateway resource...")
 	// check if this event happened after last updated time for the configuration
-	if node.UpdateTime.Time.Before(event.EventTime.Time) {
+	if ok && node.UpdateTime.Time.Before(event.EventTime.Time) {
 		node.UpdateTime = event.EventTime
-		switch gwv1alpha1.NodePhase(event.Action) {
-		case gwv1alpha1.NodePhaseInitialized, gwv1alpha1.NodePhaseRunning, gwv1alpha1.NodePhaseCompleted, gwv1alpha1.NodePhaseError:
+		gc.Log.Info().Str("config-name", nodeID).Str("action", event.Action).Msg("taking action on configuration")
+
+		switch v1alpha1.NodePhase(event.Action) {
+		case v1alpha1.NodePhaseRunning, v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
 			gc.gw.Status.Nodes[nodeID] = node
-			gc.MarkGatewayNodePhase(nodeID, gwv1alpha1.NodePhase(event.Action), event.Reason)
+			gc.MarkGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
+			return gc.PersistUpdates()
+		case v1alpha1.NodePhaseRemove:
+			gc.Log.Info().Str("config-name", nodeID).Msg("removing configuration from gateway")
+			delete(gc.gw.Status.Nodes, nodeID)
 			return gc.PersistUpdates()
 		default:
 			return fmt.Errorf("invalid gateway k8 event. unknown gateway phase, %s", event.Action)
@@ -187,7 +197,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 // filters unwanted events
 func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
 	if event.Type == gateway.Kind && event.Source.Component == gc.Name &&
-		event.ObjectMeta.Labels[common.LabelGatewayEventSeen] == "" &&
+		event.ObjectMeta.Labels[common.LabelEventSeen] == "" &&
 		event.ReportingInstance == gc.controllerInstanceID &&
 		event.ReportingController == gc.controllerName {
 		gc.Log.Debug().Str("event-name", event.ObjectMeta.Name).Msg("processing gateway k8 event")
@@ -297,7 +307,7 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 		return err
 	}
 	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
-	gc.Log.Debug().Interface("stale-config", staleConfigKeys).Msg("stale configurations")
+	gc.Log.Debug().Interface("stale-config-keys", staleConfigKeys).Msg("stale configurations")
 	gc.Log.Debug().Interface("new-config-keys", newConfigKeys).Msg("new configurations")
 
 	// run new configurations
@@ -312,12 +322,13 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 		} else {
 			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("activating configuration...")
 			// create k8 event for new configuration
-			newConfigEvent := gc.K8Event("new configuration", gwv1alpha1.NodePhaseInitialized, newConfig.Data.Src)
-			err = gc.CreateK8Event(newConfigEvent)
+			newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, newConfig.Data.Src)
+			err = common.CreateK8Event(newConfigEvent, gc.Clientset)
 			if err != nil {
 				gc.Log.Error().Str("config-name", newConfig.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations. skipping configuration...")
 				continue
 			}
+			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("created k8 event for new configuration.")
 		}
 
 		// run configuration
@@ -331,6 +342,12 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 		if err == nil {
 			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
 			delete(gc.registeredConfigs, staleConfigKey)
+			// create a k8 event to remove the node configuration from gateway resource
+			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data.Src)
+			err = common.CreateK8Event(removeConfigEvent, gc.Clientset)
+			if err != nil {
+				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
+			}
 		} else {
 			gc.Log.Error().Str("config", staleConfig.Data.Src).Err(err).Msg("failed to deactivate the configuration.")
 		}
@@ -362,7 +379,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string]*ConfigContext, error) {
 	configs := make(map[string]*ConfigContext)
 	for configKey, configValue := range cm.Data {
-		hashKey := Hasher(configValue)
+		hashKey := Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 
 		configs[hashKey] = &ConfigContext{
@@ -458,7 +475,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	gwcs := gwClientset.NewForConfigOrDie(restConfig)
+	gwcs := gwclientset.NewForConfigOrDie(restConfig)
 	gw, err := gwcs.ArgoprojV1alpha1().Gateways(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("failed to get gateway resource")
@@ -522,9 +539,9 @@ func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
 }
 
 // create a new node
-func (gc *GatewayConfig) initializeNode(nodeName string, messages string) gwv1alpha1.NodeStatus {
+func (gc *GatewayConfig) initializeNode(nodeName string, messages string) v1alpha1.NodeStatus {
 	if gc.gw.Status.Nodes == nil {
-		gc.gw.Status.Nodes = make(map[string]gwv1alpha1.NodeStatus)
+		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 	nodeID := nodeName
 	gc.Log.Info().Str("node-id", nodeID).Msg("node")
@@ -533,11 +550,11 @@ func (gc *GatewayConfig) initializeNode(nodeName string, messages string) gwv1al
 		gc.Log.Info().Str("node-name", nodeName).Msg("node already initialized")
 		return oldNode
 	}
-	node := gwv1alpha1.NodeStatus{
+	node := v1alpha1.NodeStatus{
 		ID:          nodeID,
 		Name:        nodeName,
 		DisplayName: nodeName,
-		Phase:       gwv1alpha1.NodePhaseInitialized,
+		Phase:       v1alpha1.NodePhaseInitialized,
 		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
 	}
 	node.Message = messages
@@ -547,7 +564,7 @@ func (gc *GatewayConfig) initializeNode(nodeName string, messages string) gwv1al
 }
 
 // getNodeByName returns the node from this gateway for the nodeName
-func (gc *GatewayConfig) getNodeByName(nodeName string) *gwv1alpha1.NodeStatus {
+func (gc *GatewayConfig) getNodeByName(nodeName string) *v1alpha1.NodeStatus {
 	node, ok := gc.gw.Status.Nodes[nodeName]
 	if !ok {
 		return nil
@@ -556,7 +573,7 @@ func (gc *GatewayConfig) getNodeByName(nodeName string) *gwv1alpha1.NodeStatus {
 }
 
 // markNodePhase marks the node with a phase, returns the node
-func (gc *GatewayConfig) MarkGatewayNodePhase(nodeName string, phase gwv1alpha1.NodePhase, message string) *gwv1alpha1.NodeStatus {
+func (gc *GatewayConfig) MarkGatewayNodePhase(nodeName string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
 	gc.Log.Debug().Str("node-name", nodeName).Msg("marking node phase...")
 	gc.Log.Info().Interface("nodes", gc.gw.Status.Nodes).Msg("nodes")
 	node := gc.getNodeByName(nodeName)
@@ -564,7 +581,7 @@ func (gc *GatewayConfig) MarkGatewayNodePhase(nodeName string, phase gwv1alpha1.
 		gc.Log.Warn().Str("node-name", nodeName).Msg("node is not initialized")
 		return nil
 	}
-	if node.Phase != gwv1alpha1.NodePhaseCompleted && node.Phase != phase {
+	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
 		gc.Log.Info().Str("node-name", node.Name).Str("phase", string(node.Phase)).Msg("phase marked")
 		node.Phase = phase
 	}
@@ -614,42 +631,23 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 	})
 }
 
-// K8Event returns a kubernetes event
-func (gc *GatewayConfig) K8Event(reason string, action gwv1alpha1.NodePhase, configName string) *corev1.Event {
-	return &corev1.Event{
-		Reason: reason,
-		Type:   gateway.Kind,
-		Action: string(action),
-		EventTime: metav1.MicroTime{
-			Time: time.Now(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: gc.Namespace,
-			Name:      gc.Name + "-" + common.RandomStringGenerator(),
-			Labels: map[string]string{
-				common.LabelGatewayConfigurationName: configName,
-				common.LabelGatewayEventSeen:         "",
-				common.LabelGatewayName:              gc.Name,
-			},
-		},
-		InvolvedObject: corev1.ObjectReference{
-			Namespace: gc.Namespace,
-			Name:      gc.Name,
-			Kind:      gateway.Kind,
-		},
-		Source: corev1.EventSource{
-			Component: gc.Name,
-		},
-		ReportingInstance:   gc.controllerInstanceID,
-		ReportingController: gc.controllerName,
-	}
-}
-
 // createK8Event creates a kubernetes event.
-func (gc *GatewayConfig) CreateK8Event(event *corev1.Event) error {
-	gc.Log.Info().Str("event-action", event.Action).Msg("creating an event to update gateway state")
-	_, err := gc.Clientset.CoreV1().Events(gc.Namespace).Create(event)
-	return err
+func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, configName string) *corev1.Event {
+	event := &common.K8Event{
+		Name: gc.Name,
+		Namespace: gc.Namespace,
+		Type: gateway.Kind,
+		Reason: reason,
+		Action: string(action),
+		ReportingController: gc.controllerName,
+		ReportingInstance: gc.controllerInstanceID,
+		Labels: map[string]string{
+			common.LabelGatewayConfigurationName: configName,
+			common.LabelEventSeen:         "",
+			common.LabelGatewayName:              gc.Name,
+		},
+	}
+	return common.GetK8Event(event)
 }
 
 // GatewayCleanup marks configuration as non-active and marks final gateway state
@@ -662,15 +660,14 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage string
 	if err != nil {
 		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(errMessage)
 		// create k8 event for error state
-		event = gc.K8Event(errMessage, gwv1alpha1.NodePhaseError, config.Data.Src)
-
+		event = gc.GetK8Event(errMessage, v1alpha1.NodePhaseError, config.Data.Src)
 	} else {
 		// gateway successfully completed/deactivated this configuration.
 		gc.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")
 		// create k8 event for completion state
-		event = gc.K8Event("configuration completed", gwv1alpha1.NodePhaseCompleted, config.Data.Src)
+		event = gc.GetK8Event("configuration completed", v1alpha1.NodePhaseCompleted, config.Data.Src)
 	}
-	err = gc.CreateK8Event(event)
+	err = common.CreateK8Event(event, gc.Clientset)
 	if err != nil {
 		gc.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to create gateway k8 event")
 	}

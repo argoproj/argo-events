@@ -137,8 +137,7 @@ func (toc *tOperationCtx) postCloudEventToWatcher(ip string, port string, endpoi
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
-	resp, err := client.Do(req)
-	toc.log.Info().Int("response-status-code", resp.StatusCode).Str("response-status", resp.Status).Msg("posting cloud event to watcher")
+	_, err = client.Do(req)
 	return err
 }
 

@@ -5,11 +5,11 @@ metadata:
   namespace: argo-events
 data:
   # port can't be reconfigured.
-  webhoo.portConfig: |-
+  webhook.portConfig: |-
     port: "12000"
-  webhook.fooConfig: |-
-    endpoint: "/foo"
-    method: "POST"
   webhook.barConfig: |-
     endpoint: "/bar"
+    method: "POST"
+  webhook.fooConfig: |-
+    endpoint: "/foo"
     method: "POST"

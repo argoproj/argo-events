@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: resource-gateway
-  namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "resource-gateway"
@@ -16,5 +15,8 @@ spec:
     serviceAccountName: "argo-events-sa"
   configMap: "resource-gateway-configmap"
   type: "resource"
+  dispatchMechanism: "HTTP"
   version: "1.0"
-  sensors: ["resource-sensor"]
+  watchers:
+    sensors:
+    - name: "resource-sensor"

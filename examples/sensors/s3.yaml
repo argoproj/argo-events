@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: artifact-sensor
-  namespace: argo-events
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -22,7 +21,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: hello-world-
+                generateName: s3-
               spec:
                 entrypoint: whalesay
                 templates:

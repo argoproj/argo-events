@@ -2,7 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: calendar-gateway-configmap
-  namespace: argo-events
 data:
   calendar.barConfig: |-
-    interval: 21s
+    interval: 55s
+  calendar.fooConfig: |-
+    interval: 10s

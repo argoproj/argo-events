@@ -8,11 +8,25 @@ spec:
   signals:
     - name: mqtt-gateway/mqtt.fooConfig
   triggers:
-    - name: "done-mqtt-stream"
-      message:
-        body: "this is the message body"
-        stream:
-          type: mqtt
-          url: tcp://localhost:1883
-          attributes:
-            topic: gateway-controller
+    - name: mqtt-workflow-trigger
+      resource:
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

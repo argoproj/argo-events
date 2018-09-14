@@ -25,38 +25,121 @@ import (
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
+	"github.com/argoproj/argo-events/common"
 )
 
+// createEscalationEvent creates a k8 event for escalation
+func (se *sensorExecutor) createEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
+	se.log.Info().Interface("policy", policy).Msg("printing policy")
+	event := common.GetK8Event(&common.K8Event{
+		Name: policy.Name,
+		Namespace: se.sensor.Namespace,
+		ReportingInstance: se.sensor.Name,
+		ReportingController: se.sensor.Name,
+		Labels: map[string]string{
+			common.LabelEventSeen: "",
+			common.LabelSignalName: signalFilterName,
+		},
+		Type: common.LabelArgoEventsEscalationKind,
+		Action: string(policy.Level),
+		Reason: policy.Message,
+	})
+	err := common.CreateK8Event(event, se.kubeClient)
+	return err
+}
+
 // apply the signal filters to an event
-func filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
-	dataRes, err := filterData(f.Data, event)
-	return filterTime(f.Time, &event.Context.EventTime) && filterContext(f.Context, &event.Context) && dataRes, err
+func (se *sensorExecutor) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
+	dataRes, err := se.filterData(f.Data.Filters, event)
+	// generate sensor failure event and mark sensor as failed
+	if err != nil {
+		return false, err
+	}
+	if !dataRes {
+		err = se.createEscalationEvent(f.Data.EscalationPolicy, f.Name)
+		if err != nil {
+			return false, err
+		}
+	}
+	timeRes, err := se.filterTime(f.Time, &event.Context.EventTime)
+	// generate sensor failure event and mark sensor as failed
+	if err != nil {
+		return false, err
+	}
+	if !timeRes {
+		err = se.createEscalationEvent(f.Time.EscalationPolicy, f.Name)
+		if err != nil {
+			return false, err
+		}
+	}
+	ctxRes := se.filterContext(f.Context, &event.Context)
+	if !ctxRes {
+		err = se.createEscalationEvent(f.Context.EscalationPolicy, f.Name)
+		if err != nil {
+			return false, err
+		}
+	}
+	return timeRes && ctxRes && dataRes, err
 }
 
 // applyTimeFilter checks the eventTime against the timeFilter:
 // 1. the eventTime is greater than or equal to the start time
 // 2. the eventTime is less than the end time
 // returns true if 1 and 2 are true and false otherwise
-func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) bool {
-	if timeFilter != nil && eventTime != nil {
-		if timeFilter.Start != nil && timeFilter.Stop != nil {
-			return (timeFilter.Start.Before(eventTime) || timeFilter.Start.Equal(eventTime)) && eventTime.Before(timeFilter.Stop)
+func (se *sensorExecutor) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) (bool, error) {
+	if timeFilter != nil {
+		currentT := time.Now().UTC()
+		se.log.Info().Str("current-time", currentT.String()).Msg("current time")
+		currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
+
+		if timeFilter.Start != "" && timeFilter.Stop != "" {
+			se.log.Info().Str("start time format", currentTStr + " " + timeFilter.Start).Msg("start time format")
+			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Start)
+			if err != nil {
+				fmt.Println(err)
+				return false, err
+			}
+			se.log.Info().Str("start time", startTime.String()).Msg("start time")
+			startTime = startTime.UTC()
+			se.log.Info().Str("stop time format", currentTStr + " " + timeFilter.Stop).Msg("stop time format")
+			stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Stop)
+			if err != nil {
+				fmt.Println(err)
+				return false, err
+			}
+			se.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+			stopTime = stopTime.UTC()
+			return (startTime.Before(eventTime.Time) || stopTime.Equal(eventTime.Time)) && eventTime.Time.Before(stopTime), nil
 		}
-		if timeFilter.Start != nil {
+		if timeFilter.Start != "" {
 			// stop is nil - does not have an end
-			return timeFilter.Start.Before(eventTime) || timeFilter.Start.Equal(eventTime)
+			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Start)
+			if err != nil {
+				return false, err
+			}
+			se.log.Info().Str("start time", startTime.String()).Msg("start time")
+			startTime = startTime.UTC()
+			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
-		if timeFilter.Stop != nil {
-			return eventTime.Before(timeFilter.Stop)
+		if timeFilter.Stop != "" {
+			stopTime, err := time.Parse("2016-01-02 15:04:05", currentTStr + " " + timeFilter.Stop)
+			if err != nil {
+				return false, err
+			}
+			se.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+			stopTime = stopTime.UTC()
+			return eventTime.Time.Before(stopTime), nil
 		}
 	}
-	return true
+	se.log.Info().Msg("NO time filter")
+	return true, nil
 }
 
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
+func (se *sensorExecutor) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -89,9 +172,12 @@ func filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext)
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
-func filterData(dataFilters []*v1alpha1.DataFilter, event *v1alpha.Event) (bool, error) {
+func (se *sensorExecutor) filterData(dataFilters []*v1alpha1.DataFilter, event *v1alpha.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
+	if dataFilters == nil {
+		return true, nil
+	}
 	if event == nil {
 		return false, fmt.Errorf("nil event")
 	}

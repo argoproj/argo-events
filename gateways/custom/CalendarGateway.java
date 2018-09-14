@@ -248,7 +248,7 @@ class ConfigWatcher implements Runnable {
 
 public class CalendarGateway {
     public static void main(String[] args) {
-        KubernetesClient client = DefaultKubernetesClient.fromConfig("/Users/vpage/.kube/config");
+        KubernetesClient client = DefaultKubernetesClient.fromConfig(".kube/config");
         String namespace = System.getenv(Config.NamespaceEnv);
         String transformerPort = System.getenv(Config.TransformerPortEnv);
         Config config = new Config(client, namespace, transformerPort, new HashSet<Schedule>());

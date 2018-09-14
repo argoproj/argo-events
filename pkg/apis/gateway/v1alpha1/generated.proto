@@ -69,7 +69,7 @@ message GatewaySpec {
   // ConfigMap is name of the configmap for gateway-processor
   optional string configmap = 2;
 
-  // Type is type of the gateway
+  // Type is the type of gateway
   optional string type = 3;
 
   // Version is used for marking event version
@@ -89,6 +89,9 @@ message GatewaySpec {
 
   // HTTPServerPort if provided is used to communicate between gateway client and server over http
   optional string httpServerPort = 8;
+
+  // DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
+  optional string dispatchMechanism = 9;
 }
 
 // GatewayStatus contains information about the status of a gateway.

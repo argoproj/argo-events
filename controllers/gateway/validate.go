@@ -16,7 +16,7 @@ func (goc *gwOperationCtx) validate() error {
 	if goc.gw.Spec.Version == "" {
 		return fmt.Errorf("gateway version is not specified")
 	}
-	switch goc.gw.Spec.Type {
+	switch goc.gw.Spec.DispatchMechanism {
 	case v1alpha1.HTTPGateway:
 		if goc.gw.Spec.Watchers == nil || (goc.gw.Spec.Watchers.Gateways == nil && goc.gw.Spec.Watchers.Sensors == nil) {
 			return fmt.Errorf("no associated watchers with gateway")

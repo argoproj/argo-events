@@ -32,6 +32,7 @@ const (
 	NodePhaseServiceError NodePhase = "ServiceError" // failed to expose gateway using a service
 	NodePhaseCompleted    NodePhase = "Completed"    // node has completed running
 	NodePhaseInitialized  NodePhase = "Initialized"  // node has been initialized
+	NodePhaseRemove       NodePhase = "Remove"       // node should be removed
 )
 
 // GatewayType is type of the gateway. It is used determining the internal event dispatch mechanism
@@ -71,8 +72,8 @@ type GatewaySpec struct {
 	// ConfigMap is name of the configmap for gateway-processor
 	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
 
-	// Type is type of the gateway
-	Type GatewayType `json:"type" protobuf:"bytes,3,opt,name=type"`
+	// Type is the type of gateway
+	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 
 	// Version is used for marking event version
 	Version string `json:"version" protobuf:"bytes,4,opt,name=version"`
@@ -91,6 +92,9 @@ type GatewaySpec struct {
 
 	// HTTPServerPort if provided is used to communicate between gateway client and server over http
 	HTTPServerPort string `json:"httpServerPort,omitempty" protobuf:"bytes,8,opt,name=httpServerPort"`
+
+	// DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
+	DispatchMechanism GatewayType `json:"dispatchMechanism" protobuf:"bytes,9,opt,name=dispatchMechanism"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

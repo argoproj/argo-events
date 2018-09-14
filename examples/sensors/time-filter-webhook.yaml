@@ -9,23 +9,33 @@ spec:
     - name: webhook-gateway/webhook.barConfig
       filters:
         time:
-          start: "2016-05-10T15:04:05Z07:00"
-          stop: "2020-01-02T15:04:05Z07:00"
+          start: "22:14:05"
+          stop: "23:04:05"
+          escalationPolicy:
+            name: "time-filter-escalation"
+            level: "Alert"
+            message: "time filter failed"
   triggers:
-    - name: done-workflow
+    - name: hello-world-workflow-trigger
       resource:
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
         source:
-          s3:
-            bucket: workflows
-            key: hello-world.yaml
-            endpoint: minio-service.default:9000
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: time-filter-hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

@@ -73,9 +73,6 @@ type SensorSpec struct {
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
-	// Escalation describes the policy for signal failures and violations of the dependency's constraints.
-	Escalation EscalationPolicy `json:"escalation,omitempty" protobuf:"bytes,3,opt,name=escalation"`
-
 	// Repeat is a flag that determines if the sensor status should be reset after completion.
 	// NOTE: functionality is currently expiremental and part of an initiative to define
 	// a more concrete pattern or cycle for sensor reptition.
@@ -101,7 +98,7 @@ type Signal struct {
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,8,opt,name=filters"`
+	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
@@ -114,14 +111,17 @@ type GroupVersionKind struct {
 
 // SignalFilter defines filters and constraints for a signal.
 type SignalFilter struct {
-	// Time filter on the signal
-	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
+	// Name is the name of signal filter
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
-	// Context filter constraints
-	Context *EventContext `json:"context,omitempty" protobuf:"bytes,2,opt,name=context"`
+	// Time filter on the signal with escalation
+	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 
-	// Data filter constraints
-	Data []*DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
+	// Context filter constraints with escalation
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+
+	// Data filter constraints with escalation
+	Data *Data `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
 }
 
 // TimeFilter describes a window in time.
@@ -131,15 +131,16 @@ type SignalFilter struct {
 type TimeFilter struct {
 	// Start is the beginning of a time window.
 	// Before this time, events for this signal are ignored and
-	// do not contribute to resolving the signal.
-	// A nil value represents -∞
-	Start *v1.Time `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
+	// format is hh:mm:ss
+	Start string `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
 
-	// Stop is the end of a time window.
+	// StopPattern is the end of a time window.
 	// After this time, events for this signal are ignored and
-	// do not contribute to resolving the signal.
-	// A nil value represents ∞
-	Stop *v1.Time `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
+	// format is hh:mm:ss
+	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
+
+	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
 // JSONType contains the supported JSON types for data filtering
@@ -151,6 +152,14 @@ const (
 	JSONTypeNumber JSONType = "number"
 	JSONTypeString JSONType = "string"
 )
+
+type Data struct {
+	// filter constraints
+	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
+
+	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
+}
 
 // DataFilter describes constraints and filters for event data
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
@@ -171,6 +180,9 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
+
+	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -243,15 +255,32 @@ type ResourceObject struct {
 type RetryStrategy struct {
 }
 
+// EscalationLevel is the degree of importance
+type EscalationLevel string
+
+// possible values for EscalationLevel
+const (
+	// level 0 of escalation
+	Alert EscalationLevel = "Alert"
+	// level 1 of escalation
+	Warning EscalationLevel = "Warning"
+	// level 2 of escalation
+	Critical EscalationLevel = "Critical"
+)
+
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// NOTE: this functionality is currently experimental, but we believe serves as an
-// important future enhancement around handling lifecycle error conditions of a sensor.
+// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// escalation will be triggered
 type EscalationPolicy struct {
+	// Name is name of the escalation policy
+	// This is referred by signal filter/s
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+
 	// Level is the degree of importance
-	Level string `json:"level" protobuf:"bytes,1,opt,name=level"`
+	Level EscalationLevel `json:"level" protobuf:"bytes,2,opt,name=level"`
 
 	// need someway to progressively get more serious notifications
-	Message string `json:"message" protobuf:"bytes,2,opt,name=message"`
+	Message string `json:"message" protobuf:"bytes,3,opt,name=message"`
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -361,6 +390,9 @@ type EventContext struct {
 	// Enables a place for custom fields a producer or middleware might want to include and provides a place
 	// to test metadata before adding them to the CloudEvents specification.
 	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
+
+	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy" protobuf:"bytes,10,opt,name=escalationPolicy"`
 }
 
 // URI is a Uniform Resource Identifier based on RFC 3986

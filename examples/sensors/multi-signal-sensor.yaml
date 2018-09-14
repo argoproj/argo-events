@@ -12,7 +12,7 @@ spec:
     - name: webhook-gateway/webhook.fooConfig
     - name: calendar-gateway/calendar.fooConfig
   triggers:
-    - name: hello-world-workflow-trigger
+    - name: multi-signal-workflow-trigger
       resource:
         namespace: argo-events
         group: argoproj.io

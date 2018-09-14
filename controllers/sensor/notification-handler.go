@@ -135,12 +135,31 @@ func (se *sensorExecutor) handleSignals(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// check if sensor is in error state
+	if se.sensor.Status.Phase == v1alpha1.NodePhaseError {
+		se.log.Warn().Msg("sensor is in error state. can't process the notification")
+		common.SendErrorResponse(w)
+		return
+	}
+
 	// validate the signal is from gateway of interest
 	var isSignalValid bool
 	for _, signal := range se.sensor.Spec.Signals {
 		if signal.Name == gatewaySignal.Context.Source.Host {
-			isSignalValid = true
-			break
+			ok, err := se.filterEvent(signal.Filters, &gatewaySignal)
+			if err != nil {
+				se.log.Error().Str("signal-name", gatewaySignal.Context.Source.Host).Err(err).Msg("failed to apply filter")
+				// mark signal as failed
+				node := getNodeByName(se.sensor, gatewaySignal.Context.Source.Host)
+				se.markNodePhase(node.Name, v1alpha1.NodePhaseError, err.Error())
+				return
+			}
+			if ok {
+				isSignalValid = true
+				break
+			} else {
+				se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("notification failed to pass signal filter")
+			}
 		}
 	}
 

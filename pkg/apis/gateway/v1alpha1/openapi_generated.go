@@ -185,7 +185,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type is type of the gateway",
+							Description: "Type is the type of gateway",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -223,8 +223,15 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"dispatchMechanism": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"deploySpec", "type", "version"},
+				Required: []string{"deploySpec", "type", "version", "dispatchMechanism"},
 			},
 		},
 		Dependencies: []string{

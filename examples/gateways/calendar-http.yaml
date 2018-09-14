@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: calendar-gateway
-  namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "calendar-gateway"
@@ -16,6 +15,9 @@ spec:
     serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
+  dispatchMechanism: "HTTP"
   version: "1.0"
-  sensors: ["calendar-sensor", "multi-signal-sensor"]
+  watchers:
+    sensors:
+    - name: "calendar-sensor"
   httpServerPort: "9696"

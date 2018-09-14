@@ -31,6 +31,7 @@ import (
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/argoproj/argo-events/common"
 )
 
 const (
@@ -108,7 +109,12 @@ func (c *SensorController) processNextItem() bool {
 	if err != nil {
 		// now let's escalate the sensor
 		// the context should have the most up-to-date version
-		log.Infof("escalating sensor to level %s via %s message", ctx.s.Spec.Escalation.Level, ctx.s.Spec.Escalation.Message)
+		ctx.log.Error().Err(err).Msg("escalating controller failure")
+		event := ctx.GetK8Event("controller error", v1alpha1.NodePhaseError, sensor.Kind)
+		err = common.CreateK8Event(event, ctx.controller.kubeClientset)
+		if err != nil {
+			ctx.log.Error().Err(err).Msg("failed to create escalation event for controller failure")
+		}
 	}
 
 	return true

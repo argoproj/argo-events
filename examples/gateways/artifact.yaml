@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: artifact-gateway
-  namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "artifact-gateway"
@@ -15,6 +14,9 @@ spec:
       command: ["/bin/artifact-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
-  type: "artifact"
   version: "1.0"
-  sensors: ["artifact-sensor"]
+  type: "artifact"
+  dispatchMechanism: "HTTP"
+  watchers:
+    sensors:
+    - name: "artifact-sensor"

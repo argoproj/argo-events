@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: mqtt-gateway
-  namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "mqtt-gateway"
@@ -16,5 +15,8 @@ spec:
     serviceAccountName: "argo-events-sa"
   configMap: "mqtt-gateway-configmap"
   type: "mqtt"
+  dispatchMechanism: "HTTP"
   version: "1.0"
-  sensors: ["mqtt-sensor"]
+  watchers:
+    sensors:
+    - name: "mqtt-sensor"

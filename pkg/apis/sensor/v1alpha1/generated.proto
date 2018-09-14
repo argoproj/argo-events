@@ -39,6 +39,14 @@ message ArtifactLocation {
   optional URLArtifact url = 4;
 }
 
+message Data {
+  // filter constraints
+  repeated DataFilter filters = 1;
+
+  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 2;
+}
+
 // DataFilter describes constraints and filters for event data
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
@@ -58,17 +66,24 @@ message DataFilter {
   // Strings are taken as is
   // Nils this value is ignored
   optional string value = 3;
+
+  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 4;
 }
 
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// NOTE: this functionality is currently experimental, but we believe serves as an
-// important future enhancement around handling lifecycle error conditions of a sensor.
+// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// escalation will be triggered
 message EscalationPolicy {
+  // Name is name of the escalation policy
+  // This is referred by signal filter/s
+  optional string name = 1;
+
   // Level is the degree of importance
-  optional string level = 1;
+  optional string level = 2;
 
   // need someway to progressively get more serious notifications
-  optional string message = 2;
+  optional string message = 3;
 }
 
 // Event is a data record expressing an occurrence and its context.
@@ -119,6 +134,9 @@ message EventContext {
   // Enables a place for custom fields a producer or middleware might want to include and provides a place
   // to test metadata before adding them to the CloudEvents specification.
   map<string, string> extensions = 9;
+
+  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 10;
 }
 
 // EventWrapper wraps an event with an additional flag to check if we processed this event already
@@ -292,9 +310,6 @@ message SensorSpec {
   // Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
   repeated Trigger triggers = 2;
 
-  // Escalation describes the policy for signal failures and violations of the dependency's constraints.
-  optional EscalationPolicy escalation = 3;
-
   // Repeat is a flag that determines if the sensor status should be reset after completion.
   // NOTE: functionality is currently expiremental and part of an initiative to define
   // a more concrete pattern or cycle for sensor reptition.
@@ -342,19 +357,22 @@ message Signal {
   optional int64 deadline = 2;
 
   // Filters and rules governing tolerations of success and constraints on the context and data of an event
-  optional SignalFilter filters = 8;
+  optional SignalFilter filters = 3;
 }
 
 // SignalFilter defines filters and constraints for a signal.
 message SignalFilter {
-  // Time filter on the signal
-  optional TimeFilter time = 1;
+  // Name is the name of signal filter
+  optional string name = 1;
 
-  // Context filter constraints
-  optional EventContext context = 2;
+  // Time filter on the signal with escalation
+  optional TimeFilter time = 2;
 
-  // Data filter constraints
-  repeated DataFilter data = 3;
+  // Context filter constraints with escalation
+  optional EventContext context = 3;
+
+  // Data filter constraints with escalation
+  optional Data data = 4;
 }
 
 // TimeFilter describes a window in time.
@@ -364,15 +382,16 @@ message SignalFilter {
 message TimeFilter {
   // Start is the beginning of a time window.
   // Before this time, events for this signal are ignored and
-  // do not contribute to resolving the signal.
-  // A nil value represents -∞
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time start = 1;
+  // format is hh:mm:ss
+  optional string start = 1;
 
-  // Stop is the end of a time window.
+  // StopPattern is the end of a time window.
   // After this time, events for this signal are ignored and
-  // do not contribute to resolving the signal.
-  // A nil value represents ∞
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time stop = 2;
+  // format is hh:mm:ss
+  optional string stop = 2;
+
+  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 3;
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent

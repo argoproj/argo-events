@@ -13,7 +13,7 @@ spec:
   signals:
     - name: nats-gateway/nats.fooConfig
   triggers:
-    - name: hello-world-workflow-trigger
+    - name: nats-workflow-trigger
       resource:
         namespace: argo-events
         group: argoproj.io

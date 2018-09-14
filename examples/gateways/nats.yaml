@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: nats-gateway
-  namespace: argo-events
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "nats-gateway"
@@ -16,5 +15,8 @@ spec:
     serviceAccountName: "argo-events-sa"
   configMap: "nats-gateway-configmap"
   type: "nats"
+  dispatchMechanism: "HTTP"
   version: "1.0"
-  sensors: ["nats-sensor"]
+  watchers:
+    sensors:
+    - name: "nats-sensor"

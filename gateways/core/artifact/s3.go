@@ -68,7 +68,7 @@ type S3Filter struct {
 }
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
-func getSecrets(client *kubernetes.Clientset, namespace string, name, key string) (string, error) {
+func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
 	secretsIf := client.CoreV1().Secrets(namespace)
 	var secret *corev1.Secret
 	var err error
@@ -151,8 +151,8 @@ func configRunner(config *gateways.ConfigContext) error {
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
 
-	event := gatewayConfig.K8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
-	err = gatewayConfig.CreateK8Event(event)
+	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err
@@ -163,6 +163,7 @@ func configRunner(config *gateways.ConfigContext) error {
 		string(artifact.S3EventConfig.Event),
 	}, doneCh) {
 		if notificationInfo.Err != nil {
+			err = notificationInfo.Err
 			errMessage = "notification error"
 			config.StopCh <- struct{}{}
 			break

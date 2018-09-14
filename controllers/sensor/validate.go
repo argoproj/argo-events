@@ -82,13 +82,27 @@ func validateSignalFilter(filter v1alpha1.SignalFilter) error {
 
 func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	currentT := metav1.Time{Time: time.Now().UTC()}
-	if tFilter.Start != nil && tFilter.Stop != nil {
-		if tFilter.Stop.Before(tFilter.Start) || tFilter.Start.Equal(tFilter.Stop) {
+	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
+	if tFilter.Start != "" && tFilter.Stop != "" {
+		startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Start)
+		if err != nil {
+			return err
+		}
+		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Stop)
+		if err != nil {
+			return err
+		}
+		if stopTime.Before(startTime) || startTime.Equal(stopTime) {
 			return fmt.Errorf("invalid signal time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
 		}
 	}
-	if tFilter.Stop != nil {
-		if tFilter.Stop.Before(&currentT) {
+	if tFilter.Stop != "" {
+		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Stop)
+		if err != nil {
+			return err
+		}
+		stopTime = stopTime.UTC()
+		if stopTime.Before(currentT.Time) {
 			return fmt.Errorf("invalid signal time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
 		}
 	}

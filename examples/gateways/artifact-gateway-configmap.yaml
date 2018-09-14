@@ -6,7 +6,7 @@ metadata:
 data:
   s3.fooConfig: |-
     s3EventConfig:
-      bucket: foo
+      bucket: mybucket
       endpoint: minio-service.argo-events:9000
       event: s3:ObjectCreated:Put
       filter:

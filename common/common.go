@@ -31,6 +31,11 @@ const (
 	// http responses
 	SuccessResponse = "Success"
 	ErrorResponse   = "Error"
+
+	// LabelEventSeen is the label for already seen k8 event
+	LabelEventSeen = "event-seen"
+
+	LabelArgoEventsEscalationKind = "ArgoEventsEscalation"
 )
 
 // SENSOR CONTROLLER CONSTANTS
@@ -71,6 +76,11 @@ const (
 
 	// LabelJobName is label for job name
 	LabelJobName = "job-name"
+
+	// LabelSensorName is label for sensor name
+	LabelSensorName = "sensor-name"
+
+	LabelSignalName = "signal-name"
 )
 
 // GATEWAY CONSTANTS
@@ -102,9 +112,6 @@ const (
 
 	// LabelGatewayConfigurationName is the label for a configuration in gateway
 	LabelGatewayConfigurationName = "config-name"
-
-	// LabelGatewayEventSeen is the label for already seen gateway event
-	LabelGatewayEventSeen = "event-seen"
 
 	// GatewayControllerInstanceIDEnvVar is used to get controller instance id
 	GatewayControllerInstanceIDEnvVar = "GATEWAY_CONTROLLER_INSTANCE_ID"

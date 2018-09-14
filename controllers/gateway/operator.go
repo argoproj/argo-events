@@ -64,7 +64,7 @@ func (goc *gwOperationCtx) operate() error {
 		// check if the type of the gateway is http
 		var sensorWatchers []string
 		var gatewayWatchers []string
-		if goc.gw.Spec.Type == v1alpha1.HTTPGateway {
+		if goc.gw.Spec.DispatchMechanism == v1alpha1.HTTPGateway {
 			if goc.gw.Spec.Watchers.Sensors != nil {
 				for _, sensor := range goc.gw.Spec.Watchers.Sensors {
 					b, err := yaml.Marshal(sensor)
@@ -402,7 +402,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 
 	var transformerImage string
 
-	switch goc.gw.Spec.Type {
+	switch goc.gw.Spec.DispatchMechanism {
 	case v1alpha1.HTTPGateway:
 		transformerImage = common.GatewayHTTPEventTransformerImage
 	case v1alpha1.KafkaGateway:
