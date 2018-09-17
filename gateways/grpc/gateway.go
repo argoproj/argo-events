@@ -80,12 +80,12 @@ func configRunner(config *gateways.ConfigContext) error {
 	}
 
 	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
-	err = common.CreateK8Event(event, gatewayConfig.Clientset)
+	k8Event, err := common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err
 	}
-
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("phase", string(v1alpha1.NodePhaseRunning)).Str("event-name", k8Event.Name).Msg("k8 event created")
 	for {
 		event, err := eventStream.Recv()
 		if err == io.EOF {

@@ -18,154 +18,83 @@ package sensor
 
 import (
 	"testing"
-
 	"github.com/stretchr/testify/assert"
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/argoproj/argo-events/common"
+	"fmt"
 )
 
-var sampleSensor = v1alpha1.Sensor{
-	ObjectMeta: metav1.ObjectMeta{
-		Name:      "sample",
-		Namespace: apiv1.NamespaceDefault,
-	},
-	Spec: v1alpha1.SensorSpec{
-		Signals: []v1alpha1.Signal{
-			{
-				Name: "webhook-test",
-			},
-			{
-				Name: "resource-test",
-			},
-		},
-		Triggers: []v1alpha1.Trigger{
-			{
-				Name:    "test-trigger",
-				Message: "boy of message",
-				Resource: &v1alpha1.ResourceObject{
-					Namespace: apiv1.NamespaceDefault,
-					GroupVersionKind: v1alpha1.GroupVersionKind{
-						Group:   "argoproj.io",
-						Version: "v1alpha1",
-						Kind:    "workflow",
-					},
-					Source: v1alpha1.ArtifactLocation{
-						S3: &v1alpha1.S3Artifact{},
-					},
-					Labels: map[string]string{"test-label": "test-value"},
-				},
-			},
-		},
-	},
-}
-
-/*
 func TestSensorOperateLifecycle(t *testing.T) {
 	fake := newFakeController()
-	defer fake.teardown()
 
-	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+	// create a new sensor object
+	sensor, err := getSensor()
 	assert.Nil(t, err)
-	soc := newSensorOperationCtx(sensor, fake.SensorController)
+	assert.NotNil(t, sensor)
 
-	// STEP 1: operate on new sensor
-	err = soc.operate()
+	// create sensor resource
+	sensor, err = fake.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
 	assert.Nil(t, err)
-	// assert the status of sensor's signal is initializing
-	assert.Equal(t, v1alpha1.NodePhaseInit, soc.s.Status.Phase)
-	assert.Equal(t, 2, len(soc.s.Status.Nodes))
-	natsSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseInit, natsSignalNode.Phase)
-	resourceSignalNode := soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
-	assert.Equal(t, v1alpha1.NodePhaseInit, resourceSignalNode.Phase)
-	fmt.Print("\n\n")
+	assert.NotNil(t, sensor)
 
-	// STEP 2: operate on still init sensor after creating executor pod
-	executorPod := &apiv1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      soc.s.Name + "-sensor-123",
-			Namespace: fake.Config.Namespace,
-			Labels:    map[string]string{common.LabelKeySensor: soc.s.Name, common.LabelKeyComplete: "false"},
-		},
-		Spec: apiv1.PodSpec{},
-		Status: apiv1.PodStatus{
-			Phase: apiv1.PodRunning,
-		},
+	sOpCtx := newSensorOperationCtx(sensor, fake.SensorController)
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
+	for _, signal := range sOpCtx.s.Spec.Signals {
+		node := getNodeByName(sOpCtx.s, signal.Name)
+		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
-	_, err = fake.kubeClientset.CoreV1().Pods(fake.Config.Namespace).Create(executorPod)
+	// check whether sensor job is created
+	job, err := fake.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
 	assert.Nil(t, err)
-	err = soc.operate()
+	assert.NotNil(t, job)
+
+	// check whether sensor service is created
+	svc, err := fake.kubeClientset.CoreV1().Services(sOpCtx.s.Namespace).Get(common.DefaultSensorServiceName(sOpCtx.s.Name), metav1.GetOptions{})
 	assert.Nil(t, err)
-	// check status of the sensor's signals
-	natsSignalNode = soc.getNodeByName(sampleSensor.Spec.Signals[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseActive, natsSignalNode.Phase)
-	resourceSignalNode = soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
-	assert.Equal(t, v1alpha1.NodePhaseActive, resourceSignalNode.Phase)
-	fmt.Print("\n\n")
+	assert.NotNil(t, svc)
 
-	// STEP 3: operate on sensor with resolved signals and succeeded pod
-	executorPod.Status.Phase = apiv1.PodSucceeded
-	_, err = fake.kubeClientset.CoreV1().Pods(fake.Config.Namespace).Update(executorPod)
-	assert.Nil(t, err)
-	natsSignalNode.Phase = v1alpha1.NodePhaseResolved
-	natsSignalNode.ResolvedAt = metav1.Time{Time: time.Now().UTC()}
-	soc.s.Status.Nodes[natsSignalNode.ID] = *natsSignalNode
-	resourceSignalNode.Phase = v1alpha1.NodePhaseResolved
-	resourceSignalNode.ResolvedAt = metav1.Time{Time: time.Now().UTC()}
-	soc.s.Status.Nodes[resourceSignalNode.ID] = *resourceSignalNode
-	soc.operate()
-	// check status of the sensor's signals
-	natsSignalNode = soc.getNodeByName(sampleSensor.Spec.Signals[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseSucceeded, natsSignalNode.Phase)
-	resourceSignalNode = soc.getNodeByName(sampleSensor.Spec.Signals[1].Name)
-	assert.Equal(t, v1alpha1.NodePhaseSucceeded, resourceSignalNode.Phase)
-	// check status of the sensor's trigger
-	triggerNode := soc.getNodeByName(soc.s.Spec.Triggers[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseError, triggerNode.Phase)
-	assert.Equal(t, v1alpha1.NodePhaseError, soc.s.Status.Phase)
-
-	// STEP 4: operate on sensor with resolved triggers
-	triggerNode.Phase = v1alpha1.NodePhaseSucceeded
-	soc.s.Status.Nodes[triggerNode.ID] = *triggerNode
-	soc.s.Status.Phase = v1alpha1.NodePhaseResolved
-	soc.operate()
-	//check status of sensor
-	assert.Equal(t, v1alpha1.NodePhaseSucceeded, soc.s.Status.Phase)
-
-	// STEP 5: operate on succeeded sensor
-	err = soc.operate()
-	assert.Nil(t, err)
-}
-*/
-
-func TestReRunSensor(t *testing.T) {
-	fake := newFakeController()
-	defer fake.teardown()
-
-	sampleSensor.Status = v1alpha1.SensorStatus{
-		Phase: v1alpha1.NodePhaseComplete,
-		Nodes: map[string]v1alpha1.NodeStatus{
-			"testEntry": v1alpha1.NodeStatus{
-				ID:    "id",
-				Name:  "name",
-				Phase: v1alpha1.NodePhaseComplete,
-			},
-		},
+	// mark sensor as complete by marking all nodes as complete
+	for _, signal := range sOpCtx.s.Spec.Signals {
+		node := getNodeByName(sOpCtx.s, signal.Name)
+		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
 	}
-	sensor, err := fake.sensorClientset.ArgoprojV1alpha1().Sensors(fake.Config.Namespace).Create(&sampleSensor)
+
+	for _, signal := range sOpCtx.s.Spec.Triggers {
+		node := getNodeByName(sOpCtx.s, signal.Name)
+		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "trigger is completed")
+	}
+
+	err = sOpCtx.operate()
 	assert.Nil(t, err)
-	soc := newSensorOperationCtx(sensor, fake.SensorController)
+	assert.NotNil(t, sOpCtx.s)
+	assert.Equal(t, string(v1alpha1.NodePhaseComplete), string(sOpCtx.s.Status.Phase))
 
-	soc.reRunSensor()
+	// check if sensor has rerun
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+	assert.NotNil(t, sOpCtx.s)
+	assert.Equal(t, string(v1alpha1.NodePhaseNew), string(sOpCtx.s.Status.Phase))
 
-	// verify sensor status fields
-	assert.True(t, soc.updated)
-	assert.Equal(t, v1alpha1.NodePhaseNew, soc.s.Status.Phase)
-	assert.Equal(t, 2, len(soc.s.Status.Nodes))
-	natsSignalNode := getNodeByName(soc.s, sampleSensor.Spec.Signals[0].Name)
-	assert.Equal(t, v1alpha1.NodePhaseNew, natsSignalNode.Phase)
-	resourceSignalNode := getNodeByName(soc.s, sampleSensor.Spec.Signals[1].Name)
-	assert.Equal(t, v1alpha1.NodePhaseNew, resourceSignalNode.Phase)
+	for _, signal := range sOpCtx.s.Spec.Signals {
+		node := getNodeByName(sOpCtx.s, signal.Name)
+		assert.Equal(t, string(v1alpha1.NodePhaseNew), string(node.Phase))
+	}
+
+	// mark sensor as error and check if it is escalated through k8 event
+	sOpCtx.markSensorPhase(v1alpha1.NodePhaseError, false, "sensor is in error state")
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1alpha1.NodePhaseError), string(sOpCtx.s.Status.Phase))
+
+	events, err := fake.kubeClientset.CoreV1().Events(sOpCtx.s.Namespace).List(metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("%s=%s", common.LabelSensorName, sOpCtx.s.Name),
+	})
+	assert.Nil(t, err)
+	assert.NotNil(t, events.Items)
+	for _, event := range events.Items {
+		assert.Equal(t, string(v1alpha1.NodePhaseError), event.Action)
+	}
 }

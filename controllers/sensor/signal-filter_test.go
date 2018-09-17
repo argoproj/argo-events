@@ -15,364 +15,258 @@ limitations under the License.
 */
 package sensor
 
-// todo: test me
+import (
+	"testing"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
+	"github.com/argoproj/argo-events/common"
+	"fmt"
+)
 
-//
-//func Test_filterTime(t *testing.T) {
-//	type args struct {
-//		timeFilter *v1alpha1.TimeFilter
-//		eventTime  *metav1.Time
-//	}
-//	tests := []struct {
-//		name string
-//		args args
-//		want bool
-//	}{
-//		{
-//			name: "nil filter and time",
-//			args: args{timeFilter: nil, eventTime: nil},
-//			want: true,
-//		},
-//		{
-//			name: "-∞ start and ∞ stop",
-//			args: args{
-//				timeFilter: &v1alpha1.TimeFilter{},
-//				eventTime: &metav1.Time{
-//					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			},
-//			want: true,
-//		},
-//		{
-//			name: "-∞ start and finite stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Stop: &metav1.Time{
-//					Time: time.Date(2018, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "finite start and ∞ stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "event > start && event > stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//				Stop: &metav1.Time{
-//					Time: time.Date(2015, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: false,
-//		},
-//		{
-//			name: "event > start && event == stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//				Stop: &metav1.Time{
-//					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: false,
-//		},
-//		{
-//			name: "event > start && event < stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2012, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//				Stop: &metav1.Time{
-//					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "event == start && event < stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//				Stop: &metav1.Time{
-//					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "event < start && event < stop",
-//			args: args{timeFilter: &v1alpha1.TimeFilter{
-//				Start: &metav1.Time{
-//					Time: time.Date(2017, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//				Stop: &metav1.Time{
-//					Time: time.Date(2018, time.May, 10, 0, 0, 0, 0, time.UTC),
-//				},
-//			}, eventTime: &metav1.Time{
-//				Time: time.Date(2016, time.May, 10, 0, 0, 0, 0, time.UTC),
-//			}},
-//			want: false,
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := filterTime(tt.args.timeFilter, tt.args.eventTime); got != tt.want {
-//				t.Errorf("filterTime() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-//
-//func Test_filterContext(t *testing.T) {
-//	type args struct {
-//		expected *v1alpha1.EventContext
-//		actual   *v1alpha1.EventContext
-//	}
-//	tests := []struct {
-//		name string
-//		args args
-//		want bool
-//	}{
-//		{
-//			name: "nil expected",
-//			args: args{
-//				expected: nil,
-//				actual: &v1alpha1.EventContext{
-//					EventType: "argo.io.event",
-//				},
-//			},
-//			want: true,
-//		},
-//		{
-//			name: "nil actual, non-nil expected",
-//			args: args{
-//				expected: &v1alpha1.EventContext{
-//					EventType: "argo.io.event",
-//				},
-//				actual: nil,
-//			},
-//			want: false,
-//		},
-//		{
-//			name: "eventType",
-//			args: args{expected: &v1alpha1.EventContext{
-//				EventType: "argo.io.event",
-//			}, actual: &v1alpha1.EventContext{
-//				EventType: "argo.io.event",
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "eventTypeVersion",
-//			args: args{expected: &v1alpha1.EventContext{
-//				EventTypeVersion: "v1",
-//			}, actual: &v1alpha1.EventContext{
-//				EventTypeVersion: "v1",
-//			}},
-//			want: true,
-//		},
-//		{
-//			name: "cloudEventsVersion",
-//			args: args{expected: &v1alpha1.EventContext{
-//				CloudEventsVersion: "v1",
-//			}, actual: &v1alpha1.EventContext{
-//				CloudEventsVersion: "v1",
-//			}},
-//			want: true,
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := filterContext(tt.args.expected, tt.args.actual); got != tt.want {
-//				t.Errorf("filterContext() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-//
-//func Test_filterData(t *testing.T) {
-//	type args struct {
-//		dataFilters []*v1alpha1.DataFilter
-//		event       *v1alpha1.Event
-//	}
-//	tests := []struct {
-//		name    string
-//		args    args
-//		want    bool
-//		wantErr bool
-//	}{
-//		{
-//			name:    "nil event",
-//			args:    args{dataFilters: nil, event: nil},
-//			want:    false,
-//			wantErr: true,
-//		},
-//		{
-//			name:    "unsupported content type",
-//			args:    args{dataFilters: nil, event: &v1alpha1.Event{Payload: []byte("a")}},
-//			want:    false,
-//			wantErr: true,
-//		},
-//		{
-//			name: "empty data",
-//			args: args{dataFilters: nil, event: &v1alpha1.Event{
-//				Context: v1alpha1.EventContext{
-//					ContentType: "application/json",
-//				},
-//			}},
-//			want:    true,
-//			wantErr: false,
-//		},
-//		{
-//			name: "nil filters, JSON data",
-//			args: args{dataFilters: nil, event: &v1alpha1.Event{
-//				Context: v1alpha1.EventContext{
-//					ContentType: "application/json",
-//				},
-//				Payload: []byte("{\"k\": \"v\"}"),
-//			}},
-//			want:    true,
-//			wantErr: false,
-//		},
-//		{
-//			name: "string filter, JSON data",
-//			args: args{dataFilters: []*v1alpha1.DataFilter{
-//				{
-//					Path:  "k",
-//					Type:  v1alpha1.JSONTypeString,
-//					Value: "v",
-//				},
-//			}, event: &v1alpha1.Event{
-//				Context: v1alpha1.EventContext{
-//					ContentType: "application/json",
-//				},
-//				Payload: []byte("{\"k\": \"v\"}"),
-//			}},
-//			want:    true,
-//			wantErr: false,
-//		},
-//		{
-//			name: "number filter, JSON data",
-//			args: args{dataFilters: []*v1alpha1.DataFilter{
-//				{
-//					Path:  "k",
-//					Type:  v1alpha1.JSONTypeNumber,
-//					Value: "1.0",
-//				},
-//			}, event: &v1alpha1.Event{
-//				Context: v1alpha1.EventContext{
-//					ContentType: "application/json",
-//				},
-//				Payload: []byte("{\"k\": \"1.0\"}"),
-//			}},
-//			want:    true,
-//			wantErr: false,
-//		},
-//		{
-//			name: "multiple filters, nested JSON data",
-//			args: args{dataFilters: []*v1alpha1.DataFilter{
-//				{
-//					Path:  "k",
-//					Type:  v1alpha1.JSONTypeBool,
-//					Value: "true",
-//				},
-//				{
-//					Path:  "k1.k",
-//					Type:  v1alpha1.JSONTypeNumber,
-//					Value: "3.14",
-//				},
-//				{
-//					Path:  "k1.k2",
-//					Type:  v1alpha1.JSONTypeString,
-//					Value: "hello,world",
-//				},
-//			}, event: &v1alpha1.Event{
-//				Context: v1alpha1.EventContext{
-//					ContentType: "application/json",
-//				},
-//				Payload: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
-//			}},
-//			want:    false,
-//			wantErr: false,
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			got, err := filterData(tt.args.dataFilters, tt.args.event)
-//			if (err != nil) != tt.wantErr {
-//				t.Errorf("filterData() error = %v, wantErr %v", err, tt.wantErr)
-//				return
-//			}
-//			if got != tt.want {
-//				t.Errorf("filterData() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
-//
-//func Test_mapIsSubset(t *testing.T) {
-//	type args struct {
-//		sub map[string]string
-//		m   map[string]string
-//	}
-//	tests := []struct {
-//		name string
-//		args args
-//		want bool
-//	}{
-//		{
-//			name: "nil sub, nil map",
-//			args: args{sub: nil, m: nil},
-//			want: true,
-//		},
-//		{
-//			name: "empty sub, empty map",
-//			args: args{sub: make(map[string]string), m: make(map[string]string)},
-//			want: true,
-//		},
-//		{
-//			name: "empty sub, non-empty map",
-//			args: args{sub: make(map[string]string), m: map[string]string{"k": "v"}},
-//			want: true,
-//		},
-//		{
-//			name: "disjoint",
-//			args: args{sub: map[string]string{"k1": "v1"}, m: map[string]string{"k": "v"}},
-//			want: false,
-//		},
-//		{
-//			name: "subset",
-//			args: args{sub: map[string]string{"k1": "v1"}, m: map[string]string{"k": "v", "k1": "v1"}},
-//			want: true,
-//		},
-//	}
-//	for _, tt := range tests {
-//		t.Run(tt.name, func(t *testing.T) {
-//			if got := mapIsSubset(tt.args.sub, tt.args.m); got != tt.want {
-//				t.Errorf("mapIsSubset() = %v, want %v", got, tt.want)
-//			}
-//		})
-//	}
-//}
+func Test_filterTime(t *testing.T) {
+	timeFilter := &v1alpha1.TimeFilter{
+		EscalationPolicy:  &v1alpha1.EscalationPolicy{
+			Name: "time filter escalation",
+			Message: "filter failed",
+			Level: v1alpha1.Alert,
+		},
+		Stop: "17:14:00",
+		Start: "10:11:00",
+	}
+	event := getCloudEvent()
+	currentT := time.Now().UTC()
+	currentMonth := fmt.Sprintf("%d", int(currentT.Month()))
+	if int(currentT.Month()) < 10 {
+		currentMonth = "0" + currentMonth
+	}
+	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), currentMonth, currentT.Day())
+	parsedTime, err := time.Parse(common.StandardTimeFormat, currentTStr + " 16:36:34")
+	assert.Nil(t, err)
+	event.Context.EventTime = metav1.MicroTime{
+		Time: parsedTime,
+	}
+	sensor, err := getSensor()
+	assert.Nil(t, err)
+	sOptCtx := getsensorExecutionCtx(sensor)
+	valid, err := sOptCtx.filterTime(timeFilter, &event.Context.EventTime)
+	assert.Nil(t, err)
+	assert.Equal(t, true, valid)
+
+	// test invalid event
+	timeFilter.Start = "09:09:09"
+	timeFilter.Stop = "09:10:09"
+	valid, err = sOptCtx.filterTime(timeFilter, &event.Context.EventTime)
+	assert.Nil(t, err)
+	assert.Equal(t, false, valid)
+
+	// test no stop
+	timeFilter.Start = "09:09:09"
+	timeFilter.Stop = ""
+	valid, err = sOptCtx.filterTime(timeFilter, &event.Context.EventTime)
+	assert.Nil(t, err)
+	assert.Equal(t, true, valid)
+
+	// test no start
+	timeFilter.Start = ""
+	timeFilter.Stop = "17:09:09"
+	valid, err = sOptCtx.filterTime(timeFilter, &event.Context.EventTime)
+	assert.Nil(t, err)
+	assert.Equal(t, true, valid)
+}
+
+func Test_filterContext(t *testing.T) {
+	event := getCloudEvent()
+	assert.NotNil(t, event)
+	sensor, err := getSensor()
+	assert.Nil(t, err)
+	sOptCtx := getsensorExecutionCtx(sensor)
+	assert.NotNil(t, sOptCtx)
+	testCtx := event.Context.DeepCopy()
+	valid := sOptCtx.filterContext(testCtx, &event.Context)
+	assert.Equal(t, true, valid)
+	testCtx.Source.Host = "dummy source"
+	valid = sOptCtx.filterContext(testCtx, &event.Context)
+	assert.Equal(t, false, valid)
+}
+
+
+func Test_filterData(t *testing.T) {
+	type args struct {
+		data *v1alpha1.Data
+		event       *v1alpha1.Event
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    bool
+		wantErr bool
+	}{
+		{
+			name:    "nil event",
+			args:    args{data: nil, event: nil},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name:    "unsupported content type",
+			args:    args{data: nil, event: &v1alpha1.Event{Payload: []byte("a")}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "empty data",
+			args: args{data: nil, event: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: "application/json",
+				},
+			}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "nil filters, JSON data",
+			args: args{data: nil, event: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: "application/json",
+				},
+				Payload: []byte("{\"k\": \"v\"}"),
+			}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "string filter, JSON data",
+			args: args{
+				data: &v1alpha1.Data{
+					Filters: []*v1alpha1.DataFilter{
+						{
+							Path:  "k",
+							Type:  v1alpha1.JSONTypeString,
+							Value: "v",
+						},
+					},
+				},
+				event: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: "application/json",
+				},
+				Payload: []byte("{\"k\": \"v\"}"),
+			}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "number filter, JSON data",
+			args: args{data: &v1alpha1.Data{
+				Filters: []*v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeNumber,
+						Value: "1.0",
+					},
+				},
+			},
+				event: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: "application/json",
+				},
+				Payload: []byte("{\"k\": \"1.0\"}"),
+			}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "multiple filters, nested JSON data",
+			args: args{
+				data: &v1alpha1.Data{
+					Filters: []*v1alpha1.DataFilter{
+						{
+							Path:  "k",
+							Type:  v1alpha1.JSONTypeString,
+							Value: "v",
+						},
+						{
+							Path:  "k1.k",
+							Type:  v1alpha1.JSONTypeNumber,
+							Value: "3.14",
+						},
+						{
+							Path:  "k1.k2",
+							Type:  v1alpha1.JSONTypeString,
+							Value: "hello,world",
+						},
+					},
+				},
+				event: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: "application/json",
+				},
+				Payload: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
+			}},
+			want:    false,
+			wantErr: false,
+		},
+	}
+	sensor, err := getSensor()
+	assert.Nil(t, err)
+	sOptCtx := getsensorExecutionCtx(sensor)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := sOptCtx.filterData(tt.args.data, tt.args.event)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("filterData() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("filterData() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_mapIsSubset(t *testing.T) {
+	type args struct {
+		sub map[string]string
+		m   map[string]string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "nil sub, nil map",
+			args: args{sub: nil, m: nil},
+			want: true,
+		},
+		{
+			name: "empty sub, empty map",
+			args: args{sub: make(map[string]string), m: make(map[string]string)},
+			want: true,
+		},
+		{
+			name: "empty sub, non-empty map",
+			args: args{sub: make(map[string]string), m: map[string]string{"k": "v"}},
+			want: true,
+		},
+		{
+			name: "disjoint",
+			args: args{sub: map[string]string{"k1": "v1"}, m: map[string]string{"k": "v"}},
+			want: false,
+		},
+		{
+			name: "subset",
+			args: args{sub: map[string]string{"k1": "v1"}, m: map[string]string{"k": "v", "k1": "v1"}},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := mapIsSubset(tt.args.sub, tt.args.m); got != tt.want {
+				t.Errorf("mapIsSubset() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

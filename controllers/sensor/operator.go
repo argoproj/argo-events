@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
@@ -32,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 // the context of an operation on a sensor.
@@ -182,9 +182,9 @@ func (soc *sOperationCtx) operate() error {
 			}
 		}
 
-		// MArk all signal nodes as active
+		// Mark all signal nodes as active
 		for _, signal := range soc.s.Spec.Signals {
-			soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseActive)
+			soc.markNodePhase(signal.Name, v1alpha1.NodePhaseActive, "node is active")
 		}
 
 		// if we get here - we know the signals are running
@@ -200,7 +200,15 @@ func (soc *sOperationCtx) operate() error {
 			}
 		}
 	case v1alpha1.NodePhaseError:
-		// trigger escalation for all signals in error state
+		// trigger escalation
+		soc.log.Info().Msg("escalating sensor error by creating k8 event")
+		k8Event := soc.GetK8Event("sensor is in error phase", v1alpha1.NodePhaseError, common.LabelArgoEventsEscalationKind)
+		k8EventCreated, err := common.CreateK8Event(k8Event, soc.controller.kubeClientset)
+		if err != nil {
+			soc.log.Error().Err(err).Msg("failed to create k8 event to escalate sensor error state")
+			return err
+		}
+		soc.log.Info().Str("event-name", k8EventCreated.ObjectMeta.Name).Msg("created k8 event to escalate sensor error state")
 	case v1alpha1.NodePhaseComplete:
 		soc.log.Info().Msg("sensor is completed")
 		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
@@ -220,6 +228,7 @@ func (soc *sOperationCtx) reRunSensor() {
 	soc.log.Info().Msg("resetting nodes and re-running sensor")
 	// reset the nodes
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+	// todo: remove this, it is redundant
 	// re-initialize the signal nodes
 	for _, signal := range soc.s.Spec.Signals {
 		soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseNew)
@@ -345,6 +354,29 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 	}
 }
 
+// markNodePhase marks the node with a phase, returns the node
+func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhase, message ...string) *v1alpha1.NodeStatus {
+	node := getNodeByName(soc.s, nodeName)
+	if node == nil {
+		soc.log.Panic().Str("node-name", nodeName).Msg("node is uninitialized")
+	}
+	if node.Phase != phase {
+		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase))
+		node.Phase = phase
+	}
+	if len(message) > 0 && node.Message != message[0] {
+		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase)).Str("message", message[0])
+		node.Message = message[0]
+	}
+	if node.IsComplete() && node.CompletedAt.IsZero() {
+		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
+		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Msg("completed")
+	}
+	soc.s.Status.Nodes[node.ID] = *node
+	return node
+}
+
+
 // createK8Event creates a kubernetes event.
 func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, eventType string) *corev1.Event {
 	event := &common.K8Event{
@@ -353,7 +385,7 @@ func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, e
 		Type:                eventType,
 		Reason:              reason,
 		Action:              string(action),
-		Kind:                gateway.Kind,
+		Kind:                sensor.Kind,
 		ReportingController: common.DefaultSensorControllerDeploymentName,
 		ReportingInstance:   soc.controller.Config.InstanceID,
 		Labels: map[string]string{

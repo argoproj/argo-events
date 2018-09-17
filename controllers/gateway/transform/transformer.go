@@ -101,11 +101,11 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", eventId),
 			ContentType:        r.Header.Get(common.HeaderContentType),
-			EventTime:          metav1.Time{Time: time.Now().UTC()},
+			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          toc.Config.EventType,
 			EventTypeVersion:   toc.Config.EventTypeVersion,
 			Source: &sv1alpha.URI{
-				Host: toc.Config.EventSource + "/" + tp.Src,
+				Host: common.DefaultGatewayConfigurationName(toc.Config.EventSource, tp.Src),
 			},
 		},
 		Payload: tp.Payload,

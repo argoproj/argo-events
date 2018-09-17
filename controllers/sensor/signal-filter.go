@@ -87,25 +87,28 @@ func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alph
 // 1. the eventTime is greater than or equal to the start time
 // 2. the eventTime is less than the end time
 // returns true if 1 and 2 are true and false otherwise
-func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) (bool, error) {
+func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.MicroTime) (bool, error) {
 	if timeFilter != nil {
+		se.log.Info().Str("event-time", eventTime.String()).Msg("event time")
 		currentT := time.Now().UTC()
 		se.log.Info().Str("current-time", currentT.String()).Msg("current time")
-		currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
+		currentMonth := fmt.Sprintf("%d", int(currentT.Month()))
+		if int(currentT.Month()) < 10 {
+			currentMonth = "0" + currentMonth
+		}
+		currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), currentMonth, currentT.Day())
 
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
 			se.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
-			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Start)
+			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)
 			if err != nil {
-				fmt.Println(err)
 				return false, err
 			}
 			se.log.Info().Str("start time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
 			se.log.Info().Str("stop time format", currentTStr+" "+timeFilter.Stop).Msg("stop time format")
-			stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Stop)
+			stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Stop)
 			if err != nil {
-				fmt.Println(err)
 				return false, err
 			}
 			se.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
@@ -114,7 +117,7 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 		}
 		if timeFilter.Start != "" {
 			// stop is nil - does not have an end
-			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Start)
+			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)
 			if err != nil {
 				return false, err
 			}
@@ -123,7 +126,7 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
 		if timeFilter.Stop != "" {
-			stopTime, err := time.Parse("2016-01-02 15:04:05", currentTStr+" "+timeFilter.Stop)
+			stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Stop)
 			if err != nil {
 				return false, err
 			}

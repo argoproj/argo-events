@@ -37,6 +37,9 @@ const (
 
 	// LabelArgoEventsEscalationKind is the label for escalation
 	LabelArgoEventsEscalationKind = "ArgoEventsEscalation"
+
+	// StandardTimeFormat is time format reference for golang
+	StandardTimeFormat = "2006-01-02 15:04:05"
 )
 
 // SENSOR CONTROLLER CONSTANTS

@@ -109,13 +109,13 @@ func runGateway(config *gateways.ConfigContext) error {
 		return nextT
 	}
 
-	event := httpGatewayServerConfig.GwConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src, "Normal")
-	err = common.CreateK8Event(event, httpGatewayServerConfig.GwConfig.Clientset)
+	event := httpGatewayServerConfig.GwConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	k8Event, err := common.CreateK8Event(event, httpGatewayServerConfig.GwConfig.Clientset)
 	if err != nil {
 		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err
 	}
-
+	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Str("phase", string(v1alpha1.NodePhaseRunning)).Str("event-name", k8Event.Name).Msg("k8 event created")
 	lastT := time.Now()
 calendarConfigRunner:
 	for {

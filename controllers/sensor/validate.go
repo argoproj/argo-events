@@ -22,6 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/argoproj/argo-events/common"
 )
 
 // validateSensor accepts a sensor and performs validation against it
@@ -82,13 +83,13 @@ func validateSignalFilter(filter v1alpha1.SignalFilter) error {
 
 func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	currentT := metav1.Time{Time: time.Now().UTC()}
-	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
+	currentTStr := fmt.Sprintf("%d-%d-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
 	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Start)
+		startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Start)
 		if err != nil {
 			return err
 		}
-		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Stop)
+		stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Stop)
 		if err != nil {
 			return err
 		}
@@ -97,7 +98,7 @@ func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 		}
 	}
 	if tFilter.Stop != "" {
-		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Stop)
+		stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Stop)
 		if err != nil {
 			return err
 		}

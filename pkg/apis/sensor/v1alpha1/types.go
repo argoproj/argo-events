@@ -374,7 +374,7 @@ type EventContext struct {
 	EventID string `json:"eventID" protobuf:"bytes,5,opt,name=eventID"`
 
 	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-	EventTime v1.Time `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
+	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
 
 	// A link to the schema that the data attribute adheres to.
 	// Must adhere to the format specified in RFC 3986.
@@ -391,8 +391,8 @@ type EventContext struct {
 	// to test metadata before adding them to the CloudEvents specification.
 	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
 
-	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy" protobuf:"bytes,10,opt,name=escalationPolicy"`
+	// EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,10,opt,name=escalationPolicy"`
 }
 
 // URI is a Uniform Resource Identifier based on RFC 3986
@@ -476,7 +476,6 @@ func (s *Sensor) IsComplete() bool {
 
 // AreAllNodesSuccess determines if all nodes of the given type have completed successfully
 func (s *Sensor) AreAllNodesSuccess(nodeType NodeType) bool {
-	fmt.Println(len(s.Status.Nodes))
 	for _, node := range s.Status.Nodes {
 		if node.Type == nodeType && node.Phase != NodePhaseComplete {
 			return false

@@ -18,10 +18,12 @@ package sensor
 
 import (
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_validateSensor(t *testing.T) {
-}
-
-func Test_validateSignalFilter(t *testing.T) {
+	sensor, err := getSensor()
+	assert.Nil(t, err)
+	err = validateSensor(sensor)
+	assert.Nil(t, err)
 }
