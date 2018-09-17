@@ -35,6 +35,7 @@ const (
 	// LabelEventSeen is the label for already seen k8 event
 	LabelEventSeen = "event-seen"
 
+	// LabelArgoEventsEscalationKind is the label for escalation
 	LabelArgoEventsEscalationKind = "ArgoEventsEscalation"
 )
 
@@ -59,6 +60,10 @@ const (
 	// EnvVarConfigMap is the name of the configmap to use for the sensor-controller
 	EnvVarConfigMap = "SENSOR_CONFIG_MAP"
 
+)
+
+// SENSOR CONSTANTS
+const (
 	// Sensor image is the image used to deploy sensor.
 	SensorImage = "metalgearsolid/sensor"
 
@@ -80,7 +85,17 @@ const (
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 
+	// LabelSignalName is label for signal name
 	LabelSignalName = "signal-name"
+
+	// LabelSensorStateUpdate is the label for sensor state updates
+	LabelSensorStateUpdate = "sensor-state-update"
+
+	// LabelEventForSignalNode is the label for event set in signal node
+	LabelEventForSensorNode = "event-for-signal-node"
+
+	// SensorControllerInstanceIDEnvVar is used to get sensor controller instance id
+	SensorControllerInstanceIDEnvVar = "SENSOR_CONTROLLER_INSTANCE_ID"
 )
 
 // GATEWAY CONSTANTS
@@ -113,7 +128,7 @@ const (
 	// LabelGatewayConfigurationName is the label for a configuration in gateway
 	LabelGatewayConfigurationName = "config-name"
 
-	// GatewayControllerInstanceIDEnvVar is used to get controller instance id
+	// GatewayControllerInstanceIDEnvVar is used to get gateway controller instance id
 	GatewayControllerInstanceIDEnvVar = "GATEWAY_CONTROLLER_INSTANCE_ID"
 
 	// GatewayControllerNameEnvVar is used to get name of gateway controller

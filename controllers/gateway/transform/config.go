@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -11,10 +13,9 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 	"strings"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 )
 
+// WatchGatewayTransformerConfigMap watches gateway transformer configmap for any changes.
 func (t *tOperationCtx) WatchGatewayTransformerConfigMap(ctx context.Context, name string) (cache.Controller, error) {
 	source := t.newStoreConfigMapWatch(name)
 	_, controller := cache.NewInformer(
@@ -46,6 +47,7 @@ func (t *tOperationCtx) WatchGatewayTransformerConfigMap(ctx context.Context, na
 	return controller, nil
 }
 
+// newStoreConfigMapWatch returns a new configmap watcher
 func (t *tOperationCtx) newStoreConfigMapWatch(name string) *cache.ListWatch {
 	x := t.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
@@ -71,14 +73,24 @@ func (t *tOperationCtx) newStoreConfigMapWatch(name string) *cache.ListWatch {
 	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
+// updateConfig updates the transformer configmap whenever there is an update.
 func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
+	// it is the type of gateway
 	eventType, ok := cm.Data[common.EventType]
 	if !ok {
 		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventType)
 	}
+
+	// version of cloudevents
 	eventTypeVersion, ok := cm.Data[common.EventTypeVersion]
 	if !ok {
 		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventTypeVersion)
+	}
+
+	// name of the gateway
+	eventSource, ok := cm.Data[common.EventSource]
+	if !ok {
+		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventSource)
 	}
 
 	// parse sensor watchers and gateway watchers if any
@@ -88,43 +100,40 @@ func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
 	sensorWatchersStr := cm.Data[common.SensorWatchers]
 	gatewayWatchersStr := cm.Data[common.GatewayWatchers]
 
-	fmt.Sprintf("sensor watchers: %s", sensorWatchersStr)
-	fmt.Sprintf("gateway watchers: %s", gatewayWatchersStr)
+	t.log.Info().Interface("sensors", sensorWatchersStr).Msg("sensor watchers")
+	t.log.Info().Interface("gateways", gatewayWatchersStr).Msg("gateway watchers")
 
+	// parse sensor watchers
 	if sensorWatchersStr != "" {
 		for _, sensorWatcherStr := range strings.Split(sensorWatchersStr, ",") {
-			fmt.Sprintf("unmarshalling sensor watcher: %s", sensorWatcherStr)
+			fmt.Sprintf("parsing sensor watcher: %s", sensorWatcherStr)
 			var sensorWatcher v1alpha1.SensorNotificationWatcher
 			err := yaml.Unmarshal([]byte(sensorWatcherStr), &sensorWatcher)
 			if err != nil {
-				panic(fmt.Errorf("failed to unmarshal sensor watcher string. Err: %+v", err))
+				panic(fmt.Errorf("failed to parse sensor watcher string. Err: %+v", err))
 			}
 			sensorWatchers = append(sensorWatchers, sensorWatcher)
 		}
 	}
 
+	// parse gateway watchers
 	if gatewayWatchersStr != "" {
 		for _, gatewayWatcherStr := range strings.Split(gatewayWatchersStr, ",") {
-			fmt.Sprintf("unmarshalling gateway watcher: %s", gatewayWatcherStr)
+			fmt.Sprintf("parsing gateway watcher: %s", gatewayWatcherStr)
 			var gatewayWatcher v1alpha1.GatewayNotificationWatcher
 			err := yaml.Unmarshal([]byte(gatewayWatcherStr), &gatewayWatcher)
 			if err != nil {
-				panic(fmt.Errorf("failed to unmarshal gateway watcher string. Err: %+v", err))
+				panic(fmt.Errorf("failed to parse gateway watcher string. Err: %+v", err))
 			}
 			gatewayWatchers = append(gatewayWatchers, gatewayWatcher)
 		}
 	}
 
-	eventSource, ok := cm.Data[common.EventSource]
-	if !ok {
-		return fmt.Errorf("configMap '%s' does not have key '%s'", cm.Name, common.EventSource)
-	}
-
 	t.Config = &tConfig{
 		EventType:        eventType,
 		EventTypeVersion: eventTypeVersion,
-		Gateways: gatewayWatchers,
-		Sensors: sensorWatchers,
+		Gateways:         gatewayWatchers,
+		Sensors:          sensorWatchers,
 		EventSource:      eventSource,
 	}
 	return nil

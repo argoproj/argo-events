@@ -28,15 +28,12 @@ import (
 func TestInstanceIDReq(t *testing.T) {
 	controller := &SensorController{
 		Config: SensorControllerConfig{
-			InstanceID: "",
+			InstanceID: "argo-events",
 		},
 	}
 
 	req := controller.instanceIDReq()
 	assert.Equal(t, common.LabelKeySensorControllerInstanceID, req.Key())
-	assert.Equal(t, selection.DoesNotExist, req.Operator())
-
-	controller.Config.InstanceID = "argo-events"
 	req = controller.instanceIDReq()
 	assert.Equal(t, selection.Equals, req.Operator())
 	assert.True(t, req.Values().Has("argo-events"))
@@ -46,7 +43,7 @@ func TestNewSensorInformer(t *testing.T) {
 	controller := &SensorController{
 		Config: SensorControllerConfig{
 			Namespace:  "testing",
-			InstanceID: "",
+			InstanceID: "argo-events",
 		},
 		sensorClientset: fake_ss.NewSimpleClientset(),
 	}

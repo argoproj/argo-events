@@ -20,25 +20,23 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/argoproj/argo-events/common"
 	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 func (c *SensorController) instanceIDReq() labels.Requirement {
 	var instanceIDReq *labels.Requirement
 	var err error
-	if c.Config.InstanceID != "" {
-		instanceIDReq, err = labels.NewRequirement(common.LabelKeySensorControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
-	} else {
-		instanceIDReq, err = labels.NewRequirement(common.LabelKeySensorControllerInstanceID, selection.DoesNotExist, nil)
+	if c.Config.InstanceID == "" {
+		panic("controller instance id must be specified")
 	}
+	instanceIDReq, err = labels.NewRequirement(common.LabelKeySensorControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}
-
 	return *instanceIDReq
 }
 

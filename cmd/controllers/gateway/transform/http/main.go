@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 )
 
 func main() {
@@ -51,13 +51,14 @@ func main() {
 	fmt.Sprintf("sensor watchers: %s", sensorWatchersStr)
 	fmt.Sprintf("gateway watchers: %s", gatewayWatchersStr)
 
+	// parse sensor and gateway watchers for this gateway
 	if sensorWatchersStr != "" {
 		for _, sensorWatcherStr := range strings.Split(sensorWatchersStr, ",") {
-			fmt.Sprintf("unmarshalling sensor watcher: %s", sensorWatcherStr)
+			fmt.Sprintf("parsing sensor watcher: %s", sensorWatcherStr)
 			var sensorWatcher v1alpha1.SensorNotificationWatcher
 			err = yaml.Unmarshal([]byte(sensorWatcherStr), &sensorWatcher)
 			if err != nil {
-				panic(fmt.Errorf("failed to unmarshal sensor watcher string. Err: %+v", err))
+				panic(fmt.Errorf("failed to parse sensor watcher string. Err: %+v", err))
 			}
 			sensorWatchers = append(sensorWatchers, sensorWatcher)
 		}
@@ -75,21 +76,28 @@ func main() {
 		}
 	}
 
+	// creates a new configuration for gateway transformer. Gateway transformer is responsible for
+	// converting events received from gateway processor into cloudevents specification compliant events
+	// and dispatch them to watchers(components interested in listening to events produced by this gateway)
 	transformerConfig := transform.NewTransformerConfig(tConfigMapData[common.EventType],
 		tConfigMapData[common.EventTypeVersion],
 		tConfigMapData[common.EventSource],
 		sensorWatchers,
 		gatewayWatchers,
-			)
+	)
 
-	// Create an operation context
+	// Create an operation context for transformer
 	toc := transform.NewTransformOperationContext(transformerConfig, namespace, kubeClient)
 	ctx := context.Background()
+
+	// configmap for gateway transformer contains information necessary to convert an event received from
+	// gateway processor into cloudevents specification compliant event.
 	_, err = toc.WatchGatewayTransformerConfigMap(ctx, configmap)
 	if err != nil {
 		log.Fatalf("failed to register watch for store config map: %+v", err)
 	}
 
+	// endpoint to listen events
 	http.HandleFunc("/", toc.TransformRequest)
 	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", common.GatewayTransformerPort), nil))
 }

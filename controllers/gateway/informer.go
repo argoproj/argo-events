@@ -19,21 +19,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/argoproj/argo-events/common"
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 func (c *GatewayController) instanceIDReq() labels.Requirement {
 	var instanceIDReq *labels.Requirement
 	var err error
-	if c.Config.InstanceID != "" {
-		instanceIDReq, err = labels.NewRequirement(common.LabelKeyGatewayControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
-	} else {
-		instanceIDReq, err = labels.NewRequirement(common.LabelKeyGatewayControllerInstanceID, selection.DoesNotExist, nil)
+	// it makes sense to make instance id is mandatory.
+	if c.Config.InstanceID == "" {
+		panic("instance id is required")
 	}
+	instanceIDReq, err = labels.NewRequirement(common.LabelKeyGatewayControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}

@@ -117,8 +117,6 @@ type HTTPGatewayServerConfig struct {
 	Data *ConfigData
 }
 
-// add a gateway resource watcher.
-
 // newEventWatcher creates a new event watcher.
 func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
@@ -128,7 +126,7 @@ func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.LabelSelector = labelSelector.String()
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(gc.gw.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -137,7 +135,7 @@ func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 		options.LabelSelector = labelSelector.String()
 		options.Watch = true
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(gc.gw.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -147,15 +145,24 @@ func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 
 // updateGatewayResource updates gateway resource
 func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
+	var err error
+
 	defer func() {
 		gc.Log.Info().Str("event-name", event.Name).Msg("marking gateway k8 event as seen")
 		// mark event as seen
 		event.ObjectMeta.Labels[common.LabelEventSeen] = "true"
-		_, err := gc.Clientset.CoreV1().Events(gc.Namespace).Update(event)
+		_, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Update(event)
 		if err != nil {
 			gc.Log.Error().Err(err).Str("event-name", event.ObjectMeta.Name).Msg("failed to mark event as seen")
 		}
 	}()
+
+	// its better to get latest resource version in case user performed an gateway resource update using kubectl
+	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
+	if err != nil {
+		gc.Log.Error().Err(err).Str("event-name", event.Name).Msg("failed to retrieve the gateway")
+		return err
+	}
 
 	// get node/configuration to update
 	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
@@ -170,7 +177,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 		return gc.PersistUpdates()
 	}
 
-	gc.Log.Warn().Str("config-name", nodeID).Msg("updating gateway resource...")
+	gc.Log.Info().Str("config-name", nodeID).Msg("updating gateway resource...")
 	// check if this event happened after last updated time for the configuration
 	if ok && node.UpdateTime.Time.Before(event.EventTime.Time) {
 		node.UpdateTime = event.EventTime
@@ -196,10 +203,10 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 
 // filters unwanted events
 func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
-	if event.Type == gateway.Kind && event.Source.Component == gc.Name &&
+	if event.Type == gateway.Kind && event.Source.Component == gc.gw.Name &&
 		event.ObjectMeta.Labels[common.LabelEventSeen] == "" &&
 		event.ReportingInstance == gc.controllerInstanceID &&
-		event.ReportingController == gc.controllerName {
+		event.ReportingController == gc.gw.Name {
 		gc.Log.Debug().Str("event-name", event.ObjectMeta.Name).Msg("processing gateway k8 event")
 		return true
 	}
@@ -323,7 +330,7 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("activating configuration...")
 			// create k8 event for new configuration
 			newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, newConfig.Data.Src)
-			err = common.CreateK8Event(newConfigEvent, gc.Clientset)
+			_, err = common.CreateK8Event(newConfigEvent, gc.Clientset)
 			if err != nil {
 				gc.Log.Error().Str("config-name", newConfig.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations. skipping configuration...")
 				continue
@@ -344,7 +351,7 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 			delete(gc.registeredConfigs, staleConfigKey)
 			// create a k8 event to remove the node configuration from gateway resource
 			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data.Src)
-			err = common.CreateK8Event(removeConfigEvent, gc.Clientset)
+			_, err = common.CreateK8Event(removeConfigEvent, gc.Clientset)
 			if err != nil {
 				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
 			}
@@ -634,16 +641,16 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 // createK8Event creates a kubernetes event.
 func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, configName string) *corev1.Event {
 	event := &common.K8Event{
-		Name: gc.Name,
-		Namespace: gc.Namespace,
-		Type: gateway.Kind,
-		Reason: reason,
-		Action: string(action),
-		ReportingController: gc.controllerName,
-		ReportingInstance: gc.controllerInstanceID,
+		Name:                gc.Name,
+		Namespace:           gc.Namespace,
+		Type:                gateway.Kind,
+		Reason:              reason,
+		Action:              string(action),
+		ReportingController: gc.Name,
+		ReportingInstance:   gc.controllerInstanceID,
 		Labels: map[string]string{
 			common.LabelGatewayConfigurationName: configName,
-			common.LabelEventSeen:         "",
+			common.LabelEventSeen:                "",
 			common.LabelGatewayName:              gc.Name,
 		},
 	}
@@ -667,7 +674,7 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage string
 		// create k8 event for completion state
 		event = gc.GetK8Event("configuration completed", v1alpha1.NodePhaseCompleted, config.Data.Src)
 	}
-	err = common.CreateK8Event(event, gc.Clientset)
+	_, err = common.CreateK8Event(event, gc.Clientset)
 	if err != nil {
 		gc.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to create gateway k8 event")
 	}

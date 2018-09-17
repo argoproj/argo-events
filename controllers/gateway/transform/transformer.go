@@ -5,19 +5,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
 	suuid "github.com/satori/go.uuid"
 	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"os"
 	"time"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
+// tConfig contains information to generate cloudevents specification compliant event
 type tConfig struct {
 	// EventType is type of the event
 	EventType string
@@ -31,6 +32,7 @@ type tConfig struct {
 	Gateways []v1alpha1.GatewayNotificationWatcher
 }
 
+// tOperationCtx is the operation context for gateway transformer
 type tOperationCtx struct {
 	// Namespace is namespace where gateway-controller is deployed
 	Namespace string
@@ -42,6 +44,7 @@ type tOperationCtx struct {
 	kubeClientset kubernetes.Interface
 }
 
+// TransformerPayload contains payload of cloudevents.
 type TransformerPayload struct {
 	// Src contains information about which specific configuration in gateway generated the event
 	Src string `json:"src"`
@@ -49,6 +52,7 @@ type TransformerPayload struct {
 	Payload []byte `json:"payload"`
 }
 
+// NewTransformerConfig returns a new gateway transformer configuration
 func NewTransformerConfig(eventType string, eventTypeVersion string, eventSource string, sensors []v1alpha1.SensorNotificationWatcher, gateways []v1alpha1.GatewayNotificationWatcher) *tConfig {
 	return &tConfig{
 		EventType:        eventType,
@@ -59,6 +63,7 @@ func NewTransformerConfig(eventType string, eventTypeVersion string, eventSource
 	}
 }
 
+// NewTransformOperationContext returns a new gateway transformer operation context
 func NewTransformOperationContext(config *tConfig, namespace string, clientset kubernetes.Interface) *tOperationCtx {
 	return &tOperationCtx{
 		Namespace:     namespace,
@@ -86,9 +91,11 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 		return nil, err
 	}
 
-	toc.log.Debug().Str("source", tp.Src).Msg("received an event")
+	toc.log.Info().Str("source", tp.Src).
+		Msg("received an event, converting into cloudevents specification compliant event")
 
 	// Create an CloudEvent
+	// See https://github.com/cloudevents/spec for more info.
 	ce := &sv1alpha.Event{
 		Context: sv1alpha.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
@@ -104,7 +111,7 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 		Payload: tp.Payload,
 	}
 
-	toc.log.Debug().Interface("cloud-event", ce).Msg("transformed event")
+	toc.log.Info().Interface("event", ce).Msg("transformed into cloud event")
 	return ce, nil
 }
 
@@ -115,7 +122,6 @@ func (toc *tOperationCtx) getWatcherIP(name string) (string, string, error) {
 		toc.log.Error().Str("service-name", name).Err(err).Msg("failed to connect to watcher service")
 		return "", "", err
 	}
-
 	switch service.Spec.Type {
 	case corev1.ServiceTypeClusterIP:
 		return service.ObjectMeta.Name, service.Spec.ClusterIP, nil
@@ -146,60 +152,110 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 	// get the bytes from cloudevent to dispatch to watcher service
 	eventBytes, err := json.Marshal(ce)
 	if err != nil {
-		toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).Err(err).Msg("failed to marshal event")
+		toc.log.Error().
+			Str("event-source", ce.Context.Source.Host).
+			Str("event-id", ce.Context.EventID).
+			Err(err).Msg("failed to marshal event")
 		return err
 	}
 
+	// dispatch event to sensor watchers
 	for _, sensor := range toc.Config.Sensors {
+		// get the ip of service backing the sensor
 		serviceName, ip, err := toc.getWatcherIP(sensor.Name)
 		if err != nil {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("sensor-name", sensor.Name).Str("sensor-port", common.SensorServicePort).Str("sensor-endpoint", common.SensorServiceEndpoint).Err(err).
-				Msg("failed to get watcher ip")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("sensor-name", sensor.Name).
+				Str("sensor-port", common.SensorServicePort).
+				Str("sensor-endpoint", common.SensorServiceEndpoint).
+				Err(err).Msg("failed to get watcher ip")
+			// maybe service/sensor is not running. skip dispatching event to this sensor
 			continue
 		}
 		// dispatch the event
-		toc.log.Info().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-			Str("service-name", serviceName).Str("sensor-name", sensor.Name).Str("sensor-port", common.SensorServicePort).Str("sensor-endpoint", common.SensorServiceEndpoint).Msg("dispatching cloudevent to sensor")
-		err = toc.postCloudEventToWatcher(ip, common.SensorServicePort, common.SensorServiceEndpoint,  eventBytes)
+		toc.log.Info().
+			Str("event-source", ce.Context.Source.Host).
+			Str("event-id", ce.Context.EventID).
+			Str("service-name", serviceName).
+			Str("sensor-name", sensor.Name).
+			Str("sensor-port", common.SensorServicePort).
+			Str("sensor-endpoint", common.SensorServiceEndpoint).Msg("dispatching cloudevent to sensor")
+
+		// send a http post request containing event in the body
+		err = toc.postCloudEventToWatcher(ip, common.SensorServicePort, common.SensorServiceEndpoint, eventBytes)
 		if err != nil {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("sensor-name", sensor.Name).Err(err).Msg("failed to send event to watcher")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("sensor-name", sensor.Name).
+				Err(err).Msg("failed to send event to watcher")
 		} else {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("sensor-name", sensor.Name).Msg("event dispatched to watcher")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("sensor-name", sensor.Name).Msg("event dispatched to watcher")
 		}
 	}
+
+	// dispatch the event to all gateway watchers
 	for _, gateway := range toc.Config.Gateways {
 		serviceName, ip, err := toc.getWatcherIP(gateway.Name)
 		if err != nil {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("gateway-name", gateway.Name).Str("gateway-port", gateway.Port).Str("gateway-endpoint", gateway.Endpoint).Err(err).
-				Msg("failed to get watcher ip")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("gateway-name", gateway.Name).
+				Str("gateway-port", gateway.Port).
+				Str("gateway-endpoint", gateway.Endpoint).
+				Err(err).Msg("failed to get watcher ip")
+			// maybe service/gateway is not running
 			continue
 		}
-		// dispatch the event
-		toc.log.Info().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-			Str("service-name", serviceName).Str("gateway-name", gateway.Name).Str("gateway-port", gateway.Port).Str("gateway-endpoint", gateway.Endpoint).Msg("dispatching cloudevent to gateway")
-		err = toc.postCloudEventToWatcher(ip, common.SensorServicePort, common.SensorServiceEndpoint,  eventBytes)
+
+		toc.log.Info().
+			Str("event-source", ce.Context.Source.Host).
+			Str("event-id", ce.Context.EventID).
+			Str("service-name", serviceName).
+			Str("gateway-name", gateway.Name).
+			Str("gateway-port", gateway.Port).
+			Str("gateway-endpoint", gateway.Endpoint).Msg("dispatching cloudevent to gateway")
+
+		// make an http post request to gateway watcher containing event in request body
+		err = toc.postCloudEventToWatcher(ip, gateway.Port, gateway.Endpoint, eventBytes)
 		if err != nil {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("sensor-name", gateway.Name).Err(err).Msg("failed to send event to watcher")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("sensor-name", gateway.Name).
+				Err(err).Msg("failed to send event to watcher")
 		} else {
-			toc.log.Error().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-				Str("service-name", serviceName).Str("sensor-name", gateway.Name).Msg("event dispatched to watcher")
+			toc.log.Error().
+				Str("event-source", ce.Context.Source.Host).
+				Str("event-id", ce.Context.EventID).
+				Str("service-name", serviceName).
+				Str("sensor-name", gateway.Name).Msg("event dispatched to watcher")
 		}
 	}
-	toc.log.Info().Str("event-source", ce.Context.Source.Host).Str("event-id", ce.Context.EventID).
-		Str("event-source", ce.Context.Source.Host).Str("", ce.Context.EventID).Msg("event sent to all watchers")
+	toc.log.Info().
+		Str("event-source", ce.Context.Source.Host).
+		Str("event-id", ce.Context.EventID).
+		Str("event-source", ce.Context.Source.Host).
+		Str("", ce.Context.EventID).Msg("event sent to all watchers")
 	return nil
 }
 
-// transforms the event into cloudevent
+// transforms the event into cloudevent specification compliant event
 func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Request) {
 	toc.log.Info().Msg("transforming incoming request into cloudevent")
 
-	// transform event
+	// transform the event
 	ce, err := toc.transform(r)
 	if err != nil {
 		toc.log.Error().Err(err).Msg("failed to transform user event into CloudEvent")
@@ -207,10 +263,10 @@ func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// dispatch the cloudevent to sensors registered for this gateway
+	// dispatch the cloudevent to sensors and gateway watchers for this gateway
 	err = toc.dispatchTransformedEvent(ce)
 	if err != nil {
-		toc.log.Error().Err(err).Str("event-id", ce.Context.EventID).Msg("failed to send the event to sensor")
+		toc.log.Error().Err(err).Str("event-id", ce.Context.EventID).Msg("failed to send the event to watchers")
 		common.SendErrorResponse(w)
 		return
 	}

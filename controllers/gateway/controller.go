@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"os"
@@ -38,14 +39,13 @@ const (
 	gatewayResyncPeriod = 20 * time.Minute
 )
 
-// GatewayControllerConfig contain the configuration settings for the gateway-controller-controller
+// GatewayControllerConfig contain the configuration settings for the gateway-controller
 type GatewayControllerConfig struct {
-	// InstanceID is a label selector to limit the gateway-controller-controller's watch of gateway-controller jobs to a specific instance.
-	// If omitted, the gateway-controller-controller watches gateways that *are not* labeled with an instance id.
-	InstanceID string `json:"instanceID,omitempty"`
+	// InstanceID is a label selector to limit the gateway-controller's watch of gateway jobs to a specific instance.
+	InstanceID string
 
 	// Namespace is a label selector filter to limit gateway-controller-controller's watch to specific namespace
-	Namespace string `json:"namespace"`
+	Namespace string
 }
 
 // GatewayController listens for new gateways and hands off handling of each gateway-controller on the queue to the operator
@@ -109,8 +109,26 @@ func (c *GatewayController) processNextItem() bool {
 	ctx := newGatewayOperationCtx(gateway, c)
 
 	err = c.handleErr(ctx.operate(), key)
+	// create k8 event to escalate the error
 	if err != nil {
-		// todo: handle this
+		escalationEvent := &common.K8Event{
+			Name:      gateway.Name,
+			Namespace: gateway.Namespace,
+			Reason:    err.Error(),
+			Kind:      common.LabelArgoEventsEscalationKind,
+			Type:      "Error",
+			Labels: map[string]string{
+				common.LabelGatewayName: gateway.Name,
+			},
+			ReportingInstance:   ctx.controller.Config.InstanceID,
+			ReportingController: common.DefaultGatewayControllerDeploymentName,
+			Action:              "Escalate",
+		}
+		k8Event := common.GetK8Event(escalationEvent)
+		_, err = common.CreateK8Event(k8Event, ctx.controller.kubeClientset)
+		if err != nil {
+			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
+		}
 	}
 	return true
 }
@@ -138,13 +156,13 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	return errors.New("exceeded max requeues")
 }
 
-// Run executes the gateway-controller-controller
-func (c *GatewayController) Run(ctx context.Context, ssThreads, signalThreads int) {
+// Run executes the gateway-controller
+func (c *GatewayController) Run(ctx context.Context, gwThreads, signalThreads int) {
 	defer c.queue.ShutDown()
 	c.log.Info().Str("version", base.GetVersion().Version).Str("instance-id", c.Config.InstanceID).Msg("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller-controller config map")
+		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller config map")
 		return
 	}
 
@@ -156,7 +174,7 @@ func (c *GatewayController) Run(ctx context.Context, ssThreads, signalThreads in
 		return
 	}
 
-	for i := 0; i < ssThreads; i++ {
+	for i := 0; i < gwThreads; i++ {
 		go wait.Until(c.runWorker, time.Second, ctx.Done())
 	}
 

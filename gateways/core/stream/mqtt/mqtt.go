@@ -19,6 +19,7 @@ package mqtt
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
@@ -26,7 +27,6 @@ import (
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"sync"
-	"github.com/argoproj/argo-events/common"
 )
 
 const (
@@ -103,7 +103,7 @@ func configRunner(config *gateways.ConfigContext) error {
 
 	config.Active = true
 	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
-	err = common.CreateK8Event(event, gatewayConfig.Clientset)
+	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err

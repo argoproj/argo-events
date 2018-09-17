@@ -11,11 +11,11 @@ import (
 
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"time"
 	"strings"
-	"github.com/ghodss/yaml"
+	"time"
 )
 
 const (
@@ -46,11 +46,13 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 	}
 }
 
+// operate checks the status of gateway resource and takes action based on it.
 func (goc *gwOperationCtx) operate() error {
+	// persist updates to gateway resource once we are done operating on it.
 	defer goc.persistUpdates()
-	goc.log.Info().Msg("operating on the gateway")
+	goc.log.Info().Msg("operating on the gateway...")
 
-	// validate the gateway
+	// performs a basic validation on gateway resource.
 	err := goc.validate()
 	if err != nil {
 		goc.log.Error().Err(err).Msg("gateway validation failed")
@@ -58,12 +60,16 @@ func (goc *gwOperationCtx) operate() error {
 		return err
 	}
 
-	// manages states of a gateway
+	// check the state of a gateway and take actions accordingly
 	switch goc.gw.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		// check if the type of the gateway is http
+		// check if the dispatch mechanism of the gateway is http
+		// if it is, then we need to list of watchers because http post query requires endpoints to query to.
 		var sensorWatchers []string
 		var gatewayWatchers []string
+		// list sensor and gateway watchers and passes this list to gateway transformer using a k8 configmap
+		// gateway transformer then set a watcher for this configmap so the watcher list in configmap can be updated
+		// and gateway transformer will pick up any new changes to the watchers
 		if goc.gw.Spec.DispatchMechanism == v1alpha1.HTTPGateway {
 			if goc.gw.Spec.Watchers.Sensors != nil {
 				for _, sensor := range goc.gw.Spec.Watchers.Sensors {
@@ -89,7 +95,12 @@ func (goc *gwOperationCtx) operate() error {
 			}
 		}
 
-		// declare the configuration map for gateway transformer
+		// create a configuration map for gateway transformer
+		// this configmap contains information required to convert event received
+		// from gateway processor into cloudevents specification compliant event
+		// and the list of watchers to dispatch the event to.
+		// In future, we will add different flavors of gateway transformer depending on event dispatch mechanism
+		// e.g. for kafka and nats dispatch mechanism we won't need list of watchers.
 		gatewayConfigMap := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
@@ -99,19 +110,27 @@ func (goc *gwOperationCtx) operate() error {
 				},
 			},
 			Data: map[string]string{
-				common.EventSource:      goc.gw.Name,
+				// source of the event is the gateway
+				common.EventSource: goc.gw.Name,
+				// version of event
 				common.EventTypeVersion: goc.gw.Spec.Version,
-				common.EventType:        string(goc.gw.Spec.Type),
-				common.SensorWatchers:       strings.Join(sensorWatchers, ","),
+				// type of the event is type of the gateway e.g. webhook, calendar, stream etc
+				common.EventType: string(goc.gw.Spec.Type),
+				// list of sensor watchers
+				common.SensorWatchers: strings.Join(sensorWatchers, ","),
+				// list of gateway watchers
 				common.GatewayWatchers: strings.Join(gatewayWatchers, ","),
 			},
 		}
-		// create gateway transformer configmap
+
+		// create the gateway transformer configmap
 		_, err = goc.controller.kubeClientset.CoreV1().ConfigMaps(goc.gw.Namespace).Create(gatewayConfigMap)
 		if err != nil {
+			// the error will be escalated by creating k8 event.
 			goc.log.Error().Err(err).Msg("failed to create transformer gateway configuration")
 			// mark gateway as failed
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create transformer gateway configuration. err: %s", err))
+			return err
 		}
 
 		// add gateway name to gateway label
@@ -153,22 +172,28 @@ func (goc *gwOperationCtx) operate() error {
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
+			return err
 		} else {
+			goc.log.Info().Str("deployment-name", common.DefaultGatewayDeploymentName(goc.gw.Name)).Msg("gateway deployment created")
 			// expose gateway if service is configured
 			if goc.gw.Spec.ServiceSpec != nil {
-				err = goc.createGatewayService()
+				svc, err := goc.createGatewayService()
+				// Failed to expose gateway through a service.
 				if err != nil {
 					goc.log.Error().Err(err).Msg("failed to create service for gateway")
-					goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, "failed to create service", err.Error())
+					goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, fmt.Sprintf("failed to create service. err: %s", err.Error()))
 					return err
 				}
+				goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service is created")
 			}
 			goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 		}
 
 		// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		gDeployment, err := goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Get(goc.gw.Name, metav1.GetOptions{})
+		// todo: maybe we don't need to perform any deployment update. If the gateway is in error state
+		// then user will just delete the gateway and create a new one.
+		gDeployment, err := goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Get(common.DefaultGatewayDeploymentName(goc.gw.Name), metav1.GetOptions{})
 		if err != nil {
 			goc.log.Error().Err(err).Msg("error occurred retrieving gateway deployment")
 			return err
@@ -188,7 +213,6 @@ func (goc *gwOperationCtx) operate() error {
 		// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Msg("gateway is running")
-		// Failed to expose gateway through a service.
 	case v1alpha1.NodePhaseServiceError:
 		// check whether service is now created successfully. service's name must be gateway name followed by "-gateway-svc".
 		_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Get(common.DefaultGatewayServiceName(goc.gw.Name), metav1.GetOptions{})
@@ -204,8 +228,8 @@ func (goc *gwOperationCtx) operate() error {
 	return nil
 }
 
-// Creates a service that exposes gateway outside the cluster
-func (goc *gwOperationCtx) createGatewayService() error {
+// Creates a service that exposes gateway to other cluster components or to outside world
+func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 	gatewayService := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      common.DefaultGatewayServiceName(goc.gw.Name),
@@ -218,12 +242,14 @@ func (goc *gwOperationCtx) createGatewayService() error {
 	}
 
 	// if selector is not provided, override selectors with gateway labels
+	// todo: this might not be required if in validation we check that if serviceSpec is
+	// specified then make sure selectors are specified as well.
 	if gatewayService.Spec.Selector == nil {
 		gatewayService.Spec.Selector = goc.gw.ObjectMeta.Labels
 	}
 
-	_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
-	return err
+	svc, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
+	return svc, err
 }
 
 // persist the updates to the gateway resource
@@ -270,7 +296,7 @@ func (goc *gwOperationCtx) reapplyUpdate(gatewayClient client.GatewayInterface) 
 }
 
 // mark the overall gateway phase
-func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message ...string) {
+func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
 	justCompleted := goc.gw.Status.Phase != phase
 	if justCompleted {
 		goc.log.Info().Str("old-phase", string(goc.gw.Status.Phase)).Str("new-phase", string(phase))
@@ -290,16 +316,15 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message ..
 		goc.gw.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 		goc.updated = true
 	}
-	if len(message) > 0 && goc.gw.Status.Message != message[0] {
-		goc.log.Info().Str("old-message", string(goc.gw.Status.Message)).Str("new-message", message[0])
-		goc.gw.Status.Message = message[0]
-		goc.updated = true
-	}
+	goc.log.Info().Str("old-message", string(goc.gw.Status.Message)).Str("new-message", message)
+	goc.gw.Status.Message = message
+	goc.updated = true
 }
 
 // creates a list of containers required for gateway deployment
 func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	// env variables for gateway processor
+	// these env vars are common to different flavors of gateway.
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.GatewayTransformerPortEnvVar,
@@ -334,13 +359,19 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	if goc.gw.Spec.RPCPort != "" {
 		// in case of gRPC gateway, gateway processor client(eventProcessor) will connect with container that has rpc server running
 		// on RPCPort.
+
+		// gateway processor server containers. Only one of these need to act as gRPC server and accept
+		// connections from gateway processor client.
 		eventGeneratorContainers := goc.gw.Spec.DeploySpec.Containers
+
+		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
 			Image:           common.GatewayProcessorGRPCClientImage,
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
+		// this env var is available across all gateway processor server and client containers
 		rpcGatewayEnvVars := append(envVars, corev1.EnvVar{
 			Name:  common.GatewayProcessorGRPCServerPort,
 			Value: goc.gw.Spec.RPCPort,
@@ -353,13 +384,22 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			containers[i].Env = append(container.Env, rpcGatewayEnvVars...)
 		}
 	} else if goc.gw.Spec.HTTPServerPort != "" {
+		// in case of http gateway flavor, gateway processor server listens for new/stale configs on predefined API endpoints
+		// similarly, gateway processor client listens to events from gateway processor server on a predefined API endpoint
+
+		// gateway processor server containers. Only one of these needs to accept new/old configs from
+		// gateway processor client
 		eventGeneratorContainers := goc.gw.Spec.DeploySpec.Containers
+
+		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
 			Image:           common.GatewayProcessorHTTPClientImage,
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
+		// these variables are available to all containers, both gateway processor server
+		// and gateway processor client
 		httpEnvVars := []corev1.EnvVar{
 			{
 				Name:  common.GatewayProcessorServerHTTPPortEnvVar,
@@ -393,6 +433,8 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		}
 	} else {
 		// this is when user is deploying gateway by either following core gateways or writing a completely custom gateway
+
+		// only one of these container must have a main entry. others can act as a supporting components
 		eventGeneratorAndProcessorContainers := goc.gw.Spec.DeploySpec.Containers
 		containers = append(containers, eventGeneratorAndProcessorContainers...)
 		for i, container := range containers {
@@ -400,6 +442,9 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		}
 	}
 
+	// Gateway transformer container. Currently only HTTP protocol is supported
+	// for event dispatch mechanism. In future, we plan to add different dispatch mechanisms like
+	// NATS, Kafka etc.
 	var transformerImage string
 
 	switch goc.gw.Spec.DispatchMechanism {

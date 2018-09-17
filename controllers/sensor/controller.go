@@ -29,9 +29,9 @@ import (
 	"k8s.io/client-go/util/workqueue"
 
 	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"github.com/argoproj/argo-events/common"
 )
 
 const (
@@ -42,10 +42,10 @@ const (
 type SensorControllerConfig struct {
 	// InstanceID is a label selector to limit the sensor-controller's watch of sensor jobs to a specific instance.
 	// If omitted, the sensor-controller watches sensors that *are not* labeled with an instance id.
-	InstanceID string `json:"instanceID,omitempty"`
+	InstanceID string
 
 	// Namespace is a label selector filter to limit sensor-controller's watch to specific namespace
-	Namespace string `json:"namespace"`
+	Namespace string
 }
 
 // SensorController listens for new sensors and hands off handling of each sensor on the queue to the operator
@@ -111,7 +111,7 @@ func (c *SensorController) processNextItem() bool {
 		// the context should have the most up-to-date version
 		ctx.log.Error().Err(err).Msg("escalating controller failure")
 		event := ctx.GetK8Event("controller error", v1alpha1.NodePhaseError, sensor.Kind)
-		err = common.CreateK8Event(event, ctx.controller.kubeClientset)
+		_, err = common.CreateK8Event(event, ctx.controller.kubeClientset)
 		if err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create escalation event for controller failure")
 		}

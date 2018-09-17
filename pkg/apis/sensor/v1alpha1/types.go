@@ -139,7 +139,7 @@ type TimeFilter struct {
 	// format is hh:mm:ss
 	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
 
-	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
@@ -157,7 +157,7 @@ type Data struct {
 	// filter constraints
 	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
 
-	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
 }
 
@@ -181,7 +181,7 @@ type DataFilter struct {
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
 
-	// EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
@@ -325,10 +325,10 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
+	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
-	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
+	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for signal notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
@@ -476,6 +476,7 @@ func (s *Sensor) IsComplete() bool {
 
 // AreAllNodesSuccess determines if all nodes of the given type have completed successfully
 func (s *Sensor) AreAllNodesSuccess(nodeType NodeType) bool {
+	fmt.Println(len(s.Status.Nodes))
 	for _, node := range s.Status.Nodes {
 		if node.Type == nodeType && node.Phase != NodePhaseComplete {
 			return false

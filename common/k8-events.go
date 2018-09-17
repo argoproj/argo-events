@@ -3,8 +3,8 @@ package common
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 	"k8s.io/client-go/kubernetes"
+	"time"
 )
 
 // K8Event abstracts kubernetes event.
@@ -32,7 +32,7 @@ type K8Event struct {
 }
 
 // CreateK8Event returns a kubernetes event object
-func GetK8Event(event *K8Event) *corev1.Event{
+func GetK8Event(event *K8Event) *corev1.Event {
 	return &corev1.Event{
 		Reason: event.Reason,
 		Type:   event.Type,
@@ -41,9 +41,9 @@ func GetK8Event(event *K8Event) *corev1.Event{
 			Time: time.Now(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: event.Namespace,
-			Name:      event.Name + "-" + RandomStringGenerator(),
-			Labels: event.Labels,
+			Namespace:    event.Namespace,
+			GenerateName: event.Name + "-",
+			Labels:       event.Labels,
 		},
 		InvolvedObject: corev1.ObjectReference{
 			Namespace: event.Namespace,
@@ -59,7 +59,7 @@ func GetK8Event(event *K8Event) *corev1.Event{
 }
 
 // CreateK8Event creates a kubernetes event resource
-func CreateK8Event(event *corev1.Event, clientset kubernetes.Interface) error {
-	_, err := clientset.CoreV1().Events(event.ObjectMeta.Namespace).Create(event)
-	return err
+func CreateK8Event(event *corev1.Event, clientset kubernetes.Interface) (*corev1.Event, error) {
+	k8Event, err := clientset.CoreV1().Events(event.ObjectMeta.Namespace).Create(event)
+	return k8Event, err
 }

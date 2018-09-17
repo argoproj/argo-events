@@ -5,7 +5,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
-// Validates the gateway resource
+// Validates the gateway resource.
 func (goc *gwOperationCtx) validate() error {
 	if goc.gw.Spec.DeploySpec == nil {
 		return fmt.Errorf("gateway deploy specification is not specified")

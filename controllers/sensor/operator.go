@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
@@ -31,7 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 )
 
 // the context of an operation on a sensor.
@@ -134,6 +134,10 @@ func (soc *sOperationCtx) operate() error {
 											Name:  common.SensorNamespace,
 											Value: soc.s.Namespace,
 										},
+										{
+											Name: common.SensorControllerInstanceIDEnvVar,
+											Value: soc.controller.Config.InstanceID,
+										},
 									},
 								},
 							},
@@ -176,6 +180,11 @@ func (soc *sOperationCtx) operate() error {
 				// fail silently
 				soc.log.Error().Err(err).Msg("failed to create sensor service")
 			}
+		}
+
+		// MArk all signal nodes as active
+		for _, signal := range soc.s.Spec.Signals {
+			soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseActive)
 		}
 
 		// if we get here - we know the signals are running
@@ -283,7 +292,7 @@ func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.Node
 		DisplayName: nodeName,
 		Type:        nodeType,
 		Phase:       phase,
-		StartedAt:   metav1.Time{Time: time.Now().UTC()},
+		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
 	}
 	if len(messages) > 0 {
 		node.Message = messages[0]
@@ -339,17 +348,17 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 // createK8Event creates a kubernetes event.
 func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, eventType string) *corev1.Event {
 	event := &common.K8Event{
-		Name: soc.s.Name,
-		Namespace: soc.s.Namespace,
-		Type: eventType,
-		Reason: reason,
-		Action: string(action),
-		Kind: gateway.Kind,
+		Name:                soc.s.Name,
+		Namespace:           soc.s.Namespace,
+		Type:                eventType,
+		Reason:              reason,
+		Action:              string(action),
+		Kind:                gateway.Kind,
 		ReportingController: common.DefaultSensorControllerDeploymentName,
-		ReportingInstance: soc.controller.Config.InstanceID,
+		ReportingInstance:   soc.controller.Config.InstanceID,
 		Labels: map[string]string{
-			common.LabelEventSeen:         "",
-			common.LabelSensorName:              soc.s.Name,
+			common.LabelEventSeen:  "",
+			common.LabelSensorName: soc.s.Name,
 		},
 	}
 	return common.GetK8Event(event)

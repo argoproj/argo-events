@@ -58,10 +58,10 @@ func TestResyncConfig(t *testing.T) {
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 
-	err := controller.ResyncConfig()
-	assert.NotNil(t, err)
-
 	os.Setenv(common.EnvVarNamespace, "testing")
+
+	err := controller.ResyncConfig("testing")
+	assert.NotNil(t, err)
 
 	// Note: need to refresh the namespace
 	common.RefreshNamespace()
@@ -76,18 +76,18 @@ func TestResyncConfig(t *testing.T) {
 	}
 	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Create(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig()
+	err = controller.ResyncConfig("testing")
 	assert.NotNil(t, err)
 
 	// succeed with no errors now that configmap has 'config' key
 	configMap.Data = map[string]string{"config": controllerConfig}
 	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Update(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig()
+	err = controller.ResyncConfig("testing")
 	assert.Nil(t, err)
 }
 
 var controllerConfig = `
-instanceID: argoproj
-executorImage: argoproj/sensor:latest
+instanceID: argo-events
+executorImage: argoproj/sensor-controller:latest
 `

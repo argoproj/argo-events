@@ -21,37 +21,37 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
-	"github.com/argoproj/argo-events/common"
 )
 
 // createEscalationEvent creates a k8 event for escalation
-func (se *sensorExecutor) createEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
+func (se *sensorExecutionCtx) createEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
 	se.log.Info().Interface("policy", policy).Msg("printing policy")
 	event := common.GetK8Event(&common.K8Event{
-		Name: policy.Name,
-		Namespace: se.sensor.Namespace,
-		ReportingInstance: se.sensor.Name,
+		Name:                policy.Name,
+		Namespace:           se.sensor.Namespace,
+		ReportingInstance:   se.sensor.Name,
 		ReportingController: se.sensor.Name,
 		Labels: map[string]string{
-			common.LabelEventSeen: "",
+			common.LabelEventSeen:  "",
 			common.LabelSignalName: signalFilterName,
 		},
-		Type: common.LabelArgoEventsEscalationKind,
+		Type:   common.LabelArgoEventsEscalationKind,
 		Action: string(policy.Level),
 		Reason: policy.Message,
 	})
-	err := common.CreateK8Event(event, se.kubeClient)
+	_, err := common.CreateK8Event(event, se.kubeClient)
 	return err
 }
 
 // apply the signal filters to an event
-func (se *sensorExecutor) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
-	dataRes, err := se.filterData(f.Data.Filters, event)
+func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
+	dataRes, err := se.filterData(f.Data, event)
 	// generate sensor failure event and mark sensor as failed
 	if err != nil {
 		return false, err
@@ -87,23 +87,23 @@ func (se *sensorExecutor) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Ev
 // 1. the eventTime is greater than or equal to the start time
 // 2. the eventTime is less than the end time
 // returns true if 1 and 2 are true and false otherwise
-func (se *sensorExecutor) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) (bool, error) {
+func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.Time) (bool, error) {
 	if timeFilter != nil {
 		currentT := time.Now().UTC()
 		se.log.Info().Str("current-time", currentT.String()).Msg("current time")
 		currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
 
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
-			se.log.Info().Str("start time format", currentTStr + " " + timeFilter.Start).Msg("start time format")
-			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Start)
+			se.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
+			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Start)
 			if err != nil {
 				fmt.Println(err)
 				return false, err
 			}
 			se.log.Info().Str("start time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
-			se.log.Info().Str("stop time format", currentTStr + " " + timeFilter.Stop).Msg("stop time format")
-			stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Stop)
+			se.log.Info().Str("stop time format", currentTStr+" "+timeFilter.Stop).Msg("stop time format")
+			stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Stop)
 			if err != nil {
 				fmt.Println(err)
 				return false, err
@@ -114,7 +114,7 @@ func (se *sensorExecutor) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime 
 		}
 		if timeFilter.Start != "" {
 			// stop is nil - does not have an end
-			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + timeFilter.Start)
+			startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+timeFilter.Start)
 			if err != nil {
 				return false, err
 			}
@@ -123,7 +123,7 @@ func (se *sensorExecutor) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime 
 			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
 		if timeFilter.Stop != "" {
-			stopTime, err := time.Parse("2016-01-02 15:04:05", currentTStr + " " + timeFilter.Stop)
+			stopTime, err := time.Parse("2016-01-02 15:04:05", currentTStr+" "+timeFilter.Stop)
 			if err != nil {
 				return false, err
 			}
@@ -132,14 +132,13 @@ func (se *sensorExecutor) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime 
 			return eventTime.Time.Before(stopTime), nil
 		}
 	}
-	se.log.Info().Msg("NO time filter")
 	return true, nil
 }
 
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func (se *sensorExecutor) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
+func (se *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -172,9 +171,13 @@ func (se *sensorExecutor) filterContext(expected *v1alpha.EventContext, actual *
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
-func (se *sensorExecutor) filterData(dataFilters []*v1alpha1.DataFilter, event *v1alpha.Event) (bool, error) {
+func (se *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *v1alpha.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
+	if data == nil {
+		return true, nil
+	}
+	dataFilters := data.Filters
 	if dataFilters == nil {
 		return true, nil
 	}

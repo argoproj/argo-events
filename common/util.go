@@ -59,6 +59,10 @@ func DefaultSensorServiceName(serviceName string) string {
 	return fmt.Sprintf("%s-sensor-svc", serviceName)
 }
 
+func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
+	return fmt.Sprintf("%s/%s", gatewayName, configurationName)
+}
+
 // GetClientConfig return rest config, if path not specified, assume in cluster config
 func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 	if kubeconfig != "" {

@@ -26,7 +26,9 @@ func main() {
 		namespace = common.DefaultGatewayControllerNamespace
 	}
 
+	// create new gateway controller
 	controller := gateway.NewGatewayController(restConfig, configMap)
+	// watch for configuration updates for the controller
 	err = controller.ResyncConfig(namespace)
 	if err != nil {
 		panic(err)

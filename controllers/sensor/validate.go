@@ -84,11 +84,11 @@ func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	currentT := metav1.Time{Time: time.Now().UTC()}
 	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
 	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Start)
+		startTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Start)
 		if err != nil {
 			return err
 		}
-		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Stop)
+		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Stop)
 		if err != nil {
 			return err
 		}
@@ -97,7 +97,7 @@ func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 		}
 	}
 	if tFilter.Stop != "" {
-		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr + " " + tFilter.Stop)
+		stopTime, err := time.Parse("2006-01-02 15:04:05", currentTStr+" "+tFilter.Stop)
 		if err != nil {
 			return err
 		}

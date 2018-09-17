@@ -31,6 +31,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
+// watchControllerConfigMap watches updates to sensor controller configmap
 func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
 	log.Info("watching sensor sensor-controller config map updates")
 	source := c.newControllerConfigMapWatch()
@@ -63,6 +64,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 	return controller, nil
 }
 
+// newControllerConfigMapWatch returns a configmap watcher
 func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	x := c.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
