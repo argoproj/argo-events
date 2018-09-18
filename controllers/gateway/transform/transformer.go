@@ -100,7 +100,7 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 		Context: sv1alpha.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", eventId),
-			ContentType:        r.Header.Get(common.HeaderContentType),
+			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          toc.Config.EventType,
 			EventTypeVersion:   toc.Config.EventTypeVersion,

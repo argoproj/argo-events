@@ -34,6 +34,9 @@ var (
 	// whether http server has started or not
 	hasServerStarted atomic.Bool
 
+	// srv holds reference to http server
+	srv http.Server
+
 	// mutex synchronizes activeRoutes
 	mutex sync.Mutex
 	// as http package does not provide method for unregistering routes,
@@ -43,6 +46,7 @@ var (
 
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig = gateways.NewGatewayConfiguration()
+
 )
 
 // webhook is a general purpose REST API
@@ -76,24 +80,6 @@ func configRunner(config *gateways.ConfigContext) error {
 	}
 	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("webhook", h).Msg("configuring...")
 
-	// start a http server only if given configuration contains port information and no other
-	// configuration previously started the server
-	if h.Port != "" && !hasServerStarted.Load() {
-		// mark http server as started
-		hasServerStarted.Store(true)
-		go func() {
-			gatewayConfig.Log.Info().Str("http-port", h.Port).Msg("http server started listening...")
-			err = http.ListenAndServe(":"+fmt.Sprintf("%s", h.Port), nil)
-			if err != nil {
-				errMessage = "http server stopped"
-			}
-			if config.Active == true {
-				config.StopCh <- struct{}{}
-			}
-			return
-		}()
-	}
-
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -108,6 +94,13 @@ func configRunner(config *gateways.ConfigContext) error {
 		if ok {
 			delete(activeHTTPMethods, h.Method)
 		}
+		if h.Port != "" && hasServerStarted.Load() {
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping http server")
+			err = srv.Shutdown(context.Background())
+			if err != nil {
+				errMessage = "failed to stop http server"
+			}
+		}
 		mutex.Unlock()
 		wg.Done()
 	}()
@@ -119,6 +112,29 @@ func configRunner(config *gateways.ConfigContext) error {
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err
+	}
+
+	// start a http server only if given configuration contains port information and no other
+	// configuration previously started the server
+	if h.Port != "" && !hasServerStarted.Load() {
+		// mark http server as started
+		hasServerStarted.Store(true)
+		go func() {
+			gatewayConfig.Log.Info().Str("http-port", h.Port).Msg("http server started listening...")
+			srv := &http.Server{Addr: ":"+fmt.Sprintf("%s", h.Port)}
+			err = srv.ListenAndServe()
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
+			if err == http.ErrServerClosed {
+				err = nil
+			}
+			if err != nil {
+				errMessage = "http server stopped"
+			}
+			if config.Active == true {
+				config.StopCh <- struct{}{}
+			}
+			return
+		}()
 	}
 
 	// configure endpoint and http method
@@ -165,8 +181,8 @@ func configRunner(config *gateways.ConfigContext) error {
 		}
 
 		gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
-		wg.Wait()
 	}
+	wg.Wait()
 	return nil
 }
 
