@@ -10,7 +10,7 @@ spec:
       filters:
         context:
             source:
-                host: amazon.com
+                host: dev.blackrock.com
             contentType: application/json
   triggers:
     - name: done-workflow

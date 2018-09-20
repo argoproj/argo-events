@@ -12,7 +12,7 @@ spec:
       image: "metalgearsolid/calendar-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/calendar-gateway"]
-    serviceAccountName: "argo-events-sa"
+    serviceAccountName: "axis-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
   dispatchMechanism: "HTTP"

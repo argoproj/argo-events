@@ -300,6 +300,13 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
+					"timeID": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TimeID is used to resolve events arriving out of order for same node",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"name": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Name is a unique name in the node tree used to generate the node ID",
@@ -341,7 +348,7 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 						},
 					},
 				},
-				Required: []string{"id", "name", "displayName", "phase"},
+				Required: []string{"id", "timeID", "name", "displayName", "phase"},
 			},
 		},
 		Dependencies: []string{

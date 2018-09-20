@@ -43,7 +43,7 @@ message Data {
   // filter constraints
   repeated DataFilter filters = 1;
 
-  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
   optional EscalationPolicy escalationPolicy = 2;
 }
 
@@ -67,7 +67,7 @@ message DataFilter {
   // Nils this value is ignored
   optional string value = 3;
 
-  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
   optional EscalationPolicy escalationPolicy = 4;
 }
 
@@ -118,7 +118,7 @@ message EventContext {
   optional string eventID = 5;
 
   // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time eventTime = 6;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6;
 
   // A link to the schema that the data attribute adheres to.
   // Must adhere to the format specified in RFC 3986.
@@ -135,7 +135,7 @@ message EventContext {
   // to test metadata before adding them to the CloudEvents specification.
   map<string, string> extensions = 9;
 
-  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  // EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
   optional EscalationPolicy escalationPolicy = 10;
 }
 
@@ -181,10 +181,10 @@ message NodeStatus {
   optional string phase = 5;
 
   // StartedAt is the time at which this node started
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 6;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
 
   // CompletedAt is the time at which this node completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 7;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
   // store data or something to save for signal notifications or trigger events
   optional string message = 8;
@@ -390,7 +390,7 @@ message TimeFilter {
   // format is hh:mm:ss
   optional string stop = 2;
 
-  // EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
   optional EscalationPolicy escalationPolicy = 3;
 }
 

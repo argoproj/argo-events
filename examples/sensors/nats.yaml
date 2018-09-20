@@ -5,7 +5,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: nats-sensor
-  namespace: argo-events
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:

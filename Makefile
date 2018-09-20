@@ -196,7 +196,6 @@ calendar-grpc-image: calendar-grpc-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-grpc-gateway:$(IMAGE_TAG) ; fi
 
 
-
 # HTTP gateway client binary
 http-gateway-images: gateway-processor-http-client-image calendar-http-image
 
@@ -221,10 +220,6 @@ calendar-http-linux:
 calendar-http-image: calendar-http-linux
 	 docker build -t $(IMAGE_PREFIX)calendar-http-gateway:$(IMAGE_TAG) -f ./gateways/rest/calendar/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-http-gateway:$(IMAGE_TAG) ; fi
-
-
-
-# Todo: Add more gRPC gateway binaries
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

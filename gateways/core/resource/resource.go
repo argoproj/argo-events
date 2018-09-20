@@ -42,17 +42,17 @@ var (
 
 // Resource refers to a dependency on a k8s resource.
 type Resource struct {
-	Namespace               string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-	Filter                  *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
-	metav1.GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
+	Namespace               string          `json:"namespace"`
+	Filter                  *ResourceFilter `json:"filter,omitempty"`
+	metav1.GroupVersionKind `json:",inline"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
 type ResourceFilter struct {
-	Prefix      string            `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,3,rep,name=annotations"`
-	CreatedBy   metav1.Time       `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+	Prefix      string            `json:"prefix,omitempty"`
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations,omitempty"`
+	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
 }
 
 // Runs a configuration
@@ -93,7 +93,7 @@ var configRunner = func(config *gateways.ConfigContext) error {
 
 	config.Active = true
 
-	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
@@ -131,6 +131,7 @@ var configRunner = func(config *gateways.ConfigContext) error {
 		}()
 	}
 	wg.Wait()
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
 	return nil
 }
 

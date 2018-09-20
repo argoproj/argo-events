@@ -17,7 +17,7 @@ spec:
         # The artifact key from the workflow are overridden by the s3 notification key
         parameters:
           - src:
-              signal: minioS3
+              signal: artifact-gateway/s3.fooConfig
               path: s3.object.key
             dest: spec.templates.0.inputs.artifacts.0.key
         source:

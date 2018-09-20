@@ -2,9 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: webhook-gateway-configmap
-  namespace: argo-events
 data:
-  # port can't be reconfigured.
   webhook.portConfig: |-
     port: "12000"
   webhook.barConfig: |-

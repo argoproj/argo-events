@@ -5,11 +5,12 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  serviceAccountName: argo-events-sa
+  serviceAccountName: axis-sa
   imagePullPolicy: Always
   repeat: true
   signals:
     - name: calendar-gateway/calendar.fooConfig
+    - name:
   triggers:
     - name: calendar-workflow-trigger
       resource:
@@ -23,6 +24,7 @@ spec:
               kind: Workflow
               metadata:
                 generateName: hello-world-
+                namespace: "dev-raspberry"
               spec:
                 entrypoint: whalesay
                 templates:

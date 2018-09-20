@@ -30,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"sync"
+	"encoding/json"
 )
 
 var (
@@ -40,31 +41,31 @@ var (
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
-	S3EventConfig S3EventConfig `json:"s3EventConfig" protobuf:"bytes,1,opt,name=s3EventConfig"`
+	S3EventConfig S3EventConfig `json:"s3EventConfig"`
 
 	// Mode of operation for s3 client
-	Insecure bool `json:"insecure,omitempty" protobuf:"bytes,2,opt,name=insecure"`
+	Insecure bool `json:"insecure,omitempty"`
 
 	// AccessKey
-	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,3,opt,name=accessKey"`
+	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty"`
 
 	// SecretKey
-	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,4,opt,name=secretKey"`
+	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty"`
 }
 
 // S3EventConfig contains configuration for bucket notification
 type S3EventConfig struct {
-	Endpoint string                      `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket   string                      `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
-	Region   string                      `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,4,opt,name=event"`
-	filter   S3Filter                    `json:"filter,omitempty" protobuf:"bytes,5,opt,name=filter"`
+	Endpoint string                      `json:"endpoint,omitempty"`
+	Bucket   string                      `json:"bucket,omitempty"`
+	Region   string                      `json:"region,omitempty"`
+	Event    minio.NotificationEventType `json:"event,omitempty"`
+	filter   S3Filter                    `json:"filter,omitempty"`
 }
 
 // S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
 type S3Filter struct {
-	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
-	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
+	Prefix string `json:"prefix"`
+	Suffix string `json:"suffix"`
 }
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
@@ -151,7 +152,7 @@ func configRunner(config *gateways.ConfigContext) error {
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
 
-	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
@@ -169,14 +170,20 @@ func configRunner(config *gateways.ConfigContext) error {
 			break
 		} else {
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
-			payload := []byte(fmt.Sprintf("%v", notificationInfo))
+			payload, err := json.Marshal(notificationInfo.Records[0])
+			if err != nil {
+				errMessage = err.Error()
+				config.StopCh <- struct{}{}
+				break
+			}
 			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
-				Payload: payload,
+				Payload: []byte(string(payload)),
 			})
 		}
 	}
 	wg.Wait()
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
 	return nil
 }
 

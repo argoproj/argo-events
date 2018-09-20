@@ -107,7 +107,7 @@ func configRunner(config *gateways.ConfigContext) error {
 
 	config.Active = true
 
-	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data.Src)
+	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
@@ -159,6 +159,9 @@ func configRunner(config *gateways.ConfigContext) error {
 						} else {
 							gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
 							common.SendSuccessResponse(writer)
+
+							gatewayConfig.Log.Info().Str("payload", string(body)).Msg("payload is")
+
 							// dispatch event to gateway transformer
 							gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 								Src:     config.Data.Src,
@@ -183,6 +186,7 @@ func configRunner(config *gateways.ConfigContext) error {
 		gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	}
 	wg.Wait()
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
 	return nil
 }
 

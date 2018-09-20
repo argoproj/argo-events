@@ -34,7 +34,6 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 		if err != nil {
 			return nil, err
 		}
-
 		// now let's set the value
 		tmp, err = sjson.SetBytes(jsonObj, param.Dest, v)
 		if err != nil {

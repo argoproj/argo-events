@@ -113,7 +113,7 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
@@ -155,7 +155,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
@@ -272,7 +272,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					"eventTime": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Timestamp of when the event happened. Must adhere to format specified in RFC 3339.",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
 						},
 					},
 					"schemaURL": {
@@ -304,16 +304,16 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
 				},
-				Required: []string{"eventType", "eventTypeVersion", "cloudEventsVersion", "source", "eventID", "eventTime", "schemaURL", "contentType", "escalationPolicy"},
+				Required: []string{"eventType", "eventTypeVersion", "cloudEventsVersion", "source", "eventID", "eventTime", "schemaURL", "contentType"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 
@@ -438,13 +438,13 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 					"startedAt": {
 						SchemaProps: spec.SchemaProps{
 							Description: "StartedAt is the time at which this node started",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
 						},
 					},
 					"completedAt": {
 						SchemaProps: spec.SchemaProps{
 							Description: "CompletedAt is the time at which this node completed",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
 						},
 					},
 					"message": {
@@ -465,7 +465,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 
@@ -1066,7 +1066,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalaation policy to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},

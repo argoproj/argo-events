@@ -26,6 +26,7 @@ import (
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog"
+	"k8s.io/client-go/rest"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -34,7 +35,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"net/http"
 	"os"
@@ -53,7 +53,6 @@ type GatewayConfig struct {
 	Namespace string
 	// KubeConfig rest client config
 	KubeConfig *rest.Config
-
 	// gateway holds Gateway custom resource
 	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
@@ -64,8 +63,6 @@ type GatewayConfig struct {
 	registeredConfigs map[string]*ConfigContext
 	// configName is name of configmap that contains run configuration/s for the gateway
 	configName string
-	// controllerName is the name of gateway controller
-	controllerName string
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
 }
@@ -85,6 +82,14 @@ type ConfigContext struct {
 
 // ConfigData holds the actual configuration
 type ConfigData struct {
+	// Unique ID for configuration
+	ID string `json:"id"`
+	// TimeID is unique time id for configuration. It is used to resolve conflict between two k8 events arriving in different oder.
+	// Consider a configuration becomes stale, then as the configuration is stopped gateway processor server will generate Completed phase event,
+	// meanwhile gateway processor will generate Remove phase event, if remove is generated before complete and if complete ohase event is consumed first
+	// then it will disregard the remove event. this is not what is expected. TimeID will be used as override in such scenarios.
+	// This is because k8 events does not have temporal order.
+	TimeID string `json:"timeID"`
 	// Src contains name of the configuration
 	Src string `json:"src"`
 	// Config contains the configuration
@@ -164,39 +169,60 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 		return err
 	}
 
+	// get time id of configuration
+	timeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigTimeID]
+	if !ok {
+		return fmt.Errorf("failed to apply update to gateway configuration. time ID is not present. event ID: %s", event.ObjectMeta.Name)
+	}
+
 	// get node/configuration to update
-	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
+	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigID]
 	if !ok {
 		return fmt.Errorf("failed to update gateway resource. no configuration name provided")
 	}
 	node, ok := gc.gw.Status.Nodes[nodeID]
 	// initialize the configuration
 	if !ok && v1alpha1.NodePhase(event.Action) == v1alpha1.NodePhaseInitialized {
-		gc.Log.Warn().Str("config-name", nodeID).Msg("configuration not registered with gateway resource. initializing configuration...")
-		gc.initializeNode(nodeID, "initialized")
+		nodeName, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
+		if !ok {
+			gc.Log.Warn().Str("config-id", nodeID).Msg("configuration name is not provided")
+			nodeName = nodeID
+		}
+
+		gc.Log.Warn().Str("config-id", nodeID).Msg("configuration not registered with gateway resource. initializing configuration...")
+		gc.initializeNode(nodeID, nodeName, timeID,  "initialized")
 		return gc.PersistUpdates()
 	}
 
 	gc.Log.Info().Str("config-name", nodeID).Msg("updating gateway resource...")
-	// check if this event happened after last updated time for the configuration
-	if ok && node.UpdateTime.Time.Before(event.EventTime.Time) {
-		node.UpdateTime = event.EventTime
-		gc.Log.Info().Str("config-name", nodeID).Str("action", event.Action).Msg("taking action on configuration")
 
-		switch v1alpha1.NodePhase(event.Action) {
-		case v1alpha1.NodePhaseRunning, v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
-			gc.gw.Status.Nodes[nodeID] = node
-			gc.MarkGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
-			return gc.PersistUpdates()
-		case v1alpha1.NodePhaseRemove:
-			gc.Log.Info().Str("config-name", nodeID).Msg("removing configuration from gateway")
-			delete(gc.gw.Status.Nodes, nodeID)
-			return gc.PersistUpdates()
-		default:
-			return fmt.Errorf("invalid gateway k8 event. unknown gateway phase, %s", event.Action)
+	// check if the event is actually valid and just arrived out of order
+	if ok {
+		if node.TimeID == timeID {
+			// precedence of states Remove > Complete/Error > Running > Initialized
+			switch v1alpha1.NodePhase(event.Action) {
+			case v1alpha1.NodePhaseRunning, v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
+				gc.gw.Status.Nodes[nodeID] = node
+				if node.Phase != v1alpha1.NodePhaseCompleted || node.Phase == v1alpha1.NodePhaseError {
+					gc.MarkGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
+				}
+				return gc.PersistUpdates()
+			case v1alpha1.NodePhaseRemove:
+				gc.Log.Info().Str("config-name", nodeID).Msg("removing configuration from gateway")
+				delete(gc.gw.Status.Nodes, nodeID)
+				return gc.PersistUpdates()
+			default:
+				gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).Msg("unknown action for configuration")
+				return nil
+			}
+		} else {
+			// should never come here
+			gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).
+				Str("node-time-id", node.TimeID).Str("event-time-id", timeID).Msg("time ids mismatch")
+			return nil
 		}
 	} else {
-		gc.Log.Warn().Str("config-name", nodeID).Str("node-last-update-time", node.UpdateTime.Time.String()).Str("event-time", event.EventTime.Time.String()).Msg("stale event. skipping update...")
+		gc.Log.Warn().Str("config-name", nodeID).Str("event-name", event.Name).Msg("skipping event")
 		return nil
 	}
 }
@@ -322,14 +348,14 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 		newConfig := newConfigs[newConfigKey]
 		gc.registeredConfigs[newConfigKey] = newConfig
 		// check if this is reactivation of configuration
-		node := gc.getNodeByName(newConfig.Data.Src)
+		node := gc.getNodeByID(newConfig.Data.ID)
 		if node != nil {
 			// no need to initialize the node as this is a reactivation
 			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("reactivating configuration...")
 		} else {
 			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("activating configuration...")
 			// create k8 event for new configuration
-			newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, newConfig.Data.Src)
+			newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, newConfig.Data)
 			_, err = common.CreateK8Event(newConfigEvent, gc.Clientset)
 			if err != nil {
 				gc.Log.Error().Str("config-name", newConfig.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations. skipping configuration...")
@@ -350,7 +376,7 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
 			delete(gc.registeredConfigs, staleConfigKey)
 			// create a k8 event to remove the node configuration from gateway resource
-			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data.Src)
+			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data)
 			_, err = common.CreateK8Event(removeConfigEvent, gc.Clientset)
 			if err != nil {
 				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
@@ -388,9 +414,12 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 	for configKey, configValue := range cm.Data {
 		hashKey := Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
-
+		currentTimeStr := time.Now().String()
+		timeID := Hasher(currentTimeStr)
 		configs[hashKey] = &ConfigContext{
 			Data: &ConfigData{
+				ID: hashKey,
+				TimeID: timeID,
 				Src:    configKey,
 				Config: configValue,
 			},
@@ -472,10 +501,6 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway processor configmap is not provided")
 	}
-	controllerName, ok := os.LookupEnv(common.GatewayControllerNameEnvVar)
-	if !ok {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller name is not provided")
-	}
 	controllerInstanceID, ok := os.LookupEnv(common.GatewayControllerInstanceIDEnvVar)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller instance ID is not provided")
@@ -498,7 +523,6 @@ func NewGatewayConfiguration() *GatewayConfig {
 		configName:           configName,
 		gwcs:                 gwcs,
 		gw:                   gw,
-		controllerName:       controllerName,
 		controllerInstanceID: controllerInstanceID,
 	}
 }
@@ -546,19 +570,20 @@ func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
 }
 
 // create a new node
-func (gc *GatewayConfig) initializeNode(nodeName string, messages string) v1alpha1.NodeStatus {
+func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, timeID string, messages string) v1alpha1.NodeStatus {
 	if gc.gw.Status.Nodes == nil {
 		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
-	nodeID := nodeName
 	gc.Log.Info().Str("node-id", nodeID).Msg("node")
 	oldNode, ok := gc.gw.Status.Nodes[nodeID]
 	if ok {
 		gc.Log.Info().Str("node-name", nodeName).Msg("node already initialized")
 		return oldNode
 	}
+
 	node := v1alpha1.NodeStatus{
 		ID:          nodeID,
+		TimeID: 	 timeID,
 		Name:        nodeName,
 		DisplayName: nodeName,
 		Phase:       v1alpha1.NodePhaseInitialized,
@@ -571,8 +596,8 @@ func (gc *GatewayConfig) initializeNode(nodeName string, messages string) v1alph
 }
 
 // getNodeByName returns the node from this gateway for the nodeName
-func (gc *GatewayConfig) getNodeByName(nodeName string) *v1alpha1.NodeStatus {
-	node, ok := gc.gw.Status.Nodes[nodeName]
+func (gc *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
+	node, ok := gc.gw.Status.Nodes[nodeID]
 	if !ok {
 		return nil
 	}
@@ -580,16 +605,16 @@ func (gc *GatewayConfig) getNodeByName(nodeName string) *v1alpha1.NodeStatus {
 }
 
 // markNodePhase marks the node with a phase, returns the node
-func (gc *GatewayConfig) MarkGatewayNodePhase(nodeName string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
-	gc.Log.Debug().Str("node-name", nodeName).Msg("marking node phase...")
+func (gc *GatewayConfig) MarkGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
+	gc.Log.Debug().Str("node-id", nodeID).Msg("marking node phase...")
 	gc.Log.Info().Interface("nodes", gc.gw.Status.Nodes).Msg("nodes")
-	node := gc.getNodeByName(nodeName)
+	node := gc.getNodeByID(nodeID)
 	if node == nil {
-		gc.Log.Warn().Str("node-name", nodeName).Msg("node is not initialized")
+		gc.Log.Warn().Str("node-id", nodeID).Msg("node is not initialized")
 		return nil
 	}
 	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
-		gc.Log.Info().Str("node-name", node.Name).Str("phase", string(node.Phase)).Msg("phase marked")
+		gc.Log.Info().Str("node-id", nodeID).Str("phase", string(node.Phase)).Msg("phase marked")
 		node.Phase = phase
 	}
 	node.Message = message
@@ -639,7 +664,7 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 }
 
 // createK8Event creates a kubernetes event.
-func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, configName string) *corev1.Event {
+func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, config *ConfigData) *corev1.Event {
 	event := &common.K8Event{
 		Name:                gc.Name,
 		Namespace:           gc.Namespace,
@@ -649,9 +674,11 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 		ReportingController: gc.Name,
 		ReportingInstance:   gc.controllerInstanceID,
 		Labels: map[string]string{
-			common.LabelGatewayConfigurationName: configName,
+			common.LabelGatewayConfigurationName: config.Src,
 			common.LabelEventSeen:                "",
 			common.LabelGatewayName:              gc.Name,
+			common.LabelGatewayConfigID: config.ID,
+			common.LabelGatewayConfigTimeID: config.TimeID,
 		},
 	}
 	return common.GetK8Event(event)
@@ -667,12 +694,12 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage string
 	if err != nil {
 		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(errMessage)
 		// create k8 event for error state
-		event = gc.GetK8Event(errMessage, v1alpha1.NodePhaseError, config.Data.Src)
+		event = gc.GetK8Event(errMessage, v1alpha1.NodePhaseError, config.Data)
 	} else {
 		// gateway successfully completed/deactivated this configuration.
 		gc.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")
 		// create k8 event for completion state
-		event = gc.GetK8Event("configuration completed", v1alpha1.NodePhaseCompleted, config.Data.Src)
+		event = gc.GetK8Event("configuration completed", v1alpha1.NodePhaseCompleted, config.Data)
 	}
 	_, err = common.CreateK8Event(event, gc.Clientset)
 	if err != nil {

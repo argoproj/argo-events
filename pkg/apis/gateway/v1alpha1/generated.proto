@@ -117,23 +117,26 @@ message NodeStatus {
   // It is a hash of the node name
   optional string id = 1;
 
+  // TimeID is used to resolve events arriving out of order for same node
+  optional string timeID = 2;
+
   // Name is a unique name in the node tree used to generate the node ID
-  optional string name = 2;
+  optional string name = 3;
 
   // DisplayName is the human readable representation of the node
-  optional string displayName = 3;
+  optional string displayName = 5;
 
   // Phase of the node
-  optional string phase = 4;
+  optional string phase = 6;
 
   // StartedAt is the time at which this node started
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 5;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 7;
 
   // Message store data or something to save for configuration
-  optional string message = 6;
+  optional string message = 8;
 
   // UpdateTime is the time when node(gateway configuration) was updated
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updateTime = 7;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updateTime = 9;
 }
 
 // NotificationWatchers are components which are interested listening to notifications from this gateway

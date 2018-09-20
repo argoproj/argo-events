@@ -136,6 +136,12 @@ const (
 
 	// GatewayControllerNameEnvVar is used to get name of gateway controller
 	GatewayControllerNameEnvVar = "GATEWAY_CONTROLLER_NAME"
+
+	// LabelGatewayConfigID is the label for gateway configuration ID
+	LabelGatewayConfigID = "GATEWAY_CONFIG_ID"
+
+	// LabelGatewayConfigTimeID is the label for gateway configuration time ID
+	LabelGatewayConfigTimeID = "GATEWAY_CONFIG_TIME_ID"
 )
 
 // Gateway Processor constants

@@ -120,23 +120,26 @@ type NodeStatus struct {
 	// It is a hash of the node name
 	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
 
+	// TimeID is used to resolve events arriving out of order for same node
+	TimeID string `json:"timeID" protobuf:"bytes,2,opt,name=timeID"`
+
 	// Name is a unique name in the node tree used to generate the node ID
-	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`
 
 	// DisplayName is the human readable representation of the node
-	DisplayName string `json:"displayName" protobuf:"bytes,3,opt,name=displayName"`
+	DisplayName string `json:"displayName" protobuf:"bytes,5,opt,name=displayName"`
 
 	// Phase of the node
-	Phase NodePhase `json:"phase" protobuf:"bytes,4,opt,name=phase"`
+	Phase NodePhase `json:"phase" protobuf:"bytes,6,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,5,opt,name=startedAt"`
+	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,7,opt,name=startedAt"`
 
 	// Message store data or something to save for configuration
-	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
+	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// UpdateTime is the time when node(gateway configuration) was updated
-	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,7,opt,name=updateTime"`
+	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,9,opt,name=updateTime"`
 }
 
 // NotificationWatchers are components which are interested listening to notifications from this gateway

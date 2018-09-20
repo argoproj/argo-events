@@ -33,3 +33,4 @@ spec:
     - name: "webhook-sensor"
     - name: "multi-signal-sensor"
     - name: "webhook-time-filter-sensor"
+    - name: "dsp-sensor"

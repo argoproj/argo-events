@@ -13,6 +13,14 @@ user to watch configuration updates and take actions.
 
 ##### Below are the environment variables provided to all kinds of gateways
  
+ |  Field               |  Description |
+ |----------------------|--------------|
+ | TRANSFORMER_PORT     | Env var for http server port running within gateway transformer |
+ |  ARGO_EVENTS_NAMESPACE | Env var for the namespace of the controller & services |
+ |  GATEWAY_PROCESSOR_CONFIG_MAP            | Contains grpc server port for gateway processor server |
+ |  GATEWAY_NAME             | Env var for name of gateway |
+ |  GATEWAY_CONTROLLER_INSTANCE_ID             | Contains gateway controller instance id |
+ |  GATEWAY_CONTROLLER_NAME             | Contains name of gateway controller |
 
 ## Core Gateway Style
 It is the most straightforward option. The gateway consists of two components,
