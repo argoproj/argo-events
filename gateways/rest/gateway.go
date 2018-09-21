@@ -16,7 +16,10 @@ var (
 	httpGatewayServerConfig = gateways.NewHTTPGatewayServerConfig()
 )
 
-func configRunner(config *gateways.ConfigContext) error {
+// httpConfigExecutor implements ConfigExecutor
+type httpConfigExecutor struct{}
+
+func (hce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("start configuration")
 	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
@@ -28,7 +31,7 @@ func configRunner(config *gateways.ConfigContext) error {
 	return err
 }
 
-func configStopper(config *gateways.ConfigContext) error {
+func (hce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
 	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
@@ -56,7 +59,7 @@ func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 
 func main() {
 	httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
-	httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), configRunner, configStopper)
+	httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
 	// handle events from gateway processor server
 	http.HandleFunc(httpGatewayServerConfig.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		httpGatewayServerConfig.GwConfig.Log.Info().Msg("received an event. processing...")

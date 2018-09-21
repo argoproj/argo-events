@@ -62,7 +62,6 @@ const (
 
 	// EnvVarConfigMap is the name of the configmap to use for the sensor-controller
 	EnvVarConfigMap = "SENSOR_CONFIG_MAP"
-
 )
 
 // SENSOR CONSTANTS

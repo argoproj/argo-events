@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
@@ -31,7 +32,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 // the context of an operation on a sensor.
@@ -135,7 +135,7 @@ func (soc *sOperationCtx) operate() error {
 											Value: soc.s.Namespace,
 										},
 										{
-											Name: common.SensorControllerInstanceIDEnvVar,
+											Name:  common.SensorControllerInstanceIDEnvVar,
 											Value: soc.controller.Config.InstanceID,
 										},
 									},
@@ -375,7 +375,6 @@ func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhas
 	soc.s.Status.Nodes[node.ID] = *node
 	return node
 }
-
 
 // createK8Event creates a kubernetes event.
 func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, eventType string) *corev1.Event {

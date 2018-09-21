@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
@@ -36,6 +35,9 @@ var (
 
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
+
+// calendarConfigExecutor implements ConfigExecutor interface
+type calendarConfigExecutor struct{}
 
 // calSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
@@ -55,8 +57,8 @@ type calSchedule struct {
 	Recurrence []string `json:"recurrence,omitempty"`
 }
 
-// Runs a configuration
-func configRunner(config *gateways.ConfigContext) error {
+// StartConfig runs a configuration
+func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -141,6 +143,14 @@ calendarLoop:
 	return nil
 }
 
+// StopConfig deactivates a configuration
+func (ce *calendarConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
 func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		schedule, err := cronlib.Parse(cal.Schedule)
@@ -165,7 +175,7 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &calendarConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

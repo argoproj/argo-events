@@ -16,23 +16,23 @@ limitations under the License.
 package sensor
 
 import (
-	"testing"
+	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 	"time"
-	"github.com/argoproj/argo-events/common"
-	"fmt"
 )
 
 func Test_filterTime(t *testing.T) {
 	timeFilter := &v1alpha1.TimeFilter{
-		EscalationPolicy:  &v1alpha1.EscalationPolicy{
-			Name: "time filter escalation",
+		EscalationPolicy: &v1alpha1.EscalationPolicy{
+			Name:    "time filter escalation",
 			Message: "filter failed",
-			Level: v1alpha1.Alert,
+			Level:   v1alpha1.Alert,
 		},
-		Stop: "17:14:00",
+		Stop:  "17:14:00",
 		Start: "10:11:00",
 	}
 	event := getCloudEvent()
@@ -42,7 +42,7 @@ func Test_filterTime(t *testing.T) {
 		currentMonth = "0" + currentMonth
 	}
 	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), currentMonth, currentT.Day())
-	parsedTime, err := time.Parse(common.StandardTimeFormat, currentTStr + " 16:36:34")
+	parsedTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" 16:36:34")
 	assert.Nil(t, err)
 	event.Context.EventTime = metav1.MicroTime{
 		Time: parsedTime,
@@ -91,11 +91,10 @@ func Test_filterContext(t *testing.T) {
 	assert.Equal(t, false, valid)
 }
 
-
 func Test_filterData(t *testing.T) {
 	type args struct {
-		data *v1alpha1.Data
-		event       *v1alpha1.Event
+		data  *v1alpha1.Data
+		event *v1alpha1.Event
 	}
 	tests := []struct {
 		name    string
@@ -149,11 +148,11 @@ func Test_filterData(t *testing.T) {
 					},
 				},
 				event: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
-					ContentType: "application/json",
-				},
-				Payload: []byte("{\"k\": \"v\"}"),
-			}},
+					Context: v1alpha1.EventContext{
+						ContentType: "application/json",
+					},
+					Payload: []byte("{\"k\": \"v\"}"),
+				}},
 			want:    true,
 			wantErr: false,
 		},
@@ -169,11 +168,11 @@ func Test_filterData(t *testing.T) {
 				},
 			},
 				event: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
-					ContentType: "application/json",
-				},
-				Payload: []byte("{\"k\": \"1.0\"}"),
-			}},
+					Context: v1alpha1.EventContext{
+						ContentType: "application/json",
+					},
+					Payload: []byte("{\"k\": \"1.0\"}"),
+				}},
 			want:    true,
 			wantErr: false,
 		},
@@ -200,11 +199,11 @@ func Test_filterData(t *testing.T) {
 					},
 				},
 				event: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
-					ContentType: "application/json",
-				},
-				Payload: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
-			}},
+					Context: v1alpha1.EventContext{
+						ContentType: "application/json",
+					},
+					Payload: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
+				}},
 			want:    false,
 			wantErr: false,
 		},

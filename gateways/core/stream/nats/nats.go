@@ -20,7 +20,6 @@ import (
 	"context"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -38,8 +37,11 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
+// natsConfigExecutor implements ConfigExecutor
+type natsConfigExecutor struct{}
+
 // Runs a configuration
-func configRunner(config *gateways.ConfigContext) error {
+func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -111,12 +113,19 @@ func configRunner(config *gateways.ConfigContext) error {
 	return nil
 }
 
+func (nce *natsConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &natsConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

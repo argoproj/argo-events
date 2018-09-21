@@ -20,7 +20,6 @@ import (
 	"context"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -40,6 +39,9 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
+// resourceConfigExecutor implements ConfigExecutor interface
+type resourceConfigExecutor struct{}
+
 // Resource refers to a dependency on a k8s resource.
 type Resource struct {
 	Namespace               string          `json:"namespace"`
@@ -55,8 +57,8 @@ type ResourceFilter struct {
 	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
 }
 
-// Runs a configuration
-var configRunner = func(config *gateways.ConfigContext) error {
+// StartConfig runs a configuration
+func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -132,6 +134,14 @@ var configRunner = func(config *gateways.ConfigContext) error {
 	}
 	wg.Wait()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
+	return nil
+}
+
+// StopConfig stops a configuration
+func (rce *resourceConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
 	return nil
 }
 
@@ -227,7 +237,7 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &resourceConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

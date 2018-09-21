@@ -22,7 +22,6 @@ import (
 	"context"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -40,8 +39,11 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
-// Runs a configuration
-func configRunner(config *gateways.ConfigContext) error {
+// amqpConfigExecutor implements ConfigExecutor interface
+type amqpConfigExecutor struct{}
+
+// StartConfig runs a configuration
+func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -103,6 +105,14 @@ amqpConfigRunner:
 	return nil
 }
 
+// StopConfig stops a configuration
+func (ace *amqpConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
 func parseAttributes(attr map[string]string) (string, string, string, error) {
 	// parse out the attributes
 	exchangeName, ok := attr[exchangeNameKey]
@@ -153,7 +163,7 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &amqpConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

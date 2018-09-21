@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/argoproj/argo-events/common"
 )
 
 // validateSensor accepts a sensor and performs validation against it

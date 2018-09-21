@@ -6,9 +6,9 @@ import (
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/discovery"
 	"os"
 	"sync"
 )

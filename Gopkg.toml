@@ -43,7 +43,7 @@ required = [
 
 [[constraint]]
   name = "github.com/argoproj/argo"
-  version = "v2.1.0-beta2"
+  version = "v2.2.0"
 
 [[constraint]]
   name = "github.com/nats-io/gnatsd"

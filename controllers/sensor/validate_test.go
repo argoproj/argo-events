@@ -17,8 +17,8 @@ limitations under the License.
 package sensor
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_validateSensor(t *testing.T) {

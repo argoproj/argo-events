@@ -38,7 +38,10 @@ and dispatches them to interested sensors.
 User needs to implement following interface.
 
 ```go
-func RunConfiguration(config *ConfigData) error
+type ConfigExecutor interface {
+	StartConfig(configContext *ConfigContext) error
+	StopConfig(configContext *ConfigContext) error
+}
 ```
 
 ConfigData contains configuration key/name and value.
@@ -92,27 +95,17 @@ which takes further actions.
 GatewayConfig contains generic configuration for a gateway
 ```go
 type GatewayConfig struct {
-	// log provides fast and simple logger dedicated to JSON output
+	// Log provides fast and simple logger dedicated to JSON output
 	Log zerolog.Logger
 	// Clientset is client for kubernetes API
-	Clientset *kubernetes.Clientset
+	Clientset kubernetes.Interface
+	// Name is gateway name
+	Name string
 	// Namespace is namespace for the gateway to run inside
-	Namespace string	
+	Namespace string
+	// KubeConfig rest client config
+	KubeConfig *rest.Config	
 }
-```
-
-The gateway calls WatchGatewayConfigMap(gtEx GatewayExecutor, ctx context.Context) (cache.Controller, error)
-and waits forever
-
-```go
-// creates a gateway configuration
-gatewayConfig := gateways.NewGatewayConfiguration()
-// struct that implements RunConfiguration
-c := &calendar{
-    gatewayConfig,
-}
-gatewayConfig.WatchGatewayConfigMap(c, context.Background())
-select {}
 ```
 
 * To send events back to framework code for further processing, use
@@ -200,5 +193,5 @@ List of environment variables available to user code
 |  GATEWAY_PROCESSOR_CONFIG_MAP                | Name of ConfigMap for gateway configuration |
 |  GATEWAY_NAME             | Gateway name  |
 
-### Gateway Specs
-* Example gateway specs is available at [gateway examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+### Gateway Examples
+* Example gateways are available at [gateway examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)

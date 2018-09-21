@@ -32,6 +32,9 @@ const (
 	serverAddr = "localhost:%s"
 )
 
+// grpcConfigExecutor implements ConfigExecutor
+type grpcConfigExecutor struct{}
+
 var (
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig = gateways.NewGatewayConfiguration()
@@ -44,9 +47,9 @@ var (
 	}()
 )
 
-// configRunner establishes connection with gateway server and sends new configurations to run.
+// StartConfig establishes connection with gateway server and sends new configurations to run.
 // also disconnect the clients for stale configurations
-func configRunner(config *gateways.ConfigContext) error {
+func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -111,7 +114,8 @@ func configRunner(config *gateways.ConfigContext) error {
 	return nil
 }
 
-func configDeactivator(config *gateways.ConfigContext) error {
+// Stop config disconnects the client connection and hence stops the configuration
+func (gce *grpcConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	config.Cancel()
 	return nil
 }
@@ -121,7 +125,7 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, configDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &grpcConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

@@ -1,8 +1,8 @@
 package gateways
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Test_transformPayload(t *testing.T) {

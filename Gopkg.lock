@@ -25,8 +25,8 @@
     "pkg/apis/workflow",
     "pkg/apis/workflow/v1alpha1"
   ]
-  revision = "ac241c95c13f08e868cd6f5ee32c9ce273e239ff"
-  version = "v2.1.1"
+  revision = "af636ddd8455660f307d835814d3112b90815dfd"
+  version = "v2.2.0"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -250,12 +250,6 @@
   revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/mitchellh/hashstructure"
-  packages = ["."]
-  revision = "2bca23e0e452137f789efbc8610126fd8b94f73b"
-
-[[projects]]
   name = "github.com/modern-go/concurrent"
   packages = ["."]
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
@@ -266,19 +260,6 @@
   packages = ["."]
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
-
-[[projects]]
-  name = "github.com/nats-io/gnatsd"
-  packages = [
-    "conf",
-    "logger",
-    "server",
-    "server/pse",
-    "test",
-    "util"
-  ]
-  revision = "6608e9ac3be979dcb0614b772cc86a87b71acaa3"
-  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/nats-io/go-nats"
@@ -392,9 +373,7 @@
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
-    "bcrypt",
     "blake2b",
-    "blowfish",
     "ssh/terminal"
   ]
   revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
@@ -422,12 +401,7 @@
   packages = [
     "cpu",
     "unix",
-    "windows",
-    "windows/registry",
-    "windows/svc",
-    "windows/svc/debug",
-    "windows/svc/eventlog",
-    "windows/svc/mgr"
+    "windows"
   ]
   revision = "e072cadbbdc8dd3d3ffa82b8b4b9304c261d9311"
 
@@ -755,6 +729,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6dd9acbe4422071fdf8de4a5f7f52ead66fb99ec6944e3056d9d1b049dddf940"
+  inputs-digest = "e4894be13767ea7013125f3ead10986dab6b6474cd61227d028fcf4b8a5816ab"
   solver-name = "gps-cdcl"
   solver-version = 1

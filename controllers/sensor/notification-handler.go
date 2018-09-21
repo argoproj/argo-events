@@ -50,7 +50,7 @@ type sensorExecutionCtx struct {
 
 // sensorEventWrapper is a wrapper around event received from gateway and the signal which represents the event
 type sensorEventWrapper struct {
-	event *ss_v1alpha1.Event
+	event  *ss_v1alpha1.Event
 	signal *v1alpha1.Signal
 	writer http.ResponseWriter
 }
@@ -67,7 +67,7 @@ func NewsensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 		sensor:          sensor,
 		log:             log,
 		wg:              wg,
-		queue : make(chan *sensorEventWrapper),
+		queue:           make(chan *sensorEventWrapper),
 	}
 }
 
@@ -247,7 +247,6 @@ func (se *sensorExecutionCtx) WatchSignalNotifications() {
 	se.server = srv
 }
 
-
 // validate whether the signal/notification/event is indeed from gateway that this sensor is watching
 func (se *sensorExecutionCtx) validateSignal(gatewaySignal *ss_v1alpha1.Event) (*ss_v1alpha1.Signal, bool) {
 	for _, signal := range se.sensor.Spec.Signals {
@@ -275,7 +274,7 @@ func (se *sensorExecutionCtx) handleSignals(w http.ResponseWriter, r *http.Reque
 	if isValidSignal {
 		// process the signal/event/notification
 		se.queue <- &sensorEventWrapper{
-			event: &gatewaySignal,
+			event:  &gatewaySignal,
 			writer: w,
 			signal: selectedSignal,
 		}

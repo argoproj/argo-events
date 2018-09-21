@@ -1,21 +1,21 @@
 package sensor
 
 import (
-	"testing"
-	"k8s.io/client-go/kubernetes/fake"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/rs/zerolog"
-	"os"
-	"sync"
-	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	discoveryFake "k8s.io/client-go/discovery/fake"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
+	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	discoveryFake "k8s.io/client-go/discovery/fake"
+	"k8s.io/client-go/kubernetes/fake"
+	"os"
+	"sync"
+	"testing"
 	"time"
-	"encoding/json"
 )
 
 var sensorStr = `apiVersion: argoproj.io/v1alpha1
@@ -62,13 +62,13 @@ func getSensor() (*v1alpha1.Sensor, error) {
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
 	return &sensorExecutionCtx{
-		kubeClient: kubeClientset,
+		kubeClient:      kubeClientset,
 		discoveryClient: kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
-		clientPool: NewFakeClientPool(),
-		log: zerolog.New(os.Stdout).With().Str("sensor-name", sensor.ObjectMeta.Name).Logger(),
-		wg: &sync.WaitGroup{},
-		sensorClient: sensorFake.NewSimpleClientset(),
-		sensor: sensor,
+		clientPool:      NewFakeClientPool(),
+		log:             zerolog.New(os.Stdout).With().Str("sensor-name", sensor.ObjectMeta.Name).Logger(),
+		wg:              &sync.WaitGroup{},
+		sensorClient:    sensorFake.NewSimpleClientset(),
+		sensor:          sensor,
 	}
 }
 
@@ -122,7 +122,7 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 	assert.Equal(t, v1alpha1.NodePhaseError, se.sensor.Status.Phase)
 
 	eventWrapper := &v1alpha1.EventWrapper{
-		Seen: true,
+		Seen:  true,
 		Event: *event,
 	}
 	eventWrapperBytes, err := yaml.Marshal(eventWrapper)
@@ -131,11 +131,11 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 
 	testNode := v1alpha1.NodeStatus{
 		Phase: v1alpha1.NodePhaseNew,
-		Name: common.DefaultGatewayConfigurationName("test-gateway", "test-config"),
+		Name:  common.DefaultGatewayConfigurationName("test-gateway", "test-config"),
 		StartedAt: metav1.MicroTime{
 			Time: time.Now(),
 		},
-		Type: v1alpha1.NodeTypeSignal,
+		Type:        v1alpha1.NodeTypeSignal,
 		DisplayName: common.DefaultGatewayConfigurationName("test-gateway", "test-config"),
 	}
 	se.sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{

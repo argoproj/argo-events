@@ -18,10 +18,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
@@ -30,13 +30,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"sync"
-	"encoding/json"
 )
 
 var (
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
+
+// s3ConfigExecutor implements ConfigExecutor interface
+type s3ConfigExecutor struct{}
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
@@ -93,8 +95,8 @@ func getSecrets(client kubernetes.Interface, namespace string, name, key string)
 	return string(val), nil
 }
 
-// Runs a configuration
-func configRunner(config *gateways.ConfigContext) error {
+// StartConfig runs a configuration
+func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -187,12 +189,20 @@ func configRunner(config *gateways.ConfigContext) error {
 	return nil
 }
 
+// StopConfig stops the configuration
+func (s3ce *s3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
 func main() {
 	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &s3ConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

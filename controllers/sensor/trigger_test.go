@@ -17,23 +17,22 @@ limitations under the License.
 package sensor
 
 import (
-	"k8s.io/client-go/kubernetes/fake"
-	kTesting "k8s.io/client-go/testing"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/watch"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/flowcontrol"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes/fake"
+	kTesting "k8s.io/client-go/testing"
+	"k8s.io/client-go/util/flowcontrol"
 	"testing"
 )
-
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
 
@@ -179,7 +178,6 @@ func (p *FakeClientPool) ClientForGroupVersionResource(resource schema.GroupVers
 	return p.ClientForGroupVersionKind(resource.GroupVersion().WithKind(""))
 }
 
-
 func NewFakeClientPool(objects ...runtime.Object) *FakeClientPool {
 	fakeClientset := fake.NewSimpleClientset(objects...)
 	return &FakeClientPool{
@@ -196,7 +194,6 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 		Fake:         &p.Fake,
 	}, nil
 }
-
 
 var sampleTrigger = v1alpha1.Trigger{
 	Name: "sample",

@@ -17,12 +17,12 @@ limitations under the License.
 package sensor
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/argoproj/argo-events/common"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 )
 
 func TestSensorOperateLifecycle(t *testing.T) {

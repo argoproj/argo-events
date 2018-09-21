@@ -1,20 +1,44 @@
 package gateways
 
 import (
-	"testing"
+	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	gwFake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
+	"github.com/ghodss/yaml"
 	zlog "github.com/rs/zerolog"
-	"os"
-	"k8s.io/client-go/kubernetes/fake"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	gwFake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
-	"time"
-	"fmt"
+	"k8s.io/client-go/kubernetes/fake"
+	"os"
 	"sync"
+	"testing"
+	"time"
 )
+
+type testConfigExecutor struct{}
+
+func (tce *testConfigExecutor) StartConfig(ctx *ConfigContext) error {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	ctx.Active = true
+	fmt.Println("hello")
+	go func() {
+		<-ctx.StopCh
+		ctx.Active = false
+		fmt.Println("stopped")
+		wg.Done()
+	}()
+	wg.Wait()
+	return nil
+}
+
+func (tce *testConfigExecutor) StopConfig(ctx *ConfigContext) error {
+	if ctx.Active {
+		ctx.StopCh <- struct{}{}
+	}
+	return nil
+}
 
 var testGateway = `apiVersion: argoproj.io/v1alpha1
 kind: Gateway
@@ -73,18 +97,18 @@ func gatewayConfigMap() (*corev1.ConfigMap, error) {
 	return &gconfig, err
 }
 
-func newGatewayconfig(gw *v1alpha1.Gateway) *GatewayConfig{
+func newGatewayconfig(gw *v1alpha1.Gateway) *GatewayConfig {
 	return &GatewayConfig{
-		Log: zlog.New(os.Stdout).With().Logger(),
-		Name: "test-gateway",
-		Namespace: "test-namespace",
-		Clientset: fake.NewSimpleClientset(),
+		Log:                  zlog.New(os.Stdout).With().Logger(),
+		Name:                 "test-gateway",
+		Namespace:            "test-namespace",
+		Clientset:            fake.NewSimpleClientset(),
 		controllerInstanceID: "test-id",
-		configName: "test-gateway-configmap",
-		gwcs: gwFake.NewSimpleClientset(),
-		registeredConfigs: make(map[string]*ConfigContext),
-		transformerPort: "9000",
-		gw: gw,
+		configName:           "test-gateway-configmap",
+		gwcs:                 gwFake.NewSimpleClientset(),
+		registeredConfigs:    make(map[string]*ConfigContext),
+		transformerPort:      "9000",
+		gw:                   gw,
 	}
 }
 
@@ -101,7 +125,6 @@ func Test_gatewayOperations(t *testing.T) {
 	configs, err := gatewayConfig.createInternalConfigs(configmap)
 	assert.Nil(t, err)
 	assert.NotNil(t, configs)
-
 
 	for _, config := range configs {
 		assert.NotNil(t, config.Data)
@@ -123,9 +146,9 @@ func Test_gatewayOperations(t *testing.T) {
 	configName := "new-test-config"
 	newConfigContext := &ConfigContext{
 		Data: &ConfigData{
-			ID: Hasher(configName),
+			ID:     Hasher(configName),
 			TimeID: Hasher(time.Now().String()),
-			Src: "test.newConfig",
+			Src:    "test.newConfig",
 			Config: `|-
     interval: 55s`,
 		},
@@ -140,31 +163,8 @@ func Test_gatewayOperations(t *testing.T) {
 	assert.NotNil(t, staleConfigKeys)
 	assert.NotEqual(t, staleConfigKeys, newConfigKeys)
 
-	// test update gateway resource
-	configRunner := func(ctx *ConfigContext) error{
-		var wg sync.WaitGroup
-		wg.Add(1)
-		ctx.Active = true
-		fmt.Println("hello")
-		go func() {
-			<- ctx.StopCh
-			ctx.Active = false
-			fmt.Println("stopped")
-			wg.Done()
-		}()
-		wg.Wait()
-		return nil
-	}
-
-	configStopper := func(ctx *ConfigContext) error{
-		if ctx.Active {
-			ctx.StopCh <- struct{}{}
-		}
-		return nil
-	}
-
 	gatewayConfig.registeredConfigs = make(map[string]*ConfigContext)
-	err = gatewayConfig.manageConfigurations(configRunner, configStopper, configmap)
+	err = gatewayConfig.manageConfigurations(&testConfigExecutor{}, configmap)
 	assert.Nil(t, err)
 
 	events, err := gatewayConfig.Clientset.CoreV1().Events("test-namespace").List(metav1.ListOptions{})
@@ -172,7 +172,7 @@ func Test_gatewayOperations(t *testing.T) {
 	assert.NotNil(t, events)
 
 	delete(configmap.Data, "test.fooConfig")
-	err = gatewayConfig.manageConfigurations(configRunner, configStopper, configmap)
+	err = gatewayConfig.manageConfigurations(&testConfigExecutor{}, configmap)
 	assert.Nil(t, err)
 
 	nodeStatus := gatewayConfig.initializeNode(Hasher("test-node"), "test-node", Hasher(time.Now().String()), "init")

@@ -26,7 +26,6 @@ import (
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog"
-	"k8s.io/client-go/rest"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +34,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"net/http"
 	"os"
@@ -122,6 +122,12 @@ type HTTPGatewayServerConfig struct {
 	Data *ConfigData
 }
 
+// ConfigExecutor is interface a gateway processor server must implement
+type ConfigExecutor interface {
+	StartConfig(configContext *ConfigContext) error
+	StopConfig(configContext *ConfigContext) error
+}
+
 // newEventWatcher creates a new event watcher.
 func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
@@ -190,7 +196,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 		}
 
 		gc.Log.Warn().Str("config-id", nodeID).Msg("configuration not registered with gateway resource. initializing configuration...")
-		gc.initializeNode(nodeID, nodeName, timeID,  "initialized")
+		gc.initializeNode(nodeID, nodeName, timeID, "initialized")
 		return gc.PersistUpdates()
 	}
 
@@ -276,7 +282,7 @@ func (gc *GatewayConfig) WatchGatewayEvents(ctx context.Context) (cache.Controll
 }
 
 // WatchGatewayConfigMap watches change in configuration for the gateway
-func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, configManager func(config *ConfigContext) error, configDeactivator func(config *ConfigContext) error) (cache.Controller, error) {
+func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor ConfigExecutor) (cache.Controller, error) {
 	source := gc.newConfigMapWatch(gc.configName)
 	_, controller := cache.NewInformer(
 		source,
@@ -286,7 +292,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, configManage
 			AddFunc: func(obj interface{}) {
 				if newCm, ok := obj.(*corev1.ConfigMap); ok {
 					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
-					err := gc.manageConfigurations(configManager, configDeactivator, newCm)
+					err := gc.manageConfigurations(executor, newCm)
 					if err != nil {
 						gc.Log.Error().Err(err).Msg("update of run config failed")
 					}
@@ -295,7 +301,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, configManage
 			UpdateFunc: func(old, new interface{}) {
 				if cm, ok := new.(*corev1.ConfigMap); ok {
 					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
-					err := gc.manageConfigurations(configManager, configDeactivator, cm)
+					err := gc.manageConfigurations(executor, cm)
 					if err != nil {
 						gc.Log.Error().Err(err).Msg("update of run config failed")
 					}
@@ -334,7 +340,7 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 }
 
 // manageConfigurations syncs registered configurations and updated gateway configmap
-func (gc *GatewayConfig) manageConfigurations(configActivator func(config *ConfigContext) error, configDeactivator func(config *ConfigContext) error, cm *corev1.ConfigMap) error {
+func (gc *GatewayConfig) manageConfigurations(executor ConfigExecutor, cm *corev1.ConfigMap) error {
 	newConfigs, err := gc.createInternalConfigs(cm)
 	if err != nil {
 		return err
@@ -365,13 +371,13 @@ func (gc *GatewayConfig) manageConfigurations(configActivator func(config *Confi
 		}
 
 		// run configuration
-		go configActivator(newConfig)
+		go executor.StartConfig(newConfig)
 	}
 
 	// remove stale configurations
 	for _, staleConfigKey := range staleConfigKeys {
 		staleConfig := gc.registeredConfigs[staleConfigKey]
-		err := configDeactivator(staleConfig)
+		err := executor.StopConfig(staleConfig)
 		if err == nil {
 			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
 			delete(gc.registeredConfigs, staleConfigKey)
@@ -418,7 +424,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 		timeID := Hasher(currentTimeStr)
 		configs[hashKey] = &ConfigContext{
 			Data: &ConfigData{
-				ID: hashKey,
+				ID:     hashKey,
 				TimeID: timeID,
 				Src:    configKey,
 				Config: configValue,
@@ -583,7 +589,7 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, timeID s
 
 	node := v1alpha1.NodeStatus{
 		ID:          nodeID,
-		TimeID: 	 timeID,
+		TimeID:      timeID,
 		Name:        nodeName,
 		DisplayName: nodeName,
 		Phase:       v1alpha1.NodePhaseInitialized,
@@ -677,8 +683,8 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 			common.LabelGatewayConfigurationName: config.Src,
 			common.LabelEventSeen:                "",
 			common.LabelGatewayName:              gc.Name,
-			common.LabelGatewayConfigID: config.ID,
-			common.LabelGatewayConfigTimeID: config.TimeID,
+			common.LabelGatewayConfigID:          config.ID,
+			common.LabelGatewayConfigTimeID:      config.TimeID,
 		},
 	}
 	return common.GetK8Event(event)

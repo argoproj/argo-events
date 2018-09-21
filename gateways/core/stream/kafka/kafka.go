@@ -21,7 +21,6 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core"
 	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -38,8 +37,11 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
+// kafkaConfigExecutor implements ConfigExecutor interface
+type kafkaConfigExecutor struct{}
+
 // Runs a configuration
-func configRunner(config *gateways.ConfigContext) error {
+func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -119,6 +121,14 @@ kafkaConfigRunner:
 	return nil
 }
 
+// StopConfiguration stops a configuration
+func (kce *kafkaConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
 func verifyPartitionAvailable(part int32, partitions []int32) bool {
 	for _, p := range partitions {
 		if part == p {
@@ -133,7 +143,7 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), configRunner, core.ConfigDeactivator)
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &kafkaConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}

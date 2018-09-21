@@ -26,7 +26,7 @@ func TestResolveNamespace(t *testing.T) {
 	defer os.Unsetenv(EnvVarNamespace)
 
 	RefreshNamespace()
-	assert.Equal(t, "default", DefaultSensorControllerNamespace)
+	assert.Equal(t, "argo-events", DefaultSensorControllerNamespace)
 
 	// TODO: now write the namespace file
 
