@@ -21,7 +21,7 @@ import (
 	"errors"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -32,6 +32,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"fmt"
+	"log"
 )
 
 const (
@@ -88,7 +90,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		log.Warnf("failed to get sensor '%s' from informer index: %+v", key, err)
+		fmt.Errorf("failed to get sensor '%s' from informer index: %+v", key, err)
 		return true
 	}
 
@@ -99,7 +101,7 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		log.Warnf("key '%s' in index is not a sensor", key)
+		fmt.Errorf("key '%s' in index is not a sensor", key)
 		return true
 	}
 
@@ -134,7 +136,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a signal pod goes down
 	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		log.Errorf("Error syncing sensor '%v': %v", key, err)
+		fmt.Errorf("Error syncing sensor '%v': %v", key, err)
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -147,10 +149,10 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
 	defer c.queue.ShutDown()
 
-	log.Infof("sensor sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
+	fmt.Printf("sensor sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		log.Errorf("failed to register watch for sensor-controller config map: %v", err)
+		fmt.Errorf("failed to register watch for sensor-controller config map: %v", err)
 		return
 	}
 
