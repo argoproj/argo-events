@@ -13,7 +13,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
       - name: sensor-controller
-        image: metalgearsolid/sensor-controller:latest
+        image: argoproj/sensor-controller:latest
         imagePullPolicy: Always
         env:
           - name: SENSOR_NAMESPACE

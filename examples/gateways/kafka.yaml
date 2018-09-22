@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "kafka-events"
-      image: "metalgearsolid/kafka-gateway"
+      image: "argoproj/kafka-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/kafka-gateway"]
     serviceAccountName: "argo-events-sa"

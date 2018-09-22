@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: webhook-events
-      image: "metalgearsolid/amqp-gateway"
+      image: "argoproj/amqp-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/amqp-gateway"]
     serviceAccountName: "argo-events-sa"

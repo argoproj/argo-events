@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "calendar-events"
-      image: "metalgearsolid/calendar-http-gateway"
+      image: "argoproj/calendar-http-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/calendar-http"]
     serviceAccountName: "argo-events-sa"

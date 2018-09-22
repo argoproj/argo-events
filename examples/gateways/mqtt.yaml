@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "mqtt-events"
-      image: "metalgearsolid/mqtt-gateway"
+      image: "argoproj/mqtt-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/mqtt-gateway"]
     serviceAccountName: "argo-events-sa"

@@ -25,7 +25,7 @@ spec:
   deploySpec:
     containers:
     - name: "webhook-events"
-      image: "metalgearsolid/webhook-gateway"
+      image: "argoproj/webhook-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/webhook-gateway"]
     serviceAccountName: "argo-events-sa"

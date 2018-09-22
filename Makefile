@@ -16,7 +16,7 @@ override LDFLAGS += \
 
 #  docker image publishing options
 DOCKER_PUSH=true
-IMAGE_NAMESPACE=metalgearsolid
+IMAGE_NAMESPACE=argoproj
 IMAGE_TAG=latest
 
 ifeq (${DOCKER_PUSH},true)

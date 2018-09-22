@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "nats-events"
-      image: "metalgearsolid/nats-gateway"
+      image: "argoproj/nats-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/nats-gateway"]
     serviceAccountName: "argo-events-sa"
