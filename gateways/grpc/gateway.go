@@ -53,7 +53,7 @@ func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	var err error
 	var errMessage string
 
-	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),

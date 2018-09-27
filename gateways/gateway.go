@@ -691,16 +691,16 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 }
 
 // GatewayCleanup marks configuration as non-active and marks final gateway state
-func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage string, err error) {
+func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *string, err error) {
 	var event *corev1.Event
 	// mark configuration as deactivated so gateway processor client won't run configStopper in case if there
 	// was configuration error.
 	config.Active = false
 	// check if gateway configuration is in error condition.
 	if err != nil {
-		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(errMessage)
+		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(*errMessage)
 		// create k8 event for error state
-		event = gc.GetK8Event(errMessage, v1alpha1.NodePhaseError, config.Data)
+		event = gc.GetK8Event(*errMessage, v1alpha1.NodePhaseError, config.Data)
 	} else {
 		// gateway successfully completed/deactivated this configuration.
 		gc.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")

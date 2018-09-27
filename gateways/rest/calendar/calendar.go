@@ -72,7 +72,7 @@ func runGateway(config *gateways.ConfigContext) error {
 	var errMessage string
 
 	// mark final gateway state
-	defer httpGatewayServerConfig.GwConfig.GatewayCleanup(config, errMessage, err)
+	defer httpGatewayServerConfig.GwConfig.GatewayCleanup(config, &errMessage, err)
 
 	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing calendar schedule...")
 

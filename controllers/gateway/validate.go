@@ -6,19 +6,20 @@ import (
 )
 
 // Validates the gateway resource.
-func (goc *gwOperationCtx) validate() error {
-	if goc.gw.Spec.DeploySpec == nil {
+// Exporting this function so that external APIs can use this to validate gateway resource.
+func Validate(gw *v1alpha1.Gateway) error {
+	if gw.Spec.DeploySpec == nil {
 		return fmt.Errorf("gateway deploy specification is not specified")
 	}
-	if goc.gw.Spec.Type == "" {
+	if gw.Spec.Type == "" {
 		return fmt.Errorf("gateway type is not specified")
 	}
-	if goc.gw.Spec.Version == "" {
+	if gw.Spec.Version == "" {
 		return fmt.Errorf("gateway version is not specified")
 	}
-	switch goc.gw.Spec.DispatchMechanism {
+	switch gw.Spec.DispatchMechanism {
 	case v1alpha1.HTTPGateway:
-		if goc.gw.Spec.Watchers == nil || (goc.gw.Spec.Watchers.Gateways == nil && goc.gw.Spec.Watchers.Sensors == nil) {
+		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {
 			return fmt.Errorf("no associated watchers with gateway")
 		}
 	case v1alpha1.NATSGateway:

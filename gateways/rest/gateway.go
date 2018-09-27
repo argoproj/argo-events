@@ -26,7 +26,8 @@ func (hce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigActivateEndpoint)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, "failed to send new configuration to gateway processor server", err)
+		errMsg := "failed to send new configuration to gateway processor server"
+		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, &errMsg, err)
 	}
 	return err
 }
@@ -38,7 +39,8 @@ func (hce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 		Config: config.Data.Config,
 	}, httpGatewayServerConfig.ConfigurationDeactivateEndpoint)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, "failed to send configuration to stop to gateway processor server", err)
+		errMsg := "failed to send configuration to stop to gateway processor server"
+		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, &errMsg, err)
 	}
 	return err
 }

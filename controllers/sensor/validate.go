@@ -25,10 +25,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// validateSensor accepts a sensor and performs validation against it
+// ValidateSensor accepts a sensor and performs validation against it
 // we return an error so that it can be logged as a message on the sensor status
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
-func validateSensor(s *v1alpha1.Sensor) error {
+// Exporting this function so that external APIs can use this to validate sensor resource.
+func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err := validateSignals(s.Spec.Signals); err != nil {
 		return err
 	}

@@ -75,7 +75,7 @@ func (soc *sOperationCtx) operate() error {
 		// non nil err indicates failed validation
 		// we do not want to requeue a sensor in this case
 		// since validation will fail every time
-		err := validateSensor(soc.s)
+		err := ValidateSensor(soc.s)
 		if err != nil {
 			soc.log.Error().Err(err).Msg("failed to validate sensor")
 			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())

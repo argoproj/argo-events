@@ -46,7 +46,7 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 	var errMessage string
 
 	// mark final gateway state
-	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	var s *stream.Stream
 	err = yaml.Unmarshal([]byte(config.Data.Config), &s)

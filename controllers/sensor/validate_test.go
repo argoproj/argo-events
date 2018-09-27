@@ -24,6 +24,6 @@ import (
 func Test_validateSensor(t *testing.T) {
 	sensor, err := getSensor()
 	assert.Nil(t, err)
-	err = validateSensor(sensor)
+	err = ValidateSensor(sensor)
 	assert.Nil(t, err)
 }

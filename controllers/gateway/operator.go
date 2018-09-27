@@ -53,7 +53,7 @@ func (goc *gwOperationCtx) operate() error {
 	goc.log.Info().Msg("operating on the gateway...")
 
 	// performs a basic validation on gateway resource.
-	err := goc.validate()
+	err := Validate(goc.gw)
 	if err != nil {
 		goc.log.Error().Err(err).Msg("gateway validation failed")
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")

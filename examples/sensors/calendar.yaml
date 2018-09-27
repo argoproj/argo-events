@@ -10,7 +10,6 @@ spec:
   repeat: true
   signals:
     - name: calendar-gateway/calendar.fooConfig
-    - name:
   triggers:
     - name: calendar-workflow-trigger
       resource:

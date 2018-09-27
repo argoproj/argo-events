@@ -46,7 +46,7 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	var errMessage string
 
 	// mark final gateway state
-	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
 

@@ -63,7 +63,7 @@ func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	var errMessage string
 
 	// mark final gateway state
-	defer gatewayConfig.GatewayCleanup(config, errMessage, err)
+	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 

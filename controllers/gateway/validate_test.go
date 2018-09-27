@@ -10,6 +10,6 @@ func TestGwOperationCtx_validate(t *testing.T) {
 	gateway, err := getGateway()
 	assert.Nil(t, err)
 	goc := newGatewayOperationCtx(gateway, fakeController)
-	err = goc.validate()
+	err = Validate(goc.gw)
 	assert.Nil(t, err)
 }
