@@ -26,8 +26,8 @@ import (
 )
 
 func TestDefaultConfigMapName(t *testing.T) {
-	res := DefaultConfigMapName("controller")
-	assert.Equal(t, "controller-configmap", res)
+	res := DefaultConfigMapName("sensor-controller")
+	assert.Equal(t, "sensor-controller-configmap", res)
 }
 
 func TestServerResourceForGroupVersionKind(t *testing.T) {

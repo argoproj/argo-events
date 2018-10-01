@@ -24,11 +24,41 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"net/http"
 )
 
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
 func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
+}
+
+// DefaultJobName returns a formulated name for a sensor job
+func DefaultSensorJobName(jobName string) string {
+	return fmt.Sprintf("%s-sensor-job", jobName)
+}
+
+// DefaultGatewayDeploymentName returns a formulated name for a gateway deployment
+func DefaultGatewayDeploymentName(deploymentName string) string {
+	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
+}
+
+// DefaultGatewayTransformerConfigMapName returns a formulated name for a gateway transformer configmap
+func DefaultGatewayTransformerConfigMapName(configMapName string) string {
+	return fmt.Sprintf("%s-gateway-transformer-configmap", configMapName)
+}
+
+// DefaultGatewayServiceName returns a formulated name for a gateway service
+func DefaultGatewayServiceName(serviceName string) string {
+	return fmt.Sprintf("%s-gateway-svc", serviceName)
+}
+
+// DefaultSensorServiceName returns a formulated name for a sensor service
+func DefaultSensorServiceName(serviceName string) string {
+	return fmt.Sprintf("%s-sensor-svc", serviceName)
+}
+
+func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
+	return fmt.Sprintf("%s/%s", gatewayName, configurationName)
 }
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
@@ -50,5 +80,17 @@ func ServerResourceForGroupVersionKind(disco discovery.DiscoveryInterface, gvk s
 			return &r, nil
 		}
 	}
-	return nil, fmt.Errorf("Server is unable to handle %s", gvk)
+	return nil, fmt.Errorf("server is unable to handle %s", gvk)
+}
+
+// SendSuccessResponse sends http success response
+func SendSuccessResponse(writer http.ResponseWriter) {
+	writer.WriteHeader(http.StatusOK)
+	writer.Write([]byte(SuccessResponse))
+}
+
+// SendErrorResponse sends http error response
+func SendErrorResponse(writer http.ResponseWriter) {
+	writer.WriteHeader(http.StatusBadRequest)
+	writer.Write([]byte(ErrorResponse))
 }

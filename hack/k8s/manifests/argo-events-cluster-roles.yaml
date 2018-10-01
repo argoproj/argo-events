@@ -9,20 +9,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: argo-events-sa
-  # Todo: change this value to the respective namespace for argo-events
-  namespace: default
+  namespace: argo-events
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: argo-events-cluster-role
 rules:
-- apiGroups: ["argoproj.io"]
-  resources: ["sensors"]
-  verbs: ["get", "list", "watch", "update", "patch"]
-- apiGroups: ["argoproj.io"]
-  resources: ["workflows"]
-  verbs: ["create", "delete"]
-- apiGroups: [""]
-  resources: ["configmaps", "secrets", "pods"]
-  verbs: ["get", "watch", "list", "patch"]
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]

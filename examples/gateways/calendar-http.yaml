@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: calendar-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "calendar-gateway"
+spec:
+  deploySpec:
+    containers:
+    - name: "calendar-events"
+      image: "argoproj/calendar-http-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/calendar-http"]
+    serviceAccountName: "argo-events-sa"
+  configMap: "calendar-gateway-configmap"
+  type: "calendar"
+  dispatchMechanism: "HTTP"
+  version: "1.0"
+  watchers:
+    sensors:
+    - name: "calendar-sensor"
+  httpServerPort: "9696"

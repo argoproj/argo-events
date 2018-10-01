@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: calendar-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  serviceAccountName: axis-sa
+  imagePullPolicy: Always
+  repeat: true
+  signals:
+    - name: calendar-gateway/calendar.fooConfig
+  triggers:
+    - name: calendar-workflow-trigger
+      resource:
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        namespace: "argo-events"
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+                namespace: "dev-raspberry"
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay
