@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: artifact-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "artifact-gateway"
+spec:
+  deploySpec:
+    containers:
+    - name: "artifact-events"
+      image: "argoproj/artifact-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/artifact-gateway"]
+    serviceAccountName: "argo-events-sa"
+  configMap: "artifact-gateway-configmap"
+  version: "1.0"
+  type: "artifact"
+  dispatchMechanism: "HTTP"
+  watchers:
+    sensors:
+    - name: "etl-sensor"
+    - name: "s3-k8-events-sensor-1"
+    - name: "s3-k8-events-sensor-2"

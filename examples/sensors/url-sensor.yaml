@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: url-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  signals:
+    - name: calendar-gateway/calendar.fooConfig
+  triggers:
+    - name: url-workflow-trigger
+      resource:
+        namespace: default
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          url:
+            path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"
+            verifycert: false

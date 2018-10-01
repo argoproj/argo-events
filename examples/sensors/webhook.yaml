@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  repeat: true
+  serviceAccountName: argo-events-sa
+  signals:
+    - name: webhook-gateway/webhook.fooConfig
+    - name: webhook-gateway/webhook.barConfig
+  triggers:
+    - name: hello-world-workflow-trigger
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        parameters:
+          - src:
+              signal: webhook-gateway/webhook.fooConfig
+              path: cusip
+            dest: spec.templates.0.container.args.0
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  - name: whalesay
+                    container:
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"

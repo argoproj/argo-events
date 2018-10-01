@@ -65,7 +65,7 @@ func TestDecodeAndUnstructure(t *testing.T) {
 }
 
 func decodeSensor(t *testing.T) {
-	b, err := ioutil.ReadFile("../examples/multi-trigger-sensor.yaml")
+	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 
 	gvk := v1alpha1.GroupVersionKind{

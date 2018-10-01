@@ -1,17 +1,10 @@
 # Roadmap
 
 ## Development Phase
-- Simplify logging
 - E2E testing
 - Documentation
-- Add NATS Streaming Signal support
-- Add SNS & SQS Signal Support
-
-
-## Design Phase
-- Pass in credentials for connection to various signal sources
-- Implement GC for old sensors
-- Implement repeatable sensors
+- Add NATS Streaming as internal pub-sub system
+- Add SNS & SQS gateway Support
 
 ## Idea Phase
 - Smarter pod queue processing

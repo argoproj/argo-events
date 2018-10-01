@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-time-filter-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  signals:
+    - name: webhook-gateway/webhook.barConfig
+      filters:
+        time:
+          start: "22:14:05"
+          stop: "23:04:05"
+          escalationPolicy:
+            name: "time-filter-escalation"
+            level: "Alert"
+            message: "time filter failed"
+  triggers:
+    - name: hello-world-workflow-trigger
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: time-filter-hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

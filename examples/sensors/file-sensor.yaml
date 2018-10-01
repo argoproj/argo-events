@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: file-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  signals:
+    - name: calendar-gateway/calendar.fooConfig
+  triggers:
+    - name: file-workflow-trigger
+      resource:
+        namespace: default
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        # The following requires that the sensor-sensor-controller be run with a
+        # volume mount that has the workflow yamls in it.
+        source:
+          file:
+            path: /workflows/hello_world.yaml

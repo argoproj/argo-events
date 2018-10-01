@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webhook-gateway-configmap
+data:
+  webhook.portConfig: |-
+    port: "12000"
+  webhook.barConfig: |-
+    endpoint: "/bar"
+    method: "POST"
+  webhook.fooConfig: |-
+    endpoint: "/foo"
+    method: "POST"

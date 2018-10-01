@@ -17,6 +17,7 @@ In this case, the workflow to execute is specified as a url path. E.g. [url-sens
 Resources define a YAML or JSON K8 resource. The set of currently resources supported are implemented in the `store` package. Adding support for new resources is as simple as including the type you want to create in the store's `decodeAndUnstructure()` method. We hope to change this functionality so that permissions for CRUD operations against certain resources can be controlled through RBAC roles instead.
 
 List of currently supported K8 Resources:
+- Gateway
 - Sensor
 - [Workflow](https://github.com/argoproj/argo)
 

@@ -25,18 +25,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SignalType is the type of the signal
-type SignalType string
-
-// possible types of signals or inputs
-const (
-	SignalTypeStream   SignalType = "Stream"
-	SignalTypeArtifact SignalType = "Artifact"
-	SignalTypeCalendar SignalType = "Calendar"
-	SignalTypeResource SignalType = "Resource"
-	SignalTypeWebhook  SignalType = "Webhook"
-)
-
 // NodeType is the type of a node
 type NodeType string
 
@@ -61,6 +49,7 @@ const (
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
 type Sensor struct {
 	v1.TypeMeta   `json:",inline"`
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
@@ -84,13 +73,16 @@ type SensorSpec struct {
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
-	// Escalation describes the policy for signal failures and violations of the dependency's constraints.
-	Escalation *EscalationPolicy `json:"escalation,omitempty" protobuf:"bytes,3,opt,name=escalation"`
-
 	// Repeat is a flag that determines if the sensor status should be reset after completion.
 	// NOTE: functionality is currently expiremental and part of an initiative to define
 	// a more concrete pattern or cycle for sensor reptition.
 	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
+
+	// ImagePullPolicy determines the when the image should be pulled from docker repository
+	ImagePullPolicy apiv1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy"`
+
+	// ServiceAccountName required for role based access
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
 }
 
 // Signal describes a dependency
@@ -105,49 +97,8 @@ type Signal struct {
 	// and proper escalations should proceed.
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
-	// Stream defines a message stream dependency
-	Stream *Stream `json:"stream,omitempty" protobuf:"bytes,3,opt,name=stream"`
-
-	// artifact defines an external file dependency
-	Artifact *ArtifactSignal `json:"artifact,omitempty" protobuf:"bytes,4,opt,name=artifact"`
-
-	// Calendar defines a time based dependency
-	Calendar *CalendarSignal `json:"calendar,omitempty" protobuf:"bytes,5,opt,name=calendar"`
-
-	// Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource
-	Resource *ResourceSignal `json:"resource,omitempty" protobuf:"bytes,6,opt,name=resource"`
-
-	// Webhook defines a HTTP notification dependency
-	Webhook *WebhookSignal `json:"webhook,omitempty" protobuf:"bytes,7,opt,name=webhook"`
-
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,8,opt,name=filters"`
-}
-
-// ArtifactSignal describes an external object dependency
-type ArtifactSignal struct {
-	ArtifactLocation `json:",inline" protobuf:"bytes,2,opt,name=artifactLocation"`
-
-	// Target is the stream to listen for artifact notifications
-	Target Stream `json:"target" protobuf:"bytes,1,opt,name=target"`
-}
-
-// CalendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
-// Schedule takes precedence over interval; interval takes precedence over recurrence
-type CalendarSignal struct {
-	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-	Schedule string `json:"schedule" protobuf:"bytes,1,opt,name=schedule"`
-
-	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-	Interval string `json:"interval" protobuf:"bytes,2,opt,name=interval"`
-
-	// List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
-	// RRULE is a recurrence rule which defines a repeating pattern for recurring events.
-	// RDATE defines the list of DATE-TIME values for recurring events.
-	// EXDATE defines the list of DATE-TIME exceptions for recurring events.
-	// the combination of these rules and dates combine to form a set of date times.
-	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
-	Recurrence []string `json:"recurrence" protobuf:"bytes,3,rep,name=recurrence"`
+	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
@@ -158,23 +109,19 @@ type GroupVersionKind struct {
 	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
 }
 
-// ResourceSignal refers to a dependency on a k8s resource.
-type ResourceSignal struct {
-	GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
-	Namespace        string          `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-	Filter           *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
-}
-
 // SignalFilter defines filters and constraints for a signal.
 type SignalFilter struct {
-	// Time filter on the signal
-	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,1,opt,name=time"`
+	// Name is the name of signal filter
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
-	// Context filter constraints
-	Context *EventContext `json:"context,omitempty" protobuf:"bytes,2,opt,name=context"`
+	// Time filter on the signal with escalation
+	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 
-	// Data filter constraints
-	Data []*DataFilter `json:"data,omitempty" protobuf:"bytes,3,rep,name=data"`
+	// Context filter constraints with escalation
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+
+	// Data filter constraints with escalation
+	Data *Data `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
 }
 
 // TimeFilter describes a window in time.
@@ -184,15 +131,16 @@ type SignalFilter struct {
 type TimeFilter struct {
 	// Start is the beginning of a time window.
 	// Before this time, events for this signal are ignored and
-	// do not contribute to resolving the signal.
-	// A nil value represents -∞
-	Start *v1.Time `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
+	// format is hh:mm:ss
+	Start string `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
 
-	// Stop is the end of a time window.
+	// StopPattern is the end of a time window.
 	// After this time, events for this signal are ignored and
-	// do not contribute to resolving the signal.
-	// A nil value represents ∞
-	Stop *v1.Time `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
+	// format is hh:mm:ss
+	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
+
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
 // JSONType contains the supported JSON types for data filtering
@@ -205,13 +153,21 @@ const (
 	JSONTypeString JSONType = "string"
 )
 
+type Data struct {
+	// filter constraints
+	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
+
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
+}
+
 // DataFilter describes constraints and filters for event data
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
 type DataFilter struct {
 	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	Path string `json:"path" protobuf:"bytes,1,opt,name=path"`
 
@@ -224,6 +180,9 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
+
+	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -235,7 +194,7 @@ type Trigger struct {
 	Resource *ResourceObject `json:"resource,omitempty" protobuf:"bytes,2,opt,name=resource"`
 
 	// Message describes a message that will be sent on a queue
-	Message *Message `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
+	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
 
 	// RetryStrategy is the strategy to retry a trigger if it fails
 	RetryStrategy *RetryStrategy `json:"retryStrategy" protobuf:"bytes,4,opt,name=replyStrategy"`
@@ -260,14 +219,14 @@ type ResourceParameterSource struct {
 
 	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	Path string `json:"path" protobuf:"bytes,2,opt,name=path"`
 
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the path is invalid.
 	// If the path is invalid and this is not defined, this param source will produce an error.
-	Value *string `json:"default,omitempty" protobuf:"bytes,3,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
 }
 
 // ResourceObject is the resource object to create on kubernetes
@@ -291,51 +250,37 @@ type ResourceObject struct {
 	Parameters []ResourceParameter `json:"parameters" protobuf:"bytes,4,rep,name=parameters"`
 }
 
-// Stream describes a queue stream resource
-type Stream struct {
-	// Type of the stream resource
-	Type string `json:"type" protobuf:"bytes,1,opt,name=type"`
-
-	// URL is the exposed endpoint for client connections to this service
-	URL string `json:"url" protobuf:"bytes,2,opt,name=url"`
-
-	// Attributes contains additional fields specific to each service implementation
-	Attributes map[string]string `json:"attributes,omitempty" protobuf:"bytes,3,rep,name=attributes"`
-}
-
-// WebhookSignal is a general purpose REST API
-// Due to https://github.com/argoproj/argo-events/issues/59 - the port is no longer part of the api
-type WebhookSignal struct {
-	// REST API endpoint
-	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
-
-	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
-	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string `json:"method" protobuf:"bytes,2,opt,name=method"`
-}
-
-// Message represents a message on a queue
-type Message struct {
-	Body string `json:"body" protobuf:"bytes,1,opt,name=body"`
-
-	// Stream descibes queue resources to send the message on
-	Stream Stream `json:"stream,omitempty" protobuf:"bytes,2,opt,name=stream"`
-}
-
 // RetryStrategy represents a strategy for retrying operations
 // TODO: implement me
 type RetryStrategy struct {
 }
 
+// EscalationLevel is the degree of importance
+type EscalationLevel string
+
+// possible values for EscalationLevel
+const (
+	// level 0 of escalation
+	Alert EscalationLevel = "Alert"
+	// level 1 of escalation
+	Warning EscalationLevel = "Warning"
+	// level 2 of escalation
+	Critical EscalationLevel = "Critical"
+)
+
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// NOTE: this functionality is currently experimental, but we believe serves as an
-// important future enhancement around handling lifecycle error conditions of a sensor.
+// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// escalation will be triggered
 type EscalationPolicy struct {
+	// Name is name of the escalation policy
+	// This is referred by signal filter/s
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+
 	// Level is the degree of importance
-	Level string `json:"level" protobuf:"bytes,1,opt,name=level"`
+	Level EscalationLevel `json:"level" protobuf:"bytes,2,opt,name=level"`
 
 	// need someway to progressively get more serious notifications
-	Message Message `json:"message" protobuf:"bytes,2,opt,name=message"`
+	Message string `json:"message" protobuf:"bytes,3,opt,name=message"`
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -348,6 +293,9 @@ type SensorStatus struct {
 
 	// CompletedAt is the time at which this sensor was completed
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
+
+	// CompletionCount is the count of sensor's successful runs.
+	CompletionCount int32 `json:"completionCount,omitempty" protobuf:"varint,6,opt,name=completionCount"`
 
 	// Message is a human readable string indicating details about a sensor in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
@@ -377,10 +325,10 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
+	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
-	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
+	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for signal notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
@@ -391,15 +339,15 @@ type NodeStatus struct {
 
 // EventWrapper wraps an event with an additional flag to check if we processed this event already
 type EventWrapper struct {
-	Event Event `json:"event" protobuf:"bytes,1,opt,name=event"`
-	Seen  bool  `json:"seen" protobuf:"bytes,2,opt,name=seen"`
+	Event `json:"event" protobuf:"bytes,1,opt,name=event"`
+	Seen  bool `json:"seen" protobuf:"bytes,2,opt,name=seen"`
 }
 
 // Event is a data record expressing an occurrence and its context.
 // Adheres to the CloudEvents v0.1 specification
 type Event struct {
 	Context EventContext `json:"context" protobuf:"bytes,1,opt,name=context"`
-	Data    []byte       `json:"data" protobuf:"bytes,2,opt,name=data"`
+	Payload []byte       `json:"payload" protobuf:"bytes,2,opt,name=data"`
 }
 
 // EventContext contains metadata that provides circumstantial information about the occurence.
@@ -426,7 +374,7 @@ type EventContext struct {
 	EventID string `json:"eventID" protobuf:"bytes,5,opt,name=eventID"`
 
 	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-	EventTime v1.Time `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
+	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
 
 	// A link to the schema that the data attribute adheres to.
 	// Must adhere to the format specified in RFC 3986.
@@ -442,6 +390,9 @@ type EventContext struct {
 	// Enables a place for custom fields a producer or middleware might want to include and provides a place
 	// to test metadata before adding them to the CloudEvents specification.
 	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
+
+	// EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
+	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,10,opt,name=escalationPolicy"`
 }
 
 // URI is a Uniform Resource Identifier based on RFC 3986
@@ -480,7 +431,7 @@ type FileArtifact struct {
 // URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
 	Path       string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
-	VerifyCert bool   `json:"verifycert,omitempty" protobuf:"bytes,2,opt,name=verifycert"`
+	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
 }
 
 // S3Bucket contains information for an S3 Bucket
@@ -499,37 +450,9 @@ type S3Filter struct {
 	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
-type ResourceFilter struct {
-	Prefix      string            `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
-	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,rep,name=labels"`
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,3,rep,name=annotations"`
-	CreatedBy   v1.Time           `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
-}
-
 // HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
 	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
-}
-
-// GetType returns the type of this signal
-func (signal *Signal) GetType() SignalType {
-	if signal.Stream != nil {
-		return SignalTypeStream
-	}
-	if signal.Resource != nil {
-		return SignalTypeResource
-	}
-	if signal.Artifact != nil {
-		return SignalTypeArtifact
-	}
-	if signal.Calendar != nil {
-		return SignalTypeCalendar
-	}
-	if signal.Webhook != nil {
-		return SignalTypeWebhook
-	}
-	return "Unknown"
 }
 
 // IsComplete determines if the node has reached an end state

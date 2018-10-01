@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: webhook-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "webhook-gateway"
+spec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
+  dispatchMechanism: "HTTP"
+  version: "1.0"
+  deploySpec:
+    containers:
+    - name: "webhook-events"
+      image: "argoproj/webhook-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/webhook-gateway"]
+    serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    selector:
+      gateway-name: "webhook-gateway"
+    ports:
+      - port: 12000
+        targetPort: 12000
+    type: LoadBalancer
+  watchers:
+    gateways:
+    - name: "webhook-gateway-2"
+      port: "9070"
+      endpoint: "/notifications"
+    sensors:
+    - name: "webhook-sensor"
+    - name: "multi-signal-sensor"
+    - name: "webhook-time-filter-sensor"
+    - name: "dsp-sensor"

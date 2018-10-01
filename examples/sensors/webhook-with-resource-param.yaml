@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-with-resource-param-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  signals:
+    - name: webhook-gateway/webhook.fooConfig
+  triggers:
+    - name: argo-workflow
+      resource:
+        namespace: default
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        # The parameters from the workflow are overridden by the webhook's message
+        parameters:
+          - src:
+              signal: webhook
+              path: message
+              value: hello default
+            dest: spec.arguments.parameters.0.value
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                name: arguments-via-webhook-event
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                  - name: message
+                    # this is the value that should be overridden
+                    value: hello world
+                templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}}"]

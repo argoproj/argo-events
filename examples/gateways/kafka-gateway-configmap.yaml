@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-gateway-configmap
+data:
+  kafka.fooConfig: |-
+    url: kafka.argo-events:9092
+    attributes:
+      topic: foo
+      partition: "0"
+  kafka.barConfig: |-
+    url: kafka.argo-events:9092
+    attributes:
+      topic: bar
+      partition: "1"

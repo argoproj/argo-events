@@ -1,0 +1,24 @@
+# The gateway-controller listens for changes on the gateway CRD and creates gateway
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: gateway-controller
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gateway-controller
+    spec:
+      serviceAccountName: argo-events-sa
+      containers:
+      - name: gateway-controller
+        image: argoproj/gateway-controller:latest
+        imagePullPolicy: Always
+        env:
+          - name: GATEWAY_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: GATEWAY_CONTROLLER_CONFIG_MAP
+            value: gateway-controller-configmap

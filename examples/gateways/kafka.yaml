@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: kafka-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "kafka-gateway"
+spec:
+  deploySpec:
+    containers:
+    - name: "kafka-events"
+      image: "argoproj/kafka-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/kafka-gateway"]
+    serviceAccountName: "argo-events-sa"
+  configMap: "kafka-gateway-configmap"
+  type: "kafka"
+  dispatchMechanism: "HTTP"
+  version: "1.0"
+  watchers:
+    sensors:
+    - name: "kafka-sensor"

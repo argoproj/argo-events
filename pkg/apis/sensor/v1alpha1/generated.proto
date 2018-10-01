@@ -39,30 +39,12 @@ message ArtifactLocation {
   optional URLArtifact url = 4;
 }
 
-// ArtifactSignal describes an external object dependency
-message ArtifactSignal {
-  optional ArtifactLocation artifactLocation = 2;
+message Data {
+  // filter constraints
+  repeated DataFilter filters = 1;
 
-  // Target is the stream to listen for artifact notifications
-  optional Stream target = 1;
-}
-
-// CalendarSignal describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
-// Schedule takes precedence over interval; interval takes precedence over recurrence
-message CalendarSignal {
-  // Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-  optional string schedule = 1;
-
-  // Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-  optional string interval = 2;
-
-  // List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
-  // RRULE is a recurrence rule which defines a repeating pattern for recurring events.
-  // RDATE defines the list of DATE-TIME values for recurring events.
-  // EXDATE defines the list of DATE-TIME exceptions for recurring events.
-  // the combination of these rules and dates combine to form a set of date times.
-  // NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
-  repeated string recurrence = 3;
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 2;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -71,7 +53,7 @@ message CalendarSignal {
 message DataFilter {
   // Path is the JSONPath of the event's (JSON decoded) data key
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
   optional string path = 1;
 
@@ -84,17 +66,24 @@ message DataFilter {
   // Strings are taken as is
   // Nils this value is ignored
   optional string value = 3;
+
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 4;
 }
 
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// NOTE: this functionality is currently experimental, but we believe serves as an
-// important future enhancement around handling lifecycle error conditions of a sensor.
+// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// escalation will be triggered
 message EscalationPolicy {
+  // Name is name of the escalation policy
+  // This is referred by signal filter/s
+  optional string name = 1;
+
   // Level is the degree of importance
-  optional string level = 1;
+  optional string level = 2;
 
   // need someway to progressively get more serious notifications
-  optional Message message = 2;
+  optional string message = 3;
 }
 
 // Event is a data record expressing an occurrence and its context.
@@ -129,7 +118,7 @@ message EventContext {
   optional string eventID = 5;
 
   // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time eventTime = 6;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6;
 
   // A link to the schema that the data attribute adheres to.
   // Must adhere to the format specified in RFC 3986.
@@ -145,6 +134,9 @@ message EventContext {
   // Enables a place for custom fields a producer or middleware might want to include and provides a place
   // to test metadata before adding them to the CloudEvents specification.
   map<string, string> extensions = 9;
+
+  // EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 10;
 }
 
 // EventWrapper wraps an event with an additional flag to check if we processed this event already
@@ -169,14 +161,6 @@ message GroupVersionKind {
   optional string kind = 3;
 }
 
-// Message represents a message on a queue
-message Message {
-  optional string body = 1;
-
-  // Stream descibes queue resources to send the message on
-  optional Stream stream = 2;
-}
-
 // NodeStatus describes the status for an individual node in the sensor's FSM.
 // A single node can represent the status for signal or a trigger.
 message NodeStatus {
@@ -197,27 +181,16 @@ message NodeStatus {
   optional string phase = 5;
 
   // StartedAt is the time at which this node started
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 6;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
 
   // CompletedAt is the time at which this node completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 7;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
   // store data or something to save for signal notifications or trigger events
   optional string message = 8;
 
   // LatestEvent stores the last seen event for this node
   optional EventWrapper latestEvent = 9;
-}
-
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
-message ResourceFilter {
-  optional string prefix = 1;
-
-  map<string, string> labels = 2;
-
-  map<string, string> annotations = 3;
-
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdBy = 4;
 }
 
 // ResourceObject is the resource object to create on kubernetes
@@ -260,7 +233,7 @@ message ResourceParameterSource {
 
   // Path is the JSONPath of the event's (JSON decoded) data key
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
-  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\'.
+  // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
   optional string path = 2;
 
@@ -268,15 +241,6 @@ message ResourceParameterSource {
   // This is only used if the path is invalid.
   // If the path is invalid and this is not defined, this param source will produce an error.
   optional string value = 3;
-}
-
-// ResourceSignal refers to a dependency on a k8s resource.
-message ResourceSignal {
-  optional GroupVersionKind groupVersionKind = 3;
-
-  optional string namespace = 1;
-
-  optional ResourceFilter filter = 2;
 }
 
 // RetryStrategy represents a strategy for retrying operations
@@ -321,6 +285,7 @@ message S3Filter {
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:openapi-gen=true
 message Sensor {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
@@ -345,13 +310,16 @@ message SensorSpec {
   // Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
   repeated Trigger triggers = 2;
 
-  // Escalation describes the policy for signal failures and violations of the dependency's constraints.
-  optional EscalationPolicy escalation = 3;
-
   // Repeat is a flag that determines if the sensor status should be reset after completion.
   // NOTE: functionality is currently expiremental and part of an initiative to define
   // a more concrete pattern or cycle for sensor reptition.
   optional bool repeat = 4;
+
+  // ImagePullPolicy determines the when the image should be pulled from docker repository
+  optional string imagePullPolicy = 5;
+
+  // ServiceAccountName required for role based access
+  optional string serviceAccountName = 6;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -364,6 +332,9 @@ message SensorStatus {
 
   // CompletedAt is the time at which this sensor was completed
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
+
+  // CompletionCount is the count of sensor's successful runs.
+  optional int32 completionCount = 6;
 
   // Message is a human readable string indicating details about a sensor in its phase
   optional string message = 4;
@@ -385,47 +356,23 @@ message Signal {
   // and proper escalations should proceed.
   optional int64 deadline = 2;
 
-  // Stream defines a message stream dependency
-  optional Stream stream = 3;
-
-  // artifact defines an external file dependency
-  optional ArtifactSignal artifact = 4;
-
-  // Calendar defines a time based dependency
-  optional CalendarSignal calendar = 5;
-
-  // Resource defines a dependency on a kubernetes resource -- this can be a pod, deployment or custom resource
-  optional ResourceSignal resource = 6;
-
-  // Webhook defines a HTTP notification dependency
-  optional WebhookSignal webhook = 7;
-
   // Filters and rules governing tolerations of success and constraints on the context and data of an event
-  optional SignalFilter filters = 8;
+  optional SignalFilter filters = 3;
 }
 
 // SignalFilter defines filters and constraints for a signal.
 message SignalFilter {
-  // Time filter on the signal
-  optional TimeFilter time = 1;
+  // Name is the name of signal filter
+  optional string name = 1;
 
-  // Context filter constraints
-  optional EventContext context = 2;
+  // Time filter on the signal with escalation
+  optional TimeFilter time = 2;
 
-  // Data filter constraints
-  repeated DataFilter data = 3;
-}
+  // Context filter constraints with escalation
+  optional EventContext context = 3;
 
-// Stream describes a queue stream resource
-message Stream {
-  // Type of the stream resource
-  optional string type = 1;
-
-  // URL is the exposed endpoint for client connections to this service
-  optional string url = 2;
-
-  // Attributes contains additional fields specific to each service implementation
-  map<string, string> attributes = 3;
+  // Data filter constraints with escalation
+  optional Data data = 4;
 }
 
 // TimeFilter describes a window in time.
@@ -435,15 +382,16 @@ message Stream {
 message TimeFilter {
   // Start is the beginning of a time window.
   // Before this time, events for this signal are ignored and
-  // do not contribute to resolving the signal.
-  // A nil value represents -∞
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time start = 1;
+  // format is hh:mm:ss
+  optional string start = 1;
 
-  // Stop is the end of a time window.
+  // StopPattern is the end of a time window.
   // After this time, events for this signal are ignored and
-  // do not contribute to resolving the signal.
-  // A nil value represents ∞
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time stop = 2;
+  // format is hh:mm:ss
+  optional string stop = 2;
+
+  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  optional EscalationPolicy escalationPolicy = 3;
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -455,7 +403,7 @@ message Trigger {
   optional ResourceObject resource = 2;
 
   // Message describes a message that will be sent on a queue
-  optional Message message = 3;
+  optional string message = 3;
 
   // RetryStrategy is the strategy to retry a trigger if it fails
   optional RetryStrategy replyStrategy = 4;
@@ -484,17 +432,6 @@ message URI {
 message URLArtifact {
   optional string path = 1;
 
-  optional bool verifycert = 2;
-}
-
-// WebhookSignal is a general purpose REST API
-// Due to https://github.com/argoproj/argo-events/issues/59 - the port is no longer part of the api
-message WebhookSignal {
-  // REST API endpoint
-  optional string endpoint = 1;
-
-  // Method is HTTP request method that indicates the desired action to be performed for a given resource.
-  // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-  optional string method = 2;
+  optional bool verifyCert = 2;
 }
 

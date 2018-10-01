@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: amqp-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "amqp-gateway"
+spec:
+  deploySpec:
+    containers:
+    - name: webhook-events
+      image: "argoproj/amqp-gateway"
+      imagePullPolicy: "Always"
+      command: ["/bin/amqp-gateway"]
+    serviceAccountName: "argo-events-sa"
+  configMap: "amqp-gateway-configmap"
+  type: "amqp"
+  dispatchMechanism: "HTTP"
+  version: "1.0"
+  watchers:
+    sensors:
+    - name: "amqp-sensor"
