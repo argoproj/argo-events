@@ -23,7 +23,7 @@ func main() {
 
 	namespace, ok := os.LookupEnv(common.GatewayNamespace)
 	if !ok {
-		namespace = common.DefaultGatewayControllerNamespace
+		namespace = common.DefaultControllerNamespace
 	}
 
 	// create new gateway controller

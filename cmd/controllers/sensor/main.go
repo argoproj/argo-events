@@ -39,7 +39,7 @@ func main() {
 
 	namespace, ok := os.LookupEnv(common.SensorNamespace)
 	if !ok {
-		namespace = common.DefaultGatewayControllerNamespace
+		namespace = common.DefaultControllerNamespace
 	}
 
 	// create a new sensor controller

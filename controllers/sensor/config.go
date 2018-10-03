@@ -114,7 +114,7 @@ func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
 		return err
 	}
 	if config.Namespace == "" {
-		config.Namespace = common.DefaultSensorControllerNamespace
+		config.Namespace = common.DefaultControllerNamespace
 	}
 	c.Config = config
 	return nil

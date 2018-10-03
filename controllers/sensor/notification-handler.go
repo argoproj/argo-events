@@ -166,7 +166,6 @@ func (se *sensorExecutionCtx) processSignal(gwEventWrapper *sensorEventWrapper) 
 
 	// apply filters if any.
 	// error is thrown if some problem occurs during filtering the signal
-	// apply filters if any
 	ok, err := se.filterEvent(gwEventWrapper.signal.Filters, gwEventWrapper.event)
 	if err != nil {
 		se.log.Error().Err(err).Str("signal-name", gwEventWrapper.event.Context.Source.Host).Err(err).Msg("failed to apply filter")

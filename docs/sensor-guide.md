@@ -1,33 +1,55 @@
 ## Sensor Guide
 
 Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
-[Checkout sensor examples](https://github.com/argoproj/argo-events/tree/eventing/examples/sensors)
+[Sensor examples](https://github.com/argoproj/argo-events/tree/eventing/examples/sensors)
 
 
 ### Dependencies
-Dependencies(also called signals) are the name/s of gateway/s from whom the sensor expects to get the notifications.
+Dependencies(also called signals) are defined as "gateway-name/specific-configuration"
 ``` 
 signals:
-    - name: calendar-gateway
-    - name: foo-gateway
-    - name: bar-gateway
+    - name: calendar-gateway/calendar.fooConfig
+    - name: webhook-gateway/webhook.barConfig
 ```
-
-### Triggers
-Refer [Triggers](trigger-guide.md) guide.
 
 ### Repeating the sensor
 Sensor can be configured to rerun by setting repeat property to `true`
 ``` 
 spec:
   repeat: true
-  signals:
-    - name: calendar-example-gateway
 ```
 
+### Triggers
+Refer [Triggers](trigger-guide.md) guide.
+
+
+### Event payload
+Event payload of any signal can be passed to any trigger. To pass complete payload without applying any filter,
+do not set ```path```
+e.g.
+```yaml
+parameters:
+  - src:
+      signal: webhook-gateway/webhook.fooConfig
+      path:
+    dest: spec.templates.0.container.args.0
+``` 
+
+Complete example to pass payload from signal to trigger can be found [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook.yaml) 
+
+To pass a particular field from payload to trigger, set ```path```. e.g.
+```yaml
+parameters:
+  - src:
+      signal: webhook-gateway/webhook.fooConfig
+      path: name
+    dest: spec.templates.0.container.args.0
+```
+
+In above example, the object/value corresponding to key ```name``` will be passed to trigger.  
+
 ### Filters
-The payload received from gateways to trigger resources as input. You can apply filters
-on the payload.
+Additionally, you can apply filters on the payload.
 
 There are 3 types of filters:
 

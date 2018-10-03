@@ -16,7 +16,6 @@ limitations under the License.
 package sensor
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -36,12 +35,10 @@ func Test_filterTime(t *testing.T) {
 		Start: "10:11:00",
 	}
 	event := getCloudEvent()
+
 	currentT := time.Now().UTC()
-	currentMonth := fmt.Sprintf("%d", int(currentT.Month()))
-	if int(currentT.Month()) < 10 {
-		currentMonth = "0" + currentMonth
-	}
-	currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), currentMonth, currentT.Day())
+	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
+	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
 	parsedTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" 16:36:34")
 	assert.Nil(t, err)
 	event.Context.EventTime = metav1.MicroTime{

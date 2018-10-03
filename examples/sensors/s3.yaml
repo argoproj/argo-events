@@ -10,7 +10,7 @@ spec:
   signals:
     - name: artifact-gateway/s3.fooConfig
   triggers:
-    - name: hello-world-workflow-trigger
+    - name: artifact-workflow-trigger
       resource:
         namespace: argo-events
         group: argoproj.io
@@ -21,7 +21,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: s3-
+                generateName: hello-world-
               spec:
                 entrypoint: whalesay
                 templates:

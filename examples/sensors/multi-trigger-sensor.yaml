@@ -5,18 +5,21 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  repeat: true
+  serviceAccountName: argo-events-sa
   signals:
     - name: nats-gateway/nats.fooConfig
   triggers:
-    - name: "workflow"
+    - name: multi-trigger-workflow-1
       resource:
+        namespace: argo-events
         version: v1
         kind: Pod
         source:
           s3:
             bucket: workflows
             key: hello-world.yaml
-            endpoint: artifacts-minio.default:9000
+            endpoint: minio-service.argo-events:9000
             insecure: true
             accessKey:
               key: accesskey
@@ -26,6 +29,7 @@ spec:
               name: artifacts-minio
     - name: multi-trigger-workflow-2
       resource:
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

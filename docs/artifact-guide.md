@@ -1,7 +1,5 @@
 # Artifact Guide
-This is a guide for help in utilizing artifacts within Argo Events. Sensors use artifacts for two purposes:
-1. Object notifications for use in `Artifact` signals. (currently S3 bucket notifications are only supported)
-2. A Resource Object store for use in `Resource` triggers
+This is a guide for help in utilizing artifacts within Argo Events. Sensors use artifacts for Resource Object store for use in `Resource` triggers
 
 ## Inline
 Inlined artifacts are included directly within the sensor resource and decoded as a string.

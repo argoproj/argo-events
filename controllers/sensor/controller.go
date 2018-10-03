@@ -20,20 +20,18 @@ import (
 	"context"
 	"errors"
 	"time"
-
+	"fmt"
+	"log"
 
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"fmt"
-	"log"
 )
 
 const (

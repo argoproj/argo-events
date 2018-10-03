@@ -5,12 +5,14 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  repeat: true
+  serviceAccountName: argo-events-sa
   signals:
     - name: calendar-gateway/calendar.fooConfig
   triggers:
     - name: url-workflow-trigger
       resource:
-        namespace: default
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
