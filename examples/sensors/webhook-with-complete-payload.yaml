@@ -17,11 +17,10 @@ spec:
         version: v1alpha1
         kind: Workflow
         # The parameters from the workflow are overridden by the webhook's message
+        # An empty path means complete payload will be passed to trigger
         parameters:
           - src:
               signal: webhook-gateway/webhook.fooConfig
-              path: message
-              value: hello default
             dest: spec.arguments.parameters.0.value
         source:
           inline: |

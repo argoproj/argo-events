@@ -22,7 +22,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -83,8 +82,9 @@ func validateSignalFilter(filter v1alpha1.SignalFilter) error {
 }
 
 func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
-	currentT := metav1.Time{Time: time.Now().UTC()}
-	currentTStr := fmt.Sprintf("%d-%d-%d", currentT.Year(), int(currentT.Month()), currentT.Day())
+	currentT := time.Now().UTC()
+	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
+	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
 	if tFilter.Start != "" && tFilter.Stop != "" {
 		startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Start)
 		if err != nil {
@@ -104,7 +104,7 @@ func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 			return err
 		}
 		stopTime = stopTime.UTC()
-		if stopTime.Before(currentT.Time) {
+		if stopTime.Before(currentT.UTC()) {
 			return fmt.Errorf("invalid signal time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
 		}
 	}

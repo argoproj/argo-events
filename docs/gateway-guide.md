@@ -2,16 +2,18 @@
 
 ## What is a gateway?
 A gateway is a long running/repeatable process whose tasks are to process and transform either the internally produced events or 
-incoming events into the cloudevents specification compliant events and dispatching them to sensors.
+external events into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatch them to watchers(sensors and/or gateways).
 
 ## Gateway Components
 A gateway has two components:
 
- 1. gateway-processor: Either generates the events internally or listens to incoming events. It then passes the events to gateway-transformer.
- The implementation of gateway-processor is provided by the user which means the user can easily create a custom gateway that has the business logic pertaining to a use-case.
+ 1. <b>gateway-processor</b>: Either generates the events internally or listens to external events.
+ The implementation of gateway-processor is provided by the user which means the user can easily create a custom gateway.
 
- 2. gateway-transformer: Transforms the incoming event from gateway-processor into a cloudevents specification compliant event. The event is then dispatched to sensors who are interested in listening to this gateway. 
- Refer https://github.com/cloudevents/spec for more info on cloudevents.
+ 2. <b>gateway-transformer</b>: Transforms the incoming events from gateway-processor into a cloudevents specification compliant events. 
+ The event is then dispatched to watchers. 
+ 
+ Refer <b>https://github.com/cloudevents/spec </b> for more info on cloudevents specifications.
 
 
 Core gateways come in 5 types:
@@ -44,24 +46,25 @@ The `gateway-controller` is responsible for managing the `Gateway` resources.
 |  ConfigMap           | Name of the configmap containing gateway configuration/s    |
 |  Type                | Type of gateway |
 |  Version             | To mark event version  |
-|  Service             | Name of the service to expose the gateway |
-|  Sensors             | List of sensors to dispatch events to  |
+|  ServiceSpec             | Specifications of the service to expose the gateway |
+|  Watchers             | Watchers are components which are interested listening to notifications from the gateway  |
+|  RPCPort             | Used to communicate between gRPC gateway client and gRPC gateway server |
+|  HTTPServerPort      | Used to communicate between gateway client and server over http |
+|  DispatchMechanism   | Messaging mechanism used to send events from gateway to watchers |
 
 
 ## Gateway Deployment
 
 All core gateways use kubernetes configmap to keep track of current gateway configurations. Multiple configurations can be defined for a single gateway and
 each configuration will run in a separate go routine. The gateway watches updates to configmap which let us add new configuration at run time.
-[Checkout core gateways specs.](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
 
 ## How to write a custom gateway?
-Follow the gateway tutorial
+Follow this tutorial to learn more
 [Custom Gateways](custom-gateway.md)
 
 
-## Types of Gateways & their configurations
-
-###### Gateway can have zero configuration(won't be doing anything useful) to multiple configurations. A configuration can be added or removed during the runtime. 
+## Gateway configurations
+<b>Gateway can have zero configuration(idle) or many configurations. A configuration can be added or removed during the runtime.</b> 
 
 ### Calendars
 Events produced can be based on a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar gateway currently supports a `recurrence` field in which to specify special exclusion dates for which this gateway will not produce an event.
@@ -138,10 +141,10 @@ Artifact gateway support S3 `bucket-notifications` via [Minio](https://docs.mini
 ```
 
 ### Streams
-Stream signals contain a generic specification for messages received on a queue and/or though messaging server. The following are the `builtin` supported stream signals. Users can build their own signals by adding implementations to the [custom](../signals/stream/custom/doc.go) package.
+Stream gateways contain a generic specification for messages received on a queue and/or though messaging server. The following are the `builtin` supported stream gateways. 
 
 #### NATS
-[Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project. We are currently experimenting with using NATS as a solution for gateway (inputs) and triggers (outputs), however `NATS Streaming`, the data streaming system powered by NATS, offers many  additional [features](https://nats.io/documentation/streaming/nats-streaming-intro/) on top of the core NATS platform that we believe are very desirable and definite future enhancements.
+[Nats](https://nats.io/) is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project.
 ```
   nats.fooConfig: |-
     url: nats://nats.argo-events:4222
@@ -207,4 +210,4 @@ Stream signals contain a generic specification for messages received on a queue 
 ```
 
 ### Examples
-[Gateway Examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+Explore [Gateway Examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)

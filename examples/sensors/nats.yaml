@@ -1,4 +1,3 @@
-# This examples demonstrates the use of using NATS as a signal source and message trigger mechanism.
 # This example assumes the following prerequisites:
 # 1. you have a gnats server/cluster up & running
 apiVersion: argoproj.io/v1alpha1
@@ -8,6 +7,7 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  repeat: true
   serviceAccountName: argo-events-sa
   signals:
     - name: nats-gateway/nats.fooConfig

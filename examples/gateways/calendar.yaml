@@ -12,16 +12,11 @@ spec:
       image: "argoproj/calendar-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/calendar-gateway"]
-    serviceAccountName: "axis-sa"
+    serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
   dispatchMechanism: "HTTP"
   version: "1.0"
   watchers:
-      gateways:
-      - name: "webhook-gateway-2"
-        port: "9070"
-        endpoint: "/notifications"
       sensors:
       - name: "calendar-sensor"
-      - name: "multi-signal-sensor"

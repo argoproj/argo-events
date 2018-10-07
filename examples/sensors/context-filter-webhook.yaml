@@ -5,16 +5,19 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  repeat: true
+  serviceAccountName: argo-events-sa
   signals:
     - name: webhook-gateway/webhook.fooConfig
       filters:
         context:
             source:
-                host: dev.blackrock.com
+                host: xyz.com
             contentType: application/json
   triggers:
     - name: done-workflow
       resource:
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -22,7 +25,7 @@ spec:
           s3:
             bucket: workflows
             key: hello-world.yaml
-            endpoint: minio-service.default:9000
+            endpoint: minio-service.argo-events:9000
             insecure: true
             accessKey:
               key: accesskey

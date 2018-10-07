@@ -8,7 +8,7 @@ metadata:
 spec:
   deploySpec:
     containers:
-    - name: webhook-events
+    - name: amqp-events
       image: "argoproj/amqp-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/amqp-gateway"]

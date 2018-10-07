@@ -18,33 +18,3 @@ data:
     secretKey:
       key: secretkey
       name: artifacts-minio
-  s3.ratingsConfig: |-
-    s3EventConfig:
-      bucket: ratings
-      endpoint: minio-service.argo-events:9000
-      event: s3:ObjectCreated:Put
-      filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    accessKey:
-      key: accesskey
-      name: artifacts-minio
-    secretKey:
-      key: secretkey
-      name: artifacts-minio
-  s3.secMasterConfig: |-
-    s3EventConfig:
-      bucket: sec-master
-      endpoint: minio-service.argo-events:9000
-      event: s3:ObjectCreated:Put
-      filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    accessKey:
-      key: accesskey
-      name: artifacts-minio
-    secretKey:
-      key: secretkey
-      name: artifacts-minio
