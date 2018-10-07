@@ -19,6 +19,4 @@ spec:
   dispatchMechanism: "HTTP"
   watchers:
     sensors:
-    - name: "etl-sensor"
-    - name: "s3-k8-events-sensor-1"
-    - name: "s3-k8-events-sensor-2"
+    - name: "artifact-sensor"

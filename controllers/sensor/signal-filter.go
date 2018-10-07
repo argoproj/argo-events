@@ -91,13 +91,9 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 	if timeFilter != nil {
 		se.log.Info().Str("event-time", eventTime.String()).Msg("event time")
 		currentT := time.Now().UTC()
-		se.log.Info().Str("current-time", currentT.String()).Msg("current time")
-		currentMonth := fmt.Sprintf("%d", int(currentT.Month()))
-		if int(currentT.Month()) < 10 {
-			currentMonth = "0" + currentMonth
-		}
-		currentTStr := fmt.Sprintf("%d-%s-%d", currentT.Year(), currentMonth, currentT.Day())
-
+		currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
+		currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
+		se.log.Info().Str("date", currentTStr).Msg("current date")
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
 			se.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
 			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)

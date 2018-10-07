@@ -40,6 +40,9 @@ const (
 
 	// StandardTimeFormat is time format reference for golang
 	StandardTimeFormat = "2006-01-02 15:04:05"
+
+	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
+	StandardYYYYMMDDFormat = "2006-01-02"
 )
 
 // SENSOR CONTROLLER CONSTANTS

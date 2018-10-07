@@ -11,7 +11,7 @@ Difference between first three options and fourth is that in options 1,2 and 3, 
 to watch configuration updates, start/stop a configuration dynamically. In option 4, its up to
 user to watch configuration updates and take actions.
 
-##### Below are the environment variables provided to all kinds of gateways
+<b> Below are the environment variables provided to all types of gateways </b>
  
  |  Field               |  Description |
  |----------------------|--------------|
@@ -23,15 +23,13 @@ user to watch configuration updates and take actions.
  |  GATEWAY_CONTROLLER_NAME             | Contains name of gateway controller |
 
 ## Core Gateway Style
-It is the most straightforward option. The gateway consists of two components,
+The most straightforward option. The gateway consists of two components,
 
 1. Gateway Processor: either generates events internally or listens for external events and then 
 passes those events to gateway-transformer
 
 2. Gateway Transformer: transforms incoming events into cloudevents specification compliant events 
-and dispatches them to interested sensors. 
-
-* gateway-processor can be exposed via a service using gateway's `serviceSpec`
+and dispatches them to watchers. 
 
 ![](core-gateway-style.png)
  
@@ -58,40 +56,6 @@ type ConfigData struct {
 }
 ```
 
-Lets's look at excerpt from NATS gateway's RunConfiguration implementation
-
-```go
-    var wg sync.WaitGroup
-    wg.Add(1)
-
-    // waits till stop signal.
-    go func() {
-        <-config.StopCh
-        n.gatewayConfig.Log.Info().Str("config", config.Src).Msg("stopping the configuration...")
-        n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("client disconnected. stopping the configuration...")
-        wg.Done()
-    }()
-
-    n.gatewayConfig.Log.Info().Str("config-name", config.Src).Msg("running...")
-    config.Active = true
-
-    sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
-        n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("dispatching event to gateway-processor")
-        n.gatewayConfig.DispatchEvent(msg.Data, config.Src)
-    })
-    if err != nil {
-        n.gatewayConfig.Log.Error().Str("url", s.URL).Str("subject", s.Attributes[subjectKey]).Err(err).Msg("failed to subscribe to subject")
-    } else {
-        n.gatewayConfig.Log.Info().Str("config-key", config.Src).Msg("running...")
-    }
-
-    wg.Wait()
-```
-
-First we create a wait-group and wait for stop signal. We mark configuration as active, subscribe to subject
-and listens to incoming messages. As soon as message is consumed, we dispatch the event to framwork code
-which takes further actions.
-
 GatewayConfig contains generic configuration for a gateway
 ```go
 type GatewayConfig struct {
@@ -108,13 +72,12 @@ type GatewayConfig struct {
 }
 ```
 
-* To send events back to framework code for further processing, use
+* To send events back to framework for further processing, use
 ```go
 gatewayConfig.DispatchEvent(event []byte, src string) error
 ```
 
-
-For detailed implementation, check core gateways [Core Gateways](https://github.com/argoproj/argo-events/tree/eventing/gateways/core)
+For detailed implementation, check out [Core Gateways](https://github.com/argoproj/argo-events/tree/eventing/gateways/core)
 
 ## gRPC gateway
 A gRPC gateway has 3 components, 
@@ -124,19 +87,19 @@ external events and streams them back to gateway-processor-client
 2. Gateway Processor Client - gRPC client provided by framework that connects to gateway processor server.
 
 3. Gateway Transformer: transforms incoming events into cloudevents specification compliant events 
-   and dispatches them to interested sensors. 
+   and dispatches them to interested watchers. 
 
 ### Architecture
  ![](grpc-gateway.png)
  
-To implement gateway processor server, you will need to implement 
+To implement gateway processor server, you will need to implement
 ```proto
 RunGateway(GatewayConfig) returns (stream Event)
 ```
-`RunGateway` method takes an gateway configuration and sends events over a stream.
+`RunGateway` method takes a gateway configuration and sends events over a stream.
 
-The gateway processor client opens a new connection for each gateway configuration and start listening to
-events on the stream.
+The gateway processor client opens a new connection for each gateway configuration and starts listening to
+events on a stream.
 
 For detailed implementation, check out [Calendar gRPC gateway](https://github.com/argoproj/argo-events/tree/eventing/gateways/grpc/calendar)
 
@@ -156,7 +119,7 @@ a new configuration or `/stop` endpoint to stop a configuration. Processor clien
 running internally listening for events from gateway-processor-server.
 
 3. Gateway Transformer: transforms incoming events into cloudevents specification compliant events 
-   and dispatches them to interested sensors. 
+   and dispatches them to watchers. 
 
 
 ### Architecture
@@ -175,11 +138,8 @@ List of environment variables available to user code
 
 For detailed implementation, check out [Calendar HTTP gateway](https://github.com/argoproj/argo-events/tree/eventing/gateways/rest/calendar)
 
-###### Advantage of writing a gRPC or http gateway is that you can use other languages for implementation of gateway processor server.   
-
-
-## No framework gateway code
-The third option is you provide gateway implementation from scratch, watch the configuration
+## Framework independent
+The fourth option is you provide gateway implementation from scratch: watch the configuration
 updates,  start/stop configuration if needed. Only requirement is that events must be 
 dispatched to gateway-transformer using HTTP post request. The port to dispatch the request
 is made available through environment variable `TRANSFORMER_PORT`.
@@ -194,4 +154,4 @@ List of environment variables available to user code
 |  GATEWAY_NAME             | Gateway name  |
 
 ### Gateway Examples
-* Example gateways are available at [gateway examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+* Example gateway definitions are available at [here](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)

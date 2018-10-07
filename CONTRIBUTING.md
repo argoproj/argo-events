@@ -40,7 +40,7 @@ minikube start
 eval $(minikube docker-env)
 ```
 
-#### 5. Build the project & Docker images
+#### 5. Build the project
 ```
 make all
 ```

@@ -56,5 +56,5 @@ func TestGatewayController_ResyncConfig(t *testing.T) {
 	assert.NotNil(t, cm)
 	assert.NotNil(t, gc.Config)
 	assert.NotEqual(t, gc.Config.Namespace, gc.ConfigMapNS)
-	assert.Equal(t, gc.Config.Namespace, common.DefaultGatewayControllerNamespace)
+	assert.Equal(t, gc.Config.Namespace, common.DefaultControllerNamespace)
 }

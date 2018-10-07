@@ -114,6 +114,7 @@ func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) e
 			for item := range w.ResultChan() {
 				itemObj := item.Object.(*unstructured.Unstructured)
 				b, err := itemObj.MarshalJSON()
+				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("resource notification")
 				if err != nil {
 					errMessage = "failed to marshal resource"
 					return

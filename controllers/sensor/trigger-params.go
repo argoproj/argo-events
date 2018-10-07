@@ -55,6 +55,10 @@ func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]
 			}
 			return "", err
 		}
+		// check if complete payload needs to be passed to the trigger
+		if src.Path == "" {
+			return string(js), nil
+		}
 		res := gjson.GetBytes(js, src.Path)
 		if res.Exists() {
 			return res.String(), nil
