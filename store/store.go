@@ -28,6 +28,7 @@ import (
 	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // NOTE: custom resources must be manually added here
@@ -54,7 +55,7 @@ func FetchArtifact(reader ArtifactReader, gvk ss_v1alpha1.GroupVersionKind) (*un
 }
 
 // GetArtifactReader returns the ArtifactReader for this location
-func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (ArtifactReader, error) {
+func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, kubeClientset kubernetes.Interface) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
 	} else if loc.Inline != nil {
@@ -63,6 +64,8 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (A
 		return NewFileReader(loc.File)
 	} else if loc.URL != nil {
 		return NewURLReader(loc.URL)
+	} else if loc.Configmap != nil {
+		return NewConfigmapReader(kubeClientset, loc.Configmap)
 	}
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }

@@ -23,6 +23,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
@@ -45,7 +46,8 @@ func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
 	gatewayInformerFactory := gatewayinformers.NewFilteredSharedInformerFactory(
 		c.gatewayClientset,
 		gatewayResyncPeriod,
-		c.Config.Namespace,
+		// user may need to deploy controller only in one namespace but would like to have gateways created in different namespaces.
+		corev1.NamespaceAll,
 		func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
 

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: file-watcher-gateway-configmap
+data:
+  fileWatcher.fooConfig: |-
+    directory: "/bin/"
+    type: CREATE
+    path: x.txt

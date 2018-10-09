@@ -52,7 +52,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
 		updated:    false,
-		log:        zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.Namespace).Logger(),
+		log:        zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.ObjectMeta.Namespace).Caller().Logger(),
 		controller: controller,
 	}
 }

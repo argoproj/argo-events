@@ -10,7 +10,7 @@ spec:
     containers:
     - name: "calendar-events"
       image: "argoproj/calendar-gateway"
-      imagePullPolicy: "Always"
+      imagePullPolicy: "IfNotPresent"
       command: ["/bin/calendar-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"

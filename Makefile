@@ -138,6 +138,18 @@ artifact-image: artifact-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
+file-watcher:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-watcher-gateway ./gateways/core/file-watcher/
+
+file-watcher-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file-watcher
+
+file-watcher-image: file-watcher-linux
+	 docker build -t $(IMAGE_PREFIX)file-watcher-gateway:$(IMAGE_TAG) -f ./gateways/core/file-watcher/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)file-watcher-gateway:$(IMAGE_TAG) ; fi
+
+
+
 nats:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/
 

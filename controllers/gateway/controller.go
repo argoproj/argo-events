@@ -74,7 +74,7 @@ func NewGatewayController(rest *rest.Config, configMap string) *GatewayControlle
 	return &GatewayController{
 		ConfigMap:        configMap,
 		kubeConfig:       rest,
-		log:              zlog.New(os.Stdout).With().Logger(),
+		log:              zlog.New(os.Stdout).With().Caller().Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
@@ -145,7 +145,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 
 	// due to the base delay of 5ms of the DefaultControllerRateLimiter
 	// requeues will happen very quickly even after a signal pod goes down
-	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
+	// we want to give the signal pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
 		c.log.Error().Str("gateway-controller", key.(string)).Err(err).Msg("error syncing gateway-controller")
 

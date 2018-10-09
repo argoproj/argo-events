@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.6-alpha1
++ Custom gateways for Slack, Twitter, AWS S3, Google Cloud Pub-Sub, Reddit and Docker
++ FileWatcher as core gateway
++ Kubernetes configmaps as artifact locations for triggers
++ Tutorials on setting up pipelines
+
 ## v0.5
 [#92](https://github.com/argoproj/argo-events/pull/92)
 + Introduced gateways as event generators. 
@@ -12,7 +18,7 @@
 + Sensors are now repeatable and fixed all issues with signal repeatability.
 + Removed signal deployments as microservices.
 
-## v0.5-beta1 (tbd)
+## v0.5-beta1
 + Signals as separate deployments [#49](https://github.com/argoproj/argo-events/pull/49)
 + Fixed code-gen bug [#46](https://github.com/argoproj/argo-events/issues/46)
 + Filters for signals [#26](https://github.com/argoproj/argo-events/issues/26)

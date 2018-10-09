@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// initialize logger
-	log := zerolog.New(os.Stdout).With().Str("sensor-name", sensorName).Logger()
+	log := zerolog.New(os.Stdout).With().Str("sensor-name", sensorName).Caller().Logger()
 	sensorClient, err := sv1.NewForConfig(restConfig)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get sensor client")

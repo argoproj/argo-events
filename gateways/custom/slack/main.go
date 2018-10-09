@@ -17,21 +17,21 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
+	"context"
+	"encoding/gob"
+	"encoding/json"
+	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
+	slackAPI "github.com/nlopes/slack"
+	"github.com/nlopes/slack/slackevents"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"sync"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/ghodss/yaml"
-	"fmt"
-	"context"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/common"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
-	slackAPI "github.com/nlopes/slack"
-	"bytes"
-	"github.com/nlopes/slack/slackevents"
-	"encoding/json"
-	"encoding/gob"
 )
 
 // SlackAPIType is type of api to use to listen to events.
@@ -61,7 +61,7 @@ var (
 )
 
 // slack implements ConfigExecutor
-type slack struct {}
+type slack struct{}
 
 // slackConfig contains configuration for Slack API to consume events.
 type slackConfig struct {
@@ -97,14 +97,14 @@ type SlackAPIToken struct {
 }
 
 type Server struct {
-	mux    *http.ServeMux
+	mux *http.ServeMux
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func (s *slackConfig) getAccessTokens() (*corev1.Secret, error){
+func (s *slackConfig) getAccessTokens() (*corev1.Secret, error) {
 	// read slack access token from k8 secret
 	secret, err := gatewayConfig.Clientset.CoreV1().Secrets(gatewayConfig.Namespace).Get(s.APIToken.Name, metav1.GetOptions{})
 	if err != nil {
@@ -173,7 +173,7 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 			}
 			sConfig.mux = s.mux
 			sConfig.srv = &http.Server{
-				Addr: ":" + fmt.Sprintf("%s", sConfig.Port),
+				Addr:    ":" + fmt.Sprintf("%s", sConfig.Port),
 				Handler: s,
 			}
 			activeServers[sConfig.Port] = sConfig.srv

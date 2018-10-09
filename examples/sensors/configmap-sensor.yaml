@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: configmap-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  serviceAccountName: argo-events-sa
+  repeat: true
+  signals:
+    - name: webhook-gateway/webhook.fooConfig
+  triggers:
+    - name: configmap-workflow-trigger
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          # name: name of the configmap
+          # namespace: k8 namespace where configmap is deployed
+          # key: key against which workflow resource definition is declared
+          configmap:
+            name: wf-configmap
+            namespace: argo-events
+            key: wf

@@ -16,16 +16,18 @@ cd $GOPATH/src/github.com/argoproj/argo-events
 ## 2. Deploy Argo Events SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller
 Note: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-events-cluster-roles.yaml) file to use the correct namespace that you wish to deploy the sensor controller and gateway controller.
 
+<b>Tip:</b> Install utility called `kubectx`  https://github.com/ahmetb/kubectx for easy switching between namespaces.
+
 ```
 kubectl create namespace argo-events
 kubectl apply -f hack/k8s/manifests/argo-events-sa.yaml
 kubectl apply -f hack/k8s/manifests/argo-events-cluster-roles.yaml
 kubectl apply -f hack/k8s/manifests/sensor-crd.yaml
 kubectl apply -f hack/k8s/manifests/gateway-crd.yaml
-kubectl apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
-kubectl apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
-kubectl apply -f hack/k8s/manifests/gateway-controller-configmap.yaml
-kubectl apply -f hack/k8s/manifests/gateway-controller-deployment.yaml
+kubectl -n argo-events apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
+kubectl -n argo-events apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
+kubectl -n argo-events apply -f hack/k8s/manifests/gateway-controller-configmap.yaml
+kubectl -n argo-events apply -f hack/k8s/manifests/gateway-controller-deployment.yaml
 ```
 
 <b>Note</b> If you want to use a different namespace for deployments, make sure to update namespace references

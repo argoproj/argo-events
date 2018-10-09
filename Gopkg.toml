@@ -12,7 +12,6 @@ required = [
   "github.com/gogo/protobuf/protoc-gen-gogofast",
 ]
 
-
 [[constraint]]
   name = "k8s.io/code-generator"
   branch = "release-1.10"
@@ -55,6 +54,10 @@ required = [
 
 [[constraint]]
   name = "github.com/nlopes/slack"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/fsnotify/fsnotify"
   branch = "master"
 
 [[override]]
