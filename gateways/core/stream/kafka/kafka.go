@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -25,7 +26,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"strconv"
-	"fmt"
 )
 
 const (

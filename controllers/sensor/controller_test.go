@@ -35,7 +35,7 @@ type fakeController struct {
 
 func (f *fakeController) setup(namespace string) {
 	f.SensorController = &SensorController{
-		ConfigMap:   "configmap",
+		ConfigMap: "configmap",
 		Namespace: namespace,
 		Config: SensorControllerConfig{
 			Namespace: namespace,

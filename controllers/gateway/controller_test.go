@@ -11,7 +11,7 @@ import (
 
 func getGatewayController() *GatewayController {
 	return &GatewayController{
-		ConfigMap:   "configmap",
+		ConfigMap: "configmap",
 		Namespace: "testing",
 		Config: GatewayControllerConfig{
 			Namespace: "testing",

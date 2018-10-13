@@ -17,7 +17,7 @@ var (
 func getController() *GatewayController {
 	return &GatewayController{
 		ConfigMap:     configmapName,
-		Namespace:   "testing",
+		Namespace:     "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 }

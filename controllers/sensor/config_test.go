@@ -34,7 +34,7 @@ func TestWatchControllerConfigMap(t *testing.T) {
 	defer cancel()
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		Namespace:   "testing",
+		Namespace:     "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 	_, err := controller.watchControllerConfigMap(ctx)
@@ -44,7 +44,7 @@ func TestWatchControllerConfigMap(t *testing.T) {
 func TestNewControllerConfigMapWatch(t *testing.T) {
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		Namespace:   "testing",
+		Namespace:     "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 	controller.newControllerConfigMapWatch()
@@ -54,7 +54,7 @@ func TestSyncControllerConfig(t *testing.T) {
 	defer os.Unsetenv(common.EnvVarControllerNamespace)
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		Namespace:   "testing",
+		Namespace:     "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 
