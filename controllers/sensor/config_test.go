@@ -34,7 +34,7 @@ func TestWatchControllerConfigMap(t *testing.T) {
 	defer cancel()
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
+		Namespace:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 	_, err := controller.watchControllerConfigMap(ctx)
@@ -44,27 +44,19 @@ func TestWatchControllerConfigMap(t *testing.T) {
 func TestNewControllerConfigMapWatch(t *testing.T) {
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
+		Namespace:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 	controller.newControllerConfigMapWatch()
 }
 
-func TestResyncConfig(t *testing.T) {
-	defer os.Unsetenv(common.EnvVarNamespace)
+func TestSyncControllerConfig(t *testing.T) {
+	defer os.Unsetenv(common.EnvVarControllerNamespace)
 	controller := SensorController{
 		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
+		Namespace:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
-
-	os.Setenv(common.EnvVarNamespace, "testing")
-
-	err := controller.ResyncConfig("testing")
-	assert.NotNil(t, err)
-
-	// Note: need to refresh the namespace
-	common.RefreshNamespace()
 
 	// fail when the configmap does not have key 'config'
 	configMap := &corev1.ConfigMap{
@@ -74,20 +66,19 @@ func TestResyncConfig(t *testing.T) {
 		},
 		Data: map[string]string{},
 	}
-	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Create(configMap)
+	_, err := controller.kubeClientset.CoreV1().ConfigMaps("testing").Create(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig("testing")
+	err = controller.SyncControllerConfig()
 	assert.NotNil(t, err)
 
 	// succeed with no errors now that configmap has 'config' key
 	configMap.Data = map[string]string{"config": controllerConfig}
 	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Update(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig("testing")
+	err = controller.SyncControllerConfig()
 	assert.Nil(t, err)
 }
 
 var controllerConfig = `
 instanceID: argo-events
-executorImage: argoproj/sensor-controller:latest
 `

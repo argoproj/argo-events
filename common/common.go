@@ -22,9 +22,6 @@ import (
 )
 
 const (
-	// EnvVarNamespace contains the namespace of the controller & services
-	EnvVarNamespace = "ARGO_EVENTS_NAMESPACE"
-
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
 
@@ -43,11 +40,17 @@ const (
 
 	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
 	StandardYYYYMMDDFormat = "2006-01-02"
+
+	// EnvVarControllerNamespace is the namespace to use for controller
+	EnvVarControllerNamespace = "CONTROLLER_NAMESPACE"
+
+	// EnvVarControllerConfigmap is the name of configmap for the controller
+	EnvVarControllerConfigmap = "CONTROLLER_CONFIG_MAP"
 )
 
 // SENSOR CONTROLLER CONSTANTS
 const (
-	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor sensor-controller
+	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor controller
 	DefaultSensorControllerDeploymentName = "sensor-controller"
 
 	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
@@ -62,9 +65,6 @@ const (
 
 	// LabelKeyComplete is the label to mark sensors as complete
 	LabelKeyComplete = sensor.FullName + "/complete"
-
-	// EnvVarConfigMap is the name of the configmap to use for the sensor-controller
-	EnvVarConfigMap = "SENSOR_CONFIG_MAP"
 )
 
 // SENSOR CONSTANTS
@@ -93,12 +93,6 @@ const (
 	// LabelSignalName is label for signal name
 	LabelSignalName = "signal-name"
 
-	// LabelSensorStateUpdate is the label for sensor state updates
-	LabelSensorStateUpdate = "sensor-state-update"
-
-	// LabelEventForSignalNode is the label for event set in signal node
-	LabelEventForSensorNode = "event-for-signal-node"
-
 	// SensorControllerInstanceIDEnvVar is used to get sensor controller instance id
 	SensorControllerInstanceIDEnvVar = "SENSOR_CONTROLLER_INSTANCE_ID"
 )
@@ -107,9 +101,6 @@ const (
 const (
 	// DefaultGatewayControllerDeploymentName is the default deployment name of the gateway-controller-controller
 	DefaultGatewayControllerDeploymentName = "gateway-controller"
-
-	// GatewayControllerConfigMapEnvVar contains name of the configmap to retrieve gateway-controller configuration from
-	GatewayControllerConfigMapEnvVar = "GATEWAY_CONTROLLER_CONFIG_MAP"
 
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
 	// Content encoding is expected to be YAML.

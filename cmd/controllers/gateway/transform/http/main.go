@@ -23,7 +23,7 @@ func main() {
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 
-	namespace, _ := os.LookupEnv(common.EnvVarNamespace)
+	namespace, _ := os.LookupEnv(common.GatewayNamespace)
 	if namespace == "" {
 		panic("no namespace provided")
 	}

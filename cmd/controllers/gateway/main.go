@@ -16,20 +16,20 @@ func main() {
 	}
 
 	// gateway-controller configuration
-	configMap, ok := os.LookupEnv(common.GatewayControllerConfigMapEnvVar)
+	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigmap)
 	if !ok {
 		configMap = common.DefaultConfigMapName(common.DefaultGatewayControllerDeploymentName)
 	}
 
-	namespace, ok := os.LookupEnv(common.GatewayNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarControllerNamespace)
 	if !ok {
 		namespace = common.DefaultControllerNamespace
 	}
 
 	// create new gateway controller
-	controller := gateway.NewGatewayController(restConfig, configMap)
+	controller := gateway.NewGatewayController(restConfig, configMap, namespace)
 	// watch for configuration updates for the controller
-	err = controller.ResyncConfig(namespace)
+	err = controller.SyncControllerConfig()
 	if err != nil {
 		panic(err)
 	}

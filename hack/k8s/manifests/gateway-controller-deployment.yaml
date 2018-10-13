@@ -16,9 +16,9 @@ spec:
         image: argoproj/gateway-controller:latest
         imagePullPolicy: Always
         env:
-          - name: GATEWAY_NAMESPACE
+          - name: CONTROLLER_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          - name: GATEWAY_CONTROLLER_CONFIG_MAP
+          - name: CONTROLLER_CONFIG_MAP
             value: gateway-controller-configmap

@@ -25,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"strconv"
+	"fmt"
 )
 
 const (
@@ -55,6 +56,7 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 		return err
 	}
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("stream", *s).Msg("kafka configuration")
+
 	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
 	if err != nil {
 		errMessage = "failed to connect to cluster"
@@ -65,18 +67,19 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 	pString := s.Attributes[partitionKey]
 	pInt, err := strconv.ParseInt(pString, 10, 32)
 	if err != nil {
-
 		return err
 	}
-	partition := int32(pInt)
 
+	partition := int32(pInt)
 	availablePartitions, err := consumer.Partitions(topic)
 	if err != nil {
 		errMessage = "unable to get available partitions for kafka topic"
 		return err
 	}
+
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		errMessage = "partition does not exist for topic"
+		errMessage = fmt.Sprintf("partition %d does not exist for topic %s", partition, topic)
+		err = fmt.Errorf(errMessage)
 		return err
 	}
 
@@ -113,6 +116,7 @@ kafkaConfigRunner:
 			err = partitionConsumer.Close()
 			if err != nil {
 				errMessage = "failed to close partition"
+				gatewayConfig.Log.Error().Err(err).Msg(errMessage)
 			}
 			break kafkaConfigRunner
 		}

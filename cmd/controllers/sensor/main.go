@@ -32,20 +32,20 @@ func main() {
 	}
 
 	// sensor-controller configuration
-	configMap, ok := os.LookupEnv(common.EnvVarConfigMap)
+	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigmap)
 	if !ok {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
 
-	namespace, ok := os.LookupEnv(common.SensorNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarControllerNamespace)
 	if !ok {
 		namespace = common.DefaultControllerNamespace
 	}
 
 	// create a new sensor controller
-	controller := sensor.NewSensorController(restConfig, configMap)
-	// watch updates to sensor controller configuration
-	err = controller.ResyncConfig(namespace)
+	controller := sensor.NewSensorController(restConfig, configMap, namespace)
+	// sync sensor controller configuration
+	err = controller.SyncControllerConfig()
 	if err != nil {
 		panic(err)
 	}

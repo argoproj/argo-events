@@ -31,5 +31,5 @@ func TestNewGatewayInformer(t *testing.T) {
 		},
 		gatewayClientset: fake_gw.NewSimpleClientset(),
 	}
-	controller.newGatewayInformer()
+	assert.NotNil(t, controller.newGatewayInformer())
 }

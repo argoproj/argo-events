@@ -331,7 +331,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: common.GatewayTransformerPort,
 		},
 		{
-			Name:  common.EnvVarNamespace,
+			Name:  common.GatewayNamespace,
 			Value: goc.gw.Namespace,
 		},
 		{
@@ -469,7 +469,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
 			},
 			{
-				Name:  common.EnvVarNamespace,
+				Name:  common.GatewayNamespace,
 				Value: goc.gw.Namespace,
 			},
 		},

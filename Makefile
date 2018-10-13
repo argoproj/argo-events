@@ -100,8 +100,8 @@ webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
 
 webhook-image: webhook-linux
-	 docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/core/webhook/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
+	  docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/core/webhook/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then   docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
 
 
 calendar:
@@ -168,8 +168,8 @@ kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
 
 kafka-image: kafka-linux
-	 docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/kafka/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
+	  docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/kafka/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then   docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
 
 
 amqp:

@@ -69,7 +69,7 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	x := c.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := c.ConfigMap
-	namespace := c.ConfigMapNS
+	namespace := c.Namespace
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
@@ -92,14 +92,13 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
-// ResyncConfig reloads the sensor-controller config from the configmap
-func (c *SensorController) ResyncConfig(namespace string) error {
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
+// SyncControllerConfig reloads the sensor-controller config from the configmap
+func (c *SensorController) SyncControllerConfig() error {
+	cmClient := c.kubeClientset.CoreV1().ConfigMaps(c.Namespace)
 	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	c.ConfigMapNS = cm.Namespace
 	return c.updateConfig(cm)
 }
 
@@ -113,8 +112,8 @@ func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
 	if err != nil {
 		return err
 	}
-	if config.Namespace == "" {
-		config.Namespace = common.DefaultControllerNamespace
+	if config.InstanceID == "" {
+		return fmt.Errorf("instanceID can't be empty")
 	}
 	c.Config = config
 	return nil

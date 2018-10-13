@@ -17,7 +17,7 @@ var (
 func getController() *GatewayController {
 	return &GatewayController{
 		ConfigMap:     configmapName,
-		ConfigMapNS:   "testing",
+		Namespace:   "testing",
 		kubeClientset: fake.NewSimpleClientset(),
 	}
 }
@@ -36,11 +36,11 @@ func TestNewControllerConfigMapWatch(t *testing.T) {
 	assert.NotNil(t, watcher)
 }
 
-func TestGatewayController_ResyncConfig(t *testing.T) {
+func TestGatewayController_SyncControllerConfig(t *testing.T) {
 	gc := getController()
 	cmObj := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace: gc.ConfigMapNS,
+			Namespace: gc.Namespace,
 			Name:      gc.ConfigMap,
 		},
 		Data: map[string]string{
@@ -48,13 +48,13 @@ func TestGatewayController_ResyncConfig(t *testing.T) {
 		},
 	}
 
-	cm, err := gc.kubeClientset.CoreV1().ConfigMaps(gc.ConfigMapNS).Create(cmObj)
+	cm, err := gc.kubeClientset.CoreV1().ConfigMaps(gc.Namespace).Create(cmObj)
 	assert.Nil(t, err)
 
-	err = gc.ResyncConfig(gc.ConfigMapNS)
+	err = gc.SyncControllerConfig()
 	assert.Nil(t, err)
 	assert.NotNil(t, cm)
 	assert.NotNil(t, gc.Config)
-	assert.NotEqual(t, gc.Config.Namespace, gc.ConfigMapNS)
-	assert.Equal(t, gc.Config.Namespace, common.DefaultControllerNamespace)
+	assert.NotEqual(t, gc.Config.Namespace, gc.Namespace)
+	assert.Equal(t, gc.Config.Namespace, corev1.NamespaceAll)
 }

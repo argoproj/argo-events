@@ -24,7 +24,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
@@ -46,8 +45,7 @@ func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
 	sensorInformerFactory := sensorinformers.NewFilteredSharedInformerFactory(
 		c.sensorClientset,
 		sensorResyncPeriod,
-		// user may need to deploy controller only in one namespace but would like to have sensors created in different namespaces.
-		corev1.NamespaceAll,
+		c.Config.Namespace,
 		func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
 

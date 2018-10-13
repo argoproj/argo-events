@@ -55,7 +55,7 @@ func detectNamespace() (string, error) {
 // this function is run as part of an init() function
 func RefreshNamespace() {
 	// 1 - env variable
-	nm, ok := os.LookupEnv(EnvVarNamespace)
+	nm, ok := os.LookupEnv(EnvVarControllerNamespace)
 	if ok {
 		DefaultControllerNamespace = nm
 		return

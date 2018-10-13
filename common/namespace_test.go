@@ -23,14 +23,14 @@ import (
 )
 
 func TestResolveNamespace(t *testing.T) {
-	defer os.Unsetenv(EnvVarNamespace)
+	defer os.Unsetenv(EnvVarControllerNamespace)
 
 	assert.Equal(t, "argo-events", DefaultControllerNamespace)
 
 	// TODO: now write the namespace file
 
 	// now set the env variable
-	err := os.Setenv(EnvVarNamespace, "test")
+	err := os.Setenv(EnvVarControllerNamespace, "test")
 	if err != nil {
 		t.Error(err)
 	}

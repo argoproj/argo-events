@@ -6,10 +6,10 @@ data:
   kafka.fooConfig: |-
     url: kafka.argo-events:9092
     attributes:
-      topic: foo
+      topic: test
       partition: "0"
   kafka.barConfig: |-
     url: kafka.argo-events:9092
     attributes:
       topic: bar
-      partition: "1"
+      partition: "0"

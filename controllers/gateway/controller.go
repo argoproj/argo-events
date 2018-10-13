@@ -44,7 +44,7 @@ type GatewayControllerConfig struct {
 	// InstanceID is a label selector to limit the gateway-controller's watch of gateway jobs to a specific instance.
 	InstanceID string
 
-	// Namespace is a label selector filter to limit gateway-controller-controller's watch to specific namespace
+	// Namespace is a label selector filter to limit gateway-controller's watch to specific namespace
 	Namespace string
 }
 
@@ -52,8 +52,8 @@ type GatewayControllerConfig struct {
 type GatewayController struct {
 	// ConfigMap is the name of the config map in which to derive configuration of the contoller
 	ConfigMap string
-	// namespace for the config map
-	ConfigMapNS string
+	// Namespace where gateway controller is deployed
+	Namespace string
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
@@ -70,9 +70,10 @@ type GatewayController struct {
 }
 
 // NewGatewayController creates a new Controller
-func NewGatewayController(rest *rest.Config, configMap string) *GatewayController {
+func NewGatewayController(rest *rest.Config, configMap, namespace string) *GatewayController {
 	return &GatewayController{
 		ConfigMap:        configMap,
+		Namespace: namespace,
 		kubeConfig:       rest,
 		log:              zlog.New(os.Stdout).With().Caller().Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
