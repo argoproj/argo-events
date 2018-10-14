@@ -285,5 +285,13 @@ func (s *slack) StopConfig(config *gateways.ConfigContext) error {
 }
 
 func main() {
-
+	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+	}
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &slack{})
+	if err != nil {
+		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+	}
+	select {}
 }
