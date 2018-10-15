@@ -103,6 +103,25 @@ func (soc *sOperationCtx) operate() error {
 		_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
 		if err != nil {
 			if apierr.IsNotFound(err) {
+				// default env variables
+				envVars := []corev1.EnvVar{
+					{
+						Name:  common.SensorName,
+						Value: soc.s.Name,
+					},
+					{
+						Name:  common.SensorNamespace,
+						Value: soc.s.Namespace,
+					},
+					{
+						Name:  common.SensorControllerInstanceIDEnvVar,
+						Value: soc.controller.Config.InstanceID,
+					},
+				}
+				// user defined environment variable. This feature is added due to Issue #103
+				if soc.s.Spec.EnvVars != nil {
+					envVars = append(envVars, soc.s.Spec.EnvVars...)
+				}
 				sensorJob := &batchv1.Job{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      soc.s.Name,
@@ -128,20 +147,7 @@ func (soc *sOperationCtx) operate() error {
 										Name:            soc.s.Name,
 										Image:           common.SensorImage,
 										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env: []corev1.EnvVar{
-											{
-												Name:  common.SensorName,
-												Value: soc.s.Name,
-											},
-											{
-												Name:  common.SensorNamespace,
-												Value: soc.s.Namespace,
-											},
-											{
-												Name:  common.SensorControllerInstanceIDEnvVar,
-												Value: soc.controller.Config.InstanceID,
-											},
-										},
+										Env: envVars,
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,

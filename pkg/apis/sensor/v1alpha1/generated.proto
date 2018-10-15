@@ -334,6 +334,9 @@ message SensorSpec {
 
   // ServiceAccountName required for role based access
   optional string serviceAccountName = 6;
+
+  // EnvVars are user defined env variables to sensor pod
+  repeated k8s.io.api.core.v1.EnvVar envVars = 7;
 }
 
 // SensorStatus contains information about the status of a sensor.

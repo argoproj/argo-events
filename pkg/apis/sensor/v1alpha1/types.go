@@ -22,6 +22,7 @@ import (
 
 	"github.com/minio/minio-go"
 	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -83,6 +84,9 @@ type SensorSpec struct {
 
 	// ServiceAccountName required for role based access
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
+
+	// EnvVars are user defined env variables to sensor pod
+	EnvVars []corev1.EnvVar `json:"envVars,omitempty" protobuf:"bytes,7,opt,name=envVars"`
 }
 
 // Signal describes a dependency

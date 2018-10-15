@@ -68,11 +68,16 @@ Follow this tutorial to learn more
 
 ### Calendars
 Events produced can be based on a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar gateway currently supports a `recurrence` field in which to specify special exclusion dates for which this gateway will not produce an event.
+
+We use traditional (inherited from Unix) cron format consists of five fields separated by white spaces:
+       
+       <Minute> <Hour> <Day_of_the_Month> <Month_of_the_Year> <Day_of_the_Week>
+ 
 ```
   calendar.fooConfig: |-
     interval: 10s
   calendar.barConfig: |-
-    schedule: */1 * * * *
+    schedule: 30 * * * * *
 ```
 
 ### Webhooks

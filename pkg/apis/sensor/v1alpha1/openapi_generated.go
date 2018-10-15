@@ -940,12 +940,25 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"envVars": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EnvVars are user defined env variables to sensor pod",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.EnvVar"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"signals", "triggers"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.EnvVar"},
 	}
 }
 
