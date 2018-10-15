@@ -35,13 +35,13 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-http-transformer-linux webhook-linux calendar-linux resource-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux gateway-processor-grpc-client-linux calendar-grpc-linux gateway-processor-http-client-linux calendar-http-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-http-transformer-linux webhook-linux calendar-linux resource-linux s3-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux gateway-processor-grpc-client-linux calendar-grpc-linux gateway-processor-http-client-linux calendar-http-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-http-transformer-image webhook-image calendar-image resource-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-http-transformer-image webhook-image calendar-image resource-image s3-image file-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
-all-core-gateway-images: webhook-image calendar-image artifact-image nats-image kafka-image amqp-image mqtt-image resource-image
+all-core-gateway-images: webhook-image calendar-image s3-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
 .PHONY: all clean test
 
@@ -92,7 +92,7 @@ gateway-http-transformer-image: gateway-http-transformer-linux
 	 docker build -t $(IMAGE_PREFIX)gateway-http-transformer:$(IMAGE_TAG) -f ./controllers/gateway/transform/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-http-transformer:$(IMAGE_TAG) ; fi
 
-# gateway binaries
+# Gateway binaries
 webhook:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/
 
@@ -126,30 +126,28 @@ resource-image: resource-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)resource-gateway:$(IMAGE_TAG) ; fi
 
 
+# Artifact gateways
+s3:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/s3-gateway ./gateways/core/artifact/s3
 
-artifact:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/
+s3-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make s3
 
-artifact-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
+s3-image: s3-linux
+	 docker build -t $(IMAGE_PREFIX)s3-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/s3/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)s3-gateway:$(IMAGE_TAG) ; fi
 
-artifact-image: artifact-linux
-	 docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
+file:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/artifact/file/
 
+file-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file
 
-file-watcher:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-watcher-gateway ./gateways/core/file-watcher/
+file-image: file-linux
+	 docker build -t $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) -f ./gateways/core/artifact/file/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) ; fi
 
-file-watcher-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file-watcher
-
-file-watcher-image: file-watcher-linux
-	 docker build -t $(IMAGE_PREFIX)file-watcher-gateway:$(IMAGE_TAG) -f ./gateways/core/file-watcher/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)file-watcher-gateway:$(IMAGE_TAG) ; fi
-
-
-
+# Stream gateways
 nats:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/
 

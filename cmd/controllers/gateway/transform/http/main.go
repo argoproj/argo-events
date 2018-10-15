@@ -99,5 +99,6 @@ func main() {
 
 	// endpoint to listen events
 	http.HandleFunc("/", toc.TransformRequest)
+	http.HandleFunc("/readiness", toc.ReadinessProbe)
 	log.Fatal(http.ListenAndServe(":"+fmt.Sprintf("%s", common.GatewayTransformerPort), nil))
 }

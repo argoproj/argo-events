@@ -5,6 +5,14 @@ metadata:
 data:
   resource.fooConfig: |-
     namespace: argo-events
+    group: "argoproj.io"
+    version: "v1alpha1"
+    kind: "Workflow"
+    filter:
+      labels:
+        workflows.argoproj.io/phase: Succeeded
+  resource.xConfig: |-
+    namespace: argo-events
     group: "k8s.io"
     version: "v1"
     kind: "Namespace"

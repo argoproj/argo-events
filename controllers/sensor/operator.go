@@ -31,7 +31,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"os"
+	"fmt"
 )
 
 // the context of an operation on a sensor.
@@ -100,86 +102,108 @@ func (soc *sOperationCtx) operate() error {
 		// check if sensor job is already been created for repeated sensor
 		_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
 		if err != nil {
-			sensorJob := &batchv1.Job{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      soc.s.Name,
-					Namespace: soc.s.Namespace,
-					Labels: map[string]string{
-						common.LabelJobName: soc.s.Name,
-					},
-					OwnerReferences: []metav1.OwnerReference{
-						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-					},
-				},
-				Spec: batchv1.JobSpec{
-					Template: corev1.PodTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							GenerateName: common.DefaultSensorJobName(soc.s.Name),
-							Labels: map[string]string{
-								common.LabelJobName: soc.s.Name,
-							},
+			if apierr.IsNotFound(err) {
+				sensorJob := &batchv1.Job{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      soc.s.Name,
+						Namespace: soc.s.Namespace,
+						Labels: map[string]string{
+							common.LabelJobName: soc.s.Name,
 						},
-						Spec: corev1.PodSpec{
-							Containers: []corev1.Container{
-								{
-									Name:            soc.s.Name,
-									Image:           common.SensorImage,
-									ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-									Env: []corev1.EnvVar{
-										{
-											Name:  common.SensorName,
-											Value: soc.s.Name,
-										},
-										{
-											Name:  common.SensorNamespace,
-											Value: soc.s.Namespace,
-										},
-										{
-											Name:  common.SensorControllerInstanceIDEnvVar,
-											Value: soc.controller.Config.InstanceID,
+						OwnerReferences: []metav1.OwnerReference{
+							*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
+						},
+					},
+					Spec: batchv1.JobSpec{
+						Template: corev1.PodTemplateSpec{
+							ObjectMeta: metav1.ObjectMeta{
+								GenerateName: common.DefaultSensorJobName(soc.s.Name),
+								Labels: map[string]string{
+									common.LabelJobName: soc.s.Name,
+								},
+							},
+							Spec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									{
+										Name:            soc.s.Name,
+										Image:           common.SensorImage,
+										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
+										Env: []corev1.EnvVar{
+											{
+												Name:  common.SensorName,
+												Value: soc.s.Name,
+											},
+											{
+												Name:  common.SensorNamespace,
+												Value: soc.s.Namespace,
+											},
+											{
+												Name:  common.SensorControllerInstanceIDEnvVar,
+												Value: soc.controller.Config.InstanceID,
+											},
 										},
 									},
 								},
+								ServiceAccountName: soc.s.Spec.ServiceAccountName,
+								RestartPolicy:      corev1.RestartPolicyNever,
 							},
-							ServiceAccountName: soc.s.Spec.ServiceAccountName,
-							RestartPolicy:      corev1.RestartPolicyNever,
 						},
 					},
-				},
+				}
+				// Create sensor job
+				_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
+				if err != nil {
+					soc.log.Error().Err(err).Msg("failed to create sensor job")
+					soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor job. Err: %+v", err))
+					return err
+				}
+			} else {
+				soc.log.Info().Msg("failed to retrieve sensor job")
+				soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to retrieve sensor job. Err: %+v", err))
+				return err
 			}
-			// Create sensor service
-			sensorSvc := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      common.DefaultSensorServiceName(soc.s.Name),
-					Namespace: soc.s.Namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-					},
-				},
-				Spec: corev1.ServiceSpec{
-					Ports: []corev1.ServicePort{
-						{
-							Port:       intstr.Parse(common.SensorServicePort).IntVal,
-							TargetPort: intstr.FromInt(int(intstr.Parse(common.SensorServicePort).IntVal)),
+		} else {
+			soc.log.Warn().Msg("sensor job already exists")
+		}
+
+		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultSensorServiceName(soc.s.Name), metav1.GetOptions{})
+		if err != nil {
+			if apierr.IsNotFound(err) {
+				// Create sensor service
+				sensorSvc := &corev1.Service{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      common.DefaultSensorServiceName(soc.s.Name),
+						Namespace: soc.s.Namespace,
+						OwnerReferences: []metav1.OwnerReference{
+							*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
 						},
 					},
-					Type: corev1.ServiceTypeClusterIP,
-					Selector: map[string]string{
-						common.LabelJobName: soc.s.Name,
+					Spec: corev1.ServiceSpec{
+						Ports: []corev1.ServicePort{
+							{
+								Port:       intstr.Parse(common.SensorServicePort).IntVal,
+								TargetPort: intstr.FromInt(int(intstr.Parse(common.SensorServicePort).IntVal)),
+							},
+						},
+						Type: corev1.ServiceTypeClusterIP,
+						Selector: map[string]string{
+							common.LabelJobName: soc.s.Name,
+						},
 					},
-				},
+				}
+				_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
+				if err != nil {
+					soc.log.Error().Err(err).Msg("failed to create sensor service")
+					soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor service. Err: %+v", err))
+					return err
+				}
+			} else {
+				soc.log.Info().Msg("failed to retrieve sensor service")
+				soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to retrieve sensor service. Err: %+v", err))
+				return err
 			}
-			// Create sensor job
-			_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
-			if err != nil {
-				// fail silently
-				soc.log.Error().Err(err).Msg("failed to create sensor job")
-			}
-			_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
-			if err != nil {
-				// fail silently
-				soc.log.Error().Err(err).Msg("failed to create sensor service")
-			}
+		} else {
+			soc.log.Info().Msg("sensor service already exists")
 		}
 
 		// Mark all signal nodes as active
@@ -224,16 +248,13 @@ func (soc *sOperationCtx) reRunSensor() {
 	// if we get here we know the sensor pod & job is succeeded, the triggers have fired, but the sensor is repeatable
 	// we know have to reset the sensor status
 	// todo: persist changes in a transaction store somewhere, is it reasonable to put in the sensor object? probably not for scale
-
 	soc.log.Info().Msg("resetting nodes and re-running sensor")
 	// reset the nodes
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	// todo: remove this, it is redundant
 	// re-initialize the signal nodes
 	for _, signal := range soc.s.Spec.Signals {
 		soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseNew)
 	}
-
 	// add a field to status to log # of times this sensor went resolved -> init
 	soc.markSensorPhase(v1alpha1.NodePhaseNew, false)
 	soc.updated = true
