@@ -180,6 +180,17 @@ func (t *twitter) StartConfig(config *gateways.ConfigContext) error {
 		}
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		<-config.StopCh
+		config.Active = false
+		gatewayConfig.Log.Info().Str("config", config.Data.Src).Msg("stopping the configuration...")
+		stream.Stop()
+		wg.Done()
+	}()
+
 	demux := twClient.NewSwitchDemux()
 	for _, eventType := range twConfig.EventTypes {
 		switch EventType(eventType) {
@@ -237,17 +248,6 @@ func (t *twitter) StartConfig(config *gateways.ConfigContext) error {
 		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		return err
 	}
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	go func() {
-		<-config.StopCh
-		config.Active = false
-		gatewayConfig.Log.Info().Str("config", config.Data.Src).Msg("stopping the configuration...")
-		stream.Stop()
-		wg.Done()
-	}()
 
 	go func() {
 		demux.HandleChan(stream.Messages)

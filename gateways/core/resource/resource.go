@@ -124,7 +124,7 @@ func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) e
 					errMessage = "failed to watch resource"
 					return
 				}
-				if passFilters(itemObj, res.Filter) {
+				if res.Filter != nil && passFilters(itemObj, res.Filter) {
 					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 						Src:     config.Data.Src,
 						Payload: b,

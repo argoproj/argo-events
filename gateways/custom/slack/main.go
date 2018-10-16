@@ -19,7 +19,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
@@ -32,6 +31,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 	"sync"
+	"encoding/binary"
 )
 
 // SlackAPIType is type of api to use to listen to events.
@@ -146,7 +146,8 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
 					err = sConfig.srv.Shutdown(context.Background())
 					if err != nil {
-						errMessage = "failed to stop http server"
+						// previous err message is useful when there was an error in configuration
+						errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
 					}
 				}
 			}
@@ -186,7 +187,7 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 					err = nil
 				}
 				if err != nil {
-					errMessage = "http server stopped"
+					errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
 				}
 				if config.Active == true {
 					config.StopCh <- struct{}{}
@@ -214,23 +215,25 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 				if err != nil {
 					gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to parse event")
 					common.SendErrorResponse(writer)
+					config.StopCh <- struct{}{}
+					return
 				}
 				for _, eventType := range sConfig.Events {
 					if eventType == eventsAPIEvent.Type {
 						gatewayConfig.Log.Info().Str("endpoint", sConfig.Endpoint).Msg("dispatching event to gateway-processor")
 						common.SendSuccessResponse(writer)
 						gatewayConfig.Log.Debug().Str("body", string(body)).Msg("payload")
-						var buff bytes.Buffer
-						enc := gob.NewEncoder(&buff)
-						err := enc.Encode(eventsAPIEvent)
+						buf := new(bytes.Buffer)
+						err = binary.Write(buf, binary.LittleEndian, eventsAPIEvent)
 						if err != nil {
-							gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to encode slack event")
-							continue
+							errMessage = "failed to encode slack event"
+							config.StopCh <- struct{}{}
+							break
 						}
 						// dispatch event to gateway transformer
 						gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 							Src:     config.Data.Src,
-							Payload: buff.Bytes(),
+							Payload: buf.Bytes(),
 						})
 					}
 				}
@@ -251,16 +254,17 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 
 		for msg := range rtm.IncomingEvents {
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("received a slack event")
-			var buff bytes.Buffer
-			enc := gob.NewEncoder(&buff)
-			err := enc.Encode(msg)
+			buf := new(bytes.Buffer)
+			err = binary.Write(buf, binary.LittleEndian, msg)
 			if err != nil {
-				gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to encode slack event")
+				errMessage = "failed to encode slack event"
+				config.StopCh <- struct{}{}
+				break
 			} else {
 				// dispatch event to gateway transformer
 				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 					Src:     config.Data.Src,
-					Payload: buff.Bytes(),
+					Payload: buf.Bytes(),
 				})
 			}
 		}

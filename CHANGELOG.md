@@ -1,10 +1,15 @@
 # Changelog
 
-## v0.6-alpha1
-+ Custom gateways for Slack, Twitter, AWS S3, Google Cloud Pub-Sub, Reddit and Docker
-+ FileWatcher as core gateway
-+ Kubernetes configmaps as artifact locations for triggers
-+ Tutorials on setting up pipelines
+## v0.6
++ Custom gateways for Slack, Twitter, AWS S3, Google Cloud Pub-Sub, Reddit and Docker #96
++ FileWatcher as core gateway #98
++ Kubernetes configmaps as artifact locations for triggers #104
++ Tutorials on setting up pipelines #105
++ Start gateway containers in correct order. Gateway transformer > gateway processor. Add readiness probe to gateway transformer #106
++ Let user set extra environment variable for sensor pod #103
++ Asciinema recording for setup #107
++ Retry strategy for sensor and gateway 
++ The schedule for calendar gateway is now in standard cron format   #102 
 
 ## v0.5
 [#92](https://github.com/argoproj/argo-events/pull/92)

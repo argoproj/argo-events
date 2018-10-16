@@ -151,7 +151,6 @@ func (soc *sOperationCtx) operate() error {
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,
-								RestartPolicy:      corev1.RestartPolicyNever,
 							},
 						},
 					},
