@@ -32,7 +32,7 @@ var (
 	// mutex synchronizes activeServers
 	mutex sync.Mutex
 	// activeServers keeps track of currently running http servers.
-	activeServers = make(map[string]*http.Server)
+	activeServers = make(map[string]*http.ServeMux)
 
 	// mutex synchronizes activeRoutes
 	routesMutex sync.Mutex
@@ -68,6 +68,43 @@ type server struct {
 
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
+}
+
+// starts a http server
+func (wce *webhookConfigExecutor) startHttpServer(hook *webhook, config *gateways.ConfigContext, err error, errMessage *string) {
+	// start a http server only if no other configuration previously started the server on given port
+	mutex.Lock()
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active servers", activeServers[hook.Port]).Msg("active servers")
+	if _, ok := activeServers[hook.Port]; !ok {
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("port", hook.Port).Msg("http server started listening...")
+		s := &server{
+			mux: http.NewServeMux(),
+		}
+		hook.mux = s.mux
+		hook.srv = &http.Server{
+			Addr:    ":" + fmt.Sprintf("%s", hook.Port),
+			Handler: s,
+		}
+		activeServers[hook.Port] = s.mux
+
+		// start http server
+		go func() {
+			err := hook.srv.ListenAndServe()
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
+			if err == http.ErrServerClosed {
+				err = nil
+			}
+			if err != nil {
+				msg := fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
+				errMessage = &msg
+			}
+			if config.Active == true {
+				config.StopCh <- struct{}{}
+			}
+			return
+		}()
+	}
+	mutex.Unlock()
 }
 
 // Runs a gateway configuration
@@ -126,36 +163,7 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	}
 
 	// start a http server only if no other configuration previously started the server on given port
-	mutex.Lock()
-	if _, ok := activeServers[hook.Port]; !ok {
-		gatewayConfig.Log.Info().Str("port", hook.Port).Msg("http server started listening...")
-		s := &server{
-			mux: http.NewServeMux(),
-		}
-		hook.mux = s.mux
-		hook.srv = &http.Server{
-			Addr:    ":" + fmt.Sprintf("%s", hook.Port),
-			Handler: s,
-		}
-		activeServers[hook.Port] = hook.srv
-
-		// start http server
-		go func() {
-			err = hook.srv.ListenAndServe()
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
-			if err == http.ErrServerClosed {
-				err = nil
-			}
-			if err != nil {
-				errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
-			}
-			if config.Active == true {
-				config.StopCh <- struct{}{}
-			}
-			return
-		}()
-	}
-	mutex.Unlock()
+	wce.startHttpServer(hook, config, err, &errMessage)
 
 	// add endpoint
 	routesMutex.Lock()
@@ -164,21 +172,43 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	}
 	if _, ok := activeRoutes[hook.Port][hook.Endpoint]; !ok {
 		activeRoutes[hook.Port][hook.Endpoint] = struct{}{}
+
+		// server with same port is already started by another configuration
+		if hook.mux == nil {
+			mutex.Lock()
+			hook.mux = activeServers[hook.Port]
+			mutex.Unlock()
+		}
+
+		// if the configuration that started the server was removed even before we had chance to regiser this endpoint against the port,
+		// and it was last endpoint for port, server is now start new http server
+		if hook.mux == nil {
+			wce.startHttpServer(hook, config, err, &errMessage)
+		}
+
 		hook.mux.HandleFunc(hook.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 			gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("http-method", hook.Method).Msg("received a request")
-			body, err := ioutil.ReadAll(request.Body)
-			if err != nil {
-				gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
-				common.SendErrorResponse(writer)
-			} else {
-				gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("http-method", hook.Method).Msg("dispatching event to gateway-processor")
-				common.SendSuccessResponse(writer)
-				gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
-				// dispatch event to gateway transformer
-				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-					Src:     config.Data.Src,
-					Payload: body,
-				})
+			// I don't like checking activeRoutes again but http won't let us delete route.
+			if _, ok := activeRoutes[hook.Port][hook.Endpoint]; ok {
+				if  hook.Method == request.Method {
+					body, err := ioutil.ReadAll(request.Body)
+					if err != nil {
+						gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
+						common.SendErrorResponse(writer)
+					} else {
+						gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("http-method", hook.Method).Msg("dispatching event to gateway-processor")
+						common.SendSuccessResponse(writer)
+						gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
+						// dispatch event to gateway transformer
+						gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+							Src:     config.Data.Src,
+							Payload: body,
+						})
+					}
+				} else {
+					gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("expected", hook.Method).Str("actual", request.Method).Msg("http method mismatched")
+					common.SendErrorResponse(writer)
+				}
 			}
 		})
 	}
