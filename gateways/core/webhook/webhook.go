@@ -23,26 +23,21 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
-	"go.uber.org/atomic"
-	"io/ioutil"
 	"net/http"
 	"sync"
+	"io/ioutil"
 )
 
 var (
-	// whether http server has started or not
-	hasServerStarted atomic.Bool
-
-	// srv holds reference to http server
-	srv http.Server
+	// mutex synchronizes activeServers
+	mutex sync.Mutex
+	// activeServers keeps track of currently running http servers.
+	activeServers = make(map[string]*http.Server)
 
 	// mutex synchronizes activeRoutes
-	mutex sync.Mutex
-	// as http package does not provide method for unregistering routes,
-	// this keeps track of configured http routes and their methods.
-	// keeps endpoints as keys and corresponding http methods as a map
+	routesMutex sync.Mutex
+	// activeRoutes keep track of active routes for a http server
 	activeRoutes = make(map[string]map[string]struct{})
-
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
@@ -61,6 +56,18 @@ type webhook struct {
 
 	// Port on which HTTP server is listening for incoming events.
 	Port string
+
+	// srv holds reference to http server
+	srv *http.Server
+	mux *http.ServeMux
+}
+
+type server struct {
+	mux *http.ServeMux
+}
+
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
 }
 
 // Runs a gateway configuration
@@ -73,39 +80,42 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 
-	var h *webhook
-	err = yaml.Unmarshal([]byte(config.Data.Config), &h)
+	var hook *webhook
+	err = yaml.Unmarshal([]byte(config.Data.Config), &hook)
 	if err != nil {
 		errMessage = "failed to parse configuration"
 		return err
 	}
-	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("webhook", h).Msg("configuring...")
+	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("webhook", hook).Msg("configuring...")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// waits till disconnection from client and perform cleanup.
 	go func() {
 		<-config.StopCh
 		config.Active = false
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
-		// remove the endpoint and http method configuration.
-		mutex.Lock()
-		activeHTTPMethods, ok := activeRoutes[h.Endpoint]
-		if ok {
-			delete(activeHTTPMethods, h.Method)
-		}
-		if h.Port != "" && hasServerStarted.Load() {
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping http server")
-			err = srv.Shutdown(context.Background())
-			if err != nil {
-				errMessage = "failed to stop http server"
+
+		// remove the endpoint.
+		routesMutex.Lock()
+		if _, ok := activeRoutes[hook.Port]; ok {
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("routes", activeRoutes[hook.Port]).Msg("active routes")
+			delete(activeRoutes[hook.Port], hook.Endpoint)
+			// Check if the endpoint in this configuration was the last of the active endpoints for the http server.
+			// If so, shutdown the server.
+			if len(activeRoutes[hook.Port]) == 0 {
+				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
+				err = hook.srv.Shutdown(context.Background())
+				if err != nil {
+					// previous err message is useful when there was an error in configuration
+					errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
+				}
 			}
 		}
-		mutex.Unlock()
+		routesMutex.Unlock()
 		wg.Done()
 	}()
-
+	
 	config.Active = true
 
 	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
@@ -115,21 +125,29 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 		return err
 	}
 
-	// start a http server only if given configuration contains port information and no other
-	// configuration previously started the server
-	if h.Port != "" && !hasServerStarted.Load() {
-		// mark http server as started
-		hasServerStarted.Store(true)
+	// start a http server only if no other configuration previously started the server on given port
+	mutex.Lock()
+	if _, ok := activeServers[hook.Port]; !ok {
+		gatewayConfig.Log.Info().Str("port", hook.Port).Msg("http server started listening...")
+		s := &server{
+			mux: http.NewServeMux(),
+		}
+		hook.mux = s.mux
+		hook.srv = &http.Server{
+			Addr:    ":" + fmt.Sprintf("%s", hook.Port),
+			Handler: s,
+		}
+		activeServers[hook.Port] = hook.srv
+
+		// start http server
 		go func() {
-			gatewayConfig.Log.Info().Str("http-port", h.Port).Msg("http server started listening...")
-			srv := &http.Server{Addr: ":" + fmt.Sprintf("%s", h.Port)}
-			err = srv.ListenAndServe()
+			err = hook.srv.ListenAndServe()
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
 			if err == http.ErrServerClosed {
 				err = nil
 			}
 			if err != nil {
-				errMessage = "http server stopped"
+				errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
 			}
 			if config.Active == true {
 				config.StopCh <- struct{}{}
@@ -137,53 +155,35 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 			return
 		}()
 	}
+	mutex.Unlock()
 
-	// configure endpoint and http method
-	if h.Endpoint != "" && h.Method != "" {
-		if _, ok := activeRoutes[h.Endpoint]; !ok {
-			mutex.Lock()
-			activeRoutes[h.Endpoint] = make(map[string]struct{})
-			// save event channel for this connection/configuration
-			activeRoutes[h.Endpoint][h.Method] = struct{}{}
-			mutex.Unlock()
-
-			// add a handler for endpoint if not already added.
-			http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-				// check if http methods match and route and http method is registered.
-				if _, ok := activeRoutes[h.Endpoint]; ok {
-					if _, isActive := activeRoutes[h.Endpoint][request.Method]; isActive {
-						gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
-						body, err := ioutil.ReadAll(request.Body)
-						if err != nil {
-							gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
-							common.SendErrorResponse(writer)
-						} else {
-							gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
-							common.SendSuccessResponse(writer)
-							gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
-							// dispatch event to gateway transformer
-							gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-								Src:     config.Data.Src,
-								Payload: body,
-							})
-						}
-					} else {
-						gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
-						common.SendErrorResponse(writer)
-					}
-				} else {
-					gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Msg("endpoint is not active")
-					common.SendErrorResponse(writer)
-				}
-			})
-		} else {
-			mutex.Lock()
-			activeRoutes[h.Endpoint][h.Method] = struct{}{}
-			mutex.Unlock()
-		}
-
-		gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
+	// add endpoint
+	routesMutex.Lock()
+	if _, ok := activeRoutes[hook.Port]; !ok {
+		activeRoutes[hook.Port] = make(map[string]struct{})
 	}
+	if _, ok := activeRoutes[hook.Port][hook.Endpoint]; !ok {
+		activeRoutes[hook.Port][hook.Endpoint] = struct{}{}
+		hook.mux.HandleFunc(hook.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+			gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("http-method", hook.Method).Msg("received a request")
+			body, err := ioutil.ReadAll(request.Body)
+			if err != nil {
+				gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
+				common.SendErrorResponse(writer)
+			} else {
+				gatewayConfig.Log.Info().Str("endpoint", hook.Endpoint).Str("http-method", hook.Method).Msg("dispatching event to gateway-processor")
+				common.SendSuccessResponse(writer)
+				gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
+				// dispatch event to gateway transformer
+				gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: body,
+				})
+			}
+		})
+	}
+	routesMutex.Unlock()
+	
 	wg.Wait()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
 	return nil

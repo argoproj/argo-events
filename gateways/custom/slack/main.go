@@ -142,7 +142,7 @@ func (s *slack) StartConfig(config *gateways.ConfigContext) error {
 				delete(activeRoutes[sConfig.Port], sConfig.Endpoint)
 				// Check if the endpoint in this configuration was the last of the active endpoints for the http server.
 				// If so, shutdown the server.
-				if len(activeRoutes) == 0 {
+				if len(activeRoutes[sConfig.Port]) == 0 {
 					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
 					err = sConfig.srv.Shutdown(context.Background())
 					if err != nil {

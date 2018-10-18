@@ -3,11 +3,11 @@ kind: ConfigMap
 metadata:
   name: webhook-gateway-configmap
 data:
-  webhook.portConfig: |-
-    port: "12000"
   webhook.barConfig: |-
+    port: "12000"
     endpoint: "/bar"
     method: "POST"
   webhook.fooConfig: |-
+    port: "13000"
     endpoint: "/foo"
     method: "POST"

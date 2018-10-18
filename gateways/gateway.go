@@ -214,16 +214,16 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 				}
 				return gc.PersistUpdates()
 			case v1alpha1.NodePhaseRemove:
-				gc.Log.Info().Str("config-name", nodeID).Msg("removing configuration from gateway")
+				gc.Log.Info().Str("config-id", nodeID).Msg("removing configuration from gateway")
 				delete(gc.gw.Status.Nodes, nodeID)
 				return gc.PersistUpdates()
 			default:
-				gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).Msg("unknown action for configuration")
+				gc.Log.Error().Str("config-id", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).Msg("unknown action for configuration")
 				return nil
 			}
 		} else {
 			// should never come here
-			gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).
+			gc.Log.Error().Str("config-id", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).
 				Str("node-time-id", node.TimeID).Str("event-time-id", timeID).Msg("time ids mismatch")
 			return nil
 		}
