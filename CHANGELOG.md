@@ -1,6 +1,7 @@
 # Changelog
 
 ## v0.6
+[#100](https://github.com/argoproj/argo-events/pull/100)
 + Custom gateways for Slack, Twitter, AWS S3, Google Cloud Pub-Sub, Reddit and Docker #96
 + FileWatcher as core gateway #98
 + Kubernetes configmaps as artifact locations for triggers #104
@@ -10,6 +11,9 @@
 + Asciinema recording for setup #107
 + Retry strategy for sensor and gateway 
 + The schedule for calendar gateway is now in standard cron format   #102 
++ Allow multiple servers in webhook gateway #108
++ Update shopify's sarama to 1.19.0 to support Kafka 2.0
++ If sensor is repeatable then deploy it as deployment else job #109
 
 ## v0.5
 [#92](https://github.com/argoproj/argo-events/pull/92)

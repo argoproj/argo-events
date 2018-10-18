@@ -62,15 +62,15 @@ func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 func main() {
 	err := httpGatewayServerConfig.GwConfig.TransformerReadinessProbe()
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg("failed to connect to gateway transformer")
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
 	}
 	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
 	}
 	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
 	}
 	// handle events from gateway processor server
 	http.HandleFunc(httpGatewayServerConfig.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {

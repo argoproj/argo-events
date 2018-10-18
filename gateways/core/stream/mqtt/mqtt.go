@@ -128,15 +128,15 @@ func (mce *mqttConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 func main() {
 	err := gatewayConfig.TransformerReadinessProbe()
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to connect to gateway transformer")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
 	}
 	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &mqttConfigExecutor{})
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
 	}
 	select {}
 }

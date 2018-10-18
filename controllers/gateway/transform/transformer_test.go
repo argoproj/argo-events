@@ -62,7 +62,7 @@ func TestTOperationCtx_TransformRequest(t *testing.T) {
 			},
 			Type: corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{
-				common.LabelJobName: "test-sensor",
+				common.LabelSensorName: "test-sensor",
 			},
 		},
 	}

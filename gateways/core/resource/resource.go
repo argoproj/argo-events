@@ -193,6 +193,10 @@ func resolveGroupVersion(obj *Resource) string {
 
 // helper method to return a flag indicating if the object passed the client side filters
 func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+	// no filters are applied.
+	if filter == nil {
+		return true
+	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
 		gatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
@@ -236,15 +240,15 @@ func checkMap(expected, actual map[string]string) bool {
 func main() {
 	err := gatewayConfig.TransformerReadinessProbe()
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to connect to gateway transformer")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
 	}
 	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &resourceConfigExecutor{})
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
 	}
 	select {}
 }

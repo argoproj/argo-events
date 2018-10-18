@@ -1,3 +1,3 @@
-FROM centos:7
+FROM scratch
 COPY dist/calendar-http /bin/
 ENTRYPOINT [ "/bin/calendar-http" ]

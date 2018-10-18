@@ -160,9 +160,7 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 						} else {
 							gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
 							common.SendSuccessResponse(writer)
-
-							gatewayConfig.Log.Info().Str("payload", string(body)).Msg("payload is")
-
+							gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
 							// dispatch event to gateway transformer
 							gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 								Src:     config.Data.Src,
@@ -202,15 +200,15 @@ func (wce *webhookConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 func main() {
 	err := gatewayConfig.TransformerReadinessProbe()
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to connect to gateway transformer")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
 	}
 	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
 	}
 	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &webhookConfigExecutor{})
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
 	}
 	select {}
 }

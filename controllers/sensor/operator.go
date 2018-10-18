@@ -25,8 +25,9 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	batchv1 "k8s.io/api/batch/v1"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -99,76 +100,135 @@ func (soc *sOperationCtx) operate() error {
 		// For now, sensor will receive event notifications through http server.
 		// And it will communicate the updates back to sensor controller.
 
-		// check if sensor job is already been created for repeated sensor
-		_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
-		if err != nil {
-			if apierr.IsNotFound(err) {
-				// default env variables
-				envVars := []corev1.EnvVar{
-					{
-						Name:  common.SensorName,
-						Value: soc.s.Name,
-					},
-					{
-						Name:  common.SensorNamespace,
-						Value: soc.s.Namespace,
-					},
-					{
-						Name:  common.SensorControllerInstanceIDEnvVar,
-						Value: soc.controller.Config.InstanceID,
-					},
-				}
-				// user defined environment variable. This feature is added due to Issue #103
-				if soc.s.Spec.EnvVars != nil {
-					envVars = append(envVars, soc.s.Spec.EnvVars...)
-				}
-				sensorJob := &batchv1.Job{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      soc.s.Name,
-						Namespace: soc.s.Namespace,
-						Labels: map[string]string{
-							common.LabelJobName: soc.s.Name,
+		// default env variables
+		envVars := []corev1.EnvVar{
+			{
+				Name:  common.SensorName,
+				Value: soc.s.Name,
+			},
+			{
+				Name:  common.SensorNamespace,
+				Value: soc.s.Namespace,
+			},
+			{
+				Name:  common.SensorControllerInstanceIDEnvVar,
+				Value: soc.controller.Config.InstanceID,
+			},
+		}
+		// user defined environment variable. This feature is added due to Issue #103
+		if soc.s.Spec.EnvVars != nil {
+			envVars = append(envVars, soc.s.Spec.EnvVars...)
+		}
+
+		// if sensor is repeatable then create a deployment else create a job
+		if soc.s.Spec.Repeat {
+			_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+			if err != nil {
+				if apierr.IsNotFound(err) {
+					// create new deployment
+					sensorDeployment := &appsv1.Deployment{
+						ObjectMeta: metav1.ObjectMeta{
+							Name: soc.s.Name,
+							Namespace: soc.s.Namespace,
+							Labels: map[string]string{
+								common.LabelSensorName: soc.s.Name,
+							},
+							OwnerReferences: []metav1.OwnerReference{
+								*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
+							},
 						},
-						OwnerReferences: []metav1.OwnerReference{
-							*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-						},
-					},
-					Spec: batchv1.JobSpec{
-						Template: corev1.PodTemplateSpec{
-							ObjectMeta: metav1.ObjectMeta{
-								GenerateName: common.DefaultSensorJobName(soc.s.Name),
-								Labels: map[string]string{
-									common.LabelJobName: soc.s.Name,
+						Spec: appsv1.DeploymentSpec{
+							Selector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									common.LabelSensorName: soc.s.Name,
 								},
 							},
-							Spec: corev1.PodSpec{
-								Containers: []corev1.Container{
-									{
-										Name:            soc.s.Name,
-										Image:           common.SensorImage,
-										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env: envVars,
+							Template: corev1.PodTemplateSpec{
+								ObjectMeta: metav1.ObjectMeta{
+									Name: common.DefaultSensorDeploymentName(soc.s.Name),
+									Namespace: soc.s.Name,
+									Labels: map[string]string{
+										common.LabelSensorName: soc.s.Name,
 									},
 								},
-								ServiceAccountName: soc.s.Spec.ServiceAccountName,
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{
+											Name:            soc.s.Name,
+											Image:           common.SensorImage,
+											ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
+											Env: envVars,
+										},
+									},
+									ServiceAccountName: soc.s.Spec.ServiceAccountName,
+								},
 							},
 						},
-					},
-				}
-				// Create sensor job
-				_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
-				if err != nil {
-					soc.log.Error().Err(err).Msg("failed to create sensor job")
-					soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor job. Err: %+v", err))
-					return err
+					}
+					_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Create(sensorDeployment)
+					if err != nil {
+						soc.log.Error().Err(err).Msg("failed to create sensor deployment")
+						soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor deployment. Err: %+v", err))
+						return err
+					}
+					soc.log.Info().Msg("sensor deployment created")
+				} else {
+					soc.log.Error().Msg("failed to query for existing sensor deployment")
 				}
 			} else {
-				soc.log.Info().Msg("failed to retrieve sensor job")
-				soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to retrieve sensor job. Err: %+v", err))
-				return err
+				soc.log.Info().Msg("sensor deployment already exists")
 			}
 		} else {
-			soc.log.Warn().Msg("sensor job already exists")
+			_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+			if err != nil {
+				if apierr.IsNotFound(err) {
+					sensorJob := &batchv1.Job{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      soc.s.Name,
+							Namespace: soc.s.Namespace,
+							Labels: map[string]string{
+								common.LabelSensorName: soc.s.Name,
+							},
+							OwnerReferences: []metav1.OwnerReference{
+								*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
+							},
+						},
+						Spec: batchv1.JobSpec{
+							Template: corev1.PodTemplateSpec{
+								ObjectMeta: metav1.ObjectMeta{
+									GenerateName: common.DefaultSensorJobName(soc.s.Name),
+									Labels: map[string]string{
+										common.LabelSensorName: soc.s.Name,
+									},
+								},
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{
+											Name:            soc.s.Name,
+											Image:           common.SensorImage,
+											ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
+											Env: envVars,
+										},
+									},
+									ServiceAccountName: soc.s.Spec.ServiceAccountName,
+								},
+							},
+						},
+					}
+					// Create sensor job
+					_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
+					if err != nil {
+						soc.log.Error().Err(err).Msg("failed to create sensor job")
+						soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor job. Err: %+v", err))
+						return err
+					}
+					soc.log.Info().Msg("sensor job created")
+				} else {
+					soc.log.Error().Msg("failed to query for existing sensor job")
+				}
+			} else {
+				soc.log.Warn().Msg("sensor job already exists")
+			}
 		}
 
 		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultSensorServiceName(soc.s.Name), metav1.GetOptions{})
@@ -192,7 +252,7 @@ func (soc *sOperationCtx) operate() error {
 						},
 						Type: corev1.ServiceTypeClusterIP,
 						Selector: map[string]string{
-							common.LabelJobName: soc.s.Name,
+							common.LabelSensorName: soc.s.Name,
 						},
 					},
 				}
@@ -203,9 +263,7 @@ func (soc *sOperationCtx) operate() error {
 					return err
 				}
 			} else {
-				soc.log.Info().Msg("failed to retrieve sensor service")
-				soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to retrieve sensor service. Err: %+v", err))
-				return err
+				soc.log.Error().Msg("failed to query for existing sensor service")
 			}
 		} else {
 			soc.log.Info().Msg("sensor service already exists")

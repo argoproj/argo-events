@@ -18,8 +18,8 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
-// fileWatcher implements ConfigExecutor interface
-type fileWatcher struct{}
+// fileWatcherConfigExecutor implements ConfigExecutor interface
+type fileWatcherConfigExecutor struct{}
 
 // fileWatcherConfig contains configuration information for this gateway
 type fileWatcherConfig struct {
@@ -33,7 +33,7 @@ type fileWatcherConfig struct {
 }
 
 // StartConfig runs a configuration
-func (fw *fileWatcher) StartConfig(config *gateways.ConfigContext) error {
+func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 	// mark final gateway state
@@ -123,7 +123,7 @@ NotificationListener:
 }
 
 // StopConfig deactivates a configuration
-func (fw *fileWatcher) StopConfig(config *gateways.ConfigContext) error {
+func (fw *fileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
 	}
@@ -133,15 +133,15 @@ func (fw *fileWatcher) StopConfig(config *gateways.ConfigContext) error {
 func main() {
 	err := gatewayConfig.TransformerReadinessProbe()
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to connect to gateway transformer")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
 	}
 	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &fileWatcher{})
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &fileWatcherConfigExecutor{})
 	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
+		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
 	}
 	select {}
 }

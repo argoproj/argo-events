@@ -46,10 +46,10 @@ func TestSensorOperateLifecycle(t *testing.T) {
 		node := getNodeByName(sOpCtx.s, signal.Name)
 		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
-	// check whether sensor job is created
-	job, err := fake.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
+	// check whether sensor deployment is created
+	deployment, err := fake.kubeClientset.AppsV1().Deployments(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
 	assert.Nil(t, err)
-	assert.NotNil(t, job)
+	assert.NotNil(t, deployment)
 
 	// check whether sensor service is created
 	svc, err := fake.kubeClientset.CoreV1().Services(sOpCtx.s.Namespace).Get(common.DefaultSensorServiceName(sOpCtx.s.Name), metav1.GetOptions{})
@@ -97,4 +97,23 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	for _, event := range events.Items {
 		assert.Equal(t, string(v1alpha1.NodePhaseError), event.Action)
 	}
+
+	// delete the sensor
+	err = fake.sensorClientset.ArgoprojV1alpha1().Sensors(sOpCtx.s.Namespace).Delete(sOpCtx.s.Name, &metav1.DeleteOptions{})
+	assert.Nil(t, err)
+
+	// create a non repeatable sensor
+	sensor, err = getSensor()
+	assert.Nil(t, err)
+	sensor.Spec.Repeat = false
+	sOpCtx.s, err = fake.sensorClientset.ArgoprojV1alpha1().Sensors(sOpCtx.s.Namespace).Create(sensor)
+	assert.Nil(t, err)
+
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+
+	// check whether sensor job is created
+	job, err := fake.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.NotNil(t, job)
 }

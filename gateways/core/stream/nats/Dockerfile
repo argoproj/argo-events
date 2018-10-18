@@ -1,3 +1,3 @@
-FROM centos:7
+FROM scratch
 COPY dist/nats-gateway /bin/
 ENTRYPOINT [ "/bin/nats-gateway" ]

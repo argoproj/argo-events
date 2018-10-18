@@ -47,6 +47,12 @@
   revision = "e75339c4bc3d739058b5e43806e7accda132fb53"
 
 [[projects]]
+  name = "github.com/dghubble/oauth1"
+  packages = ["."]
+  revision = "70562a5920ad9b6ff03ef697c0f90ae569abbd2b"
+  version = "v0.4.0"
+
+[[projects]]
   name = "github.com/dghubble/sling"
   packages = ["."]
   revision = "eb56e89ac5088bebb12eef3cb4b293300f43608b"
@@ -109,8 +115,8 @@
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "7b294651033cd7d9e7f0d9ffa1b75ed1e198e737"
-  version = "v1.38.3"
+  revision = "9c8236e659b76e87bf02044d06fde8683008ff3e"
+  version = "v1.39.0"
 
 [[projects]]
   name = "github.com/go-openapi/jsonpointer"
@@ -327,7 +333,7 @@
     "slackevents",
     "slackutilsx"
   ]
-  revision = "0f8db5050731c50359e319cf253af5b9997a2b1e"
+  revision = "cd5e66cd06325a936961b077e1947f1eb2a61561"
 
 [[projects]]
   name = "github.com/pierrec/lz4"
@@ -354,7 +360,7 @@
   branch = "master"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
-  revision = "e2704e165165ec55d062f5919b4b29494e9fa790"
+  revision = "3113b8401b8a98917cde58f8bbd42a1b1c03b1fd"
 
 [[projects]]
   name = "github.com/robfig/cron"
@@ -434,7 +440,7 @@
     "blake2b",
     "ssh/terminal"
   ]
-  revision = "a92615f3c49003920a58dedcf32cf55022cefb8d"
+  revision = "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb"
 
 [[projects]]
   branch = "master"
@@ -451,7 +457,7 @@
     "trace",
     "websocket"
   ]
-  revision = "49bb7cea24b1df9410e1712aa6433dae904ff66a"
+  revision = "04a2e542c03f1d053ab3e4d6e5abcd4b66e2be8e"
 
 [[projects]]
   branch = "master"
@@ -500,13 +506,13 @@
     "internal/fastwalk",
     "internal/gopathwalk"
   ]
-  revision = "5e66757b835f155f7e50931f54c9f6af8af86f75"
+  revision = "06f26fdaaa28cdb20cf496a5eec17e1270830a63"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "af9cb2a35e7f169ec875002c1829c9b315cddc04"
+  revision = "94acd270e44e65579b9ee3cdab25034d33fed608"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -783,11 +789,11 @@
     "pkg/generators/rules",
     "pkg/util/sets"
   ]
-  revision = "9dfdf9be683f61f82cda12362c44c784e0778b56"
+  revision = "5d05df014ac640f14b5e777958248251c2ef5e86"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5db0dc4f752508deb1db503351a3e51ff161119ab4a1f714e19e0c7dc6fa6dc"
+  inputs-digest = "137117916ca382c9427dc73a89699c90521f76ccf6f296dfbf70e4eadb856426"
   solver-name = "gps-cdcl"
   solver-version = 1
