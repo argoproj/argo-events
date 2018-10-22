@@ -48,16 +48,16 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 // returns an error if the Path is invalid/not found and the default value is nil OR if the signal event doesn't exist and default value is nil
 func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]v1alpha.Event) (string, error) {
 	if e, ok := events[src.Signal]; ok {
+		// only convert payload to json when path is set.
+		if src.Path == "" {
+			return string(e.Payload), nil
+		}
 		js, err := renderEventDataAsJSON(&e)
 		if err != nil {
 			if src.Value != nil {
 				return *src.Value, nil
 			}
 			return "", err
-		}
-		// check if complete payload needs to be passed to the trigger
-		if src.Path == "" {
-			return string(js), nil
 		}
 		res := gjson.GetBytes(js, src.Path)
 		if res.Exists() {

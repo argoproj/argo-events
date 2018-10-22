@@ -21,6 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"fmt"
 )
 
 func Test_applyParams(t *testing.T) {
@@ -32,7 +33,7 @@ func Test_applyParams(t *testing.T) {
 			},
 			Payload: []byte(`{"name":{"first":"matt","last":"magaldi"},"age":24}`),
 		},
-		"invalidJSON": v1alpha.Event{
+		"nonJSON": v1alpha.Event{
 			Context: v1alpha.EventContext{
 				ContentType: MediaTypeJSON,
 			},
@@ -138,13 +139,31 @@ func Test_applyParams(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "invalidJSON, no default -> error",
+			name: "non JSON, no default -> pass payload bytes without converting",
 			args: args{
 				jsonObj: []byte(``),
 				params: []v1alpha1.ResourceParameter{
 					v1alpha1.ResourceParameter{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "invalidJSON",
+							Signal: "nonJSON",
+						},
+						Dest: "x",
+					},
+				},
+				events: events,
+			},
+			want:    []byte(fmt.Sprintf(`{"x":"%s"}`, string(events["nonJSON"].Payload))),
+			wantErr: false,
+		},
+		{
+			name: "non JSON, with path -> error",
+			args: args{
+				jsonObj: []byte(``),
+				params: []v1alpha1.ResourceParameter{
+					v1alpha1.ResourceParameter{
+						Src: &v1alpha1.ResourceParameterSource{
+							Signal: "nonJSON",
+							Path: "test",
 						},
 						Dest: "x",
 					},
@@ -154,24 +173,6 @@ func Test_applyParams(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
-		{
-			name: "invalidJSON, default set -> success",
-			args: args{
-				jsonObj: []byte(``),
-				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
-						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "invalidJSON",
-							Value:  &defaultValue,
-						},
-						Dest: "x",
-					},
-				},
-				events: events,
-			},
-			want:    []byte(`{"x":"default"}`),
-			wantErr: false,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -180,6 +181,7 @@ func Test_applyParams(t *testing.T) {
 				t.Errorf("applyParams() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			fmt.Println(string(got))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("applyParams() = %v, want %v", got, tt.want)
 			}
