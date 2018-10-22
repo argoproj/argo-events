@@ -6,4 +6,4 @@ data:
   calendar.barConfig: |-
     interval: 55s
   calendar.fooConfig: |-
-    interval: 10s
+    interval: 30 * * * *
