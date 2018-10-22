@@ -1,10 +1,8 @@
 # Guide
 
-<b>Follow [getting started](https://github.com/argoproj/argo-events/blob/master/docs/quickstart.md) to setup namespace, service account and controllers</b>
-<br>
-
-1. [What are sensor and gateway controllers](controllers-guide.md)
-2. [Core Gateways and Sensors](#gands)
+1. [Getting started](quickstart.md)
+2. [What are sensor and gateway controllers](controllers-guide.md)
+3. [Core Gateways and Sensors](#gands)
     1. [Webhook](#webhook)
     2. [Artifact](#artifact)
     3. [Calendar](#calendar)
@@ -14,11 +12,11 @@
         2. [Kafka](#kafka)
         3. [MQTT](#mqtt)
         4. [AMQP](#amqp)
-3. [Updating configurations dynamically](#updating-configurations)
-4. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
-5. [Sensor Filters](#sensor-filters)
-6. [Fetching Triggers](#fetching-sensor-triggers) 
-7. [Writing custom gateways](custom-gateway.md)
+4. [Updating configurations dynamically](#updating-configurations)
+5. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
+6. [Sensor Filters](#sensor-filters)
+7. [Fetching Triggers](#fetching-sensor-triggers) 
+8. [Writing custom gateways](custom-gateway.md)
          
 ## <a name="gands">Gateways and Sensors</a>
 
