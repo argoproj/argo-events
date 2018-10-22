@@ -36,7 +36,7 @@ func init() {
 	RefreshNamespace()
 }
 
-// detectNamespace attemps to read the namespace from the mounted service account token
+// detectNamespace attempts to read the namespace from the mounted service account token
 // Note that this will return an error if running outside a Kubernetes pod
 func detectNamespace() (string, error) {
 	// Make sure it's a file and we can read it

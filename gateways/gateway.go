@@ -67,7 +67,7 @@ type GatewayConfig struct {
 	controllerInstanceID string
 }
 
-// ConfigData contains information of a configuration for gateway to run.
+// ConfigContext contains information of a configuration for gateway to run.
 type ConfigContext struct {
 	// Data holds the actual configuration
 	Data *ConfigData
@@ -106,7 +106,7 @@ type GatewayEvent struct {
 
 // HTTPGatewayServerConfig contains information regarding http ports, endpoints
 type HTTPGatewayServerConfig struct {
-	// HTTPServerPort is the port on which gateway processor server is runnung
+	// HTTPServerPort is the port on which gateway processor server is running
 	HTTPServerPort string
 	// HTTPClientPort is the port on which gateway processor client is running
 	HTTPClientPort string
@@ -400,14 +400,13 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 	if err != nil {
 		gc.Log.Warn().Str("config-key", gatewayEvent.Src).Err(err).Msg("failed to transform request body.")
 		return err
-	} else {
-		gc.Log.Info().Str("config-key", gatewayEvent.Src).Msg("dispatching the event to gateway-transformer...")
+	}
+	gc.Log.Info().Str("config-key", gatewayEvent.Src).Msg("dispatching the event to gateway-transformer...")
 
-		_, err = http.Post(fmt.Sprintf("http://localhost:%s", gc.transformerPort), "application/octet-stream", bytes.NewReader(payload))
-		if err != nil {
-			gc.Log.Warn().Str("config-key", gatewayEvent.Src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
-			return err
-		}
+	_, err = http.Post(fmt.Sprintf("http://localhost:%s", gc.transformerPort), "application/octet-stream", bytes.NewReader(payload))
+	if err != nil {
+		gc.Log.Warn().Str("config-key", gatewayEvent.Src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
+		return err
 	}
 	return nil
 }
@@ -444,10 +443,10 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext
 	var currentConfigKeys []string
 	var updatedConfigKeys []string
 
-	for currentConfigKey, _ := range gc.registeredConfigs {
+	for currentConfigKey := range gc.registeredConfigs {
 		currentConfigKeys = append(currentConfigKeys, currentConfigKey)
 	}
-	for updatedConfigKey, _ := range newConfigs {
+	for updatedConfigKey := range newConfigs {
 		updatedConfigKeys = append(updatedConfigKeys, updatedConfigKey)
 	}
 
@@ -610,7 +609,7 @@ func (gc *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
 	return &node
 }
 
-// markNodePhase marks the node with a phase, returns the node
+// MarkGatewayNodePhase marks the node with a phase, returns the node
 func (gc *GatewayConfig) MarkGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
 	gc.Log.Debug().Str("node-id", nodeID).Msg("marking node phase...")
 	gc.Log.Info().Interface("nodes", gc.gw.Status.Nodes).Msg("nodes")
@@ -628,7 +627,7 @@ func (gc *GatewayConfig) MarkGatewayNodePhase(nodeID string, phase v1alpha1.Node
 	return node
 }
 
-// persist the updates to the Gateway resource
+// PersistUpdates persists the updates to the Gateway resource
 func (gc *GatewayConfig) PersistUpdates() error {
 	var err error
 	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.Namespace).Update(gc.gw)
@@ -669,7 +668,7 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 	})
 }
 
-// createK8Event creates a kubernetes event.
+// GetK8Event retrieves a kubernetes event.
 func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, config *ConfigData) *corev1.Event {
 	event := &common.K8Event{
 		Name:                gc.Name,

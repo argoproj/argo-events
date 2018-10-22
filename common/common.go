@@ -28,8 +28,9 @@ const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
 
-	// http responses
+	// SuccessResponse for http request
 	SuccessResponse = "Success"
+	// ErrorResponse for http request
 	ErrorResponse   = "Error"
 
 	// LabelEventSeen is the label for already seen k8 event

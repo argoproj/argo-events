@@ -5,7 +5,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
-// Validates the gateway resource.
+// Validate validates the gateway resource.
 // Exporting this function so that external APIs can use this to validate gateway resource.
 func Validate(gw *v1alpha1.Gateway) error {
 	if gw.Spec.DeploySpec == nil {

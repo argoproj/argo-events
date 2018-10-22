@@ -27,7 +27,6 @@ import (
 
 // apply the params to the resource json object
 func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map[string]v1alpha.Event) ([]byte, error) {
-	tmp := make([]byte, len(jsonObj))
 	for _, param := range params {
 		// let's grab the param value
 		v, err := resolveParamValue(param.Src, events)
@@ -35,7 +34,7 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 			return nil, err
 		}
 		// now let's set the value
-		tmp, err = sjson.SetBytes(jsonObj, param.Dest, v)
+		tmp, err := sjson.SetBytes(jsonObj, param.Dest, v)
 		if err != nil {
 			return nil, err
 		}

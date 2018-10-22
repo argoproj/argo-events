@@ -61,7 +61,7 @@ type S3EventConfig struct {
 	Bucket   string                      `json:"bucket,omitempty"`
 	Region   string                      `json:"region,omitempty"`
 	Event    minio.NotificationEventType `json:"event,omitempty"`
-	filter   S3Filter                    `json:"filter,omitempty"`
+	Filter   S3Filter                    `json:"filter,omitempty"`
 }
 
 // S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
@@ -162,7 +162,7 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	}
 
 	// Listen for bucket notifications
-	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.filter.Prefix, artifact.S3EventConfig.filter.Suffix, []string{
+	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
 		string(artifact.S3EventConfig.Event),
 	}, doneCh) {
 		if notificationInfo.Err != nil {

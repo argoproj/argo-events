@@ -181,7 +181,6 @@ func Test_applyParams(t *testing.T) {
 				t.Errorf("applyParams() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			fmt.Println(string(got))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("applyParams() = %v, want %v", got, tt.want)
 			}

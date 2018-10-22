@@ -48,13 +48,9 @@ func main() {
 	sensorWatchersStr := tConfigMapData[common.SensorWatchers]
 	gatewayWatchersStr := tConfigMapData[common.GatewayWatchers]
 
-	fmt.Sprintf("sensor watchers: %s", sensorWatchersStr)
-	fmt.Sprintf("gateway watchers: %s", gatewayWatchersStr)
-
 	// parse sensor and gateway watchers for this gateway
 	if sensorWatchersStr != "" {
 		for _, sensorWatcherStr := range strings.Split(sensorWatchersStr, ",") {
-			fmt.Sprintf("parsing sensor watcher: %s", sensorWatcherStr)
 			var sensorWatcher v1alpha1.SensorNotificationWatcher
 			err = yaml.Unmarshal([]byte(sensorWatcherStr), &sensorWatcher)
 			if err != nil {
@@ -66,7 +62,6 @@ func main() {
 
 	if gatewayWatchersStr != "" {
 		for _, gatewayWatcherStr := range strings.Split(gatewayWatchersStr, ",") {
-			fmt.Sprintf("unmarshalling gateway watcher: %s", gatewayWatcherStr)
 			var gatewayWatcher v1alpha1.GatewayNotificationWatcher
 			err = yaml.Unmarshal([]byte(gatewayWatcherStr), &gatewayWatcher)
 			if err != nil {

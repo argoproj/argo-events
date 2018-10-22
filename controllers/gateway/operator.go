@@ -173,21 +173,21 @@ func (goc *gwOperationCtx) operate() error {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
 			return err
-		} else {
-			goc.log.Info().Str("deployment-name", common.DefaultGatewayDeploymentName(goc.gw.Name)).Msg("gateway deployment created")
-			// expose gateway if service is configured
-			if goc.gw.Spec.ServiceSpec != nil {
-				svc, err := goc.createGatewayService()
-				// Failed to expose gateway through a service.
-				if err != nil {
-					goc.log.Error().Err(err).Msg("failed to create service for gateway")
-					goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, fmt.Sprintf("failed to create service. err: %s", err.Error()))
-					return err
-				}
-				goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service is created")
-			}
-			goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 		}
+
+		goc.log.Info().Str("deployment-name", common.DefaultGatewayDeploymentName(goc.gw.Name)).Msg("gateway deployment created")
+		// expose gateway if service is configured
+		if goc.gw.Spec.ServiceSpec != nil {
+			svc, err := goc.createGatewayService()
+			// Failed to expose gateway through a service.
+			if err != nil {
+				goc.log.Error().Err(err).Msg("failed to create service for gateway")
+				goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, fmt.Sprintf("failed to create service. err: %s", err.Error()))
+				return err
+			}
+			goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service is created")
+		}
+		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 		// Gateway is in error
 	case v1alpha1.NodePhaseError:

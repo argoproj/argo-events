@@ -32,10 +32,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err := validateSignals(s.Spec.Signals); err != nil {
 		return err
 	}
-	if err := validateTriggers(s.Spec.Triggers); err != nil {
-		return err
-	}
-	return nil
+	return validateTriggers(s.Spec.Triggers)
 }
 
 func validateTriggers(triggers []v1alpha1.Trigger) error {
