@@ -642,482 +642,174 @@ Resource gateway can monitor any K8 resource and any CRD.
     kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
     ``` 
     
- 4. Create an basic `hello-world` argo workflow with name  `my-workflow` and watch the magic happen.    
-
+ 4. Create an basic `hello-world` argo workflow with name  `my-workflow`. 
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: hello-world-
+      namespace: argo-events
+      labels:
+        name: my-workflow
+    spec:
+      entrypoint: whalesay
+      serviceAccountName: argo-events-sa
+      templates:
+      - container:
+          args:
+          - "hello world"
+          command:
+          - cowsay
+          image: docker/whalesay:latest
+        name: whalesay
+    ```
+    Run
+    ```bash
+    kubectl -n argo-events -f https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml
+    ```
+    
+    Once workflow is created, resource sensor will trigger workflow.
+    
  5. Run `argo -n argo-events list`
 
 
 ## <a name="streams">Streams</a> 
+Yet to be documented. 
 
 
-
-### Passing payload from signal to trigger
+## <a name="passing-payload-from-signal-to-trigger">Passing payload from signal to trigger</a> 
 
 #### Complete payload
-Create a webhook sensor, 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: webhook-with-resource-param-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  signals:
-    - name: webhook-gateway/webhook.fooConfig
-  triggers:
-    - name: argo-workflow
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        parameters:
-          - src:
-              signal: webhook-gateway/webhook.fooConfig
-            # pass payload of webhook-gateway/webhook.fooConfig signal to first parameter value
-            # of arguments.
-            dest: spec.arguments.parameters.0.value
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                name: arguments-via-webhook-event
-              spec:
-                entrypoint: whalesay
-                arguments:
-                  parameters:
-                  - name: message
-                    # this is the value that should be overridden
-                    value: hello world
-                templates:
-                - name: whalesay
-                  inputs:
-                    parameters:
-                    - name: message
-                  container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
-```
 
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-complete-payload.yaml
-```
+ 1. Create a webhook sensor,
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Sensor
+    metadata:
+      name: webhook-with-resource-param-sensor
+      labels:
+        sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    spec:
+      repeat: true
+      serviceAccountName: argo-events-sa
+      signals:
+        - name: webhook-gateway/webhook.fooConfig
+      triggers:
+        - name: argo-workflow
+          resource:
+            namespace: argo-events
+            group: argoproj.io
+            version: v1alpha1
+            kind: Workflow
+            parameters:
+              - src:
+                  signal: webhook-gateway/webhook.fooConfig
+                # pass payload of webhook-gateway/webhook.fooConfig signal to first parameter value
+                # of arguments.
+                dest: spec.arguments.parameters.0.value
+            source:
+              inline: |
+                  apiVersion: argoproj.io/v1alpha1
+                  kind: Workflow
+                  metadata:
+                    name: arguments-via-webhook-event
+                  spec:
+                    entrypoint: whalesay
+                    arguments:
+                      parameters:
+                      - name: message
+                        # this is the value that should be overridden
+                        value: hello world
+                    templates:
+                    - name: whalesay
+                      inputs:
+                        parameters:
+                        - name: message
+                      container:
+                        image: docker/whalesay:latest
+                        command: [cowsay]
+                        args: ["{{inputs.parameters.message}}"]
+    ```
+    
+    Run,
+    ```bash
+    kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-complete-payload.yaml
+    ```
 
-<b>Make sure to update webhook gateway with `webhook-with-resource-param-sensor` as it's watcher.</b>
+ 2. <b>Make sure to update webhook gateway with `webhook-with-resource-param-sensor` as it's watcher.</b>
 
-Send a POST request to your webhook gateway,
-```bash
-curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
-```
-
-and inspect the logs of the new argo workflow using `argo logs`.
+ 3.  Send a POST request to your webhook gateway
+    ```bash
+    curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
+    ```
+    
+ 4. List argo workflows,
+    ```bash
+    argo -n argo-events list
+    ```   
+    
+ 5. Check the workflow logs using `argo -n argo-events logs <your-workflow-pod-name>`
 
 #### Filter event payload
-Create a webhook sensor,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: webhook-with-resource-param-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  signals:
-    - name: webhook-gateway/webhook.fooConfig
-  triggers:
-    - name: argo-workflow
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        # The parameters from the workflow are overridden by the webhook's message
-        parameters:
-          - src:
-              signal: webhook-gateway/webhook.fooConfig
-              # extract the object corresponding to `message` key from event payload
-              # of webhook-gateway/webhook.fooConfig signal
-              path: message
-              # if `message` key doesn't exists in event payload then default value of payload
-              # passed to trigger will be `hello default`
-              value: hello default
-            # override the value of first parameter in arguments with above payload.
-            dest: spec.arguments.parameters.0.value
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                name: arguments-via-webhook-event
-              spec:
-                entrypoint: whalesay
-                arguments:
-                  parameters:
-                  - name: message
-                    # this is the value that should be overridden
-                    value: hello world
-                templates:
-                - name: whalesay
-                  inputs:
-                    parameters:
-                    - name: message
-                  container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
-
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-resource-param.yaml
-```
-
-Post request to webhook gateway and watch new workflow being created
-
-#### Calendar
-Create configmap,
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: calendar-gateway-configmap
-data:
-  # generate event after every 55s
-  calendar.barConfig: |-
-    interval: 55s
-  # generate event after every 10s
-  calendar.fooConfig: |-
-    interval: 10s
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar-gateway-configmap.yaml
-```
-
-Create a calendar gateway,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Gateway
-metadata:
-  name: calendar-gateway
-  labels:
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "calendar-gateway"
-spec:
-  deploySpec:
-    containers:
-    - name: "calendar-events"
-      image: "argoproj/calendar-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/calendar-gateway"]
-    serviceAccountName: "argo-events-sa"
-  configMap: "calendar-gateway-configmap"
-  type: "calendar"
-  dispatchMechanism: "HTTP"
-  version: "1.0"
-  watchers:
-      sensors:
-      - name: "calendar-sensor"
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar.yaml
-```
-
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: calendar-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  serviceAccountName: argo-events-sa
-  imagePullPolicy: Always
-  repeat: true
-  signals:
-    - name: calendar-gateway/calendar.fooConfig
-  triggers:
-    - name: calendar-workflow-trigger
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  -
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
-```
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/calendar.yaml
-```
-
-
-Monitor your namespace for argo workflows,
-
-```bash
-argo list
-```
-
-#### Artifact
-<b>Make sure to have Minio service deployed in your namespace.</b> Follow https://www.minio.io/kubernetes.html
-
-Create configmap,
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: artifact-gateway-configmap
-data:
-  s3.fooConfig: |-
-    s3EventConfig:
-      # name of bucket on which gateway should listen for notifications
-      bucket: input
-      # minio service
-      endpoint: minio-service.argo-events:9000
-      # type of notification
-      event: s3:ObjectCreated:Put
-      filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    # k8 secret that contains minio access and secret keys
-    accessKey:
-      key: accesskey
-      name: artifacts-minio
-    secretKey:
-      key: secretkey
-      name: artifacts-minio
-```
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/artifact-gateway-configmap.yaml
-```
-
-Create gateway,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Gateway
-metadata:
-  name: artifact-gateway
-  labels:
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "artifact-gateway"
-spec:
-  deploySpec:
-    containers:
-    - name: "artifact-events"
-      image: "argoproj/artifact-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/artifact-gateway"]
-    serviceAccountName: "argo-events-sa"
-  configMap: "artifact-gateway-configmap"
-  version: "1.0"
-  type: "artifact"
-  dispatchMechanism: "HTTP"
-  watchers:
-    sensors:
-    - name: "artifact-sensor"
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/artifact.yaml
-```
-
-Create sensor,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: artifact-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  signals:
-    - name: artifact-gateway/s3.fooConfig
-  triggers:
-    - name: artifact-workflow-trigger
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  -
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/s3.yaml
-```
-
-Drop a file into `input` bucket and monitor namespace for argo workflow.
-
-#### Resource
-Create resource configmap,
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: resource-gateway-configmap
-data:
-  resource.fooConfig: |-
-    namespace: argo-events
-    group: "argoproj.io"
-    version: "v1alpha1"
-    kind: "Workflow"
-    filter:
+ 1. Create a webhook sensor,
+    ```yaml
+    apiVersion: argoproj.io/v1alpha1
+    kind: Sensor
+    metadata:
+      name: webhook-with-resource-param-sensor
       labels:
-        # watch workflows that have label `name: my-workflow`
-        name: "my-workflow"
-  resource.barConfig: |-
-    namespace: argo-events
-    group: "argoproj.io"
-    version: "v1alpha1"
-    kind: "Workflow"
-    filter:
-      # watch workflows that has phase as failed
-      labels:
-        workflows.argoproj.io/phase: Failed
-```
+        sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    spec:
+      repeat: true
+      serviceAccountName: argo-events-sa
+      signals:
+        - name: webhook-gateway/webhook.fooConfig
+      triggers:
+        - name: argo-workflow
+          resource:
+            namespace: argo-events
+            group: argoproj.io
+            version: v1alpha1
+            kind: Workflow
+            # The parameters from the workflow are overridden by the webhook's message
+            parameters:
+              - src:
+                  signal: webhook-gateway/webhook.fooConfig
+                  # extract the object corresponding to `message` key from event payload
+                  # of webhook-gateway/webhook.fooConfig signal
+                  path: message
+                  # if `message` key doesn't exists in event payload then default value of payload
+                  # passed to trigger will be `hello default`
+                  value: hello default
+                # override the value of first parameter in arguments with above payload.
+                dest: spec.arguments.parameters.0.value
+            source:
+              inline: |
+                  apiVersion: argoproj.io/v1alpha1
+                  kind: Workflow
+                  metadata:
+                    name: arguments-via-webhook-event
+                  spec:
+                    entrypoint: whalesay
+                    arguments:
+                      parameters:
+                      - name: message
+                        # this is the value that should be overridden
+                        value: hello world
+                    templates:
+                    - name: whalesay
+                      inputs:
+                        parameters:
+                        - name: message
+                      container:
+                        image: docker/whalesay:latest
+                        command: [cowsay]
+                        args: ["{{inputs.parameters.message}}"]
+    
+    ```
+    Run,
+    ```bash
+    kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-resource-param.yaml
+    ```
 
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/resource-gateway.configmap.yaml
-```
-
-Create resource gateway,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Gateway
-metadata:
-  name: resource-gateway
-  labels:
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "resource-gateway"
-spec:
-  deploySpec:
-    containers:
-    - name: "resource-events"
-      image: "argoproj/resource-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/resource-gateway"]
-    serviceAccountName: "argo-events-sa"
-  configMap: "resource-gateway-configmap"
-  type: "resource"
-  dispatchMechanism: "HTTP"
-  version: "1.0"
-  watchers:
-    sensors:
-    - name: "resource-sensor"
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/resource.yaml
-```
-
-Create resource sensor,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  name: resource-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  signals:
-    - name: resource-gateway/resource.fooConfig
-  triggers:
-    - name: argo-workflow
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  -
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
-```
-
-```bash
-https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
-```
-
-Now, create a workflow with label `name: my-workflow`,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
-metadata:
-  generateName: hello-world-
-  namespace: argo-events
-  labels:
-    name: my-workflow
-spec:
-  entrypoint: whalesay
-  serviceAccountName: argo-events-sa
-  templates:
-  - container:
-      args:
-      - "hello world"
-      command:
-      - cowsay
-      image: docker/whalesay:latest
-    name: whalesay
-```
-
-Once workflow is created, resource sensor will trigger workflow.
-
-#### Streams
-Deploying stream gateways and sensors are pretty much same as other gateways. Just make sure you have
-streaming solutions(NATS, KAFKA etc.) deployed in your namespace.
+    Post request to webhook gateway and watch new workflow being created
