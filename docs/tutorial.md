@@ -1,225 +1,317 @@
 # Tutorial
 
 <b>Follow [getting started](https://github.com/argoproj/argo-events/blob/master/docs/quickstart.md) to setup namespace, service account and controllers</b>
+<br>
 
-## Controller
- 
-## Controller configmap
-Provide the `instance-id` and the namespace for controller
-controller configmap
-e.g. 
-```yaml
-# The gateway-controller configmap includes configuration information for the gateway-controller
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: gateway-controller-configmap
-data:
-  config: |
-    instanceID: argo-events  # mandatory
-    namespace: my-custom-namespace # optional
-```
-<b>Note on `instance-id`</b>: it is used to map a gateway or sensor to a controller. 
-e.g. when you create a gateway with label `gateways.argoproj.io/gateway-controller-instanceid: argo-events`, a
- controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml)
-Basically `instance-id` is used to horizontally scale controllers, so you won't end up overwhelming a controller with large
- number of gateways or sensors. Also keep in mind that `instance-id` has nothing to do with namespace where you are
- deploying controllers and gateways/sensors.
+1. [What are sensor and gateway controllers](controllers-guide.md)
+2. [Core Gateways and Sensors](#gands)
+    1. [Webhook](#webhook)
+    2. [Artifact](#artifact)
+    3. [Calendar](#calendar)
+    4. [Resource](#resource)
+    5. [Streams](#streams)
+        1. [Nats](#nats)
+        2. [Kafka](#kafka)
+        3. [MQTT](#mqtt)
+        4. [AMQP](#amqp)
+3. [Updating configurations dynamically](#updating-configurations)
+4. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
+5. [Sensor Filters](#sensor-filters)
+6. [Fetching Triggers](#fetching-sensor-triggers) 
+7. [Writing custom gateways](custom-gateway.md)
+         
+## <a name="gands">Gateways and Sensors</a>
 
+## <a name="webhook">Webhook</a>
 
-### Gateway controller
-Gateway controller watches gateway resource and manages lifecycle of a gateway.
-```yaml
-# The gateway-controller listens for changes on the gateway CRD and creates gateway
-apiVersion: apps/v1beta1
-kind: Deployment
-metadata:
-  name: gateway-controller
-spec:
-  replicas: 1
-  template:
+Webhook gateway is useful when you want to listen to an incoming HTTP request and forward that event to watchers. 
+
+1) <h5>Let's have a look at the configuration for our gateway.</h5>
+
+    ```yaml
+    apiVersion: v1
+    kind: ConfigMap
     metadata:
-      labels:
-        app: gateway-controller
-    spec:
-      serviceAccountName: argo-events-sa
-      containers:
-      - name: gateway-controller
-        image: argoproj/gateway-controller:latest
-        imagePullPolicy: Always
-        env:
-          - name: GATEWAY_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: GATEWAY_CONTROLLER_CONFIG_MAP
-            value: gateway-controller-configmap
-```
+      name: webhook-gateway-configmap
+    data:
+      # run http server on 12000
+      webhook.portConfig: |-
+        port: "12000"
+      # listen to /bar endpoint for POST requests
+      webhook.barConfig: |-
+        endpoint: "/bar"
+        method: "POST"
+      # listen to /foo endpoint for POST requests
+      webhook.fooConfig: |-
+        endpoint: "/foo"
+        method: "POST"
+    ```
+    
+    1) This configmap contains multiple configurations. First configuration describes on which port HTTP server should run. Currently, the gateway
+    can only start one HTTP server and all endpoints will be registered with this server. But in future, we plan to add support to 
+    spin up multiple HTTP servers and give ability to user to register endpoints to different servers.
+    
+    2) Second configuration describes an endpoint called `/bar` that will be registered with HTTP server. The `method` describes which HTTP method
+    is allowed for a request. In this case only incoming HTTP POST requests will be accepted on `/bar`.
+    
+    3) Third configuration has endpoint `/foo` and accepts requests with method POST.
+    
+    <h5>Lets go ahead and create above configmap,</h5>
+    
+    ```bash
+    kubectl create -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml
+    ```
+    
+    ```bash
+    # Make sure that configmap is created in `argo-events` namespace
+    
+    kubectl -n argo-events get configmaps webhook-gateway-configmap
+    ```
 
-### Sensor controller
-Sensor controller watches sensor resource and manages lifecycle of a sensor.
-```yaml
-# The sensor sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
-apiVersion: apps/v1beta1
-kind: Deployment
-metadata:
-  name: sensor-controller
-spec:
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: sensor-controller
-    spec:
-      serviceAccountName: argo-events-sa
-      containers:
-      - name: sensor-controller
-        image: argoproj/sensor-controller:latest
-        imagePullPolicy: Always
-        env:
-          - name: SENSOR_NAMESPACE
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.namespace
-          - name: SENSOR_CONFIG_MAP
-            value: sensor-controller-configmap
-```
+2) <h5>Next step is to create the webhook gateway,<h5>
 
-## Lets get started with gateways and sensors
+    1. Gateway definition,
+        ```yaml
+        apiVersion: argoproj.io/v1alpha1
+        kind: Gateway
+        metadata:
+           # name of the gateway
+          name: webhook-gateway
+          labels:
+            # must match with instance id of one of the gateway controllers. 
+            gateways.argoproj.io/gateway-controller-instanceid: argo-events 
+            gateway-name: "webhook-gateway"
+        spec:
+          # configmap to read configurations from
+          configMap: "webhook-gateway-configmap"
+          # type of gateway
+          type: "webhook"
+          # event dispatch protocol between gateway and it's watchers
+          dispatchMechanism: "HTTP"
+          # version of events this gateway is generating. Required for cloudevents specification
+          version: "1.0"
+          # these are pod specifications
+          deploySpec:
+            containers:
+            - name: "webhook-events"
+              image: "argoproj/webhook-gateway"
+              imagePullPolicy: "Always"
+              command: ["/bin/webhook-gateway"]
+            serviceAccountName: "argo-events-sa"
+          # service specifications to expose gateway
+          serviceSpec:
+            selector:
+              gateway-name: "webhook-gateway"
+            ports:
+              - port: 12000
+                targetPort: 12000
+            type: LoadBalancer
+          # watchers are components interested in listening to events produced by this gateway
+          watchers:
+            sensors:
+            - name: "webhook-sensor"
+        ```
+    
+    2. Run following command,    
+        ```bash
+        kubectl create -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        ```
+    
+    3. Check all gateway configurations are in `running` state
+       ```bash
+        kubectl get -n argo-events gateways webhook-gateway -o yaml
+        ```
 
-#### Webhook
-Create webhook gateway configmap
+3) <h5>Now its time to create webhook sensor.</h5>
+    1. Sensor definition,
+        
+        ```yaml
+        apiVersion: argoproj.io/v1alpha1
+        kind: Sensor
+        metadata:
+          # name of sensor
+          name: webhook-sensor
+          labels:
+            # instance-id must match with one of the deployed sensor controller's instance-id
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
+        spec:
+          # make this sensor as long running.
+          repeat: true
+          serviceAccountName: argo-events-sa
+          # signals/notifications this sensor is interested in.
+          signals:
+            # event must be from webhook-gateway and the configuration that produced this event must be
+            # webhook.fooConfig
+            - name: webhook-gateway/webhook.fooConfig
+          triggers:
+            - name: webhook-workflow-trigger
+              resource:
+                namespace: argo-events
+                group: argoproj.io
+                version: v1alpha1
+                kind: Workflow
+                source:
+                  inline: |
+                      apiVersion: argoproj.io/v1alpha1
+                      kind: Workflow
+                      metadata:
+                        generateName: hello-world-
+                      spec:
+                        entrypoint: whalesay
+                        templates:
+                          - name: whalesay
+                            container:
+                              args:
+                                - "hello world"
+                              command:
+                                - cowsay
+                              image: "docker/whalesay:latest"
+         ```
+    
+        This sensor defines only one signal called `webhook-gateway/webhook.fooConfig`, meaning, it is interested in listening
+        events from `webhook.fooConfig` configuration within `webhook-gateway` gateway.
+    
+    2. Run following command, 
+        ```bash
+        kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+        ```
 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: webhook-gateway-configmap
-data:
-  # run http server on 12000
-  webhook.portConfig: |-
-    port: "12000"
-  # listen to /bar endpoint for POST requests
-  webhook.barConfig: |-
-    endpoint: "/bar"
-    method: "POST"
-  # listen to /foo endpoint for POST requests
-  webhook.fooConfig: |-
-    endpoint: "/foo"
-    method: "POST"
-```
+    3. Check whether all sensor nodes are initialized,
+        ```bash
+        kubectl get -n argo-events sensors webhook-sensor   
+        ```
 
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml
-```
+    4. Get the service url for gateway,
+        ```bash
+        minikube service --url webhook-gateway-gateway-svc
+        ```
+    
+    5. If you face issue getting service url from executing above command, you can use `kubectl port-forward`
+        1. Open another terminal window and enter `kubectl port-forward <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
+        2. You can now user `localhost:9003` to query webhook gateway
 
-Create webhook gateway. Make sure to create it in same namespace as configmap above.
+    6. Send a POST request to the gateway service, and monitor namespace for new workflow
+        ```bash
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST <WEBHOOK_SERVICE_URL>/foo
+        ```
+    
+    7. List argo workflows
+        ```bash
+        argo list
+        ```
 
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Gateway
-metadata:
-   # name of the gateway
-  name: webhook-gateway
-  labels:
-    # must match with instance id of one of the gateway controllers. 
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events 
-    gateway-name: "webhook-gateway"
-spec:
-  # configmap to read configurations from
-  configMap: "webhook-gateway-configmap"
-  # type of gateway
-  type: "webhook"
-  # event dispatch protocol between gateway and it's watchers
-  dispatchMechanism: "HTTP"
-  # version of events this gateway is generating. Required for cloudevents specification
-  version: "1.0"
-  # these are pod specifications
-  deploySpec:
-    containers:
-    - name: "webhook-events"
-      image: "argoproj/webhook-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/webhook-gateway"]
-    serviceAccountName: "argo-events-sa"
-  # service specifications to expose gateway
-  serviceSpec:
-    selector:
-      gateway-name: "webhook-gateway"
-    ports:
-      - port: 12000
-        targetPort: 12000
-    type: LoadBalancer
-  # watchers are components interested in listening to events produced by this gateway
-  watchers:
-    sensors:
-    - name: "webhook-sensor"
-```
+<br/>
 
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
-```
+## <a name="artifact">Artifact</a>
+Currently framework supports Minio S3 storage for artifact gateway but we plan to add File System and AWS/GCP S3 gateways in future.
 
-Check whether all configurations are running and gateway is active
-```bash
-kubectl get gateway webhook-gateway -o yaml
-```
+Lets start with deploying Minio server standalone deployment. You can get the K8 deployment from https://www.minio.io/kubernetes.html
+   
+   1. Minio deployment, store it in `minio-deployment.yaml`
+        ```yaml
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          # This name uniquely identifies the PVC. Will be used in deployment below.
+          name: minio-pv-claim
+          labels:
+            app: minio-storage-claim
+        spec:
+          # Read more about access modes here: http://kubernetes.io/docs/user-guide/persistent-volumes/#access-modes
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            # This is the request for storage. Should be available in the cluster.
+            requests:
+              storage: 10Gi
+          # Uncomment and add storageClass specific to your requirements below. Read more https://kubernetes.io/docs/concepts/storage/persistent-volumes/#class-1
+          #storageClassName:
+        ---
+        apiVersion: extensions/v1beta1
+        kind: Deployment
+        metadata:
+          # This name uniquely identifies the Deployment
+          name: minio-deployment
+        spec:
+          strategy:
+            type: Recreate
+          template:
+            metadata:
+              labels:
+                # Label is used as selector in the service.
+                app: minio
+            spec:
+              # Refer to the PVC created earlier
+              volumes:
+              - name: storage
+                persistentVolumeClaim:
+                  # Name of the PVC created earlier
+                  claimName: minio-pv-claim
+              containers:
+              - name: minio
+                # Pulls the default Minio image from Docker Hub
+                image: minio/minio
+                args:
+                - server
+                - /storage
+                env:
+                # Minio access key and secret key
+                - name: MINIO_ACCESS_KEY
+                  value: "myaccess"
+                - name: MINIO_SECRET_KEY
+                  value: "mysecret"
+                ports:
+                - containerPort: 9000
+                # Mount the volume into the pod
+                volumeMounts:
+                - name: storage # must match the volume name, above
+                  mountPath: "/storage"
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: minio-service
+        spec:
+          type: LoadBalancer
+          ports:
+            - port: 9000
+              targetPort: 9000
+              protocol: TCP
+          selector:
+            app: minio
 
-Create webhook sensor,
-```yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Sensor
-metadata:
-  # name of sensor
-  name: webhook-sensor
-  labels:
-    # instance-id must match with one of the deployed sensor controller's instance-id
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
-spec:
-  # make this sensor as long running.
-  repeat: true
-  serviceAccountName: argo-events-sa
-  # signals/notifications this sensor is interested in.
-  signals:
-    # event must be from webhook-gateway and the configuration that produced this event must be
-    # webhook.fooConfig
-    - name: webhook-gateway/webhook.fooConfig
-  triggers:
-    - name: webhook-workflow-trigger
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  - name: whalesay
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-```
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
-```
-
-Send a POST request to the gateway service, and monitor namespace for new workflow
-```bash
-curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
-```
-```bash
-argo list
-```
+        ```
+        
+   2. Install minio,
+        ```bash
+        kubectl create -n argo-events -f minio-deployment.yaml 
+        ``` 
+    
+   3. Create the configuration,
+        ```yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: artifact-gateway-configmap
+        data:
+          s3.fooConfig: |-
+            s3EventConfig:
+              bucket: input # name of the bucket we want to listen to
+              endpoint: minio-service.argo-events:9000 # minio service endpoint
+              event: s3:ObjectCreated:Put # type of event
+              filter: # filter on object name if any
+                prefix: ""
+                suffix: ""
+            insecure: true # type of minio server deployment
+            accessKey: 
+              key: accesskey # key within below k8 secret whose corresponding value is name of the accessKey
+              name: artifacts-minio # k8 secret name that holds minio creds
+            secretKey:
+              key: secretkey # key within below k8 secret whose corresponding value is name of the secretKey
+              name: artifacts-minio # k8 secret name that holds minio creds
+        ``` 
+    
+        Read comments on configmap to understand more about each field in configuration
 
 ### Passing payload from signal to trigger
 

@@ -18,14 +18,14 @@ Note: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-eve
 
 ```
 kubectl create namespace argo-events
-kubectl apply -f hack/k8s/manifests/argo-events-sa.yaml
-kubectl apply -f hack/k8s/manifests/argo-events-cluster-roles.yaml
-kubectl apply -f hack/k8s/manifests/sensor-crd.yaml
-kubectl apply -f hack/k8s/manifests/gateway-crd.yaml
-kubectl apply -f hack/k8s/manifests/sensor-controller-configmap.yaml
-kubectl apply -f hack/k8s/manifests/sensor-controller-deployment.yaml
-kubectl apply -f hack/k8s/manifests/gateway-controller-configmap.yaml
-kubectl apply -f hack/k8s/manifests/gateway-controller-deployment.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/argo-events-sa.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/argo-events-cluster-roles.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/sensor-crd.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/gateway-crd.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/sensor-controller-configmap.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/sensor-controller-deployment.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/gateway-controller-configmap.yaml
+kubectl apply -n argo-events -f hack/k8s/manifests/gateway-controller-deployment.yaml
 ```
 
 <b>Note</b> If you want to use a different namespace for deployments, make sure to update namespace references
@@ -38,13 +38,13 @@ Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 
 ## 4. Create a webhook gateway
 ```
-kubectl apply -f examples/gateways/webhook-gateway-configmap.yaml
-kubectl apply -f examples/gateways/webhook.yaml
+kubectl apply -n argo-events -f examples/gateways/webhook-gateway-configmap.yaml
+kubectl apply -n argo-events -f examples/gateways/webhook.yaml
 ```
 
 ## 5. Create a webhook sensor
 ```
-kubectl apply -f examples/sensors/webhook.yaml
+kubectl apply -n argo-events -f examples/sensors/webhook.yaml
 ```
 
 ## 6. Trigger the webhook & corresponding Argo workflow
@@ -53,8 +53,15 @@ gateway configuration at run time as well.
 Note: the `WEBHOOK_SERVICE_URL` will differ based on the Kubernetes cluster.
 ```
 export WEBHOOK_SERVICE_URL=$(minikube service --url webhook-gateway-gateway-svc)
+echo $WEBHOOK_SERVICE_URL
 curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
 ```
+
+<b>Note</b>: 
+   * If you are facing an issue getting service url by running `minikube service --url webhook-gateway-gateway-svc`, you can use `kubectl port-forward`
+   * Open another terminal window and enter `kubectl port-forward <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
+   * You can now user `localhost:9003` to query webhook gateway
+  
 
 Verify that the Argo workflow was run when the trigger was executed.
 ```
