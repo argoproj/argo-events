@@ -15,7 +15,7 @@
 4. [Updating configurations dynamically](#updating-configurations)
 5. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
 6. [Sensor Filters](#sensor-filters)
-7. [Fetching Triggers](#fetching-sensor-triggers) 
+7. [Fetching Triggers](#fetching-sensor-triggers)
 8. [Writing custom gateways](custom-gateway.md)
          
 ## <a name="gands">Gateways and Sensors</a>
