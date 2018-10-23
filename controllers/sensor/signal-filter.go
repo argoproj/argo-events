@@ -31,7 +31,7 @@ import (
 
 // createEscalationEvent creates a k8 event for escalation
 func (se *sensorExecutionCtx) createEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
-	se.log.Info().Interface("policy", policy).Msg("printing policy")
+	se.log.Info().Interface("policy", policy).Msg("escalation policy")
 	event := common.GetK8Event(&common.K8Event{
 		Name:                policy.Name,
 		Namespace:           se.sensor.Namespace,
@@ -39,7 +39,9 @@ func (se *sensorExecutionCtx) createEscalationEvent(policy *v1alpha1.EscalationP
 		ReportingController: se.sensor.Name,
 		Labels: map[string]string{
 			common.LabelEventSeen:  "",
+			common.LabelEventType:  string(v1alpha1.NodePhaseError),
 			common.LabelSignalName: signalFilterName,
+			common.LabelSensorName: se.sensor.Name,
 		},
 		Type:   common.LabelArgoEventsEscalationKind,
 		Action: string(policy.Level),

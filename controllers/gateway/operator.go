@@ -191,30 +191,12 @@ func (goc *gwOperationCtx) operate() error {
 
 		// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		// todo: maybe we don't need to perform any deployment update. If the gateway is in error state
-		// then user will just delete the gateway and create a new one.
-		gDeployment, err := goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Get(common.DefaultGatewayDeploymentName(goc.gw.Name), metav1.GetOptions{})
-		if err != nil {
-			goc.log.Error().Err(err).Msg("error occurred retrieving gateway deployment")
-			return err
-		}
-
-		// self heal by updating container images if any
-		gDeployment.Spec.Template.Spec.Containers = *goc.getContainersForGatewayPod()
-		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Update(gDeployment)
-		if err != nil {
-			goc.log.Error().Err(err).Msg("error occurred updating gateway deployment")
-			return err
-		}
-
-		// Update node phase to running
-		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
-
+		goc.log.Error().Msg("gateway is in error state. please check escalated K8 event for the error")
 		// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Msg("gateway is running")
 	case v1alpha1.NodePhaseServiceError:
-		// check whether service is now created successfully. service's name must be gateway name followed by "-gateway-svc".
+		// check whether service is now created manually by user. service's name must be gateway name followed by "-gateway-svc".
 		_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Get(common.DefaultGatewayServiceName(goc.gw.Name), metav1.GetOptions{})
 		if err != nil {
 			goc.log.Warn().Str("expected-service", common.DefaultGatewayServiceName(goc.gw.Name)).Err(err).Msg("no service found")
@@ -240,14 +222,12 @@ func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 		},
 		Spec: *goc.gw.Spec.ServiceSpec,
 	}
-
 	// if selector is not provided, override selectors with gateway labels
 	// todo: this might not be required if in validation we check that if serviceSpec is
 	// specified then make sure selectors are specified as well.
 	if gatewayService.Spec.Selector == nil {
 		gatewayService.Spec.Selector = goc.gw.ObjectMeta.Labels
 	}
-
 	svc, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
 	return svc, err
 }

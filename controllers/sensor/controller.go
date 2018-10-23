@@ -19,19 +19,19 @@ package sensor
 import (
 	"context"
 	"errors"
-	"time"
 	"fmt"
 	"log"
+	"time"
 
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 const (
@@ -105,15 +105,21 @@ func (c *SensorController) processNextItem() bool {
 
 	ctx := newSensorOperationCtx(sensor, c)
 
-	err = c.handleErr(ctx.operate(), key)
+	err = ctx.operate()
 	if err != nil {
-		// now let's escalate the sensor
-		// the context should have the most up-to-date version
-		ctx.log.Error().Err(err).Msg("escalating controller failure")
-		event := ctx.GetK8Event("controller error", v1alpha1.NodePhaseError, sensor.Kind)
-		_, err = common.CreateK8Event(event, ctx.controller.kubeClientset)
+		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
+		err = escalateError(sensor.Name, sensor.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
 		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to create escalation event for controller failure")
+			ctx.log.Error().Err(err).Msg("failed to escalate error")
+		}
+	}
+
+	err = c.handleErr(err, key)
+	if err != nil {
+		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
+		err = escalateError(sensor.Name, sensor.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
+		if err != nil {
+			ctx.log.Error().Err(err).Msg("failed to escalate error")
 		}
 	}
 
@@ -172,4 +178,26 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 func (c *SensorController) runWorker() {
 	for c.processNextItem() {
 	}
+}
+
+func escalateError(name, namespace, reason, instanceID string, kubeClientset kubernetes.Interface) error {
+	labels := map[string]string{
+		common.LabelEventSeen:  "",
+		common.LabelSensorName: name,
+		common.LabelEventType:  string(v1alpha1.NodePhaseError),
+	}
+	event := &common.K8Event{
+		Name:                name,
+		Namespace:           namespace,
+		Reason:              reason,
+		Kind:                common.LabelArgoEventsEscalationKind,
+		Type:                string(v1alpha1.NodePhaseError),
+		Labels:              labels,
+		ReportingInstance:   instanceID,
+		ReportingController: common.DefaultSensorControllerDeploymentName,
+		Action:              "Escalate",
+	}
+	k8Event := common.GetK8Event(event)
+	_, err := common.CreateK8Event(k8Event, kubeClientset)
+	return err
 }

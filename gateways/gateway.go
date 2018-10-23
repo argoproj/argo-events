@@ -681,6 +681,7 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 		Labels: map[string]string{
 			common.LabelGatewayConfigurationName: config.Src,
 			common.LabelEventSeen:                "",
+			common.LabelEventType:                string(action),
 			common.LabelGatewayName:              gc.Name,
 			common.LabelGatewayConfigID:          config.ID,
 			common.LabelGatewayConfigTimeID:      config.TimeID,

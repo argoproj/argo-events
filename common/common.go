@@ -21,6 +21,8 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
+type K8EventType string
+
 const (
 	// EnvVarNamespace contains the namespace of the controller & services
 	EnvVarNamespace = "ARGO_EVENTS_NAMESPACE"
@@ -31,7 +33,7 @@ const (
 	// SuccessResponse for http request
 	SuccessResponse = "Success"
 	// ErrorResponse for http request
-	ErrorResponse   = "Error"
+	ErrorResponse = "Error"
 
 	// LabelEventSeen is the label for already seen k8 event
 	LabelEventSeen = "event-seen"
@@ -44,6 +46,9 @@ const (
 
 	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
 	StandardYYYYMMDDFormat = "2006-01-02"
+
+	// LabelEventType is label for k8 event type
+	LabelEventType = "event-type"
 )
 
 // SENSOR CONTROLLER CONSTANTS

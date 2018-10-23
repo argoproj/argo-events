@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
@@ -172,13 +171,13 @@ func (soc *sOperationCtx) operate() error {
 			// Create sensor job
 			_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
 			if err != nil {
-				// fail silently
 				soc.log.Error().Err(err).Msg("failed to create sensor job")
+				return err
 			}
 			_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
 			if err != nil {
-				// fail silently
 				soc.log.Error().Err(err).Msg("failed to create sensor service")
+				return err
 			}
 		}
 
@@ -194,26 +193,17 @@ func (soc *sOperationCtx) operate() error {
 	case v1alpha1.NodePhaseActive:
 		if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) {
 			if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeTrigger) {
-				// here we need to check if the sensor is repeatable, if so, we should go back to init phase for the sensor & all the nodes
 				// todo: add spec level deadlines here
 				soc.markSensorPhase(v1alpha1.NodePhaseComplete, true)
 			}
 		}
 	case v1alpha1.NodePhaseError:
-		// trigger escalation
-		soc.log.Info().Msg("escalating sensor error by creating k8 event")
-		k8Event := soc.GetK8Event("sensor is in error phase", v1alpha1.NodePhaseError, common.LabelArgoEventsEscalationKind)
-		k8EventCreated, err := common.CreateK8Event(k8Event, soc.controller.kubeClientset)
-		if err != nil {
-			soc.log.Error().Err(err).Msg("failed to create k8 event to escalate sensor error state")
-			return err
-		}
-		soc.log.Info().Str("event-name", k8EventCreated.ObjectMeta.Name).Msg("created k8 event to escalate sensor error state")
+		soc.log.Info().Msg("sensor is in error state. Check escalated K8 event for the error")
 	case v1alpha1.NodePhaseComplete:
-		soc.log.Info().Msg("sensor is completed")
+		soc.log.Info().Msg("sensor is in complete state")
 		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
 		if soc.s.Spec.Repeat {
-			soc.log.Info().Msg("sensor is configured in repeat mode")
+			soc.log.Info().Msg("re-run sensor")
 			soc.reRunSensor()
 		}
 	}
@@ -221,20 +211,9 @@ func (soc *sOperationCtx) operate() error {
 }
 
 func (soc *sOperationCtx) reRunSensor() {
-	// if we get here we know the sensor pod & job is succeeded, the triggers have fired, but the sensor is repeatable
-	// we know have to reset the sensor status
 	// todo: persist changes in a transaction store somewhere, is it reasonable to put in the sensor object? probably not for scale
-
 	soc.log.Info().Msg("resetting nodes and re-running sensor")
-	// reset the nodes
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	// todo: remove this, it is redundant
-	// re-initialize the signal nodes
-	for _, signal := range soc.s.Spec.Signals {
-		soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseNew)
-	}
-
-	// add a field to status to log # of times this sensor went resolved -> init
 	soc.markSensorPhase(v1alpha1.NodePhaseNew, false)
 	soc.updated = true
 }
@@ -374,23 +353,4 @@ func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhas
 	}
 	soc.s.Status.Nodes[node.ID] = *node
 	return node
-}
-
-// createK8Event creates a kubernetes event.
-func (soc *sOperationCtx) GetK8Event(reason string, action v1alpha1.NodePhase, eventType string) *corev1.Event {
-	event := &common.K8Event{
-		Name:                soc.s.Name,
-		Namespace:           soc.s.Namespace,
-		Type:                eventType,
-		Reason:              reason,
-		Action:              string(action),
-		Kind:                sensor.Kind,
-		ReportingController: common.DefaultSensorControllerDeploymentName,
-		ReportingInstance:   soc.controller.Config.InstanceID,
-		Labels: map[string]string{
-			common.LabelEventSeen:  "",
-			common.LabelSensorName: soc.s.Name,
-		},
-	}
-	return common.GetK8Event(event)
 }
