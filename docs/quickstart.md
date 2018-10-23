@@ -1,4 +1,4 @@
-# Getting Started - Quickstart
+# Installation
 This is a guide to getting started with Argo Events.
 
 ## Requirements
