@@ -35,9 +35,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-http-transformer-linux webhook-linux calendar-linux resource-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux gateway-processor-grpc-client-linux calendar-grpc-linux gateway-processor-http-client-linux calendar-http-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-http-transformer-linux webhook-linux calendar-linux resource-linux artifact-linux nats-linux kafka-linux amqp-linux mqtt-linux gateway-processor-grpc-client-linux calendar-grpc-linux gateway-processor-http-client-linux calendar-http-linux storage-grid-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-http-transformer-image webhook-image calendar-image resource-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-http-transformer-image webhook-image calendar-image resource-image artifact-image nats-image kafka-image amqp-image mqtt-image gateway-processor-grpc-client-image calendar-grpc-image gateway-processor-http-client-image calendar-http-image storage-grid-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -180,6 +180,18 @@ mqtt-linux:
 mqtt-image: mqtt-linux
 	 docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/core/stream/mqtt/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
+
+
+# Custom gateways
+storage-grid:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storage-grid-gateway ./gateways/custom/storage-grid/
+
+storage-grid-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
+
+storage-grid-image: storage-grid-linux
+	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storage-grid/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
 
 # gRPC gateway binary
