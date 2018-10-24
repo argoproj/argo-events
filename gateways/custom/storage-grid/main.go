@@ -35,7 +35,16 @@ import (
 )
 
 var (
-	// gatewayConfig provides a generic configuration for a gateway
+	// mutex synchronizes activeServers
+	mutex sync.Mutex
+	// activeServers keeps track of currently running http servers.
+	activeServers = make(map[string]*http.ServeMux)
+
+	// mutex synchronizes activeRoutes
+	routesMutex sync.Mutex
+	// activeRoutes keep track of active routes for a http server
+	activeRoutes = make(map[string]map[string]struct{})
+
 	gatewayConfig = gateways.NewGatewayConfiguration()
 	respBody = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
@@ -45,22 +54,33 @@ var (
     <ResponseMetadata>
        <RequestId>` + generateUUID().String() + `</RequestId>
     </ResponseMetadata> 
-</PublishResponse>\n`
+</PublishResponse>` + "\n"
 )
 
-// s3ConfigExecutor implements ConfigExecutor interface
-type s3ConfigExecutor struct{}
+// storageGridConfigExecutor implements ConfigExecutor interface
+type storageGridConfigExecutor struct{}
 
-// s3EventConfig contains configuration for bucket notification
-type s3EventConfig struct {
+// storageGridEventConfig contains configuration for storage grid sns
+type storageGridEventConfig struct {
 	Port string
 	Endpoint string
 	Events   []minio.NotificationEventType
-	Filter   S3Filter
+	Filter   StoageGridFilter
+	// srv holds reference to http server
+	srv *http.Server
+	mux *http.ServeMux
 }
 
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type S3Filter struct {
+type server struct {
+	mux *http.ServeMux
+}
+
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
+}
+
+// StoageGridFilter represents filters to apply to bucket nofifications for specifying constraints on objects
+type StoageGridFilter struct {
 	Prefix string
 	Suffix string
 }
@@ -94,8 +114,45 @@ func generateUUID() uuid.UUID{
 	return uuid.NewV4()
 }
 
+// starts a http server
+func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
+	// start a http server only if no other configuration previously started the server on given port
+	mutex.Lock()
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active servers", activeServers[sg.Port]).Msg("active servers")
+	if _, ok := activeServers[sg.Port]; !ok {
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("port", sg.Port).Msg("http server started listening...")
+		s := &server{
+			mux: http.NewServeMux(),
+		}
+		sg.mux = s.mux
+		sg.srv = &http.Server{
+			Addr:    ":" + fmt.Sprintf("%s", sg.Port),
+			Handler: s,
+		}
+		activeServers[sg.Port] = s.mux
+
+		// start http server
+		go func() {
+			err := sg.srv.ListenAndServe()
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
+			if err == http.ErrServerClosed {
+				err = nil
+			}
+			if err != nil {
+				msg := fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
+				errMessage = &msg
+			}
+			if config.Active == true {
+				config.StopCh <- struct{}{}
+			}
+			return
+		}()
+	}
+	mutex.Unlock()
+}
+
 // StartConfig runs a configuration
-func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
+func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
 	var errMessage string
 
@@ -104,47 +161,42 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 
-	var artifact *s3EventConfig
-	err = yaml.Unmarshal([]byte(config.Data.Config), &artifact)
+	var sg *storageGridEventConfig
+	err = yaml.Unmarshal([]byte(config.Data.Config), &sg)
 	if err != nil {
 		errMessage = "failed to parse configuration"
 		return err
 	}
-
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Config).Interface("artifact", *artifact).Msg("s3 artifact")
-
-	// Create a done channel to control 'ListenBucketNotification' go routine.
-	doneCh := make(chan struct{})
-
-	// Indicate to our routine to exit cleanly upon return.
-	defer close(doneCh)
+	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("storage-grid", sg).Msg("configuring...")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	// waits till disconnection from client.
 	go func() {
 		<-config.StopCh
 		config.Active = false
-		gatewayConfig.Log.Info().Str("config", config.Data.Src).Msg("stopping the configuration...")
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
+
+		// remove the endpoint.
+		routesMutex.Lock()
+		if _, ok := activeRoutes[sg.Port]; ok {
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("routes", activeRoutes[sg.Port]).Msg("active routes")
+			delete(activeRoutes[sg.Port], sg.Endpoint)
+			// Check if the endpoint in this configuration was the last of the active endpoints for the http server.
+			// If so, shutdown the server.
+			if len(activeRoutes[sg.Port]) == 0 {
+				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
+				err = sg.srv.Shutdown(context.Background())
+				if err != nil {
+					// previous err message is useful when there was an error in configuration
+					errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
+				}
+			}
+		}
+		routesMutex.Unlock()
 		wg.Done()
 	}()
 
-	// start a http server listening to notifications from storage grid
-	srv := &http.Server{Addr: ":" + fmt.Sprintf("%s", artifact.Port)}
-	err = srv.ListenAndServe()
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
-	if err == http.ErrServerClosed {
-		err = nil
-	}
-	if err != nil {
-		errMessage = "http server stopped"
-	}
-	if config.Active == true {
-		config.StopCh <- struct{}{}
-	}
-
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
 	config.Active = true
 
 	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
@@ -154,26 +206,73 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 		return err
 	}
 
-	http.HandleFunc(artifact.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-		var resp string
-		switch request.Method {
-		case http.MethodPost, http.MethodPut:
-			body, err := ioutil.ReadAll(request.Body)
-			if err != nil {
-				gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to parse request body")
-			} else {
-				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("msg", string(body)).Msg("msg body")
-			}
-		case http.MethodHead:
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
-			resp = ""
-		default:
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
+	// start a http server only if no other configuration previously started the server on given port
+	sgce.startHttpServer(sg, config, err, &errMessage)
+
+	// add endpoint
+	routesMutex.Lock()
+	if _, ok := activeRoutes[sg.Port]; !ok {
+		activeRoutes[sg.Port] = make(map[string]struct{})
+	}
+	if _, ok := activeRoutes[sg.Port][sg.Endpoint]; !ok {
+		activeRoutes[sg.Port][sg.Endpoint] = struct{}{}
+
+		// server with same port is already started by another configuration
+		if sg.mux == nil {
+			mutex.Lock()
+			sg.mux = activeServers[sg.Port]
+			mutex.Unlock()
 		}
-		writer.WriteHeader(http.StatusOK)
-		writer.Header().Add("Content-Type", "text/plain")
-		writer.Write([]byte(resp))
-	})
+
+		// if the configuration that started the server was removed even before we had chance to regiser this endpoint against the port,
+		// and it was last endpoint for port, server is now start new http server
+		if sg.mux == nil {
+			sgce.startHttpServer(sg, config, err, &errMessage)
+		}
+
+		sg.mux.HandleFunc(sg.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+			gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("received a request")
+			// I don't like checking activeRoutes again but http won't let us delete route.
+			if _, ok := activeRoutes[sg.Port][sg.Endpoint]; ok {
+				body, err := ioutil.ReadAll(request.Body)
+				if err != nil {
+					gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
+					common.SendErrorResponse(writer)
+				} else {
+					gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("dispatching event to gateway-processor")
+					gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
+
+					switch request.Method {
+					case http.MethodPost, http.MethodPut:
+						body, err := ioutil.ReadAll(request.Body)
+						if err != nil {
+							gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to parse request body")
+						} else {
+							gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("msg", string(body)).Msg("msg body")
+						}
+					case http.MethodHead:
+						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
+						respBody = ""
+					default:
+						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
+					}
+
+					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("resp", respBody).Msg("response body")
+
+					writer.WriteHeader(http.StatusOK)
+					writer.Header().Add("Content-Type", "text/plain")
+					writer.Write([]byte(respBody))
+
+					// dispatch event to gateway transformer
+					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+						Src:     config.Data.Src,
+						Payload: body,
+					})
+				}
+			}
+		})
+	}
+	routesMutex.Unlock()
 
 	wg.Wait()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
@@ -181,7 +280,7 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 }
 
 // StopConfig stops the configuration
-func (s3ce *s3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (sgce *storageGridConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
 	}
@@ -193,10 +292,9 @@ func main() {
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
 	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &s3ConfigExecutor{})
+	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &storageGridConfigExecutor{})
 	if err != nil {
 		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
 	}
 	select {}
 }
-
