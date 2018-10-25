@@ -139,7 +139,7 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 				err = nil
 			}
 			if err != nil {
-				msg := fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
+				msg := fmt.Sprintf("failed to stop http server. configuration err message: %+v", err)
 				errMessage = &msg
 			}
 			if config.Active == true {

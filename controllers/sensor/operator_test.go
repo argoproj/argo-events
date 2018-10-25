@@ -17,7 +17,6 @@ limitations under the License.
 package sensor
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -78,9 +77,12 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	assert.NotNil(t, sOpCtx.s)
 	assert.Equal(t, string(v1alpha1.NodePhaseNew), string(sOpCtx.s.Status.Phase))
 
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+	
 	for _, signal := range sOpCtx.s.Spec.Signals {
 		node := getNodeByName(sOpCtx.s, signal.Name)
-		assert.Equal(t, string(v1alpha1.NodePhaseNew), string(node.Phase))
+		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
 
 	// mark sensor as error and check if it is escalated through k8 event
@@ -88,13 +90,4 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
 	assert.Equal(t, string(v1alpha1.NodePhaseError), string(sOpCtx.s.Status.Phase))
-
-	events, err := fake.kubeClientset.CoreV1().Events(sOpCtx.s.Namespace).List(metav1.ListOptions{
-		LabelSelector: fmt.Sprintf("%s=%s", common.LabelSensorName, sOpCtx.s.Name),
-	})
-	assert.Nil(t, err)
-	assert.NotNil(t, events.Items)
-	for _, event := range events.Items {
-		assert.Equal(t, string(v1alpha1.NodePhaseError), event.Action)
-	}
 }

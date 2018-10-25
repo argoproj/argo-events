@@ -116,11 +116,7 @@ func (c *SensorController) processNextItem() bool {
 
 	err = c.handleErr(err, key)
 	if err != nil {
-		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
-		err = escalateError(sensor.Name, sensor.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
-		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to escalate error")
-		}
+		ctx.log.Error().Interface("error", err).Msg("sensor controller is unable to handle the error")
 	}
 
 	return true

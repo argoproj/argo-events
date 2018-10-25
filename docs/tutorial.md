@@ -17,8 +17,7 @@
 6. [Updating gateway configurations dynamically](#updating-configurations)
 7. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
 8. [Sensor filters](#sensor-filters)
-9. [Fetching triggers from different sources](#fetching-sensor-triggers)
-10. [Writing custom gateways](custom-gateway.md)
+9. [Writing custom gateways](custom-gateway.md)
 
 ## <a name="gands">Install gateways and sensors</a>
 
@@ -894,84 +893,84 @@ Resource gateway can monitor any K8 resource and any CRD.
   6) Check the gateway resource,  `kubectl -n argo-events get gateways webhook-gateway -o yaml`. You will see `webhook.myNewConfig` is removed from the gateway.
   
   7) Try sending a POST request to '/my' and server will respond with 404.
-  
-  8) You can  
+
+<br/>
    
 ## <a name="passing-payload-from-signal-to-trigger">Passing payload from signal to trigger</a> 
 
-#### Complete payload
+ * ### Complete payload
 
- 1. Create a webhook sensor,
-    ```yaml
-    apiVersion: argoproj.io/v1alpha1
-    kind: Sensor
-    metadata:
-      name: webhook-with-resource-param-sensor
-      labels:
-        sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    spec:
-      repeat: true
-      serviceAccountName: argo-events-sa
-      signals:
-        - name: webhook-gateway/webhook.fooConfig
-      triggers:
-        - name: argo-workflow
-          resource:
-            namespace: argo-events
-            group: argoproj.io
-            version: v1alpha1
-            kind: Workflow
-            parameters:
-              - src:
-                  signal: webhook-gateway/webhook.fooConfig
-                # pass payload of webhook-gateway/webhook.fooConfig signal to first parameter value
-                # of arguments.
-                dest: spec.arguments.parameters.0.value
-            source:
-              inline: |
-                  apiVersion: argoproj.io/v1alpha1
-                  kind: Workflow
-                  metadata:
-                    name: arguments-via-webhook-event
-                  spec:
-                    entrypoint: whalesay
-                    arguments:
-                      parameters:
-                      - name: message
-                        # this is the value that should be overridden
-                        value: hello world
-                    templates:
-                    - name: whalesay
-                      inputs:
-                        parameters:
-                        - name: message
-                      container:
-                        image: docker/whalesay:latest
-                        command: [cowsay]
-                        args: ["{{inputs.parameters.message}}"]
-    ```
+     1. Create a webhook sensor,
+        ```yaml
+        apiVersion: argoproj.io/v1alpha1
+        kind: Sensor
+        metadata:
+          name: webhook-with-resource-param-sensor
+          labels:
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
+        spec:
+          repeat: true
+          serviceAccountName: argo-events-sa
+          signals:
+            - name: webhook-gateway/webhook.fooConfig
+          triggers:
+            - name: argo-workflow
+              resource:
+                namespace: argo-events
+                group: argoproj.io
+                version: v1alpha1
+                kind: Workflow
+                parameters:
+                  - src:
+                      signal: webhook-gateway/webhook.fooConfig
+                    # pass payload of webhook-gateway/webhook.fooConfig signal to first parameter value
+                    # of arguments.
+                    dest: spec.arguments.parameters.0.value
+                source:
+                  inline: |
+                      apiVersion: argoproj.io/v1alpha1
+                      kind: Workflow
+                      metadata:
+                        name: arguments-via-webhook-event
+                      spec:
+                        entrypoint: whalesay
+                        arguments:
+                          parameters:
+                          - name: message
+                            # this is the value that should be overridden
+                            value: hello world
+                        templates:
+                        - name: whalesay
+                          inputs:
+                            parameters:
+                            - name: message
+                          container:
+                            image: docker/whalesay:latest
+                            command: [cowsay]
+                            args: ["{{inputs.parameters.message}}"]
+        ```
+        
+        Run,
+        ```bash
+        kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-complete-payload.yaml
+        ```
     
-    Run,
-    ```bash
-    kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-complete-payload.yaml
-    ```
-
- 2. <b>Make sure to update webhook gateway with `webhook-with-resource-param-sensor` as it's watcher.</b>
-
- 3.  Send a POST request to your webhook gateway
-    ```bash
-    curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
-    ```
+     2. <b>Note that sensor name is `webhook-with-resource-param-sensor`. Update your gateway accordingly or create a new one.</b>
     
- 4. List argo workflows,
-    ```bash
-    argo -n argo-events list
-    ```   
-    
- 5. Check the workflow logs using `argo -n argo-events logs <your-workflow-pod-name>`
+     3.  Send a POST request to your webhook gateway
+        ```bash
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
+        ```
+        
+     4. List argo workflows,
+        ```bash
+        argo -n argo-events list
+        ```   
+        
+     5. Check the workflow logs using `argo -n argo-events logs <your-workflow-pod-name>`
 
 
-#### Filter event payload
+ ## Filter event payload
  1. Create a webhook sensor,
     ```yaml
     apiVersion: argoproj.io/v1alpha1
@@ -1028,9 +1027,54 @@ Resource gateway can monitor any K8 resource and any CRD.
                         args: ["{{inputs.parameters.message}}"]
     
     ```
-    Run,
+ 2. Run,
     ```bash
     kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-resource-param.yaml
     ```
 
-    Post request to webhook gateway and watch new workflow being created
+ 3. Post request to webhook gateway and watch new workflow being created
+
+<br/>
+
+## Sensor Filters
+ Following are the types of the filter you can apply on signal/event payload,
+    
+ |   Type   |   Description      |
+ |----------|-------------------|
+ |   Time            |   Filters the signal based on time constraints     |
+ |   EventContext    |   Filters metadata that provides circumstantial information about the signal.      |
+ |   Data            |   Describes constraints and filters for payload      |
+    
+ ### Time Filter
+   ```yaml 
+   filters:
+    time:
+     start: "2016-05-10T15:04:05Z07:00"
+     stop: "2020-01-02T15:04:05Z07:00"
+   ```
+ 
+ Example:  
+ https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/time-filter-webhook.yaml
+ 
+ ### EventContext Filter
+  ``` 
+  filters:
+   context:
+    source:
+     host: amazon.com
+     contentType: application/json
+  ```
+  
+  Example:  
+  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/context-filter-webhook.yaml
+
+ ### Data filter
+ ```
+ filters:
+  data:
+  - path: bucket
+    type: string
+    value: argo-workflow-input
+ ```
+  Example:  
+  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/data-filter-webhook.yaml

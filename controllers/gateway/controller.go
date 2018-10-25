@@ -120,11 +120,7 @@ func (c *GatewayController) processNextItem() bool {
 	err = c.handleErr(err, key)
 	// create k8 event to escalate the error
 	if err != nil {
-		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
-		err = escalateError(gateway.Name, gateway.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
-		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
-		}
+		ctx.log.Error().Interface("error", err).Msg("gateway controller failed to handle error")
 	}
 	return true
 }
