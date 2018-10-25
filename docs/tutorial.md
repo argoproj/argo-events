@@ -1,8 +1,10 @@
 # Guide
 
-1. [Getting started](quickstart.md)
-2. [What are sensor and gateway controllers](controllers-guide.md)
-3. [Core Gateways and Sensors](#gands)
+1. [What are sensor and gateway controllers](controllers-guide.md)
+2. [Learn about gateways](gateway-guide.md)
+3. [Learn about sensors](sensor-guide.md)
+4. [Learn about triggers](trigger-guide.md)
+5. [Install gateways and sensors](#gands)
     1. [Webhook](#webhook)
     2. [Artifact](#artifact)
     3. [Calendar](#calendar)
@@ -12,13 +14,13 @@
         2. [Kafka](#kafka)
         3. [MQTT](#mqtt)
         4. [AMQP](#amqp)
-4. [Updating configurations dynamically](#updating-configurations)
-5. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
-6. [Sensor Filters](#sensor-filters)
-7. [Fetching Triggers](#fetching-sensor-triggers)
-8. [Writing custom gateways](custom-gateway.md)
-         
-## <a name="gands">Gateways and Sensors</a>
+6. [Updating gateway configurations dynamically](#updating-configurations)
+7. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
+8. [Sensor filters](#sensor-filters)
+9. [Fetching triggers from different sources](#fetching-sensor-triggers)
+10. [Writing custom gateways](custom-gateway.md)
+
+## <a name="gands">Install gateways and sensors</a>
 
 ## <a name="webhook">Webhook</a>
 
@@ -406,6 +408,8 @@ Lets start with deploying Minio server standalone deployment. You can get the K8
         argo -n argo-events list
         ```     
 
+<br/>
+
 ## <a name="calendar">Calendar</a>
 Calendar gateway either accepts `interval` or `cron schedules` as configuration.
 
@@ -515,6 +519,8 @@ Calendar gateway either accepts `interval` or `cron schedules` as configuration.
     ```bash
     argo -n argo-events list
     ```
+
+<br/>
 
 ## <a name="resource">Resource</a>
 Resource gateway can monitor any K8 resource and any CRD.
@@ -670,11 +676,227 @@ Resource gateway can monitor any K8 resource and any CRD.
     
  5. Run `argo -n argo-events list`
 
+<br/>
 
 ## <a name="streams">Streams</a> 
-Yet to be documented. 
+ * ### <a name="nats">NATS</a>
+    Lets start by installing a NATS cluster
+    
+    1) Store following NATS deployment in nats-deploy.yaml 
+        ```yaml
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: nats
+          namespace: argo-events
+          labels:
+            component: nats
+        spec:
+          selector:
+            component: nats
+          type: ClusterIP
+          ports:
+          - name: client
+            port: 4222
+          - name: cluster
+            port: 6222
+          - name: monitor
+            port: 8222
+        ---
+        apiVersion: apps/v1beta1
+        kind: StatefulSet
+        metadata:
+          name: nats
+          namespace: argo-events
+          labels:
+            component: nats
+        spec:
+          serviceName: nats
+          replicas: 3
+          template:
+            metadata:
+              labels:
+                component: nats
+            spec:
+              serviceAccountName: argo-events-sa
+              containers:
+              - name: nats
+                image: nats:latest
+                ports:
+                - containerPort: 4222
+                  name: client
+                - containerPort: 6222
+                  name: cluster
+                - containerPort: 8222
+                  name: monitor
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 8222
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 5
+        ```
+        Run,
+        ```bash
+        kubectl -n argo-events create -f nats-deploy.yaml
+        ```
+        
+   2) Once all pods are up and running, create gateway configmap,
+       ```bash
+       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/nats-gateway-configmap.yaml
+       ```
+   
+   3) Lets create a sensor,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/nats.yaml
+      ```
+   
+   4) Lets create gateway,  
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/nats.yaml
+      ```   
+   5) Use nats client to publish message to subject. To install NATS client, head to [go-nats](https://github.com/nats-io/go-nats)
+   
+   6) Once you publish message to a subject the gateway is configured to listen, you will see the argo workflow getting created.
+    
+ * ### <a name="kafka">Kafka</a>
+   1) If you don't already have a Kafka cluster running, follow the [kafka setup](https://github.com/helm/charts/tree/master/incubator/kafka) 
+
+   2) Lets create the configuration for gateway,   
+       ```bash
+       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/kafka-gateway-configmap.yaml
+       ```
+
+   3) Once above configmap is created, lets deploy the gateway,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/kafka.yaml
+      ```
+
+   4) To create sensor, run
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/kafka.yaml
+      ```
+
+   5) Publish a message to a topic and partition the gateway is configured to listen, you will see the argo workflow getting created.
+
+ * ### <a name="mqtt">MQTT</a>
+   1) If you don't have MQTT broker installed, use `Mosquitto`.
+   
+       Deployment,
+       ```yaml
+       apiVersion: extensions/v1beta1
+       kind: Deployment
+       metadata:
+         name: mosquitto
+         namespace: argo-events
+       spec:
+         template:
+           spec:
+             serviceAccountName: argo-events-sa
+             containers:
+             - name: mosquitto
+               image: toke/mosquitto
+               ports:
+               - containerPort: 9001
+               - containerPort: 8883
+       ```
+       
+       Service,
+       ```yaml
+       apiVersion: v1
+       kind: Service
+       metadata:
+         name: mqtt
+         namespace: argo-events
+       spec:
+         ports:
+         - name: mosquitto
+           port: 1883
+         - name: mosquitto-web
+           port: 80
+           targetPort: 9001
+       ```
+       
+   2. Create the gateway configuration,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/mqtt-gateway-configmap.yaml
+      ```
+      
+   3. Deploy the gateway,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateway/mqtt-gateway.yaml
+      ```
+      
+   4. Deploy the sensor,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/mqtt-sensor.yaml
+      ```  
+   
+   5. Send a message to correct topic the gateway is configured to listen, you will see the argo workflow getting created.
+   
+ * ### <a name="amqp">AMQP</a>
+   1) If you haven't already setup rabbitmq cluster, follow [rabbitmq setup](https://github.com/binarin/rabbit-on-k8s-standalone)  
+   
+   2) Create gateway configuration,
+       ```bash
+       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/amqp-gateway-configmap.yaml 
+       ``` 
+    
+   3) Deploy gateway,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/amqp.yaml
+      ``` 
+      
+   4) Deploy sensor,
+      ```bash
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/amqp.yaml
+      ```
+      
+   5) Send a message to exchange name the gateway is configured to listen, you will see the argo workflow getting created.
 
 
+<br/>
+
+## <a name="updating-configurations">Updating gateway configurations dynamically</a>
+  The framework offers ability to add and remove configurations for gateway on the fly.
+  Lets look at an example of webhook gateway. You already have three configurations running in gateway, 
+  `webhook.portConfig`, `webhook.fooConfig`  and `webhook.barConfig`
+  
+  1) Lets add a new configuration to gateway configmap. Update configmap looks like,
+      ```yaml
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: webhook-gateway-configmap
+      data:
+        webhook.portConfig: |-
+          port: "12000"
+        webhook.barConfig: |-
+          endpoint: "/bar"
+          method: "POST"
+        webhook.fooConfig: |-
+          endpoint: "/foo"
+          method: "POST"
+        webhook.myNewConfig: |-
+          endpoint: "/my"
+          method: "POST"
+      ```
+      Run `kubectl -n argo-events apply -f configmap-file-name` on gateway configmap to update the configmap resource.
+  
+  2) Run `kubectl -n argo-events get gateways webhook-gateway -o yaml`, you'll see gateway now has `webhook.myNewConfig` running.     
+  
+  3) Update the webhook sensor or create a new sensor to listen to this new configuration.
+  
+  4) Test the endpoint by firing a HTTP POST request to `/my`.
+  
+  5) Now, lets remove the configuration `webhook.myNewConfig` from gateway configmap. Run `kubectl apply` to update the configmap.
+   
+  6) Check the gateway resource,  `kubectl -n argo-events get gateways webhook-gateway -o yaml`. You will see `webhook.myNewConfig` is removed from the gateway.
+  
+  7) Try sending a POST request to '/my' and server will respond with 404.
+  
+  8) You can  
+   
 ## <a name="passing-payload-from-signal-to-trigger">Passing payload from signal to trigger</a> 
 
 #### Complete payload
@@ -747,6 +969,7 @@ Yet to be documented.
     ```   
     
  5. Check the workflow logs using `argo -n argo-events logs <your-workflow-pod-name>`
+
 
 #### Filter event payload
  1. Create a webhook sensor,
