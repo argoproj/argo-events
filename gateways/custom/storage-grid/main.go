@@ -23,11 +23,6 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/minio/minio-go"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes"
 	"sync"
 	"net/http"
 	"github.com/satori/go.uuid"
@@ -64,7 +59,8 @@ type storageGridConfigExecutor struct{}
 type storageGridEventConfig struct {
 	Port string
 	Endpoint string
-	Events   []minio.NotificationEventType
+	// Todo: add event and prefix filtering.
+	Events   []string
 	Filter   StoageGridFilter
 	// srv holds reference to http server
 	srv *http.Server
@@ -83,31 +79,6 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 type StoageGridFilter struct {
 	Prefix string
 	Suffix string
-}
-
-// getSecrets retrieves the secret value from the secret in namespace with name and key
-func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secretsIf := client.CoreV1().Secrets(namespace)
-	var secret *corev1.Secret
-	var err error
-	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		secret, err = secretsIf.Get(name, metav1.GetOptions{})
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
-	if err != nil {
-		return "", err
-	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
 }
 
 func generateUUID() uuid.UUID{
@@ -232,7 +203,7 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 
 		sg.mux.HandleFunc(sg.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 			gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("received a request")
-			// I don't like checking activeRoutes again but http won't let us delete route.
+			// Todo: find a better to handle route deletion
 			if _, ok := activeRoutes[sg.Port][sg.Endpoint]; ok {
 				body, err := ioutil.ReadAll(request.Body)
 				if err != nil {
