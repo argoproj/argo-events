@@ -27,13 +27,13 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -111,7 +111,7 @@ func (c *SensorController) processNextItem() bool {
 	if err != nil {
 		escalationEvent := &corev1.Event{
 			Reason: err.Error(),
-			Type:   common.EscalationEventType,
+			Type:   string(common.EscalationEventType),
 			Action: "gateway is marked as failed",
 			EventTime: metav1.MicroTime{
 				Time: time.Now(),
@@ -119,10 +119,10 @@ func (c *SensorController) processNextItem() bool {
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:    sensor.Namespace,
 				GenerateName: sensor.Name + "-",
-				Labels:       map[string]string{
-					common.LabelEventSeen:   "",
+				Labels: map[string]string{
+					common.LabelEventSeen:    "",
 					common.LabelResourceName: sensor.Name,
-					common.LabelEventType:   common.EscalationEventType,
+					common.LabelEventType:    string(common.EscalationEventType),
 				},
 			},
 			InvolvedObject: corev1.ObjectReference{
@@ -133,7 +133,7 @@ func (c *SensorController) processNextItem() bool {
 			Source: corev1.EventSource{
 				Component: sensor.Name,
 			},
-			ReportingInstance: common.DefaultSensorControllerDeploymentName,
+			ReportingInstance:   common.DefaultSensorControllerDeploymentName,
 			ReportingController: c.Config.InstanceID,
 		}
 

@@ -672,7 +672,7 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, config *ConfigData) *corev1.Event {
 	return &corev1.Event{
 		Reason: reason,
-		Type:   common.ResourceStateChangeEventType,
+		Type:   string(common.ResourceStateChangeEventType),
 		Action: fmt.Sprintf("gateway is state changed to %s", string(action)),
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
@@ -680,10 +680,10 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    gc.gw.Namespace,
 			GenerateName: gc.gw.Name + "-",
-			Labels:       map[string]string{
-				common.LabelEventSeen:   "",
-				common.LabelResourceName: gc.gw.Name,
-				common.LabelEventType:   common.ResourceStateChangeEventType,
+			Labels: map[string]string{
+				common.LabelEventSeen:                "",
+				common.LabelResourceName:             gc.gw.Name,
+				common.LabelEventType:                string(common.ResourceStateChangeEventType),
 				common.LabelGatewayConfigurationName: config.Src,
 				common.LabelGatewayName:              gc.Name,
 				common.LabelGatewayConfigID:          config.ID,
@@ -698,7 +698,7 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 		Source: corev1.EventSource{
 			Component: gc.gw.Name,
 		},
-		ReportingInstance: common.DefaultGatewayControllerDeploymentName,
+		ReportingInstance:   common.DefaultGatewayControllerDeploymentName,
 		ReportingController: gc.controllerInstanceID,
 	}
 }

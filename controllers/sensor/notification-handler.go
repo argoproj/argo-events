@@ -62,14 +62,14 @@ func NewsensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
 	sensor *v1alpha1.Sensor, log zerolog.Logger, wg *sync.WaitGroup, controllerInstanceID string) *sensorExecutionCtx {
 	return &sensorExecutionCtx{
-		sensorClient:    sensorClient,
-		kubeClient:      kubeClient,
-		clientPool:      clientPool,
-		discoveryClient: discoveryClient,
-		sensor:          sensor,
-		log:             log,
-		wg:              wg,
-		queue:           make(chan *sensorEventWrapper),
+		sensorClient:         sensorClient,
+		kubeClient:           kubeClient,
+		clientPool:           clientPool,
+		discoveryClient:      discoveryClient,
+		sensor:               sensor,
+		log:                  log,
+		wg:                   wg,
+		queue:                make(chan *sensorEventWrapper),
 		controllerInstanceID: controllerInstanceID,
 	}
 }

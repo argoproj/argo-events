@@ -25,9 +25,9 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // createFilterEscalationEvent creates a k8 event for escalation for filter failures
@@ -35,7 +35,7 @@ func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.Escal
 	se.log.Info().Interface("policy", policy).Msg("escalation policy")
 	escalationEvent := &corev1.Event{
 		Reason: policy.Message,
-		Type:   common.EscalationEventType,
+		Type:   string(common.EscalationEventType),
 		Action: fmt.Sprintf("sensor filter failed. Cause: %s", string(policy.Level)),
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
@@ -43,12 +43,12 @@ func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.Escal
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    se.sensor.Namespace,
 			GenerateName: se.sensor.Name + "-",
-			Labels:       map[string]string{
-				common.LabelEventSeen:   "",
+			Labels: map[string]string{
+				common.LabelEventSeen:    "",
 				common.LabelResourceName: se.sensor.Name,
-				common.LabelEventType:   common.EscalationEventType,
-				common.LabelSignalName: signalFilterName,
-				common.LabelSensorName: se.sensor.Name,
+				common.LabelEventType:    string(common.EscalationEventType),
+				common.LabelSignalName:   signalFilterName,
+				common.LabelSensorName:   se.sensor.Name,
 			},
 		},
 		InvolvedObject: corev1.ObjectReference{
@@ -59,7 +59,7 @@ func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.Escal
 		Source: corev1.EventSource{
 			Component: se.sensor.Name,
 		},
-		ReportingInstance: common.DefaultSensorControllerDeploymentName,
+		ReportingInstance:   common.DefaultSensorControllerDeploymentName,
 		ReportingController: se.controllerInstanceID,
 	}
 	_, err := common.CreateK8Event(escalationEvent, se.kubeClient)

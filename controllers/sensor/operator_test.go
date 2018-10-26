@@ -79,7 +79,7 @@ func TestSensorOperateLifecycle(t *testing.T) {
 
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
-	
+
 	for _, signal := range sOpCtx.s.Spec.Signals {
 		node := getNodeByName(sOpCtx.s, signal.Name)
 		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))

@@ -21,15 +21,24 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const (
-	EscalationEventType = "Escalation"
-	ResourceStateChangeEventType = "StateChange"
+// K8EventType is the type of event generated to indicate change in state of resource
+type K8EventType string
 
+// Possible values for K8EventType
+var (
+	EscalationEventType          K8EventType = "Escalation"
+	ResourceStateChangeEventType K8EventType = "StateChange"
+)
+
+const (
 	// LabelEventSeen is the label for already seen k8 event
 	LabelEventSeen = "event-seen"
 
 	// LabelResourceName is the label for a resource name. It is used while creating K8 event to indicate which component/resource caused the event.
 	LabelResourceName = "component"
+
+	// LabelEventType is label for k8 event type
+	LabelEventType = "event-type"
 )
 
 // CreateK8Event creates a kubernetes event resource

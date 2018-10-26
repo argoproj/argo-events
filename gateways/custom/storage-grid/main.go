@@ -23,10 +23,10 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
-	"sync"
-	"net/http"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
+	"net/http"
+	"sync"
 )
 
 var (
@@ -41,7 +41,7 @@ var (
 	activeRoutes = make(map[string]map[string]struct{})
 
 	gatewayConfig = gateways.NewGatewayConfiguration()
-	respBody = `
+	respBody      = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
     <PublishResult> 
         <MessageId>` + generateUUID().String() + `</MessageId> 
@@ -57,11 +57,11 @@ type storageGridConfigExecutor struct{}
 
 // storageGridEventConfig contains configuration for storage grid sns
 type storageGridEventConfig struct {
-	Port string
+	Port     string
 	Endpoint string
 	// Todo: add event and prefix filtering.
-	Events   []string
-	Filter   StorageGridFilter
+	Events []string
+	Filter StorageGridFilter
 	// srv holds reference to http server
 	srv *http.Server
 	mux *http.ServeMux
@@ -81,7 +81,7 @@ type StorageGridFilter struct {
 	Suffix string
 }
 
-func generateUUID() uuid.UUID{
+func generateUUID() uuid.UUID {
 	return uuid.NewV4()
 }
 

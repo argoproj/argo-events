@@ -32,9 +32,9 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"os"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"os"
 )
 
 const (
@@ -114,7 +114,7 @@ func (c *GatewayController) processNextItem() bool {
 	if err != nil {
 		escalationEvent := &corev1.Event{
 			Reason: err.Error(),
-			Type:   common.EscalationEventType,
+			Type:   string(common.EscalationEventType),
 			Action: "gateway is marked as failed",
 			EventTime: metav1.MicroTime{
 				Time: time.Now(),
@@ -122,10 +122,10 @@ func (c *GatewayController) processNextItem() bool {
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace:    gateway.Namespace,
 				GenerateName: gateway.Name + "-",
-				Labels:       map[string]string{
-					common.LabelEventSeen:   "",
+				Labels: map[string]string{
+					common.LabelEventSeen:    "",
 					common.LabelResourceName: gateway.Name,
-					common.LabelEventType:   common.EscalationEventType,
+					common.LabelEventType:    string(common.EscalationEventType),
 				},
 			},
 			InvolvedObject: corev1.ObjectReference{
@@ -136,7 +136,7 @@ func (c *GatewayController) processNextItem() bool {
 			Source: corev1.EventSource{
 				Component: gateway.Name,
 			},
-			ReportingInstance: common.DefaultGatewayControllerDeploymentName,
+			ReportingInstance:   common.DefaultGatewayControllerDeploymentName,
 			ReportingController: c.Config.InstanceID,
 		}
 		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
