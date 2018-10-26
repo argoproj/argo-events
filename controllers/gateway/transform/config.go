@@ -106,7 +106,6 @@ func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
 	// parse sensor watchers
 	if sensorWatchersStr != "" {
 		for _, sensorWatcherStr := range strings.Split(sensorWatchersStr, ",") {
-			fmt.Sprintf("parsing sensor watcher: %s", sensorWatcherStr)
 			var sensorWatcher v1alpha1.SensorNotificationWatcher
 			err := yaml.Unmarshal([]byte(sensorWatcherStr), &sensorWatcher)
 			if err != nil {
@@ -119,7 +118,6 @@ func (t *tOperationCtx) updateConfig(cm *apiv1.ConfigMap) error {
 	// parse gateway watchers
 	if gatewayWatchersStr != "" {
 		for _, gatewayWatcherStr := range strings.Split(gatewayWatchersStr, ",") {
-			fmt.Sprintf("parsing gateway watcher: %s", gatewayWatcherStr)
 			var gatewayWatcher v1alpha1.GatewayNotificationWatcher
 			err := yaml.Unmarshal([]byte(gatewayWatcherStr), &gatewayWatcher)
 			if err != nil {

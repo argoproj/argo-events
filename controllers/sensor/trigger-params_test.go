@@ -19,9 +19,9 @@ import (
 	"reflect"
 	"testing"
 
+	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"fmt"
 )
 
 func Test_applyParams(t *testing.T) {
@@ -163,7 +163,7 @@ func Test_applyParams(t *testing.T) {
 					v1alpha1.ResourceParameter{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "nonJSON",
-							Path: "test",
+							Path:   "test",
 						},
 						Dest: "x",
 					},
@@ -181,7 +181,6 @@ func Test_applyParams(t *testing.T) {
 				t.Errorf("applyParams() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			fmt.Println(string(got))
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("applyParams() = %v, want %v", got, tt.want)
 			}

@@ -28,15 +28,10 @@ const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
 
-	// http responses
+	// SuccessResponse for http request
 	SuccessResponse = "Success"
-	ErrorResponse   = "Error"
-
-	// LabelEventSeen is the label for already seen k8 event
-	LabelEventSeen = "event-seen"
-
-	// LabelArgoEventsEscalationKind is the label for escalation
-	LabelArgoEventsEscalationKind = "ArgoEventsEscalation"
+	// ErrorResponse for http request
+	ErrorResponse = "Error"
 
 	// StandardTimeFormat is time format reference for golang
 	StandardTimeFormat = "2006-01-02 15:04:05"
@@ -93,14 +88,8 @@ const (
 	// LabelSignalName is label for signal name
 	LabelSignalName = "signal-name"
 
-	// LabelSensorStateUpdate is the label for sensor state updates
-	LabelSensorStateUpdate = "sensor-state-update"
-
-	// LabelEventForSignalNode is the label for event set in signal node
-	LabelEventForSensorNode = "event-for-signal-node"
-
-	// SensorControllerInstanceIDEnvVar is used to get sensor controller instance id
-	SensorControllerInstanceIDEnvVar = "SENSOR_CONTROLLER_INSTANCE_ID"
+	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
+	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
 )
 
 // GATEWAY CONSTANTS
@@ -108,8 +97,8 @@ const (
 	// DefaultGatewayControllerDeploymentName is the default deployment name of the gateway-controller-controller
 	DefaultGatewayControllerDeploymentName = "gateway-controller"
 
-	// GatewayControllerConfigMapEnvVar contains name of the configmap to retrieve gateway-controller configuration from
-	GatewayControllerConfigMapEnvVar = "GATEWAY_CONTROLLER_CONFIG_MAP"
+	// EnvVarGatewayControllerConfigMap contains name of the configmap to retrieve gateway-controller configuration from
+	EnvVarGatewayControllerConfigMap = "GATEWAY_CONTROLLER_CONFIG_MAP"
 
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
 	// Content encoding is expected to be YAML.
@@ -133,11 +122,11 @@ const (
 	// LabelGatewayConfigurationName is the label for a configuration in gateway
 	LabelGatewayConfigurationName = "config-name"
 
-	// GatewayControllerInstanceIDEnvVar is used to get gateway controller instance id
-	GatewayControllerInstanceIDEnvVar = "GATEWAY_CONTROLLER_INSTANCE_ID"
+	// EnvVarGatewayControllerInstanceID is used to get gateway controller instance id
+	EnvVarGatewayControllerInstanceID = "GATEWAY_CONTROLLER_INSTANCE_ID"
 
-	// GatewayControllerNameEnvVar is used to get name of gateway controller
-	GatewayControllerNameEnvVar = "GATEWAY_CONTROLLER_NAME"
+	// EnvVarGatewayControllerName is used to get name of gateway controller
+	EnvVarGatewayControllerName = "GATEWAY_CONTROLLER_NAME"
 
 	// LabelGatewayConfigID is the label for gateway configuration ID
 	LabelGatewayConfigID = "GATEWAY_CONFIG_ID"
@@ -148,35 +137,35 @@ const (
 
 // Gateway Processor constants
 const (
-	// GatewayProcessorConfigMapEnvVar is used to get map containing configurations to run in a gateway
-	GatewayProcessorConfigMapEnvVar = "GATEWAY_PROCESSOR_CONFIG_MAP"
+	// EnvVarGatewayProcessorConfigMap is used to get map containing configurations to run in a gateway
+	EnvVarGatewayProcessorConfigMap = "GATEWAY_PROCESSOR_CONFIG_MAP"
 
 	// GatewayProcessorGRPCServerPort is used to get grpc server port for gateway processor server
 	GatewayProcessorGRPCServerPort = "GATEWAY_PROCESSOR_GRPC_SERVER_PORT"
 
-	// GatewayProcessorClientHTTPPortEnvVar is used to get http server port for gateway processor client
-	GatewayProcessorClientHTTPPortEnvVar = "GATEWAY_PROCESSOR_CLIENT_HTTP_PORT"
+	// EnvVarGatewayProcessorClientHTTPPort is used to get http server port for gateway processor client
+	EnvVarGatewayProcessorClientHTTPPort = "GATEWAY_PROCESSOR_CLIENT_HTTP_PORT"
 
 	// GatewayProcessorClientHTTPPort is gateway processor client http server port
 	GatewayProcessorClientHTTPPort = "9393"
 
-	// GatewayProcessorServerHTTPPortEnvVar is used get http server port for gateway processor server
-	GatewayProcessorServerHTTPPortEnvVar = "GATEWAY_PROCESSOR_SERVER_HTTP_PORT"
+	// EnvVarGatewayProcessorServerHTTPPort is used get http server port for gateway processor server
+	EnvVarGatewayProcessorServerHTTPPort = "GATEWAY_PROCESSOR_SERVER_HTTP_PORT"
 
-	// GatewayProcessorHTTPServerConfigStartEndpointEnvVar is used to get REST endpoint to post new configuration to
-	GatewayProcessorHTTPServerConfigStartEndpointEnvVar = "GATEWAY_HTTP_CONFIG_START"
+	// EnvVarGatewayProcessorHTTPServerConfigStartEndpoint is used to get REST endpoint to post new configuration to
+	EnvVarGatewayProcessorHTTPServerConfigStartEndpoint = "GATEWAY_HTTP_CONFIG_START"
 
 	// GatewayProcessorHTTPServerConfigStartEndpoint is REST endpoint to post new configuration to
 	GatewayProcessorHTTPServerConfigStartEndpoint = "/start"
 
-	// GatewayProcessorHTTPServerConfigStopEndpointEnvVar is used to get REST endpoint to post to stop a configuration
-	GatewayProcessorHTTPServerConfigStopEndpointEnvVar = "GATEWAY_HTTP_CONFIG_STOP"
+	// EnvVarGatewayProcessorHTTPServerConfigStopEndpoint is used to get REST endpoint to post to stop a configuration
+	EnvVarGatewayProcessorHTTPServerConfigStopEndpoint = "GATEWAY_HTTP_CONFIG_STOP"
 
 	// GatewayProcessorHTTPServerConfigStopEndpoint is REST endpoint to post to stop a configuration
 	GatewayProcessorHTTPServerConfigStopEndpoint = "/stop"
 
-	// GatewayProcessorHTTPServerEventEndpointEnvVar is used to get the REST endpoint to send event to for gateway processor server
-	GatewayProcessorHTTPServerEventEndpointEnvVar = "GATEWAY_HTTP_CONFIG_EVENT"
+	// EnvVarGatewayProcessorHTTPServerEventEndpoint is used to get the REST endpoint to send event to for gateway processor server
+	EnvVarGatewayProcessorHTTPServerEventEndpoint = "GATEWAY_HTTP_CONFIG_EVENT"
 
 	// GatewayProcessorHTTPServerEventEndpoint is REST endpoint to send event to for gateway processor server
 	GatewayProcessorHTTPServerEventEndpoint = "/event"
@@ -190,8 +179,8 @@ const (
 
 // Gateway Transformer constants
 const (
-	// GatewayConfigMapEnvVar is used for gateway  configuration
-	GatewayTransformerConfigMapEnvVar = "GATEWAY_TRANSFORMER_CONFIG_MAP"
+	// EnvVarGatewayTransformerConfigMap is used for gateway  configuration
+	EnvVarGatewayTransformerConfigMap = "GATEWAY_TRANSFORMER_CONFIG_MAP"
 
 	// GatewayHTTPEventTransformerImage is image for gateway http event transformer
 	GatewayHTTPEventTransformerImage = "argoproj/gateway-http-transformer"
@@ -202,8 +191,8 @@ const (
 	// GatewayKafkaEventTransformerImage is image for gateway kafka event transformer
 	GatewayKafkaEventTransformerImage = "argoproj/gateway-kafka-transformer"
 
-	//  TransformerPortEnvVar is the env var for http server port
-	GatewayTransformerPortEnvVar = "TRANSFORMER_PORT"
+	//  EnvVarGatewayTransformerPort is the env var for http server port
+	EnvVarGatewayTransformerPort = "TRANSFORMER_PORT"
 
 	// TransformerPort is http server port where transformer service is running
 	GatewayTransformerPort = "9300"

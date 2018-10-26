@@ -153,7 +153,9 @@ func (ce *calendarConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 
 func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
-		schedule, err := cronlib.Parse(cal.Schedule)
+		// standard cron expression
+		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
+		schedule, err := specParser.Parse(cal.Schedule)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.Schedule, err.Error())
 		}

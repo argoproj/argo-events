@@ -96,7 +96,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 	goc.gw.Status.Phase = v1alpha1.NodePhaseError
 	err = goc.operate()
 	assert.Nil(t, err)
-	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseRunning))
+	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseError))
 
 	// mark gateway phase as service error
 	goc.gw.Status.Phase = v1alpha1.NodePhaseServiceError

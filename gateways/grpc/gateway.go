@@ -104,14 +104,12 @@ func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 			errMessage = "event can't be nil"
 			err = fmt.Errorf(errMessage)
 			return err
-		} else {
-			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: event.Data,
-			})
 		}
+		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+			Src:     config.Data.Src,
+			Payload: event.Data,
+		})
 	}
-	return nil
 }
 
 // Stop config disconnects the client connection and hence stops the configuration

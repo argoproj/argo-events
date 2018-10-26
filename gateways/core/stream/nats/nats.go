@@ -99,9 +99,8 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		errMessage = "failed to subscribe to subject"
 		config.StopCh <- struct{}{}
 		return err
-	} else {
-		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
 	}
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
 
 	wg.Wait()
 	err = sub.Unsubscribe()
