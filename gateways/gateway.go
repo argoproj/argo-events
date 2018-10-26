@@ -498,15 +498,15 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("no namespace provided")
 	}
-	transformerPort, ok := os.LookupEnv(common.GatewayTransformerPortEnvVar)
+	transformerPort, ok := os.LookupEnv(common.EnvVarGatewayTransformerPort)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway transformer port is not provided")
 	}
-	configName, ok := os.LookupEnv(common.GatewayProcessorConfigMapEnvVar)
+	configName, ok := os.LookupEnv(common.EnvVarGatewayProcessorConfigMap)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway processor configmap is not provided")
 	}
-	controllerInstanceID, ok := os.LookupEnv(common.GatewayControllerInstanceIDEnvVar)
+	controllerInstanceID, ok := os.LookupEnv(common.EnvVarGatewayControllerInstanceID)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller instance ID is not provided")
 	}
@@ -536,35 +536,35 @@ func NewGatewayConfiguration() *GatewayConfig {
 func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
 	httpGatewayServerConfig := &HTTPGatewayServerConfig{}
 	httpGatewayServerConfig.HTTPServerPort = func() string {
-		httpServerPort, ok := os.LookupEnv(common.GatewayProcessorServerHTTPPortEnvVar)
+		httpServerPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorServerHTTPPort)
 		if !ok {
 			panic("gateway server http port is not provided")
 		}
 		return httpServerPort
 	}()
 	httpGatewayServerConfig.HTTPClientPort = func() string {
-		httpClientPort, ok := os.LookupEnv(common.GatewayProcessorClientHTTPPortEnvVar)
+		httpClientPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorClientHTTPPort)
 		if !ok {
 			panic("gateway client http port is not provided")
 		}
 		return httpClientPort
 	}()
 	httpGatewayServerConfig.ConfigActivateEndpoint = func() string {
-		configActivateEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar)
+		configActivateEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint)
 		if !ok {
 			panic("gateway config activation endpoint is not provided")
 		}
 		return configActivateEndpoint
 	}()
 	httpGatewayServerConfig.ConfigurationDeactivateEndpoint = func() string {
-		configDeactivateEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar)
+		configDeactivateEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint)
 		if !ok {
 			panic("gateway config deactivation endpoint is not provided")
 		}
 		return configDeactivateEndpoint
 	}()
 	httpGatewayServerConfig.EventEndpoint = func() string {
-		eventEndpoint, ok := os.LookupEnv(common.GatewayProcessorHTTPServerEventEndpointEnvVar)
+		eventEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerEventEndpoint)
 		if !ok {
 			panic("gateway event endpoint is not provided")
 		}
@@ -668,26 +668,39 @@ func (gc *GatewayConfig) reapplyUpdate() error {
 	})
 }
 
-// GetK8Event retrieves a kubernetes event.
+// GetK8Event returns a kubernetes event.
 func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, config *ConfigData) *corev1.Event {
-	event := &common.K8Event{
-		Name:                gc.Name,
-		Namespace:           gc.Namespace,
-		Type:                gateway.Kind,
-		Reason:              reason,
-		Action:              string(action),
-		ReportingController: gc.Name,
-		ReportingInstance:   gc.controllerInstanceID,
-		Labels: map[string]string{
-			common.LabelGatewayConfigurationName: config.Src,
-			common.LabelEventSeen:                "",
-			common.LabelEventType:                string(action),
-			common.LabelGatewayName:              gc.Name,
-			common.LabelGatewayConfigID:          config.ID,
-			common.LabelGatewayConfigTimeID:      config.TimeID,
+	return &corev1.Event{
+		Reason: reason,
+		Type:   common.ResourceStateChangeEventType,
+		Action: fmt.Sprintf("gateway is state changed to %s", string(action)),
+		EventTime: metav1.MicroTime{
+			Time: time.Now(),
 		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    gc.gw.Namespace,
+			GenerateName: gc.gw.Name + "-",
+			Labels:       map[string]string{
+				common.LabelEventSeen:   "",
+				common.LabelResourceName: gc.gw.Name,
+				common.LabelEventType:   common.ResourceStateChangeEventType,
+				common.LabelGatewayConfigurationName: config.Src,
+				common.LabelGatewayName:              gc.Name,
+				common.LabelGatewayConfigID:          config.ID,
+				common.LabelGatewayConfigTimeID:      config.TimeID,
+			},
+		},
+		InvolvedObject: corev1.ObjectReference{
+			Namespace: gc.gw.Namespace,
+			Name:      gc.gw.Name,
+			Kind:      gateway.Kind,
+		},
+		Source: corev1.EventSource{
+			Component: gc.gw.Name,
+		},
+		ReportingInstance: common.DefaultGatewayControllerDeploymentName,
+		ReportingController: gc.controllerInstanceID,
 	}
-	return common.GetK8Event(event)
 }
 
 // GatewayCleanup marks configuration as non-active and marks final gateway state

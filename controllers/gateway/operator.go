@@ -307,7 +307,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	// these env vars are common to different flavors of gateway.
 	envVars := []corev1.EnvVar{
 		{
-			Name:  common.GatewayTransformerPortEnvVar,
+			Name:  common.EnvVarGatewayTransformerPort,
 			Value: common.GatewayTransformerPort,
 		},
 		{
@@ -315,7 +315,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: goc.gw.Namespace,
 		},
 		{
-			Name:  common.GatewayProcessorConfigMapEnvVar,
+			Name:  common.EnvVarGatewayProcessorConfigMap,
 			Value: goc.gw.Spec.ConfigMap,
 		},
 		{
@@ -323,11 +323,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: goc.gw.Name,
 		},
 		{
-			Name:  common.GatewayControllerInstanceIDEnvVar,
+			Name:  common.EnvVarGatewayControllerInstanceID,
 			Value: goc.controller.Config.InstanceID,
 		},
 		{
-			Name:  common.GatewayControllerNameEnvVar,
+			Name:  common.EnvVarGatewayControllerName,
 			Value: common.DefaultGatewayControllerDeploymentName,
 		},
 	}
@@ -382,23 +382,23 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// and gateway processor client
 		httpEnvVars := []corev1.EnvVar{
 			{
-				Name:  common.GatewayProcessorServerHTTPPortEnvVar,
+				Name:  common.EnvVarGatewayProcessorServerHTTPPort,
 				Value: goc.gw.Spec.HTTPServerPort,
 			},
 			{
-				Name:  common.GatewayProcessorClientHTTPPortEnvVar,
+				Name:  common.EnvVarGatewayProcessorClientHTTPPort,
 				Value: common.GatewayProcessorClientHTTPPort,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint,
 				Value: common.GatewayProcessorHTTPServerConfigStartEndpoint,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint,
 				Value: common.GatewayProcessorHTTPServerConfigStopEndpoint,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerEventEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerEventEndpoint,
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
 		}
@@ -445,7 +445,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		Image:           transformerImage,
 		Env: []corev1.EnvVar{
 			{
-				Name:  common.GatewayTransformerConfigMapEnvVar,
+				Name:  common.EnvVarGatewayTransformerConfigMap,
 				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
 			},
 			{

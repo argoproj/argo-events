@@ -28,7 +28,7 @@ func main() {
 		panic("no namespace provided")
 	}
 
-	configmap, _ := os.LookupEnv(common.GatewayTransformerConfigMapEnvVar)
+	configmap, _ := os.LookupEnv(common.EnvVarGatewayTransformerConfigMap)
 	if configmap == "" {
 		panic("no gateway transformer config-map provided.")
 	}

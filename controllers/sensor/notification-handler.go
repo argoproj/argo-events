@@ -46,6 +46,8 @@ type sensorExecutionCtx struct {
 	wg *sync.WaitGroup
 	// queue is internal queue to manage incoming events
 	queue chan *sensorEventWrapper
+	// controllerInstanceID is the instance ID of sensor controller processing this sensor
+	controllerInstanceID string
 }
 
 // sensorEventWrapper is a wrapper around event received from gateway and the signal which represents the event
@@ -58,7 +60,7 @@ type sensorEventWrapper struct {
 // NewsensorExecutionCtx returns a new sensor execution context.
 func NewsensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface,
 	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
-	sensor *v1alpha1.Sensor, log zerolog.Logger, wg *sync.WaitGroup) *sensorExecutionCtx {
+	sensor *v1alpha1.Sensor, log zerolog.Logger, wg *sync.WaitGroup, controllerInstanceID string) *sensorExecutionCtx {
 	return &sensorExecutionCtx{
 		sensorClient:    sensorClient,
 		kubeClient:      kubeClient,
@@ -68,6 +70,7 @@ func NewsensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 		log:             log,
 		wg:              wg,
 		queue:           make(chan *sensorEventWrapper),
+		controllerInstanceID: controllerInstanceID,
 	}
 }
 

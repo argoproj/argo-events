@@ -32,6 +32,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -107,8 +109,36 @@ func (c *SensorController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
+		escalationEvent := &corev1.Event{
+			Reason: err.Error(),
+			Type:   common.EscalationEventType,
+			Action: "gateway is marked as failed",
+			EventTime: metav1.MicroTime{
+				Time: time.Now(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:    sensor.Namespace,
+				GenerateName: sensor.Name + "-",
+				Labels:       map[string]string{
+					common.LabelEventSeen:   "",
+					common.LabelResourceName: sensor.Name,
+					common.LabelEventType:   common.EscalationEventType,
+				},
+			},
+			InvolvedObject: corev1.ObjectReference{
+				Namespace: sensor.Namespace,
+				Name:      sensor.Name,
+				Kind:      sensor.Kind,
+			},
+			Source: corev1.EventSource{
+				Component: sensor.Name,
+			},
+			ReportingInstance: common.DefaultSensorControllerDeploymentName,
+			ReportingController: c.Config.InstanceID,
+		}
+
 		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
-		err = escalateError(sensor.Name, sensor.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
+		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
 		if err != nil {
 			ctx.log.Error().Err(err).Msg("failed to escalate error")
 		}
@@ -118,7 +148,6 @@ func (c *SensorController) processNextItem() bool {
 	if err != nil {
 		ctx.log.Error().Interface("error", err).Msg("sensor controller is unable to handle the error")
 	}
-
 	return true
 }
 
@@ -174,26 +203,4 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 func (c *SensorController) runWorker() {
 	for c.processNextItem() {
 	}
-}
-
-func escalateError(name, namespace, reason, instanceID string, kubeClientset kubernetes.Interface) error {
-	labels := map[string]string{
-		common.LabelEventSeen:  "",
-		common.LabelSensorName: name,
-		common.LabelEventType:  string(v1alpha1.NodePhaseError),
-	}
-	event := &common.K8Event{
-		Name:                name,
-		Namespace:           namespace,
-		Reason:              reason,
-		Kind:                common.LabelArgoEventsEscalationKind,
-		Type:                string(v1alpha1.NodePhaseError),
-		Labels:              labels,
-		ReportingInstance:   instanceID,
-		ReportingController: common.DefaultSensorControllerDeploymentName,
-		Action:              "Escalate",
-	}
-	k8Event := common.GetK8Event(event)
-	_, err := common.CreateK8Event(k8Event, kubeClientset)
-	return err
 }

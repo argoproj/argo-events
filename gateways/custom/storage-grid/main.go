@@ -61,7 +61,7 @@ type storageGridEventConfig struct {
 	Endpoint string
 	// Todo: add event and prefix filtering.
 	Events   []string
-	Filter   StoageGridFilter
+	Filter   StorageGridFilter
 	// srv holds reference to http server
 	srv *http.Server
 	mux *http.ServeMux
@@ -75,8 +75,8 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-// StoageGridFilter represents filters to apply to bucket nofifications for specifying constraints on objects
-type StoageGridFilter struct {
+// StorageGridFilter represents filters to apply to bucket nofifications for specifying constraints on objects
+type StorageGridFilter struct {
 	Prefix string
 	Suffix string
 }
@@ -224,12 +224,7 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 					case http.MethodHead:
 						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
 						respBody = ""
-					default:
-						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
 					}
-
-					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("resp", respBody).Msg("response body")
-
 					writer.WriteHeader(http.StatusOK)
 					writer.Header().Add("Content-Type", "text/plain")
 					writer.Write([]byte(respBody))

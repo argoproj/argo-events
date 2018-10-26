@@ -33,6 +33,8 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"os"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -110,8 +112,35 @@ func (c *GatewayController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
+		escalationEvent := &corev1.Event{
+			Reason: err.Error(),
+			Type:   common.EscalationEventType,
+			Action: "gateway is marked as failed",
+			EventTime: metav1.MicroTime{
+				Time: time.Now(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:    gateway.Namespace,
+				GenerateName: gateway.Name + "-",
+				Labels:       map[string]string{
+					common.LabelEventSeen:   "",
+					common.LabelResourceName: gateway.Name,
+					common.LabelEventType:   common.EscalationEventType,
+				},
+			},
+			InvolvedObject: corev1.ObjectReference{
+				Namespace: gateway.Namespace,
+				Name:      gateway.Name,
+				Kind:      gateway.Kind,
+			},
+			Source: corev1.EventSource{
+				Component: gateway.Name,
+			},
+			ReportingInstance: common.DefaultGatewayControllerDeploymentName,
+			ReportingController: c.Config.InstanceID,
+		}
 		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
-		err = escalateError(gateway.Name, gateway.Namespace, err.Error(), ctx.controller.Config.InstanceID, ctx.controller.kubeClientset)
+		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
 		if err != nil {
 			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
 		}
@@ -176,26 +205,4 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, signalThreads in
 func (c *GatewayController) runWorker() {
 	for c.processNextItem() {
 	}
-}
-
-func escalateError(name, namespace, reason, instanceID string, kubeClientset kubernetes.Interface) error {
-	labels := map[string]string{
-		common.LabelEventSeen:   "",
-		common.LabelGatewayName: name,
-		common.LabelEventType:   string(v1alpha1.NodePhaseError),
-	}
-	event := &common.K8Event{
-		Name:                name,
-		Namespace:           namespace,
-		Reason:              reason,
-		Kind:                common.LabelArgoEventsEscalationKind,
-		Type:                string(v1alpha1.NodePhaseError),
-		Labels:              labels,
-		ReportingInstance:   instanceID,
-		ReportingController: common.DefaultGatewayControllerDeploymentName,
-		Action:              "Escalate",
-	}
-	k8Event := common.GetK8Event(event)
-	_, err := common.CreateK8Event(k8Event, kubeClientset)
-	return err
 }

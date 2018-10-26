@@ -27,27 +27,42 @@ import (
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
+	corev1 "k8s.io/api/core/v1"
 )
 
-// createEscalationEvent creates a k8 event for escalation
-func (se *sensorExecutionCtx) createEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
+// createFilterEscalationEvent creates a k8 event for escalation for filter failures
+func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
 	se.log.Info().Interface("policy", policy).Msg("escalation policy")
-	event := common.GetK8Event(&common.K8Event{
-		Name:                policy.Name,
-		Namespace:           se.sensor.Namespace,
-		ReportingInstance:   se.sensor.Name,
-		ReportingController: se.sensor.Name,
-		Labels: map[string]string{
-			common.LabelEventSeen:  "",
-			common.LabelEventType:  string(v1alpha1.NodePhaseError),
-			common.LabelSignalName: signalFilterName,
-			common.LabelSensorName: se.sensor.Name,
-		},
-		Type:   common.LabelArgoEventsEscalationKind,
-		Action: string(policy.Level),
+	escalationEvent := &corev1.Event{
 		Reason: policy.Message,
-	})
-	_, err := common.CreateK8Event(event, se.kubeClient)
+		Type:   common.EscalationEventType,
+		Action: fmt.Sprintf("sensor filter failed. Cause: %s", string(policy.Level)),
+		EventTime: metav1.MicroTime{
+			Time: time.Now(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    se.sensor.Namespace,
+			GenerateName: se.sensor.Name + "-",
+			Labels:       map[string]string{
+				common.LabelEventSeen:   "",
+				common.LabelResourceName: se.sensor.Name,
+				common.LabelEventType:   common.EscalationEventType,
+				common.LabelSignalName: signalFilterName,
+				common.LabelSensorName: se.sensor.Name,
+			},
+		},
+		InvolvedObject: corev1.ObjectReference{
+			Namespace: se.sensor.Namespace,
+			Name:      se.sensor.Name,
+			Kind:      se.sensor.Kind,
+		},
+		Source: corev1.EventSource{
+			Component: se.sensor.Name,
+		},
+		ReportingInstance: common.DefaultSensorControllerDeploymentName,
+		ReportingController: se.controllerInstanceID,
+	}
+	_, err := common.CreateK8Event(escalationEvent, se.kubeClient)
 	return err
 }
 
@@ -59,7 +74,7 @@ func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alph
 		return false, err
 	}
 	if !dataRes {
-		err = se.createEscalationEvent(f.Data.EscalationPolicy, f.Name)
+		err = se.createFilterEscalationEvent(f.Data.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}
@@ -70,14 +85,14 @@ func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alph
 		return false, err
 	}
 	if !timeRes {
-		err = se.createEscalationEvent(f.Time.EscalationPolicy, f.Name)
+		err = se.createFilterEscalationEvent(f.Time.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}
 	}
 	ctxRes := se.filterContext(f.Context, &event.Context)
 	if !ctxRes {
-		err = se.createEscalationEvent(f.Context.EscalationPolicy, f.Name)
+		err = se.createFilterEscalationEvent(f.Context.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}

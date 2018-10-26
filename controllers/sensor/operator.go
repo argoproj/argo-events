@@ -134,7 +134,7 @@ func (soc *sOperationCtx) operate() error {
 											Value: soc.s.Namespace,
 										},
 										{
-											Name:  common.SensorControllerInstanceIDEnvVar,
+											Name:  common.EnvVarSensorControllerInstanceID,
 											Value: soc.controller.Config.InstanceID,
 										},
 									},
