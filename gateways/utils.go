@@ -43,6 +43,7 @@ func Logger(name string) zlog.Logger {
 	return zlog.New(os.Stdout).With().Str("name", name).Logger()
 }
 
+// Hasher hashes a string
 func Hasher(value string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(value))

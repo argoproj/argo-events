@@ -19,19 +19,21 @@ package sensor
 import (
 	"context"
 	"errors"
-	"time"
 	"fmt"
 	"log"
+	"time"
 
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 const (
@@ -88,7 +90,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		fmt.Errorf("failed to get sensor '%s' from informer index: %+v", key, err)
+		fmt.Printf("failed to get sensor '%s' from informer index: %+v", key, err)
 		return true
 	}
 
@@ -99,24 +101,53 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		fmt.Errorf("key '%s' in index is not a sensor", key)
+		fmt.Printf("key '%s' in index is not a sensor", key)
 		return true
 	}
 
 	ctx := newSensorOperationCtx(sensor, c)
 
-	err = c.handleErr(ctx.operate(), key)
+	err = ctx.operate()
 	if err != nil {
-		// now let's escalate the sensor
-		// the context should have the most up-to-date version
-		ctx.log.Error().Err(err).Msg("escalating controller failure")
-		event := ctx.GetK8Event("controller error", v1alpha1.NodePhaseError, sensor.Kind)
-		_, err = common.CreateK8Event(event, ctx.controller.kubeClientset)
+		escalationEvent := &corev1.Event{
+			Reason: err.Error(),
+			Type:   string(common.EscalationEventType),
+			Action: "gateway is marked as failed",
+			EventTime: metav1.MicroTime{
+				Time: time.Now(),
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:    sensor.Namespace,
+				GenerateName: sensor.Name + "-",
+				Labels: map[string]string{
+					common.LabelEventSeen:    "",
+					common.LabelResourceName: sensor.Name,
+					common.LabelEventType:    string(common.EscalationEventType),
+				},
+			},
+			InvolvedObject: corev1.ObjectReference{
+				Namespace: sensor.Namespace,
+				Name:      sensor.Name,
+				Kind:      sensor.Kind,
+			},
+			Source: corev1.EventSource{
+				Component: sensor.Name,
+			},
+			ReportingInstance:   common.DefaultSensorControllerDeploymentName,
+			ReportingController: c.Config.InstanceID,
+		}
+
+		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
+		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
 		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to create escalation event for controller failure")
+			ctx.log.Error().Err(err).Msg("failed to escalate error")
 		}
 	}
 
+	err = c.handleErr(err, key)
+	if err != nil {
+		ctx.log.Error().Interface("error", err).Msg("sensor controller is unable to handle the error")
+	}
 	return true
 }
 
@@ -134,7 +165,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a signal pod goes down
 	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		fmt.Errorf("Error syncing sensor '%v': %v", key, err)
+		fmt.Printf("Error syncing sensor '%v': %v", key, err)
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -150,7 +181,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int
 	fmt.Printf("sensor sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		fmt.Errorf("failed to register watch for sensor-controller config map: %v", err)
+		fmt.Printf("failed to register watch for sensor-controller config map: %v", err)
 		return
 	}
 

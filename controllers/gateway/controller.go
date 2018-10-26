@@ -32,6 +32,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
 )
 
@@ -108,27 +110,46 @@ func (c *GatewayController) processNextItem() bool {
 
 	ctx := newGatewayOperationCtx(gateway, c)
 
-	err = c.handleErr(ctx.operate(), key)
-	// create k8 event to escalate the error
+	err = ctx.operate()
 	if err != nil {
-		escalationEvent := &common.K8Event{
-			Name:      gateway.Name,
-			Namespace: gateway.Namespace,
-			Reason:    err.Error(),
-			Kind:      common.LabelArgoEventsEscalationKind,
-			Type:      "Error",
-			Labels: map[string]string{
-				common.LabelGatewayName: gateway.Name,
+		escalationEvent := &corev1.Event{
+			Reason: err.Error(),
+			Type:   string(common.EscalationEventType),
+			Action: "gateway is marked as failed",
+			EventTime: metav1.MicroTime{
+				Time: time.Now(),
 			},
-			ReportingInstance:   ctx.controller.Config.InstanceID,
-			ReportingController: common.DefaultGatewayControllerDeploymentName,
-			Action:              "Escalate",
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace:    gateway.Namespace,
+				GenerateName: gateway.Name + "-",
+				Labels: map[string]string{
+					common.LabelEventSeen:    "",
+					common.LabelResourceName: gateway.Name,
+					common.LabelEventType:    string(common.EscalationEventType),
+				},
+			},
+			InvolvedObject: corev1.ObjectReference{
+				Namespace: gateway.Namespace,
+				Name:      gateway.Name,
+				Kind:      gateway.Kind,
+			},
+			Source: corev1.EventSource{
+				Component: gateway.Name,
+			},
+			ReportingInstance:   common.DefaultGatewayControllerDeploymentName,
+			ReportingController: c.Config.InstanceID,
 		}
-		k8Event := common.GetK8Event(escalationEvent)
-		_, err = common.CreateK8Event(k8Event, ctx.controller.kubeClientset)
+		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
+		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
 		if err != nil {
 			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
 		}
+	}
+
+	err = c.handleErr(err, key)
+	// create k8 event to escalate the error
+	if err != nil {
+		ctx.log.Error().Interface("error", err).Msg("gateway controller failed to handle error")
 	}
 	return true
 }

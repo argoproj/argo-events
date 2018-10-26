@@ -74,8 +74,8 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// Repeat is a flag that determines if the sensor status should be reset after completion.
-	// NOTE: functionality is currently expiremental and part of an initiative to define
-	// a more concrete pattern or cycle for sensor reptition.
+	// NOTE: functionality is currently experimental and part of an initiative to define
+	// a more concrete pattern or cycle for sensor repetition.
 	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
 
 	// ImagePullPolicy determines the when the image should be pulled from docker repository
@@ -350,7 +350,7 @@ type Event struct {
 	Payload []byte       `json:"payload" protobuf:"bytes,2,opt,name=data"`
 }
 
-// EventContext contains metadata that provides circumstantial information about the occurence.
+// EventContext contains metadata that provides circumstantial information about the occurrence.
 type EventContext struct {
 	// The type of occurrence which has happened. Often this attribute is used for
 	// routing, observability, policy enforcement, etc.
@@ -363,7 +363,7 @@ type EventContext struct {
 	EventTypeVersion string `json:"eventTypeVersion" protobuf:"bytes,2,opt,name=eventTypeVersion"`
 
 	// The version of the CloudEvents specification which the event uses.
-	// Enables the intepretation of the context.
+	// Enables the interpretation of the context.
 	CloudEventsVersion string `json:"cloudEventsVersion" protobuf:"bytes,3,opt,name=cloudEventsVersion"`
 
 	// This describes the event producer.

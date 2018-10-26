@@ -173,48 +173,30 @@ func (goc *gwOperationCtx) operate() error {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
 			return err
-		} else {
-			goc.log.Info().Str("deployment-name", common.DefaultGatewayDeploymentName(goc.gw.Name)).Msg("gateway deployment created")
-			// expose gateway if service is configured
-			if goc.gw.Spec.ServiceSpec != nil {
-				svc, err := goc.createGatewayService()
-				// Failed to expose gateway through a service.
-				if err != nil {
-					goc.log.Error().Err(err).Msg("failed to create service for gateway")
-					goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, fmt.Sprintf("failed to create service. err: %s", err.Error()))
-					return err
-				}
-				goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service is created")
-			}
-			goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 		}
+
+		goc.log.Info().Str("deployment-name", common.DefaultGatewayDeploymentName(goc.gw.Name)).Msg("gateway deployment created")
+		// expose gateway if service is configured
+		if goc.gw.Spec.ServiceSpec != nil {
+			svc, err := goc.createGatewayService()
+			// Failed to expose gateway through a service.
+			if err != nil {
+				goc.log.Error().Err(err).Msg("failed to create service for gateway")
+				goc.markGatewayPhase(v1alpha1.NodePhaseServiceError, fmt.Sprintf("failed to create service. err: %s", err.Error()))
+				return err
+			}
+			goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service is created")
+		}
+		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 		// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		// todo: maybe we don't need to perform any deployment update. If the gateway is in error state
-		// then user will just delete the gateway and create a new one.
-		gDeployment, err := goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Get(common.DefaultGatewayDeploymentName(goc.gw.Name), metav1.GetOptions{})
-		if err != nil {
-			goc.log.Error().Err(err).Msg("error occurred retrieving gateway deployment")
-			return err
-		}
-
-		// self heal by updating container images if any
-		gDeployment.Spec.Template.Spec.Containers = *goc.getContainersForGatewayPod()
-		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Update(gDeployment)
-		if err != nil {
-			goc.log.Error().Err(err).Msg("error occurred updating gateway deployment")
-			return err
-		}
-
-		// Update node phase to running
-		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
-
+		goc.log.Error().Msg("gateway is in error state. please check escalated K8 event for the error")
 		// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Msg("gateway is running")
 	case v1alpha1.NodePhaseServiceError:
-		// check whether service is now created successfully. service's name must be gateway name followed by "-gateway-svc".
+		// check whether service is now created manually by user. service's name must be gateway name followed by "-gateway-svc".
 		_, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Get(common.DefaultGatewayServiceName(goc.gw.Name), metav1.GetOptions{})
 		if err != nil {
 			goc.log.Warn().Str("expected-service", common.DefaultGatewayServiceName(goc.gw.Name)).Err(err).Msg("no service found")
@@ -240,14 +222,12 @@ func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 		},
 		Spec: *goc.gw.Spec.ServiceSpec,
 	}
-
 	// if selector is not provided, override selectors with gateway labels
 	// todo: this might not be required if in validation we check that if serviceSpec is
 	// specified then make sure selectors are specified as well.
 	if gatewayService.Spec.Selector == nil {
 		gatewayService.Spec.Selector = goc.gw.ObjectMeta.Labels
 	}
-
 	svc, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
 	return svc, err
 }
@@ -327,7 +307,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	// these env vars are common to different flavors of gateway.
 	envVars := []corev1.EnvVar{
 		{
-			Name:  common.GatewayTransformerPortEnvVar,
+			Name:  common.EnvVarGatewayTransformerPort,
 			Value: common.GatewayTransformerPort,
 		},
 		{
@@ -335,7 +315,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: goc.gw.Namespace,
 		},
 		{
-			Name:  common.GatewayProcessorConfigMapEnvVar,
+			Name:  common.EnvVarGatewayProcessorConfigMap,
 			Value: goc.gw.Spec.ConfigMap,
 		},
 		{
@@ -343,11 +323,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: goc.gw.Name,
 		},
 		{
-			Name:  common.GatewayControllerInstanceIDEnvVar,
+			Name:  common.EnvVarGatewayControllerInstanceID,
 			Value: goc.controller.Config.InstanceID,
 		},
 		{
-			Name:  common.GatewayControllerNameEnvVar,
+			Name:  common.EnvVarGatewayControllerName,
 			Value: common.DefaultGatewayControllerDeploymentName,
 		},
 	}
@@ -402,23 +382,23 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// and gateway processor client
 		httpEnvVars := []corev1.EnvVar{
 			{
-				Name:  common.GatewayProcessorServerHTTPPortEnvVar,
+				Name:  common.EnvVarGatewayProcessorServerHTTPPort,
 				Value: goc.gw.Spec.HTTPServerPort,
 			},
 			{
-				Name:  common.GatewayProcessorClientHTTPPortEnvVar,
+				Name:  common.EnvVarGatewayProcessorClientHTTPPort,
 				Value: common.GatewayProcessorClientHTTPPort,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerConfigStartEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint,
 				Value: common.GatewayProcessorHTTPServerConfigStartEndpoint,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerConfigStopEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint,
 				Value: common.GatewayProcessorHTTPServerConfigStopEndpoint,
 			},
 			{
-				Name:  common.GatewayProcessorHTTPServerEventEndpointEnvVar,
+				Name:  common.EnvVarGatewayProcessorHTTPServerEventEndpoint,
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
 		}
@@ -465,7 +445,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		Image:           transformerImage,
 		Env: []corev1.EnvVar{
 			{
-				Name:  common.GatewayTransformerConfigMapEnvVar,
+				Name:  common.EnvVarGatewayTransformerConfigMap,
 				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
 			},
 			{

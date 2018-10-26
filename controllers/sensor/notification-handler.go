@@ -46,6 +46,8 @@ type sensorExecutionCtx struct {
 	wg *sync.WaitGroup
 	// queue is internal queue to manage incoming events
 	queue chan *sensorEventWrapper
+	// controllerInstanceID is the instance ID of sensor controller processing this sensor
+	controllerInstanceID string
 }
 
 // sensorEventWrapper is a wrapper around event received from gateway and the signal which represents the event
@@ -58,16 +60,17 @@ type sensorEventWrapper struct {
 // NewsensorExecutionCtx returns a new sensor execution context.
 func NewsensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface,
 	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
-	sensor *v1alpha1.Sensor, log zerolog.Logger, wg *sync.WaitGroup) *sensorExecutionCtx {
+	sensor *v1alpha1.Sensor, log zerolog.Logger, wg *sync.WaitGroup, controllerInstanceID string) *sensorExecutionCtx {
 	return &sensorExecutionCtx{
-		sensorClient:    sensorClient,
-		kubeClient:      kubeClient,
-		clientPool:      clientPool,
-		discoveryClient: discoveryClient,
-		sensor:          sensor,
-		log:             log,
-		wg:              wg,
-		queue:           make(chan *sensorEventWrapper),
+		sensorClient:         sensorClient,
+		kubeClient:           kubeClient,
+		clientPool:           clientPool,
+		discoveryClient:      discoveryClient,
+		sensor:               sensor,
+		log:                  log,
+		wg:                   wg,
+		queue:                make(chan *sensorEventWrapper),
+		controllerInstanceID: controllerInstanceID,
 	}
 }
 
@@ -200,11 +203,10 @@ func (se *sensorExecutionCtx) processSignal(gwEventWrapper *sensorEventWrapper) 
 			se.log.Error().Err(err).Str("signal-name", gwEventWrapper.event.Context.Source.Host).Msg("failed to execute triggers")
 		}
 		return
-	} else {
-		se.log.Error().Str("signal-name", gwEventWrapper.event.Context.Source.Host).Msg("unknown signal source")
-		common.SendErrorResponse(gwEventWrapper.writer)
-		return
 	}
+	se.log.Error().Str("signal-name", gwEventWrapper.event.Context.Source.Host).Msg("unknown signal source")
+	common.SendErrorResponse(gwEventWrapper.writer)
+	return
 }
 
 // processQueue processes the event sent from gateway to this sensor.
@@ -260,7 +262,7 @@ func (se *sensorExecutionCtx) validateSignal(gatewaySignal *ss_v1alpha1.Event) (
 func (se *sensorExecutionCtx) handleSignals(w http.ResponseWriter, r *http.Request) {
 	// parse the request body which contains the cloudevents specification compliant event/signal dispatched from gateway.
 	body, err := ioutil.ReadAll(r.Body)
-	gatewaySignal := ss_v1alpha1.Event{}
+	var gatewaySignal *ss_v1alpha1.Event
 	err = json.Unmarshal(body, &gatewaySignal)
 	if err != nil {
 		se.log.Error().Err(err).Msg("failed to parse signal received from gateway")
@@ -269,11 +271,11 @@ func (se *sensorExecutionCtx) handleSignals(w http.ResponseWriter, r *http.Reque
 	}
 
 	// validate whether the signal/notification/event is indeed from gateway that this sensor is watching
-	selectedSignal, isValidSignal := se.validateSignal(&gatewaySignal)
+	selectedSignal, isValidSignal := se.validateSignal(gatewaySignal)
 	if isValidSignal {
 		// process the signal/event/notification
 		se.queue <- &sensorEventWrapper{
-			event:  &gatewaySignal,
+			event:  gatewaySignal,
 			writer: w,
 			signal: selectedSignal,
 		}

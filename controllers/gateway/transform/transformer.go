@@ -79,16 +79,14 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 	eventId := suuid.Must(suuid.NewV4(), nil)
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		fmt.Errorf("failed to parse request payload. Err %+v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to parse request payload. Err %+v", err)
 	}
 
 	var tp TransformerPayload
 	err = json.Unmarshal(payload, &tp)
 
 	if err != nil {
-		fmt.Errorf("failed to convert request payload into transformer payload. Err %+v", err)
-		return nil, err
+		return nil, fmt.Errorf("failed to convert request payload into transformer payload. Err %+v", err)
 	}
 
 	toc.log.Info().Str("source", tp.Src).

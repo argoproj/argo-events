@@ -27,6 +27,10 @@ func main() {
 	if !ok {
 		panic("sensor namespace is not provided")
 	}
+	controllerInstanceID, ok := os.LookupEnv(common.EnvVarSensorControllerInstanceID)
+	if !ok {
+		panic("sensor controller instance ID is not provided")
+	}
 
 	// initialize logger
 	log := zerolog.New(os.Stdout).With().Str("sensor-name", sensorName).Logger()
@@ -46,7 +50,7 @@ func main() {
 	// wait for sensor http server to shutdown
 	var wg sync.WaitGroup
 	wg.Add(1)
-	sensorExecutionCtx := sc.NewsensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, log, &wg)
+	sensorExecutionCtx := sc.NewsensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, log, &wg, controllerInstanceID)
 	go sensorExecutionCtx.WatchSignalNotifications()
 	wg.Wait()
 }
