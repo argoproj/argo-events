@@ -79,9 +79,6 @@ const (
 	// SensorNamespace is used to get namespace where sensors are deployed
 	SensorNamespace = "SENSOR_NAMESPACE"
 
-	// LabelJobName is label for job name
-	LabelJobName = "job-name"
-
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 

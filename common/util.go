@@ -32,6 +32,11 @@ func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
 }
 
+// DefaultSensorDeploymentName returns a formulated name for sensor deployment
+func DefaultSensorDeploymentName(deploymentName string) string {
+	return fmt.Sprintf("%s-sensor-deployement", deploymentName)
+}
+
 // DefaultSensorJobName returns a formulated name for a sensor job
 func DefaultSensorJobName(jobName string) string {
 	return fmt.Sprintf("%s-sensor-job", jobName)

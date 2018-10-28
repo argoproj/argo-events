@@ -233,7 +233,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "EventContext contains metadata that provides circumstantial information about the occurence.",
+				Description: "EventContext contains metadata that provides circumstantial information about the occurrence.",
 				Properties: map[string]spec.Schema{
 					"eventType": {
 						SchemaProps: spec.SchemaProps{
@@ -251,7 +251,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					},
 					"cloudEventsVersion": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The version of the CloudEvents specification which the event uses. Enables the intepretation of the context.",
+							Description: "The version of the CloudEvents specification which the event uses. Enables the interpretation of the context.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -880,7 +880,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"repeat": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repeat is a flag that determines if the sensor status should be reset after completion. NOTE: functionality is currently expiremental and part of an initiative to define a more concrete pattern or cycle for sensor reptition.",
+							Description: "Repeat is a flag that determines if the sensor status should be reset after completion. NOTE: functionality is currently experimental and part of an initiative to define a more concrete pattern or cycle for sensor repetition.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -899,12 +899,25 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"envVars": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EnvVars are user defined env variables to sensor pod",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.EnvVar"),
+									},
+								},
+							},
+						},
+					},
 				},
 				Required: []string{"signals", "triggers"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.EnvVar"},
 	}
 }
 
