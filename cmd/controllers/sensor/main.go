@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// create a new sensor controller
-	controller := sensor.NewSensorController(restConfig, configMap)
+	controller := sensor.NewSensorController(restConfig, configMap, namespace)
 	// watch updates to sensor controller configuration
 	err = controller.ResyncConfig(namespace)
 	if err != nil {

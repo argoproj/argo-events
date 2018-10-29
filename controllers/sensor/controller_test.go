@@ -21,24 +21,25 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 
+	"github.com/argoproj/argo-events/common"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 )
 
-// fakeController is a wrapper around the sensorController to allow efficient test setup/cleanup
-type fakeController struct {
-	*SensorController
-}
+var (
+	SensorControllerConfigmap  = common.DefaultConfigMapName("sensor-controller")
+	SensorControllerInstanceID = "argo-events"
+)
 
-func (f *fakeController) setup(namespace string) {
-	f.SensorController = &SensorController{
-		ConfigMap:   "configmap",
-		ConfigMapNS: namespace,
+func sensorController() *SensorController {
+	return &SensorController{
+		ConfigMap: SensorControllerConfigmap,
+		Namespace: common.DefaultControllerNamespace,
 		Config: SensorControllerConfig{
-			Namespace: namespace,
+			Namespace:  common.DefaultControllerNamespace,
+			InstanceID: SensorControllerInstanceID,
 		},
 		kubeClientset:   fake.NewSimpleClientset(),
 		sensorClientset: fakesensor.NewSimpleClientset(),
@@ -46,18 +47,8 @@ func (f *fakeController) setup(namespace string) {
 	}
 }
 
-func (f *fakeController) teardown() {
-	f.queue.ShutDown()
-}
-
-func newFakeController() *fakeController {
-	fakeController := &fakeController{}
-	fakeController.setup(v1.NamespaceDefault)
-	return fakeController
-}
-
 func TestProcessNextItem(t *testing.T) {
-	controller := newFakeController()
+	controller := sensorController()
 	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 	controller.informer = controller.newSensorInformer()
 
@@ -71,15 +62,13 @@ func TestProcessNextItem(t *testing.T) {
 }
 
 func TestHandleErr(t *testing.T) {
-	controller := newFakeController()
+	controller := sensorController()
 	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 
 	controller.queue.Add("hi")
 	controller.handleErr(nil, "hi")
 
 	controller.queue.Add("bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
+	err := controller.handleErr(fmt.Errorf("real error"), "bye")
+	assert.Nil(t, err)
 }

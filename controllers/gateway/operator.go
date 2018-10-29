@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package gateway
 
 import (
@@ -41,7 +57,7 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 	return &gwOperationCtx{
 		gw:         gw.DeepCopy(),
 		updated:    false,
-		log:        zlog.New(os.Stdout).With().Str("name", gw.Name).Str("namespace", gw.Namespace).Logger(),
+		log:        zlog.New(os.Stdout).With().Str("name", gw.Name).Str("namespace", gw.Namespace).Caller().Logger(),
 		controller: controller,
 	}
 }
@@ -131,6 +147,10 @@ func (goc *gwOperationCtx) operate() error {
 			// mark gateway as failed
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create transformer gateway configuration. err: %s", err))
 			return err
+		}
+
+		if goc.gw.Spec.ImageVersion == "" {
+			goc.gw.Spec.ImageVersion = common.ImageVersionLatest
 		}
 
 		// add gateway name to gateway label
@@ -311,7 +331,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: common.GatewayTransformerPort,
 		},
 		{
-			Name:  common.EnvVarNamespace,
+			Name:  common.GatewayNamespace,
 			Value: goc.gw.Namespace,
 		},
 		{
@@ -347,7 +367,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           common.GatewayProcessorGRPCClientImage,
+			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorGRPCClientImage, goc.gw.Spec.ImageVersion),
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
@@ -374,7 +394,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           common.GatewayProcessorHTTPClientImage,
+			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorHTTPClientImage, goc.gw.Spec.ImageVersion),
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
@@ -442,14 +462,14 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	gatewayTransformerContainer := corev1.Container{
 		Name:            gatewayTransformer,
 		ImagePullPolicy: corev1.PullAlways,
-		Image:           transformerImage,
+		Image:           fmt.Sprintf("%s:%s", transformerImage, goc.gw.Spec.ImageVersion),
 		Env: []corev1.EnvVar{
 			{
 				Name:  common.EnvVarGatewayTransformerConfigMap,
 				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
 			},
 			{
-				Name:  common.EnvVarNamespace,
+				Name:  common.GatewayNamespace,
 				Value: goc.gw.Namespace,
 			},
 		},

@@ -18,7 +18,6 @@ package sensor
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -26,68 +25,42 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestWatchControllerConfigMap(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	controller := SensorController{
-		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
-		kubeClientset: fake.NewSimpleClientset(),
-	}
+	controller := sensorController()
 	_, err := controller.watchControllerConfigMap(ctx)
 	assert.Nil(t, err)
 }
 
-func TestNewControllerConfigMapWatch(t *testing.T) {
-	controller := SensorController{
-		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
-		kubeClientset: fake.NewSimpleClientset(),
-	}
-	controller.newControllerConfigMapWatch()
-}
-
 func TestResyncConfig(t *testing.T) {
-	defer os.Unsetenv(common.EnvVarNamespace)
-	controller := SensorController{
-		ConfigMap:     "sensor-controller-configmap",
-		ConfigMapNS:   "testing",
-		kubeClientset: fake.NewSimpleClientset(),
-	}
-
-	os.Setenv(common.EnvVarNamespace, "testing")
-
-	err := controller.ResyncConfig("testing")
+	controller := sensorController()
+	err := controller.ResyncConfig(common.DefaultControllerNamespace)
 	assert.NotNil(t, err)
-
-	// Note: need to refresh the namespace
-	common.RefreshNamespace()
 
 	// fail when the configmap does not have key 'config'
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "sensor-controller-configmap",
-			Namespace: "testing",
+			Name:      SensorControllerConfigmap,
+			Namespace: common.DefaultControllerNamespace,
 		},
 		Data: map[string]string{},
 	}
-	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Create(configMap)
+	_, err = controller.kubeClientset.CoreV1().ConfigMaps(common.DefaultControllerNamespace).Create(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig("testing")
+	err = controller.ResyncConfig(common.DefaultControllerNamespace)
 	assert.NotNil(t, err)
 
 	// succeed with no errors now that configmap has 'config' key
 	configMap.Data = map[string]string{"config": controllerConfig}
-	_, err = controller.kubeClientset.CoreV1().ConfigMaps("testing").Update(configMap)
+	_, err = controller.kubeClientset.CoreV1().ConfigMaps(common.DefaultControllerNamespace).Update(configMap)
 	assert.Nil(t, err)
-	err = controller.ResyncConfig("testing")
+	err = controller.ResyncConfig(common.DefaultControllerNamespace)
 	assert.Nil(t, err)
 }
 
 var controllerConfig = `
 instanceID: argo-events
-executorImage: argoproj/sensor-controller:latest
 `

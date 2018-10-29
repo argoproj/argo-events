@@ -20,9 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
-	zlog "github.com/rs/zerolog"
 	"hash/fnv"
-	"os"
 )
 
 // TransformerPayload creates a new payload from input data and adds source information
@@ -36,11 +34,6 @@ func TransformerPayload(b []byte, source string) ([]byte, error) {
 		return nil, err
 	}
 	return payload, nil
-}
-
-// Logger returns a JSON output logger.
-func Logger(name string) zlog.Logger {
-	return zlog.New(os.Stdout).With().Str("name", name).Logger()
 }
 
 // Hasher hashes a string
