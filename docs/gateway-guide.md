@@ -72,7 +72,7 @@ Events produced can be based on a [cron](https://crontab.guru/) schedule or an [
   calendar.fooConfig: |-
     interval: 10s
   calendar.barConfig: |-
-    schedule: */1 * * * *
+    schedule: 30 * * * *
 ```
 
 ### Webhooks

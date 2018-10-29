@@ -137,8 +137,8 @@ func (c *GatewayController) processNextItem() bool {
 			Source: corev1.EventSource{
 				Component: gateway.Name,
 			},
-			ReportingInstance:   common.DefaultGatewayControllerDeploymentName,
-			ReportingController: c.Config.InstanceID,
+			ReportingInstance:   c.Config.InstanceID,
+			ReportingController: common.DefaultGatewayControllerDeploymentName,
 		}
 		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
 		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)

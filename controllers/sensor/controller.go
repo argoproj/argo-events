@@ -134,8 +134,8 @@ func (c *SensorController) processNextItem() bool {
 			Source: corev1.EventSource{
 				Component: sensor.Name,
 			},
-			ReportingInstance:   common.DefaultSensorControllerDeploymentName,
-			ReportingController: c.Config.InstanceID,
+			ReportingInstance:   c.Config.InstanceID,
+			ReportingController: common.DefaultSensorControllerDeploymentName,
 		}
 
 		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
