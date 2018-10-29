@@ -25,7 +25,7 @@ import (
 )
 
 func TestSensorOperateLifecycle(t *testing.T) {
-	fake := newFakeController()
+	controller := sensorController()
 
 	// create a new sensor object
 	sensor, err := getSensor()
@@ -33,11 +33,11 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	assert.NotNil(t, sensor)
 
 	// create sensor resource
-	sensor, err = fake.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+	sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
 	assert.Nil(t, err)
 	assert.NotNil(t, sensor)
 
-	sOpCtx := newSensorOperationCtx(sensor, fake.SensorController)
+	sOpCtx := newSensorOperationCtx(sensor, controller)
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
 	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
@@ -45,13 +45,13 @@ func TestSensorOperateLifecycle(t *testing.T) {
 		node := getNodeByName(sOpCtx.s, signal.Name)
 		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
-	// check whether sensor job is created
-	job, err := fake.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
+	// check whether sensor deployment is created
+	deployment, err := controller.kubeClientset.AppsV1().Deployments(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
 	assert.Nil(t, err)
-	assert.NotNil(t, job)
+	assert.NotNil(t, deployment)
 
 	// check whether sensor service is created
-	svc, err := fake.kubeClientset.CoreV1().Services(sOpCtx.s.Namespace).Get(common.DefaultSensorServiceName(sOpCtx.s.Name), metav1.GetOptions{})
+	svc, err := controller.kubeClientset.CoreV1().Services(sOpCtx.s.Namespace).Get(common.DefaultSensorServiceName(sOpCtx.s.Name), metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, svc)
 
@@ -90,4 +90,14 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
 	assert.Equal(t, string(v1alpha1.NodePhaseError), string(sOpCtx.s.Status.Phase))
+
+	sOpCtx.s.Spec.Repeat = false
+	sOpCtx.markSensorPhase(v1alpha1.NodePhaseNew, false, "sensor is in new state")
+	err = sOpCtx.operate()
+	assert.Nil(t, err)
+	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
+
+	job, err := controller.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.NotNil(t, job)
 }

@@ -94,7 +94,7 @@ message Event {
   optional bytes data = 2;
 }
 
-// EventContext contains metadata that provides circumstantial information about the occurence.
+// EventContext contains metadata that provides circumstantial information about the occurrence.
 message EventContext {
   // The type of occurrence which has happened. Often this attribute is used for
   // routing, observability, policy enforcement, etc.
@@ -107,7 +107,7 @@ message EventContext {
   optional string eventTypeVersion = 2;
 
   // The version of the CloudEvents specification which the event uses.
-  // Enables the intepretation of the context.
+  // Enables the interpretation of the context.
   optional string cloudEventsVersion = 3;
 
   // This describes the event producer.
@@ -311,8 +311,8 @@ message SensorSpec {
   repeated Trigger triggers = 2;
 
   // Repeat is a flag that determines if the sensor status should be reset after completion.
-  // NOTE: functionality is currently expiremental and part of an initiative to define
-  // a more concrete pattern or cycle for sensor reptition.
+  // NOTE: functionality is currently experimental and part of an initiative to define
+  // a more concrete pattern or cycle for sensor repetition.
   optional bool repeat = 4;
 
   // ImagePullPolicy determines the when the image should be pulled from docker repository
@@ -320,6 +320,12 @@ message SensorSpec {
 
   // ServiceAccountName required for role based access
   optional string serviceAccountName = 6;
+
+  // EnvVars are user defined env variables to sensor pod
+  repeated k8s.io.api.core.v1.EnvVar envVars = 7;
+
+  // ImageVersion is the sensor image version to run
+  optional string imageVersion = 8;
 }
 
 // SensorStatus contains information about the status of a sensor.

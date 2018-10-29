@@ -212,8 +212,6 @@ var sampleTrigger = v1alpha1.Trigger{
 }
 
 func TestProcessTrigger(t *testing.T) {
-	fake := newFakeController()
-	defer fake.teardown()
 	triggers := make([]v1alpha1.Trigger, 1)
 	triggers[0] = sampleTrigger
 	sampleSensor, err := getSensor()

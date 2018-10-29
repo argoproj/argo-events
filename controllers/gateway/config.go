@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package gateway
 
 import (
@@ -52,13 +68,12 @@ func (c *GatewayController) newControllerConfigMapWatch() *cache.ListWatch {
 	x := c.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := c.ConfigMap
-	namespace := c.ConfigMapNS
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -67,7 +82,7 @@ func (c *GatewayController) newControllerConfigMapWatch() *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -82,7 +97,6 @@ func (c *GatewayController) ResyncConfig(namespace string) error {
 	if err != nil {
 		return err
 	}
-	c.ConfigMapNS = cm.Namespace
 	return c.updateConfig(cm)
 }
 
@@ -96,9 +110,6 @@ func (c *GatewayController) updateConfig(cm *apiv1.ConfigMap) error {
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err
-	}
-	if config.Namespace == "" {
-		config.Namespace = common.DefaultControllerNamespace
 	}
 	c.Config = config
 	return nil

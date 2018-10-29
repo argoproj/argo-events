@@ -187,6 +187,8 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 		return fmt.Errorf("failed to update gateway resource. no configuration name provided")
 	}
 	node, ok := gc.gw.Status.Nodes[nodeID]
+	gc.Log.Info().Str("config-id", nodeID).Str("action", string(event.Action)).Msg("k8 event")
+
 	// initialize the configuration
 	if !ok && v1alpha1.NodePhase(event.Action) == v1alpha1.NodePhaseInitialized {
 		nodeName, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
@@ -235,7 +237,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 
 // filters unwanted events
 func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
-	if event.Type == gateway.Kind && event.Source.Component == gc.gw.Name &&
+	if event.Source.Component == gc.gw.Name &&
 		event.ObjectMeta.Labels[common.LabelEventSeen] == "" &&
 		event.ReportingInstance == gc.controllerInstanceID &&
 		event.ReportingController == gc.gw.Name {
@@ -493,8 +495,8 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		panic("gateway name not provided")
 	}
-	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
-	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
+	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Caller().Logger()
+	namespace, ok := os.LookupEnv(common.GatewayNamespace)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("no namespace provided")
 	}
@@ -673,7 +675,7 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 	return &corev1.Event{
 		Reason: reason,
 		Type:   string(common.ResourceStateChangeEventType),
-		Action: fmt.Sprintf("gateway is state changed to %s", string(action)),
+		Action: string(action),
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
 		},
@@ -698,8 +700,8 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 		Source: corev1.EventSource{
 			Component: gc.gw.Name,
 		},
-		ReportingInstance:   common.DefaultGatewayControllerDeploymentName,
-		ReportingController: gc.controllerInstanceID,
+		ReportingInstance:   gc.controllerInstanceID,
+		ReportingController: gc.gw.Name,
 	}
 }
 

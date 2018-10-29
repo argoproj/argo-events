@@ -21,7 +21,7 @@ import (
 	"hash/fnv"
 
 	"github.com/minio/minio-go"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -79,10 +79,16 @@ type SensorSpec struct {
 	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
 
 	// ImagePullPolicy determines the when the image should be pulled from docker repository
-	ImagePullPolicy apiv1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy"`
+	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy"`
 
 	// ServiceAccountName required for role based access
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
+
+	// EnvVars are user defined env variables to sensor pod
+	EnvVars []corev1.EnvVar `json:"envVars,omitempty" protobuf:"bytes,7,opt,name=envVars"`
+
+	// ImageVersion is the sensor image version to run
+	ImageVersion string `json:"imageVersion,omitempty" protobuf:"bytes,8,opt,name=imageVersion"`
 }
 
 // Signal describes a dependency
@@ -436,12 +442,12 @@ type URLArtifact struct {
 
 // S3Bucket contains information for an S3 Bucket
 type S3Bucket struct {
-	Endpoint  string                  `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket    string                  `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
-	Region    string                  `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Insecure  bool                    `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
-	AccessKey apiv1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
-	SecretKey apiv1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
+	Endpoint  string                   `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
+	Bucket    string                   `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
+	Region    string                   `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
+	Insecure  bool                     `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
+	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
 }
 
 // S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects

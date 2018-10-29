@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,11 +37,11 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
 		source,
-		&apiv1.ConfigMap{},
+		&corev1.ConfigMap{},
 		0,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				if cm, ok := obj.(*apiv1.ConfigMap); ok {
+				if cm, ok := obj.(*corev1.ConfigMap); ok {
 					log.Info("detected ConfigMap update. updating the sensor-controller config.")
 					err := c.updateConfig(cm)
 					if err != nil {
@@ -50,7 +50,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
-				if newCm, ok := new.(*apiv1.ConfigMap); ok {
+				if newCm, ok := new.(*corev1.ConfigMap); ok {
 					log.Info("detected ConfigMap update. updating the sensor-controller config.")
 					err := c.updateConfig(newCm)
 					if err != nil {
@@ -69,13 +69,12 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	x := c.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := c.ConfigMap
-	namespace := c.ConfigMapNS
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -84,7 +83,7 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -99,11 +98,10 @@ func (c *SensorController) ResyncConfig(namespace string) error {
 	if err != nil {
 		return err
 	}
-	c.ConfigMapNS = cm.Namespace
 	return c.updateConfig(cm)
 }
 
-func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
+func (c *SensorController) updateConfig(cm *corev1.ConfigMap) error {
 	configStr, ok := cm.Data[common.SensorControllerConfigMapKey]
 	if !ok {
 		return fmt.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.SensorControllerConfigMapKey)
@@ -112,9 +110,6 @@ func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err
-	}
-	if config.Namespace == "" {
-		config.Namespace = common.DefaultControllerNamespace
 	}
 	c.Config = config
 	return nil

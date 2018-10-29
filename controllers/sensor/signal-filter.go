@@ -59,8 +59,8 @@ func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.Escal
 		Source: corev1.EventSource{
 			Component: se.sensor.Name,
 		},
-		ReportingInstance:   common.DefaultSensorControllerDeploymentName,
-		ReportingController: se.controllerInstanceID,
+		ReportingInstance:   se.controllerInstanceID,
+		ReportingController: common.DefaultSensorControllerDeploymentName,
 	}
 	_, err := common.CreateK8Event(escalationEvent, se.kubeClient)
 	return err
