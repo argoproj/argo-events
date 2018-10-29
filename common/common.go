@@ -22,9 +22,6 @@ import (
 )
 
 const (
-	// EnvVarNamespace contains the namespace of the controller & services
-	EnvVarNamespace = "ARGO_EVENTS_NAMESPACE"
-
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"
 
@@ -38,6 +35,9 @@ const (
 
 	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
 	StandardYYYYMMDDFormat = "2006-01-02"
+
+	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
+	DefaultControllerNamespace = "argo-events"
 )
 
 // SENSOR CONTROLLER CONSTANTS
@@ -215,7 +215,4 @@ const (
 	// CloudEventsVersion is the version of the CloudEvents spec targeted+
 	// by this library.
 	CloudEventsVersion = "0.1"
-
-	// HeaderContentType is the standard HTTP header "Content-Type"
-	HeaderContentType = "Content-Type"
 )

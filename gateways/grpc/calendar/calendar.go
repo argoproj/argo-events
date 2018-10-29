@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	log = zlog.New(os.Stdout).With().Logger()
+	log = zlog.New(os.Stdout).With().Caller().Logger()
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -148,7 +148,7 @@ func main() {
 	}
 
 	c := &calendar{
-		log: zlog.New(os.Stdout).With().Logger(),
+		log: zlog.New(os.Stdout).With().Caller().Logger(),
 	}
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", rpcServerPort))

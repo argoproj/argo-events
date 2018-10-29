@@ -54,8 +54,8 @@ type SensorControllerConfig struct {
 type SensorController struct {
 	// ConfigMap is the name of the config map in which to derive configuration of the contoller
 	ConfigMap string
-	// namespace for the config map
-	ConfigMapNS string
+	// Namespace for sensor controller
+	Namespace string
 	// Config is the sensor sensor-controller's configuration
 	Config SensorControllerConfig
 
@@ -70,9 +70,10 @@ type SensorController struct {
 }
 
 // NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap string) *SensorController {
+func NewSensorController(rest *rest.Config, configMap, namespace string) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
+		Namespace: namespace,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),

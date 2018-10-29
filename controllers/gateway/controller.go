@@ -54,8 +54,8 @@ type GatewayControllerConfig struct {
 type GatewayController struct {
 	// ConfigMap is the name of the config map in which to derive configuration of the contoller
 	ConfigMap string
-	// namespace for the config map
-	ConfigMapNS string
+	// Namespace for gateway controller
+	Namespace string
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
@@ -72,11 +72,12 @@ type GatewayController struct {
 }
 
 // NewGatewayController creates a new Controller
-func NewGatewayController(rest *rest.Config, configMap string) *GatewayController {
+func NewGatewayController(rest *rest.Config, configMap, namespace string) *GatewayController {
 	return &GatewayController{
 		ConfigMap:        configMap,
+		Namespace:       namespace,
 		kubeConfig:       rest,
-		log:              zlog.New(os.Stdout).With().Logger(),
+		log:              zlog.New(os.Stdout).With().Caller().Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),

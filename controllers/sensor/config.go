@@ -69,13 +69,12 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	x := c.kubeClientset.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := c.ConfigMap
-	namespace := c.ConfigMapNS
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -84,7 +83,7 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(namespace).
+			Namespace(c.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -99,7 +98,6 @@ func (c *SensorController) ResyncConfig(namespace string) error {
 	if err != nil {
 		return err
 	}
-	c.ConfigMapNS = cm.Namespace
 	return c.updateConfig(cm)
 }
 
@@ -112,9 +110,6 @@ func (c *SensorController) updateConfig(cm *apiv1.ConfigMap) error {
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err
-	}
-	if config.Namespace == "" {
-		config.Namespace = common.DefaultControllerNamespace
 	}
 	c.Config = config
 	return nil

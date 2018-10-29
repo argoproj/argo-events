@@ -493,8 +493,8 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		panic("gateway name not provided")
 	}
-	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Logger()
-	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
+	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Caller().Logger()
+	namespace, ok := os.LookupEnv(common.GatewayNamespace)
 	if !ok {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("no namespace provided")
 	}
