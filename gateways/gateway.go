@@ -673,7 +673,7 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 	return &corev1.Event{
 		Reason: reason,
 		Type:   string(common.ResourceStateChangeEventType),
-		Action: fmt.Sprintf("gateway is state changed to %s", string(action)),
+		Action: string(action),
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
 		},
