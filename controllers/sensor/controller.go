@@ -73,7 +73,7 @@ type SensorController struct {
 func NewSensorController(rest *rest.Config, configMap, namespace string) *SensorController {
 	return &SensorController{
 		ConfigMap:       configMap,
-		Namespace: namespace,
+		Namespace:       namespace,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: sensorclientset.NewForConfigOrDie(rest),

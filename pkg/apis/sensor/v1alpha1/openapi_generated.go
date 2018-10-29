@@ -912,6 +912,13 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
+					"imageVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ImageVersion is the sensor image version to run",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"signals", "triggers"},
 			},

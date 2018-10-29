@@ -20,18 +20,19 @@ import (
 	"runtime/debug"
 	"time"
 
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	zlog "github.com/rs/zerolog"
+	appv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
-	apierr "k8s.io/apimachinery/pkg/api/errors"
-	appv1 "k8s.io/api/apps/v1"
 	"os"
 )
 
@@ -113,14 +114,18 @@ func (soc *sOperationCtx) operate() error {
 			envVars = append(envVars, soc.s.Spec.EnvVars...)
 		}
 
+		if soc.s.Spec.ImageVersion == "" {
+			soc.s.Spec.ImageVersion = common.ImageVersionLatest
+		}
+
 		// Todo: Make sensor as subscriber to a Pub-Sub system.
 		// if sensor is repeatable then create a deployment else create a job
 		if soc.s.Spec.Repeat {
 			_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
-			if err != nil && apierr.IsNotFound(err){
+			if err != nil && apierr.IsNotFound(err) {
 				sensorDeployment := &appv1.Deployment{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: soc.s.Name,
+						Name:      soc.s.Name,
 						Namespace: soc.s.Namespace,
 						Labels: map[string]string{
 							common.LabelSensorName: soc.s.Name,
@@ -137,7 +142,7 @@ func (soc *sOperationCtx) operate() error {
 						},
 						Template: corev1.PodTemplateSpec{
 							ObjectMeta: metav1.ObjectMeta{
-								Name: common.DefaultSensorDeploymentName(soc.s.Name),
+								Name:      common.DefaultSensorDeploymentName(soc.s.Name),
 								Namespace: soc.s.Name,
 								Labels: map[string]string{
 									common.LabelSensorName: soc.s.Name,
@@ -147,9 +152,9 @@ func (soc *sOperationCtx) operate() error {
 								Containers: []corev1.Container{
 									{
 										Name:            soc.s.Name,
-										Image:           common.SensorImage,
+										Image:           fmt.Sprintf("%s:%s", common.SensorImage, soc.s.Spec.ImageVersion),
 										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env: envVars,
+										Env:             envVars,
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,
@@ -192,7 +197,7 @@ func (soc *sOperationCtx) operate() error {
 										Name:            soc.s.Name,
 										Image:           common.SensorImage,
 										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env: envVars,
+										Env:             envVars,
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,
@@ -208,7 +213,6 @@ func (soc *sOperationCtx) operate() error {
 				}
 			}
 		}
-
 
 		// Create a ClusterIP service to expose sensor in cluster
 		// For now, sensor will receive event notifications through http server.

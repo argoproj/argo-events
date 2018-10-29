@@ -18,17 +18,17 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 	"testing"
-	"github.com/argoproj/argo-events/common"
 )
 
 func getGatewayController() *GatewayController {
 	return &GatewayController{
-		ConfigMap:   configmapName,
+		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
 		Config: GatewayControllerConfig{
 			Namespace: common.DefaultControllerNamespace,

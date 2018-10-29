@@ -75,7 +75,7 @@ type GatewayController struct {
 func NewGatewayController(rest *rest.Config, configMap, namespace string) *GatewayController {
 	return &GatewayController{
 		ConfigMap:        configMap,
-		Namespace:       namespace,
+		Namespace:        namespace,
 		kubeConfig:       rest,
 		log:              zlog.New(os.Stdout).With().Caller().Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),

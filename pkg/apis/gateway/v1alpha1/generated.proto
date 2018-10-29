@@ -92,6 +92,9 @@ message GatewaySpec {
 
   // DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
   optional string dispatchMechanism = 9;
+
+  // ImageVersion is the version for gateway components images to run
+  optional string imageVersion = 10;
 }
 
 // GatewayStatus contains information about the status of a gateway.

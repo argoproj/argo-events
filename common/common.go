@@ -38,6 +38,9 @@ const (
 
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
+
+	// ImageVersionLatest is the latest tag for image to pull
+	ImageVersionLatest = "latest"
 )
 
 // SENSOR CONTROLLER CONSTANTS

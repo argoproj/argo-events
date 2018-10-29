@@ -149,6 +149,10 @@ func (goc *gwOperationCtx) operate() error {
 			return err
 		}
 
+		if goc.gw.Spec.ImageVersion == "" {
+			goc.gw.Spec.ImageVersion = common.ImageVersionLatest
+		}
+
 		// add gateway name to gateway label
 		goc.gw.ObjectMeta.Labels[common.LabelGatewayName] = goc.gw.Name
 
@@ -363,7 +367,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           common.GatewayProcessorGRPCClientImage,
+			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorGRPCClientImage, goc.gw.Spec.ImageVersion),
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
@@ -390,7 +394,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           common.GatewayProcessorHTTPClientImage,
+			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorHTTPClientImage, goc.gw.Spec.ImageVersion),
 			ImagePullPolicy: corev1.PullAlways,
 		}
 
@@ -458,7 +462,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	gatewayTransformerContainer := corev1.Container{
 		Name:            gatewayTransformer,
 		ImagePullPolicy: corev1.PullAlways,
-		Image:           transformerImage,
+		Image:           fmt.Sprintf("%s:%s", transformerImage, goc.gw.Spec.ImageVersion),
 		Env: []corev1.EnvVar{
 			{
 				Name:  common.EnvVarGatewayTransformerConfigMap,

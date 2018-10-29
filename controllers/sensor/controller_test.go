@@ -24,21 +24,21 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 
-	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/argoproj/argo-events/common"
+	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 )
 
 var (
-	SensorControllerConfigmap = common.DefaultConfigMapName("sensor-controller")
+	SensorControllerConfigmap  = common.DefaultConfigMapName("sensor-controller")
 	SensorControllerInstanceID = "argo-events"
 )
 
-func sensorController() *SensorController{
+func sensorController() *SensorController {
 	return &SensorController{
-		ConfigMap:   SensorControllerConfigmap,
+		ConfigMap: SensorControllerConfigmap,
 		Namespace: common.DefaultControllerNamespace,
 		Config: SensorControllerConfig{
-			Namespace: common.DefaultControllerNamespace,
+			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: SensorControllerInstanceID,
 		},
 		kubeClientset:   fake.NewSimpleClientset(),
