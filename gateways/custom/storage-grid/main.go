@@ -27,6 +27,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"time"
+	"github.com/joncalhoun/qson"
+	"encoding/json"
+	"net/url"
+	"strings"
 )
 
 var (
@@ -61,26 +66,70 @@ type storageGridEventConfig struct {
 	Endpoint string
 	// Todo: add event and prefix filtering.
 	Events []string
-	Filter StorageGridFilter
+	Filter *Filter
 	// srv holds reference to http server
 	srv *http.Server
 	mux *http.ServeMux
 }
 
-type server struct {
-	mux *http.ServeMux
-}
-
-func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mux.ServeHTTP(w, r)
-}
-
-// StorageGridFilter represents filters to apply to bucket nofifications for specifying constraints on objects
-type StorageGridFilter struct {
+// Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+type Filter struct {
 	Prefix string
 	Suffix string
 }
 
+// HTTP Muxer
+type server struct {
+	mux *http.ServeMux
+}
+
+// ServeHTTP implementation
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
+}
+
+// storageGridNotification is the bucket notification received from storage grid
+type storageGridNotification struct {
+	Action  string `json:"Action"`
+	Message struct {
+		Records []struct {
+			EventVersion string    `json:"eventVersion"`
+			EventSource  string    `json:"eventSource"`
+			EventTime    time.Time `json:"eventTime"`
+			EventName    string    `json:"eventName"`
+			UserIdentity struct {
+				PrincipalID string `json:"principalId"`
+			} `json:"userIdentity"`
+			RequestParameters struct {
+				SourceIPAddress string `json:"sourceIPAddress"`
+			} `json:"requestParameters"`
+			ResponseElements struct {
+				XAmzRequestID string `json:"x-amz-request-id"`
+			} `json:"responseElements"`
+			S3 struct {
+				S3SchemaVersion string `json:"s3SchemaVersion"`
+				ConfigurationID string `json:"configurationId"`
+				Bucket          struct {
+					Name          string `json:"name"`
+					OwnerIdentity struct {
+						PrincipalID string `json:"principalId"`
+					} `json:"ownerIdentity"`
+					Arn string `json:"arn"`
+				} `json:"bucket"`
+				Object struct {
+					Key       string `json:"key"`
+					Size      int `json:"size"`
+					ETag      string `json:"eTag"`
+					Sequencer string `json:"sequencer"`
+				} `json:"object"`
+			} `json:"s3"`
+		} `json:"Records"`
+	} `json:"Message"`
+	TopicArn string `json:"TopicArn"`
+	Version  string `json:"Version"`
+}
+
+// generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
 	return uuid.NewV4()
 }
@@ -120,6 +169,36 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 		}()
 	}
 	mutex.Unlock()
+}
+
+// filterEvent filters notification based on event filter in a gateway configuration
+func filterEvent(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+	if sg.Events == nil {
+		return true
+	}
+	for _, filterEvent := range sg.Events {
+		if notification.Message.Records[0].EventName == filterEvent {
+			return true
+		}
+	}
+	return false
+}
+
+// filterName filters object key based on configured prefix and/or suffix
+func filterName(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+	if sg.Filter == nil {
+		return true
+	}
+	if sg.Filter.Prefix != "" && sg.Filter.Suffix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix) && strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	}
+	if sg.Filter.Prefix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix)
+	}
+	if sg.Filter.Suffix != "" {
+		return strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	}
+	return true
 }
 
 // StartConfig runs a configuration
@@ -229,11 +308,38 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 					writer.Header().Add("Content-Type", "text/plain")
 					writer.Write([]byte(respBody))
 
-					// dispatch event to gateway transformer
-					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-						Src:     config.Data.Src,
-						Payload: body,
-					})
+					// notification received from storage grid is url encoded.
+					parsedURL, err := url.QueryUnescape(string(body))
+					if err != nil {
+						errMessage = "failed to perform query un-escape"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+					b, err := qson.ToJSON(parsedURL)
+					if err != nil {
+						errMessage = "failed to parse payload url into JSON"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+
+					var notification *storageGridNotification
+					err = json.Unmarshal(b, &notification)
+					if err != nil {
+						errMessage = "failed to unmarshal notification JSON"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+
+					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("parsed notification")
+					if filterEvent(notification, sg) && filterName(notification, sg) {
+						// dispatch event to gateway transformer
+						gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+							Src:     config.Data.Src,
+							Payload: b,
+						})
+					} else {
+						gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("discarding notification since it did not pass all filters")
+					}
 				}
 			}
 		})
