@@ -126,7 +126,6 @@ resource-image: resource-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)resource-gateway:$(IMAGE_TAG) ; fi
 
 
-
 artifact:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/
 
@@ -138,6 +137,18 @@ artifact-image: artifact-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
+file:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/file/
+
+file-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file
+
+file-image: file-linux
+	 docker build -t $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) -f ./gateways/core/file/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) ; fi
+
+
+#Stream gateways
 nats:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/
 

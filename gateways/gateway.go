@@ -705,6 +705,22 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 	}
 }
 
+// TransformerReadinessProbe checks whether gateway transformer is running or not
+func (gc *GatewayConfig) TransformerReadinessProbe() error {
+	return wait.ExponentialBackoff(wait.Backoff{
+		Steps:    5,
+		Duration: 1 * time.Minute,
+		Factor:   1.0,
+		Jitter:   0.1,
+	}, func() (bool, error) {
+		_, err := http.Get(fmt.Sprintf("http://localhost:%s/readiness", gc.transformerPort))
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	})
+}
+
 // GatewayCleanup marks configuration as non-active and marks final gateway state
 func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *string, err error) {
 	var event *corev1.Event
