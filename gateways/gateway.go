@@ -126,6 +126,7 @@ type HTTPGatewayServerConfig struct {
 type ConfigExecutor interface {
 	StartConfig(configContext *ConfigContext) error
 	StopConfig(configContext *ConfigContext) error
+	Validate(configContext *ConfigContext) error
 }
 
 // newEventWatcher creates a new event watcher.
@@ -742,4 +743,24 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *strin
 	if err != nil {
 		gc.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to create gateway k8 event")
 	}
+}
+
+// StartGateway starts a gateway
+func (gc *GatewayConfig) StartGateway(configExecutor ConfigExecutor) error {
+	err := gc.TransformerReadinessProbe()
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayTransformerConnection)
+		return err
+	}
+	_, err = gc.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayEventWatch)
+		return err
+	}
+	_, err = gc.WatchGatewayConfigMap(context.Background(), configExecutor)
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayConfigmapWatch)
+		return err
+	}
+	select {}
 }

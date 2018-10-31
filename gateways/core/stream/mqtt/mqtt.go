@@ -17,7 +17,6 @@ limitations under the License.
 package mqtt
 
 import (
-	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -126,17 +125,5 @@ func (mce *mqttConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 }
 
 func main() {
-	err := gatewayConfig.TransformerReadinessProbe()
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
-	}
-	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &mqttConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
-	}
-	select {}
+	gatewayConfig.StartGateway(&mqttConfigExecutor{})
 }

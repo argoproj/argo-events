@@ -27,6 +27,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"strings"
+	"strconv"
 )
 
 var (
@@ -50,17 +52,14 @@ var (
 // webhookConfigExecutor implements ConfigExecutor
 type webhookConfigExecutor struct{}
 
-// webhook is a general purpose REST API
-type webhook struct {
-	// REST API endpoint
-	Endpoint string
-
-	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
-	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string
-
-	// Port on which HTTP server is listening for incoming events.
-	Port string
+// parseConfig parses webhook configuration
+func (wce *webhookConfigExecutor) parseConfig(config *gateways.ConfigContext) (*webhook, error) {
+	var h *webhook
+	err := yaml.Unmarshal([]byte(config.Data.Config), &h)
+	if err != nil {
+		return nil, err
+	}
+	return nil, err
 }
 
 // Runs a gateway configuration
@@ -73,8 +72,7 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 
-	var h *webhook
-	err = yaml.Unmarshal([]byte(config.Data.Config), &h)
+	h, err := wce.parseConfig(config)
 	if err != nil {
 		errMessage = "failed to parse configuration"
 		return err
@@ -199,18 +197,32 @@ func (wce *webhookConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 	return nil
 }
 
+// Validate validates given webhook configuration
+func (wce *webhookConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	h, err := wce.parseConfig(config)
+	if err != nil {
+		return err
+	}
+	switch h.Method {
+	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
+	default:
+		return fmt.Errorf("unknown HTTP method %s", h.Method)
+	}
+	if h.Endpoint == "" {
+		return fmt.Errorf("endpoint can't be empty")
+	}
+	if !strings.HasPrefix("/", h.Endpoint) {
+		return fmt.Errorf("endpoint must start with '/'")
+	}
+	if h.Port != "" {
+		_, err := strconv.Atoi(h.Port)
+		if err != nil {
+			return fmt.Errorf("failed to parse server port. err: %+v", err)
+		}
+	}
+	return nil
+}
+
 func main() {
-	err := gatewayConfig.TransformerReadinessProbe()
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
-	}
-	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &webhookConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
-	}
-	select {}
+	gatewayConfig.StartGateway(&webhookConfigExecutor{})
 }

@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -173,16 +172,5 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	err := gatewayConfig.TransformerReadinessProbe()
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
-	}
-	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &calendarConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
-	}
+	gatewayConfig.StartGateway(&calendarConfigExecutor{})
 }

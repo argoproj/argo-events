@@ -2,7 +2,6 @@ package file
 
 import (
 	"bytes"
-	"context"
 	"encoding/gob"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
@@ -131,17 +130,5 @@ func (fw *fileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) 
 }
 
 func main() {
-	err := gatewayConfig.TransformerReadinessProbe()
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
-	}
-	_, err = gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &fileWatcherConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
-	}
-	select {}
+	gatewayConfig.StartGateway(&fileWatcherConfigExecutor{})
 }

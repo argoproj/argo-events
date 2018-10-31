@@ -289,6 +289,5 @@ func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Reques
 
 // ReadinessProbe is probe to check whether server is running or not
 func (toc *tOperationCtx) ReadinessProbe(w http.ResponseWriter, r *http.Request) {
-	toc.log.Info().Msg("transformer is up and running")
 	common.SendSuccessResponse(w)
 }
