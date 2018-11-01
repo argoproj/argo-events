@@ -17,11 +17,9 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -32,6 +30,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	"strings"
 	"sync"
+	"fmt"
 )
 
 var (
@@ -42,21 +41,6 @@ var (
 // resourceConfigExecutor implements ConfigExecutor interface
 type resourceConfigExecutor struct{}
 
-// Resource refers to a dependency on a k8s resource.
-type Resource struct {
-	Namespace               string          `json:"namespace"`
-	Filter                  *ResourceFilter `json:"filter,omitempty"`
-	metav1.GroupVersionKind `json:",inline"`
-}
-
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
-type ResourceFilter struct {
-	Prefix      string            `json:"prefix,omitempty"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations,omitempty"`
-	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
-}
-
 // StartConfig runs a configuration
 func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -65,14 +49,10 @@ func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) e
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	res := config.Data.Config.(*resource)
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
 
-	var res *Resource
-	err = yaml.Unmarshal([]byte(config.Data.Config), &res)
-	if err != nil {
-		errMessage = "failed to parse resource configuration"
-		return err
-	}
 	resources, err := discoverResources(res)
 	if err != nil {
 		errMessage = "failed to discover resource"
@@ -146,7 +126,28 @@ func (rce *resourceConfigExecutor) StopConfig(config *gateways.ConfigContext) er
 	return nil
 }
 
-func discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
+// Validate validates gateway configuration
+func (rce *resourceConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	res, ok := config.Data.Config.(*resource)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if res.Version == "" {
+		return fmt.Errorf("%+v, resource version must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Namespace == "" {
+		return fmt.Errorf("%+v, resource namespace must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Kind == "" {
+		return fmt.Errorf("%+v, resource kind must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Group == "" {
+		return fmt.Errorf("%+v, resource group must be specified", gateways.ErrInvalidConfig)
+	}
+	return nil
+}
+
+func discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(gatewayConfig.KubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(gatewayConfig.KubeConfig)
 	if err != nil {
@@ -184,7 +185,7 @@ func discoverResources(obj *Resource) ([]dynamic.ResourceInterface, error) {
 	return resources, nil
 }
 
-func resolveGroupVersion(obj *Resource) string {
+func resolveGroupVersion(obj *resource) string {
 	if obj.Version == "v1" {
 		return obj.Version
 	}
@@ -234,13 +235,5 @@ func checkMap(expected, actual map[string]string) bool {
 }
 
 func main() {
-	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &resourceConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
-	}
-	select {}
+	gatewayConfig.StartGateway(&resourceConfigExecutor{})
 }

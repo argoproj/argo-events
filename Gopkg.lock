@@ -78,6 +78,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/fsnotify/fsnotify"
+  packages = ["."]
+  revision = "ccc981bf80385c528a65fbfdd49bf2d8da22aa23"
+
+[[projects]]
+  branch = "master"
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "c7ce16629ff4cd059ed96ed06419dd3856fd3577"
@@ -213,6 +219,12 @@
   packages = ["."]
   revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
   version = "v0.3.6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/joncalhoun/qson"
+  packages = ["."]
+  revision = "8a9cab3a62b1b693e7dfa590a215dc6217552803"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -382,7 +394,7 @@
     "blake2b",
     "ssh/terminal"
   ]
-  revision = "e84da0312774c21d64ee2317962ef669b27ffb41"
+  revision = "4d3f4d9ffa16a13f451c3b2999e9c49e9750bf06"
 
 [[projects]]
   branch = "master"
@@ -399,7 +411,7 @@
     "trace",
     "websocket"
   ]
-  revision = "9b4f9f5ad5197c79fd623a3638e70d8b26cef344"
+  revision = "c44066c5c816ec500d459a2a324a753f78531ae0"
 
 [[projects]]
   branch = "master"
@@ -409,7 +421,7 @@
     "unix",
     "windows"
   ]
-  revision = "95b1ffbd15a57cc5abb3f04402b9e8ec0016a52c"
+  revision = "7e31e0c00fa05cb5fbf4347b585621d6709e19a4"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -448,13 +460,13 @@
     "internal/fastwalk",
     "internal/gopathwalk"
   ]
-  revision = "f60e5f99f0816fc2d9ecb338008ea420248d2943"
+  revision = "bb28844c46df63910d88c11eb36098ce781adfa0"
 
 [[projects]]
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "8b5d7a19e2d98fbad9aaf9c599776bf066d7c70f"
+  revision = "b69ba1387ce2108ac9bc8e8e5e5a46e7d5c72313"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -736,6 +748,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2dde50dbe268c1ba5ca9835d7a8acb240f42b11a5fb04b5af3757539f0849c5e"
+  inputs-digest = "952784260c5e9063118c3595643f512f8e5629a68aefc25502423dc86a8ddf76"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -17,12 +17,10 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
@@ -39,24 +37,6 @@ type Next func(time.Time) time.Time
 // calendarConfigExecutor implements ConfigExecutor interface
 type calendarConfigExecutor struct{}
 
-// calSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
-// Schedule takes precedence over interval; interval takes precedence over recurrence
-type calSchedule struct {
-	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-	Schedule string `json:"schedule"`
-
-	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-	Interval string `json:"interval"`
-
-	// List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
-	// RRULE is a recurrence rule which defines a repeating pattern for recurring events.
-	// RDATE defines the list of DATE-TIME values for recurring events.
-	// EXDATE defines the list of DATE-TIME exceptions for recurring events.
-	// the combination of these rules and dates combine to form a set of date times.
-	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
-	Recurrence []string `json:"recurrence,omitempty"`
-}
-
 // StartConfig runs a configuration
 func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -66,13 +46,8 @@ func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	var cal *calSchedule
-	err = yaml.Unmarshal([]byte(config.Data.Config), &cal)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
+	cal := config.Data.Config.(*calSchedule)
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
@@ -151,6 +126,18 @@ func (ce *calendarConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 	return nil
 }
 
+// Validate validates gateway configuration
+func (ce *calendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	cal, ok := config.Data.Config.(*calSchedule)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if cal.Schedule == "" && cal.Interval == "" {
+		return fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
+	}
+	return nil
+}
+
 func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		// standard cron expression
@@ -173,13 +160,5 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 func main() {
-	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &calendarConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
-	}
-	select {}
+	gatewayConfig.StartGateway(&calendarConfigExecutor{})
 }

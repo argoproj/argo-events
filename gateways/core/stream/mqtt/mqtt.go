@@ -14,23 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqtt
+package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	MQTTlib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/ghodss/yaml"
 	"sync"
-)
-
-const (
-	topicKey = "topic"
-	clientID = "clientID"
+	"fmt"
 )
 
 var (
@@ -49,7 +41,10 @@ func (mce *mqttConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	mqttConfig := config.Data.Config.(*mqtt)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *mqttConfig).Msg("mqtt configuration")
+
 	var wg sync.WaitGroup
 	wg.Add(1)
 
@@ -61,35 +56,13 @@ func (mce *mqttConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		wg.Done()
 	}()
 
-	var s *stream.Stream
-	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
-	if err != nil {
-		errMessage = "failed to parse mqtt config"
-		config.StopCh <- struct{}{}
-		return err
-	}
-	// parse out the attributes
-	topic, ok := s.Attributes[topicKey]
-	if !ok {
-		errMessage = "failed to get topic key"
-		err = fmt.Errorf(errMessage)
-		return err
-	}
-
-	clientID, ok := s.Attributes[clientID]
-	if !ok {
-		errMessage = "failed to get client id"
-		err = fmt.Errorf(errMessage)
-		return err
-	}
-
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
 		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 			Src:     config.Data.Src,
 			Payload: msg.Payload(),
 		})
 	}
-	opts := MQTTlib.NewClientOptions().AddBroker(s.URL).SetClientID(clientID)
+	opts := MQTTlib.NewClientOptions().AddBroker(mqttConfig.URL).SetClientID(mqttConfig.ClientId)
 	client := MQTTlib.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		errMessage = "failed to connect to client"
@@ -97,7 +70,7 @@ func (mce *mqttConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		err = token.Error()
 		return err
 	}
-	if token := client.Subscribe(topic, 0, handler); token.Wait() && token.Error() != nil {
+	if token := client.Subscribe(mqttConfig.Topic, 0, handler); token.Wait() && token.Error() != nil {
 		errMessage = "failed to subscribe to topic"
 		err = token.Error()
 		return err
@@ -125,14 +98,24 @@ func (mce *mqttConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 	return nil
 }
 
+// Validate validates gateway configuration
+func (mce *mqttConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	mqttConfig, ok := config.Data.Config.(*mqtt)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if mqttConfig.URL == "" {
+		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+	}
+	if mqttConfig.Topic == "" {
+		return fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidConfig)
+	}
+	if mqttConfig.ClientId == "" {
+		return fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidConfig)
+	}
+	return nil
+}
+
 func main() {
-	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &mqttConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
-	}
-	select {}
+	gatewayConfig.StartGateway(&mqttConfigExecutor{})
 }

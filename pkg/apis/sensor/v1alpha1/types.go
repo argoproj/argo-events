@@ -415,10 +415,21 @@ type URI struct {
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
-	S3     *S3Artifact   `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
-	Inline *string       `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
-	File   *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
-	URL    *URLArtifact  `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+	S3        *S3Artifact        `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	Inline    *string            `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
+	File      *FileArtifact      `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
+	URL       *URLArtifact       `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+}
+
+// ConfigmapArtifact contains information about artifact in k8 configmap
+type ConfigmapArtifact struct {
+	// Name of the configmap
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	// Namespace where configmap is deployed
+	Namespace string `json:"namespace" protobuf:"bytes,2,opt,name=namespace"`
+	// Key within configmap data which contains trigger resource definition
+	Key string `json:"key" protobuf:"bytes,3,opt,name=key"`
 }
 
 // S3Artifact contains information about an artifact in S3

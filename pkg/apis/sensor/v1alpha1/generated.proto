@@ -37,6 +37,20 @@ message ArtifactLocation {
   optional FileArtifact file = 3;
 
   optional URLArtifact url = 4;
+
+  optional ConfigmapArtifact configmap = 5;
+}
+
+// ConfigmapArtifact contains information about artifact in k8 configmap
+message ConfigmapArtifact {
+  // Name of the configmap
+  optional string name = 1;
+
+  // Namespace where configmap is deployed
+  optional string namespace = 2;
+
+  // Key within configmap data which contains trigger resource definition
+  optional string key = 3;
 }
 
 message Data {

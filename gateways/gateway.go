@@ -93,7 +93,7 @@ type ConfigData struct {
 	// Src contains name of the configuration
 	Src string `json:"src"`
 	// Config contains the configuration
-	Config string `json:"config"`
+	Config interface{} `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.
@@ -126,6 +126,7 @@ type HTTPGatewayServerConfig struct {
 type ConfigExecutor interface {
 	StartConfig(configContext *ConfigContext) error
 	StopConfig(configContext *ConfigContext) error
+	Validate(configContext *ConfigContext) error
 }
 
 // newEventWatcher creates a new event watcher.
@@ -296,7 +297,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
 					err := gc.manageConfigurations(executor, newCm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("add config failed")
 					}
 				}
 			},
@@ -305,7 +306,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
 					err := gc.manageConfigurations(executor, cm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("update config failed")
 					}
 				}
 			},
@@ -419,6 +420,11 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string]*ConfigContext, error) {
 	configs := make(map[string]*ConfigContext)
 	for configKey, configValue := range cm.Data {
+		i, err := ParseGatewayConfig(configValue)
+		if err != nil {
+			return nil, err
+		}
+
 		hashKey := Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 		currentTimeStr := time.Now().String()
@@ -428,7 +434,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 				ID:     hashKey,
 				TimeID: timeID,
 				Src:    configKey,
-				Config: configValue,
+				Config: i,
 			},
 			StopCh: make(chan struct{}),
 		}
@@ -705,6 +711,22 @@ func (gc *GatewayConfig) GetK8Event(reason string, action v1alpha1.NodePhase, co
 	}
 }
 
+// TransformerReadinessProbe checks whether gateway transformer is running or not
+func (gc *GatewayConfig) TransformerReadinessProbe() error {
+	return wait.ExponentialBackoff(wait.Backoff{
+		Steps:    5,
+		Duration: 1 * time.Minute,
+		Factor:   1.0,
+		Jitter:   0.1,
+	}, func() (bool, error) {
+		_, err := http.Get(fmt.Sprintf("http://localhost:%s/readiness", gc.transformerPort))
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	})
+}
+
 // GatewayCleanup marks configuration as non-active and marks final gateway state
 func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *string, err error) {
 	var event *corev1.Event
@@ -726,4 +748,24 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *strin
 	if err != nil {
 		gc.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to create gateway k8 event")
 	}
+}
+
+// StartGateway starts a gateway
+func (gc *GatewayConfig) StartGateway(configExecutor ConfigExecutor) error {
+	err := gc.TransformerReadinessProbe()
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayTransformerConnectionMsg)
+		return err
+	}
+	_, err = gc.WatchGatewayEvents(context.Background())
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayEventWatchMsg)
+		return err
+	}
+	_, err = gc.WatchGatewayConfigMap(context.Background(), configExecutor)
+	if err != nil {
+		gc.Log.Panic().Err(err).Msg(ErrGatewayConfigmapWatchMsg)
+		return err
+	}
+	select {}
 }
