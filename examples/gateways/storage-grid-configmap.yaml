@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: storage_grid-gateway-configmap
+  name: storage-grid-gateway-configmap
 data:
   storage-grid.defaultConfig: |-
     port: "8080"

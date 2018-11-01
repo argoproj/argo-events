@@ -31,7 +31,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
-	"github.com/argoproj/argo-events/gateways/custom/storage_grid"
+	"github.com/argoproj/argo-events/gateways/custom/storagegrid"
 )
 
 var (
@@ -117,7 +117,7 @@ func generateUUID() uuid.UUID {
 }
 
 // starts a http server
-func (sgce *storageGridConfigExecutor) startHttpServer(sg *storage_grid.StorageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
+func (sgce *storageGridConfigExecutor) startHttpServer(sg *storagegrid.StorageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active-servers", activeServers[sg.Port]).Msg("servers")
@@ -154,7 +154,7 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storage_grid.StorageG
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *storage_grid.StorageGridEventConfig) bool {
+func filterEvent(notification *storageGridNotification, sg *storagegrid.StorageGridEventConfig) bool {
 	if sg.Events == nil {
 		return true
 	}
@@ -167,7 +167,7 @@ func filterEvent(notification *storageGridNotification, sg *storage_grid.Storage
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *storage_grid.StorageGridEventConfig) bool {
+func filterName(notification *storageGridNotification, sg *storagegrid.StorageGridEventConfig) bool {
 	if sg.Filter == nil {
 		return true
 	}
@@ -192,7 +192,7 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	sg := config.Data.Config.(*storage_grid.StorageGridEventConfig)
+	sg := config.Data.Config.(*storagegrid.StorageGridEventConfig)
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *sg).Msg("storage grid configuration")
 
 	var wg sync.WaitGroup
@@ -337,7 +337,7 @@ func (sgce *storageGridConfigExecutor) StopConfig(config *gateways.ConfigContext
 
 // Validate validates gateway configuration
 func (sgce *storageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	sg, ok := config.Data.Config.(*storage_grid.StorageGridEventConfig)
+	sg, ok := config.Data.Config.(*storagegrid.StorageGridEventConfig)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}

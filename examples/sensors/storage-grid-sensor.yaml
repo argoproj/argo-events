@@ -8,7 +8,7 @@ spec:
   repeat: true
   serviceAccountName: argo-events-sa
   signals:
-    - name: storage_grid-gateway/storage_grid.defaultConfig
+    - name: storage-grid-gateway/storage-grid.defaultConfig
   triggers:
     - name: argo-workflow
       resource:
@@ -18,7 +18,7 @@ spec:
         kind: Workflow
         parameters:
           - src:
-              signal: storage_grid-gateway/storage_grid.defaultConfig
+              signal: storage-grid-gateway/storage-grid.defaultConfig
               path:
               value: hello world
             dest: spec.templates.0.container.args.0

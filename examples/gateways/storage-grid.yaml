@@ -4,25 +4,25 @@ metadata:
   name: storage_grid-gateway
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "storage_grid-gateway"
+    gateway-name: "storage-grid-gateway"
 spec:
-  configMap: "storage_grid-gateway-configmap"
+  configMap: "storage-grid-gateway-configmap"
   type: "storage_grid"
   dispatchMechanism: "HTTP"
   version: "1.0"
   deploySpec:
     containers:
-    - name: "storage_grid-events"
-      image: "argoproj/storage_grid-gateway"
+    - name: "storage-grid-events"
+      image: "argoproj/storage-grid-gateway"
       imagePullPolicy: "Always"
     serviceAccountName: "argo-events-sa"
   serviceSpec:
     selector:
-      gateway-name: "storage_grid-gateway"
+      gateway-name: "storage-grid-gateway"
     ports:
       - port: 8080
         targetPort: 8080
     type: LoadBalancer
   watchers:
     sensors:
-    - name: "storage_grid-watcher-sensor"
+    - name: "storage-grid-watcher-sensor"

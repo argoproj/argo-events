@@ -373,6 +373,13 @@ func (gc *GatewayConfig) manageConfigurations(executor ConfigExecutor, cm *corev
 			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("created k8 event for new configuration.")
 		}
 
+		// validate configuration
+		// TODO: If validation of a configuration fails, gateway state should be marked as  Error
+		err := executor.Validate(newConfig)
+		if err != nil {
+			return err
+		}
+
 		// run configuration
 		go executor.StartConfig(newConfig)
 	}
@@ -424,7 +431,6 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 		if err != nil {
 			return nil, err
 		}
-
 		hashKey := Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 		currentTimeStr := time.Now().String()
