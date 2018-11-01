@@ -6,6 +6,7 @@ import (
 )
 
 // S3Artifact contains information about an artifact in S3
+// +k8s:openapi-gen=true
 type s3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
 	S3EventConfig *S3EventConfig `json:"s3EventConfig"`
@@ -21,6 +22,7 @@ type s3Artifact struct {
 }
 
 // S3EventConfig contains configuration for bucket notification
+// +k8s:openapi-gen=true
 type S3EventConfig struct {
 	Endpoint string                      `json:"endpoint,omitempty"`
 	Bucket   string                      `json:"bucket,omitempty"`
@@ -30,6 +32,7 @@ type S3EventConfig struct {
 }
 
 // S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+// +k8s:openapi-gen=true
 type S3Filter struct {
 	Prefix string `json:"prefix"`
 	Suffix string `json:"suffix"`

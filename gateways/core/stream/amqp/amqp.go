@@ -27,12 +27,6 @@ import (
 	amqplib "github.com/streadway/amqp"
 )
 
-const (
-	exchangeNameKey = "exchangeName"
-	exchangeTypeKey = "exchangeType"
-	routingKey      = "routingKey"
-)
-
 var (
 	// gatewayConfig provides a generic configuration for a gateway
 	gatewayConfig = gateways.NewGatewayConfiguration()
@@ -49,16 +43,9 @@ func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
-
-	var s *stream.Stream
-	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
-	if err != nil {
-		errMessage = "failed to parse amqp config"
-		return err
-	}
-
-	conn, err := amqplib.Dial(s.URL)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	amqpConfig := config.Data.Config.(*amqp)
+	conn, err := amqplib.Dial(amqpConfig.URL)
 	if err != nil {
 		errMessage = "failed to connect to server"
 		return err
@@ -112,32 +99,15 @@ func (ace *amqpConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 	return nil
 }
 
-func parseAttributes(attr map[string]string) (string, string, string, error) {
-	// parse out the attributes
-	exchangeName, ok := attr[exchangeNameKey]
-	if !ok {
-		return "", "", "", fmt.Errorf("exchange name key is not provided")
-	}
-	exchangeType, ok := attr[exchangeTypeKey]
-	if !ok {
-		return exchangeName, "", "", fmt.Errorf("exchange type is not provided")
-	}
-	routingKey, ok := attr[routingKey]
-	if !ok {
-		return exchangeName, exchangeType, "", fmt.Errorf("routing key is not provided")
-	}
-	return exchangeName, exchangeType, routingKey, nil
+// Validate validates gateway configuration
+func (ace *amqpConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	return nil
 }
 
-func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.Delivery, error) {
-	exName, exType, rKey, err := parseAttributes(attr)
+func getDelivery(ch *amqplib.Channel, config *amqp) (<-chan amqplib.Delivery, error) {
+	err := ch.ExchangeDeclare(config.ExchangeName, config.ExchangeType, true, false, false, false, nil)
 	if err != nil {
-		return nil, err
-	}
-
-	err = ch.ExchangeDeclare(exName, exType, true, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare %s exchange '%s': %s", exType, exName, err)
+		return nil, fmt.Errorf("failed to declare exchange with name %s and type %s. err: %+v", config.ExchangeName, config.ExchangeType, err)
 	}
 
 	q, err := ch.QueueDeclare("", false, false, true, false, nil)
@@ -145,9 +115,9 @@ func getDelivery(ch *amqplib.Channel, attr map[string]string) (<-chan amqplib.De
 		return nil, fmt.Errorf("failed to declare queue: %s", err)
 	}
 
-	err = ch.QueueBind(q.Name, rKey, exName, false, nil)
+	err = ch.QueueBind(q.Name, config.RoutingKey, config.ExchangeName, false, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", exType, exName, rKey, err)
+		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", config.ExchangeType, config.ExchangeName, config.RoutingKey, err)
 	}
 
 	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)

@@ -1,4 +1,4 @@
-package file
+package main
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/fsnotify/fsnotify"
-	"gopkg.in/yaml.v2"
 	"strings"
 )
 
@@ -20,17 +19,6 @@ var (
 // fileWatcherConfigExecutor implements ConfigExecutor interface
 type fileWatcherConfigExecutor struct{}
 
-// fileWatcherConfig contains configuration information for this gateway
-type fileWatcherConfig struct {
-	// Directory to watch for events
-	Directory string
-	// Path is relative path of object to watch with respect to the directory
-	Path string
-	// Type of file operations to watch
-	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
-	Type string
-}
-
 // StartConfig runs a configuration
 func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -38,14 +26,10 @@ func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext)
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("started operating on configuration")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	fwc := config.Data.Config.(*fileWatcherConfig)
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config", *fwc).Msg("s3 artifact")
 
-	var fwc *fileWatcherConfig
-	err = yaml.Unmarshal([]byte(config.Data.Config), &fwc)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -125,6 +109,24 @@ NotificationListener:
 func (fw *fileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
+// Validate validates gateway configuration
+func (fw *fileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	fwc, ok := config.Data.Config.(*fileWatcherConfig)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if fwc.Type == "" {
+		return fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidConfig)
+	}
+	if fwc.Directory == "" {
+		return fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidConfig)
+	}
+	if fwc.Path == "" {
+		return fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidConfig)
 	}
 	return nil
 }

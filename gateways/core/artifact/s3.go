@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,15 +38,6 @@ var (
 // s3ConfigExecutor implements ConfigExecutor interface
 type s3ConfigExecutor struct{}
 
-// parseConfig parses s3 configuration
-func (wce *s3ConfigExecutor) parseConfig(config *gateways.ConfigContext) (*s3Artifact, error) {
-	var h *s3Artifact
-	err := yaml.Unmarshal([]byte(config.Data.Config), &h)
-	if err != nil {
-		return nil, err
-	}
-	return nil, err
-}
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
 func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
@@ -82,15 +72,9 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	artifact, err := s3ce.parseConfig(config)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
-
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Config).Interface("artifact", *artifact).Msg("s3 artifact")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
+	artifact := config.Data.Config.(*s3Artifact)
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("artifact", *artifact).Msg("s3 artifact")
 
 	// retrieve access key id and secret access key
 	accessKey, err := getSecrets(gatewayConfig.Clientset, gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
@@ -177,9 +161,9 @@ func (s3ce *s3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 
 // Validate validates s3 configuration
 func(s3ce *s3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	artifact, err := s3ce.parseConfig(config)
-	if err != nil {
-		return err
+	artifact, ok := config.Data.Config.(*s3Artifact)
+	if !ok {
+		return gateways.ErrConfigParseFailed
 	}
 	if artifact.AccessKey != nil {
 		return fmt.Errorf("access key can't be empty")

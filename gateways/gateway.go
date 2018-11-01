@@ -93,7 +93,7 @@ type ConfigData struct {
 	// Src contains name of the configuration
 	Src string `json:"src"`
 	// Config contains the configuration
-	Config string `json:"config"`
+	Config interface{} `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.
@@ -297,7 +297,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
 					err := gc.manageConfigurations(executor, newCm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("add config failed")
 					}
 				}
 			},
@@ -306,7 +306,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
 					err := gc.manageConfigurations(executor, cm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update of run config failed")
+						gc.Log.Error().Err(err).Msg("update config failed")
 					}
 				}
 			},
@@ -420,6 +420,11 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string]*ConfigContext, error) {
 	configs := make(map[string]*ConfigContext)
 	for configKey, configValue := range cm.Data {
+		i, err := ParseGatewayConfig(configValue)
+		if err != nil {
+			return nil, err
+		}
+
 		hashKey := Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 		currentTimeStr := time.Now().String()
@@ -429,7 +434,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 				ID:     hashKey,
 				TimeID: timeID,
 				Src:    configKey,
-				Config: configValue,
+				Config: i,
 			},
 			StopCh: make(chan struct{}),
 		}
@@ -749,17 +754,17 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *strin
 func (gc *GatewayConfig) StartGateway(configExecutor ConfigExecutor) error {
 	err := gc.TransformerReadinessProbe()
 	if err != nil {
-		gc.Log.Panic().Err(err).Msg(ErrGatewayTransformerConnection)
+		gc.Log.Panic().Err(err).Msg(ErrGatewayTransformerConnectionMsg)
 		return err
 	}
 	_, err = gc.WatchGatewayEvents(context.Background())
 	if err != nil {
-		gc.Log.Panic().Err(err).Msg(ErrGatewayEventWatch)
+		gc.Log.Panic().Err(err).Msg(ErrGatewayEventWatchMsg)
 		return err
 	}
 	_, err = gc.WatchGatewayConfigMap(context.Background(), configExecutor)
 	if err != nil {
-		gc.Log.Panic().Err(err).Msg(ErrGatewayConfigmapWatch)
+		gc.Log.Panic().Err(err).Msg(ErrGatewayConfigmapWatchMsg)
 		return err
 	}
 	select {}

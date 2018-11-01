@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
 	"hash/fnv"
+	"github.com/ghodss/yaml"
 )
 
 // TransformerPayload creates a new payload from input data and adds source information
@@ -41,4 +42,14 @@ func Hasher(value string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(value))
 	return fmt.Sprintf("%v", h.Sum32())
+}
+
+// parseConfig parses gateway configuration
+func ParseGatewayConfig(config string) (interface{}, error) {
+	var i interface{}
+	err := yaml.Unmarshal([]byte(config), &i)
+	if err != nil {
+		return nil, err
+	}
+	return i, err
 }

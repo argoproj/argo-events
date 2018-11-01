@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"go.uber.org/atomic"
 	"io/ioutil"
 	"net/http"
@@ -52,16 +51,6 @@ var (
 // webhookConfigExecutor implements ConfigExecutor
 type webhookConfigExecutor struct{}
 
-// parseConfig parses webhook configuration
-func (wce *webhookConfigExecutor) parseConfig(config *gateways.ConfigContext) (*webhook, error) {
-	var h *webhook
-	err := yaml.Unmarshal([]byte(config.Data.Config), &h)
-	if err != nil {
-		return nil, err
-	}
-	return nil, err
-}
-
 // Runs a gateway configuration
 func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -71,13 +60,13 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	h, err := wce.parseConfig(config)
+	pConfig, err := gateways.ParseGatewayConfig(config)
 	if err != nil {
 		errMessage = "failed to parse configuration"
 		return err
 	}
-	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("webhook", h).Msg("configuring...")
+	h := pConfig.(*webhook)
+	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("config", *h).Msg("configuring...")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -199,10 +188,11 @@ func (wce *webhookConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 
 // Validate validates given webhook configuration
 func (wce *webhookConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	h, err := wce.parseConfig(config)
+	pConfig, err := gateways.ParseGatewayConfig(config)
 	if err != nil {
 		return err
 	}
+	h := pConfig.(*webhook)
 	switch h.Method {
 	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
 	default:
