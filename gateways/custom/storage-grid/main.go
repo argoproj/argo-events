@@ -22,11 +22,15 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"sync"
+	"time"
+	"github.com/joncalhoun/qson"
+	"encoding/json"
+	"net/url"
+	"strings"
 )
 
 var (
@@ -55,32 +59,58 @@ var (
 // storageGridConfigExecutor implements ConfigExecutor interface
 type storageGridConfigExecutor struct{}
 
-// storageGridEventConfig contains configuration for storage grid sns
-type storageGridEventConfig struct {
-	Port     string
-	Endpoint string
-	// Todo: add event and prefix filtering.
-	Events []string
-	Filter StorageGridFilter
-	// srv holds reference to http server
-	srv *http.Server
-	mux *http.ServeMux
-}
-
+// HTTP Muxer
 type server struct {
 	mux *http.ServeMux
 }
 
+// ServeHTTP implementation
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-// StorageGridFilter represents filters to apply to bucket nofifications for specifying constraints on objects
-type StorageGridFilter struct {
-	Prefix string
-	Suffix string
+// storageGridNotification is the bucket notification received from storage grid
+type storageGridNotification struct {
+	Action  string `json:"Action"`
+	Message struct {
+		Records []struct {
+			EventVersion string    `json:"eventVersion"`
+			EventSource  string    `json:"eventSource"`
+			EventTime    time.Time `json:"eventTime"`
+			EventName    string    `json:"eventName"`
+			UserIdentity struct {
+				PrincipalID string `json:"principalId"`
+			} `json:"userIdentity"`
+			RequestParameters struct {
+				SourceIPAddress string `json:"sourceIPAddress"`
+			} `json:"requestParameters"`
+			ResponseElements struct {
+				XAmzRequestID string `json:"x-amz-request-id"`
+			} `json:"responseElements"`
+			S3 struct {
+				S3SchemaVersion string `json:"s3SchemaVersion"`
+				ConfigurationID string `json:"configurationId"`
+				Bucket          struct {
+					Name          string `json:"name"`
+					OwnerIdentity struct {
+						PrincipalID string `json:"principalId"`
+					} `json:"ownerIdentity"`
+					Arn string `json:"arn"`
+				} `json:"bucket"`
+				Object struct {
+					Key       string `json:"key"`
+					Size      int `json:"size"`
+					ETag      string `json:"eTag"`
+					Sequencer string `json:"sequencer"`
+				} `json:"object"`
+			} `json:"s3"`
+		} `json:"Records"`
+	} `json:"Message"`
+	TopicArn string `json:"TopicArn"`
+	Version  string `json:"Version"`
 }
 
+// generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
 	return uuid.NewV4()
 }
@@ -89,7 +119,7 @@ func generateUUID() uuid.UUID {
 func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active servers", activeServers[sg.Port]).Msg("active servers")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active-servers", activeServers[sg.Port]).Msg("servers")
 	if _, ok := activeServers[sg.Port]; !ok {
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("port", sg.Port).Msg("http server started listening...")
 		s := &server{
@@ -122,6 +152,36 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 	mutex.Unlock()
 }
 
+// filterEvent filters notification based on event filter in a gateway configuration
+func filterEvent(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+	if sg.Events == nil {
+		return true
+	}
+	for _, filterEvent := range sg.Events {
+		if notification.Message.Records[0].EventName == filterEvent {
+			return true
+		}
+	}
+	return false
+}
+
+// filterName filters object key based on configured prefix and/or suffix
+func filterName(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+	if sg.Filter == nil {
+		return true
+	}
+	if sg.Filter.Prefix != "" && sg.Filter.Suffix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix) && strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	}
+	if sg.Filter.Prefix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix)
+	}
+	if sg.Filter.Suffix != "" {
+		return strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	}
+	return true
+}
+
 // StartConfig runs a configuration
 func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -130,15 +190,9 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	var sg *storageGridEventConfig
-	err = yaml.Unmarshal([]byte(config.Data.Config), &sg)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
-	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("storage-grid", sg).Msg("configuring...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	sg := config.Data.Config.(*storageGridEventConfig)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *sg).Msg("storage grid configuration")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -229,11 +283,38 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 					writer.Header().Add("Content-Type", "text/plain")
 					writer.Write([]byte(respBody))
 
-					// dispatch event to gateway transformer
-					gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-						Src:     config.Data.Src,
-						Payload: body,
-					})
+					// notification received from storage grid is url encoded.
+					parsedURL, err := url.QueryUnescape(string(body))
+					if err != nil {
+						errMessage = "failed to perform query un-escape"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+					b, err := qson.ToJSON(parsedURL)
+					if err != nil {
+						errMessage = "failed to parse payload url into JSON"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+
+					var notification *storageGridNotification
+					err = json.Unmarshal(b, &notification)
+					if err != nil {
+						errMessage = "failed to unmarshal notification JSON"
+						gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg(errMessage)
+						return
+					}
+
+					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("parsed notification")
+					if filterEvent(notification, sg) && filterName(notification, sg) {
+						// dispatch event to gateway transformer
+						gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+							Src:     config.Data.Src,
+							Payload: b,
+						})
+					} else {
+						gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("discarding notification since it did not pass all filters")
+					}
 				}
 			}
 		})
@@ -253,14 +334,24 @@ func (sgce *storageGridConfigExecutor) StopConfig(config *gateways.ConfigContext
 	return nil
 }
 
+// Validate validates gateway configuration
+func (sgce *storageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	sg, ok := config.Data.Config.(*storageGridEventConfig)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if sg.Port == "" {
+		return fmt.Errorf("%+v, must specify port", gateways.ErrInvalidConfig)
+	}
+	if sg.Endpoint == "" {
+		return fmt.Errorf("%+v, must specify endpoint", gateways.ErrInvalidConfig)
+	}
+	if !strings.HasPrefix(sg.Endpoint, "/") {
+		return fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidConfig)
+	}
+	return nil
+}
+
 func main() {
-	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &storageGridConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
-	}
-	select {}
+	gatewayConfig.StartGateway(&storageGridConfigExecutor{})
 }

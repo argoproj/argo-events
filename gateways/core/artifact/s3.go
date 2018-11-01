@@ -17,13 +17,11 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,35 +38,6 @@ var (
 // s3ConfigExecutor implements ConfigExecutor interface
 type s3ConfigExecutor struct{}
 
-// S3Artifact contains information about an artifact in S3
-type S3Artifact struct {
-	// S3EventConfig contains configuration for bucket notification
-	S3EventConfig S3EventConfig `json:"s3EventConfig"`
-
-	// Mode of operation for s3 client
-	Insecure bool `json:"insecure,omitempty"`
-
-	// AccessKey
-	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty"`
-
-	// SecretKey
-	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty"`
-}
-
-// S3EventConfig contains configuration for bucket notification
-type S3EventConfig struct {
-	Endpoint string                      `json:"endpoint,omitempty"`
-	Bucket   string                      `json:"bucket,omitempty"`
-	Region   string                      `json:"region,omitempty"`
-	Event    minio.NotificationEventType `json:"event,omitempty"`
-	Filter   S3Filter                    `json:"filter,omitempty"`
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type S3Filter struct {
-	Prefix string `json:"prefix"`
-	Suffix string `json:"suffix"`
-}
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
 func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
@@ -103,16 +72,9 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	var artifact *S3Artifact
-	err = yaml.Unmarshal([]byte(config.Data.Config), &artifact)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
-
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Config).Interface("artifact", *artifact).Msg("s3 artifact")
+	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
+	artifact := config.Data.Config.(*s3Artifact)
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
 
 	// retrieve access key id and secret access key
 	accessKey, err := getSecrets(gatewayConfig.Clientset, gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
@@ -197,14 +159,33 @@ func (s3ce *s3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	return nil
 }
 
+// Validate validates s3 configuration
+func(s3ce *s3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	artifact, ok := config.Data.Config.(*s3Artifact)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if artifact.AccessKey != nil {
+		return fmt.Errorf("access key can't be empty")
+	}
+	if artifact.SecretKey != nil {
+		return fmt.Errorf("secret key can't be empty")
+	}
+	if artifact.S3EventConfig != nil {
+		return fmt.Errorf("s3 event configuration can't be empty")
+	}
+	if artifact.S3EventConfig.Endpoint == "" {
+		return fmt.Errorf("endpoint url can't be empty")
+	}
+	if artifact.S3EventConfig.Bucket == "" {
+		return fmt.Errorf("bucket name can't be empty")
+	}
+	if artifact.S3EventConfig.Event != "" && minio.NotificationEventType(artifact.S3EventConfig.Event) == "" {
+		return fmt.Errorf("unknown event %s", artifact.S3EventConfig.Event)
+	}
+	return nil
+}
+
 func main() {
-	_, err := gatewayConfig.WatchGatewayEvents(context.Background())
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch k8 events for gateway configuration state updates")
-	}
-	_, err = gatewayConfig.WatchGatewayConfigMap(context.Background(), &s3ConfigExecutor{})
-	if err != nil {
-		gatewayConfig.Log.Panic().Err(err).Msg("failed to watch gateway configuration updates")
-	}
-	select {}
+	gatewayConfig.StartGateway(&s3ConfigExecutor{})
 }

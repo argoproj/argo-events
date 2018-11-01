@@ -1,0 +1,61 @@
+{
+  "swagger": "2.0",
+  "info": {
+   "title": "Integration Test",
+   "version": "1.0"
+  },
+  "paths": {},
+  "definitions": {
+   "argo-events.S3EventConfig": {
+    "description": "S3EventConfig contains configuration for bucket notification",
+    "properties": {
+     "bucket": {
+      "type": "string"
+     },
+     "endpoint": {
+      "type": "string"
+     },
+     "event": {
+      "type": "string"
+     },
+     "filter": {
+      "$ref": "#/definitions/argo-events.S3Filter"
+     },
+     "region": {
+      "type": "string"
+     }
+    }
+   },
+   "argo-events.S3Filter": {
+    "description": "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+    "required": [
+     "prefix",
+     "suffix"
+    ],
+    "properties": {
+     "prefix": {
+      "type": "string"
+     },
+     "suffix": {
+      "type": "string"
+     }
+    }
+   },
+   "argo-events.s3Artifact": {
+    "description": "S3Artifact contains information about an artifact in S3",
+    "required": [
+     "s3EventConfig"
+    ],
+    "properties": {
+     "insecure": {
+      "description": "Mode of operation for s3 client",
+      "type": "boolean"
+     },
+     "s3EventConfig": {
+      "description": "S3EventConfig contains configuration for bucket notification",
+      "$ref": "#/definitions/argo-events.S3EventConfig"
+     }
+    }
+   }
+  }
+ }

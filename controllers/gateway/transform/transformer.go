@@ -286,3 +286,8 @@ func (toc *tOperationCtx) TransformRequest(w http.ResponseWriter, r *http.Reques
 	}
 	common.SendSuccessResponse(w)
 }
+
+// ReadinessProbe is probe to check whether server is running or not
+func (toc *tOperationCtx) ReadinessProbe(w http.ResponseWriter, r *http.Request) {
+	common.SendSuccessResponse(w)
+}

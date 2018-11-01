@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"io/ioutil"
 	"net/http"
+	"io/ioutil"
+	"github.com/argoproj/argo-events/common"
+	"context"
 )
 
 var (
@@ -60,8 +60,18 @@ func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 }
 
 func main() {
-	httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
-	httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
+	err := httpGatewayServerConfig.GwConfig.TransformerReadinessProbe()
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
+	}
+	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
+	}
+	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
+	if err != nil {
+		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
+	}
 	// handle events from gateway processor server
 	http.HandleFunc(httpGatewayServerConfig.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		httpGatewayServerConfig.GwConfig.Log.Info().Msg("received an event. processing...")
