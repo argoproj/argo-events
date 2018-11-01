@@ -310,12 +310,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"eventTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Timestamp of when the event happened. Must adhere to format specified in RFC 3339.",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
-						},
-					},
 					"schemaURL": {
 						SchemaProps: spec.SchemaProps{
 							Description: "A link to the schema that the data attribute adheres to. Must adhere to the format specified in RFC 3986.",
@@ -350,11 +344,11 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"eventType", "eventTypeVersion", "cloudEventsVersion", "source", "eventID", "eventTime", "schemaURL", "contentType"},
+				Required: []string{"eventType", "eventTypeVersion", "cloudEventsVersion", "source", "eventID", "schemaURL", "contentType"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI"},
 	}
 }
 
@@ -476,18 +470,6 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"startedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this node started",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
-						},
-					},
-					"completedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CompletedAt is the time at which this node completed",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
-						},
-					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "store data or something to save for signal notifications or trigger events",
@@ -506,7 +488,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper"},
 	}
 }
 
@@ -688,16 +670,6 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 							Format: "",
 						},
 					},
-					"accessKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"secretKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
 					"key": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -719,7 +691,7 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.S3Filter"},
 	}
 }
 
@@ -753,21 +725,10 @@ func schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref common.ReferenceCallback) comm
 							Format: "",
 						},
 					},
-					"accessKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"secretKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
 				},
 			},
 		},
-		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+		Dependencies: []string{},
 	}
 }
 
@@ -803,25 +764,6 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 			SchemaProps: spec.SchemaProps{
 				Description: "Sensor is the definition of a sensor resource",
 				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
-						},
-					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec"),
@@ -833,11 +775,11 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 						},
 					},
 				},
-				Required: []string{"metadata", "spec", "status"},
+				Required: []string{"spec", "status"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus"},
 	}
 }
 
@@ -847,25 +789,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorList is the list of Sensor resources",
 				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
-						},
-					},
 					"items": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
@@ -879,11 +802,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"metadata", "items"},
+				Required: []string{"items"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor"},
 	}
 }
 
@@ -940,19 +863,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"envVars": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EnvVars are user defined env variables to sensor pod",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("k8s.io/api/core/v1.EnvVar"),
-									},
-								},
-							},
-						},
-					},
 					"imageVersion": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ImageVersion is the sensor image version to run",
@@ -965,7 +875,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.EnvVar"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
 	}
 }
 
@@ -980,18 +890,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Description: "Phase is the high-level summary of the sensor",
 							Type:        []string{"string"},
 							Format:      "",
-						},
-					},
-					"startedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this sensor was initiated",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"completedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CompletedAt is the time at which this sensor was completed",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"completionCount": {
@@ -1026,7 +924,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus"},
 	}
 }
 

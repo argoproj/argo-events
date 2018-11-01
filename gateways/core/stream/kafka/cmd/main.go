@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"strconv"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
 )
 
 var (
@@ -42,7 +43,7 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	kafkaConfig := config.Data.Config.(*kafka)
+	kafkaConfig := config.Data.Config.(*kafka.Kafka)
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *kafkaConfig).Msg("kafka configuration")
 
 	consumer, err := sarama.NewConsumer([]string{kafkaConfig.URL}, nil)
@@ -119,7 +120,7 @@ func (kce *kafkaConfigExecutor) StopConfig(config *gateways.ConfigContext) error
 
 // Validate validates the gateway configuration
 func (kce *kafkaConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	kafkaConfig, ok := config.Data.Config.(*kafka)
+	kafkaConfig, ok := config.Data.Config.(*kafka.Kafka)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}

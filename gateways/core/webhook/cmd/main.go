@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/gateways/core/webhook"
 	"go.uber.org/atomic"
 	"io/ioutil"
 	"net/http"
@@ -60,7 +61,7 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	webhookConfig := config.Data.Config.(*webhook)
+	webhookConfig := config.Data.Config.(*webhook.Webhook)
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *webhookConfig).Msg("webhook configuration")
 
 	var wg sync.WaitGroup
@@ -183,7 +184,7 @@ func (wce *webhookConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 
 // Validate validates given webhook configuration
 func (wce *webhookConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	webhookConfig, ok := config.Data.Config.(*webhook)
+	webhookConfig, ok := config.Data.Config.(*webhook.Webhook)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}

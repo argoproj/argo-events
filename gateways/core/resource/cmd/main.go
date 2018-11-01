@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core/resource"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +51,7 @@ func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) e
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	res := config.Data.Config.(*resource)
+	res := config.Data.Config.(*resource.Resource)
 	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
 
 	resources, err := discoverResources(res)
@@ -128,7 +129,7 @@ func (rce *resourceConfigExecutor) StopConfig(config *gateways.ConfigContext) er
 
 // Validate validates gateway configuration
 func (rce *resourceConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	res, ok := config.Data.Config.(*resource)
+	res, ok := config.Data.Config.(*resource.Resource)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}
@@ -147,7 +148,7 @@ func (rce *resourceConfigExecutor) Validate(config *gateways.ConfigContext) erro
 	return nil
 }
 
-func discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
+func discoverResources(obj *resource.Resource) ([]dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(gatewayConfig.KubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(gatewayConfig.KubeConfig)
 	if err != nil {
@@ -185,7 +186,7 @@ func discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
 	return resources, nil
 }
 
-func resolveGroupVersion(obj *resource) string {
+func resolveGroupVersion(obj *resource.Resource) string {
 	if obj.Version == "v1" {
 		return obj.Version
 	}
@@ -193,7 +194,7 @@ func resolveGroupVersion(obj *resource) string {
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func passFilters(obj *unstructured.Unstructured, filter *resource.ResourceFilter) bool {
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
 		gatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")

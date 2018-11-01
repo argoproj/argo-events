@@ -50,7 +50,9 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Gateway struct {
+	// +k8s:openapi-gen=false
 	metav1.TypeMeta   `json:",inline"`
+	// +k8s:openapi-gen=false
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Status            GatewayStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
 	Spec              GatewaySpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
@@ -59,7 +61,9 @@ type Gateway struct {
 // GatewayList is the list of Gateway resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type GatewayList struct {
+	// +k8s:openapi-gen=false
 	metav1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items           []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }

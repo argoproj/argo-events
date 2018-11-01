@@ -1,0 +1,37 @@
+{
+  "swagger": "2.0",
+  "info": {
+   "title": "Argo-Events",
+   "version": "1.0"
+  },
+  "paths": {},
+  "definitions": {
+   "amqp.AMQP": {
+    "description": "AMQP contains configuration required to connect to rabbitmq service and process messages",
+    "required": [
+     "url",
+     "exchangeName",
+     "exchangeType",
+     "routingKey"
+    ],
+    "properties": {
+     "exchangeName": {
+      "description": "ExchangeName is the exchange name For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html",
+      "type": "string"
+     },
+     "exchangeType": {
+      "description": "ExchangeType is rabbitmq exchange type",
+      "type": "string"
+     },
+     "routingKey": {
+      "description": "Routing key for bindings",
+      "type": "string"
+     },
+     "url": {
+      "description": "URL for rabbitmq service",
+      "type": "string"
+     }
+    }
+   }
+  }
+ }

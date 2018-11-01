@@ -1,0 +1,32 @@
+{
+  "swagger": "2.0",
+  "info": {
+   "title": "Argo-Events",
+   "version": "1.0"
+  },
+  "paths": {},
+  "definitions": {
+   "kafka.Kafka": {
+    "description": "Kafka defines configuration required to connect to kafka cluster",
+    "required": [
+     "url",
+     "partition",
+     "topic"
+    ],
+    "properties": {
+     "partition": {
+      "description": "Partition name",
+      "type": "string"
+     },
+     "topic": {
+      "description": "Topic name",
+      "type": "string"
+     },
+     "url": {
+      "description": "URL to kafka cluster",
+      "type": "string"
+     }
+    }
+   }
+  }
+ }

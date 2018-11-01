@@ -1,8 +1,8 @@
-package main
+package webhook
 
-// webhook is a general purpose REST API
+// Webhook is a general purpose REST API
 // +k8s:openapi-gen=true
-type webhook struct {
+type Webhook struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
 

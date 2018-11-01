@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	amqplib "github.com/streadway/amqp"
+	"github.com/argoproj/argo-events/gateways/core/stream/amqp"
 )
 
 var (
@@ -42,7 +43,7 @@ func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	amqpConfig := config.Data.Config.(*amqp)
+	amqpConfig := config.Data.Config.(*amqp.AMQP)
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *amqpConfig).Msg("amqp configuration")
 
 	conn, err := amqplib.Dial(amqpConfig.URL)
@@ -101,7 +102,7 @@ func (ace *amqpConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 
 // Validate validates gateway configuration
 func (ace *amqpConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	amqpConfig, ok := config.Data.Config.(*amqp)
+	amqpConfig, ok := config.Data.Config.(*amqp.AMQP)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}
@@ -120,7 +121,7 @@ func (ace *amqpConfigExecutor) Validate(config *gateways.ConfigContext) error {
 	return nil
 }
 
-func getDelivery(ch *amqplib.Channel, config *amqp) (<-chan amqplib.Delivery, error) {
+func getDelivery(ch *amqplib.Channel, config *amqp.AMQP) (<-chan amqplib.Delivery, error) {
 	err := ch.ExchangeDeclare(config.ExchangeName, config.ExchangeType, true, false, false, false, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to declare exchange with name %s and type %s. err: %+v", config.ExchangeName, config.ExchangeType, err)

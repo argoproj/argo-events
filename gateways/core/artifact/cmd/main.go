@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"sync"
+	"github.com/argoproj/argo-events/gateways/core/artifact/spec"
 )
 
 var (
@@ -37,7 +38,6 @@ var (
 
 // s3ConfigExecutor implements ConfigExecutor interface
 type s3ConfigExecutor struct{}
-
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
 func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
@@ -73,7 +73,7 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
-	artifact := config.Data.Config.(*s3Artifact)
+	artifact := config.Data.Config.(*spec.S3Artifact)
 	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
 
 	// retrieve access key id and secret access key
@@ -161,7 +161,7 @@ func (s3ce *s3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 
 // Validate validates s3 configuration
 func(s3ce *s3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	artifact, ok := config.Data.Config.(*s3Artifact)
+	artifact, ok := config.Data.Config.(*spec.S3Artifact)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}

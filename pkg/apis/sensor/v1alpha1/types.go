@@ -51,7 +51,9 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
+	// +k8s:openapi-gen=false
 	v1.TypeMeta   `json:",inline"`
+	// +k8s:openapi-gen=false
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
@@ -60,7 +62,9 @@ type Sensor struct {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type SensorList struct {
+	// +k8s:openapi-gen=false
 	v1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	v1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items       []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
@@ -85,6 +89,7 @@ type SensorSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
 
 	// EnvVars are user defined env variables to sensor pod
+	// +k8s:openapi-gen=false
 	EnvVars []corev1.EnvVar `json:"envVars,omitempty" protobuf:"bytes,7,opt,name=envVars"`
 
 	// ImageVersion is the sensor image version to run
@@ -295,9 +300,11 @@ type SensorStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
+	// +k8s:openapi-gen=false
 	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
+	// +k8s:openapi-gen=false
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
@@ -331,9 +338,11 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
+	// +k8s:openapi-gen=false
 	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
+	// +k8s:openapi-gen=false
 	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for signal notifications or trigger events
@@ -380,6 +389,7 @@ type EventContext struct {
 	EventID string `json:"eventID" protobuf:"bytes,5,opt,name=eventID"`
 
 	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
+	// +k8s:openapi-gen=false
 	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
 
 	// A link to the schema that the data attribute adheres to.
@@ -457,7 +467,9 @@ type S3Bucket struct {
 	Bucket    string                   `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
 	Region    string                   `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
 	Insecure  bool                     `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	// +k8s:openapi-gen=false
 	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
+	// +k8s:openapi-gen=false
 	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
 }
 

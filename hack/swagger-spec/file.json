@@ -1,0 +1,32 @@
+{
+  "swagger": "2.0",
+  "info": {
+   "title": "Argo-Events",
+   "version": "1.0"
+  },
+  "paths": {},
+  "definitions": {
+   ".FileWatcherConfig": {
+    "description": "FileWatcherConfig contains configuration information for this gateway",
+    "required": [
+     "directory",
+     "path",
+     "type"
+    ],
+    "properties": {
+     "directory": {
+      "description": "Directory to watch for events",
+      "type": "string"
+     },
+     "path": {
+      "description": "Path is relative path of object to watch with respect to the directory",
+      "type": "string"
+     },
+     "type": {
+      "description": "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
+      "type": "string"
+     }
+    }
+   }
+  }
+ }

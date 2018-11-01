@@ -24,6 +24,7 @@ import (
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
+	"github.com/argoproj/argo-events/gateways/core/calendar/spec"
 )
 
 var (
@@ -46,7 +47,7 @@ func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-	cal := config.Data.Config.(*calSchedule)
+	cal := config.Data.Config.(*spec.CalSchedule)
 	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
 
 	schedule, err := resolveSchedule(cal)
@@ -128,7 +129,7 @@ func (ce *calendarConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 
 // Validate validates gateway configuration
 func (ce *calendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	cal, ok := config.Data.Config.(*calSchedule)
+	cal, ok := config.Data.Config.(*spec.CalSchedule)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}
@@ -138,7 +139,7 @@ func (ce *calendarConfigExecutor) Validate(config *gateways.ConfigContext) error
 	return nil
 }
 
-func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
+func resolveSchedule(cal *spec.CalSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		// standard cron expression
 		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)

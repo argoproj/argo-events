@@ -31,6 +31,7 @@ import (
 	"encoding/json"
 	"net/url"
 	"strings"
+	"github.com/argoproj/argo-events/gateways/custom/storage_grid"
 )
 
 var (
@@ -116,7 +117,7 @@ func generateUUID() uuid.UUID {
 }
 
 // starts a http server
-func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
+func (sgce *storageGridConfigExecutor) startHttpServer(sg *storage_grid.StorageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active-servers", activeServers[sg.Port]).Msg("servers")
@@ -125,8 +126,8 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 		s := &server{
 			mux: http.NewServeMux(),
 		}
-		sg.mux = s.mux
-		sg.srv = &http.Server{
+		sg.Mux = s.mux
+		sg.Srv = &http.Server{
 			Addr:    ":" + fmt.Sprintf("%s", sg.Port),
 			Handler: s,
 		}
@@ -134,7 +135,7 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 
 		// start http server
 		go func() {
-			err := sg.srv.ListenAndServe()
+			err := sg.Srv.ListenAndServe()
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
 			if err == http.ErrServerClosed {
 				err = nil
@@ -153,7 +154,7 @@ func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfi
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+func filterEvent(notification *storageGridNotification, sg *storage_grid.StorageGridEventConfig) bool {
 	if sg.Events == nil {
 		return true
 	}
@@ -166,7 +167,7 @@ func filterEvent(notification *storageGridNotification, sg *storageGridEventConf
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *storageGridEventConfig) bool {
+func filterName(notification *storageGridNotification, sg *storage_grid.StorageGridEventConfig) bool {
 	if sg.Filter == nil {
 		return true
 	}
@@ -191,7 +192,7 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	sg := config.Data.Config.(*storageGridEventConfig)
+	sg := config.Data.Config.(*storage_grid.StorageGridEventConfig)
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *sg).Msg("storage grid configuration")
 
 	var wg sync.WaitGroup
@@ -211,7 +212,7 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 			// If so, shutdown the server.
 			if len(activeRoutes[sg.Port]) == 0 {
 				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
-				err = sg.srv.Shutdown(context.Background())
+				err = sg.Srv.Shutdown(context.Background())
 				if err != nil {
 					// previous err message is useful when there was an error in configuration
 					errMessage = fmt.Sprintf("failed to stop http server. configuration err message: %s", errMessage)
@@ -243,19 +244,19 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 		activeRoutes[sg.Port][sg.Endpoint] = struct{}{}
 
 		// server with same port is already started by another configuration
-		if sg.mux == nil {
+		if sg.Mux == nil {
 			mutex.Lock()
-			sg.mux = activeServers[sg.Port]
+			sg.Mux = activeServers[sg.Port]
 			mutex.Unlock()
 		}
 
 		// if the configuration that started the server was removed even before we had chance to regiser this endpoint against the port,
 		// and it was last endpoint for port, server is now start new http server
-		if sg.mux == nil {
+		if sg.Mux == nil {
 			sgce.startHttpServer(sg, config, err, &errMessage)
 		}
 
-		sg.mux.HandleFunc(sg.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+		sg.Mux.HandleFunc(sg.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 			gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("received a request")
 			// Todo: find a better to handle route deletion
 			if _, ok := activeRoutes[sg.Port][sg.Endpoint]; ok {
@@ -336,7 +337,7 @@ func (sgce *storageGridConfigExecutor) StopConfig(config *gateways.ConfigContext
 
 // Validate validates gateway configuration
 func (sgce *storageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	sg, ok := config.Data.Config.(*storageGridEventConfig)
+	sg, ok := config.Data.Config.(*storage_grid.StorageGridEventConfig)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}

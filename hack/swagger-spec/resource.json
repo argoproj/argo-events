@@ -1,0 +1,44 @@
+{
+  "swagger": "2.0",
+  "info": {
+   "title": "Argo-Events",
+   "version": "1.0"
+  },
+  "paths": {},
+  "definitions": {
+   ".Resource": {
+    "description": "Resource refers to a dependency on a k8s resource.",
+    "required": [
+     "namespace"
+    ],
+    "properties": {
+     "filter": {
+      "$ref": "#/definitions/.ResourceFilter"
+     },
+     "namespace": {
+      "type": "string"
+     }
+    }
+   },
+   ".ResourceFilter": {
+    "description": "ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects",
+    "properties": {
+     "annotations": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "labels": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "string"
+      }
+     },
+     "prefix": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }

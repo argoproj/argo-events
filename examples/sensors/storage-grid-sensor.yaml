@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: storage-grid-watcher-sensor
+  name: storage_grid-watcher-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   repeat: true
   serviceAccountName: argo-events-sa
   signals:
-    - name: storage-grid-gateway/storage-grid.defaultConfig
+    - name: storage_grid-gateway/storage_grid.defaultConfig
   triggers:
     - name: argo-workflow
       resource:
@@ -18,7 +18,7 @@ spec:
         kind: Workflow
         parameters:
           - src:
-              signal: storage-grid-gateway/storage-grid.defaultConfig
+              signal: storage_grid-gateway/storage_grid.defaultConfig
               path:
               value: hello world
             dest: spec.templates.0.container.args.0

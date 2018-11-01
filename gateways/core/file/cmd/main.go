@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package main
 
 import (
@@ -9,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/fsnotify/fsnotify"
 	"strings"
+	"github.com/argoproj/argo-events/gateways/core/file/spec"
 )
 
 var (
@@ -27,7 +44,7 @@ func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext)
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	fwc := config.Data.Config.(*fileWatcherConfig)
+	fwc := config.Data.Config.(*spec.FileWatcherConfig)
 	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *fwc).Msg("file configuration")
 
 	// create new fs watcher
@@ -115,7 +132,7 @@ func (fw *fileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) 
 
 // Validate validates gateway configuration
 func (fw *fileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	fwc, ok := config.Data.Config.(*fileWatcherConfig)
+	fwc, ok := config.Data.Config.(*spec.FileWatcherConfig)
 	if !ok {
 		return gateways.ErrConfigParseFailed
 	}
