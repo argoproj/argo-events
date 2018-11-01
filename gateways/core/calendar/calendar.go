@@ -47,7 +47,7 @@ func (ce *calendarConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 	cal := config.Data.Config.(*calSchedule)
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config", *cal).Msg("s3 artifact")
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
 
 	schedule, err := resolveSchedule(cal)
 	if err != nil {

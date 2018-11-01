@@ -59,14 +59,9 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-	pConfig, err := gateways.ParseGatewayConfig(config)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
-	h := pConfig.(*webhook)
-	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("config", *h).Msg("configuring...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	webhookConfig := config.Data.Config.(*webhook)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *webhookConfig).Msg("webhook configuration")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -78,11 +73,11 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
 		// remove the endpoint and http method configuration.
 		mutex.Lock()
-		activeHTTPMethods, ok := activeRoutes[h.Endpoint]
+		activeHTTPMethods, ok := activeRoutes[webhookConfig.Endpoint]
 		if ok {
-			delete(activeHTTPMethods, h.Method)
+			delete(activeHTTPMethods, webhookConfig.Method)
 		}
-		if h.Port != "" && hasServerStarted.Load() {
+		if webhookConfig.Port != "" && hasServerStarted.Load() {
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping http server")
 			err = srv.Shutdown(context.Background())
 			if err != nil {
@@ -104,12 +99,12 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 
 	// start a http server only if given configuration contains port information and no other
 	// configuration previously started the server
-	if h.Port != "" && !hasServerStarted.Load() {
+	if webhookConfig.Port != "" && !hasServerStarted.Load() {
 		// mark http server as started
 		hasServerStarted.Store(true)
 		go func() {
-			gatewayConfig.Log.Info().Str("http-port", h.Port).Msg("http server started listening...")
-			srv := &http.Server{Addr: ":" + fmt.Sprintf("%s", h.Port)}
+			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("http-port", webhookConfig.Port).Msg("http server started listening...")
+			srv := &http.Server{Addr: ":" + fmt.Sprintf("%s", webhookConfig.Port)}
 			err = srv.ListenAndServe()
 			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
 			if err == http.ErrServerClosed {
@@ -126,29 +121,29 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 	}
 
 	// configure endpoint and http method
-	if h.Endpoint != "" && h.Method != "" {
-		if _, ok := activeRoutes[h.Endpoint]; !ok {
+	if webhookConfig.Endpoint != "" && webhookConfig.Method != "" {
+		if _, ok := activeRoutes[webhookConfig.Endpoint]; !ok {
 			mutex.Lock()
-			activeRoutes[h.Endpoint] = make(map[string]struct{})
+			activeRoutes[webhookConfig.Endpoint] = make(map[string]struct{})
 			// save event channel for this connection/configuration
-			activeRoutes[h.Endpoint][h.Method] = struct{}{}
+			activeRoutes[webhookConfig.Endpoint][webhookConfig.Method] = struct{}{}
 			mutex.Unlock()
 
 			// add a handler for endpoint if not already added.
-			http.HandleFunc(h.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
+			http.HandleFunc(webhookConfig.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
 				// check if http methods match and route and http method is registered.
-				if _, ok := activeRoutes[h.Endpoint]; ok {
-					if _, isActive := activeRoutes[h.Endpoint][request.Method]; isActive {
-						gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("received a request")
+				if _, ok := activeRoutes[webhookConfig.Endpoint]; ok {
+					if _, isActive := activeRoutes[webhookConfig.Endpoint][request.Method]; isActive {
+						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("endpoint", webhookConfig.Endpoint).Str("http-method", webhookConfig.Method).Msg("received a request")
 						body, err := ioutil.ReadAll(request.Body)
 						if err != nil {
-							gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
+							gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to parse request body")
 							common.SendErrorResponse(writer)
 						} else {
-							gatewayConfig.Log.Info().Str("endpoint", h.Endpoint).Str("http-method", h.Method).Msg("dispatching event to gateway-processor")
+							gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("endpoint", webhookConfig.Endpoint).Str("http-method", webhookConfig.Method).Msg("dispatching event to gateway-processor")
 							common.SendSuccessResponse(writer)
 
-							gatewayConfig.Log.Info().Str("payload", string(body)).Msg("payload is")
+							gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Str("payload", string(body)).Msg("payload")
 
 							// dispatch event to gateway transformer
 							gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
@@ -157,21 +152,21 @@ func (wce *webhookConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 							})
 						}
 					} else {
-						gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
+						gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Str("endpoint", webhookConfig.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
 						common.SendErrorResponse(writer)
 					}
 				} else {
-					gatewayConfig.Log.Warn().Str("endpoint", h.Endpoint).Msg("endpoint is not active")
+					gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Str("endpoint", webhookConfig.Endpoint).Msg("endpoint is not active")
 					common.SendErrorResponse(writer)
 				}
 			})
 		} else {
 			mutex.Lock()
-			activeRoutes[h.Endpoint][h.Method] = struct{}{}
+			activeRoutes[webhookConfig.Endpoint][webhookConfig.Method] = struct{}{}
 			mutex.Unlock()
 		}
 
-		gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
+		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
 	}
 	wg.Wait()
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
@@ -188,26 +183,25 @@ func (wce *webhookConfigExecutor) StopConfig(config *gateways.ConfigContext) err
 
 // Validate validates given webhook configuration
 func (wce *webhookConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	pConfig, err := gateways.ParseGatewayConfig(config)
-	if err != nil {
-		return err
+	webhookConfig, ok := config.Data.Config.(*webhook)
+	if !ok {
+		return gateways.ErrConfigParseFailed
 	}
-	h := pConfig.(*webhook)
-	switch h.Method {
+	switch webhookConfig.Method {
 	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
 	default:
-		return fmt.Errorf("unknown HTTP method %s", h.Method)
+		return fmt.Errorf("%+v, unknown HTTP method %s", gateways.ErrInvalidConfig, webhookConfig.Method)
 	}
-	if h.Endpoint == "" {
-		return fmt.Errorf("endpoint can't be empty")
+	if webhookConfig.Endpoint == "" {
+		return fmt.Errorf("%+v, endpoint can't be empty", gateways.ErrInvalidConfig)
 	}
-	if !strings.HasPrefix("/", h.Endpoint) {
-		return fmt.Errorf("endpoint must start with '/'")
+	if !strings.HasPrefix("/", webhookConfig.Endpoint) {
+		return fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidConfig)
 	}
-	if h.Port != "" {
-		_, err := strconv.Atoi(h.Port)
+	if webhookConfig.Port != "" {
+		_, err := strconv.Atoi(webhookConfig.Port)
 		if err != nil {
-			return fmt.Errorf("failed to parse server port. err: %+v", err)
+			return fmt.Errorf("%+v, failed to parse server port %s. err: %+v", gateways.ErrInvalidConfig, webhookConfig.Port, err)
 		}
 	}
 	return nil

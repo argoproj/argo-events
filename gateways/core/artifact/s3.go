@@ -74,7 +74,7 @@ func (s3ce *s3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 
 	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
 	artifact := config.Data.Config.(*s3Artifact)
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("artifact", *artifact).Msg("s3 artifact")
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
 
 	// retrieve access key id and secret access key
 	accessKey, err := getSecrets(gatewayConfig.Clientset, gatewayConfig.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)

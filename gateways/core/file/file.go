@@ -28,7 +28,7 @@ func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext)
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	fwc := config.Data.Config.(*fileWatcherConfig)
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config", *fwc).Msg("s3 artifact")
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *fwc).Msg("file configuration")
 
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()

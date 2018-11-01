@@ -19,16 +19,10 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	natsio "github.com/nats-io/go-nats"
-	"strings"
 	"sync"
-)
-
-const (
-	subjectKey = "subject"
+	"fmt"
 )
 
 var (
@@ -47,7 +41,9 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("parsing configuration...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	natsConfig := config.Data.Config.(*nats)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *natsConfig).Msg("nats configuration")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -59,27 +55,14 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		wg.Done()
 	}()
 
-	var s *stream.Stream
-	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
+	conn, err := natsio.Connect(natsConfig.URL)
 	if err != nil {
-		errMessage = "failed to parse configuration"
+		gatewayConfig.Log.Error().Str("url", natsConfig.URL).Err(err).Msg("connection failed")
 		config.StopCh <- struct{}{}
 		return err
 	}
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("stream", *s).Msg("configuring...")
 
-	conn, err := natsio.Connect(s.URL)
-	if err != nil {
-		gatewayConfig.Log.Error().Str("url", s.URL).Err(err).Msg("connection failed")
-		config.StopCh <- struct{}{}
-		return err
-	}
-	gatewayConfig.Log.Debug().Str("server id", conn.ConnectedServerId()).Str("connected url", conn.ConnectedUrl()).
-		Str("servers", strings.Join(conn.DiscoveredServers(), ",")).Msg("nats connection")
-
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("running...")
 	config.Active = true
-
 	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
 	if err != nil {
@@ -87,7 +70,7 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		return err
 	}
 
-	sub, err := conn.Subscribe(s.Attributes[subjectKey], func(msg *natsio.Msg) {
+	sub, err := conn.Subscribe(natsConfig.Subject, func(msg *natsio.Msg) {
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 			Src:     config.Data.Src,
@@ -99,7 +82,8 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		config.StopCh <- struct{}{}
 		return err
 	}
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running...")
+
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running.")
 
 	wg.Wait()
 	err = sub.Unsubscribe()
@@ -111,9 +95,25 @@ func (nce *natsConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	return nil
 }
 
+// StopConfig stops gateway configuration
 func (nce *natsConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
+// Validate validates gateway configuration
+func (nce *natsConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	natsConfig, ok := config.Data.Config.(*nats)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if natsConfig.URL == "" {
+		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+	}
+	if natsConfig.Subject == "" {
+		return fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidConfig)
 	}
 	return nil
 }

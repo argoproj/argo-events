@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
@@ -59,24 +58,6 @@ var (
 
 // storageGridConfigExecutor implements ConfigExecutor interface
 type storageGridConfigExecutor struct{}
-
-// storageGridEventConfig contains configuration for storage grid sns
-type storageGridEventConfig struct {
-	Port     string
-	Endpoint string
-	// Todo: add event and prefix filtering.
-	Events []string
-	Filter *Filter
-	// srv holds reference to http server
-	srv *http.Server
-	mux *http.ServeMux
-}
-
-// Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type Filter struct {
-	Prefix string
-	Suffix string
-}
 
 // HTTP Muxer
 type server struct {
@@ -138,7 +119,7 @@ func generateUUID() uuid.UUID {
 func (sgce *storageGridConfigExecutor) startHttpServer(sg *storageGridEventConfig, config *gateways.ConfigContext, err error, errMessage *string) {
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active servers", activeServers[sg.Port]).Msg("active servers")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("active-servers", activeServers[sg.Port]).Msg("servers")
 	if _, ok := activeServers[sg.Port]; !ok {
 		gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("port", sg.Port).Msg("http server started listening...")
 		s := &server{
@@ -209,15 +190,9 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-
-	var sg *storageGridEventConfig
-	err = yaml.Unmarshal([]byte(config.Data.Config), &sg)
-	if err != nil {
-		errMessage = "failed to parse configuration"
-		return err
-	}
-	gatewayConfig.Log.Info().Interface("config", config.Data.Config).Interface("storage-grid", sg).Msg("configuring...")
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	sg := config.Data.Config.(*storageGridEventConfig)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *sg).Msg("storage grid configuration")
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -355,6 +330,24 @@ func (sgce *storageGridConfigExecutor) StartConfig(config *gateways.ConfigContex
 func (sgce *storageGridConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
+// Validate validates gateway configuration
+func (sgce *storageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	sg, ok := config.Data.Config.(*storageGridEventConfig)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if sg.Port == "" {
+		return fmt.Errorf("%+v, must specify port", gateways.ErrInvalidConfig)
+	}
+	if sg.Endpoint == "" {
+		return fmt.Errorf("%+v, must specify endpoint", gateways.ErrInvalidConfig)
+	}
+	if !strings.HasPrefix(sg.Endpoint, "/") {
+		return fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidConfig)
 	}
 	return nil
 }

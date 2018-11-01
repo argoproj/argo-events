@@ -20,15 +20,9 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"strconv"
-)
-
-const (
-	topicKey     = "topic"
-	partitionKey = "partition"
+	"fmt"
 )
 
 var (
@@ -47,29 +41,24 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 	// mark final gateway state
 	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
 
-	var s *stream.Stream
-	err = yaml.Unmarshal([]byte(config.Data.Config), &s)
-	if err != nil {
-		errMessage = "failed to parse kafka config"
-		return err
-	}
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("stream", *s).Msg("kafka configuration")
-	consumer, err := sarama.NewConsumer([]string{s.URL}, nil)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
+	kafkaConfig := config.Data.Config.(*kafka)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *kafkaConfig).Msg("kafka configuration")
+
+	consumer, err := sarama.NewConsumer([]string{kafkaConfig.URL}, nil)
 	if err != nil {
 		errMessage = "failed to connect to cluster"
 		return err
 	}
 
-	topic := s.Attributes[topicKey]
-	pString := s.Attributes[partitionKey]
-	pInt, err := strconv.ParseInt(pString, 10, 32)
+	pInt, err := strconv.ParseInt(kafkaConfig.Partition, 10, 32)
 	if err != nil {
 
 		return err
 	}
 	partition := int32(pInt)
 
-	availablePartitions, err := consumer.Partitions(topic)
+	availablePartitions, err := consumer.Partitions(kafkaConfig.Topic)
 	if err != nil {
 		errMessage = "unable to get available partitions for kafka topic"
 		return err
@@ -79,7 +68,7 @@ func (kce *kafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) erro
 		return err
 	}
 
-	partitionConsumer, err := consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
+	partitionConsumer, err := consumer.ConsumePartition(kafkaConfig.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
 		errMessage = "failed to create partition consumer for topic"
 		return err
@@ -106,7 +95,7 @@ kafkaConfigRunner:
 				Payload: msg.Value,
 			})
 		case err := <-partitionConsumer.Errors():
-			gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Str("partition", pString).Str("topic", topic).Err(err).Msg("received an error")
+			gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Str("partition", kafkaConfig.Partition).Str("topic", kafkaConfig.Topic).Err(err).Msg("received an error")
 			config.StopCh <- struct{}{}
 		case <-config.StopCh:
 			err = partitionConsumer.Close()
@@ -124,6 +113,24 @@ kafkaConfigRunner:
 func (kce *kafkaConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
 		config.StopCh <- struct{}{}
+	}
+	return nil
+}
+
+// Validate validates the gateway configuration
+func (kce *kafkaConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	kafkaConfig, ok := config.Data.Config.(*kafka)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if kafkaConfig.URL == "" {
+		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+	}
+	if kafkaConfig.Topic == "" {
+		return fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidConfig)
+	}
+	if kafkaConfig.Partition == "" {
+		return fmt.Errorf("%+v, partition must be specified", gateways.ErrInvalidConfig)
 	}
 	return nil
 }

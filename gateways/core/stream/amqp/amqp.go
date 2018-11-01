@@ -21,9 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/stream"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	amqplib "github.com/streadway/amqp"
 )
 
@@ -45,6 +43,8 @@ func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	amqpConfig := config.Data.Config.(*amqp)
+	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *amqpConfig).Msg("amqp configuration")
+
 	conn, err := amqplib.Dial(amqpConfig.URL)
 	if err != nil {
 		errMessage = "failed to connect to server"
@@ -57,7 +57,7 @@ func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 		return err
 	}
 
-	delivery, err := getDelivery(ch, s.Attributes)
+	delivery, err := getDelivery(ch, amqpConfig)
 	if err != nil {
 		errMessage = "failed to get message delivery"
 		return err
@@ -101,6 +101,22 @@ func (ace *amqpConfigExecutor) StopConfig(config *gateways.ConfigContext) error 
 
 // Validate validates gateway configuration
 func (ace *amqpConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	amqpConfig, ok := config.Data.Config.(*amqp)
+	if !ok {
+		return gateways.ErrConfigParseFailed
+	}
+	if amqpConfig.URL == "" {
+		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+	}
+	if amqpConfig.RoutingKey == "" {
+		return fmt.Errorf("%+v, routing key must be specified", gateways.ErrInvalidConfig)
+	}
+	if amqpConfig.ExchangeName == "" {
+		return fmt.Errorf("%+v, exchange name must be specified", gateways.ErrInvalidConfig)
+	}
+	if amqpConfig.ExchangeType == "" {
+		return fmt.Errorf("%+v, exchange type must be specified", gateways.ErrInvalidConfig)
+	}
 	return nil
 }
 

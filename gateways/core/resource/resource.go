@@ -51,7 +51,7 @@ func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) e
 
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	res := config.Data.Config.(*resource)
-	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config", *res).Msg("s3 artifact")
+	gatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
 
 	resources, err := discoverResources(res)
 	if err != nil {
