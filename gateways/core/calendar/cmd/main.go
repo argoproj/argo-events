@@ -119,25 +119,7 @@ calendarLoop:
 	return nil
 }
 
-// StopConfig deactivates a configuration
-func (ce *calendarConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
-	if config.Active == true {
-		config.StopCh <- struct{}{}
-	}
-	return nil
-}
 
-// Validate validates gateway configuration
-func (ce *calendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	cal, ok := config.Data.Config.(*spec.CalSchedule)
-	if !ok {
-		return gateways.ErrConfigParseFailed
-	}
-	if cal.Schedule == "" && cal.Interval == "" {
-		return fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
-	}
-	return nil
-}
 
 func resolveSchedule(cal *spec.CalSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {

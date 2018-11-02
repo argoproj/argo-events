@@ -16,9 +16,11 @@ limitations under the License.
 
 package artifact
 
-import "github.com/argoproj/argo-events/common"
+import (
+	"github.com/argoproj/argo-events/gateways"
+)
 
 // S3ConfigExecutor implements ConfigExecutor interface
 type S3ConfigExecutor struct{
-	*common.DefaultConfigExecutor
+	*gateways.DefaultConfigExecutor
 }

@@ -100,11 +100,3 @@ func SendErrorResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(ErrorResponse))
 }
-
-// CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
-func (d *DefaultConfigExecutor) CloseChannels() {
-	close(d.StartChan)
-	close(d.StartChan)
-	close(d.DoneCh)
-	close(d.ErrChan)
-}

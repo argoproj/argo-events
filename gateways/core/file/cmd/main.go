@@ -33,9 +33,6 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
-// fileWatcherConfigExecutor implements ConfigExecutor interface
-type fileWatcherConfigExecutor struct{}
-
 // StartConfig runs a configuration
 func (fw *fileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
@@ -119,32 +116,6 @@ NotificationListener:
 		}
 	}
 	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now stopped.")
-	return nil
-}
-
-// StopConfig deactivates a configuration
-func (fw *fileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
-	if config.Active == true {
-		config.StopCh <- struct{}{}
-	}
-	return nil
-}
-
-// Validate validates gateway configuration
-func (fw *fileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	fwc, ok := config.Data.Config.(*spec.FileWatcherConfig)
-	if !ok {
-		return gateways.ErrConfigParseFailed
-	}
-	if fwc.Type == "" {
-		return fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidConfig)
-	}
-	if fwc.Directory == "" {
-		return fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidConfig)
-	}
-	if fwc.Path == "" {
-		return fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidConfig)
-	}
 	return nil
 }
 

@@ -23,7 +23,7 @@ import (
 
 func main() {
 	gc := gateways.NewGatewayConfiguration()
-	gc.StartGateway(&artifact.S3ConfigExecutor{
-		GatewayConfig: gc,
-	})
+	ce := &artifact.S3ConfigExecutor{}
+	ce.GatewayConfig = gc
+	gc.StartGateway(ce)
 }

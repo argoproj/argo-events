@@ -16,6 +16,13 @@ limitations under the License.
 
 package calendar
 
+import "github.com/argoproj/argo-events/gateways"
+
+// CalendarConfigExecutor implements ConfigExecutor interface
+type CalendarConfigExecutor struct{
+	*gateways.DefaultConfigExecutor
+}
+
 // CalSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 // +k8s:openapi-gen=true

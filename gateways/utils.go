@@ -53,3 +53,11 @@ func ParseGatewayConfig(config string) (interface{}, error) {
 	}
 	return i, err
 }
+
+// CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
+func (d *DefaultConfigExecutor) CloseChannels() {
+	close(d.StartChan)
+	close(d.StartChan)
+	close(d.DoneCh)
+	close(d.ErrChan)
+}

@@ -1,12 +1,29 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package artifact
 
 import (
-	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1alphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
+	"github.com/mitchellh/mapstructure"
+	"encoding/json"
 )
 
 // StartConfig runs a configuration
@@ -18,7 +35,11 @@ func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	defer s3ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	s3ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
-	artifact := config.Data.Config.(*common.S3Artifact)
+	var artifact *sv1alphav1.S3Artifact
+	err = mapstructure.Decode(config.Data.Config, &artifact)
+	if err != nil {
+		return gateways.ErrConfigParseFailed
+	}
 	s3ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
 
 	go s3ce.listenToEvents(artifact, config)
@@ -38,11 +59,8 @@ func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 
 		case <-s3ce.StopChan:
 			s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
+			s3ce.DoneCh <- struct{}{}
 			config.Active = false
-			return nil
-
-		case <-s3ce.DoneCh:
-			s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is complete")
 			return nil
 
 		case err := <-s3ce.ErrChan:
@@ -53,7 +71,7 @@ func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 }
 
 // listenEvents listens to minio bucket notifications
-func (s3ce *S3ConfigExecutor) listenToEvents(artifact *common.S3Artifact, config *gateways.ConfigContext) {
+func (s3ce *S3ConfigExecutor) listenToEvents(artifact *sv1alphav1.S3Artifact, config *gateways.ConfigContext) {
 	defer s3ce.DefaultConfigExecutor.CloseChannels()
 
 	creds, err := store.GetCredentials(s3ce.GatewayConfig.Clientset, s3ce.GatewayConfig.Namespace,  &sv1alphav1.ArtifactLocation{
@@ -74,7 +92,7 @@ func (s3ce *S3ConfigExecutor) listenToEvents(artifact *common.S3Artifact, config
 		s3ce.ErrChan <- err
 	}
 
-	// at this point configuration is sucessfully running
+	// at this point configuration is successfully running
 	s3ce.StartChan <- struct {}{}
 
 	// Listen for bucket notifications
@@ -83,14 +101,14 @@ func (s3ce *S3ConfigExecutor) listenToEvents(artifact *common.S3Artifact, config
 	}, s3ce.DoneCh) {
 		if notificationInfo.Err != nil {
 			s3ce.ErrChan <- notificationInfo.Err
-			break
-		} else {
-			payload, err := json.Marshal(notificationInfo.Records[0])
-			if err != nil {
-				s3ce.ErrChan <- err
-				break
-			}
-			s3ce.DataCh <- payload
+			return
 		}
+		payload, err := json.Marshal(notificationInfo.Records[0])
+		if err != nil {
+			s3ce.ErrChan <- err
+			return
+		}
+		s3ce.DataCh <- payload
 	}
+	s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is stopped")
 }

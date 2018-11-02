@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"hash/fnv"
 
-	"github.com/argoproj/argo-events/common"
+	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -425,11 +425,38 @@ type URI struct {
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
-	S3        *common.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+	S3        *S3Artifact        `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	Inline    *string            `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	File      *FileArtifact      `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
 	URL       *URLArtifact       `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+}
+
+// S3Artifact contains information about an artifact in S3
+type S3Artifact struct {
+	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
+	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
+	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+	*S3Bucket                   `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
+}
+
+// S3Bucket contains information for an S3 Bucket
+type S3Bucket struct {
+	Endpoint string `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
+	Bucket   string `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
+	Region   string `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
+	Insecure bool   `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	// +k8s:openapi-gen=false
+	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
+	// +k8s:openapi-gen=false
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
+}
+
+// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+type S3Filter struct {
+	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
+	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap

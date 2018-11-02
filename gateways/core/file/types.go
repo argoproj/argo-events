@@ -16,6 +16,14 @@ limitations under the License.
 
 package file
 
+import "github.com/argoproj/argo-events/gateways"
+
+// FileWatcherConfigExecutor implements ConfigExecutor interface
+type FileWatcherConfigExecutor struct{
+	*gateways.DefaultConfigExecutor
+}
+
+
 // FileWatcherConfig contains configuration information for this gateway
 // +k8s:openapi-gen=true
 type FileWatcherConfig struct {

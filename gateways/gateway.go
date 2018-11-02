@@ -129,6 +129,15 @@ type ConfigExecutor interface {
 	Validate(configContext *ConfigContext) error
 }
 
+type DefaultConfigExecutor struct {
+	StartChan chan struct{}
+	StopChan chan struct{}
+	DataCh chan []byte
+	DoneCh chan struct{}
+	ErrChan chan error
+	GatewayConfig *GatewayConfig
+}
+
 // newEventWatcher creates a new event watcher.
 func (gc *GatewayConfig) newEventWatcher() *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
@@ -586,6 +595,16 @@ func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
 	}()
 	httpGatewayServerConfig.GwConfig = NewGatewayConfiguration()
 	return httpGatewayServerConfig
+}
+
+func NewDefaultConfigExecutor() *DefaultConfigExecutor {
+	return &DefaultConfigExecutor{
+		StartChan: make(chan struct{}),
+		DataCh: make(chan []byte),
+		DoneCh: make(chan struct{}),
+		StopChan: make(chan struct{}),
+		ErrChan: make(chan error),
+	}
 }
 
 // create a new node
