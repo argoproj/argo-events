@@ -1,7 +1,9 @@
 package main
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	salphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	galphav1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+
 	"github.com/go-openapi/spec"
 
 	"fmt"
@@ -19,11 +21,18 @@ import (
 	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
 	"github.com/argoproj/argo-events/gateways/core/stream/amqp"
 	"github.com/argoproj/argo-events/gateways/core/stream/mqtt"
+	"os"
 )
 
-const (
-	SpecDir = "swagger-spec"
-)
+var specDir = getSpecDir() + "/hack/swagger-spec"
+
+func getSpecDir() string {
+	specDir, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return specDir
+}
 
 func swaggerSpecs(swaggerFilename string, defNames []string, config *common.Config) {
 	fmt.Println(swaggerFilename)
@@ -42,16 +51,29 @@ func swaggerSpecs(swaggerFilename string, defNames []string, config *common.Conf
 	}
 }
 
-func gatewayDefs() {
+func sensorDefs() {
 	var defNames []string
-	for name, _ := range v1alpha1.GetOpenAPIDefinitions(func(name string) spec.Ref {
+	for name, _ := range salphav1.GetOpenAPIDefinitions(func(name string) spec.Ref {
 		return spec.Ref{}
 	}) {
 		defNames = append(defNames, name)
 	}
 	config := createOpenAPIBuilderConfig()
-	config.GetDefinitions = v1alpha1.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "gateway.json"), defNames, config)
+	config.GetDefinitions = salphav1.GetOpenAPIDefinitions
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "sensor.json"), defNames, config)
+}
+
+
+func gatewayDefs() {
+	var defNames []string
+	for name, _ := range galphav1.GetOpenAPIDefinitions(func(name string) spec.Ref {
+		return spec.Ref{}
+	}) {
+		defNames = append(defNames, name)
+	}
+	config := createOpenAPIBuilderConfig()
+	config.GetDefinitions = galphav1.GetOpenAPIDefinitions
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "gateway.json"), defNames, config)
 }
 
 func webhookDefs() {
@@ -63,7 +85,7 @@ func webhookDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = webhook.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "webhook.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "webhook.json"), defNames, config)
 }
 
 func artifactDefs() {
@@ -75,7 +97,7 @@ func artifactDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = artifact.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "artifact.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "artifact.json"), defNames, config)
 }
 
 func calendarDefs() {
@@ -87,7 +109,7 @@ func calendarDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = calendar.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "calendar.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "calendar.json"), defNames, config)
 }
 
 func fileDefs() {
@@ -99,7 +121,7 @@ func fileDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = file.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "file.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "file.json"), defNames, config)
 }
 
 func resourceDefs() {
@@ -111,7 +133,7 @@ func resourceDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = resource.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "resource.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "resource.json"), defNames, config)
 }
 
 func natsDefs() {
@@ -123,7 +145,7 @@ func natsDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = nats.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "nats.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "nats.json"), defNames, config)
 }
 
 
@@ -136,7 +158,7 @@ func kafkaDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = kafka.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "kafka.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "kafka.json"), defNames, config)
 }
 
 func amqpDefs() {
@@ -148,7 +170,7 @@ func amqpDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = amqp.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "amqp.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "amqp.json"), defNames, config)
 }
 
 func mqttDefs() {
@@ -160,7 +182,7 @@ func mqttDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = mqtt.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "mqtt.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "mqtt.json"), defNames, config)
 }
 
 
@@ -173,11 +195,12 @@ func storageGridDefs() {
 	}
 	config := createOpenAPIBuilderConfig()
 	config.GetDefinitions = storagegrid.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", SpecDir, "storagegrid.json"), defNames, config)
+	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "storagegrid.json"), defNames, config)
 }
 
 
 func main() {
+	sensorDefs()
 	gatewayDefs()
 	webhookDefs()
 	artifactDefs()
@@ -200,7 +223,7 @@ func createOpenAPIBuilderConfig() *common.Config {
 		Info: &spec.Info{
 			InfoProps: spec.InfoProps{
 				Title:   "Argo-Events",
-				Version: "1.0",
+				Version: "v0.6",
 			},
 		},
 	}

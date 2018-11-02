@@ -43,7 +43,7 @@ all-controller-images: sensor-controller-image gateway-controller-image
 
 all-core-gateway-images: webhook-image calendar-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
-.PHONY: all clean test
+.PHONY: all clean test generate-spec-docs
 
 # Sensor
 sensor:
@@ -265,6 +265,11 @@ coverage:
 
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
+
+generate-spec-docs:
+	 ./hack/update-openapigen.sh
+	 go run hack/spec-gen.go
+	 sudo sh ./hack/generate-spec-docs.sh
 
 .PHONY: protogen
 protogen:

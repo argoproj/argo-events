@@ -132,6 +132,7 @@ message EventContext {
   optional string eventID = 5;
 
   // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6;
 
   // A link to the schema that the data attribute adheres to.
@@ -195,9 +196,11 @@ message NodeStatus {
   optional string phase = 5;
 
   // StartedAt is the time at which this node started
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
 
   // CompletedAt is the time at which this node completed
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
   // store data or something to save for signal notifications or trigger events
@@ -262,45 +265,13 @@ message ResourceParameterSource {
 message RetryStrategy {
 }
 
-// S3Artifact contains information about an artifact in S3
-message S3Artifact {
-  optional S3Bucket s3Bucket = 4;
-
-  optional string key = 1;
-
-  optional string event = 2;
-
-  optional S3Filter filter = 3;
-}
-
-// S3Bucket contains information for an S3 Bucket
-message S3Bucket {
-  optional string endpoint = 1;
-
-  optional string bucket = 2;
-
-  optional string region = 3;
-
-  optional bool insecure = 4;
-
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
-
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-message S3Filter {
-  optional string prefix = 1;
-
-  optional string suffix = 2;
-}
-
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Sensor {
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional SensorSpec spec = 2;
@@ -311,6 +282,7 @@ message Sensor {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message SensorList {
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated Sensor items = 2;
@@ -336,6 +308,7 @@ message SensorSpec {
   optional string serviceAccountName = 6;
 
   // EnvVars are user defined env variables to sensor pod
+  // +k8s:openapi-gen=false
   repeated k8s.io.api.core.v1.EnvVar envVars = 7;
 
   // ImageVersion is the sensor image version to run
@@ -348,9 +321,11 @@ message SensorStatus {
   optional string phase = 1;
 
   // StartedAt is the time at which this sensor was initiated
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
   // CompletedAt is the time at which this sensor was completed
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
 
   // CompletionCount is the count of sensor's successful runs.
@@ -453,5 +428,37 @@ message URLArtifact {
   optional string path = 1;
 
   optional bool verifyCert = 2;
+}
+
+message S3Artifact {
+  optional S3Bucket s3Bucket = 4;
+
+  optional string key = 1;
+
+  optional string event = 2;
+
+  optional S3Filter filter = 3;
+}
+
+message S3Bucket {
+  optional string endpoint = 1;
+
+  optional string bucket = 2;
+
+  optional string region = 3;
+
+  optional bool insecure = 4;
+
+  // +k8s:openapi-gen=false
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
+
+  // +k8s:openapi-gen=false
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
+}
+
+message S3Filter {
+  optional string prefix = 1;
+
+  optional string suffix = 2;
 }
 

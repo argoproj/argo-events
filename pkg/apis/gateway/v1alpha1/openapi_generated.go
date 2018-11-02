@@ -221,12 +221,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 							Format:      "",
 						},
 					},
-					"startedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this gateway was initiated",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Message is a human readable string indicating details about a gateway in its phase",
@@ -252,7 +246,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus"},
 	}
 }
 
@@ -297,12 +291,6 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
-					"startedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this node started",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
-						},
-					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Message store data or something to save for configuration",
@@ -310,18 +298,11 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
-					"updateTime": {
-						SchemaProps: spec.SchemaProps{
-							Description: "UpdateTime is the time when node(gateway configuration) was updated",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
-						},
-					},
 				},
 				Required: []string{"id", "timeID", "name", "displayName", "phase"},
 			},
 		},
-		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
+		Dependencies: []string{},
 	}
 }
 
