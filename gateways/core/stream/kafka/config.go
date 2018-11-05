@@ -14,14 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nats
+package kafka
 
-// Nats contains configuration to connect to NATS cluster
+import (
+	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/gateways"
+)
+
+// KafkaConfigExecutor implements ConfigExecutor
+type KafkaConfigExecutor struct{
+	*gateways.GatewayConfig
+}
+
+// kafka defines configuration required to connect to kafka cluster
 // +k8s:openapi-gen=true
-type Nats struct {
-	// URL to connect to nats cluster
+type kafka struct {
+	// URL to kafka cluster
 	URL string `json:"url"`
 
-	// Subject name
-	Subject string `json:"subject"`
+	// Partition name
+	Partition string `json:"partition"`
+
+	// Topic name
+	Topic string `json:"topic"`
+}
+
+func parseConfig(config string) (*kafka, error) {
+	var n *kafka
+	err := yaml.Unmarshal([]byte(config), &n)
+	if err != nil {
+		return nil, err
+	}
+	return n, nil
 }

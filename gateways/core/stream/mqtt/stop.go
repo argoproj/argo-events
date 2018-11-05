@@ -14,17 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kafka
+package mqtt
 
-// Kafka defines configuration required to connect to kafka cluster
-// +k8s:openapi-gen=true
-type Kafka struct {
-	// URL to kafka cluster
-	URL string `json:"url"`
+import "github.com/argoproj/argo-events/gateways"
 
-	// Partition name
-	Partition string `json:"partition"`
-
-	// Topic name
-	Topic string `json:"topic"`
+// StopConfig stops a configuration
+func (mce *MqttConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+	if config.Active == true {
+		config.StopCh <- struct{}{}
+	}
+	return nil
 }

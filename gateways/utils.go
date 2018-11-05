@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
 	"hash/fnv"
-	"github.com/ghodss/yaml"
 )
 
 // TransformerPayload creates a new payload from input data and adds source information
@@ -44,20 +43,11 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
-// parseConfig parses gateway configuration
-func ParseGatewayConfig(config string) (interface{}, error) {
-	var i interface{}
-	err := yaml.Unmarshal([]byte(config), &i)
-	if err != nil {
-		return nil, err
-	}
-	return i, err
-}
-
 // CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
-func (d *DefaultConfigExecutor) CloseChannels() {
-	close(d.StartChan)
-	close(d.StartChan)
-	close(d.DoneCh)
-	close(d.ErrChan)
+func CloseChannels(ctx *ConfigContext) {
+	close(ctx.StartChan)
+	close(ctx.StartChan)
+	close(ctx.DoneChan)
+	close(ctx.ErrChan)
+	close(ctx.StopChan)
 }

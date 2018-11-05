@@ -1,11 +1,11 @@
-package resource
+package amqp
 
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig stops a configuration
-func (rce *ResourceConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (ace *AMQPConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
 	if config.Active == true {
-		config.StopCh <- struct{}{}
+		config.StopChan <- struct{}{}
 	}
 	return nil
 }

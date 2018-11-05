@@ -25,39 +25,28 @@ import (
 var (
 	configKey = "testConfig"
 	configValue = `
-s3Bucket:
+s3EventConfig:
     bucket: input
-    endpoint: minio-service.argo-events:9000    
+    endpoint: minio-service.argo-events:9000
+    event: s3:ObjectCreated:Put
     filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    accessKey:
-        key: accesskey
-        name: artifacts-minio
-    secretKey:
-        key: secretkey
-        name: artifacts-minio
-event: s3:ObjectCreated:Put
+    prefix: ""
+    suffix: ""
+insecure: true
+accessKey:
+    key: accesskey
+    name: artifacts-minio
+secretKey:
+    key: secretkey
+    name: artifacts-minio
 `
 )
 
-func getConfigContext() *gateways.ConfigContext {
-	return &gateways.ConfigContext{
-		StopCh: make(chan struct{}),
-		Data: &gateways.ConfigData{
-			Src: configKey,
-		},
-	}
-}
-
 func TestS3ConfigExecutor_Validate(t *testing.T) {
-	i, err := gateways.ParseGatewayConfig(configValue)
-	assert.Nil(t, err)
 	s3Config := &S3ConfigExecutor{}
-	ctx := getConfigContext()
-	ctx.Data.Config = i
-	err = s3Config.Validate(ctx)
+	ctx := gateways.GetDefaultConfigContext(configKey)
+	ctx.Data.Config = configValue
+	err := s3Config.Validate(ctx)
 	assert.Nil(t, err)
 
 	badConfig := `

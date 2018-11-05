@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1alphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
-	"github.com/mitchellh/mapstructure"
 	"encoding/json"
 )
 
@@ -35,8 +34,7 @@ func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 	defer s3ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
 
 	s3ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
-	var artifact *sv1alphav1.S3Artifact
-	err = mapstructure.Decode(config.Data.Config, &artifact)
+	artifact, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed
 	}
@@ -71,16 +69,28 @@ func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 }
 
 // listenEvents listens to minio bucket notifications
-func (s3ce *S3ConfigExecutor) listenToEvents(artifact *sv1alphav1.S3Artifact, config *gateways.ConfigContext) {
+func (s3ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateways.ConfigContext) {
 	defer s3ce.DefaultConfigExecutor.CloseChannels()
 
+	sartifact := &sv1alphav1.S3Artifact{
+		Event: artifact.S3EventConfig.Event,
+		S3Bucket: &sv1alphav1.S3Bucket{
+			Region: artifact.S3EventConfig.Region,
+			Insecure: artifact.Insecure,
+			Bucket: artifact.S3EventConfig.Bucket,
+			Endpoint: artifact.S3EventConfig.Endpoint,
+			SecretKey: artifact.SecretKey,
+			AccessKey: artifact.AccessKey,
+		},
+	}
+
 	creds, err := store.GetCredentials(s3ce.GatewayConfig.Clientset, s3ce.GatewayConfig.Namespace,  &sv1alphav1.ArtifactLocation{
-		S3: artifact,
+		S3: sartifact,
 	})
 	if err != nil {
 		s3ce.ErrChan <- err
 	}
-	minioClient, err := store.NewMinioClient(artifact, *creds)
+	minioClient, err := store.NewMinioClient(sartifact, *creds)
 	if err != nil {
 		s3ce.ErrChan <- err
 	}
@@ -96,8 +106,8 @@ func (s3ce *S3ConfigExecutor) listenToEvents(artifact *sv1alphav1.S3Artifact, co
 	s3ce.StartChan <- struct {}{}
 
 	// Listen for bucket notifications
-	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3Bucket.Bucket, artifact.Filter.Prefix, artifact.Filter.Suffix, []string{
-		string(artifact.Event),
+	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
+		string(artifact.S3EventConfig.Event),
 	}, s3ce.DoneCh) {
 		if notificationInfo.Err != nil {
 			s3ce.ErrChan <- notificationInfo.Err

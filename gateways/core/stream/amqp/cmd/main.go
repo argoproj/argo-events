@@ -17,133 +17,13 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
-
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	amqplib "github.com/streadway/amqp"
 	"github.com/argoproj/argo-events/gateways/core/stream/amqp"
 )
 
-var (
-	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig = gateways.NewGatewayConfiguration()
-)
-
-// amqpConfigExecutor implements ConfigExecutor interface
-type amqpConfigExecutor struct{}
-
-// StartConfig runs a configuration
-func (ace *amqpConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-
-	// mark final gateway state
-	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
-
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	amqpConfig := config.Data.Config.(*amqp.AMQP)
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *amqpConfig).Msg("amqp configuration")
-
-	conn, err := amqplib.Dial(amqpConfig.URL)
-	if err != nil {
-		errMessage = "failed to connect to server"
-		return err
-	}
-
-	ch, err := conn.Channel()
-	if err != nil {
-		errMessage = "failed to open channel"
-		return err
-	}
-
-	delivery, err := getDelivery(ch, amqpConfig)
-	if err != nil {
-		errMessage = "failed to get message delivery"
-		return err
-	}
-
-	gatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running...")
-	config.Active = true
-
-	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, gatewayConfig.Clientset)
-	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		return err
-	}
-
-	// start listening for messages
-amqpConfigRunner:
-	for {
-		select {
-		case msg := <-delivery:
-			gatewayConfig.Log.Info().Msg("dispatching the event to gateway-transformer")
-			gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: msg.Body,
-			})
-		case <-config.StopCh:
-			break amqpConfigRunner
-		}
-	}
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
-	return nil
-}
-
-// StopConfig stops a configuration
-func (ace *amqpConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
-	if config.Active == true {
-		config.StopCh <- struct{}{}
-	}
-	return nil
-}
-
-// Validate validates gateway configuration
-func (ace *amqpConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	amqpConfig, ok := config.Data.Config.(*amqp.AMQP)
-	if !ok {
-		return gateways.ErrConfigParseFailed
-	}
-	if amqpConfig.URL == "" {
-		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
-	}
-	if amqpConfig.RoutingKey == "" {
-		return fmt.Errorf("%+v, routing key must be specified", gateways.ErrInvalidConfig)
-	}
-	if amqpConfig.ExchangeName == "" {
-		return fmt.Errorf("%+v, exchange name must be specified", gateways.ErrInvalidConfig)
-	}
-	if amqpConfig.ExchangeType == "" {
-		return fmt.Errorf("%+v, exchange type must be specified", gateways.ErrInvalidConfig)
-	}
-	return nil
-}
-
-func getDelivery(ch *amqplib.Channel, config *amqp.AMQP) (<-chan amqplib.Delivery, error) {
-	err := ch.ExchangeDeclare(config.ExchangeName, config.ExchangeType, true, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare exchange with name %s and type %s. err: %+v", config.ExchangeName, config.ExchangeType, err)
-	}
-
-	q, err := ch.QueueDeclare("", false, false, true, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare queue: %s", err)
-	}
-
-	err = ch.QueueBind(q.Name, config.RoutingKey, config.ExchangeName, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", config.ExchangeType, config.ExchangeName, config.RoutingKey, err)
-	}
-
-	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to begin consuming messages: %s", err)
-	}
-	return delivery, nil
-}
-
 func main() {
-	gatewayConfig.StartGateway(&amqpConfigExecutor{})
+	ce := &amqp.AMQPConfigExecutor{}
+	gc := gateways.NewGatewayConfiguration()
+	ce.GatewayConfig = gc
+	gc.StartGateway(ce)
 }

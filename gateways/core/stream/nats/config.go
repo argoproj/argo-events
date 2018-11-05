@@ -14,17 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqtt
+package nats
 
-// MQTT contains information to connect to MQTT broker
+import (
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+)
+
+// NatsConfigExecutor implements ConfigExecutor
+type NatsConfigExecutor struct{
+	*gateways.GatewayConfig
+}
+
+
+// Nats contains configuration to connect to NATS cluster
 // +k8s:openapi-gen=true
-type MQTT struct {
-	// URL to connect to broker
+type nats struct {
+	// URL to connect to nats cluster
 	URL string `json:"url"`
 
-	// Topic name
-	Topic string `json:"topic"`
+	// Subject name
+	Subject string `json:"subject"`
+}
 
-	// Client ID
-	ClientId string `json:"clientId"`
+func parseConfig(config string) (*nats, error) {
+	var n *nats
+	err := yaml.Unmarshal([]byte(config), &n)
+	if err != nil {
+		return nil, err
+	}
+	return n, nil
 }

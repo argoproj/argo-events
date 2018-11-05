@@ -71,8 +71,17 @@ type GatewayConfig struct {
 type ConfigContext struct {
 	// Data holds the actual configuration
 	Data *ConfigData
+
+	StartChan chan struct{}
 	// StopCh is used to send a stop signal to configuration runner/executor
-	StopCh chan struct{}
+	StopChan chan struct{}
+
+	DataChan chan []byte
+
+	DoneChan chan struct{}
+
+	ErrChan chan error
+
 	// Active tracks configuration state as running or stopped
 	Active bool
 	// Cancel is called to cancel the context used by client to communicate with gRPC server.
@@ -93,7 +102,7 @@ type ConfigData struct {
 	// Src contains name of the configuration
 	Src string `json:"src"`
 	// Config contains the configuration
-	Config interface{} `json:"config"`
+	Config string `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.
@@ -127,15 +136,6 @@ type ConfigExecutor interface {
 	StartConfig(configContext *ConfigContext) error
 	StopConfig(configContext *ConfigContext) error
 	Validate(configContext *ConfigContext) error
-}
-
-type DefaultConfigExecutor struct {
-	StartChan chan struct{}
-	StopChan chan struct{}
-	DataCh chan []byte
-	DoneCh chan struct{}
-	ErrChan chan error
-	GatewayConfig *GatewayConfig
 }
 
 // newEventWatcher creates a new event watcher.
@@ -436,12 +436,8 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *GatewayEvent) error {
 func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string]*ConfigContext, error) {
 	configs := make(map[string]*ConfigContext)
 	for configKey, configValue := range cm.Data {
-		i, err := ParseGatewayConfig(configValue)
-		if err != nil {
-			return nil, err
-		}
 		hashKey := Hasher(configKey + configValue)
-		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
+		gc.Log.Info().Str("config-key", configKey).Str("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 		currentTimeStr := time.Now().String()
 		timeID := Hasher(currentTimeStr)
 		configs[hashKey] = &ConfigContext{
@@ -449,9 +445,13 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 				ID:     hashKey,
 				TimeID: timeID,
 				Src:    configKey,
-				Config: i,
+				Config: configValue,
 			},
-			StopCh: make(chan struct{}),
+			StopChan: make(chan struct{}),
+			DataChan: make(chan []byte),
+			StartChan: make(chan struct{}),
+			ErrChan: make(chan error),
+			DoneChan: make(chan struct{}),
 		}
 	}
 	return configs, nil
@@ -595,16 +595,6 @@ func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
 	}()
 	httpGatewayServerConfig.GwConfig = NewGatewayConfiguration()
 	return httpGatewayServerConfig
-}
-
-func NewDefaultConfigExecutor() *DefaultConfigExecutor {
-	return &DefaultConfigExecutor{
-		StartChan: make(chan struct{}),
-		DataCh: make(chan []byte),
-		DoneCh: make(chan struct{}),
-		StopChan: make(chan struct{}),
-		ErrChan: make(chan error),
-	}
 }
 
 // create a new node

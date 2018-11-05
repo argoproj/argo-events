@@ -18,7 +18,13 @@ package resource
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/argoproj/argo-events/gateways"
 )
+
+// ResourceConfigExecutor implements ConfigExecutor interface
+type ResourceConfigExecutor struct{
+	*gateways.DefaultConfigExecutor
+}
 
 // Resource refers to a dependency on a k8s resource.
 // +k8s:openapi-gen=true

@@ -14,6 +14,10 @@ import (
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
+func parseConfig(config string) () {
+
+}
+
 // StartConfig runs a configuration
 func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error

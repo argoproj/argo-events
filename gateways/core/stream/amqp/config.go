@@ -16,9 +16,20 @@ limitations under the License.
 
 package amqp
 
-// AMQP contains configuration required to connect to rabbitmq service and process messages
+import (
+	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/gateways"
+)
+
+// AMQPConfigExecutor implements ConfigExecutor interface
+type AMQPConfigExecutor struct{
+	*gateways.GatewayConfig
+}
+
+
+// amqp contains configuration required to connect to rabbitmq service and process messages
 // +k8s:openapi-gen=true
-type AMQP struct {
+type amqp struct {
 	// URL for rabbitmq service
 	URL string `json:"url"`
 
@@ -31,4 +42,13 @@ type AMQP struct {
 
 	// Routing key for bindings
 	RoutingKey string `json:"routingKey"`
+}
+
+func parseConfig(config string) (*amqp, error) {
+	var a *amqp
+	err := yaml.Unmarshal([]byte(config), &a)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }

@@ -19,11 +19,12 @@ package artifact
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 func TestS3ConfigExecutor_StopConfig(t *testing.T) {
 	s3Config := &S3ConfigExecutor{}
-	ctx := getConfigContext()
+	ctx := gateways.GetDefaultConfigContext(configKey)
 	ctx.Active = true
 	go func() {
 		msg :=<- ctx.StopCh

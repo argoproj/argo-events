@@ -13,20 +13,11 @@ schedule: 30 * * * *
 `
 )
 
-func getConfigContext() *gateways.ConfigContext {
-	return &gateways.ConfigContext{
-		StopCh: make(chan struct{}),
-		Data: &gateways.ConfigData{
-			Src: configKey,
-		},
-	}
-}
-
 func testConfigs(t *testing.T, config string) error {
 	i, err := gateways.ParseGatewayConfig(config)
 	assert.Nil(t, err)
 	ce := &CalendarConfigExecutor{}
-	ctx := getConfigContext()
+	ctx := gateways.GetDefaultConfigContext(configKey)
 	ctx.Data.Config = i
 	return ce.Validate(ctx)
 

@@ -39,9 +39,6 @@ var (
 	gatewayConfig = gateways.NewGatewayConfiguration()
 )
 
-// resourceConfigExecutor implements ConfigExecutor interface
-type resourceConfigExecutor struct{}
-
 // StartConfig runs a configuration
 func (rce *resourceConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
 	var err error
