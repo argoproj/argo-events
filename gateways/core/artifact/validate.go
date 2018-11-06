@@ -17,14 +17,13 @@ limitations under the License.
 package artifact
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
-	"github.com/ghodss/yaml"
 )
 
 // Validate validates s3 configuration
-func(s3ce *S3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (s3ce *S3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
 	artifact, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed
@@ -51,13 +50,4 @@ func(s3ce *S3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
 		return fmt.Errorf("%+v, unknown event %s", gateways.ErrInvalidConfig, artifact.S3EventConfig.Event)
 	}
 	return nil
-}
-
-func parseConfig(config string) (*S3Artifact, error) {
-	var i *S3Artifact
-	err := yaml.Unmarshal([]byte(config), &i)
-	if err != nil {
-		return nil, err
-	}
-	return i, err
 }

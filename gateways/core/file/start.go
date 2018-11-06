@@ -1,63 +1,55 @@
 package file
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/fsnotify/fsnotify"
-	"strings"
 	"bytes"
 	"encoding/gob"
-	"github.com/mitchellh/mapstructure"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/fsnotify/fsnotify"
+	"strings"
 )
 
 // StartConfig runs a configuration
-func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-	// mark final gateway state
-	defer ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
-
+func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	var fwc *FileWatcherConfig
-	err = mapstructure.Decode(config.Data.Config, &fwc)
+	f, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		config.ErrChan <- gateways.ErrConfigParseFailed
+		return
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *fwc).Msg("file configuration")
+	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *f).Msg("file configuration")
 
-	go ce.watchFileSystemEvents(fwc, config)
+	go ce.watchFileSystemEvents(f, config)
 
 	for {
 		select {
-		case <-ce.StartChan:
+		case <-config.StartChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
 			config.Active = true
 
-		case data := <-ce.DataCh:
+		case data := <-config.DataChan:
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
 
-		case <-ce.StopChan:
+		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.Active = false
-			ce.DoneCh <- struct{}{}
-			return nil
-
-		case err := <-ce.ErrChan:
-			return err
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-	return nil
 }
 
 func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.ConfigContext) {
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		ce.ErrChan <- err
+		config.ErrChan <- err
 		return
 	}
 	defer watcher.Close()
@@ -65,19 +57,30 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
 	err = watcher.Add(fwc.Directory)
 	if err != nil {
-		ce.ErrChan <- err
+		config.ErrChan <- err
 		return
 	}
+
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
+
+	config.StartChan <- struct{}{}
 
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
 				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("fs watcher has stopped")
-				// it means this watcher stopped watching internally
+				// watcher stopped watching file events
 				if config.Active {
 					config.Active = false
-					ce.ErrChan <- fmt.Errorf("watcher stopped watching file events")
+					config.ErrChan <- fmt.Errorf("watcher stopped watching file events")
 					return
 				}
 			}
@@ -88,15 +91,14 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 				enc := gob.NewEncoder(&buff)
 				err := enc.Encode(event)
 				if err != nil {
-					ce.ErrChan <- err
+					config.ErrChan <- err
 					return
 				}
-				ce.DataCh <- buff.Bytes()
+				config.DataChan <- buff.Bytes()
 			}
 		case err := <-watcher.Errors:
-			ce.ErrChan <- err
-		case <-ce.DoneCh:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration stopped")
+			config.ErrChan <- err
+		case <-config.DoneChan:
 			return
 		}
 	}

@@ -19,9 +19,9 @@ package store
 import (
 	"io/ioutil"
 
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // S3Reader implements the ArtifactReader interface and allows reading artifacts from S3 compatible API store

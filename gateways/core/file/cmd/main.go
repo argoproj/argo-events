@@ -17,8 +17,8 @@ limitations under the License.
 package main
 
 import (
-	"github.com/argoproj/argo-events/gateways/core/file"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/core/file"
 )
 
 func main() {

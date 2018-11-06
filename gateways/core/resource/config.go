@@ -17,20 +17,21 @@ limitations under the License.
 package resource
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ResourceConfigExecutor implements ConfigExecutor interface
-type ResourceConfigExecutor struct{
-	*gateways.DefaultConfigExecutor
+type ResourceConfigExecutor struct {
+	*gateways.GatewayConfig
 }
 
-// Resource refers to a dependency on a k8s resource.
+// resource refers to a dependency on a k8s resource.
 // +k8s:openapi-gen=true
-type Resource struct {
-	Namespace               string          `json:"namespace"`
-	Filter                  *ResourceFilter `json:"filter,omitempty"`
+type resource struct {
+	Namespace string          `json:"namespace"`
+	Filter    *ResourceFilter `json:"filter,omitempty"`
 	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`
 }
@@ -42,5 +43,14 @@ type ResourceFilter struct {
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
 	// +k8s:openapi-gen=false
-	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
+	CreatedBy metav1.Time `json:"createdBy,omitempty"`
+}
+
+func parseConfig(config string) (*resource, error) {
+	var r *resource
+	err := yaml.Unmarshal([]byte(config), &r)
+	if err != nil {
+		return nil, err
+	}
+	return r, err
 }

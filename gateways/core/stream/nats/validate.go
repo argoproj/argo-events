@@ -1,8 +1,8 @@
 package nats
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates gateway configuration
@@ -22,4 +22,3 @@ func (nce *NatsConfigExecutor) Validate(config *gateways.ConfigContext) error {
 	}
 	return nil
 }
-

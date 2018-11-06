@@ -1,15 +1,13 @@
 package file
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates gateway configuration
 func (fw *FileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	var fwc *FileWatcherConfig
-	err := mapstructure.Decode(config.Data.Config, &fwc)
+	fwc, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed
 	}

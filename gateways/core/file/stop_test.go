@@ -1,20 +1,21 @@
 package file
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestCalendarConfigExecutor_StopConfig(t *testing.T) {
 	ce := &FileWatcherConfigExecutor{}
-	ctx := gateways.GetDefaultConfigContext(configKey)
+	ctx := &gateways.ConfigContext{
+		StopChan: make(chan struct{}),
+	}
 	ctx.Active = true
 	go func() {
-		msg :=<- ctx.StopCh
-		assert.Equal(t, msg, struct {}{})
+		msg := <-ctx.StopChan
+		assert.Equal(t, msg, struct{}{})
 	}()
-	err := ce.StopConfig(ctx)
-	assert.Nil(t, err)
+	ce.StopConfig(ctx)
+	assert.Equal(t, false, ctx.Active)
 }
-

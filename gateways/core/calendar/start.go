@@ -1,36 +1,25 @@
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/common"
-	"time"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	cronlib "github.com/robfig/cron"
-	"github.com/mitchellh/mapstructure"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
-func parseConfig(config string) () {
-
-}
-
 // StartConfig runs a configuration
-func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var msg string
-
-	// mark final gateway state
-	defer ce.GatewayConfig.GatewayCleanup(config, &msg, err)
-
+func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-	var cal *CalSchedule
-	err = mapstructure.Decode(config.Data.Config, &cal)
+	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		config.ErrChan <- gateways.ErrConfigParseFailed
+		return
 	}
 	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
 
@@ -38,28 +27,24 @@ func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) er
 
 	for {
 		select {
-		case <-ce.StartChan:
+		case <-config.StartChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
 			config.Active = true
 
-		case data := <-ce.DataCh:
+		case data := <-config.DataChan:
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
 
-		case <-ce.StopChan:
+		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.Active = false
-			ce.DoneCh <- struct{}{}
-			return nil
-
-		case err := <-ce.ErrChan:
-			return err
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-	return nil
 }
 
 func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
@@ -85,27 +70,28 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 
 // fireEvent fires an event when schedule is passed.
 func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.ConfigContext) {
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		ce.ErrChan <- err
-		return
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
-	ce.StartChan <- struct{}{}
-
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		ce.ErrChan <- err
+		config.ErrChan <- err
 		return
 	}
 
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		ce.ErrChan <- err
+		config.ErrChan <- err
 		return
 	}
+
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
+
+	config.StartChan <- struct{}{}
 
 	var next Next
 	next = func(last time.Time) time.Time {
@@ -133,12 +119,11 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.C
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				ce.ErrChan <- err
+				config.ErrChan <- err
 				return
 			}
-			ce.DataCh <- payload
-		case <-ce.DoneCh:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is stopped")
+			config.DataChan <- payload
+		case <-config.DoneChan:
 			return
 		}
 	}

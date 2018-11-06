@@ -16,11 +16,14 @@ limitations under the License.
 
 package calendar
 
-import "github.com/argoproj/argo-events/gateways"
+import (
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+)
 
 // CalendarConfigExecutor implements ConfigExecutor interface
-type CalendarConfigExecutor struct{
-	*gateways.DefaultConfigExecutor
+type CalendarConfigExecutor struct {
+	*gateways.GatewayConfig
 }
 
 // CalSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -40,4 +43,13 @@ type CalSchedule struct {
 	// the combination of these rules and dates combine to form a set of date times.
 	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
 	Recurrence []string `json:"recurrence,omitempty"`
+}
+
+func parseConfig(config string) (*CalSchedule, error) {
+	var c *CalSchedule
+	err := yaml.Unmarshal([]byte(config), &c)
+	if err != nil {
+		return nil, err
+	}
+	return c, err
 }

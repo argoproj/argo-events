@@ -17,12 +17,12 @@ limitations under the License.
 package kafka
 
 import (
-	"github.com/ghodss/yaml"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
 )
 
 // KafkaConfigExecutor implements ConfigExecutor
-type KafkaConfigExecutor struct{
+type KafkaConfigExecutor struct {
 	*gateways.GatewayConfig
 }
 

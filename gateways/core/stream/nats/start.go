@@ -1,24 +1,18 @@
 package nats
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/common"
 	natsio "github.com/nats-io/go-nats"
 )
 
 // Runs a configuration
-func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-
-	// mark final gateway state
-	defer ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
-
+func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	n, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return err
+		config.ErrChan <- err
 	}
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *n).Msg("nats configuration")
 
@@ -36,12 +30,15 @@ func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 				Src:     config.Data.Src,
 				Payload: data,
 			})
+
+		case <-config.StopChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 
 	}
-
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
-	return nil
 }
 
 func (ce *NatsConfigExecutor) listenEvents(n *nats, config *gateways.ConfigContext) {
@@ -70,8 +67,7 @@ func (ce *NatsConfigExecutor) listenEvents(n *nats, config *gateways.ConfigConte
 		return
 	}
 
-	<-config.StopChan
-	config.Active = false
-	sub.Unsubscribe()
-	config.DoneChan <- struct{}{}
+	<-config.DoneChan
+	err = sub.Unsubscribe()
+	ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to unsubscribe client")
 }

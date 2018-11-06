@@ -22,10 +22,9 @@ import (
 )
 
 // MqttConfigExecutor implements ConfigExecutor
-type MqttConfigExecutor struct{
-	*gateways.DefaultConfigExecutor
+type MqttConfigExecutor struct {
+	*gateways.GatewayConfig
 }
-
 
 // mqtt contains information to connect to MQTT broker
 // +k8s:openapi-gen=true

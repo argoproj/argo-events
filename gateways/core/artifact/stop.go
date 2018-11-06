@@ -19,9 +19,9 @@ package artifact
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig stops the configuration
-func (s3ce *S3ConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (s3ce *S3ConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	if config.Active == true {
-		config.StopCh <- struct{}{}
+		config.Active = false
+		config.StopChan <- struct{}{}
 	}
-	return nil
 }

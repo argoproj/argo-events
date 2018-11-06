@@ -133,8 +133,8 @@ type HTTPGatewayServerConfig struct {
 
 // ConfigExecutor is interface a gateway processor server must implement
 type ConfigExecutor interface {
-	StartConfig(configContext *ConfigContext) error
-	StopConfig(configContext *ConfigContext) error
+	StartConfig(configContext *ConfigContext)
+	StopConfig(configContext *ConfigContext)
 	Validate(configContext *ConfigContext) error
 }
 
@@ -389,6 +389,11 @@ func (gc *GatewayConfig) manageConfigurations(executor ConfigExecutor, cm *corev
 			return err
 		}
 
+		go func() {
+			err := <-newConfig.ErrChan
+			gc.GatewayCleanup(newConfig, err)
+		}()
+
 		// run configuration
 		go executor.StartConfig(newConfig)
 	}
@@ -396,7 +401,7 @@ func (gc *GatewayConfig) manageConfigurations(executor ConfigExecutor, cm *corev
 	// remove stale configurations
 	for _, staleConfigKey := range staleConfigKeys {
 		staleConfig := gc.registeredConfigs[staleConfigKey]
-		err := executor.StopConfig(staleConfig)
+		executor.StopConfig(staleConfig)
 		if err == nil {
 			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
 			delete(gc.registeredConfigs, staleConfigKey)
@@ -447,11 +452,11 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 				Src:    configKey,
 				Config: configValue,
 			},
-			StopChan: make(chan struct{}),
-			DataChan: make(chan []byte),
+			StopChan:  make(chan struct{}),
+			DataChan:  make(chan []byte),
 			StartChan: make(chan struct{}),
-			ErrChan: make(chan error),
-			DoneChan: make(chan struct{}),
+			ErrChan:   make(chan error),
+			DoneChan:  make(chan struct{}),
 		}
 	}
 	return configs, nil
@@ -743,16 +748,16 @@ func (gc *GatewayConfig) TransformerReadinessProbe() error {
 }
 
 // GatewayCleanup marks configuration as non-active and marks final gateway state
-func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *string, err error) {
+func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, err error) {
 	var event *corev1.Event
 	// mark configuration as deactivated so gateway processor client won't run configStopper in case if there
 	// was configuration error.
 	config.Active = false
 	// check if gateway configuration is in error condition.
 	if err != nil {
-		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg(*errMessage)
+		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error")
 		// create k8 event for error state
-		event = gc.GetK8Event(*errMessage, v1alpha1.NodePhaseError, config.Data)
+		event = gc.GetK8Event(err.Error(), v1alpha1.NodePhaseError, config.Data)
 	} else {
 		// gateway successfully completed/deactivated this configuration.
 		gc.Log.Info().Str("config-key", config.Data.Src).Msg("configuration completed")
@@ -763,6 +768,7 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, errMessage *strin
 	if err != nil {
 		gc.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to create gateway k8 event")
 	}
+	CloseChannels(config)
 }
 
 // StartGateway starts a gateway

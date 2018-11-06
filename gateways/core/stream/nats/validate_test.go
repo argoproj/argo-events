@@ -1,13 +1,13 @@
 package nats
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
-	configKey = "testConfig"
+	configKey   = "testConfig"
 	configValue = `
 url: nats://nats.argo-events:4222
 subject: foo
@@ -16,7 +16,7 @@ subject: foo
 
 func TestNatsConfigExecutor_Validate(t *testing.T) {
 	ce := &NatsConfigExecutor{}
-	ctx := &gateways.ConfigContext{}
+	ctx := &gateways.ConfigContext{Data: &gateways.ConfigData{}}
 	ctx.Data.Config = configValue
 	err := ce.Validate(ctx)
 	assert.Nil(t, err)

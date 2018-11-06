@@ -18,15 +18,15 @@ package artifact
 
 import (
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // S3ConfigExecutor implements ConfigExecutor interface
-type S3ConfigExecutor struct{
-	*gateways.DefaultConfigExecutor
+type S3ConfigExecutor struct {
+	*gateways.GatewayConfig
 }
-
 
 // S3Artifact contains information about an artifact in S3
 // +k8s:openapi-gen=true
@@ -61,4 +61,13 @@ type S3EventConfig struct {
 type S3Filter struct {
 	Prefix string `json:"prefix"`
 	Suffix string `json:"suffix"`
+}
+
+func parseConfig(config string) (*S3Artifact, error) {
+	var s *S3Artifact
+	err := yaml.Unmarshal([]byte(config), &s)
+	if err != nil {
+		return nil, err
+	}
+	return s, err
 }

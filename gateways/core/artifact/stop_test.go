@@ -17,19 +17,20 @@ limitations under the License.
 package artifact
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestS3ConfigExecutor_StopConfig(t *testing.T) {
 	s3Config := &S3ConfigExecutor{}
-	ctx := gateways.GetDefaultConfigContext(configKey)
+	ctx := &gateways.ConfigContext{}
+	ctx.StopChan = make(chan struct{})
 	ctx.Active = true
 	go func() {
-		msg :=<- ctx.StopCh
-		assert.Equal(t, msg, struct {}{})
+		msg := <-ctx.StopChan
+		assert.Equal(t, msg, struct{}{})
 	}()
-	err := s3Config.StopConfig(ctx)
-	assert.Nil(t, err)
+	s3Config.StopConfig(ctx)
+	assert.Equal(t, false, ctx.Active)
 }

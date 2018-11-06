@@ -1,8 +1,8 @@
 package kafka
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates the gateway configuration

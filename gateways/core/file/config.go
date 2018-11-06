@@ -16,13 +16,15 @@ limitations under the License.
 
 package file
 
-import "github.com/argoproj/argo-events/gateways"
+import (
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
+)
 
 // FileWatcherConfigExecutor implements ConfigExecutor interface
-type FileWatcherConfigExecutor struct{
-	*gateways.DefaultConfigExecutor
+type FileWatcherConfigExecutor struct {
+	*gateways.GatewayConfig
 }
-
 
 // FileWatcherConfig contains configuration information for this gateway
 // +k8s:openapi-gen=true
@@ -34,4 +36,13 @@ type FileWatcherConfig struct {
 	// Type of file operations to watch
 	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
 	Type string `json:"type"`
+}
+
+func parseConfig(config string) (*FileWatcherConfig, error) {
+	var f *FileWatcherConfig
+	err := yaml.Unmarshal([]byte(config), &f)
+	if err != nil {
+		return nil, err
+	}
+	return f, err
 }

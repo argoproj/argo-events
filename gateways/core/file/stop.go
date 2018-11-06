@@ -3,9 +3,9 @@ package file
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig deactivates a configuration
-func (fw *FileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (fw *FileWatcherConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	if config.Active == true {
-		config.StopCh <- struct{}{}
+		config.Active = false
+		config.StopChan <- struct{}{}
 	}
-	return nil
 }

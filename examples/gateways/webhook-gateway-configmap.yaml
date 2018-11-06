@@ -5,7 +5,6 @@ metadata:
 data:
   webhook.portConfig: |-
     port: "12000"
-  webhook.barConfig: |-
     endpoint: "/bar"
     method: "POST"
   webhook.fooConfig: |-

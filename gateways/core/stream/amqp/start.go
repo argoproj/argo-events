@@ -1,10 +1,10 @@
 package amqp
 
 import (
+	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/common"
-	"fmt"
 	amqplib "github.com/streadway/amqp"
 )
 
@@ -30,12 +30,15 @@ func (ce *AMQPConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 				Src:     config.Data.Src,
 				Payload: data,
 			})
+
+		case <-config.StartChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
 }
-
 
 func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
 	err := ch.ExchangeDeclare(a.ExchangeName, a.ExchangeType, true, false, false, false, nil)
@@ -79,28 +82,28 @@ func (ce *AMQPConfigExecutor) listenEvents(a *amqp, config *gateways.ConfigConte
 		return
 	}
 
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-	config.Active = true
-
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
 		config.ErrChan <- err
 		return
 	}
+
+	config.StartChan <- struct{}{}
 
 	for {
 		select {
 		case msg := <-delivery:
 			config.DataChan <- msg.Body
-		case <-config.StopChan:
+		case <-config.DoneChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
 			config.Active = false
 			err = conn.Close()
 			if err != nil {
 				ce.GatewayConfig.Log.Error().Err(err).Str("config-name", config.Data.Src).Msg("failed to close connection")
 			}
-			config.DoneChan <- struct{}{}
+			return
 		}
 	}
 }

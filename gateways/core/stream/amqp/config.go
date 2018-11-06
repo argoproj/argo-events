@@ -17,15 +17,14 @@ limitations under the License.
 package amqp
 
 import (
-	"github.com/ghodss/yaml"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
 )
 
 // AMQPConfigExecutor implements ConfigExecutor interface
-type AMQPConfigExecutor struct{
+type AMQPConfigExecutor struct {
 	*gateways.GatewayConfig
 }
-
 
 // amqp contains configuration required to connect to rabbitmq service and process messages
 // +k8s:openapi-gen=true

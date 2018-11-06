@@ -1,13 +1,12 @@
 package kafka
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/Shopify/sarama"
-	"strconv"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"strconv"
 )
-
 
 func verifyPartitionAvailable(part int32, partitions []int32) bool {
 	for _, p := range partitions {
@@ -19,70 +18,65 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 // Runs a configuration
-func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-
-	// mark final gateway state
-	defer ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
-
+func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	k, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return err
+		config.ErrChan <- err
+		return
 	}
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *k).Msg("kafka configuration")
-	
+
 	for {
 		select {
 		case <-config.StartChan:
 			config.Active = true
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
-			
+
 		case data := <-config.DataChan:
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
+
+		case <-config.StopChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-	
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
-	return nil
 }
 
 func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigContext) {
-
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	k, err := parseConfig(config.Data.Config)
-	if err != nil {
-		config.ErrChan <- err
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *k).Msg("kafka configuration")
-
 	consumer, err := sarama.NewConsumer([]string{k.URL}, nil)
 	if err != nil {
 		config.ErrChan <- err
+		return
 	}
 
 	pInt, err := strconv.ParseInt(k.Partition, 10, 32)
 	if err != nil {
 		config.ErrChan <- err
+		return
 	}
 	partition := int32(pInt)
 
 	availablePartitions, err := consumer.Partitions(k.Topic)
 	if err != nil {
 		config.ErrChan <- err
+		return
 	}
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
 		config.ErrChan <- err
+		return
 	}
 
 	partitionConsumer, err := consumer.ConsumePartition(k.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
 		config.ErrChan <- err
+		return
 	}
 
 	config.StartChan <- struct{}{}
@@ -94,7 +88,7 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 		config.ErrChan <- err
 		return
 	}
-	
+
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -105,14 +99,12 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 			config.ErrChan <- err
 			return
 
-		case <-config.StopChan:
-			config.Active = false
+		case <-config.DoneChan:
 			err = partitionConsumer.Close()
 			if err != nil {
-				config.ErrChan <- err
-				return
+				ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to close consumer")
 			}
-			config.DoneChan <- struct{}{}
+			return
 		}
 	}
 }

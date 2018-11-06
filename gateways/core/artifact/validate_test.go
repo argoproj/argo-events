@@ -17,13 +17,13 @@ limitations under the License.
 package artifact
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
-	configKey = "testConfig"
+	configKey   = "testConfig"
 	configValue = `
 s3EventConfig:
     bucket: input
@@ -44,7 +44,9 @@ secretKey:
 
 func TestS3ConfigExecutor_Validate(t *testing.T) {
 	s3Config := &S3ConfigExecutor{}
-	ctx := gateways.GetDefaultConfigContext(configKey)
+	ctx := &gateways.ConfigContext{
+		Data: &gateways.ConfigData{},
+	}
 	ctx.Data.Config = configValue
 	err := s3Config.Validate(ctx)
 	assert.Nil(t, err)
@@ -60,8 +62,8 @@ s3EventConfig:
 insecure: true
 `
 
-     ctx.Data.Config = badConfig
+	ctx.Data.Config = badConfig
 
-     err = s3Config.Validate(ctx)
-     assert.NotNil(t, err)
+	err = s3Config.Validate(ctx)
+	assert.NotNil(t, err)
 }

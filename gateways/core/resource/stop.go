@@ -3,9 +3,9 @@ package resource
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig stops a configuration
-func (rce *ResourceConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (rce *ResourceConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	if config.Active == true {
-		config.StopCh <- struct{}{}
+		config.Active = false
+		config.StopChan <- struct{}{}
 	}
-	return nil
 }

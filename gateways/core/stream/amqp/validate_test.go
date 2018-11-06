@@ -1,13 +1,13 @@
 package amqp
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
-	configKey = "testConfig"
+	configKey   = "testConfig"
 	configValue = `
 url: amqp://amqp.argo-events:5672
 exchangeName: fooExchangeName

@@ -22,10 +22,9 @@ import (
 )
 
 // NatsConfigExecutor implements ConfigExecutor
-type NatsConfigExecutor struct{
+type NatsConfigExecutor struct {
 	*gateways.GatewayConfig
 }
-
 
 // Nats contains configuration to connect to NATS cluster
 // +k8s:openapi-gen=true

@@ -1,26 +1,26 @@
 package main
 
 import (
-	salphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	galphav1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	salphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 
 	"github.com/go-openapi/spec"
 
-	"fmt"
-	"k8s.io/kube-openapi/pkg/builder"
 	"encoding/json"
-	"io/ioutil"
-	"k8s.io/kube-openapi/pkg/common"
-	"github.com/argoproj/argo-events/gateways/core/webhook"
-	"github.com/argoproj/argo-events/gateways/core/resource"
+	"fmt"
 	"github.com/argoproj/argo-events/gateways/core/artifact"
 	"github.com/argoproj/argo-events/gateways/core/calendar"
 	"github.com/argoproj/argo-events/gateways/core/file"
-	"github.com/argoproj/argo-events/gateways/custom/storagegrid"
-	"github.com/argoproj/argo-events/gateways/core/stream/nats"
-	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
+	"github.com/argoproj/argo-events/gateways/core/resource"
 	"github.com/argoproj/argo-events/gateways/core/stream/amqp"
+	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
 	"github.com/argoproj/argo-events/gateways/core/stream/mqtt"
+	"github.com/argoproj/argo-events/gateways/core/stream/nats"
+	"github.com/argoproj/argo-events/gateways/core/webhook"
+	"github.com/argoproj/argo-events/gateways/custom/storagegrid"
+	"io/ioutil"
+	"k8s.io/kube-openapi/pkg/builder"
+	"k8s.io/kube-openapi/pkg/common"
 	"os"
 )
 
@@ -62,7 +62,6 @@ func sensorDefs() {
 	config.GetDefinitions = salphav1.GetOpenAPIDefinitions
 	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "sensor.json"), defNames, config)
 }
-
 
 func gatewayDefs() {
 	var defNames []string
@@ -148,7 +147,6 @@ func natsDefs() {
 	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "nats.json"), defNames, config)
 }
 
-
 func kafkaDefs() {
 	var defNames []string
 	for name, _ := range kafka.GetOpenAPIDefinitions(func(name string) spec.Ref {
@@ -185,7 +183,6 @@ func mqttDefs() {
 	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "mqtt.json"), defNames, config)
 }
 
-
 func storageGridDefs() {
 	var defNames []string
 	for name, _ := range storagegrid.GetOpenAPIDefinitions(func(name string) spec.Ref {
@@ -197,7 +194,6 @@ func storageGridDefs() {
 	config.GetDefinitions = storagegrid.GetOpenAPIDefinitions
 	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "storagegrid.json"), defNames, config)
 }
-
 
 func main() {
 	sensorDefs()

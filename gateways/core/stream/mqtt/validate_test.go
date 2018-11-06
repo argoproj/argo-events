@@ -1,13 +1,13 @@
 package mqtt
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
-	configKey = "testConfig"
+	configKey   = "testConfig"
 	configValue = `
 url: tcp://mqtt.argo-events:1883
 topic: foo

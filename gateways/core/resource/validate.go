@@ -1,16 +1,13 @@
 package resource
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates gateway configuration
 func (rce *ResourceConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	var res *Resource
-	fmt.Println(config.Data.Config)
-	err := mapstructure.Decode(config.Data.Config, &res)
+	res, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed
 	}

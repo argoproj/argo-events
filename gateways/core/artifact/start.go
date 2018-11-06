@@ -17,108 +17,102 @@ limitations under the License.
 package artifact
 
 import (
+	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1alphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
-	"encoding/json"
 )
 
 // StartConfig runs a configuration
-func (s3ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
+func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer gateways.CloseChannels(config)
 
-	// mark final gateway state
-	defer s3ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
-
-	s3ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("starting configuration...")
+	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("operating on configuration")
 	artifact, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		config.ErrChan <- gateways.ErrConfigParseFailed
 	}
-	s3ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
+	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
 
-	go s3ce.listenToEvents(artifact, config)
+	go ce.listenToEvents(artifact, config)
 
 	for {
 		select {
-		case <-s3ce.StartChan:
-			s3ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
+		case <-config.StartChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
 			config.Active = true
 
-		case data := <-s3ce.DataCh:
-			s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
-			s3ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src: config.Data.Src,
+		case data := <-config.DataChan:
+			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
+			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+				Src:     config.Data.Src,
 				Payload: data,
 			})
 
-		case <-s3ce.StopChan:
-			s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
-			s3ce.DoneCh <- struct{}{}
-			config.Active = false
-			return nil
-
-		case err := <-s3ce.ErrChan:
-			return err
+		case <-config.StopChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-	return nil
 }
 
 // listenEvents listens to minio bucket notifications
-func (s3ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateways.ConfigContext) {
-	defer s3ce.DefaultConfigExecutor.CloseChannels()
+func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateways.ConfigContext) {
+	defer gateways.CloseChannels(config)
 
 	sartifact := &sv1alphav1.S3Artifact{
 		Event: artifact.S3EventConfig.Event,
 		S3Bucket: &sv1alphav1.S3Bucket{
-			Region: artifact.S3EventConfig.Region,
-			Insecure: artifact.Insecure,
-			Bucket: artifact.S3EventConfig.Bucket,
-			Endpoint: artifact.S3EventConfig.Endpoint,
+			Region:    artifact.S3EventConfig.Region,
+			Insecure:  artifact.Insecure,
+			Bucket:    artifact.S3EventConfig.Bucket,
+			Endpoint:  artifact.S3EventConfig.Endpoint,
 			SecretKey: artifact.SecretKey,
 			AccessKey: artifact.AccessKey,
 		},
 	}
 
-	creds, err := store.GetCredentials(s3ce.GatewayConfig.Clientset, s3ce.GatewayConfig.Namespace,  &sv1alphav1.ArtifactLocation{
+	creds, err := store.GetCredentials(ce.GatewayConfig.Clientset, ce.GatewayConfig.Namespace, &sv1alphav1.ArtifactLocation{
 		S3: sartifact,
 	})
 	if err != nil {
-		s3ce.ErrChan <- err
+		config.ErrChan <- err
+		return
 	}
 	minioClient, err := store.NewMinioClient(sartifact, *creds)
 	if err != nil {
-		s3ce.ErrChan <- err
+		config.ErrChan <- err
+		return
 	}
 
-	event := s3ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, s3ce.GatewayConfig.Clientset)
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
-		s3ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		s3ce.ErrChan <- err
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
 	}
 
 	// at this point configuration is successfully running
-	s3ce.StartChan <- struct {}{}
+	config.StartChan <- struct{}{}
 
 	// Listen for bucket notifications
 	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
 		string(artifact.S3EventConfig.Event),
-	}, s3ce.DoneCh) {
+	}, config.DoneChan) {
 		if notificationInfo.Err != nil {
-			s3ce.ErrChan <- notificationInfo.Err
+			config.ErrChan <- notificationInfo.Err
 			return
 		}
 		payload, err := json.Marshal(notificationInfo.Records[0])
 		if err != nil {
-			s3ce.ErrChan <- err
+			config.ErrChan <- err
 			return
 		}
-		s3ce.DataCh <- payload
+		config.DataChan <- payload
 	}
-	s3ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is stopped")
 }

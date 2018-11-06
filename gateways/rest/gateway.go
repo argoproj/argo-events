@@ -2,96 +2,95 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/gateways"
-	"net/http"
-	"io/ioutil"
 	"github.com/argoproj/argo-events/common"
-	"context"
+	"github.com/argoproj/argo-events/gateways"
+	"io/ioutil"
+	"net/http"
 )
 
 var (
 	// gateway http server configurations
-	httpGatewayServerConfig = gateways.NewHTTPGatewayServerConfig()
+	gc = gateways.NewHTTPGatewayServerConfig()
 )
 
 // httpConfigExecutor implements ConfigExecutor
 type httpConfigExecutor struct{}
 
-func (hce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("start configuration")
+func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	gc.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("start configuration")
 	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
-	}, httpGatewayServerConfig.ConfigActivateEndpoint)
+	}, gc.ConfigActivateEndpoint)
 	if err != nil {
-		errMsg := "failed to send new configuration to gateway processor server"
-		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, &errMsg, err)
+		config.ErrChan <- err
 	}
-	return err
 }
 
-func (hce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
+func (ce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) {
+	gc.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping configuration")
 	err := sendHTTPRequest(&gateways.ConfigData{
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
-	}, httpGatewayServerConfig.ConfigurationDeactivateEndpoint)
+	}, gc.ConfigurationDeactivateEndpoint)
 	if err != nil {
-		errMsg := "failed to send configuration to stop to gateway processor server"
-		httpGatewayServerConfig.GwConfig.GatewayCleanup(config, &errMsg, err)
+		config.ErrChan <- err
 	}
-	return err
+}
+
+func (ce *httpConfigExecutor) Validate(configContext *gateways.ConfigContext) error {
+	return nil
 }
 
 func sendHTTPRequest(config *gateways.ConfigData, endpoint string) error {
 	payload, err := json.Marshal(config)
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to marshal configuration")
+		gc.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to marshal configuration")
 		return err
 	}
-	_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", httpGatewayServerConfig.HTTPServerPort, endpoint), "application/octet-stream", bytes.NewReader(payload))
+	_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", gc.HTTPServerPort, endpoint), "application/octet-stream", bytes.NewReader(payload))
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
+		gc.GwConfig.Log.Warn().Str("config-key", config.Src).Err(err).Msg("failed to dispatch event to gateway-transformer.")
 		return err
 	}
 	return nil
 }
 
 func main() {
-	err := httpGatewayServerConfig.GwConfig.TransformerReadinessProbe()
+	err := gc.GwConfig.TransformerReadinessProbe()
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnection)
+		gc.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayTransformerConnectionMsg)
 	}
-	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayEvents(context.Background())
+	_, err = gc.GwConfig.WatchGatewayEvents(context.Background())
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatch)
+		gc.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayEventWatchMsg)
 	}
-	_, err = httpGatewayServerConfig.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
+	_, err = gc.GwConfig.WatchGatewayConfigMap(context.Background(), &httpConfigExecutor{})
 	if err != nil {
-		httpGatewayServerConfig.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatch)
+		gc.GwConfig.Log.Panic().Err(err).Msg(gateways.ErrGatewayConfigmapWatchMsg)
 	}
 	// handle events from gateway processor server
-	http.HandleFunc(httpGatewayServerConfig.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
-		httpGatewayServerConfig.GwConfig.Log.Info().Msg("received an event. processing...")
+	http.HandleFunc(gc.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
+		gc.GwConfig.Log.Info().Msg("received an event. processing...")
 		var event gateways.GatewayEvent
 		body, err := ioutil.ReadAll(request.Body)
 		if err != nil {
-			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to read request body")
+			gc.GwConfig.Log.Error().Err(err).Msg("failed to read request body")
 			common.SendErrorResponse(writer)
 			return
 		}
 		err = json.Unmarshal(body, &event)
 		if err != nil {
-			httpGatewayServerConfig.GwConfig.Log.Error().Err(err).Msg("failed to read request body")
+			gc.GwConfig.Log.Error().Err(err).Msg("failed to read request body")
 			common.SendErrorResponse(writer)
 			return
 		}
 		common.SendSuccessResponse(writer)
-		httpGatewayServerConfig.GwConfig.DispatchEvent(&event)
+		gc.GwConfig.DispatchEvent(&event)
 	})
 
-	httpGatewayServerConfig.GwConfig.Log.Info().Str("port", httpGatewayServerConfig.HTTPClientPort).Msg("gateway processor client is now listening for events.")
-	httpGatewayServerConfig.GwConfig.Log.Fatal().Str("port", httpGatewayServerConfig.HTTPClientPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", httpGatewayServerConfig.HTTPClientPort), nil)).Msg("")
+	gc.GwConfig.Log.Fatal().Str("port", gc.HTTPClientPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", gc.HTTPClientPort), nil)).Msg("gateway processor client is now listening for events")
 }

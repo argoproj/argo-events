@@ -17,24 +17,18 @@ limitations under the License.
 package mqtt
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	MQTTlib "github.com/eclipse/paho.mqtt.golang"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	MQTTlib "github.com/eclipse/paho.mqtt.golang"
 )
 
 // StartConfig runs a configuration
-func (ce *MqttConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-
-	// mark final gateway state
-	defer ce.GatewayConfig.GatewayCleanup(config, &errMessage, err)
-
+func (ce *MqttConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	m, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return err
+		config.ErrChan <- err
 	}
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *m).Msg("mqtt configuration")
 
@@ -42,44 +36,38 @@ func (ce *MqttConfigExecutor) StartConfig(config *gateways.ConfigContext) error 
 
 	for {
 		select {
-		case <-ce.StartChan:
+		case <-config.StartChan:
 			config.Active = true
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
 
-		case data := <-ce.DataCh:
+		case data := <-config.DataChan:
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-transformer")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
 
-		case <-ce.ErrChan:
-			return err
-
-		case <-ce.StopChan:
+		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.Active = false
-			ce.DoneCh <- struct{}{}
-			return nil
+			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
+			return
 		}
 	}
-
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is now complete.")
-	return nil
 }
 
 func (ce *MqttConfigExecutor) listenEvents(m *mqtt, config *gateways.ConfigContext) {
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
-		ce.DataCh <- msg.Payload()
+		config.DataChan <- msg.Payload()
 	}
 	opts := MQTTlib.NewClientOptions().AddBroker(m.URL).SetClientID(m.ClientId)
 	client := MQTTlib.NewClient(opts)
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		ce.ErrChan <- token.Error()
+		config.ErrChan <- token.Error()
 		return
 	}
 	if token := client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		ce.ErrChan <- token.Error()
+		config.ErrChan <- token.Error()
 		return
 	}
 
@@ -87,12 +75,16 @@ func (ce *MqttConfigExecutor) listenEvents(m *mqtt, config *gateways.ConfigConte
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
-		ce.ErrChan <- err
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
 		return
 	}
 
-	ce.StartChan <- struct{}{}
+	config.StartChan <- struct{}{}
 
-	<-ce.DoneCh
-	client.Unsubscribe(m.Topic)
+	<-config.DoneChan
+	token := client.Unsubscribe(m.Topic)
+	if token.Error() != nil {
+		ce.GatewayConfig.Log.Error().Err(token.Error()).Str("config-key", config.Data.Src).Msg("failed to unsubscribe client")
+	}
 }

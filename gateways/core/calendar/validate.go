@@ -1,15 +1,13 @@
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates gateway configuration
 func (ce *CalendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	var cal *CalSchedule
-	err := mapstructure.Decode(config.Data.Config, &cal)
+	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed
 	}

@@ -1,8 +1,8 @@
 package amqp
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // Validate validates gateway configuration
