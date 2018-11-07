@@ -11,8 +11,8 @@ import (
 	"fmt"
 )
 
-// MarkGatewayNodePhase marks the node with a phase, returns the node
-func (gc *GatewayConfig) MarkGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
+// markGatewayNodePhase marks the node with a phase, returns the node
+func (gc *GatewayConfig) markGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
 	gc.Log.Debug().Str("node-id", nodeID).Msg("marking node phase...")
 	gc.Log.Info().Interface("nodes", gc.gw.Status.Nodes).Msg("nodes")
 	node := gc.getNodeByID(nodeID)
@@ -122,7 +122,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 			case v1alpha1.NodePhaseRunning, v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
 				gc.gw.Status.Nodes[nodeID] = node
 				if node.Phase != v1alpha1.NodePhaseCompleted || node.Phase == v1alpha1.NodePhaseError {
-					gc.MarkGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
+					gc.markGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
 				}
 				return gc.persistUpdates()
 			case v1alpha1.NodePhaseRemove:
@@ -148,7 +148,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 // PersistUpdates persists the updates to the Gateway resource
 func (gc *GatewayConfig) persistUpdates() error {
 	var err error
-	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.Namespace).Update(gc.gw)
+	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Update(gc.gw)
 	if err != nil {
 		gc.Log.Warn().Err(err).Msg("error updating gateway")
 		if errors.IsConflict(err) {
@@ -169,8 +169,8 @@ func (gc *GatewayConfig) persistUpdates() error {
 // reapplyUpdate by fetching a new version of the sensor and updating the status
 func (gc *GatewayConfig) reapplyUpdate() error {
 	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		gwClient := gc.gwcs.ArgoprojV1alpha1().Gateways(gc.Namespace)
-		gw, err := gwClient.Get(gc.Name, metav1.GetOptions{})
+		gwClient := gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace)
+		gw, err := gwClient.Get(gc.gw.Name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}

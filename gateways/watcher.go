@@ -86,7 +86,6 @@ func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
 	return false
 }
 
-
 // WatchGatewayConfigMap watches change in configuration for the gateway
 func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor ConfigExecutor) (cache.Controller, error) {
 	source := gc.newConfigMapWatch(gc.configName)

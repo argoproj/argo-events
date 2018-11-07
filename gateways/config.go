@@ -308,7 +308,15 @@ func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*Con
 
 		go func() {
 			err := <-configValue.ErrChan
-			gc.GatewayCleanup(configValue, err)
+			if err != nil && configValue.Active {
+				go func() {
+					<-configValue.ShutdownChan
+					gc.GatewayCleanup(configValue, err)
+				}()
+				ce.StopConfig(configValue)
+			} else {
+				gc.GatewayCleanup(configValue, err)
+			}
 		}()
 
 		// start configuration
@@ -334,8 +342,7 @@ func (gc *GatewayConfig) stopConfigs(ce ConfigExecutor, configs []string) {
 			}
 			CloseChannels(staleConfig)
 		}()
-
-		go ce.StopConfig(staleConfig)
+		ce.StopConfig(staleConfig)
 	}
 }
 
