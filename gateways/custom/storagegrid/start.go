@@ -26,7 +26,6 @@ var (
 	// activeRoutes keep track of active routes for a http server
 	activeRoutes = make(map[string]map[string]struct{})
 
-	gatewayConfig = gateways.NewGatewayConfiguration()
 	respBody      = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
     <PublishResult> 
@@ -72,13 +71,13 @@ func (ce *StorageGridConfigExecutor) startHttpServer(sg *StorageGridEventConfig,
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
 
-	gatewayConfig.Log.Info().
+	ce.Log.Info().
 		Str("config-key", config.Data.Src).
 		Interface("active-servers", activeServers[sg.Port]).
 		Msg("servers")
 
 	if _, ok := activeServers[sg.Port]; !ok {
-		gatewayConfig.Log.Info().
+		ce.Log.Info().
 			Str("config-key", config.Data.Src).
 			Str("port", sg.Port).
 			Msg("http server started listening...")
@@ -96,7 +95,7 @@ func (ce *StorageGridConfigExecutor) startHttpServer(sg *StorageGridEventConfig,
 		// start http server
 		go func() {
 			err := sg.Srv.ListenAndServe()
-			gatewayConfig.Log.Info().
+			ce.Log.Info().
 				Str("config-key", config.Data.Src).Msg("http server stopped")
 
 			if err == http.ErrServerClosed {
@@ -153,17 +152,17 @@ func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext)
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
+			ce.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
 
 			// remove the endpoint.
 			routesMutex.Lock()
 			if _, ok := activeRoutes[sg.Port]; ok {
-				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("routes", activeRoutes[sg.Port]).Msg("active routes")
+				ce.Log.Info().Str("config-key", config.Data.Src).Interface("routes", activeRoutes[sg.Port]).Msg("active routes")
 				delete(activeRoutes[sg.Port], sg.Endpoint)
 				// Check if the endpoint in this configuration was the last of the active endpoints for the http server.
 				// If so, shutdown the server.
 				if len(activeRoutes[sg.Port]) == 0 {
-					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
+					ce.Log.Info().Str("config-key", config.Data.Src).Msg("all endpoint are deactivated, stopping http server")
 					err = sg.Srv.Shutdown(context.Background())
 					if err != nil {
 						ce.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred while shutting server down")
@@ -203,30 +202,32 @@ func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, co
 		}
 
 		sg.Mux.HandleFunc(sg.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-			gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("received a request")
+			ce.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("received a request")
 			// Todo: find a better to handle route deletion
 			if _, ok := activeRoutes[sg.Port][sg.Endpoint]; ok {
 				body, err := ioutil.ReadAll(request.Body)
 				if err != nil {
-					gatewayConfig.Log.Error().Err(err).Msg("failed to parse request body")
+					ce.Log.Error().Err(err).Msg("failed to parse request body")
 					common.SendErrorResponse(writer)
 					config.Active = false
 					config.ErrChan <- err
 					return
 				}
-				gatewayConfig.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).Msg("dispatching event to gateway-processor")
-				gatewayConfig.Log.Debug().Str("payload", string(body)).Msg("payload")
+
+				ce.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).
+					Str("payload", string(body)).Msg("dispatching event to gateway-processor")
 
 				switch request.Method {
 				case http.MethodPost, http.MethodPut:
 					body, err := ioutil.ReadAll(request.Body)
 					if err != nil {
-						gatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to parse request body")
+						ce.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to parse request body")
 					} else {
-						gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("msg", string(body)).Msg("msg body")
+						ce.Log.Info().Str("config-key", config.Data.Src).Str("msg", string(body)).Msg("msg body")
 					}
+
 				case http.MethodHead:
-					gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
+					ce.Log.Info().Str("config-key", config.Data.Src).Str("method", http.MethodHead).Msg("received a request")
 					respBody = ""
 				}
 				writer.WriteHeader(http.StatusOK)
@@ -255,11 +256,11 @@ func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, co
 					return
 				}
 
-				gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("parsed notification")
+				ce.Log.Info().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("parsed notification")
 				if filterEvent(notification, sg) && filterName(notification, sg) {
 					config.DataChan <- b
 				} else {
-					gatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("discarding notification since it did not pass all filters")
+					ce.Log.Warn().Str("config-key", config.Data.Src).Interface("notification", notification).Msg("discarding notification since it did not pass all filters")
 				}
 			}
 		})

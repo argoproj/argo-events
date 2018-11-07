@@ -195,13 +195,13 @@ mqtt-image: mqtt-linux
 
 # Custom gateways
 storage-grid:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storage-grid-gateway ./gateways/custom/storage-grid/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/custom/storagegrid/cmd
 
 storage-grid-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
 
 storage-grid-image: storage-grid-linux
-	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storage-grid/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storagegrid/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
 

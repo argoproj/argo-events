@@ -12,6 +12,9 @@ func (sgce *StorageGridConfigExecutor) Validate(config *gateways.ConfigContext) 
 	if err != nil {
 		return gateways.ErrConfigParseFailed
 	}
+	if sg == nil {
+		return gateways.ErrEmptyConfig
+	}
 	if sg.Port == "" {
 		return fmt.Errorf("%+v, must specify port", gateways.ErrInvalidConfig)
 	}

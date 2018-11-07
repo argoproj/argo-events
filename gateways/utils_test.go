@@ -27,3 +27,18 @@ func Test_transformPayload(t *testing.T) {
 	_, err := TransformerPayload(payload, src)
 	assert.Nil(t, err)
 }
+
+func TestCloseChannels(t *testing.T) {
+	ctx := GetConfigContext()
+	CloseChannels(ctx)
+	_, ok := <- ctx.DataChan
+	assert.Equal(t, false, ok)
+	_, ok = <-ctx.StopChan
+	assert.Equal(t, false, ok)
+	_, ok = <-ctx.DoneChan
+	assert.Equal(t, false, ok)
+	_, ok = <-ctx.StartChan
+	assert.Equal(t, false, ok)
+	_, ok = <-ctx.ErrChan
+	assert.Equal(t, false, ok)
+}
