@@ -115,4 +115,6 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 		}
 		config.DataChan <- payload
 	}
+
+	config.ShutdownChan <- struct{}{}
 }

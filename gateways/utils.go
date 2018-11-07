@@ -45,9 +45,28 @@ func Hasher(value string) string {
 
 // CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
 func CloseChannels(ctx *ConfigContext) {
-	close(ctx.StartChan)
-	close(ctx.DoneChan)
-	close(ctx.ErrChan)
-	close(ctx.StopChan)
-	close(ctx.DataChan)
+	_, ok := <-ctx.StartChan
+	if ok {
+		close(ctx.StartChan)
+	}
+	_, ok = <-ctx.DoneChan
+	if ok {
+		close(ctx.DoneChan)
+	}
+	_, ok = <-ctx.ErrChan
+	if ok {
+		close(ctx.ErrChan)
+	}
+	_, ok = <-ctx.StopChan
+	if ok {
+		close(ctx.StopChan)
+	}
+	_, ok = <-ctx.DataChan
+	if ok {
+		close(ctx.DataChan)
+	}
+	_, ok = <-ctx.ShutdownChan
+	if ok {
+		close(ctx.ShutdownChan)
+	}
 }

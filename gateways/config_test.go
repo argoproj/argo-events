@@ -74,3 +74,7 @@ func Test_diffConfigurations(t *testing.T) {
 	assert.NotNil(t, staleConfigKeys)
 	assert.NotEqual(t, staleConfigKeys, newConfigKeys)
 }
+
+func Test_manageConfigurations(t *testing.T) {
+
+}

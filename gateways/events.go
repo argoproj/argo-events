@@ -52,7 +52,7 @@ func (gc *GatewayConfig) GatewayCleanup(config *ConfigContext, err error) {
 	config.Active = false
 	// check if gateway configuration is in error condition.
 	if err != nil {
-		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error")
+		gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred while running configuration")
 		// create k8 event for error state
 		event = gc.GetK8Event(err.Error(), v1alpha1.NodePhaseError, config.Data)
 	} else {

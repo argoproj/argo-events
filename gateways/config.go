@@ -55,6 +55,8 @@ type ConfigContext struct {
 
 	ErrChan chan error
 
+	ShutdownChan chan struct{}
+
 	// Active tracks configuration state as running or stopped
 	Active bool
 	// Cancel is called to cancel the context used by client to communicate with gRPC server.
@@ -225,6 +227,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 			StartChan: make(chan struct{}),
 			ErrChan:   make(chan error),
 			DoneChan:  make(chan struct{}),
+			ShutdownChan: make(chan struct{}),
 		}
 	}
 	return configs, nil
@@ -278,69 +281,83 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext
 	return
 }
 
+// validateConfigs validates all configurations
+func (gc *GatewayConfig) validateConfigs(ce ConfigExecutor, configs map[string]*ConfigContext) error {
+	for _, config := range configs {
+		if err := ce.Validate(config); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// startConfigs starts new configurations added to gateway
+func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*ConfigContext) error {
+	for configKey, configValue := range configs {
+		// register the configuration
+		gc.registeredConfigs[configKey] = configValue
+		gc.Log.Info().Str("config-key", configValue.Data.Src).Msg("activating new configuration")
+		// create k8 event for new configuration
+		newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, configValue.Data)
+		_, err := common.CreateK8Event(newConfigEvent, gc.Clientset)
+		if err != nil {
+			gc.Log.Error().Str("config-name", configValue.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations.")
+			return err
+		}
+		gc.Log.Info().Str("config-key", configValue.Data.Src).Msg("created k8 event to mark init state for new configuration.")
+
+		go func() {
+			err := <-configValue.ErrChan
+			gc.GatewayCleanup(configValue, err)
+		}()
+
+		// start configuration
+		go ce.StartConfig(configValue)
+	}
+	return nil
+}
+
+// stopConfigs stops existing configurations
+func (gc *GatewayConfig) stopConfigs(ce ConfigExecutor, configs []string) {
+	for _, configKey := range configs {
+		staleConfig := gc.registeredConfigs[configKey]
+
+		go func() {
+			<-staleConfig.ShutdownChan
+			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
+			delete(gc.registeredConfigs, configKey)
+			// create a k8 event to remove the node configuration from gateway resource
+			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data)
+			_, err := common.CreateK8Event(removeConfigEvent, gc.Clientset)
+			if err != nil {
+				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
+			}
+			CloseChannels(staleConfig)
+		}()
+
+		go ce.StopConfig(staleConfig)
+	}
+}
+
 // manageConfigurations syncs registered configurations and updated gateway configmap
-func (gc *GatewayConfig) manageConfigurations(executor ConfigExecutor, cm *corev1.ConfigMap) error {
+func (gc *GatewayConfig) manageConfigurations(ce ConfigExecutor, cm *corev1.ConfigMap) error {
 	newConfigs, err := gc.createInternalConfigs(cm)
 	if err != nil {
 		return err
 	}
+
 	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
-	gc.Log.Debug().Interface("stale-config-keys", staleConfigKeys).Msg("stale configurations")
-	gc.Log.Debug().Interface("new-config-keys", newConfigKeys).Msg("new configurations")
+	gc.Log.Info().Interface("stale-config-keys", staleConfigKeys).Msg("stale configurations")
+	gc.Log.Info().Interface("new-config-keys", newConfigKeys).Msg("new configurations")
 
-	// run new configurations
-	for _, newConfigKey := range newConfigKeys {
-		newConfig := newConfigs[newConfigKey]
-		gc.registeredConfigs[newConfigKey] = newConfig
-		// check if this is reactivation of configuration
-		node := gc.getNodeByID(newConfig.Data.ID)
-		if node != nil {
-			// no need to initialize the node as this is a reactivation
-			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("reactivating configuration...")
-		} else {
-			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("activating configuration...")
-			// create k8 event for new configuration
-			newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, newConfig.Data)
-			_, err = common.CreateK8Event(newConfigEvent, gc.Clientset)
-			if err != nil {
-				gc.Log.Error().Str("config-name", newConfig.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations. skipping configuration...")
-				continue
-			}
-			gc.Log.Info().Str("config-key", newConfig.Data.Src).Msg("created k8 event for new configuration.")
-		}
+	// stop existing configurations
+	gc.stopConfigs(ce, staleConfigKeys)
 
-		// validate configuration
-		// TODO: If validation of a configuration fails, gateway state should be marked as  Error
-		err := executor.Validate(newConfig)
-		if err != nil {
-			return err
-		}
+	// validate new configurations
+	gc.validateConfigs(ce, newConfigs)
 
-		go func() {
-			err := <-newConfig.ErrChan
-			gc.GatewayCleanup(newConfig, err)
-		}()
+	// start new configurations
+	gc.startConfigs(ce, newConfigs)
 
-		// run configuration
-		go executor.StartConfig(newConfig)
-	}
-
-	// remove stale configurations
-	for _, staleConfigKey := range staleConfigKeys {
-		staleConfig := gc.registeredConfigs[staleConfigKey]
-		executor.StopConfig(staleConfig)
-		if err == nil {
-			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
-			delete(gc.registeredConfigs, staleConfigKey)
-			// create a k8 event to remove the node configuration from gateway resource
-			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data)
-			_, err = common.CreateK8Event(removeConfigEvent, gc.Clientset)
-			if err != nil {
-				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
-			}
-		} else {
-			gc.Log.Error().Str("config", staleConfig.Data.Src).Err(err).Msg("failed to deactivate the configuration.")
-		}
-	}
 	return nil
 }
