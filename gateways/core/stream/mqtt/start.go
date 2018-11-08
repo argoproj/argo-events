@@ -87,4 +87,5 @@ func (ce *MqttConfigExecutor) listenEvents(m *mqtt, config *gateways.ConfigConte
 	if token.Error() != nil {
 		ce.GatewayConfig.Log.Error().Err(token.Error()).Str("config-key", config.Data.Src).Msg("failed to unsubscribe client")
 	}
+	config.ShutdownChan <- struct{}{}
 }

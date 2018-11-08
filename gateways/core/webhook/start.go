@@ -46,13 +46,13 @@ func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-transformer")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
 
 		case <-config.StopChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
 			mutex.Lock()
 			activeHTTPMethods, ok := activeRoutes[w.Endpoint]
 			if ok {
@@ -65,13 +65,26 @@ func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 					ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred while shutting down server")
 				}
 			}
-			config.DoneChan <- struct{}{}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
 			mutex.Unlock()
+			config.DoneChan <- struct{}{}
+			return
 		}
 	}
 }
 
 func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.ConfigContext) {
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+
+	config.StartChan <- struct{}{}
+
+
 	// start a http server only if given configuration contains port information and no other
 	// configuration previously started the server
 	if w.Port != "" && !hasServerStarted.Load() {
@@ -86,22 +99,11 @@ func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.Confi
 				err = nil
 			}
 			if err != nil {
-				if config.Active == true {
-					ce.StopConfig(config)
-				}
+				config.ErrChan <- err
+				return
 			}
 		}()
 	}
-
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
-	config.StartChan <- struct{}{}
 
 	// configure endpoint and http method
 	if w.Endpoint != "" && w.Method != "" {
@@ -123,11 +125,8 @@ func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.Confi
 							ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to parse request body")
 							common.SendErrorResponse(writer)
 						} else {
-							ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("endpoint", w.Endpoint).Str("http-method", w.Method).Msg("dispatching event to gateway-processor")
 							common.SendSuccessResponse(writer)
-
 							ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Str("payload", string(body)).Msg("payload")
-
 							// dispatch event to gateway transformer
 							ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 								Src:     config.Data.Src,
@@ -153,4 +152,6 @@ func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.Confi
 	}
 
 	<-config.DoneChan
+	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
+	config.ShutdownChan <- struct{}{}
 }

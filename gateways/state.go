@@ -79,11 +79,13 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 	}()
 
 	// its better to get latest resource version in case user performed an gateway resource update using kubectl
-	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
+	gw, err := gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
 	if err != nil {
 		gc.Log.Error().Err(err).Str("event-name", event.Name).Msg("failed to retrieve the gateway")
 		return err
 	}
+
+	gc.gw = gw
 
 	// get time id of configuration
 	timeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigTimeID]
@@ -134,7 +136,6 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 				return nil
 			}
 		} else {
-			// should never come here
 			gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).
 				Str("node-time-id", node.TimeID).Str("event-time-id", timeID).Msg("time ids mismatch")
 			return nil

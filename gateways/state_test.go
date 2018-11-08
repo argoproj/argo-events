@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/argoproj/argo-events/common"
 )
 
 func Test_markGatewayNodePhase(t *testing.T) {
@@ -83,4 +84,167 @@ func Test_reapplyupdate(t *testing.T) {
 	gc.gw.Spec.Type = "change-type"
 	err = gc.reapplyUpdate()
 	assert.Nil(t, err)
+}
+
+func Test_updateGatewayResourceNoGateway(t *testing.T) {
+	gw, err := getGateway()
+	assert.Nil(t, err)
+	assert.NotNil(t, gw)
+	gc := newGatewayconfig(gw)
+	e := gc.GetK8Event("test", "test", &ConfigData{
+		Config: "testConfig",
+		Src: "testSrc",
+		ID: "1234",
+		TimeID: "4567",
+	})
+	e, err = common.CreateK8Event(e, gc.Clientset)
+	assert.Nil(t, err)
+
+	err = gc.updateGatewayResource(e)
+	assert.NotNil(t, err)
+
+	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.Equal(t, "true", e.ObjectMeta.Labels[common.LabelEventSeen])
+}
+
+func Test_updateGatewayResourceInit(t *testing.T) {
+	gw, err := getGateway()
+	assert.Nil(t, err)
+	assert.NotNil(t, gw)
+	gc := newGatewayconfig(gw)
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseInitialized, &ConfigData{
+		Config: "testConfig",
+		Src: "testSrc",
+		ID: "1234",
+		TimeID: "4567",
+	})
+	e, err = common.CreateK8Event(e, gc.Clientset)
+	assert.Nil(t, err)
+
+	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gw)
+	assert.Nil(t, err)
+
+	err = gc.updateGatewayResource(e)
+	assert.Nil(t, err)
+
+	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.NotNil(t, gc.gw.Status.Nodes)
+	for _, node := range gc.gw.Status.Nodes {
+		assert.Equal(t, string(v1alpha1.NodePhaseInitialized), string(node.Phase))
+	}
+
+	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.Equal(t, "true", e.ObjectMeta.Labels[common.LabelEventSeen])
+}
+
+func Test_updateGatewayResourceRunning(t *testing.T) {
+	gw, err := getGateway()
+	assert.Nil(t, err)
+	assert.NotNil(t, gw)
+	gc := newGatewayconfig(gw)
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseRunning, &ConfigData{
+		Config: "testConfig",
+		Src: "testSrc",
+		ID: "1234",
+		TimeID: "4567",
+	})
+	e, err = common.CreateK8Event(e, gc.Clientset)
+	assert.Nil(t, err)
+
+	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+		Name: "test-node",
+		Phase: v1alpha1.NodePhaseInitialized,
+		ID: "1234",
+		TimeID: "4567",
+	}
+
+	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
+	assert.Nil(t, err)
+
+	err = gc.updateGatewayResource(e)
+	assert.Nil(t, err)
+
+	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	for _, node := range gc.gw.Status.Nodes {
+		assert.Equal(t, string(v1alpha1.NodePhaseRunning), string(node.Phase))
+	}
+
+	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.Equal(t, "true", e.ObjectMeta.Labels[common.LabelEventSeen])
+}
+
+func Test_updateGatewayResourceRemove(t *testing.T) {
+	gw, err := getGateway()
+	assert.Nil(t, err)
+	assert.NotNil(t, gw)
+	gc := newGatewayconfig(gw)
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseRemove, &ConfigData{
+		Config: "testConfig",
+		Src: "testSrc",
+		ID: "1234",
+		TimeID: "4567",
+	})
+	e, err = common.CreateK8Event(e, gc.Clientset)
+	assert.Nil(t, err)
+
+	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+		Name: "test-node",
+		Phase: v1alpha1.NodePhaseRunning,
+		ID: "1234",
+		TimeID: "4567",
+	}
+
+	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
+	assert.Nil(t, err)
+
+	err = gc.updateGatewayResource(e)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(gc.gw.Status.Nodes))
+
+	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.Equal(t, "true", e.ObjectMeta.Labels[common.LabelEventSeen])
+}
+
+func Test_updateGatewayResourceCompleted(t *testing.T) {
+	gw, err := getGateway()
+	assert.Nil(t, err)
+	assert.NotNil(t, gw)
+	gc := newGatewayconfig(gw)
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &ConfigData{
+		Config: "testConfig",
+		Src: "testSrc",
+		ID: "1234",
+		TimeID: "4567",
+	})
+	e, err = common.CreateK8Event(e, gc.Clientset)
+	assert.Nil(t, err)
+
+	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+		Name: "test-node",
+		Phase: v1alpha1.NodePhaseRunning,
+		ID: "1234",
+		TimeID: "4567",
+	}
+
+	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
+	assert.Nil(t, err)
+
+	err = gc.updateGatewayResource(e)
+	assert.Nil(t, err)
+	for _, node := range gc.gw.Status.Nodes {
+		assert.Equal(t, string(v1alpha1.NodePhaseCompleted), string(node.Phase))
+	}
+
+	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
+	assert.Nil(t, err)
+	assert.Equal(t, "true", e.ObjectMeta.Labels[common.LabelEventSeen])
 }

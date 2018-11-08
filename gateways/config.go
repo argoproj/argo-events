@@ -292,35 +292,39 @@ func (gc *GatewayConfig) validateConfigs(ce ConfigExecutor, configs map[string]*
 }
 
 // startConfigs starts new configurations added to gateway
-func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*ConfigContext) error {
-	for configKey, configValue := range configs {
+func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*ConfigContext, keys []string) error {
+	for _, key := range keys {
+		config := configs[key]
 		// register the configuration
-		gc.registeredConfigs[configKey] = configValue
-		gc.Log.Info().Str("config-key", configValue.Data.Src).Msg("activating new configuration")
+		gc.registeredConfigs[key] = config
+		gc.Log.Info().Str("config-key", config.Data.Src).Msg("activating new configuration")
 		// create k8 event for new configuration
-		newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, configValue.Data)
+		newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, config.Data)
 		_, err := common.CreateK8Event(newConfigEvent, gc.Clientset)
 		if err != nil {
-			gc.Log.Error().Str("config-name", configValue.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations.")
+			gc.Log.Error().Str("config-name", config.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations.")
 			return err
 		}
-		gc.Log.Info().Str("config-key", configValue.Data.Src).Msg("created k8 event to mark init state for new configuration.")
+		gc.Log.Info().Str("config-key", config.Data.Src).Msg("created k8 event to mark init state for new configuration.")
 
 		go func() {
-			err := <-configValue.ErrChan
-			if err != nil && configValue.Active {
+			err := <-config.ErrChan
+			if err != nil && config.Active {
+				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred in active configuration")
 				go func() {
-					<-configValue.ShutdownChan
-					gc.GatewayCleanup(configValue, err)
+					<-config.ShutdownChan
+					gc.GatewayCleanup(config, err)
 				}()
-				ce.StopConfig(configValue)
-			} else {
-				gc.GatewayCleanup(configValue, err)
+				ce.StopConfig(config)
+			} else if err != nil {
+				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred before marking configuration as active")
+				gc.GatewayCleanup(config, err)
 			}
+			gc.Log.Debug().Str("config-key", config.Data.Src).Msg("configuration channels are closed")
 		}()
 
 		// start configuration
-		go ce.StartConfig(configValue)
+		go ce.StartConfig(config)
 	}
 	return nil
 }
@@ -364,7 +368,7 @@ func (gc *GatewayConfig) manageConfigurations(ce ConfigExecutor, cm *corev1.Conf
 	gc.validateConfigs(ce, newConfigs)
 
 	// start new configurations
-	gc.startConfigs(ce, newConfigs)
+	gc.startConfigs(ce, newConfigs, newConfigKeys)
 
 	return nil
 }

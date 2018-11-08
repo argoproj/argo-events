@@ -99,6 +99,7 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 		case err := <-watcher.Errors:
 			config.ErrChan <- err
 		case <-config.DoneChan:
+			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}

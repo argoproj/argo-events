@@ -20,6 +20,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: test-gateway
+  namespace: test-namespace
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "test-gateway"
@@ -260,7 +261,9 @@ func Test_startConfigs(t *testing.T) {
 	configs, err := gc.createInternalConfigs(configmap)
 	assert.Nil(t, err)
 
-	err = gc.startConfigs(&testConfigExecutor{}, configs)
+	_, newConfigKeys := gc.diffConfigurations(configs)
+
+	err = gc.startConfigs(&testConfigExecutor{}, configs, newConfigKeys)
 	assert.Nil(t, err)
 
 	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{
@@ -300,7 +303,9 @@ func Test_stopConfigs(t *testing.T) {
 	configs, err := gc.createInternalConfigs(configmap)
 	assert.Nil(t, err)
 
-	err = gc.startConfigs(&testConfigExecutor{}, configs)
+	_, newConfigKeys := gc.diffConfigurations(configs)
+
+	err = gc.startConfigs(&testConfigExecutor{}, configs, newConfigKeys)
 	assert.Nil(t, err)
 
 	time.Sleep(5 * time.Second)

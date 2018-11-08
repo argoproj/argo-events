@@ -124,6 +124,7 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.C
 			}
 			config.DataChan <- payload
 		case <-config.DoneChan:
+			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}

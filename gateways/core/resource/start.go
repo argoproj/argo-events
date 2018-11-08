@@ -96,10 +96,11 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 						config.DataChan <- b
 					}
 				case <-stopChan:
+					config.ShutdownChan <- struct{}{}
 					return
 				}
 			}
-		}(config.StopChan)
+		}(config.DoneChan)
 	}
 }
 

@@ -103,6 +103,7 @@ func (ce *AMQPConfigExecutor) listenEvents(a *amqp, config *gateways.ConfigConte
 			if err != nil {
 				ce.GatewayConfig.Log.Error().Err(err).Str("config-name", config.Data.Src).Msg("failed to close connection")
 			}
+			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}

@@ -69,5 +69,8 @@ func (ce *NatsConfigExecutor) listenEvents(n *nats, config *gateways.ConfigConte
 
 	<-config.DoneChan
 	err = sub.Unsubscribe()
-	ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to unsubscribe client")
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to unsubscribe client")
+	}
+	config.ShutdownChan <- struct{}{}
 }

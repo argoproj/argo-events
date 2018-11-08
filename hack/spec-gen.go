@@ -1,9 +1,6 @@
 package main
 
 import (
-	galphav1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	salphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-
 	"github.com/go-openapi/spec"
 
 	"encoding/json"
@@ -49,30 +46,6 @@ func swaggerSpecs(swaggerFilename string, defNames []string, config *common.Conf
 	if err != nil {
 		panic(err)
 	}
-}
-
-func sensorDefs() {
-	var defNames []string
-	for name, _ := range salphav1.GetOpenAPIDefinitions(func(name string) spec.Ref {
-		return spec.Ref{}
-	}) {
-		defNames = append(defNames, name)
-	}
-	config := createOpenAPIBuilderConfig()
-	config.GetDefinitions = salphav1.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "sensor.json"), defNames, config)
-}
-
-func gatewayDefs() {
-	var defNames []string
-	for name, _ := range galphav1.GetOpenAPIDefinitions(func(name string) spec.Ref {
-		return spec.Ref{}
-	}) {
-		defNames = append(defNames, name)
-	}
-	config := createOpenAPIBuilderConfig()
-	config.GetDefinitions = galphav1.GetOpenAPIDefinitions
-	swaggerSpecs(fmt.Sprintf("%s/%s", specDir, "gateway.json"), defNames, config)
 }
 
 func webhookDefs() {
@@ -196,8 +169,6 @@ func storageGridDefs() {
 }
 
 func main() {
-	sensorDefs()
-	gatewayDefs()
 	webhookDefs()
 	artifactDefs()
 	calendarDefs()

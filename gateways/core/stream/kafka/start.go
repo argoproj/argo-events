@@ -104,6 +104,7 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 			if err != nil {
 				ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to close consumer")
 			}
+			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}
