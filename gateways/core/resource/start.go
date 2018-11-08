@@ -34,7 +34,6 @@ func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			config.Active = true
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
@@ -96,6 +95,7 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 						config.DataChan <- b
 					}
 				case <-stopChan:
+					ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
 					config.ShutdownChan <- struct{}{}
 					return
 				}

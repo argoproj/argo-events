@@ -212,7 +212,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 	configs := make(map[string]*ConfigContext)
 	for configKey, configValue := range cm.Data {
 		hashKey := Hasher(configKey + configValue)
-		gc.Log.Info().Str("config-key", configKey).Str("config-data", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
+		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
 		currentTimeStr := time.Now().String()
 		timeID := Hasher(currentTimeStr)
 		configs[hashKey] = &ConfigContext{
@@ -229,6 +229,7 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 			DoneChan:  make(chan struct{}),
 			ShutdownChan: make(chan struct{}),
 		}
+		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configs[hashKey].Data).Msg("configuration")
 	}
 	return configs, nil
 }
@@ -249,8 +250,8 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext
 		updatedConfigKeys = append(updatedConfigKeys, updatedConfigKey)
 	}
 
-	gc.Log.Debug().Interface("current-config-keys", currentConfigKeys).Msg("hashes")
-	gc.Log.Debug().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
+	gc.Log.Info().Interface("current-config-keys", currentConfigKeys).Msg("hashes")
+	gc.Log.Info().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
 
 	swapped := false
 	// iterates over current configurations and updated configurations
@@ -336,7 +337,7 @@ func (gc *GatewayConfig) stopConfigs(ce ConfigExecutor, configs []string) {
 
 		go func() {
 			<-staleConfig.ShutdownChan
-			gc.Log.Info().Str("config", staleConfig.Data.Src).Msg("configuration deactivated.")
+			gc.Log.Info().Str("config", staleConfig.Data.Src).Interface("config", staleConfig.Data).Msg("configuration deactivated.")
 			delete(gc.registeredConfigs, configKey)
 			// create a k8 event to remove the node configuration from gateway resource
 			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data)

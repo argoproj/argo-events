@@ -32,7 +32,6 @@ func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			config.Active = true
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
@@ -124,6 +123,7 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.C
 			}
 			config.DataChan <- payload
 		case <-config.DoneChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
 			config.ShutdownChan <- struct{}{}
 			return
 		}

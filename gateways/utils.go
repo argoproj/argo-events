@@ -43,13 +43,15 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
+func Recover() {
+	if r := recover(); r != nil {
+		fmt.Println("Recovered", r)
+	}
+}
+
 // CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
 func CloseChannels(ctx *ConfigContext) {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("Recovered in CloseChannels", r)
-		}
-	}()
+	defer Recover()
 	close(ctx.StartChan)
 	close(ctx.DoneChan)
 	close(ctx.ErrChan)

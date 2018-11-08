@@ -13,16 +13,16 @@ import (
 
 // markGatewayNodePhase marks the node with a phase, returns the node
 func (gc *GatewayConfig) markGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
-	gc.Log.Debug().Str("node-id", nodeID).Msg("marking node phase...")
-	gc.Log.Info().Interface("nodes", gc.gw.Status.Nodes).Msg("nodes")
+	gc.Log.Debug().Str("node-id", nodeID).Str("phase", string(phase)).Msg("marking node phase")
+	gc.Log.Info().Interface("active-nodes", gc.gw.Status.Nodes).Msg("nodes")
 	node := gc.getNodeByID(nodeID)
 	if node == nil {
 		gc.Log.Warn().Str("node-id", nodeID).Msg("node is not initialized")
 		return nil
 	}
 	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
-		gc.Log.Info().Str("node-id", nodeID).Str("phase", string(node.Phase)).Msg("phase marked")
 		node.Phase = phase
+		gc.Log.Info().Str("node-id", nodeID).Str("old-phase", string(node.Phase)).Str("new-phase", string(phase)).Msg("phase marked")
 	}
 	node.Message = message
 	gc.gw.Status.Nodes[node.ID] = *node
@@ -43,7 +43,7 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, timeID s
 	if gc.gw.Status.Nodes == nil {
 		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
-	gc.Log.Info().Str("node-id", nodeID).Msg("node")
+	gc.Log.Info().Str("node-id", nodeID).Str("node-name", nodeName).Str("time-id", timeID).Msg("node")
 	oldNode, ok := gc.gw.Status.Nodes[nodeID]
 	if ok {
 		gc.Log.Info().Str("node-name", nodeName).Msg("node already initialized")
@@ -69,7 +69,7 @@ func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
 	var err error
 
 	defer func() {
-		gc.Log.Info().Str("event-name", event.Name).Msg("marking gateway k8 event as seen")
+		gc.Log.Info().Str("event-name", event.Name).Str("action", event.Action).Msg("marking gateway k8 event as seen")
 		// mark event as seen
 		event.ObjectMeta.Labels[common.LabelEventSeen] = "true"
 		_, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Update(event)

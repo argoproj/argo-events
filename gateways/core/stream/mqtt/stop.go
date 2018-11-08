@@ -19,9 +19,9 @@ package mqtt
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig stops a configuration
-func (mce *MqttConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (mce *MqttConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	if config.Active == true {
-		config.StopCh <- struct{}{}
+		config.Active  = false
+		config.StopChan <- struct{}{}
 	}
-	return nil
 }

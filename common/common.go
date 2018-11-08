@@ -68,7 +68,7 @@ const (
 // SENSOR CONSTANTS
 const (
 	// Sensor image is the image used to deploy sensor.
-	SensorImage = "argoproj/sensor"
+	SensorImage = "metalgearsolid/sensor"
 
 	// Sensor service port
 	SensorServicePort = "9300"
@@ -171,10 +171,10 @@ const (
 	GatewayProcessorHTTPServerEventEndpoint = "/event"
 
 	// GatewayProcessorGRPCClientImage is gRPC gateway processor client image
-	GatewayProcessorGRPCClientImage = "argoproj/gateway-processor-grpc-client"
+	GatewayProcessorGRPCClientImage = "metalgearsolid/gateway-processor-grpc-client"
 
 	// GatewayProcessorHTTPClientImage is HTTP gateway processor client image
-	GatewayProcessorHTTPClientImage = "argoproj/gateway-processor-http-client"
+	GatewayProcessorHTTPClientImage = "metalgearsolid/gateway-processor-http-client"
 )
 
 // Gateway Transformer constants
@@ -183,13 +183,13 @@ const (
 	EnvVarGatewayTransformerConfigMap = "GATEWAY_TRANSFORMER_CONFIG_MAP"
 
 	// GatewayHTTPEventTransformerImage is image for gateway http event transformer
-	GatewayHTTPEventTransformerImage = "argoproj/gateway-http-transformer"
+	GatewayHTTPEventTransformerImage = "metalgearsolid/gateway-http-transformer"
 
 	// GatewayNATSEventTransformerImage is image for gateway nats event transformer
-	GatewayNATSEventTransformerImage = "argoproj/gateway-nats-transformer"
+	GatewayNATSEventTransformerImage = "metalgearsolid/gateway-nats-transformer"
 
 	// GatewayKafkaEventTransformerImage is image for gateway kafka event transformer
-	GatewayKafkaEventTransformerImage = "argoproj/gateway-kafka-transformer"
+	GatewayKafkaEventTransformerImage = "metalgearsolid/gateway-kafka-transformer"
 
 	//  EnvVarGatewayTransformerPort is the env var for http server port
 	EnvVarGatewayTransformerPort = "TRANSFORMER_PORT"

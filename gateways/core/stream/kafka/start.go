@@ -34,7 +34,6 @@ func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
@@ -104,6 +103,7 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 			if err != nil {
 				ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to close consumer")
 			}
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
 			config.ShutdownChan <- struct{}{}
 			return
 		}

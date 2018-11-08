@@ -21,14 +21,41 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	sv1alphav1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/store"
+	"fmt"
+	"k8s.io/client-go/kubernetes"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/minio/minio-go"
 )
+
+// getSecrets retrieves the secret value from the secret in namespace with name and key
+func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
+	secretsIf := client.CoreV1().Secrets(namespace)
+	var secret *corev1.Secret
+	var err error
+	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		secret, err = secretsIf.Get(name, metav1.GetOptions{})
+		if err != nil {
+			if !common.IsRetryableKubeAPIError(err) {
+				return false, err
+			}
+			return false, nil
+		}
+		return true, nil
+	})
+	if err != nil {
+		return "", err
+	}
+	val, ok := secret.Data[key]
+	if !ok {
+		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
+	}
+	return string(val), nil
+}
 
 // StartConfig runs a configuration
 func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	defer gateways.CloseChannels(config)
-
 	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("operating on configuration")
 	artifact, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -45,7 +72,6 @@ func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			config.Active = true
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
@@ -62,33 +88,25 @@ func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 // listenEvents listens to minio bucket notifications
 func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateways.ConfigContext) {
-	defer gateways.CloseChannels(config)
-
-	sartifact := &sv1alphav1.S3Artifact{
-		Event: artifact.S3EventConfig.Event,
-		S3Bucket: &sv1alphav1.S3Bucket{
-			Region:    artifact.S3EventConfig.Region,
-			Insecure:  artifact.Insecure,
-			Bucket:    artifact.S3EventConfig.Bucket,
-			Endpoint:  artifact.S3EventConfig.Endpoint,
-			SecretKey: artifact.SecretKey,
-			AccessKey: artifact.AccessKey,
-		},
-	}
-
-	creds, err := store.GetCredentials(ce.GatewayConfig.Clientset, ce.GatewayConfig.Namespace, &sv1alphav1.ArtifactLocation{
-		S3: sartifact,
-	})
+	// retrieve access key id and secret access key
+	accessKey, err := getSecrets(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
 		config.ErrChan <- err
 		return
 	}
-	minioClient, err := store.NewMinioClient(sartifact, *creds)
+	secretKey, err := getSecrets(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
 		config.ErrChan <- err
 		return
 	}
 
+	ce.Log.Debug().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secrets")
+
+	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
+	if err != nil {
+		config.ErrChan <- err
+		return
+	}
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
@@ -100,21 +118,29 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 	// at this point configuration is successfully running
 	config.StartChan <- struct{}{}
 
-	// Listen for bucket notifications
-	for notificationInfo := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
-		string(artifact.S3EventConfig.Event),
-	}, config.DoneChan) {
-		if notificationInfo.Err != nil {
-			config.ErrChan <- notificationInfo.Err
-			return
-		}
-		payload, err := json.Marshal(notificationInfo.Records[0])
-		if err != nil {
-			config.ErrChan <- err
-			return
-		}
-		config.DataChan <- payload
-	}
+	ce.Log.Info().Str("config-key", config.Data.Src).Interface("config", artifact).Msg("artifact")
 
-	config.ShutdownChan <- struct{}{}
+	for {
+		select {
+		case notification := <- minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
+			string(artifact.S3EventConfig.Event),
+		}, make(chan struct{})):
+			if notification.Err != nil {
+				ce.Log.Error().Err(notification.Err).Str("config-key", config.Data.Src).Str("error", notification.Err.Error()).Msg("notification error")
+				config.ErrChan <- notification.Err
+				return
+			}
+			payload, err := json.Marshal(notification.Records[0])
+			if err != nil {
+				ce.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("marshal error")
+				config.ErrChan <- err
+				return
+			}
+			config.DataChan <- payload
+		case <-config.DoneChan:
+			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
+			config.ShutdownChan <- struct{}{}
+			return
+		}
+	}
 }

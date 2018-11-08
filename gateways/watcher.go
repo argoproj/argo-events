@@ -80,7 +80,7 @@ func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
 		event.ObjectMeta.Labels[common.LabelEventSeen] == "" &&
 		event.ReportingInstance == gc.controllerInstanceID &&
 		event.ReportingController == gc.gw.Name {
-		gc.Log.Debug().Str("event-name", event.ObjectMeta.Name).Msg("processing gateway k8 event")
+		gc.Log.Info().Str("event-name", event.ObjectMeta.Name).Msg("processing gateway k8 event")
 		return true
 	}
 	return false
