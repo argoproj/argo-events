@@ -14,24 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package file
+package calendar
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
-	"testing"
+	gp "github.com/argoproj/argo-events/gateways/grpc/proto"
 )
 
-func TestCalendarConfigExecutor_StopConfig(t *testing.T) {
-	ce := &FileWatcherConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		StopChan: make(chan struct{}),
+// Validate validates gateway configuration
+func (ce *CalendarConfigExecutor) Validate(config *gp.GatewayConfig) error {
+	cal, err := parseConfig(config.Config)
+	if err != nil {
+		return gateways.ErrConfigParseFailed
 	}
-	ctx.Active = true
-	go func() {
-		msg := <-ctx.StopChan
-		assert.Equal(t, msg, struct{}{})
-	}()
-	ce.StopConfig(ctx)
-	assert.Equal(t, false, ctx.Active)
+	if cal == nil {
+		return gateways.ErrEmptyConfig
+	}
+	if cal.Schedule == "" && cal.Interval == "" {
+		return fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
+	}
+	_, err = resolveSchedule(cal)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,22 +1,22 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: file-watcher-gateway
+  name: file-gateway
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "file-watcher-gateway"
+    gateway-name: "file-gateway"
 spec:
   deploySpec:
     containers:
-    - name: "file-watcher-events"
-      image: "argoproj/file-watcher-gateway"
+    - name: "file-events"
+      image: "metalgearsolid/file-gateway"
       imagePullPolicy: "Always"
-      command: ["/bin/file-watcher-gateway"]
+      command: ["/bin/file-gateway"]
     serviceAccountName: "argo-events-sa"
-  configMap: "file-watcher-gateway-configmap"
+  configMap: "file-gateway-configmap"
   version: "1.0"
-  type: "file-watcher"
+  type: "file"
   dispatchMechanism: "HTTP"
   watchers:
     sensors:
-    - name: "file-watcher-sensor"
+    - name: "file-sensor"

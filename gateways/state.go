@@ -21,8 +21,8 @@ func (gc *GatewayConfig) markGatewayNodePhase(nodeID string, phase v1alpha1.Node
 		return nil
 	}
 	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
-		node.Phase = phase
 		gc.Log.Info().Str("node-id", nodeID).Str("old-phase", string(node.Phase)).Str("new-phase", string(phase)).Msg("phase marked")
+		node.Phase = phase
 	}
 	node.Message = message
 	gc.gw.Status.Nodes[node.ID] = *node

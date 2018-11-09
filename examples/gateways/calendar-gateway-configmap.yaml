@@ -5,5 +5,3 @@ metadata:
 data:
   calendar.barConfig: |-
     interval: 55s
-  calendar.fooConfig: |-
-    schedule: 30 * * * *

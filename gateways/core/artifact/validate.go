@@ -29,7 +29,7 @@ func (s3ce *S3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
 		return gateways.ErrConfigParseFailed
 	}
 	if artifact == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return gateways.ErrEmptyConfig
 	}
 	if artifact.S3EventConfig == nil {
 		return fmt.Errorf("%+v, s3 bucket configuration can't be empty", gateways.ErrInvalidConfig)

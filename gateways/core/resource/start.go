@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package resource
 
 import (
@@ -17,8 +33,6 @@ import (
 
 // StartConfig runs a configuration
 func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	defer gateways.CloseChannels(config)
-
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	res, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -26,6 +40,8 @@ func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 		return
 	}
 	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
+
+	go ce.listenEvents(res, config)
 
 	for {
 		select {
@@ -70,6 +86,9 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 
 	config.StartChan <- struct{}{}
 
+	// global quit channel
+	quitChan := make(chan struct{})
+
 	// start up listeners
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
@@ -78,10 +97,17 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 			config.ErrChan <- err
 			return
 		}
-		go func(stopChan chan struct{}) {
+
+		localQuitChan := quitChan
+
+		go func() {
 			for {
 				select {
 				case item := <-w.ResultChan():
+					if item.Object == nil {
+						ce.Log.Warn().Str("config-key", config.Data.Src).Msg("object to watch is nil")
+						return
+					}
 					itemObj := item.Object.(*unstructured.Unstructured)
 					b, err := itemObj.MarshalJSON()
 					if err != nil {
@@ -94,14 +120,19 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 					if ce.passFilters(itemObj, res.Filter) {
 						config.DataChan <- b
 					}
-				case <-stopChan:
-					ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-					config.ShutdownChan <- struct{}{}
+
+				case <-localQuitChan:
 					return
 				}
 			}
-		}(config.DoneChan)
+		}()
 	}
+
+	 <-config.DoneChan
+	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
+	close(quitChan)
+	config.ShutdownChan <- struct{}{}
+	return
 }
 
 func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
@@ -151,6 +182,10 @@ func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {
 
 // helper method to return a flag indicating if the object passed the client side filters
 func (ce *ResourceConfigExecutor) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+	// no filters are applied.
+	if filter == nil {
+		return true
+	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
 		ce.GatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")

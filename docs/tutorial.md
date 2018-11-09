@@ -711,7 +711,7 @@ Resource gateway can monitor any K8 resource and any CRD.
             component: nats
         spec:
           serviceName: nats
-          replicas: 3
+          replicas: 1
           template:
             metadata:
               labels:

@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: file-watcher-sensor
+  name: file-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   serviceAccountName: argo-events-sa
   repeat: true
   signals:
-    - name: file-watcher-gateway/fileWatcher.defaultConfig
+    - name: file-gateway/file.defaultConfig
   triggers:
-    - name: file-watcher-workflow-trigger
+    - name: file-workflow-trigger
       resource:
         namespace: argo-events
         group: argoproj.io

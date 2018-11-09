@@ -100,8 +100,6 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 		return
 	}
 
-	ce.Log.Debug().Str("accesskey", accessKey).Str("secretaccess", secretKey).Msg("minio secrets")
-
 	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
 	if err != nil {
 		config.ErrChan <- err
@@ -126,17 +124,16 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 			string(artifact.S3EventConfig.Event),
 		}, make(chan struct{})):
 			if notification.Err != nil {
-				ce.Log.Error().Err(notification.Err).Str("config-key", config.Data.Src).Str("error", notification.Err.Error()).Msg("notification error")
 				config.ErrChan <- notification.Err
 				return
 			}
 			payload, err := json.Marshal(notification.Records[0])
 			if err != nil {
-				ce.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("marshal error")
 				config.ErrChan <- err
 				return
 			}
 			config.DataChan <- payload
+
 		case <-config.DoneChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
 			config.ShutdownChan <- struct{}{}

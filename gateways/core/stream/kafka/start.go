@@ -27,6 +27,8 @@ func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *k).Msg("kafka configuration")
 
+	go ce.listenEvents(k, config)
+
 	for {
 		select {
 		case <-config.StartChan:

@@ -28,7 +28,7 @@ type NatsConfigExecutor struct {
 
 // Nats contains configuration to connect to NATS cluster
 // +k8s:openapi-gen=true
-type nats struct {
+type natsConfig struct {
 	// URL to connect to nats cluster
 	URL string `json:"url"`
 
@@ -36,8 +36,8 @@ type nats struct {
 	Subject string `json:"subject"`
 }
 
-func parseConfig(config string) (*nats, error) {
-	var n *nats
+func parseConfig(config string) (*natsConfig, error) {
+	var n *natsConfig
 	err := yaml.Unmarshal([]byte(config), &n)
 	if err != nil {
 		return nil, err
