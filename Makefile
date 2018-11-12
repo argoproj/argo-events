@@ -204,6 +204,16 @@ storage-grid-image: storage-grid-linux
 	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storagegrid/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
+gitlab:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gitlab-gateway ./gateways/custom/gitlab/cmd
+
+gitlab-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gitlab
+
+gitlab-image: gitlab-linux
+	 docker build -t $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) -f ./gateways/custom/gitlab/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) ; fi
+
 
 # gRPC gateway binary
 grpc-gateway-images:  gateway-processor-grpc-client-image calendar-grpc-image
