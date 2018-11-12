@@ -1,7 +1,7 @@
 ## Sensor Guide
 
 Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
-[Sensor examples](https://github.com/argoproj/argo-events/tree/eventing/examples/sensors)
+[Sensor examples](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
 
 
 ### Dependencies

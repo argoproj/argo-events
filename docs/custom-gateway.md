@@ -77,7 +77,7 @@ type GatewayConfig struct {
 gatewayConfig.DispatchEvent(event []byte, src string) error
 ```
 
-For detailed implementation, check out [Core Gateways](https://github.com/argoproj/argo-events/tree/eventing/gateways/core)
+For detailed implementation, check out [Core Gateways](https://github.com/argoproj/argo-events/tree/master/gateways/core)
 
 ## gRPC gateway
 A gRPC gateway has 3 components, 
@@ -101,7 +101,7 @@ RunGateway(GatewayConfig) returns (stream Event)
 The gateway processor client opens a new connection for each gateway configuration and starts listening to
 events on a stream.
 
-For detailed implementation, check out [Calendar gRPC gateway](https://github.com/argoproj/argo-events/tree/eventing/gateways/grpc/calendar)
+For detailed implementation, check out [Calendar gRPC gateway](https://github.com/argoproj/argo-events/tree/master/gateways/grpc/calendar)
 
 * To run gRPC gateway, you need to provide `rpcPort` in gateway spec.
 
@@ -136,7 +136,7 @@ List of environment variables available to user code
 |  GATEWAY_HTTP_CONFIG_EVENT             | REST endpoint to send events to |
 
 
-For detailed implementation, check out [Calendar HTTP gateway](https://github.com/argoproj/argo-events/tree/eventing/gateways/rest/calendar)
+For detailed implementation, check out [Calendar HTTP gateway](https://github.com/argoproj/argo-events/tree/master/gateways/rest/calendar)
 
 ## Framework independent
 The fourth option is you provide gateway implementation from scratch: watch the configuration
@@ -154,4 +154,4 @@ List of environment variables available to user code
 |  GATEWAY_NAME             | Gateway name  |
 
 ### Gateway Examples
-* Example gateway definitions are available at [here](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+* Example gateway definitions are available at [here](https://github.com/argoproj/argo-events/tree/master/examples/gateways)
