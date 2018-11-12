@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "resource-events"
-      image: "metalgearsolid/resource-gateway"
+      image: "argoproj/resource-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/resource-gateway"]
     serviceAccountName: "argo-events-sa"

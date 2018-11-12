@@ -2,16 +2,16 @@ package gateways
 
 import (
 	"fmt"
-	"testing"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwFake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/ghodss/yaml"
 	zlog "github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"os"
+	"testing"
 	"time"
 )
 
@@ -168,7 +168,6 @@ func newGatewayconfig(gw *v1alpha1.Gateway) *GatewayConfig {
 	}
 }
 
-
 func Test_createInternalConfigs(t *testing.T) {
 	gw, err := getGateway()
 	assert.Nil(t, err)
@@ -222,11 +221,11 @@ func Test_diffConfigurations(t *testing.T) {
 			Config: `|-
     msg: new message`,
 		},
-		Active: false,
-		StopChan: make(chan struct{}),
-		DoneChan: make(chan struct{}),
-		ErrChan: make(chan error),
-		DataChan: make(chan []byte),
+		Active:    false,
+		StopChan:  make(chan struct{}),
+		DoneChan:  make(chan struct{}),
+		ErrChan:   make(chan error),
+		DataChan:  make(chan []byte),
 		StartChan: make(chan struct{}),
 	}
 
@@ -238,7 +237,7 @@ func Test_diffConfigurations(t *testing.T) {
 	assert.NotEqual(t, staleConfigKeys, newConfigKeys)
 }
 
-func Test_validateConfigs(t *testing.T)  {
+func Test_validateConfigs(t *testing.T) {
 	gw, err := getGateway()
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
@@ -266,8 +265,7 @@ func Test_startConfigs(t *testing.T) {
 	err = gc.startConfigs(&testConfigExecutor{}, configs, newConfigKeys)
 	assert.Nil(t, err)
 
-	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{
-	})
+	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, el.Items)
 	assert.Equal(t, string(v1alpha1.NodePhaseInitialized), el.Items[0].Action)
@@ -278,7 +276,7 @@ func Test_startConfigs(t *testing.T) {
 	for _, value := range configs {
 		fmt.Println("sending error")
 		value.ErrChan <- fmt.Errorf("error")
-		_, ok := <- value.DataChan
+		_, ok := <-value.DataChan
 		assert.Equal(t, false, ok)
 		_, ok = <-value.StopChan
 		assert.Equal(t, false, ok)

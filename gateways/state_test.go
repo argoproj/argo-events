@@ -1,11 +1,11 @@
 package gateways
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 )
 
 func Test_markGatewayNodePhase(t *testing.T) {
@@ -19,9 +19,9 @@ func Test_markGatewayNodePhase(t *testing.T) {
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 
 	gc.gw.Status.Nodes["1234"] = v1alpha1.NodeStatus{
-		ID: "1234",
+		ID:     "1234",
 		TimeID: "5678",
-		Name: "test",
+		Name:   "test",
 	}
 
 	status = gc.markGatewayNodePhase("1234", v1alpha1.NodePhaseInitialized, "init")
@@ -39,9 +39,9 @@ func Test_getNodeByID(t *testing.T) {
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 
 	gc.gw.Status.Nodes["test"] = v1alpha1.NodeStatus{
-		ID: "1234",
+		ID:     "1234",
 		TimeID: "5678",
-		Name: "test",
+		Name:   "test",
 	}
 	status = gc.getNodeByID("test")
 	assert.NotNil(t, status)
@@ -93,8 +93,8 @@ func Test_updateGatewayResourceNoGateway(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	e := gc.GetK8Event("test", "test", &ConfigData{
 		Config: "testConfig",
-		Src: "testSrc",
-		ID: "1234",
+		Src:    "testSrc",
+		ID:     "1234",
 		TimeID: "4567",
 	})
 	e, err = common.CreateK8Event(e, gc.Clientset)
@@ -115,8 +115,8 @@ func Test_updateGatewayResourceInit(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	e := gc.GetK8Event("test", v1alpha1.NodePhaseInitialized, &ConfigData{
 		Config: "testConfig",
-		Src: "testSrc",
-		ID: "1234",
+		Src:    "testSrc",
+		ID:     "1234",
 		TimeID: "4567",
 	})
 	e, err = common.CreateK8Event(e, gc.Clientset)
@@ -147,8 +147,8 @@ func Test_updateGatewayResourceRunning(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	e := gc.GetK8Event("test", v1alpha1.NodePhaseRunning, &ConfigData{
 		Config: "testConfig",
-		Src: "testSrc",
-		ID: "1234",
+		Src:    "testSrc",
+		ID:     "1234",
 		TimeID: "4567",
 	})
 	e, err = common.CreateK8Event(e, gc.Clientset)
@@ -156,9 +156,9 @@ func Test_updateGatewayResourceRunning(t *testing.T) {
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
-		Name: "test-node",
-		Phase: v1alpha1.NodePhaseInitialized,
-		ID: "1234",
+		Name:   "test-node",
+		Phase:  v1alpha1.NodePhaseInitialized,
+		ID:     "1234",
 		TimeID: "4567",
 	}
 
@@ -186,8 +186,8 @@ func Test_updateGatewayResourceRemove(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	e := gc.GetK8Event("test", v1alpha1.NodePhaseRemove, &ConfigData{
 		Config: "testConfig",
-		Src: "testSrc",
-		ID: "1234",
+		Src:    "testSrc",
+		ID:     "1234",
 		TimeID: "4567",
 	})
 	e, err = common.CreateK8Event(e, gc.Clientset)
@@ -195,9 +195,9 @@ func Test_updateGatewayResourceRemove(t *testing.T) {
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
-		Name: "test-node",
-		Phase: v1alpha1.NodePhaseRunning,
-		ID: "1234",
+		Name:   "test-node",
+		Phase:  v1alpha1.NodePhaseRunning,
+		ID:     "1234",
 		TimeID: "4567",
 	}
 
@@ -220,8 +220,8 @@ func Test_updateGatewayResourceCompleted(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &ConfigData{
 		Config: "testConfig",
-		Src: "testSrc",
-		ID: "1234",
+		Src:    "testSrc",
+		ID:     "1234",
 		TimeID: "4567",
 	})
 	e, err = common.CreateK8Event(e, gc.Clientset)
@@ -229,9 +229,9 @@ func Test_updateGatewayResourceCompleted(t *testing.T) {
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
-		Name: "test-node",
-		Phase: v1alpha1.NodePhaseRunning,
-		ID: "1234",
+		Name:   "test-node",
+		Phase:  v1alpha1.NodePhaseRunning,
+		ID:     "1234",
 		TimeID: "4567",
 	}
 

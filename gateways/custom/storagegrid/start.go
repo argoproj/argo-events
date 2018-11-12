@@ -1,18 +1,18 @@
 package storagegrid
 
 import (
-	"strings"
-	"sync"
-	"net/http"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/satori/go.uuid"
-	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"io/ioutil"
-	"net/url"
-	"github.com/joncalhoun/qson"
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/joncalhoun/qson"
+	"github.com/satori/go.uuid"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"strings"
+	"sync"
 )
 
 var (
@@ -26,7 +26,7 @@ var (
 	// activeRoutes keep track of active routes for a http server
 	activeRoutes = make(map[string]map[string]struct{})
 
-	respBody      = `
+	respBody = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
     <PublishResult> 
         <MessageId>` + generateUUID().String() + `</MessageId> 
@@ -46,7 +46,6 @@ type server struct {
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
-
 
 // generateUUID returns a new uuid
 func generateUUID() uuid.UUID {

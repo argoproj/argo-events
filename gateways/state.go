@@ -1,14 +1,14 @@
 package gateways
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"time"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"github.com/argoproj/argo-events/common"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"time"
 )
 
 // markGatewayNodePhase marks the node with a phase, returns the node

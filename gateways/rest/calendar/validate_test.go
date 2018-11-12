@@ -31,4 +31,3 @@ interval: 55s`
 	err = ce.Validate(ctx)
 	assert.NotNil(t, err)
 }
-

@@ -1,8 +1,8 @@
 package calendar
 
 import (
-	"github.com/ghodss/yaml"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/ghodss/yaml"
 )
 
 // CalendarConfigExecutor implements ConfigExecutor interface
@@ -28,7 +28,6 @@ type calSchedule struct {
 	Recurrence []string
 }
 
-
 func parseConfig(config string) (*calSchedule, error) {
 	var c *calSchedule
 	err := yaml.Unmarshal([]byte(config), &c)
@@ -37,4 +36,3 @@ func parseConfig(config string) (*calSchedule, error) {
 	}
 	return c, err
 }
-

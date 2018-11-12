@@ -19,9 +19,9 @@ package calendar
 import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	gp "github.com/argoproj/argo-events/gateways/grpc/proto"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	gp "github.com/argoproj/argo-events/gateways/grpc/proto"
 	"time"
 )
 

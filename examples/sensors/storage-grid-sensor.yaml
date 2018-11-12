@@ -35,4 +35,4 @@ spec:
                     container:
                       args:
                         - "hello world"
-                      image: "metalgearsolid/args-printer:latest"
+                      image: "argoproj/args-printer:latest"

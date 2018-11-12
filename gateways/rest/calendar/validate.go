@@ -23,4 +23,3 @@ func (ce *CalendarConfigExecutor) Validate(config *gateways.ConfigContext) error
 	}
 	return nil
 }
-

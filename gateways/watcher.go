@@ -1,15 +1,15 @@
 package gateways
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
-	"context"
 )
 
 // WatchGatewayEvents watches events generated in namespace

@@ -12,6 +12,6 @@ const (
 
 var (
 	ErrConfigParseFailed = errors.New("failed to parse configuration")
-	ErrEmptyConfig = errors.New("configuration must be non empty")
+	ErrEmptyConfig       = errors.New("configuration must be non empty")
 	ErrInvalidConfig     = errors.New("invalid configuration")
 )

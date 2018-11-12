@@ -1,18 +1,17 @@
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"time"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"fmt"
-	"net/http"
 	"bytes"
+	"encoding/json"
+	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"encoding/json"
+	"net/http"
+	"time"
 )
-
 
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
@@ -35,7 +34,6 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 		return nil, fmt.Errorf("calendar signal must contain either a schedule or interval")
 	}
 }
-
 
 // StartGateway runs given configuration and sends event back to gateway processor client
 func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {

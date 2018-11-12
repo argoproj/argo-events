@@ -2,15 +2,15 @@ package gateways
 
 import (
 	"context"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	zlog "github.com/rs/zerolog"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"os"
-	"github.com/argoproj/argo-events/common"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	corev1 "k8s.io/api/core/v1"
 	"time"
 )
 
@@ -222,11 +222,11 @@ func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string
 				Src:    configKey,
 				Config: configValue,
 			},
-			StopChan:  make(chan struct{}),
-			DataChan:  make(chan []byte),
-			StartChan: make(chan struct{}),
-			ErrChan:   make(chan error),
-			DoneChan:  make(chan struct{}),
+			StopChan:     make(chan struct{}),
+			DataChan:     make(chan []byte),
+			StartChan:    make(chan struct{}),
+			ErrChan:      make(chan error),
+			DoneChan:     make(chan struct{}),
 			ShutdownChan: make(chan struct{}),
 		}
 		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configs[hashKey].Data).Msg("configuration")

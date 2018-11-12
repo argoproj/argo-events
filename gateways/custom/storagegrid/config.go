@@ -17,18 +17,16 @@ limitations under the License.
 package storagegrid
 
 import (
-	"net/http"
-	"time"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"net/http"
+	"time"
 )
 
-
 // StorageGridConfigExecutor implements ConfigExecutor interface
-type StorageGridConfigExecutor struct{
+type StorageGridConfigExecutor struct {
 	*gateways.GatewayConfig
 }
-
 
 // StorageGridEventConfig contains configuration for storage grid sns
 // +k8s:openapi-gen=true
@@ -97,7 +95,6 @@ type storageGridNotification struct {
 	TopicArn string `json:"TopicArn"`
 	Version  string `json:"Version"`
 }
-
 
 func parseConfig(config string) (*StorageGridEventConfig, error) {
 	var s *StorageGridEventConfig

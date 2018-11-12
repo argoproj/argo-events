@@ -18,15 +18,15 @@ package artifact
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"fmt"
-	"k8s.io/client-go/kubernetes"
+	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"github.com/minio/minio-go"
+	"k8s.io/client-go/kubernetes"
 )
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
@@ -120,7 +120,7 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 
 	for {
 		select {
-		case notification := <- minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
+		case notification := <-minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
 			string(artifact.S3EventConfig.Event),
 		}, make(chan struct{})):
 			if notification.Err != nil {

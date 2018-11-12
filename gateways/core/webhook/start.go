@@ -84,7 +84,6 @@ func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.Confi
 
 	config.StartChan <- struct{}{}
 
-
 	// start a http server only if given configuration contains port information and no other
 	// configuration previously started the server
 	if w.Port != "" && !hasServerStarted.Load() {

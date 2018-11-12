@@ -1,9 +1,9 @@
 package storagegrid
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestStorageGridConfigExecutor_StopConfig(t *testing.T) {

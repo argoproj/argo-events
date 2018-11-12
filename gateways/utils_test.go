@@ -31,7 +31,7 @@ func Test_transformPayload(t *testing.T) {
 func TestCloseChannels(t *testing.T) {
 	ctx := GetConfigContext()
 	CloseChannels(ctx)
-	_, ok := <- ctx.DataChan
+	_, ok := <-ctx.DataChan
 	assert.Equal(t, false, ok)
 	_, ok = <-ctx.StopChan
 	assert.Equal(t, false, ok)

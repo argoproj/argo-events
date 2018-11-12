@@ -128,7 +128,7 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 		}()
 	}
 
-	 <-config.DoneChan
+	<-config.DoneChan
 	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
 	close(quitChan)
 	config.ShutdownChan <- struct{}{}

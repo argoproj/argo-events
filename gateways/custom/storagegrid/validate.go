@@ -1,8 +1,8 @@
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 	"strings"
 )
 
@@ -26,4 +26,3 @@ func (sgce *StorageGridConfigExecutor) Validate(config *gateways.ConfigContext) 
 	}
 	return nil
 }
-

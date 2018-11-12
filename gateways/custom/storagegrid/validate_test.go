@@ -1,6 +1,5 @@
 package storagegrid
 
-
 import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"

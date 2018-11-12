@@ -1,4 +1,4 @@
-package mqtt
+package kafka
 
 import (
 	"github.com/argoproj/argo-events/gateways"
@@ -9,23 +9,20 @@ import (
 var (
 	configKey   = "testConfig"
 	configValue = `
-url: tcp://mqtt.argo-events:1883
+url: kafka.argo-events:9092
 topic: foo
-clientId: 1
+partition: "0"
 `
 )
 
-func TestMqttConfigExecutor_Validate(t *testing.T) {
-	ce := &MqttConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
+func TestKafkaConfigExecutor_Validate(t *testing.T) {
+	ce := &KafkaConfigExecutor{}
+	ctx := &gateways.ConfigContext{Data: &gateways.ConfigData{}}
 	ctx.Data.Config = configValue
 	err := ce.Validate(ctx)
 	assert.Nil(t, err)
 
 	configValue = `
-url: tcp://mqtt.argo-events:1883
 topic: foo
 `
 	ctx.Data.Config = configValue

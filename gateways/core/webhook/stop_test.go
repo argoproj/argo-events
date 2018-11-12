@@ -2,8 +2,8 @@ package webhook
 
 import (
 	"github.com/argoproj/argo-events/gateways"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestWebhookConfigExecutor_StopConfig(t *testing.T) {

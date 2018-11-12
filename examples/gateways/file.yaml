@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "file-events"
-      image: "metalgearsolid/file-gateway"
+      image: "argoproj/file-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/file-gateway"]
     serviceAccountName: "argo-events-sa"

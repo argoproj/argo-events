@@ -2,11 +2,11 @@ package gateways
 
 import (
 	"github.com/argoproj/argo-events/common"
-	"time"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
-	corev1 "k8s.io/api/core/v1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // GetK8Event returns a kubernetes event.

@@ -3,5 +3,7 @@ kind: ConfigMap
 metadata:
   name: calendar-gateway-configmap
 data:
-  calendar.barConfig: |-
+  calendar.fooConfig: |-
     interval: 55s
+  calendar.barConfig: |-
+    schedule: 30 * * * *

@@ -1,14 +1,14 @@
-package  main
+package main
 
 import (
-	"os"
-	"github.com/argoproj/argo-events/common"
 	"fmt"
-	"net"
-	"google.golang.org/grpc"
-	gp "github.com/argoproj/argo-events/gateways/grpc/proto"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/grpc/calendar"
+	gp "github.com/argoproj/argo-events/gateways/grpc/proto"
+	"google.golang.org/grpc"
+	"net"
+	"os"
 )
 
 func main() {
@@ -31,4 +31,3 @@ func main() {
 	ce.Log.Info().Str("port", rpcServerPort).Msg("gRPC server started listening...")
 	grpcServer.Serve(lis)
 }
-

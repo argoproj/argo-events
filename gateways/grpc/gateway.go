@@ -32,7 +32,7 @@ const (
 )
 
 // grpcConfigExecutor implements ConfigExecutor
-type grpcConfigExecutor struct{
+type grpcConfigExecutor struct {
 	*gateways.GatewayConfig
 }
 

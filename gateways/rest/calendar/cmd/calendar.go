@@ -17,15 +17,15 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/rest/calendar"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/rest/calendar"
 )
 
 var (
