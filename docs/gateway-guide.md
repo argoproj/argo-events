@@ -210,4 +210,4 @@ Stream gateways contain a generic specification for messages received on a queue
 ```
 
 ### Examples
-Explore [Gateway Examples](https://github.com/argoproj/argo-events/tree/eventing/examples/gateways)
+Explore [Gateway Examples](https://github.com/argoproj/argo-events/tree/master/examples/gateways)
