@@ -66,12 +66,6 @@ func (ce *GitlabExecutor) StartConfig(config *gateways.ConfigContext) {
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
 			config.Active = true
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
 			config.DoneChan <- struct{}{}
