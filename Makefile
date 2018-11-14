@@ -221,7 +221,7 @@ gateway-processor-grpc-client-image: gateway-processor-grpc-client-linux
 
 # gRPC gateway server binaries
 calendar-grpc:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/grpc/calendar/calendar.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/grpc/calendar/cmd/main.go
 
 calendar-grpc-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-grpc
@@ -247,7 +247,7 @@ gateway-processor-http-client-image: gateway-processor-http-client-linux
 
 # HTTP gateway server binaries
 calendar-http:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-http ./gateways/rest/calendar/calendar.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-http ./gateways/rest/calendar/cmd/calendar.go
 
 calendar-http-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-http
