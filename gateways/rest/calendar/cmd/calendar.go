@@ -63,12 +63,12 @@ func getConfiguration(body io.ReadCloser) (*gateways.ConfigContext, *string, err
 func main() {
 
 	ce := &calendar.CalendarConfigExecutor{
-		gateways.NewHTTPGatewayServerConfig(),
+		gateways.NewHttpGatewayServerConfig(),
 	}
 
 	// handles new configuration. adds a stop channel to configuration, so we can pass stop signal
 	// in the event of configuration deactivation
-	http.HandleFunc(ce.ConfigActivateEndpoint, func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc(ce.StartConfigEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		config, hash, err := getConfiguration(request.Body)
 		if err != nil {
 			ce.GwConfig.Log.Error().Err(err).Msg("failed to start configuration")
@@ -84,7 +84,7 @@ func main() {
 
 	// handles configuration deactivation. no need to remove the configuration from activeConfigs as we are
 	// always overriding configurations in configuration activation.
-	http.HandleFunc(ce.ConfigurationDeactivateEndpoint, func(writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc(ce.StopConfigEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		_, hash, err := getConfiguration(request.Body)
 		if err != nil {
 			ce.GwConfig.Log.Error().Err(err).Msg("failed to stop configuration")
@@ -105,5 +105,5 @@ func main() {
 	})
 
 	// start http server
-	ce.GwConfig.Log.Fatal().Str("port", ce.HTTPServerPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", ce.HTTPServerPort), nil)).Msg("gateway server started listening")
+	ce.GwConfig.Log.Fatal().Str("port", ce.HttpServerPort).Err(http.ListenAndServe(":"+fmt.Sprintf("%s", ce.HttpServerPort), nil)).Msg("gateway server started listening")
 }
