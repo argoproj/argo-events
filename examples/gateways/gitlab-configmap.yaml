@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitlab-gateway-configmap
+data:
+  gitlab.defaultConfig: |-
+    projectId: "1"
+    url: "YOUR_WEBHOOK_GATEWAY_EXTERNAL_URL"
+    event: "PushEvents"
+    accessToken:
+      key: accesskey
+      name: gitlab-access
+    enableSSLVerification: false
+    gitlabBaseUrl: "YOUR_GITLAB_URL"

@@ -5,13 +5,11 @@ metadata:
 data:
   amqp.fooConfig: |-
     url: amqp://amqp.argo-events:5672
-    attributes:
-      exchangeName: fooExchangeName
-      exchangeType: fanout
-      routingKey: fooRoutingKey
+    exchangeName: fooExchangeName
+    exchangeType: fanout
+    routingKey: fooRoutingKey
   amqp.barConfig: |-
     url: amqp://amqp.argo-events:5672
-    attributes:
-      exchangeName: barExchangeName
-      exchangeType: fanout
-      routingKey: barRoutingKey
+    exchangeName: barExchangeName
+    exchangeType: fanout
+    routingKey: barRoutingKey
