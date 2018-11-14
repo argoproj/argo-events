@@ -195,7 +195,24 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 	}, nil
 }
 
-var sampleTrigger = v1alpha1.Trigger{
+var testWf = `
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+generateName: hello-world-
+spec:
+entrypoint: whalesay
+templates:
+- name: whalesay
+container:
+    args:
+    - "hello world"
+    command:
+    - cowsay
+    image: "docker/whalesay:latest"
+`
+
+var testTrigger = v1alpha1.Trigger{
 	Name: "sample",
 	Resource: &v1alpha1.ResourceObject{
 		Namespace: corev1.NamespaceDefault,
@@ -205,7 +222,7 @@ var sampleTrigger = v1alpha1.Trigger{
 			Kind:    "workflow",
 		},
 		Source: v1alpha1.ArtifactLocation{
-			S3: &v1alpha1.S3Artifact{},
+			Inline: &testWf,
 		},
 		Labels: map[string]string{"test-label": "test-value"},
 	},
@@ -213,11 +230,11 @@ var sampleTrigger = v1alpha1.Trigger{
 
 func TestProcessTrigger(t *testing.T) {
 	triggers := make([]v1alpha1.Trigger, 1)
-	triggers[0] = sampleTrigger
-	sampleSensor, err := getSensor()
+	triggers[0] = testTrigger
+	testSensor, err := getSensor()
 	assert.Nil(t, err)
-	sampleSensor.Spec.Triggers = triggers
-	soc := getsensorExecutionCtx(sampleSensor)
-	err = soc.executeTrigger(sampleTrigger)
+	testSensor.Spec.Triggers = triggers
+	soc := getsensorExecutionCtx(testSensor)
+	err = soc.executeTrigger(testTrigger)
 	assert.NotNil(t, err)
 }

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: file-sensor
+  name: file-location-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:

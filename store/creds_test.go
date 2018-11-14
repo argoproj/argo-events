@@ -49,12 +49,12 @@ func TestGetCredentials(t *testing.T) {
 	// succeed for S3 artifact type
 	s3Artifact := &v1alpha1.ArtifactLocation{
 		S3: &v1alpha1.S3Artifact{
-			S3Bucket: v1alpha1.S3Bucket{
-				AccessKey: apiv1.SecretKeySelector{
+			S3Bucket: &v1alpha1.S3Bucket{
+				AccessKey: &apiv1.SecretKeySelector{
 					LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
 					Key:                  "access",
 				},
-				SecretKey: apiv1.SecretKeySelector{
+				SecretKey: &apiv1.SecretKeySelector{
 					LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
 					Key:                  "secret",
 				},

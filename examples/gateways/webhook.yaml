@@ -14,7 +14,7 @@ spec:
     containers:
     - name: "webhook-events"
       image: "argoproj/webhook-gateway"
-      imagePullPolicy: "Always"
+      imagePullPolicy: "IfNotPresent"
       command: ["/bin/webhook-gateway"]
     serviceAccountName: "argo-events-sa"
   serviceSpec:

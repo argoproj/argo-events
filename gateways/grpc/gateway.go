@@ -24,7 +24,6 @@ import (
 	gwProto "github.com/argoproj/argo-events/gateways/grpc/proto"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
-	"io"
 	"os"
 )
 
@@ -33,11 +32,11 @@ const (
 )
 
 // grpcConfigExecutor implements ConfigExecutor
-type grpcConfigExecutor struct{}
+type grpcConfigExecutor struct {
+	*gateways.GatewayConfig
+}
 
 var (
-	// gatewayConfig provides a generic configuration for a gateway
-	gatewayConfig = gateways.NewGatewayConfiguration()
 	rpcServerPort = func() string {
 		rpcServerPort, ok := os.LookupEnv(common.GatewayProcessorGRPCServerPort)
 		if !ok {
@@ -49,12 +48,7 @@ var (
 
 // StartConfig establishes connection with gateway server and sends new configurations to run.
 // also disconnect the clients for stale configurations
-func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error {
-	var err error
-	var errMessage string
-
-	defer gatewayConfig.GatewayCleanup(config, &errMessage, err)
-
+func (ce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	opts := []grpc.DialOption{
 		grpc.WithInsecure(),
 		grpc.WithWaitForHandshake(),
@@ -62,8 +56,8 @@ func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 
 	conn, err := grpc.Dial(fmt.Sprintf(serverAddr, rpcServerPort), opts...)
 	if err != nil {
-		errMessage = "failed to dial"
-		return err
+		config.ErrChan <- err
+		return
 	}
 
 	// create a client for gateway server
@@ -71,41 +65,39 @@ func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 	ctx, cancel := context.WithCancel(context.Background())
 	config.Cancel = cancel
 
-	eventStream, err := client.RunGateway(ctx, &gwProto.GatewayConfig{
+	eventStream, err := client.StartConfig(ctx, &gwProto.GatewayConfig{
 		Config: config.Data.Config,
 		Src:    config.Data.Src,
 	})
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("connected with server and got a event stream")
-
 	if err != nil {
-		errMessage = "failed to get event stream"
-		return err
+		config.ErrChan <- err
+		return
 	}
 
-	event := gatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	k8Event, err := common.CreateK8Event(event, gatewayConfig.Clientset)
+	ce.Log.Info().Str("config-key", config.Data.Src).Msg("connected with server and got a event stream")
+
+	event := ce.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	k8Event, err := common.CreateK8Event(event, ce.Clientset)
 	if err != nil {
-		gatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		return err
+		ce.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
 	}
-	gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("phase", string(v1alpha1.NodePhaseRunning)).Str("event-name", k8Event.Name).Msg("k8 event created")
+
+	ce.Log.Info().Str("config-key", config.Data.Src).Str("phase", string(v1alpha1.NodePhaseRunning)).Str("event-name", k8Event.Name).Msg("k8 event created")
 	for {
 		event, err := eventStream.Recv()
-		if err == io.EOF {
-			gatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("event stream stopped")
-			return nil
-		}
 		if err != nil {
-			errMessage = "failed to receive events on stream"
-			return err
+			ce.Log.Info().Str("config-key", config.Data.Src).Msg("event stream stopped")
+			config.ErrChan <- err
+			return
 		}
 		// event should never be nil
 		if event == nil {
-			errMessage = "event can't be nil"
-			err = fmt.Errorf(errMessage)
-			return err
+			config.ErrChan <- fmt.Errorf("event can't be nil")
+			return
 		}
-		gatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+		ce.DispatchEvent(&gateways.GatewayEvent{
 			Src:     config.Data.Src,
 			Payload: event.Data,
 		})
@@ -113,11 +105,17 @@ func (gce *grpcConfigExecutor) StartConfig(config *gateways.ConfigContext) error
 }
 
 // Stop config disconnects the client connection and hence stops the configuration
-func (gce *grpcConfigExecutor) StopConfig(config *gateways.ConfigContext) error {
+func (gce *grpcConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	config.Cancel()
+}
+
+func (gce *grpcConfigExecutor) Validate(config *gateways.ConfigContext) error {
 	return nil
 }
 
 func main() {
-	gatewayConfig.StartGateway(&grpcConfigExecutor{})
+	gc := gateways.NewGatewayConfiguration()
+	ce := &grpcConfigExecutor{}
+	ce.GatewayConfig = gc
+	gc.StartGateway(ce)
 }

@@ -4,10 +4,5 @@ metadata:
   name: nats-gateway-configmap
 data:
   nats.fooConfig: |-
-    url: nats://nats.argo-events:4222
-    attributes:
-      subject: foo
-  nats.barConfig: |-
-    url: nats://nats.argo-events:4222
-    attributes:
-      subject: bar
+  url: nats://nats.argo-events:4222
+  subject: foo

@@ -51,7 +51,9 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
-	v1.TypeMeta   `json:",inline"`
+	// +k8s:openapi-gen=false
+	v1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
@@ -60,7 +62,9 @@ type Sensor struct {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type SensorList struct {
+	// +k8s:openapi-gen=false
 	v1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	v1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items       []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
@@ -85,6 +89,7 @@ type SensorSpec struct {
 	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
 
 	// EnvVars are user defined env variables to sensor pod
+	// +k8s:openapi-gen=false
 	EnvVars []corev1.EnvVar `json:"envVars,omitempty" protobuf:"bytes,7,opt,name=envVars"`
 
 	// ImageVersion is the sensor image version to run
@@ -295,9 +300,11 @@ type SensorStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
+	// +k8s:openapi-gen=false
 	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
+	// +k8s:openapi-gen=false
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
@@ -331,9 +338,11 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
+	// +k8s:openapi-gen=false
 	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
+	// +k8s:openapi-gen=false
 	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for signal notifications or trigger events
@@ -380,6 +389,7 @@ type EventContext struct {
 	EventID string `json:"eventID" protobuf:"bytes,5,opt,name=eventID"`
 
 	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
+	// +k8s:openapi-gen=false
 	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
 
 	// A link to the schema that the data attribute adheres to.
@@ -415,11 +425,38 @@ type URI struct {
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
+	// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 	S3        *S3Artifact        `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	Inline    *string            `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	File      *FileArtifact      `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
 	URL       *URLArtifact       `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+}
+
+// S3Artifact contains information about an artifact in S3
+type S3Artifact struct {
+	Key       string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
+	Event     minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
+	Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+	*S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
+}
+
+// S3Bucket contains information for an S3 Bucket
+type S3Bucket struct {
+	Endpoint string `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
+	Bucket   string `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
+	Region   string `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
+	Insecure bool   `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	// +k8s:openapi-gen=false
+	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
+	// +k8s:openapi-gen=false
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
+}
+
+// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+type S3Filter struct {
+	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
+	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
@@ -432,14 +469,6 @@ type ConfigmapArtifact struct {
 	Key string `json:"key" protobuf:"bytes,3,opt,name=key"`
 }
 
-// S3Artifact contains information about an artifact in S3
-type S3Artifact struct {
-	S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
-	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
-	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
-	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
-}
-
 // FileArtifact contains information about an artifact in a filesystem
 type FileArtifact struct {
 	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
@@ -449,22 +478,6 @@ type FileArtifact struct {
 type URLArtifact struct {
 	Path       string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
 	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
-}
-
-// S3Bucket contains information for an S3 Bucket
-type S3Bucket struct {
-	Endpoint  string                   `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket    string                   `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
-	Region    string                   `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Insecure  bool                     `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
-	AccessKey corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
-	SecretKey corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type S3Filter struct {
-	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
-	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
 // HasLocation whether or not an artifact has a location defined

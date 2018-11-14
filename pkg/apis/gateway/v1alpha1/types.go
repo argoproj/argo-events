@@ -50,7 +50,9 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Gateway struct {
-	metav1.TypeMeta   `json:",inline"`
+	// +k8s:openapi-gen=false
+	metav1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Status            GatewayStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
 	Spec              GatewaySpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
@@ -59,7 +61,9 @@ type Gateway struct {
 // GatewayList is the list of Gateway resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type GatewayList struct {
+	// +k8s:openapi-gen=false
 	metav1.TypeMeta `json:",inline"`
+	// +k8s:openapi-gen=false
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items           []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
@@ -106,6 +110,7 @@ type GatewayStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this gateway was initiated
+	// +k8s:openapi-gen=false
 	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// Message is a human readable string indicating details about a gateway in its phase
@@ -136,12 +141,14 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,6,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
+	// +k8s:openapi-gen=false
 	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,7,opt,name=startedAt"`
 
 	// Message store data or something to save for configuration
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// UpdateTime is the time when node(gateway configuration) was updated
+	// +k8s:openapi-gen=false
 	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,9,opt,name=updateTime"`
 }
 

@@ -44,7 +44,7 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 func (m *Gateway) Reset()      { *m = Gateway{} }
 func (*Gateway) ProtoMessage() {}
 func (*Gateway) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{0}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{0}
 }
 func (m *Gateway) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -72,7 +72,7 @@ var xxx_messageInfo_Gateway proto.InternalMessageInfo
 func (m *GatewayList) Reset()      { *m = GatewayList{} }
 func (*GatewayList) ProtoMessage() {}
 func (*GatewayList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{1}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{1}
 }
 func (m *GatewayList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -100,7 +100,7 @@ var xxx_messageInfo_GatewayList proto.InternalMessageInfo
 func (m *GatewayNotificationWatcher) Reset()      { *m = GatewayNotificationWatcher{} }
 func (*GatewayNotificationWatcher) ProtoMessage() {}
 func (*GatewayNotificationWatcher) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{2}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{2}
 }
 func (m *GatewayNotificationWatcher) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -128,7 +128,7 @@ var xxx_messageInfo_GatewayNotificationWatcher proto.InternalMessageInfo
 func (m *GatewaySpec) Reset()      { *m = GatewaySpec{} }
 func (*GatewaySpec) ProtoMessage() {}
 func (*GatewaySpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{3}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{3}
 }
 func (m *GatewaySpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -156,7 +156,7 @@ var xxx_messageInfo_GatewaySpec proto.InternalMessageInfo
 func (m *GatewayStatus) Reset()      { *m = GatewayStatus{} }
 func (*GatewayStatus) ProtoMessage() {}
 func (*GatewayStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{4}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{4}
 }
 func (m *GatewayStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -184,7 +184,7 @@ var xxx_messageInfo_GatewayStatus proto.InternalMessageInfo
 func (m *NodeStatus) Reset()      { *m = NodeStatus{} }
 func (*NodeStatus) ProtoMessage() {}
 func (*NodeStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{5}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{5}
 }
 func (m *NodeStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -212,7 +212,7 @@ var xxx_messageInfo_NodeStatus proto.InternalMessageInfo
 func (m *NotificationWatchers) Reset()      { *m = NotificationWatchers{} }
 func (*NotificationWatchers) ProtoMessage() {}
 func (*NotificationWatchers) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{6}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{6}
 }
 func (m *NotificationWatchers) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -240,7 +240,7 @@ var xxx_messageInfo_NotificationWatchers proto.InternalMessageInfo
 func (m *SensorNotificationWatcher) Reset()      { *m = SensorNotificationWatcher{} }
 func (*SensorNotificationWatcher) ProtoMessage() {}
 func (*SensorNotificationWatcher) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_a257ea1ae85dd1b7, []int{7}
+	return fileDescriptor_generated_ba01e0f01e505527, []int{7}
 }
 func (m *SensorNotificationWatcher) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2515,10 +2515,10 @@ var (
 )
 
 func init() {
-	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_a257ea1ae85dd1b7)
+	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_ba01e0f01e505527)
 }
 
-var fileDescriptor_generated_a257ea1ae85dd1b7 = []byte{
+var fileDescriptor_generated_ba01e0f01e505527 = []byte{
 	// 1103 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x4f, 0x6f, 0x1b, 0x45,
 	0x14, 0xcf, 0xda, 0x71, 0x6c, 0x8f, 0xd3, 0xb4, 0x1d, 0x2a, 0xb4, 0x18, 0xc9, 0xae, 0x7c, 0x40,
