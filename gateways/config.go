@@ -89,17 +89,21 @@ type GatewayEvent struct {
 }
 
 // HTTPGatewayServerConfig contains information regarding http ports, endpoints
-type HTTPGatewayServerConfig struct {
+type HttpGatewayServerConfig struct {
 	// HTTPServerPort is the port on which gateway processor server is running
-	HTTPServerPort string
+	HttpServerPort string
 	// HTTPClientPort is the port on which gateway processor client is running
-	HTTPClientPort string
-	// ConfigActivateEndpoint is REST endpoint listening for new configurations to run.
-	ConfigActivateEndpoint string
-	// ConfigurationDeactivateEndpoint is REST endpoint listening to deactivate active configuration
-	ConfigurationDeactivateEndpoint string
+	HttpClientPort string
+	// StartConfigEndpoint is REST endpoint listening for new configurations to run.
+	StartConfigEndpoint string
+	// StopConfigEndpoint is REST endpoint listening to stop active configuration
+	StopConfigEndpoint string
 	// EventEndpoint is REST endpoint on which gateway processor server sends events to gateway processor client
 	EventEndpoint string
+	// ConfigActivatedEndpoint is the REST endpoint on which gateway processor listens for activated notifications from configurations
+	ConfigActivatedEndpoint string
+	// ConfigErrorEndpoint is the REST endpoint on which gateway processor listens for errors from configurations
+	ConfigErrorEndpoint string
 	// GwConfig holds generic gateway configuration
 	GwConfig *GatewayConfig
 	// Data holds the actual configuration
@@ -163,44 +167,46 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 }
 
-// NewHTTPGatewayServerConfig returns a new HTTPGatewayServerConfig
-func NewHTTPGatewayServerConfig() *HTTPGatewayServerConfig {
-	httpGatewayServerConfig := &HTTPGatewayServerConfig{}
-	httpGatewayServerConfig.HTTPServerPort = func() string {
-		httpServerPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorServerHTTPPort)
-		if !ok {
-			panic("gateway server http port is not provided")
-		}
-		return httpServerPort
-	}()
-	httpGatewayServerConfig.HTTPClientPort = func() string {
-		httpClientPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorClientHTTPPort)
-		if !ok {
-			panic("gateway client http port is not provided")
-		}
-		return httpClientPort
-	}()
-	httpGatewayServerConfig.ConfigActivateEndpoint = func() string {
-		configActivateEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint)
-		if !ok {
-			panic("gateway config activation endpoint is not provided")
-		}
-		return configActivateEndpoint
-	}()
-	httpGatewayServerConfig.ConfigurationDeactivateEndpoint = func() string {
-		configDeactivateEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint)
-		if !ok {
-			panic("gateway config deactivation endpoint is not provided")
-		}
-		return configDeactivateEndpoint
-	}()
-	httpGatewayServerConfig.EventEndpoint = func() string {
-		eventEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerEventEndpoint)
-		if !ok {
-			panic("gateway event endpoint is not provided")
-		}
-		return eventEndpoint
-	}()
+// NewHttpGatewayServerConfig returns a new HTTPGatewayServerConfig
+func NewHttpGatewayServerConfig() *HttpGatewayServerConfig {
+	httpServerPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorServerHTTPPort)
+	if !ok {
+		panic("server port is not provided")
+	}
+	clientPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorClientHTTPPort)
+	if !ok {
+		panic("client port is not provided")
+	}
+	startConfigEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint)
+	if !ok {
+		panic("start config endpoint is not provided")
+	}
+	stopConfigEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint)
+	if !ok {
+		panic("stop config endpoint is not provided")
+	}
+	eventEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerEventEndpoint)
+	if !ok {
+		panic("event endpoint is not provided")
+	}
+	configActivatedEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigActivated)
+	if !ok {
+		panic("activated config endpoint is not provided")
+	}
+	configErrorEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigError)
+	if !ok {
+		panic("config error endpoint is not provided")
+	}
+
+	httpGatewayServerConfig := &HttpGatewayServerConfig{
+		HttpServerPort: httpServerPort,
+		HttpClientPort: clientPort,
+		StartConfigEndpoint: startConfigEndpoint,
+		StopConfigEndpoint: stopConfigEndpoint,
+		EventEndpoint: eventEndpoint,
+		ConfigActivatedEndpoint: configActivatedEndpoint,
+		ConfigErrorEndpoint: configErrorEndpoint,
+	}
 	httpGatewayServerConfig.GwConfig = NewGatewayConfiguration()
 	return httpGatewayServerConfig
 }

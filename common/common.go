@@ -170,6 +170,18 @@ const (
 	// GatewayProcessorHTTPServerEventEndpoint is REST endpoint to send event to for gateway processor server
 	GatewayProcessorHTTPServerEventEndpoint = "/event"
 
+	// EnvVarGatewayProcessorHTTPServerConfigActivated is used to get the REST endpoint to send  notifications for configuration that are successfully running
+	EnvVarGatewayProcessorHTTPServerConfigActivated = "GATEWAY_HTTP_CONFIG_RUNNING"
+
+	// GatewayProcessorHTTPServerConfigActivatedEndpoint is the REST endpoint on which gateway processor listens for activated notifications from configurations
+	GatewayProcessorHTTPServerConfigActivatedEndpoint = "/activated"
+
+	// EnvVarGatewayProcessorHTTPServerConfigError is used to get the REST endpoint on which gateway processor listens for errors from configurations
+	EnvVarGatewayProcessorHTTPServerConfigError = "GATEWAY_HTTP_CONFIG_ERROR"
+
+	// GatewayProcessorHTTPServerConfigErrorEndpoint is the REST endpoint on which gateway processor listens for errors from configurations
+	GatewayProcessorHTTPServerConfigErrorEndpoint = "/error"
+
 	// GatewayProcessorGRPCClientImage is gRPC gateway processor client image
 	GatewayProcessorGRPCClientImage = "argoproj/gateway-processor-grpc-client"
 

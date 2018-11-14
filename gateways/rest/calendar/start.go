@@ -37,21 +37,32 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 
 // StartGateway runs given configuration and sends event back to gateway processor client
 func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {
-	ce.HTTPGatewayServerConfig.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
+	ce.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
 		config.ErrChan <- gateways.ErrConfigParseFailed
 		return
 	}
-	ce.HTTPGatewayServerConfig.GwConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
+	ce.GwConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
 
 	go ce.listenEvents(cal, config)
 
 	for {
 		select {
 		case <-config.StartChan:
-			ce.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-			config.Active = true
+			b, err := json.Marshal(config.Data.Config)
+			if err != nil {
+				ce.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to marshal config activated notification")
+				_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", ce.HttpClientPort, ce.ConfigErrorEndpoint), "application/octet-stream", bytes.NewReader([]byte(err.Error())))
+				if err != nil {
+					ce.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to send config error notification")
+				}
+				return
+			}
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", ce.HttpClientPort, ce.ConfigActivatedEndpoint), "application/octet-stream", bytes.NewReader(b))
+			if err != nil {
+				ce.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to send config activated notification")
+			}
 
 		case data := <-config.DataChan:
 			ge := &gateways.GatewayEvent{
@@ -61,16 +72,17 @@ func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {
 
 			payload, err := json.Marshal(ge)
 			if err != nil {
-				if config.Active {
-					config.Active = false
-					config.ErrChan <- err
-					return
+				ce.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to marshal event payload")
+				_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", ce.HttpClientPort, ce.ConfigErrorEndpoint), "application/octet-stream", bytes.NewReader([]byte(err.Error())))
+				if err != nil {
+					ce.GwConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to send config error notification")
 				}
+				return
 			}
 
 			ce.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway processor client")
 
-			_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", ce.HTTPClientPort, ce.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
+			_, err = http.Post(fmt.Sprintf("http://localhost:%s%s", ce.HttpClientPort, ce.EventEndpoint), "application/octet-stream", bytes.NewReader(payload))
 			if err != nil {
 				config.ErrChan <- err
 				return
@@ -83,7 +95,6 @@ func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {
 			return
 		}
 	}
-
 }
 
 func (ce *CalendarConfigExecutor) listenEvents(cal *calSchedule, config *gateways.ConfigContext) {

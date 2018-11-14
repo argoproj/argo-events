@@ -23,6 +23,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"reflect"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 
@@ -107,6 +109,15 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigC
 		config.ErrChan <- err
 		return
 	}
+
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+
 
 	ce.Log.Info().Str("config-key", config.Data.Src).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 

@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
 
 var (
@@ -143,7 +144,6 @@ func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext)
 			config.Active = true
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching event to gateway-processor")
 			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
@@ -178,6 +178,14 @@ func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext)
 }
 
 func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, config *gateways.ConfigContext) {
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+
 	// start a http server only if no other configuration previously started the server on given port
 	ce.startHttpServer(sg, config)
 
@@ -212,9 +220,6 @@ func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, co
 					config.ErrChan <- err
 					return
 				}
-
-				ce.Log.Info().Str("endpoint", sg.Endpoint).Str("http-method", request.Method).
-					Str("payload", string(body)).Msg("dispatching event to gateway-processor")
 
 				switch request.Method {
 				case http.MethodPost, http.MethodPut:

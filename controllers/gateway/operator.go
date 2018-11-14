@@ -421,6 +421,14 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 				Name:  common.EnvVarGatewayProcessorHTTPServerEventEndpoint,
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
+			{
+				Name: common.EnvVarGatewayProcessorHTTPServerConfigActivated,
+				Value: common.GatewayProcessorHTTPServerConfigActivatedEndpoint,
+			},
+			{
+				Name: common.EnvVarGatewayProcessorHTTPServerConfigError,
+				Value: common.GatewayProcessorHTTPServerConfigErrorEndpoint,
+			},
 		}
 
 		httpGatewayEnvVars := append(envVars, httpEnvVars...)

@@ -7,7 +7,7 @@ import (
 
 // CalendarConfigExecutor implements ConfigExecutor interface
 type CalendarConfigExecutor struct {
-	*gateways.HTTPGatewayServerConfig
+	*gateways.HttpGatewayServerConfig
 }
 
 // calSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
