@@ -178,13 +178,12 @@ func (goc *gwOperationCtx) operate() error {
 					ObjectMeta: metav1.ObjectMeta{
 						Labels: goc.gw.ObjectMeta.Labels,
 					},
-					Spec: corev1.PodSpec{
-						ServiceAccountName: goc.gw.Spec.DeploySpec.ServiceAccountName,
-						Containers:         *goc.getContainersForGatewayPod(),
-					},
+					Spec: *goc.gw.Spec.DeploySpec,
 				},
 			},
 		}
+
+		gatewayDeployment.Spec.Template.Spec.Containers = *goc.getContainersForGatewayPod()
 
 		// we can now create the gateway deployment.
 		// depending on user configuration gateway will be exposed outside the cluster or intra-cluster.
