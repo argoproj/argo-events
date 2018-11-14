@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: gitlab-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "gitlab-gateway"
+spec:
+  deploySpec:
+    containers:
+    - name: "gitlab-events"
+      image: "argoproj/gitlab-gateway:test"
+      imagePullPolicy: "Always"
+      command: ["/bin/gitlab-gateway"]
+    serviceAccountName: "argo-events-sa"
+  configMap: "gitlab-gateway-configmap"
+  type: "gitlab"
+  dispatchMechanism: "HTTP"
+  version: "1.0"
+  watchers:
+      sensors:
+      - name: "gitlab-sensor"

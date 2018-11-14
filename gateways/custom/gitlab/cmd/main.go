@@ -14,23 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storagegrid
+package main
 
 import (
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
-	"testing"
+	"github.com/argoproj/argo-events/gateways/custom/gitlab"
 )
 
-func TestStorageGridConfigExecutor_StopConfig(t *testing.T) {
-	s3Config := &StorageGridConfigExecutor{}
-	ctx := &gateways.ConfigContext{}
-	ctx.StopChan = make(chan struct{})
-	ctx.Active = true
-	go func() {
-		msg := <-ctx.StopChan
-		assert.Equal(t, msg, struct{}{})
-	}()
-	s3Config.StopConfig(ctx)
-	assert.Equal(t, false, ctx.Active)
+func main() {
+	gc := gateways.NewGatewayConfiguration()
+	ce := &gitlab.GitlabExecutor{}
+	ce.GatewayConfig = gc
+	gc.StartGateway(ce)
 }
