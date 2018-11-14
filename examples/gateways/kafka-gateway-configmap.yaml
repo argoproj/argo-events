@@ -5,11 +5,9 @@ metadata:
 data:
   kafka.fooConfig: |-
     url: kafka.argo-events:9092
-    attributes:
-      topic: foo
-      partition: "0"
+    topic: foo
+    partition: "0"
   kafka.barConfig: |-
     url: kafka.argo-events:9092
-    attributes:
-      topic: bar
-      partition: "1"
+    topic: bar
+    partition: "1"

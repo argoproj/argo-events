@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: storage-grid-watcher-sensor
+  name: storage_grid-watcher-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -35,4 +35,4 @@ spec:
                     container:
                       args:
                         - "hello world"
-                      image: "metalgearsolid/args-printer:latest"
+                      image: "argoproj/args-printer:latest"

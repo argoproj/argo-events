@@ -33,6 +33,7 @@ option go_package = "v1alpha1";
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Gateway {
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional GatewayStatus status = 2;
@@ -43,6 +44,7 @@ message Gateway {
 // GatewayList is the list of Gateway resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message GatewayList {
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated Gateway items = 2;
@@ -103,6 +105,7 @@ message GatewayStatus {
   optional string phase = 1;
 
   // StartedAt is the time at which this gateway was initiated
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
   // Message is a human readable string indicating details about a gateway in its phase
@@ -133,12 +136,14 @@ message NodeStatus {
   optional string phase = 6;
 
   // StartedAt is the time at which this node started
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 7;
 
   // Message store data or something to save for configuration
   optional string message = 8;
 
   // UpdateTime is the time when node(gateway configuration) was updated
+  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updateTime = 9;
 }
 

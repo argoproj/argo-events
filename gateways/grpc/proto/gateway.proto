@@ -27,7 +27,7 @@ service GatewayExecutor {
 
   // Obtains the configuration available within the given GatewayConfig.  Result events are
   // streamed back to client.
-  rpc RunGateway(GatewayConfig) returns (stream Event) {}
+  rpc StartConfig(GatewayConfig) returns (stream Event) {}
 }
 
 message GatewayConfig {

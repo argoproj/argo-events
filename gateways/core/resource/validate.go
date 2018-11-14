@@ -1,0 +1,47 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package resource
+
+import (
+	"fmt"
+	"github.com/argoproj/argo-events/gateways"
+)
+
+// Validate validates gateway configuration
+func (rce *ResourceConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	res, err := parseConfig(config.Data.Config)
+	if err != nil {
+		return gateways.ErrConfigParseFailed
+	}
+	if res == nil {
+		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+	}
+
+	if res.Version == "" {
+		return fmt.Errorf("%+v, resource version must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Namespace == "" {
+		return fmt.Errorf("%+v, resource namespace must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Kind == "" {
+		return fmt.Errorf("%+v, resource kind must be specified", gateways.ErrInvalidConfig)
+	}
+	if res.Group == "" {
+		return fmt.Errorf("%+v, resource group must be specified", gateways.ErrInvalidConfig)
+	}
+	return nil
+}

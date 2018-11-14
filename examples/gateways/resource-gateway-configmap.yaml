@@ -14,10 +14,6 @@ data:
         name: "my-workflow"
   resource.barConfig: |-
     namespace: argo-events
-    group: "argoproj.io"
-    version: "v1alpha1"
-    kind: "Workflow"
-    filter:
-      prefix: scripts-bash
-      labels:
-        workflows.argoproj.io/phase: Failed
+    group: "k8s.io"
+    version: "v1"
+    kind: "Namespace"

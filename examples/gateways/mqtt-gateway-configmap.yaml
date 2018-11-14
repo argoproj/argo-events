@@ -5,9 +5,7 @@ metadata:
 data:
   mqtt.fooConfig: |-
     url: tcp://mqtt.argo-events:1883
-    attributes:
-      topic: foo
+    topic: foo
   mqtt.barConfig: |-
     url: tcp://mqtt.argo-events:1883
-    attributes:
-      topic: bar
+    topic: bar

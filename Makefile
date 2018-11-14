@@ -43,7 +43,7 @@ all-controller-images: sensor-controller-image gateway-controller-image
 
 all-core-gateway-images: webhook-image calendar-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
-.PHONY: all clean test
+.PHONY: all clean test generate-spec-docs
 
 # Sensor
 sensor:
@@ -94,7 +94,7 @@ gateway-http-transformer-image: gateway-http-transformer-linux
 
 # gateway binaries
 webhook:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/cmd/
 
 webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
@@ -105,7 +105,7 @@ webhook-image: webhook-linux
 
 
 calendar:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./gateways/core/calendar/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./gateways/core/calendar/cmd/
 
 calendar-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar
@@ -116,7 +116,7 @@ calendar-image: calendar-linux
 
 
 resource:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/resource-gateway ./gateways/core/resource/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/resource-gateway ./gateways/core/resource/cmd
 
 resource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make resource
@@ -127,7 +127,7 @@ resource-image: resource-linux
 
 
 artifact:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/cmd
 
 artifact-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
@@ -138,7 +138,7 @@ artifact-image: artifact-linux
 
 
 file:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/file/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/file/cmd
 
 file-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file
@@ -150,7 +150,7 @@ file-image: file-linux
 
 #Stream gateways
 nats:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/cmd
 
 nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
@@ -161,7 +161,7 @@ nats-image: nats-linux
 
 
 kafka:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/core/stream/kafka/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/core/stream/kafka/cmd
 
 kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
@@ -172,7 +172,7 @@ kafka-image: kafka-linux
 
 
 amqp:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/cmd
 
 amqp-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
@@ -183,7 +183,7 @@ amqp-image: amqp-linux
 
 
 mqtt:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/core/stream/mqtt/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/core/stream/mqtt/cmd
 
 mqtt-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
@@ -195,13 +195,13 @@ mqtt-image: mqtt-linux
 
 # Custom gateways
 storage-grid:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storage-grid-gateway ./gateways/custom/storage-grid/
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/custom/storagegrid/cmd
 
 storage-grid-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
 
 storage-grid-image: storage-grid-linux
-	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storage-grid/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storagegrid/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
 
@@ -221,7 +221,7 @@ gateway-processor-grpc-client-image: gateway-processor-grpc-client-linux
 
 # gRPC gateway server binaries
 calendar-grpc:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/grpc/calendar/calendar.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-grpc-gateway ./gateways/grpc/calendar/cmd/main.go
 
 calendar-grpc-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-grpc
@@ -247,7 +247,7 @@ gateway-processor-http-client-image: gateway-processor-http-client-linux
 
 # HTTP gateway server binaries
 calendar-http:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-http ./gateways/rest/calendar/calendar.go
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-http ./gateways/rest/calendar/cmd/calendar.go
 
 calendar-http-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar-http
@@ -265,6 +265,11 @@ coverage:
 
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
+
+generate-spec-docs:
+	 ./hack/update-openapigen.sh
+	 go run hack/spec-gen.go
+	 sudo sh ./hack/generate-spec-docs.sh
 
 .PHONY: protogen
 protogen:

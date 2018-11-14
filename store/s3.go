@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	minio "github.com/minio/minio-go"
+	"github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
 )
 
