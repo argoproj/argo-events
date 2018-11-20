@@ -6,6 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   repeat: true
+  imageVersion: "latest"
   serviceAccountName: argo-events-sa
   signals:
     - name: webhook-gateway/webhook.pushConfig

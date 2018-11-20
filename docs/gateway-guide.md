@@ -45,7 +45,8 @@ The `gateway-controller` is responsible for managing the `Gateway` resources.
 | DeploySpec           | Pod specification for gateway
 |  ConfigMap           | Name of the configmap containing gateway configuration/s    |
 |  Type                | Type of gateway |
-|  Version             | To mark event version  |
+|  EventVersion             | To mark event version  |
+|  ImageVersion         | ImageVersion is the version for gateway components images to run |
 |  ServiceSpec             | Specifications of the service to expose the gateway |
 |  Watchers             | Watchers are components which are interested listening to notifications from the gateway  |
 |  RPCPort             | Used to communicate between gRPC gateway client and gRPC gateway server |
@@ -80,14 +81,14 @@ Webhook gateway expose a basic HTTP server endpoint/s.
 Users can register multiple REST API endpoint. See Request Methods in RFC7231 to define the HTTP REST endpoint.
 
 ``` 
-  # port can't be reconfigured.
-  port: "12000"
+  # portConfig defines port on which http server should run. Also it serves as index route. 
+  webhook.portConfig: |-
+    port: "12000"
+    endpoint: "/"
+    method: "POST"
   webhook.fooConfig: |-
     endpoint: "/foo"
     method: "POST"
-  webhook.barConfig: |-
-    endpoint: "/bar"
-    method: "POST"  
 ```
 
 ### Kubernetes Resources
@@ -148,12 +149,10 @@ Stream gateways contain a generic specification for messages received on a queue
 ```
   nats.fooConfig: |-
     url: nats://nats.argo-events:4222
-    attributes:
-      subject: foo
+    subject: foo      
   nats.barConfig: |-
     url: nats://nats.argo-events:4222
-    attributes:
-      subject: bar
+    subject: bar          
 ```
 
 
@@ -162,12 +161,10 @@ Stream gateways contain a generic specification for messages received on a queue
 ```
   mqtt.fooConfig: |-
     url: tcp://mqtt.argo-events:1883
-    attributes:
-      topic: foo
+    topic: foo
   mqtt.barConfig: |-
     url: tcp://mqtt.argo-events:1883
-    attributes:
-      topic: bar
+    topic: bar
 ```
 
 
@@ -180,17 +177,14 @@ Stream gateways contain a generic specification for messages received on a queue
 ```
   amqp.fooConfig: |-
     url: amqp://amqp.argo-events:5672
-    attributes:
-      exchangeName: fooExchangeName
-      exchangeType: fanout
-      routingKey: fooRoutingKey
+    exchangeName: fooExchangeName
+    exchangeType: fanout
+    routingKey: fooRoutingKey
   amqp.barConfig: |-
     url: amqp://amqp.argo-events:5672
-    attributes:
-      exchangeName: barExchangeName
-      exchangeType: fanout
-      routingKey: barRoutingKey
-
+    exchangeName: barExchangeName
+    exchangeType: fanout
+    routingKey: barRoutingKey
 ```
 
 
@@ -204,9 +198,8 @@ Stream gateways contain a generic specification for messages received on a queue
       partition: "0"
   kafka.barConfig: |-
     url: kafka.argo-events:9092
-    attributes:
-      topic: bar
-      partition: "1"
+    topic: bar
+    partition: "1"
 ```
 
 ### Examples

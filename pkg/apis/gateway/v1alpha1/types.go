@@ -80,7 +80,7 @@ type GatewaySpec struct {
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 
 	// Version is used for marking event version
-	Version string `json:"version" protobuf:"bytes,4,opt,name=version"`
+	EventVersion string `json:"eventVersion" protobuf:"bytes,4,opt,name=eventVersion"`
 
 	// ServiceSpec is the specifications of the service to expose the gateway
 	ServiceSpec *corev1.ServiceSpec `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`

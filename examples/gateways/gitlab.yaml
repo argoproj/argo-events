@@ -16,7 +16,8 @@ spec:
   configMap: "gitlab-gateway-configmap"
   type: "gitlab"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   watchers:
       sensors:
       - name: "gitlab-sensor"

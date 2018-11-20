@@ -425,7 +425,6 @@ type URI struct {
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
-	// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 	S3        *S3Artifact        `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	Inline    *string            `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	File      *FileArtifact      `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
@@ -435,10 +434,10 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
+	*S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
 	Key       string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Event     minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
 	Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
-	*S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
 }
 
 // S3Bucket contains information for an S3 Bucket

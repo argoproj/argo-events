@@ -28,15 +28,15 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/stream/amqp.AMQP": schema_gateways_core_stream_amqp_AMQP(ref),
+		"github.com/argoproj/argo-events/gateways/core/stream/amqp.amqp": schema_gateways_core_stream_amqp_amqp(ref),
 	}
 }
 
-func schema_gateways_core_stream_amqp_AMQP(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_gateways_core_stream_amqp_amqp(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "AMQP contains configuration required to connect to rabbitmq service and process messages",
+				Description: "amqp contains configuration required to connect to rabbitmq service and process messages",
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{

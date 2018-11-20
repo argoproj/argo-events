@@ -75,7 +75,7 @@ message GatewaySpec {
   optional string type = 3;
 
   // Version is used for marking event version
-  optional string version = 4;
+  optional string eventVersion = 4;
 
   // ServiceSpec is the specifications of the service to expose the gateway
   optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 5;

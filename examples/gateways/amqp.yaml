@@ -16,7 +16,8 @@ spec:
   configMap: "amqp-gateway-configmap"
   type: "amqp"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "amqp-sensor"

@@ -16,7 +16,8 @@ spec:
   configMap: "kafka-gateway-configmap"
   type: "kafka"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "kafka-sensor"

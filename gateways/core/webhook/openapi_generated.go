@@ -28,15 +28,15 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/webhook.Webhook": schema_argo_events_gateways_core_webhook_Webhook(ref),
+		"github.com/argoproj/argo-events/gateways/core/webhook.webhook": schema_argo_events_gateways_core_webhook_webhook(ref),
 	}
 }
 
-func schema_argo_events_gateways_core_webhook_Webhook(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_argo_events_gateways_core_webhook_webhook(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Webhook is a general purpose REST API",
+				Description: "webhook is a general purpose REST API",
 				Properties: map[string]spec.Schema{
 					"endpoint": {
 						SchemaProps: spec.SchemaProps{
