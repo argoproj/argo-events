@@ -102,6 +102,8 @@ type GatewaySpec struct {
 
 	// ImageVersion is the version for gateway components images to run
 	ImageVersion string `json:"imageVersion,omitempty" protobuf:"bytes,10,opt,name=imageVersion"`
+
+	TransformerImage string `json:"transformerImage,omitempty" protobuf:"bytes,11,opt,name=transformerImage"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

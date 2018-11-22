@@ -20,7 +20,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
 	zlog "github.com/rs/zerolog"
-	appv1 "k8s.io/api/apps/v1"
+	appv1beta2 "k8s.io/api/apps/v1beta2"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"os"
@@ -161,7 +161,7 @@ func (goc *gwOperationCtx) operate() error {
 		//                          and dispatches the event to gateway transformer
 		// 2) Gateway Transformer - Listens for events from gateway processor, convert them into cloudevents specification
 		//                          compliant events and dispatches them to sensors of interest.
-		gatewayDeployment := &appv1.Deployment{
+		gatewayDeployment := &appv1beta2.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      common.DefaultGatewayDeploymentName(goc.gw.Name),
 				Namespace: goc.gw.Namespace,
@@ -170,7 +170,7 @@ func (goc *gwOperationCtx) operate() error {
 					*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 				},
 			},
-			Spec: appv1.DeploymentSpec{
+			Spec: appv1beta2.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: goc.gw.ObjectMeta.Labels,
 				},
@@ -187,7 +187,7 @@ func (goc *gwOperationCtx) operate() error {
 
 		// we can now create the gateway deployment.
 		// depending on user configuration gateway will be exposed outside the cluster or intra-cluster.
-		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Create(gatewayDeployment)
+		_, err = goc.controller.kubeClientset.AppsV1beta2().Deployments(goc.gw.Namespace).Create(gatewayDeployment)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
@@ -421,11 +421,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
 			{
-				Name: common.EnvVarGatewayProcessorHTTPServerConfigActivated,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigActivated,
 				Value: common.GatewayProcessorHTTPServerConfigActivatedEndpoint,
 			},
 			{
-				Name: common.EnvVarGatewayProcessorHTTPServerConfigError,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigError,
 				Value: common.GatewayProcessorHTTPServerConfigErrorEndpoint,
 			},
 		}
@@ -463,6 +463,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		transformerImage = common.GatewayNATSEventTransformerImage
 	default:
 		transformerImage = common.GatewayHTTPEventTransformerImage
+	}
+
+	// basically
+	if goc.gw.Spec.TransformerImage != "" {
+		transformerImage = goc.gw.Spec.TransformerImage
 	}
 
 	// create container for gateway transformer
