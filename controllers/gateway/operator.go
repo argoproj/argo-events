@@ -176,7 +176,8 @@ func (goc *gwOperationCtx) operate() error {
 				},
 				Template: corev1.PodTemplateSpec{
 					ObjectMeta: metav1.ObjectMeta{
-						Labels: goc.gw.ObjectMeta.Labels,
+						Labels:      goc.gw.ObjectMeta.Labels,
+						Annotations: goc.gw.Annotations,
 					},
 					Spec: *goc.gw.Spec.DeploySpec,
 				},
@@ -421,11 +422,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 				Value: common.GatewayProcessorHTTPServerEventEndpoint,
 			},
 			{
-				Name: common.EnvVarGatewayProcessorHTTPServerConfigActivated,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigActivated,
 				Value: common.GatewayProcessorHTTPServerConfigActivatedEndpoint,
 			},
 			{
-				Name: common.EnvVarGatewayProcessorHTTPServerConfigError,
+				Name:  common.EnvVarGatewayProcessorHTTPServerConfigError,
 				Value: common.GatewayProcessorHTTPServerConfigErrorEndpoint,
 			},
 		}
