@@ -16,6 +16,9 @@ spec:
       image: "argoproj/webhook-gateway"
       imagePullPolicy: "IfNotPresent"
       command: ["/bin/webhook-gateway"]
+      ports:
+      - name: http
+        containerPort: 12000
     serviceAccountName: "argo-events-sa"
   serviceSpec:
     selector:

@@ -155,6 +155,12 @@ func (soc *sOperationCtx) operate() error {
 										Image:           fmt.Sprintf("%s:%s", common.SensorImage, soc.s.Spec.ImageVersion),
 										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
 										Env:             envVars,
+										Ports: []corev1.ContainerPort{
+											{
+												Name:          common.SensorDeploymentPortName,
+												ContainerPort: intstr.Parse(common.SensorServicePort).IntVal,
+											},
+										},
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,
@@ -198,6 +204,12 @@ func (soc *sOperationCtx) operate() error {
 										Image:           common.SensorImage,
 										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
 										Env:             envVars,
+										Ports: []corev1.ContainerPort{
+											{
+												Name:          common.SensorDeploymentPortName,
+												ContainerPort: intstr.Parse(common.SensorServicePort).IntVal,
+											},
+										},
 									},
 								},
 								ServiceAccountName: soc.s.Spec.ServiceAccountName,

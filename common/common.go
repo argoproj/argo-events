@@ -73,6 +73,9 @@ const (
 	// Sensor service port
 	SensorServicePort = "9300"
 
+	// the port name on the sensor deployment
+	SensorDeploymentPortName = "http"
+
 	// SensorServiceEndpoint is the endpoint to dispatch the event to
 	SensorServiceEndpoint = "/"
 
