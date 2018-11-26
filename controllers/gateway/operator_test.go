@@ -37,7 +37,8 @@ spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "webhook-events"
@@ -91,7 +92,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 	// check whether gateway transformer configmap is created
 	cm, err := fakeController.kubeClientset.CoreV1().ConfigMaps(fakeController.Config.Namespace).Get(common.DefaultGatewayTransformerConfigMapName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
 	assert.Nil(t, err)
-	assert.Equal(t, cm.Data[common.EventTypeVersion], goc.gw.Spec.Version)
+	assert.Equal(t, cm.Data[common.EventTypeVersion], goc.gw.Spec.EventVersion)
 	assert.Equal(t, cm.Data[common.EventSource], goc.gw.ObjectMeta.Name)
 	assert.Equal(t, cm.Data[common.EventType], string(goc.gw.Spec.Type))
 	assert.NotNil(t, cm.Data[common.SensorWatchers])

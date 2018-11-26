@@ -30,7 +30,6 @@ option go_package = "v1alpha1";
 
 // ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
-  // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
   optional S3Artifact s3 = 1;
 
   optional string inline = 2;
@@ -268,13 +267,13 @@ message RetryStrategy {
 
 // S3Artifact contains information about an artifact in S3
 message S3Artifact {
+  optional S3Bucket s3Bucket = 4;
+
   optional string key = 1;
 
   optional string event = 2;
 
   optional S3Filter filter = 3;
-
-  optional S3Bucket s3Bucket = 4;
 }
 
 // S3Bucket contains information for an S3 Bucket

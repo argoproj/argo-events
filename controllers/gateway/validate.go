@@ -30,7 +30,7 @@ func Validate(gw *v1alpha1.Gateway) error {
 	if gw.Spec.Type == "" {
 		return fmt.Errorf("gateway type is not specified")
 	}
-	if gw.Spec.Version == "" {
+	if gw.Spec.EventVersion == "" {
 		return fmt.Errorf("gateway version is not specified")
 	}
 	switch gw.Spec.DispatchMechanism {

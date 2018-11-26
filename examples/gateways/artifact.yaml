@@ -14,7 +14,8 @@ spec:
       command: ["/bin/artifact-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   type: "artifact"
   dispatchMechanism: "HTTP"
   watchers:

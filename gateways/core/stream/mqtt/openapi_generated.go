@@ -28,15 +28,15 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/stream/mqtt.MQTT": schema_gateways_core_stream_mqtt_MQTT(ref),
+		"github.com/argoproj/argo-events/gateways/core/stream/mqtt.mqtt": schema_gateways_core_stream_mqtt_mqtt(ref),
 	}
 }
 
-func schema_gateways_core_stream_mqtt_MQTT(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_gateways_core_stream_mqtt_mqtt(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "MQTT contains information to connect to MQTT broker",
+				Description: "mqtt contains information to connect to MQTT broker",
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{

@@ -16,7 +16,8 @@ spec:
   configMap: "resource-gateway-configmap"
   type: "resource"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "resource-sensor"

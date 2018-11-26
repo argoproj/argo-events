@@ -37,7 +37,7 @@ func schema_argo_events_gateways_custom_storagegrid_Filter(ref common.ReferenceC
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+				Description: "Filter represents filters to apply to bucket notifications for specifying constraints on objects",
 				Properties: map[string]spec.Schema{
 					"prefix": {
 						SchemaProps: spec.SchemaProps{

@@ -57,6 +57,10 @@ required = [
   name = "github.com/fsnotify/fsnotify"
   branch = "master"
 
+[[constraint]]
+  name = "github.com/xanzy/go-gitlab"
+  branch = "master"
+
 [[override]]
   branch = "release-1.10"
   name = "k8s.io/api"

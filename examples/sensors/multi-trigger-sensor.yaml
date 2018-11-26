@@ -7,6 +7,7 @@ metadata:
 spec:
   repeat: true
   serviceAccountName: argo-events-sa
+  imageVersion: "latest"
   signals:
     - name: nats-gateway/nats.fooConfig
   triggers:

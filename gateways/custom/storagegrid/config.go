@@ -43,12 +43,12 @@ type StorageGridEventConfig struct {
 	Filter *Filter `json:"filter,omitempty"`
 	// srv holds reference to http server
 	// +k8s:openapi-gen=false
-	Srv *http.Server
+	Srv *http.Server `json:"srv,omitempty"`
 	// +k8s:openapi-gen=false
-	Mux *http.ServeMux
+	Mux *http.ServeMux `json:"mux,omitempty"`
 }
 
-// Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+// Filter represents filters to apply to bucket notifications for specifying constraints on objects
 // +k8s:openapi-gen=true
 type Filter struct {
 	Prefix string `json:"prefix"`
