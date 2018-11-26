@@ -18,14 +18,14 @@ Note: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-eve
 
 ```
 kubectl create namespace argo-events
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/argo-events-sa.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/argo-events-cluster-roles.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/sensor-crd.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/gateway-crd.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/sensor-controller-configmap.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/sensor-controller-deployment.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/gateway-controller-configmap.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/guides/hack/k8s/manifests/gateway-controller-deployment.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-crd.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-configmap.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-deployment.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
 ```
 
 <b>Note</b> If you want to use a different namespace for deployments, make sure to update namespace references
