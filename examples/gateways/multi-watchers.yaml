@@ -9,7 +9,8 @@ spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "webhook-events"

@@ -28,15 +28,15 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/stream/kafka.Kafka": schema_gateways_core_stream_kafka_Kafka(ref),
+		"github.com/argoproj/argo-events/gateways/core/stream/kafka.kafka": schema_gateways_core_stream_kafka_kafka(ref),
 	}
 }
 
-func schema_gateways_core_stream_kafka_Kafka(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_gateways_core_stream_kafka_kafka(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Kafka defines configuration required to connect to kafka cluster",
+				Description: "kafka defines configuration required to connect to kafka cluster",
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{

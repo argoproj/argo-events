@@ -10,13 +10,13 @@ var (
 	configKey   = "testConfig"
 	configValue = `
 projectId: "28"
-url: "http://webhook-gateway-gateway-svc-dev-axis.devkubewd.dev.blackrock.com/push"
+url: "http://webhook-gateway-gateway-svc/push"
 event: "PushEvents"
 accessToken:
     key: accesskey
     name: gitlab-access
 enableSSLVerification: false   
-gitlabBaseUrl: "http://gitlab.devkubewd.dev.blackrock.com/"
+gitlabBaseUrl: "http://gitlab.com/"
 `
 )
 
@@ -31,7 +31,7 @@ func TestGitlabExecutor_Validate(t *testing.T) {
 	assert.Nil(t, err)
 
 	badConfig := `
-url: "http://webhook-gateway-gateway-svc-dev-axis.devkubewd.dev.blackrock.com/push"
+url: "http://webhook-gateway-gateway-svc/push"
 event: "PushEvents"
 accessToken:
     key: accesskey

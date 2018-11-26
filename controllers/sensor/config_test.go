@@ -17,7 +17,6 @@ limitations under the License.
 package sensor
 
 import (
-	"context"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -26,14 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-func TestWatchControllerConfigMap(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	controller := sensorController()
-	_, err := controller.watchControllerConfigMap(ctx)
-	assert.Nil(t, err)
-}
 
 func TestResyncConfig(t *testing.T) {
 	controller := sensorController()

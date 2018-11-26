@@ -129,7 +129,7 @@ func (goc *gwOperationCtx) operate() error {
 				// source of the event is the gateway
 				common.EventSource: goc.gw.Name,
 				// version of event
-				common.EventTypeVersion: goc.gw.Spec.Version,
+				common.EventTypeVersion: goc.gw.Spec.EventVersion,
 				// type of the event is type of the gateway e.g. webhook, calendar, stream etc
 				common.EventType: string(goc.gw.Spec.Type),
 				// list of sensor watchers

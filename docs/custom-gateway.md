@@ -15,13 +15,12 @@ user to watch configuration updates and take actions.
  
  |  Field               |  Description |
  |----------------------|--------------|
- | TRANSFORMER_PORT     | Env var for http server port running within gateway transformer |
- |  ARGO_EVENTS_NAMESPACE | Env var for the namespace of the controller & services |
- |  GATEWAY_PROCESSOR_CONFIG_MAP            | Contains grpc server port for gateway processor server |
- |  GATEWAY_NAME             | Env var for name of gateway |
- |  GATEWAY_CONTROLLER_INSTANCE_ID             | Contains gateway controller instance id |
- |  GATEWAY_CONTROLLER_NAME             | Contains name of gateway controller |
-
+ | TRANSFORMER_PORT     | http server port running within gateway transformer |
+ |  GATEWAY_NAMESPACE | namespace of the gateway |
+ |  GATEWAY_PROCESSOR_CONFIG_MAP            | map containing configurations to run in a gateway|
+ |  GATEWAY_NAME             | name of the gateway |
+ |  GATEWAY_CONTROLLER_INSTANCE_ID             | gateway controller instance id |
+ 
 ## Core Gateway Style
 The most straightforward option. The gateway consists of two components,
 
@@ -37,22 +36,35 @@ User needs to implement following interface.
 
 ```go
 type ConfigExecutor interface {
-	StartConfig(configContext *ConfigContext) error
-	StopConfig(configContext *ConfigContext) error
+	StartConfig(configContext *ConfigContext)
+	StopConfig(configContext *ConfigContext)
+	Validate(configContext *ConfigContext) error
 }
 ```
 
-ConfigData contains configuration key/name and value.
+ConfigData contains configuration key/name, value and the state of the configuration 
 ```go
 type ConfigData struct {
-	// Src contains name of the configuration
-	Src    string
-	// Config contains the configuration
-	Config string
-	// StopCh is used to send a stop signal to configuration runner/executor
-	StopCh chan struct{}
+	// Data holds the actual configuration
+	Data *ConfigData
+
+	StartChan chan struct{}
+		
+	StopChan chan struct{}
+
+	DataChan chan []byte
+
+	DoneChan chan struct{}
+
+	ErrChan chan error
+
+	ShutdownChan chan struct{}
+
 	// Active tracks configuration state as running or stopped
 	Active bool
+	// Cancel is called to cancel the context used by client to communicate with gRPC server.
+	// Use it only if gateway is implemented as gRPC server.
+	Cancel context.CancelFunc
 }
 ```
 
@@ -131,27 +143,19 @@ List of environment variables available to user code
 |----------------------|--------------|
 | GATEWAY_PROCESSOR_SERVER_HTTP_PORT     | Gateway processor server HTTP server port |
 |  GATEWAY_PROCESSOR_CLIENT_HTTP_PORT | Gateway processor client HTTP server port  |
-|  GATEWAY_HTTP_CONFIG_START            | REST endpoint to post new configuration |
-|  GATEWAY_HTTP_CONFIG_STOP             | REST endpoint to make configuration to stop |
-|  GATEWAY_HTTP_CONFIG_EVENT             | REST endpoint to send events to |
-
+|  GATEWAY_HTTP_CONFIG_START            | Endpoint to post new configuration |
+|  GATEWAY_HTTP_CONFIG_STOP             | Endpoint to make configuration to stop |
+|  GATEWAY_HTTP_CONFIG_EVENT             | Endpoint to send events to |
+| GATEWAY_HTTP_CONFIG_RUNNING         | Endpoint to send activation notifications for the configuration /
+| GATEWAY_HTTP_CONFIG_ERROR           | Endpoint on which which gateway processor listens for errors from configurations |
 
 For detailed implementation, check out [Calendar HTTP gateway](https://github.com/argoproj/argo-events/tree/master/gateways/rest/calendar)
 
 ## Framework independent
 The fourth option is you provide gateway implementation from scratch: watch the configuration
 updates,  start/stop configuration if needed. Only requirement is that events must be 
-dispatched to gateway-transformer using HTTP post request. The port to dispatch the request
+dispatched to gateway-transformer using HTTP post request. The port to dispatch the event
 is made available through environment variable `TRANSFORMER_PORT`.
-
-List of environment variables available to user code
- 
-|  Field               |  Description |
-|----------------------|--------------|
-| TRANSFORMER_PORT     | Gateway transformer port to send HTTP POST request to |
-|  ARGO_EVENTS_NAMESPACE | Namespace where gateway is deployed  |
-|  GATEWAY_PROCESSOR_CONFIG_MAP                | Name of ConfigMap for gateway configuration |
-|  GATEWAY_NAME             | Gateway name  |
 
 ### Gateway Examples
 * Example gateway definitions are available at [here](https://github.com/argoproj/argo-events/tree/master/examples/gateways)

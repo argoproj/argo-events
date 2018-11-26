@@ -47,7 +47,7 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 func (m *ArtifactLocation) Reset()      { *m = ArtifactLocation{} }
 func (*ArtifactLocation) ProtoMessage() {}
 func (*ArtifactLocation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{0}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{0}
 }
 func (m *ArtifactLocation) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -75,7 +75,7 @@ var xxx_messageInfo_ArtifactLocation proto.InternalMessageInfo
 func (m *ConfigmapArtifact) Reset()      { *m = ConfigmapArtifact{} }
 func (*ConfigmapArtifact) ProtoMessage() {}
 func (*ConfigmapArtifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{1}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{1}
 }
 func (m *ConfigmapArtifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -103,7 +103,7 @@ var xxx_messageInfo_ConfigmapArtifact proto.InternalMessageInfo
 func (m *Data) Reset()      { *m = Data{} }
 func (*Data) ProtoMessage() {}
 func (*Data) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{2}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{2}
 }
 func (m *Data) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -131,7 +131,7 @@ var xxx_messageInfo_Data proto.InternalMessageInfo
 func (m *DataFilter) Reset()      { *m = DataFilter{} }
 func (*DataFilter) ProtoMessage() {}
 func (*DataFilter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{3}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{3}
 }
 func (m *DataFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -159,7 +159,7 @@ var xxx_messageInfo_DataFilter proto.InternalMessageInfo
 func (m *EscalationPolicy) Reset()      { *m = EscalationPolicy{} }
 func (*EscalationPolicy) ProtoMessage() {}
 func (*EscalationPolicy) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{4}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{4}
 }
 func (m *EscalationPolicy) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -187,7 +187,7 @@ var xxx_messageInfo_EscalationPolicy proto.InternalMessageInfo
 func (m *Event) Reset()      { *m = Event{} }
 func (*Event) ProtoMessage() {}
 func (*Event) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{5}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{5}
 }
 func (m *Event) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -215,7 +215,7 @@ var xxx_messageInfo_Event proto.InternalMessageInfo
 func (m *EventContext) Reset()      { *m = EventContext{} }
 func (*EventContext) ProtoMessage() {}
 func (*EventContext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{6}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{6}
 }
 func (m *EventContext) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -243,7 +243,7 @@ var xxx_messageInfo_EventContext proto.InternalMessageInfo
 func (m *EventWrapper) Reset()      { *m = EventWrapper{} }
 func (*EventWrapper) ProtoMessage() {}
 func (*EventWrapper) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{7}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{7}
 }
 func (m *EventWrapper) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -271,7 +271,7 @@ var xxx_messageInfo_EventWrapper proto.InternalMessageInfo
 func (m *FileArtifact) Reset()      { *m = FileArtifact{} }
 func (*FileArtifact) ProtoMessage() {}
 func (*FileArtifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{8}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{8}
 }
 func (m *FileArtifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -299,7 +299,7 @@ var xxx_messageInfo_FileArtifact proto.InternalMessageInfo
 func (m *GroupVersionKind) Reset()      { *m = GroupVersionKind{} }
 func (*GroupVersionKind) ProtoMessage() {}
 func (*GroupVersionKind) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{9}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{9}
 }
 func (m *GroupVersionKind) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -327,7 +327,7 @@ var xxx_messageInfo_GroupVersionKind proto.InternalMessageInfo
 func (m *NodeStatus) Reset()      { *m = NodeStatus{} }
 func (*NodeStatus) ProtoMessage() {}
 func (*NodeStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{10}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{10}
 }
 func (m *NodeStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -355,7 +355,7 @@ var xxx_messageInfo_NodeStatus proto.InternalMessageInfo
 func (m *ResourceObject) Reset()      { *m = ResourceObject{} }
 func (*ResourceObject) ProtoMessage() {}
 func (*ResourceObject) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{11}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{11}
 }
 func (m *ResourceObject) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -383,7 +383,7 @@ var xxx_messageInfo_ResourceObject proto.InternalMessageInfo
 func (m *ResourceParameter) Reset()      { *m = ResourceParameter{} }
 func (*ResourceParameter) ProtoMessage() {}
 func (*ResourceParameter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{12}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{12}
 }
 func (m *ResourceParameter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -411,7 +411,7 @@ var xxx_messageInfo_ResourceParameter proto.InternalMessageInfo
 func (m *ResourceParameterSource) Reset()      { *m = ResourceParameterSource{} }
 func (*ResourceParameterSource) ProtoMessage() {}
 func (*ResourceParameterSource) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{13}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{13}
 }
 func (m *ResourceParameterSource) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -439,7 +439,7 @@ var xxx_messageInfo_ResourceParameterSource proto.InternalMessageInfo
 func (m *RetryStrategy) Reset()      { *m = RetryStrategy{} }
 func (*RetryStrategy) ProtoMessage() {}
 func (*RetryStrategy) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{14}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{14}
 }
 func (m *RetryStrategy) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -467,7 +467,7 @@ var xxx_messageInfo_RetryStrategy proto.InternalMessageInfo
 func (m *S3Artifact) Reset()      { *m = S3Artifact{} }
 func (*S3Artifact) ProtoMessage() {}
 func (*S3Artifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{15}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{15}
 }
 func (m *S3Artifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -495,7 +495,7 @@ var xxx_messageInfo_S3Artifact proto.InternalMessageInfo
 func (m *S3Bucket) Reset()      { *m = S3Bucket{} }
 func (*S3Bucket) ProtoMessage() {}
 func (*S3Bucket) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{16}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{16}
 }
 func (m *S3Bucket) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -523,7 +523,7 @@ var xxx_messageInfo_S3Bucket proto.InternalMessageInfo
 func (m *S3Filter) Reset()      { *m = S3Filter{} }
 func (*S3Filter) ProtoMessage() {}
 func (*S3Filter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{17}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{17}
 }
 func (m *S3Filter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -551,7 +551,7 @@ var xxx_messageInfo_S3Filter proto.InternalMessageInfo
 func (m *Sensor) Reset()      { *m = Sensor{} }
 func (*Sensor) ProtoMessage() {}
 func (*Sensor) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{18}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{18}
 }
 func (m *Sensor) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -579,7 +579,7 @@ var xxx_messageInfo_Sensor proto.InternalMessageInfo
 func (m *SensorList) Reset()      { *m = SensorList{} }
 func (*SensorList) ProtoMessage() {}
 func (*SensorList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{19}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{19}
 }
 func (m *SensorList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -607,7 +607,7 @@ var xxx_messageInfo_SensorList proto.InternalMessageInfo
 func (m *SensorSpec) Reset()      { *m = SensorSpec{} }
 func (*SensorSpec) ProtoMessage() {}
 func (*SensorSpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{20}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{20}
 }
 func (m *SensorSpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -635,7 +635,7 @@ var xxx_messageInfo_SensorSpec proto.InternalMessageInfo
 func (m *SensorStatus) Reset()      { *m = SensorStatus{} }
 func (*SensorStatus) ProtoMessage() {}
 func (*SensorStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{21}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{21}
 }
 func (m *SensorStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -663,7 +663,7 @@ var xxx_messageInfo_SensorStatus proto.InternalMessageInfo
 func (m *Signal) Reset()      { *m = Signal{} }
 func (*Signal) ProtoMessage() {}
 func (*Signal) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{22}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{22}
 }
 func (m *Signal) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -691,7 +691,7 @@ var xxx_messageInfo_Signal proto.InternalMessageInfo
 func (m *SignalFilter) Reset()      { *m = SignalFilter{} }
 func (*SignalFilter) ProtoMessage() {}
 func (*SignalFilter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{23}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{23}
 }
 func (m *SignalFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -719,7 +719,7 @@ var xxx_messageInfo_SignalFilter proto.InternalMessageInfo
 func (m *TimeFilter) Reset()      { *m = TimeFilter{} }
 func (*TimeFilter) ProtoMessage() {}
 func (*TimeFilter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{24}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{24}
 }
 func (m *TimeFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -747,7 +747,7 @@ var xxx_messageInfo_TimeFilter proto.InternalMessageInfo
 func (m *Trigger) Reset()      { *m = Trigger{} }
 func (*Trigger) ProtoMessage() {}
 func (*Trigger) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{25}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{25}
 }
 func (m *Trigger) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -775,7 +775,7 @@ var xxx_messageInfo_Trigger proto.InternalMessageInfo
 func (m *URI) Reset()      { *m = URI{} }
 func (*URI) ProtoMessage() {}
 func (*URI) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{26}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{26}
 }
 func (m *URI) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -803,7 +803,7 @@ var xxx_messageInfo_URI proto.InternalMessageInfo
 func (m *URLArtifact) Reset()      { *m = URLArtifact{} }
 func (*URLArtifact) ProtoMessage() {}
 func (*URLArtifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d1a346ea063687f9, []int{27}
+	return fileDescriptor_generated_c7724a76b02f0e32, []int{27}
 }
 func (m *URLArtifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -7955,10 +7955,10 @@ var (
 )
 
 func init() {
-	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto", fileDescriptor_generated_d1a346ea063687f9)
+	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto", fileDescriptor_generated_c7724a76b02f0e32)
 }
 
-var fileDescriptor_generated_d1a346ea063687f9 = []byte{
+var fileDescriptor_generated_c7724a76b02f0e32 = []byte{
 	// 2500 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x59, 0x4b, 0x6f, 0x1b, 0xc9,
 	0xf1, 0xf7, 0xf0, 0xcd, 0x92, 0xbc, 0x92, 0xfb, 0x6f, 0x60, 0x09, 0x01, 0x2b, 0x1a, 0x63, 0xfc,

@@ -1,5 +1,4 @@
 # The gateway-controller configmap includes configuration information for the gateway-controller
-# NOTE: if namespace is not provided in `config`, namespace defaults to 'argo-events'
 apiVersion: v1
 kind: ConfigMap
 metadata:

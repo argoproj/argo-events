@@ -31,7 +31,7 @@ var (
 	gitTreeState = ""                     // determined from `git status --porcelain`. either 'clean' or 'dirty'
 )
 
-// Version contains Axis version information
+// Version contains Argo-Events version information
 type Version struct {
 	Version      string
 	BuildDate    string

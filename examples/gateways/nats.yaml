@@ -16,7 +16,8 @@ spec:
   configMap: "nats-gateway-configmap"
   type: "nats"
   dispatchMechanism: "HTTP"
-  version: "1.0"
+  eventVersion: "1.0"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "nats-sensor"

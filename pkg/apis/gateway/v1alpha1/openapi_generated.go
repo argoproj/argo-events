@@ -152,7 +152,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"version": {
+					"eventVersion": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Version is used for marking event version",
 							Type:        []string{"string"},
@@ -200,7 +200,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "version", "dispatchMechanism"},
+				Required: []string{"deploySpec", "type", "eventVersion", "dispatchMechanism"},
 			},
 		},
 		Dependencies: []string{

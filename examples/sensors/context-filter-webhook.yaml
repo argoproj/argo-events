@@ -7,6 +7,7 @@ metadata:
 spec:
   repeat: true
   serviceAccountName: argo-events-sa
+  imageVersion: "latest"
   signals:
     - name: webhook-gateway/webhook.fooConfig
       filters:

@@ -28,11 +28,11 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/stream/nats.Nats": schema_gateways_core_stream_nats_Nats(ref),
+		"github.com/argoproj/argo-events/gateways/core/stream/nats.natsConfig": schema_gateways_core_stream_nats_natsConfig(ref),
 	}
 }
 
-func schema_gateways_core_stream_nats_Nats(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_gateways_core_stream_nats_natsConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{

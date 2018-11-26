@@ -28,34 +28,8 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/gateways/core/resource/.Resource":       schema_gateways_core_resource__Resource(ref),
 		"github.com/argoproj/argo-events/gateways/core/resource/.ResourceFilter": schema_gateways_core_resource__ResourceFilter(ref),
-	}
-}
-
-func schema_gateways_core_resource__Resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Resource refers to a dependency on a k8s resource.",
-				Properties: map[string]spec.Schema{
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/gateways/core/resource/.ResourceFilter"),
-						},
-					},
-				},
-				Required: []string{"namespace"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/core/resource/.ResourceFilter"},
+		"github.com/argoproj/argo-events/gateways/core/resource/.resource":       schema_gateways_core_resource__resource(ref),
 	}
 }
 
@@ -101,5 +75,31 @@ func schema_gateways_core_resource__ResourceFilter(ref common.ReferenceCallback)
 			},
 		},
 		Dependencies: []string{},
+	}
+}
+
+func schema_gateways_core_resource__resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "resource refers to a dependency on a k8s resource.",
+				Properties: map[string]spec.Schema{
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"filter": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/gateways/core/resource/.ResourceFilter"),
+						},
+					},
+				},
+				Required: []string{"namespace"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/gateways/core/resource/.ResourceFilter"},
 	}
 }

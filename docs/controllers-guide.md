@@ -19,6 +19,9 @@ data:
     instanceID: argo-events  # mandatory
     namespace: my-custom-namespace # optional
 ```
+
+If you don't provide namespace, controller will watch all namespaces for gateway resource. 
+
 <b>Note on `instance-id`</b>: it is used to map a gateway or sensor to a controller. 
 e.g. when you create a gateway with label `gateways.argoproj.io/gateway-controller-instanceid: argo-events`, a
  controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml)
