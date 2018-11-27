@@ -335,8 +335,8 @@
     "internal/cbor",
     "internal/json"
   ]
-  revision = "848482bc3dbeed6a47eb8f8cec0d4484795b1314"
-  version = "v1.10.3"
+  revision = "8747b7b3a51b5d08ee7ac50eaf4869edaf9f714a"
+  version = "v1.11.0"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -390,7 +390,7 @@
   branch = "master"
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
-  revision = "165f0f268451ae4a0c9f84e316349783bffa4771"
+  revision = "0745b3706ccb0392e890e639c33e6a6309cf71c9"
 
 [[projects]]
   name = "go.uber.org/atomic"
@@ -406,7 +406,7 @@
     "blake2b",
     "ssh/terminal"
   ]
-  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+  revision = "eb0de9b17e854e9b1ccd9963efafc79862359959"
 
 [[projects]]
   branch = "master"
@@ -433,7 +433,7 @@
     ".",
     "internal"
   ]
-  revision = "f42d05182288abf10faef86d16c0d07b8d40ea2d"
+  revision = "8f65e3013ebad444f13bc19536f7865efc793816"
 
 [[projects]]
   branch = "master"
@@ -443,7 +443,7 @@
     "unix",
     "windows"
   ]
-  revision = "ec83556a53fe16b65c452a104ea9d1e86a671852"
+  revision = "62eef0e2fa9b2c385f7b2778e763486da6880d37"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -482,7 +482,7 @@
     "internal/fastwalk",
     "internal/gopathwalk"
   ]
-  revision = "fc4f04983f629377122b333bebb16bfd5a5dcfed"
+  revision = "04b5d21e00f1f47bd824a6ade581e7189bacde87"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -627,7 +627,7 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "e386b2658ed20923da8cc9250e552f082899a1ee"
+  revision = "08e1968f78a1f7de763ae38e22d8dfe06fc6955d"
 
 [[projects]]
   branch = "release-7.0"

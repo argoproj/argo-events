@@ -10,7 +10,6 @@ spec:
   type: "webhook"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "webhook-events"

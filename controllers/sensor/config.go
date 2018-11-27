@@ -33,7 +33,7 @@ import (
 
 // watchControllerConfigMap watches updates to sensor controller configmap
 func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
-	log.Info("watching sensor sensor-controller config map updates")
+	log.Info("watching sensor-controller config map updates")
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
 		source,

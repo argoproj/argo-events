@@ -149,10 +149,6 @@ func (goc *gwOperationCtx) operate() error {
 			return err
 		}
 
-		if goc.gw.Spec.ImageVersion == "" {
-			goc.gw.Spec.ImageVersion = common.ImageVersionLatest
-		}
-
 		// add gateway name to gateway label
 		goc.gw.ObjectMeta.Labels[common.LabelGatewayName] = goc.gw.Name
 
@@ -321,6 +317,16 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message st
 	goc.updated = true
 }
 
+// getContainerFromSpec returns a container from gateway deploy spec by name
+func (goc *gwOperationCtx) getContainerFromSpec(name string) (*corev1.Container, bool) {
+	for _, container := range goc.gw.Spec.DeploySpec.Containers {
+		if name == container.Name {
+			return &container, true
+		}
+	}
+	return nil, false
+}
+
 // creates a list of containers required for gateway deployment
 func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 	// env variables for gateway processor
@@ -367,8 +373,13 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorGRPCClientImage, goc.gw.Spec.ImageVersion),
+			Image:           fmt.Sprintf("%s/%s", common.DefaultImageRepository, common.GatewayProcessorGRPCClientImage),
 			ImagePullPolicy: corev1.PullAlways,
+		}
+
+		// if user has explicitly provided the container spec
+		if container, ok := goc.getContainerFromSpec(common.GatewayProcessorGRPCClientImage); ok {
+			eventProcessorContainer = *container
 		}
 
 		// this env var is available across all gateway processor server and client containers
@@ -394,8 +405,13 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		// gateway processor client container
 		eventProcessorContainer := corev1.Container{
 			Name:            gatewayProcessor,
-			Image:           fmt.Sprintf("%s:%s", common.GatewayProcessorHTTPClientImage, goc.gw.Spec.ImageVersion),
+			Image:           fmt.Sprintf("%s/%s", common.DefaultImageRepository, common.GatewayProcessorHTTPClientImage),
 			ImagePullPolicy: corev1.PullAlways,
+		}
+
+		// if user has explicitly provided the container spec
+		if container, ok := goc.getContainerFromSpec(common.GatewayProcessorHTTPClientImage); ok {
+			eventProcessorContainer = *container
 		}
 
 		// these variables are available to all containers, both gateway processor server
@@ -441,7 +457,6 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		}
 	} else {
 		// this is when user is deploying gateway by either following core gateways or writing a completely custom gateway
-
 		// only one of these container must have a main entry. others can act as a supporting components
 		eventGeneratorAndProcessorContainers := goc.gw.Spec.DeploySpec.Containers
 		containers = append(containers, eventGeneratorAndProcessorContainers...)
@@ -466,22 +481,30 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		transformerImage = common.GatewayHTTPEventTransformerImage
 	}
 
+	transFormerEnvVars := []corev1.EnvVar{
+		{
+			Name:  common.EnvVarGatewayTransformerConfigMap,
+			Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
+		},
+		{
+			Name:  common.GatewayNamespace,
+			Value: goc.gw.Namespace,
+		},
+	}
+
 	// create container for gateway transformer
 	gatewayTransformerContainer := corev1.Container{
 		Name:            gatewayTransformer,
+		Image:           fmt.Sprintf("%s/%s", common.DefaultImageRepository, transformerImage),
 		ImagePullPolicy: corev1.PullAlways,
-		Image:           fmt.Sprintf("%s:%s", transformerImage, goc.gw.Spec.ImageVersion),
-		Env: []corev1.EnvVar{
-			{
-				Name:  common.EnvVarGatewayTransformerConfigMap,
-				Value: common.DefaultGatewayTransformerConfigMapName(goc.gw.Name),
-			},
-			{
-				Name:  common.GatewayNamespace,
-				Value: goc.gw.Namespace,
-			},
-		},
 	}
+
+	// if user has explicitly provided the container spec
+	if container, ok := goc.getContainerFromSpec(gatewayTransformer); ok {
+		gatewayTransformerContainer = *container
+	}
+
+	gatewayTransformerContainer.Env = append(gatewayTransformerContainer.Env, transFormerEnvVars...)
 
 	containers = append(containers, gatewayTransformerContainer)
 

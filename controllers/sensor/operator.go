@@ -20,7 +20,6 @@ import (
 	"runtime/debug"
 	"time"
 
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
@@ -45,7 +44,7 @@ type sOperationCtx struct {
 	updated bool
 	// log is the logrus logging context to correlate logs with a sensor
 	log zlog.Logger
-	// reference to the sensor sensor-controller
+	// reference to the sensor-controller
 	controller *SensorController
 }
 
@@ -94,8 +93,8 @@ func (soc *sOperationCtx) operate() error {
 			soc.initializeNode(trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew)
 		}
 
-		// default env variables
-		envVars := []corev1.EnvVar{
+		// add default env variables
+		soc.s.Spec.DeploySpec.Containers[0].Env = append(soc.s.Spec.DeploySpec.Containers[0].Env, []corev1.EnvVar{
 			{
 				Name:  common.SensorName,
 				Value: soc.s.Name,
@@ -108,15 +107,8 @@ func (soc *sOperationCtx) operate() error {
 				Name:  common.EnvVarSensorControllerInstanceID,
 				Value: soc.controller.Config.InstanceID,
 			},
-		}
-		// user defined environment variable.
-		if soc.s.Spec.EnvVars != nil {
-			envVars = append(envVars, soc.s.Spec.EnvVars...)
-		}
-
-		if soc.s.Spec.ImageVersion == "" {
-			soc.s.Spec.ImageVersion = common.ImageVersionLatest
-		}
+		}...,
+		)
 
 		// Todo: Make sensor as subscriber to a Pub-Sub system.
 		// if sensor is repeatable then create a deployment else create a job
@@ -150,17 +142,7 @@ func (soc *sOperationCtx) operate() error {
 									common.LabelSensorName: soc.s.Name,
 								},
 							},
-							Spec: corev1.PodSpec{
-								Containers: []corev1.Container{
-									{
-										Name:            soc.s.Name,
-										Image:           fmt.Sprintf("%s:%s", common.SensorImage, soc.s.Spec.ImageVersion),
-										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env:             envVars,
-									},
-								},
-								ServiceAccountName: soc.s.Spec.ServiceAccountName,
-							},
+							Spec: *soc.s.Spec.DeploySpec,
 						},
 					},
 				}
@@ -194,18 +176,7 @@ func (soc *sOperationCtx) operate() error {
 									common.LabelSensorName: soc.s.Name,
 								},
 							},
-							Spec: corev1.PodSpec{
-								Containers: []corev1.Container{
-									{
-										Name:            soc.s.Name,
-										Image:           common.SensorImage,
-										ImagePullPolicy: soc.s.Spec.ImagePullPolicy,
-										Env:             envVars,
-									},
-								},
-								ServiceAccountName: soc.s.Spec.ServiceAccountName,
-								RestartPolicy:      corev1.RestartPolicyNever,
-							},
+							Spec: *soc.s.Spec.DeploySpec,
 						},
 					},
 				}

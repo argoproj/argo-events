@@ -1,9 +1,9 @@
 package gitlab
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 var (
@@ -19,7 +19,6 @@ enableSSLVerification: false
 gitlabBaseUrl: "http://gitlab.com/"
 `
 )
-
 
 func TestGitlabExecutor_Validate(t *testing.T) {
 	ce := &GitlabExecutor{}

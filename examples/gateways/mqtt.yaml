@@ -17,7 +17,6 @@ spec:
   type: "mqtt"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
   watchers:
     sensors:
     - name: "mqtt-sensor"

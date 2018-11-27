@@ -192,13 +192,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"imageVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ImageVersion is the version for gateway components images to run",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
 				Required: []string{"deploySpec", "type", "eventVersion", "dispatchMechanism"},
 			},

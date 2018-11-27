@@ -25,16 +25,17 @@ import (
 // GitlabEvent is the type of gitlab event to listen to
 type GitlabEvent string
 
+// Possible values for GitlabEvent
 var (
-	PushEvents  GitlabEvent             = "PushEvents"
-	IssuesEvents   GitlabEvent          = "IssuesEvents"
+	PushEvents               GitlabEvent = "PushEvents"
+	IssuesEvents             GitlabEvent = "IssuesEvents"
 	ConfidentialIssuesEvents GitlabEvent = "ConfidentialIssuesEvents"
-	MergeRequestsEvents GitlabEvent     = "MergeRequestsEvents"
-	TagPushEvents      GitlabEvent      = "TagPushEvents"
-	NoteEvents        GitlabEvent       = "NoteEvents"
-	JobEvents         GitlabEvent       = "JobEvents"
-	PipelineEvents   GitlabEvent        = "PipelineEvents"
-	WikiPageEvents    GitlabEvent       = "WikiPageEvents"
+	MergeRequestsEvents      GitlabEvent = "MergeRequestsEvents"
+	TagPushEvents            GitlabEvent = "TagPushEvents"
+	NoteEvents               GitlabEvent = "NoteEvents"
+	JobEvents                GitlabEvent = "JobEvents"
+	PipelineEvents           GitlabEvent = "PipelineEvents"
+	WikiPageEvents           GitlabEvent = "WikiPageEvents"
 )
 
 // GitlabExecutor implements ConfigExecutor

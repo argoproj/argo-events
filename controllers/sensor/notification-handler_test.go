@@ -42,11 +42,19 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   repeat: true
+  deploySpec:
+    containers:
+    - name: sensor
+      image: "argoproj/sensor"
+      imagePullPolicy: "Always"
+      command: ["/bin/sensor"]
+    serviceAccountName: "argo-events-sa"
   signals:
     - name: test-gateway/test-config
   triggers:
-    - name: hello-world-workflow-trigger
+    - name: webhook-workflow-trigger
       resource:
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -59,15 +67,13 @@ spec:
               spec:
                 entrypoint: whalesay
                 templates:
-                  -
+                  - name: whalesay
                     container:
                       args:
                         - "hello world"
                       command:
                         - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
-`
+                      image: "docker/whalesay:latest"`
 
 func getSensor() (*v1alpha1.Sensor, error) {
 	var sensor v1alpha1.Sensor
@@ -125,8 +131,9 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, payload)
 
+	fmt.Println(event)
+
 	selectedSignal, valid := se.validateSignal(event)
-	assert.Nil(t, err)
 	assert.Equal(t, true, valid)
 	assert.NotNil(t, selectedSignal)
 	assert.Equal(t, event.Context.Source.Host, selectedSignal.Name)

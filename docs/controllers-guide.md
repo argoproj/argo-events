@@ -66,7 +66,7 @@ spec:
 ### Sensor controller
 Sensor controller watches sensor resource and manages lifecycle of a sensor.
 ```yaml
-# The sensor sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
+# The sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:

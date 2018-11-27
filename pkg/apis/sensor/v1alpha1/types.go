@@ -78,22 +78,10 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// Repeat is a flag that determines if the sensor status should be reset after completion.
-	// NOTE: functionality is currently experimental and part of an initiative to define
-	// a more concrete pattern or cycle for sensor repetition.
 	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
 
-	// ImagePullPolicy determines the when the image should be pulled from docker repository
-	ImagePullPolicy corev1.PullPolicy `json:"imagePullPolicy,omitempty" protobuf:"bytes,5,opt,name=imagePullPolicy"`
-
-	// ServiceAccountName required for role based access
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,6,opt,name=serviceAccountName"`
-
-	// EnvVars are user defined env variables to sensor pod
-	// +k8s:openapi-gen=false
-	EnvVars []corev1.EnvVar `json:"envVars,omitempty" protobuf:"bytes,7,opt,name=envVars"`
-
-	// ImageVersion is the sensor image version to run
-	ImageVersion string `json:"imageVersion,omitempty" protobuf:"bytes,8,opt,name=imageVersion"`
+	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
+	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,5,opt,name=deploySpec"`
 }
 
 // Signal describes a dependency
@@ -434,10 +422,10 @@ type ArtifactLocation struct {
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	*S3Bucket `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
-	Key       string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
-	Event     minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
-	Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+	S3Bucket *S3Bucket                   `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
+	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
+	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
+	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
 }
 
 // S3Bucket contains information for an S3 Bucket

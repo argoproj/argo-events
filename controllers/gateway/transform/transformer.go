@@ -26,7 +26,6 @@ import (
 	zlog "github.com/rs/zerolog"
 	suuid "github.com/satori/go.uuid"
 	"io/ioutil"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"net/http"
@@ -92,7 +91,7 @@ func NewTransformOperationContext(config *tConfig, namespace string, clientset k
 // Transform request transforms http request payload into CloudEvent
 func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 	// Generate an event id
-	eventId := suuid.Must(suuid.NewV4(), nil)
+	eventId := suuid.NewV1()
 	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse request payload. Err %+v", err)
@@ -100,7 +99,6 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 
 	var tp TransformerPayload
 	err = json.Unmarshal(payload, &tp)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert request payload into transformer payload. Err %+v", err)
 	}
@@ -130,23 +128,13 @@ func (toc *tOperationCtx) transform(r *http.Request) (*sv1alpha.Event, error) {
 }
 
 // getWatcherIP returns IP of service which backs given component.
-func (toc *tOperationCtx) getWatcherIP(name string) (string, string, error) {
+func (toc *tOperationCtx) getWatcherIP(name string) (string, error) {
 	service, err := toc.kubeClientset.CoreV1().Services(toc.Namespace).Get(common.DefaultSensorServiceName(name), metav1.GetOptions{})
 	if err != nil {
 		toc.log.Error().Str("service-name", name).Err(err).Msg("failed to connect to watcher service")
-		return "", "", err
+		return "", err
 	}
-	switch service.Spec.Type {
-	case corev1.ServiceTypeClusterIP:
-		return service.ObjectMeta.Name, service.Spec.ClusterIP, nil
-	case corev1.ServiceTypeLoadBalancer:
-		return service.ObjectMeta.Name, service.Spec.LoadBalancerIP, nil
-	case corev1.ServiceTypeNodePort:
-		return service.ObjectMeta.Name, service.Spec.ExternalIPs[0], nil
-	default:
-		// should never come here
-		return service.ObjectMeta.Name, "", fmt.Errorf("unknown service type.")
-	}
+	return service.Name, err
 }
 
 // postCloudEventToWatcher makes a HTTP POST call to watcher's service ip
@@ -176,7 +164,7 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 	// dispatch event to sensor watchers
 	for _, sensor := range toc.Config.Sensors {
 		// get the ip of service backing the sensor
-		serviceName, ip, err := toc.getWatcherIP(sensor.Name)
+		serviceName, err := toc.getWatcherIP(sensor.Name)
 		if err != nil {
 			toc.log.Error().
 				Str("event-source", ce.Context.Source.Host).
@@ -199,7 +187,7 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 			Str("sensor-endpoint", common.SensorServiceEndpoint).Msg("dispatching cloudevent to sensor")
 
 		// send a http post request containing event in the body
-		err = toc.postCloudEventToWatcher(ip, common.SensorServicePort, common.SensorServiceEndpoint, eventBytes)
+		err = toc.postCloudEventToWatcher(serviceName, common.SensorServicePort, common.SensorServiceEndpoint, eventBytes)
 		if err != nil {
 			toc.log.Error().
 				Str("event-source", ce.Context.Source.Host).
@@ -218,7 +206,7 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 
 	// dispatch the event to all gateway watchers
 	for _, gateway := range toc.Config.Gateways {
-		serviceName, ip, err := toc.getWatcherIP(gateway.Name)
+		serviceName, err := toc.getWatcherIP(gateway.Name)
 		if err != nil {
 			toc.log.Error().
 				Str("event-source", ce.Context.Source.Host).
@@ -241,7 +229,7 @@ func (toc *tOperationCtx) dispatchTransformedEvent(ce *sv1alpha.Event) error {
 			Str("gateway-endpoint", gateway.Endpoint).Msg("dispatching cloudevent to gateway")
 
 		// make an http post request to gateway watcher containing event in request body
-		err = toc.postCloudEventToWatcher(ip, gateway.Port, gateway.Endpoint, eventBytes)
+		err = toc.postCloudEventToWatcher(serviceName, gateway.Port, gateway.Endpoint, eventBytes)
 		if err != nil {
 			toc.log.Error().
 				Str("event-source", ce.Context.Source.Host).
