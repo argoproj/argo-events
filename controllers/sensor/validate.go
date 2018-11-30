@@ -32,7 +32,14 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err := validateSignals(s.Spec.Signals); err != nil {
 		return err
 	}
-	return validateTriggers(s.Spec.Triggers)
+	err := validateTriggers(s.Spec.Triggers)
+	if err != nil {
+		return err
+	}
+	if len(s.Spec.DeploySpec.Containers) > 1 {
+		return fmt.Errorf("sensor pod specification can't have more than one container")
+	}
+	return nil
 }
 
 func validateTriggers(triggers []v1alpha1.Trigger) error {

@@ -56,7 +56,7 @@ type SensorController struct {
 	ConfigMap string
 	// Namespace for sensor controller
 	Namespace string
-	// Config is the sensor sensor-controller's configuration
+	// Config is the sensor-controller's configuration
 	Config SensorControllerConfig
 
 	// kubernetes config and apis
@@ -179,7 +179,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
 	defer c.queue.ShutDown()
 
-	fmt.Printf("sensor sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
+	fmt.Printf("sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
 		fmt.Printf("failed to register watch for sensor-controller config map: %v", err)

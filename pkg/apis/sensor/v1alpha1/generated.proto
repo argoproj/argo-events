@@ -332,22 +332,10 @@ message SensorSpec {
   repeated Trigger triggers = 2;
 
   // Repeat is a flag that determines if the sensor status should be reset after completion.
-  // NOTE: functionality is currently experimental and part of an initiative to define
-  // a more concrete pattern or cycle for sensor repetition.
   optional bool repeat = 4;
 
-  // ImagePullPolicy determines the when the image should be pulled from docker repository
-  optional string imagePullPolicy = 5;
-
-  // ServiceAccountName required for role based access
-  optional string serviceAccountName = 6;
-
-  // EnvVars are user defined env variables to sensor pod
-  // +k8s:openapi-gen=false
-  repeated k8s.io.api.core.v1.EnvVar envVars = 7;
-
-  // ImageVersion is the sensor image version to run
-  optional string imageVersion = 8;
+  // DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
+  optional k8s.io.api.core.v1.PodSpec deploySpec = 5;
 }
 
 // SensorStatus contains information about the status of a sensor.

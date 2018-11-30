@@ -10,7 +10,6 @@ spec:
   type: "storage_grid"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "storage-grid-events"

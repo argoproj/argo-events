@@ -820,38 +820,23 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"repeat": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Repeat is a flag that determines if the sensor status should be reset after completion. NOTE: functionality is currently experimental and part of an initiative to define a more concrete pattern or cycle for sensor repetition.",
+							Description: "Repeat is a flag that determines if the sensor status should be reset after completion.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
-					"imagePullPolicy": {
+					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ImagePullPolicy determines the when the image should be pulled from docker repository",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"serviceAccountName": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ServiceAccountName required for role based access",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"imageVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ImageVersion is the sensor image version to run",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
 						},
 					},
 				},
-				Required: []string{"signals", "triggers"},
+				Required: []string{"signals", "triggers", "deploySpec"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
 	}
 }
 

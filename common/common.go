@@ -39,13 +39,16 @@ const (
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
 
+	// DefaultImageRepository is is the default image repository
+	DefaultImageRepository = "argoproj"
+
 	// ImageVersionLatest is the latest tag for image to pull
 	ImageVersionLatest = "latest"
 )
 
 // SENSOR CONTROLLER CONSTANTS
 const (
-	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor sensor-controller
+	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor-controller
 	DefaultSensorControllerDeploymentName = "sensor-controller"
 
 	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
@@ -67,9 +70,6 @@ const (
 
 // SENSOR CONSTANTS
 const (
-	// Sensor image is the image used to deploy sensor.
-	SensorImage = "argoproj/sensor"
-
 	// Sensor service port
 	SensorServicePort = "9300"
 
@@ -183,10 +183,10 @@ const (
 	GatewayProcessorHTTPServerConfigErrorEndpoint = "/error"
 
 	// GatewayProcessorGRPCClientImage is gRPC gateway processor client image
-	GatewayProcessorGRPCClientImage = "argoproj/gateway-processor-grpc-client"
+	GatewayProcessorGRPCClientImage = "gateway-processor-grpc-client"
 
 	// GatewayProcessorHTTPClientImage is HTTP gateway processor client image
-	GatewayProcessorHTTPClientImage = "argoproj/gateway-processor-http-client"
+	GatewayProcessorHTTPClientImage = "gateway-processor-http-client"
 )
 
 // Gateway Transformer constants
@@ -195,13 +195,13 @@ const (
 	EnvVarGatewayTransformerConfigMap = "GATEWAY_TRANSFORMER_CONFIG_MAP"
 
 	// GatewayHTTPEventTransformerImage is image for gateway http event transformer
-	GatewayHTTPEventTransformerImage = "argoproj/gateway-http-transformer"
+	GatewayHTTPEventTransformerImage = "gateway-http-transformer"
 
 	// GatewayNATSEventTransformerImage is image for gateway nats event transformer
-	GatewayNATSEventTransformerImage = "argoproj/gateway-nats-transformer"
+	GatewayNATSEventTransformerImage = "gateway-nats-transformer"
 
 	// GatewayKafkaEventTransformerImage is image for gateway kafka event transformer
-	GatewayKafkaEventTransformerImage = "argoproj/gateway-kafka-transformer"
+	GatewayKafkaEventTransformerImage = "gateway-kafka-transformer"
 
 	//  EnvVarGatewayTransformerPort is the env var for http server port
 	EnvVarGatewayTransformerPort = "TRANSFORMER_PORT"

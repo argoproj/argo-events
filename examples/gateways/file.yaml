@@ -15,7 +15,6 @@ spec:
     serviceAccountName: "argo-events-sa"
   configMap: "file-gateway-configmap"
   eventVersion: "1.0"
-  imageVersion: "latest"
   type: "file"
   dispatchMechanism: "HTTP"
   watchers:

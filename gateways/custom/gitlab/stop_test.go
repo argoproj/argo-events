@@ -1,9 +1,9 @@
 package gitlab
 
 import (
-	"testing"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestGitlabExecutor_StopConfig(t *testing.T) {

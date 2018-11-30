@@ -17,16 +17,15 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/xanzy/go-gitlab"
 	"fmt"
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"reflect"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/xanzy/go-gitlab"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"reflect"
 )
-
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
 func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
@@ -88,7 +87,7 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigC
 	ce.GitlabClient.SetBaseURL(g.GitlabBaseURL)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL: &g.URL,
+		URL:   &g.URL,
 		Token: &c.token,
 		EnableSSLVerification: &g.EnableSSLVerification,
 	}
@@ -117,7 +116,6 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigC
 		config.ErrChan <- err
 		return
 	}
-
 
 	ce.Log.Info().Str("config-key", config.Data.Src).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 
