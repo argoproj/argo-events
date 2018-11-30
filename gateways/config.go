@@ -215,13 +215,13 @@ func NewHttpGatewayServerConfig() *HttpGatewayServerConfig {
 	}
 
 	httpGatewayServerConfig := &HttpGatewayServerConfig{
-		HttpServerPort: httpServerPort,
-		HttpClientPort: clientPort,
-		StartConfigEndpoint: startConfigEndpoint,
-		StopConfigEndpoint: stopConfigEndpoint,
-		EventEndpoint: eventEndpoint,
+		HttpServerPort:          httpServerPort,
+		HttpClientPort:          clientPort,
+		StartConfigEndpoint:     startConfigEndpoint,
+		StopConfigEndpoint:      stopConfigEndpoint,
+		EventEndpoint:           eventEndpoint,
 		ConfigActivatedEndpoint: configActivatedEndpoint,
-		ConfigErrorEndpoint: configErrorEndpoint,
+		ConfigErrorEndpoint:     configErrorEndpoint,
 	}
 	httpGatewayServerConfig.GwConfig = NewGatewayConfiguration()
 	return httpGatewayServerConfig

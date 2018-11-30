@@ -11,14 +11,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways"
 )
 
+// Validate validates gitlab gateway configuration
 func (ce *GitlabExecutor) Validate(config *gateways.ConfigContext) error {
 	g, err := parseConfig(config.Data.Config)
 	if err != nil {

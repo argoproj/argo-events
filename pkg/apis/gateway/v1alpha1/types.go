@@ -99,9 +99,6 @@ type GatewaySpec struct {
 
 	// DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
 	DispatchMechanism GatewayType `json:"dispatchMechanism" protobuf:"bytes,9,opt,name=dispatchMechanism"`
-
-	// ImageVersion is the version for gateway components images to run
-	ImageVersion string `json:"imageVersion,omitempty" protobuf:"bytes,10,opt,name=imageVersion"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

@@ -45,8 +45,8 @@ func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, e
 }
 
 func (reader *S3Reader) Read() ([]byte, error) {
-	log.Debugf("reading s3Artifact from %s/%s", reader.s3.Bucket, reader.s3.Key)
-	obj, err := reader.client.GetObject(reader.s3.Bucket, reader.s3.Key, minio.GetObjectOptions{})
+	log.Debugf("reading s3Artifact from %s/%s", reader.s3.S3Bucket.Bucket, reader.s3.Key)
+	obj, err := reader.client.GetObject(reader.s3.S3Bucket.Bucket, reader.s3.Key, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -62,10 +62,10 @@ func (reader *S3Reader) Read() ([]byte, error) {
 func NewMinioClient(s3 *v1alpha1.S3Artifact, creds Credentials) (*minio.Client, error) {
 	var minioClient *minio.Client
 	var err error
-	if s3.Region != "" {
-		minioClient, err = minio.NewWithRegion(s3.Endpoint, creds.accessKey, creds.secretKey, !s3.Insecure, s3.Region)
+	if s3.S3Bucket.Region != "" {
+		minioClient, err = minio.NewWithRegion(s3.S3Bucket.Endpoint, creds.accessKey, creds.secretKey, !s3.S3Bucket.Insecure, s3.S3Bucket.Region)
 	} else {
-		minioClient, err = minio.New(s3.Endpoint, creds.accessKey, creds.secretKey, !s3.Insecure)
+		minioClient, err = minio.New(s3.S3Bucket.Endpoint, creds.accessKey, creds.secretKey, !s3.S3Bucket.Insecure)
 	}
 	if err != nil {
 		return nil, err

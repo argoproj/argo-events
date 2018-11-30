@@ -5,24 +5,23 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/gateways"
-	"net/http"
-	"io/ioutil"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"io/ioutil"
+	"net/http"
 )
 
 // httpConfigExecutor implements ConfigExecutor
-type httpConfigExecutor struct{
+type httpConfigExecutor struct {
 	*gateways.HttpGatewayServerConfig
-
 }
 
 func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	errChan := make(chan error)
 
-	http.HandleFunc(ce.EventEndpoint, func (writer http.ResponseWriter, request *http.Request) {
+	http.HandleFunc(ce.EventEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		ce.GwConfig.Log.Info().Msg("received an event")
 		var event gateways.GatewayEvent
 		body, err := ioutil.ReadAll(request.Body)
@@ -80,7 +79,7 @@ func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	ce.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching configuration configuration to start")
 	err := ce.sendHttpRequest(&gateways.ConfigData{
-		ID: config.Data.ID,
+		ID:     config.Data.ID,
 		TimeID: config.Data.TimeID,
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
@@ -117,7 +116,6 @@ func (ce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 		config.ErrChan <- err
 	}
 }
-
 
 func (ce *httpConfigExecutor) Validate(configContext *gateways.ConfigContext) error {
 	return nil

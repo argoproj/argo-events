@@ -86,8 +86,7 @@ func TestTOperationCtx_TransformRequest(t *testing.T) {
 	svc, err := fakeClient.CoreV1().Services(tCtx.Namespace).Create(fakeService)
 	assert.Nil(t, err)
 
-	svcName, svcIP, err := tCtx.getWatcherIP("fake-sensor")
+	svcName, err := tCtx.getWatcherIP("fake-sensor")
 	assert.Nil(t, err)
 	assert.Equal(t, svcName, svc.ObjectMeta.Name)
-	assert.NotNil(t, svcIP)
 }

@@ -17,7 +17,6 @@ spec:
   type: "calendar"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
   watchers:
     sensors:
     - name: "calendar-sensor"
