@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: amqp-events
-      image: "argoproj/amqp-gateway"
+      image: "argoproj/amqp-gateway:v0.6"
       imagePullPolicy: "Always"
       command: ["/bin/amqp-gateway"]
     serviceAccountName: "argo-events-sa"
@@ -17,6 +17,7 @@ spec:
   type: "amqp"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
+  imageVersion: "v0.6"
   watchers:
     sensors:
     - name: "amqp-sensor"

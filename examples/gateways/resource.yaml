@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "resource-events"
-      image: "argoproj/resource-gateway"
+      image: "argoproj/resource-gateway:v0.6"
       imagePullPolicy: "Always"
       command: ["/bin/resource-gateway"]
     serviceAccountName: "argo-events-sa"
@@ -17,6 +17,7 @@ spec:
   type: "resource"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
+  imageVersion: "v0.6"
   watchers:
     sensors:
     - name: "resource-sensor"

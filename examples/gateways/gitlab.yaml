@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "gitlab-events"
-      image: "argoproj/gitlab-gateway:test"
+      image: "argoproj/gitlab-gateway:v0.6"
       imagePullPolicy: "Always"
       command: ["/bin/gitlab-gateway"]
     serviceAccountName: "argo-events-sa"
@@ -17,6 +17,7 @@ spec:
   type: "gitlab"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
+  imageVersion: "v0.6"
   watchers:
       sensors:
       - name: "gitlab-sensor"
