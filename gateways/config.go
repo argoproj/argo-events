@@ -333,14 +333,14 @@ func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*Con
 		go func() {
 			err := <-config.ErrChan
 			if err != nil && config.Active {
-				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred in active configuration")
+				gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred in active configuration")
 				go func() {
 					<-config.ShutdownChan
 					gc.GatewayCleanup(config, err)
 				}()
 				ce.StopConfig(config)
 			} else if err != nil {
-				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred before marking configuration as active")
+				gc.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred before marking configuration as active")
 				gc.GatewayCleanup(config, err)
 			}
 			gc.Log.Debug().Str("config-key", config.Data.Src).Msg("configuration channels are closed")

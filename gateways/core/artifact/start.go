@@ -125,14 +125,14 @@ func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateway
 		}, make(chan struct{})):
 			if notification.Err != nil {
 				config.ErrChan <- notification.Err
-				return
 			}
 			payload, err := json.Marshal(notification.Records[0])
 			if err != nil {
 				config.ErrChan <- err
-				return
 			}
-			config.DataChan <- payload
+			if err == nil {
+				config.DataChan <- payload
+			}
 
 		case <-config.DoneChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")

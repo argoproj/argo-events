@@ -296,7 +296,7 @@ func (se *sensorExecutionCtx) handleSignals(w http.ResponseWriter, r *http.Reque
 			signal: selectedSignal,
 		}
 	} else {
-		se.log.Warn().Msg("signal from unknown source.")
+		se.log.Warn().Str("signal-name", gatewaySignal.Context.Source.Host).Msg("signal from unknown source.")
 		common.SendErrorResponse(w)
 	}
 }

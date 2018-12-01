@@ -1,0 +1,1 @@
+package amazon_sns
