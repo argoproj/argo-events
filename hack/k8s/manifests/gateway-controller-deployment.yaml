@@ -13,7 +13,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
       - name: gateway-controller
-        image: argoproj/gateway-controller:v0.7
+        image: argoproj/gateway-controller:v0.6
         imagePullPolicy: Always
         env:
           - name: GATEWAY_NAMESPACE
