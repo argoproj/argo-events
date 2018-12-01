@@ -10,10 +10,11 @@ spec:
   type: "webhook"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
+  imageVersion: "v0.6"
   deploySpec:
     containers:
     - name: "webhook-events"
-      image: "argoproj/webhook-gateway"
+      image: "argoproj/webhook-gateway:v0.6"
       imagePullPolicy: "Always"
       command: ["/bin/webhook-gateway"]
     serviceAccountName: "argo-events-sa"

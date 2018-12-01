@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "nats-events"
-      image: "argoproj/nats-gateway"
+      image: "argoproj/nats-gateway:v0.6"
       imagePullPolicy: "Always"
       command: ["/bin/nats-gateway"]
     serviceAccountName: "argo-events-sa"
@@ -17,6 +17,7 @@ spec:
   type: "nats"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
+  imageVersion: "v0.6"
   watchers:
     sensors:
     - name: "nats-sensor"
