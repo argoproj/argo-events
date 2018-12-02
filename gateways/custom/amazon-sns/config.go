@@ -1,25 +1,29 @@
 package amazon_sns
 
 import (
-	corev1 "k8s.io/api/core/v1"
-	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
+	"net/http"
 )
 
 // AWSSNSConfig contains information to configure sns notifications
 type AWSSNSConfig struct {
-	// AccessKey refers to k8 secret containing aws access key
-	AccessKey *corev1.SecretKeySelector
+	// Port is the http server port to which the endpoint should be associated with
+	Port string `json:"port"`
 
-	// SecretKey refers to k8 secret containing aws secret key
-	SecretKey *corev1.SecretKeySelector
+	// Endpoint to listen on for SNS notification
+	Endpoint string `json:"endpoint"`
 
-	// AccessToken refers to k8 secret containing aws access token
-	AccessToken *corev1.SecretKeySelector
+	// CompletePayload if set true makes gateway dispatch complete sns notification else
+	// only the message.
+	// For more information on sns notification, refer https://docs.aws.amazon.com/sns/latest/dg/sns-http-https-endpoint-as-subscriber.html#SendMessageToHttp.prepare
+	CompletePayload bool `json:"completePayload"`
 
-	// Region is the aws region
-	Region string
+	// +k8s:openapi-gen=false
+	srv *http.Server
+	// +k8s:openapi-gen=false
+	mux *http.ServeMux
 }
 
 // AWSSNSConfigExecutor implements ConfigExecutor
@@ -27,7 +31,6 @@ type AWSSNSConfigExecutor struct {
 	*gateways.GatewayConfig
 	snsClient *sns.SNS
 }
-
 
 // parseConfig parses a configuration of gateway
 func parseConfig(config string) (*AWSSNSConfig, error) {

@@ -25,6 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"reflect"
+	"sync"
 )
 
 // getSecrets retrieves the secret value from the secret in namespace with name and key
@@ -77,6 +78,20 @@ func (ce *GitlabExecutor) StartConfig(config *gateways.ConfigContext) {
 }
 
 func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigContext) {
+	var wg sync.WaitGroup
+	var hookId int
+	wg.Add(1)
+
+	defer func() {
+		<-config.DoneChan
+		wg.Done()
+		if hookId > 0 {
+			_, err := ce.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hookId)
+			ce.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to delete gitlab hook")
+		}
+		config.ShutdownChan <- struct{}{}
+	}()
+
 	c, err := ce.getCredentials(g.AccessToken)
 	if err != nil {
 		config.ErrChan <- err
@@ -109,6 +124,8 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigC
 		return
 	}
 
+	hookId = hook.ID
+
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
@@ -119,8 +136,5 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, config *gateways.ConfigC
 
 	ce.Log.Info().Str("config-key", config.Data.Src).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 
-	<-config.DataChan
-	_, err = ce.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID)
-	ce.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to delete gitlab hook")
-	config.ShutdownChan <- struct{}{}
+	wg.Wait()
 }

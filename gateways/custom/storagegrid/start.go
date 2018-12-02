@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/joncalhoun/qson"
 	"github.com/satori/go.uuid"
 	"io/ioutil"
@@ -194,6 +195,14 @@ func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext)
 }
 
 func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, config *gateways.ConfigContext) {
+	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
+	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	if err != nil {
+		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
+		config.ErrChan <- err
+		return
+	}
+
 	// start a http server only if no other configuration previously started the server on given port
 	ce.startHttpServer(sg, config)
 
