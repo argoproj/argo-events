@@ -48,10 +48,13 @@ func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 			config.Active = true
 
 		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+			err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 				Src:     config.Data.Src,
 				Payload: data,
 			})
+			if err != nil {
+				config.ErrChan <- err
+			}
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")

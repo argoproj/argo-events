@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package amazon_sns
+package aws_sns
 
 import (
 	"fmt"
@@ -121,6 +121,8 @@ func (ce *AWSSNSConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *ac).Msg("aws sns server configuration")
 
+	go ce.listenEvents(ac, config)
+
 	for {
 		select {
 		case _, ok := <-config.StartChan:
@@ -182,7 +184,7 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 		client := http.Client{}
 		_, err := client.Get(snspayload.SubscribeURL)
 		if err != nil {
-			rc.configExecutor.Log.Error().Err(err).Str("http-method", request.Method).Str("payload", string(body)).Msg("failed to send confirmation response to sns")
+			rc.configExecutor.Log.Error().Err(err).Str("http-method", request.Method).Str("payload", string(body)).Msg("failed to send confirmation response to amazon")
 			return
 		}
 	case sns.MESSAGE_TYPE_NOTIFICATION:
