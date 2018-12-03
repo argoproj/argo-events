@@ -19,16 +19,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/gateway/transform"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"log"
-	"net/http"
-	"os"
-	"strings"
 )
 
 func main() {

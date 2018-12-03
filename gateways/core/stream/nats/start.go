@@ -24,7 +24,7 @@ func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case _, ok :=<-config.StartChan:
+		case _, ok := <-config.StartChan:
 			if ok {
 				config.Active = true
 				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
