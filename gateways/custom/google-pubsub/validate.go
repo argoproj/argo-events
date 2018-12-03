@@ -11,32 +11,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws_sqs
+package google_pubsub
 
 import (
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-func (ce *AWSSQSConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	sqsConfig, err := parseConfig(config.Data.Config)
+func (ce *GCPPubSubConfigExecutor) Validate(config *gateways.ConfigContext) error {
+	gps, err := parseConfig(config.Data.Config)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		ce.Log.Error().Err(err).Msg("failed to parse configuration")
+		return err
 	}
-	if sqsConfig.Queue == "" {
-		return fmt.Errorf("queue name not provided")
+	if gps.ProjectId == "" {
+		return fmt.Errorf("project id is not provided")
 	}
-	if sqsConfig.Region == "" {
-		return fmt.Errorf("region not provided")
+	if gps.Subscription == "" {
+		return fmt.Errorf("subscription is not provided")
 	}
-	if sqsConfig.SecretKey == nil {
-		return fmt.Errorf("secret key not provided")
-	}
-	if sqsConfig.AccessKey == nil {
-		return fmt.Errorf("access key not provided")
-	}
-	if sqsConfig.Frequency == "" {
-		return fmt.Errorf("frequency to try receive message is not provided")
+	if gps.Topic == "" {
+		return fmt.Errorf("topic is not provided")
 	}
 	return nil
 }

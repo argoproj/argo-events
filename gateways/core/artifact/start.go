@@ -71,7 +71,7 @@ func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case _, ok :=<-config.StartChan:
+		case _, ok := <-config.StartChan:
 			if ok {
 				ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
 				config.Active = true

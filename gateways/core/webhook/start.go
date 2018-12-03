@@ -29,6 +29,10 @@ var (
 
 // Runs a gateway configuration
 func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer func() {
+		gateways.Recover()
+	}()
+
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	w, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -41,15 +45,22 @@ func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+		case _, ok :=<-config.StartChan:
+			if ok {
+				config.Active = true
+				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+			}
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+		case data, ok := <-config.DataChan:
+			if ok {
+				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: data,
+				})
+				if err != nil {
+					config.ErrChan <- err
+				}
+			}
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
@@ -127,10 +138,7 @@ func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.Confi
 							common.SendSuccessResponse(writer)
 							ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Str("payload", string(body)).Msg("payload")
 							// dispatch event to gateway transformer
-							ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-								Src:     config.Data.Src,
-								Payload: body,
-							})
+							config.DataChan <- body
 						}
 					} else {
 						ce.GatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Str("endpoint", w.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")

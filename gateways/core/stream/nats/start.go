@@ -9,6 +9,10 @@ import (
 
 // Runs a configuration
 func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer func() {
+		gateways.Recover()
+	}()
+
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	n, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -20,15 +24,22 @@ func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+		case _, ok :=<-config.StartChan:
+			if ok {
+				config.Active = true
+				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+			}
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+		case data, ok := <-config.DataChan:
+			if ok {
+				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: data,
+				})
+				if err != nil {
+					config.ErrChan <- err
+				}
+			}
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
@@ -64,7 +75,6 @@ func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, config *gateways.Confi
 	})
 	if err != nil {
 		config.ErrChan <- err
-		return
 	}
 	nc.Flush()
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config", n).Msg("connected to cluster")

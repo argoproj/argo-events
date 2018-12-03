@@ -29,6 +29,10 @@ import (
 
 // StartConfig runs a configuration
 func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer func() {
+		gateways.Recover()
+	}()
+
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	f, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -41,15 +45,22 @@ func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext)
 
 	for {
 		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
-			config.Active = true
+		case _, ok := <-config.StartChan:
+			if ok {
+				ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
+				config.Active = true
+			}
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+		case data, ok := <-config.DataChan:
+			if ok {
+				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: data,
+				})
+				if err != nil {
+					config.ErrChan <- err
+				}
+			}
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
@@ -107,7 +118,7 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 				err := enc.Encode(event)
 				if err != nil {
 					config.ErrChan <- err
-					return
+					continue
 				}
 				config.DataChan <- buff.Bytes()
 			}

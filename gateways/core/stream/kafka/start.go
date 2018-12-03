@@ -19,6 +19,10 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // Runs a configuration
 func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer func() {
+		gateways.Recover()
+	}()
+
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	k, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -31,15 +35,22 @@ func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+		case _, ok := <-config.StartChan:
+			if ok {
+				config.Active = true
+				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+			}
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+		case data, ok := <-config.DataChan:
+			if ok {
+				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: data,
+				})
+				if err != nil {
+					config.ErrChan <- err
+				}
+			}
 
 		case <-config.StopChan:
 			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
@@ -80,8 +91,6 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 		return
 	}
 
-	config.StartChan <- struct{}{}
-
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {
@@ -89,6 +98,8 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 		config.ErrChan <- err
 		return
 	}
+
+	config.StartChan <- struct{}{}
 
 	for {
 		select {
@@ -98,7 +109,6 @@ func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigCon
 		case err := <-partitionConsumer.Errors():
 			ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Str("partition", k.Partition).Str("topic", k.Topic).Err(err).Msg("received an error")
 			config.ErrChan <- err
-			return
 
 		case <-config.DoneChan:
 			err = partitionConsumer.Close()

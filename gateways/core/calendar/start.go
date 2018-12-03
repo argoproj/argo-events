@@ -31,6 +31,10 @@ type Next func(time.Time) time.Time
 
 // StartConfig runs a configuration
 func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+	defer func() {
+		gateways.Recover()
+	}()
+
 	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -43,17 +47,21 @@ func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-			config.Active = true
+		case _, ok :=<-config.StartChan:
+			if ok {
+				ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
+				config.Active = true
+			}
 
-		case data := <-config.DataChan:
-			err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-			if err != nil {
-				config.ErrChan <- err
+		case data, ok := <-config.DataChan:
+			if ok {
+				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
+					Src:     config.Data.Src,
+					Payload: data,
+				})
+				if err != nil {
+					config.ErrChan <- err
+				}
 			}
 
 		case <-config.StopChan:
@@ -138,7 +146,7 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.C
 			payload, err := event.Marshal()
 			if err != nil {
 				config.ErrChan <- err
-				return
+				continue
 			}
 			config.DataChan <- payload
 		case <-config.DoneChan:

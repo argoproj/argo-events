@@ -15,6 +15,8 @@ package aws_sqs
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/AdRoll/goamz/aws"
 	"github.com/AdRoll/goamz/sqs"
 	"github.com/argoproj/argo-events/common"
@@ -23,7 +25,6 @@ import (
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"time"
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -58,13 +59,13 @@ func (ce *AWSSQSConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	for {
 		select {
-		case _, ok :=<-config.StartChan:
+		case _, ok := <-config.StartChan:
 			if ok {
 				ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
 				config.Active = true
 			}
 
-		case data, ok :=<-config.DataChan:
+		case data, ok := <-config.DataChan:
 			if ok {
 				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
 					Src:     config.Data.Src,
