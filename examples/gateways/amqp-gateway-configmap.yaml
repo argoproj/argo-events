@@ -3,12 +3,12 @@ kind: ConfigMap
 metadata:
   name: amqp-gateway-configmap
 data:
-  amqp.fooConfig: |-
+  foo: |-
     url: amqp://amqp.argo-events:5672
     exchangeName: fooExchangeName
     exchangeType: fanout
     routingKey: fooRoutingKey
-  amqp.barConfig: |-
+  bar: |-
     url: amqp://amqp.argo-events:5672
     exchangeName: barExchangeName
     exchangeType: fanout

@@ -3,11 +3,7 @@ kind: ConfigMap
 metadata:
   name: file-gateway-configmap
 data:
-  file.defaultConfig: |-
-    directory: "/bin/"
-    type: CREATE
-    path: x.txt
-  file.xConfig: |-
+  bindir: |-
     directory: "/bin/"
     type: CREATE
     path: x.txt

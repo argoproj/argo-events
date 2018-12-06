@@ -3,11 +3,11 @@ kind: ConfigMap
 metadata:
   name: kafka-gateway-configmap
 data:
-  kafka.fooConfig: |-
+  foo: |-
     url: kafka.argo-events:9092
     topic: foo
     partition: "0"
-  kafka.barConfig: |-
+  bar: |-
     url: kafka.argo-events:9092
     topic: bar
     partition: "1"

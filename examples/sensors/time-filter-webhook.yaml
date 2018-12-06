@@ -6,15 +6,11 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   repeat: true
-  deploySpec:
-    containers:
-    - name: sensor
-      image: "argoproj/sensor:v0.6"
-      imagePullPolicy: "Always"
-      command: ["/bin/sensor"]
-    serviceAccountName: "argo-events-sa"
+  serviceAccountName: argo-events-sa
+  imageVersion: "latest"
+  imagePullPolicy: Always
   signals:
-    - name: webhook-gateway/webhook.barConfig
+    - name: webhook-gateway/foo
       filters:
         time:
           start: "22:14:05"

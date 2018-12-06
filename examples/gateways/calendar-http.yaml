@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "calendar-events"
-      image: "argoproj/calendar-http-gateway:v0.6"
+      image: "argoproj/calendar-http-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/calendar-http"]
     serviceAccountName: "argo-events-sa"
@@ -17,7 +17,7 @@ spec:
   type: "calendar"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "calendar-sensor"
