@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: nats-gateway-configmap
 data:
-  nats.fooConfig: |-
-  url: nats://nats.argo-events:4222
-  subject: foo
+  foo: |-
+    url: nats://nats.argo-events:4222
+    subject: foo

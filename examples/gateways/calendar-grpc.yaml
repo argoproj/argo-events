@@ -10,11 +10,11 @@ spec:
   type: "calendar"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "calendar-events"
-      image: "argoproj/calendar-grpc-gateway:v0.6"
+      image: "argoproj/calendar-grpc-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/calendar-grpc-gateway"]
     serviceAccountName: "argo-events-sa"

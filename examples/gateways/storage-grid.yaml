@@ -10,11 +10,11 @@ spec:
   type: "storage_grid"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "storage-grid-events"
-      image: "argoproj/storage-grid-gateway:v0.6"
+      image: "argoproj/storage-grid-gateway"
       imagePullPolicy: "Always"
     serviceAccountName: "argo-events-sa"
   serviceSpec:

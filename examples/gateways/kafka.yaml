@@ -9,7 +9,7 @@ spec:
   deploySpec:
     containers:
     - name: "kafka-events"
-      image: "argoproj/kafka-gateway:v0.6"
+      image: "argoproj/kafka-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/kafka-gateway"]
     serviceAccountName: "argo-events-sa"
@@ -17,7 +17,7 @@ spec:
   type: "kafka"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   watchers:
     sensors:
     - name: "kafka-sensor"

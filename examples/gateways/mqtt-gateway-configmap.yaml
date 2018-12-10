@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: mqtt-gateway-configmap
 data:
-  mqtt.fooConfig: |-
+  foo: |-
     url: tcp://mqtt.argo-events:1883
     topic: foo
-  mqtt.barConfig: |-
+  bar: |-
     url: tcp://mqtt.argo-events:1883
     topic: bar

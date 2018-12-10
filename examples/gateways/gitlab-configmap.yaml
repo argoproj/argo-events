@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: gitlab-gateway-configmap
 data:
-  gitlab.defaultConfig: |-
+  project_1: |-
     projectId: "1"
     url: "YOUR_WEBHOOK_GATEWAY_EXTERNAL_URL"
     event: "PushEvents"
