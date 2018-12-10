@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: storage-grid-gateway-configmap
 data:
-  storage-grid.defaultConfig: |-
+  foo: |-
     port: "8080"
     endpoint: "/"
     events:

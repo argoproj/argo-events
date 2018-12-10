@@ -9,13 +9,13 @@ spec:
   deploySpec:
     containers:
     - name: "file-events"
-      image: "argoproj/file-gateway:v0.6"
+      image: "argoproj/file-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/file-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "file-gateway-configmap"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   type: "file"
   dispatchMechanism: "HTTP"
   watchers:

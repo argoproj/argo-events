@@ -2,7 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: webhook-gateway
-  namespace: default
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "webhook-gateway"
@@ -11,14 +10,14 @@ spec:
   type: "webhook"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   deploySpec:
     containers:
     - name: "webhook-events"
-      image: "argoproj/webhook-gateway:v0.6"
+      image: "argoproj/webhook-gateway"
       imagePullPolicy: "IfNotPresent"
       command: ["/bin/webhook-gateway"]
-    serviceAccountName: "default"
+    serviceAccountName: "argo-events-sa"
   transformerImage: "argoproj/gateway-http-transformer"
   serviceSpec:
     selector:

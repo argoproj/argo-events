@@ -9,13 +9,13 @@ spec:
   deploySpec:
     containers:
     - name: "artifact-events"
-      image: "argoproj/artifact-gateway:v0.6"
+      image: "argoproj/artifact-gateway"
       imagePullPolicy: "Always"
       command: ["/bin/artifact-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
   eventVersion: "1.0"
-  imageVersion: "v0.6"
+  imageVersion: "latest"
   type: "artifact"
   dispatchMechanism: "HTTP"
   watchers:

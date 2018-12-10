@@ -3,24 +3,9 @@ kind: ConfigMap
 metadata:
   name: artifact-gateway-configmap
 data:
-  s3.fooConfig: |-
+  input: |-
     s3EventConfig:
-      bucket: workflows
-      endpoint: minio-service.argo-events:9000
-      event: s3:ObjectCreated:Put
-      filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    accessKey:
-      key: accesskey
-      name: artifacts-minio
-    secretKey:
-      key: secretkey
-      name: artifacts-minio
-  s3.barConfig: |-
-    s3EventConfig:
-      bucket: workflows
+      bucket: input
       endpoint: minio-service.argo-events:9000
       event: s3:ObjectCreated:Put
       filter:
