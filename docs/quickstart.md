@@ -52,13 +52,13 @@ Trigger the webhook via sending a http POST request to `/foo` endpoint. You can 
 gateway configuration at run time as well.
 Note: the `WEBHOOK_SERVICE_URL` will differ based on the Kubernetes cluster.
 ```
-export WEBHOOK_SERVICE_URL=$(minikube service --url webhook-gateway-gateway-svc)
+export WEBHOOK_SERVICE_URL=$(minikube service -n argo-events --url webhook-gateway-gateway-svc)
 echo $WEBHOOK_SERVICE_URL
 curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
 ```
 
 <b>Note</b>: 
-   * If you are facing an issue getting service url by running `minikube service --url webhook-gateway-gateway-svc`, you can use `kubectl port-forward`
+   * If you are facing an issue getting service url by running `minikube service -n argo-events --url webhook-gateway-gateway-svc`, you can use `kubectl port-forward`
    * Open another terminal window and enter `kubectl port-forward <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
    * You can now user `localhost:9003` to query webhook gateway
   
@@ -70,7 +70,7 @@ argo list
 
 Verify that the sensor was updated correctly and moved to a "Complete" phase.
 ```
-kubectl get sensor webhook-sensor -o yaml
+kubectl get sensor -n argo-events webhook-sensor -o yaml
 ```
 
 Check the logs of the sensor-controller pod, gateway-controller, associated gateways and sensors if there are problems.
