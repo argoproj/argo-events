@@ -59,13 +59,13 @@ curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/j
 
 <b>Note</b>: 
    * If you are facing an issue getting service url by running `minikube service -n argo-events --url webhook-gateway-gateway-svc`, you can use `kubectl port-forward`
-   * Open another terminal window and enter `kubectl port-forward <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
+   * Open another terminal window and enter `kubectl port-forward -n argo-events <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
    * You can now user `localhost:9003` to query webhook gateway
   
 
 Verify that the Argo workflow was run when the trigger was executed.
 ```
-argo list
+argo list -n argo-events
 ```
 
 Verify that the sensor was updated correctly and moved to a "Complete" phase.
