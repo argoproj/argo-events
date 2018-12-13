@@ -70,7 +70,7 @@ argo list -n argo-events
 
 Verify that the sensor was updated correctly and moved to a "Complete" phase.
 ```
-kubectl get -n argo-events sensor webhook-sensor -o yaml
+kubectl get sensor -n argo-events webhook-sensor -o yaml
 ```
 
 Check the logs of the sensor-controller pod, gateway-controller, associated gateways and sensors if there are problems.
