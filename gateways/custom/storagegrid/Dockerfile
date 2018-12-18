@@ -1,3 +1,3 @@
 FROM centos:7
-COPY dist/storage-grid-gateway /bin/
-ENTRYPOINT [ "/bin/storage-grid-gateway" ]
+COPY dist/storagegrid-gateway /bin/
+ENTRYPOINT [ "/bin/storagegrid-gateway" ]
