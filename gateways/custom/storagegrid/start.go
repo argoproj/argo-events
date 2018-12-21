@@ -265,12 +265,13 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	}
 
 	rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Interface("notification", notification).Msg("parsed notification")
-	if !filterEvent(notification, rc.sgConfig) || !filterName(notification, rc.sgConfig) {
-		rc.configExecutor.Log.Warn().Str("config-key", rc.gatewayConfig.Data.Src).Interface("notification", notification).
-			Msg("discarding notification since it did not pass all filters")
+	if filterEvent(notification, rc.sgConfig) && filterName(notification, rc.sgConfig) {
+		rc.gatewayConfig.DataChan <- b
+		return
 	}
 
-	rc.gatewayConfig.DataChan <- b
+	rc.configExecutor.Log.Warn().Str("config-key", rc.gatewayConfig.Data.Src).Interface("notification", notification).
+		Msg("discarding notification since it did not pass all filters")
 }
 
 // routeDeactivateHandler handles routes that are not active
