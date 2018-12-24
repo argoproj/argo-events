@@ -43,9 +43,9 @@ type StorageGridEventConfig struct {
 	Filter *Filter `json:"filter,omitempty"`
 	// srv holds reference to http server
 	// +k8s:openapi-gen=false
-	Srv *http.Server `json:"srv,omitempty"`
+	srv *http.Server `json:"srv,omitempty"`
 	// +k8s:openapi-gen=false
-	Mux *http.ServeMux `json:"mux,omitempty"`
+	mux *http.ServeMux `json:"mux,omitempty"`
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects

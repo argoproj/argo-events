@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: storage_grid-gateway
+  name: storage-grid-gateway
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "storage-grid-gateway"
