@@ -27,18 +27,12 @@ import (
 func (ce *S3ConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return &gateways.ValidEventSource{
-			IsValid: false,
-		}, gateways.ErrConfigParseFailed
+		return &gateways.ValidEventSource{}, gateways.ErrConfigParseFailed
 	}
 	if err = ce.validate(artifact); err != nil {
-		return &gateways.ValidEventSource{
-			IsValid: false,
-		}, err
+		return &gateways.ValidEventSource{}, err
 	}
-	return &gateways.ValidEventSource{
-		IsValid: true,
-	}, nil
+	return &gateways.ValidEventSource{}, nil
 }
 
 // validates an artifact

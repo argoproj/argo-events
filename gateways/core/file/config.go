@@ -38,9 +38,9 @@ type FileWatcherConfig struct {
 	Type string `json:"type"`
 }
 
-func parseConfig(config string) (*FileWatcherConfig, error) {
+func parseEventSource(eventSource *string) (*FileWatcherConfig, error) {
 	var f *FileWatcherConfig
-	err := yaml.Unmarshal([]byte(config), &f)
+	err := yaml.Unmarshal([]byte(*eventSource), &f)
 	if err != nil {
 		return nil, err
 	}

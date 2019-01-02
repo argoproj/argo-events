@@ -2104,6 +2104,9 @@ func encodeVarintGenerated(dAtA []byte, offset int, v uint64) int {
 	return offset + 1
 }
 func (m *ArtifactLocation) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	if m.S3 != nil {
@@ -2130,6 +2133,9 @@ func (m *ArtifactLocation) Size() (n int) {
 }
 
 func (m *ConfigmapArtifact) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Name)
@@ -2142,6 +2148,9 @@ func (m *ConfigmapArtifact) Size() (n int) {
 }
 
 func (m *Data) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	if len(m.Filters) > 0 {
@@ -2158,6 +2167,9 @@ func (m *Data) Size() (n int) {
 }
 
 func (m *DataFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Path)
@@ -2174,6 +2186,9 @@ func (m *DataFilter) Size() (n int) {
 }
 
 func (m *EscalationPolicy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Name)
@@ -2186,6 +2201,9 @@ func (m *EscalationPolicy) Size() (n int) {
 }
 
 func (m *Event) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = m.Context.Size()
@@ -2198,6 +2216,9 @@ func (m *Event) Size() (n int) {
 }
 
 func (m *EventContext) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.EventType)
@@ -2236,6 +2257,9 @@ func (m *EventContext) Size() (n int) {
 }
 
 func (m *EventWrapper) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = m.Event.Size()
@@ -2245,6 +2269,9 @@ func (m *EventWrapper) Size() (n int) {
 }
 
 func (m *FileArtifact) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Path)
@@ -2253,6 +2280,9 @@ func (m *FileArtifact) Size() (n int) {
 }
 
 func (m *GroupVersionKind) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Group)
@@ -2265,6 +2295,9 @@ func (m *GroupVersionKind) Size() (n int) {
 }
 
 func (m *NodeStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.ID)
@@ -2291,6 +2324,9 @@ func (m *NodeStatus) Size() (n int) {
 }
 
 func (m *ResourceObject) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Namespace)
@@ -2317,6 +2353,9 @@ func (m *ResourceObject) Size() (n int) {
 }
 
 func (m *ResourceParameter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	if m.Src != nil {
@@ -2329,6 +2368,9 @@ func (m *ResourceParameter) Size() (n int) {
 }
 
 func (m *ResourceParameterSource) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Signal)
@@ -2343,12 +2385,18 @@ func (m *ResourceParameterSource) Size() (n int) {
 }
 
 func (m *RetryStrategy) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	return n
 }
 
 func (m *S3Artifact) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Key)
@@ -2367,6 +2415,9 @@ func (m *S3Artifact) Size() (n int) {
 }
 
 func (m *S3Bucket) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Endpoint)
@@ -2388,6 +2439,9 @@ func (m *S3Bucket) Size() (n int) {
 }
 
 func (m *S3Filter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Prefix)
@@ -2398,6 +2452,9 @@ func (m *S3Filter) Size() (n int) {
 }
 
 func (m *Sensor) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = m.ObjectMeta.Size()
@@ -2410,6 +2467,9 @@ func (m *Sensor) Size() (n int) {
 }
 
 func (m *SensorList) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = m.ListMeta.Size()
@@ -2424,6 +2484,9 @@ func (m *SensorList) Size() (n int) {
 }
 
 func (m *SensorSpec) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	if len(m.Signals) > 0 {
@@ -2447,6 +2510,9 @@ func (m *SensorSpec) Size() (n int) {
 }
 
 func (m *SensorStatus) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Phase)
@@ -2471,6 +2537,9 @@ func (m *SensorStatus) Size() (n int) {
 }
 
 func (m *Signal) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Name)
@@ -2482,6 +2551,9 @@ func (m *Signal) Size() (n int) {
 }
 
 func (m *SignalFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Name)
@@ -2502,6 +2574,9 @@ func (m *SignalFilter) Size() (n int) {
 }
 
 func (m *TimeFilter) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Start)
@@ -2516,6 +2591,9 @@ func (m *TimeFilter) Size() (n int) {
 }
 
 func (m *Trigger) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Name)
@@ -2534,6 +2612,9 @@ func (m *Trigger) Size() (n int) {
 }
 
 func (m *URI) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Scheme)
@@ -2555,6 +2636,9 @@ func (m *URI) Size() (n int) {
 }
 
 func (m *URLArtifact) Size() (n int) {
+	if m == nil {
+		return 0
+	}
 	var l int
 	_ = l
 	l = len(m.Path)

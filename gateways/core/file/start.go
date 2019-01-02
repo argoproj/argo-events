@@ -27,40 +27,25 @@ import (
 	"strings"
 )
 
-// StartConfig runs a configuration
-func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	f, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ce *FileWatcherConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+	f, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- gateways.ErrConfigParseFailed
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *f).Msg("file configuration")
 
-	go ce.watchFileSystemEvents(f, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
-			config.Active = true
+	go ce.watchFileSystemEvents(f, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+	gateways.ConsumeEventsFromEventSource(eventSource.Name, )
 
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-	}
 }
 
-func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.EventSourceContext) {
+func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -76,16 +61,6 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 		return
 	}
 
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
-
-	config.StartChan <- struct{}{}
 
 	for {
 		select {
@@ -93,11 +68,6 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 			if !ok {
 				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("fs watcher has stopped")
 				// watcher stopped watching file events
-				if config.Active {
-					config.Active = false
-					config.ErrChan <- fmt.Errorf("watcher stopped watching file events")
-					return
-				}
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			if fwc.Path == strings.TrimPrefix(event.Name, fwc.Directory) && fwc.Type == event.Op.String() {
@@ -106,17 +76,11 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 				enc := gob.NewEncoder(&buff)
 				err := enc.Encode(event)
 				if err != nil {
-					config.ErrChan <- err
 					return
 				}
-				config.DataChan <- buff.Bytes()
+				 <- buff.Bytes()
 			}
 		case err := <-watcher.Errors:
-			config.ErrChan <- err
-		case <-config.DoneChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-			config.ShutdownChan <- struct{}{}
-			return
-		}
+			 <- err
 	}
 }

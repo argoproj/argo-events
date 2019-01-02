@@ -24,6 +24,7 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"os"
+	"time"
 )
 
 // DispatchEvent dispatches event to gateway transformer for further processing
@@ -50,29 +51,50 @@ func (gc *GatewayConfig) StartGateway(es EventingServer) error {
 	// handle event source's status
 	go func() {
 		for status := range gc.statusCh {
-			gc.markGatewayNodePhase(&status)
+			gc.updateGatewayResourceState(&status)
 		}
 	}()
 
-	_, err := gc.WatchGatewayConfigMap(context.Background())
-	if err != nil {
-		gc.Log.Panic().Err(err).Msg(ErrGatewayConfigmapWatchMsg)
-		return err
-	}
-
 	port, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
-	if ok {
+	if !ok {
 		return fmt.Errorf("port is not provided")
 	}
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-	if err != nil {
-		return err
-	}
-	srv := grpc.NewServer()
-	RegisterEventingServer(srv, es)
 
-	if err := srv.Serve(lis); err != nil{
-		return err
+	errCh := make(chan error)
+
+	go func() {
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+		if err != nil {
+			errCh <- err
+			return
+		}
+		srv := grpc.NewServer()
+		RegisterEventingServer(srv, es)
+
+		if err := srv.Serve(lis); err != nil{
+			errCh <- err
+		}
+	}()
+
+	// wait for server to get started
+	time.Sleep(time.Second * 2)
+
+	gc.Log.Info().Msg("gateway started")
+
+	_, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", port))
+	if err != nil {
+		panic(err)
 	}
-	return nil
+
+	gc.Log.Info().Msg("server is up and running")
+
+	go func() {
+		_, err := gc.WatchGatewayConfigMap(context.Background())
+		if err != nil {
+			errCh <- err
+		}
+	}()
+
+	err = <-errCh
+	return err
 }

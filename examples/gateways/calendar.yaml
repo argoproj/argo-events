@@ -7,17 +7,23 @@ metadata:
     gateway-name: "calendar-gateway"
 spec:
   deploySpec:
-    containers:
-    - name: "calendar-events"
-      image: "argoproj/calendar-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/calendar-gateway"]
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      labels:
+        gateway-type: calendar
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "calendar-events"
+          image: "metalgearsolid/calendar-gateway:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/calendar-gateway"]
+      serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
   dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
+  processorPort: "9330"
+  imageVersion: "v0.6.1"
   watchers:
       sensors:
       - name: "calendar-sensor"

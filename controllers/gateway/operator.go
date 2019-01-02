@@ -51,6 +51,7 @@ type gwOperationCtx struct {
 
 // newGatewayOperationCtx creates and initializes a new gOperationCtx object
 func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController) *gwOperationCtx {
+	fmt.Println("namespace is ", gw.Namespace)
 	return &gwOperationCtx{
 		gw:         gw.DeepCopy(),
 		updated:    false,
@@ -238,8 +239,12 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Name:  common.EnvVarGatewayControllerName,
 			Value: common.DefaultGatewayControllerDeploymentName,
 		},
+		{
+			Name: common.EnvVarGatewayServerPort,
+			Value: goc.gw.Spec.ProcessorPort,
+		},
 	}
-	var containers []corev1.Container
+	containers := make([]corev1.Container, len(goc.gw.Spec.DeploySpec.Spec.Containers))
 	for i, container := range goc.gw.Spec.DeploySpec.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
 		containers[i] = container

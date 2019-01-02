@@ -19,7 +19,6 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1;
 
-import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
@@ -67,7 +66,7 @@ message GatewayNotificationWatcher {
 // GatewaySpec represents gateway specifications
 message GatewaySpec {
   // DeploySpec is description of gateway
-  optional k8s.io.api.core.v1.PodSpec deploySpec = 1;
+  optional k8s.io.api.core.v1.Pod deploySpec = 1;
 
   // ConfigMap is name of the configmap for gateway-processor
   optional string configmap = 2;
@@ -79,7 +78,7 @@ message GatewaySpec {
   optional string eventVersion = 4;
 
   // ServiceSpec is the specifications of the service to expose the gateway
-  optional k8s.io.api.core.v1.ServiceSpec serviceSpec = 5;
+  optional k8s.io.api.core.v1.Service serviceSpec = 5;
 
   // Watchers are components which are interested listening to notifications from this gateway
   // These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
@@ -87,14 +86,11 @@ message GatewaySpec {
   // specifying watchers would be unnecessary.
   optional NotificationWatchers watchers = 6;
 
-  // RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server
-  optional string rpcPort = 7;
-
-  // HTTPServerPort if provided is used to communicate between gateway client and server over http
-  optional string httpServerPort = 8;
+  // Port on which the gateway event source processor is running on.
+  optional string processorPort = 7;
 
   // DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
-  optional string dispatchMechanism = 9;
+  optional string dispatchMechanism = 8;
 }
 
 // GatewayStatus contains information about the status of a gateway.

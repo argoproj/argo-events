@@ -98,7 +98,7 @@ func (sc *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceOb
 	}
 	sc.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
 
-	reIf := client.Resource(apiResource, sc.sensor.Namespace)
+	reIf := client.Resource(apiResource, resource.Namespace)
 	liveObj, err := reIf.Create(obj)
 	if err != nil {
 		return err

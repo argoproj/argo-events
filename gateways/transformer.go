@@ -40,12 +40,8 @@ type TransformerPayload struct {
 func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, error) {
 	// Generate an event id
 	eventId := suuid.NewV1()
-	payload, err := json.Marshal(gatewayEvent)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse request payload. err: %+v", err)
-	}
 
-	gc.Log.Info().Str("source", gatewayEvent.Name).
+	gc.Log.Info().Str("source", *gatewayEvent.Name).
 		Msg("converting gateway event into cloudevents specification compliant event")
 
 	// Create an CloudEvent
@@ -59,10 +55,10 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 			EventType:          gc.gw.Spec.Type,
 			EventTypeVersion:   gc.gw.Spec.EventVersion,
 			Source: &sv1alpha.URI{
-				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, gatewayEvent.Name),
+				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, *gatewayEvent.Name),
 			},
 		},
-		Payload: payload,
+		Payload: gatewayEvent.Payload,
 	}
 
 	gc.Log.Info().Interface("event", ce).Msg("transformed into cloud event")

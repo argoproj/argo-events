@@ -1,4 +1,4 @@
-syntax = "proto3";
+syntax = "proto2";
 
 package gateways;
 
@@ -11,20 +11,19 @@ service Eventing {
 
 message EventSource {
     // ID of the event source. internally generated.
-    string id = 1;
+    optional string id = 1;
     // The event source name.
-    string name = 2;
+    optional string name = 2;
     // The event source configuration value.
-    string data = 3;
+    optional string data = 3;
 }
 
 message Event {
     // The event source name.
-    string name = 1;
+    optional string name = 1;
     // The event payload.
-    bytes payload = 2;
+    optional bytes payload = 2;
 }
 
 message ValidEventSource {
-    bool isValid = 1;
 }

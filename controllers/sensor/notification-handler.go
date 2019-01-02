@@ -277,6 +277,7 @@ func (se *sensorExecutionCtx) validateSignal(gatewaySignal *ss_v1alpha1.Event) (
 // Handles signals/notifications/events received from gateways
 func (se *sensorExecutionCtx) handleSignals(w http.ResponseWriter, r *http.Request) {
 	// parse the request body which contains the cloudevents specification compliant event/signal dispatched from gateway.
+	se.log.Info().Msg("received an event from gateway")
 	body, err := ioutil.ReadAll(r.Body)
 	var gatewaySignal *ss_v1alpha1.Event
 	err = json.Unmarshal(body, &gatewaySignal)

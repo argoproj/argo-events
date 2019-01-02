@@ -18,8 +18,7 @@ package gateways
 
 import (
 	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	zlog "github.com/rs/zerolog"
 	"hash/fnv"
 	"k8s.io/client-go/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,7 +45,7 @@ func GetSecret(client kubernetes.Interface, namespace string, name, key string) 
 }
 
 // ConsumeEventsFromEventSource consumes events from the event source.
-func ConsumeEventsFromEventSource(name string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error) error {
+func ConsumeEventsFromEventSource(name *string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
 	for {
 		select {
 		case data := <-dataCh:
@@ -55,14 +54,15 @@ func ConsumeEventsFromEventSource(name string, eventStream Eventing_StartEventSo
 				Payload: data,
 			})
 			if err != nil {
-				return status.Errorf(codes.Aborted, "failed to send event on stream", err)
+				return err
 			}
 
 		case err := <-errorCh:
-			return status.Errorf(codes.Internal, "error occurred in event source", err)
+			return err
 
 		case <-eventStream.Context().Done():
-			fmt.Println("connection is closed by client")
+			log.Info().Str("event-source-name", *name).Msg("connection is closed by client")
+			doneCh <- struct{}{}
 			return nil
 		}
 	}

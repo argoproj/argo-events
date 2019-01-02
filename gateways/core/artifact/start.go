@@ -24,16 +24,16 @@ import (
 
 // StartEventSource activates an event source and streams back events
 func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("event-source-name", eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
+	ce.GatewayConfig.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
-	doneCh := make(chan struct{})
+	doneCh := make(chan struct{}, 1)
 
 	go ce.listenToEvents(artifact, dataCh, errorCh, doneCh)
 
@@ -52,7 +52,8 @@ func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, 
 			return err
 
 		case <-eventStream.Context().Done():
-			ce.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
+			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			doneCh <- struct{}{}
 			return nil
 		}
 	}

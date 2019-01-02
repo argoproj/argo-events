@@ -45,9 +45,9 @@ type CalSchedule struct {
 	Recurrence []string `json:"recurrence,omitempty"`
 }
 
-func parseConfig(config string) (*CalSchedule, error) {
+func parseEventSource(eventSource *string) (*CalSchedule, error) {
 	var c *CalSchedule
-	err := yaml.Unmarshal([]byte(config), &c)
+	err := yaml.Unmarshal([]byte(*eventSource), &c)
 	if err != nil {
 		return nil, err
 	}

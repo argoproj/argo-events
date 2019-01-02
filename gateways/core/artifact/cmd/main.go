@@ -25,5 +25,8 @@ func main() {
 	gc := gateways.NewGatewayConfiguration()
 	ce := &artifact.S3ConfigExecutor{}
 	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	err := gc.StartGateway(ce)
+	if err != nil {
+		panic(err)
+	}
 }

@@ -17,25 +17,26 @@ limitations under the License.
 package calendar
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (ce *CalendarConfigExecutor) Validate(config *gateways.EventSourceContext) error {
-	cal, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (ce *CalendarConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return &gateways.ValidEventSource{}, gateways.ErrConfigParseFailed
 	}
 	if cal == nil {
-		return gateways.ErrEmptyConfig
+		return &gateways.ValidEventSource{}, gateways.ErrEmptyConfig
 	}
 	if cal.Schedule == "" && cal.Interval == "" {
-		return fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
+		return &gateways.ValidEventSource{}, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
 	}
 	_, err = resolveSchedule(cal)
 	if err != nil {
-		return err
+		return &gateways.ValidEventSource{}, err
 	}
-	return nil
+	return &gateways.ValidEventSource{}, nil
 }

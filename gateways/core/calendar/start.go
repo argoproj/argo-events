@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
@@ -29,35 +28,39 @@ import (
 // Next is a function to compute the next signal time from a given time
 type Next func(time.Time) time.Time
 
-// StartConfig runs a configuration
-func (ce *CalendarConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
-	cal, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ce *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- gateways.ErrConfigParseFailed
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *cal).Msg("calendar configuration")
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
 
-	go ce.fireEvent(cal, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
+
+	go ce.fireEvent(cal, eventSource, dataCh, errorCh, doneCh)
 
 	for {
 		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-			config.Active = true
-
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
+		case data := <-dataCh:
+			err := eventStream.Send(&gateways.Event{
+				Name: eventSource.Name,
 				Payload: data,
 			})
+			if err != nil {
+				return err
+			}
 
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
+		case err := <-errorCh:
+			return err
+
+		case <-eventStream.Context().Done():
+			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			doneCh <- struct{}{}
+			return nil
 		}
 	}
 }
@@ -84,29 +87,18 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 }
 
 // fireEvent fires an event when schedule is passed.
-func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.EventSourceContext) {
+func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
 	exDates, err := common.ParseExclusionDates(cal.Recurrence)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
-
-	config.StartChan <- struct{}{}
 
 	var next Next
 	next = func(last time.Time) time.Time {
@@ -127,20 +119,18 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.E
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Str("time", t.String()).Msg("expected next calendar event")
+		ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
 			event := metav1.Time{Time: t}
 			payload, err := event.Marshal()
 			if err != nil {
-				config.ErrChan <- err
+				errorCh <- err
 				return
 			}
-			config.DataChan <- payload
-		case <-config.DoneChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-			config.ShutdownChan <- struct{}{}
+			dataCh <- payload
+		case <-doneCh:
 			return
 		}
 	}

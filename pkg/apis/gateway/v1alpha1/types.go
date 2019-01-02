@@ -30,7 +30,7 @@ const (
 	NodePhaseError     NodePhase = "Error"     // the node has encountered an error in processing
 	NodePhaseNew       NodePhase = ""          // the node is new
 	NodePhaseCompleted NodePhase = "Completed" // node has completed running
-	NodePhaseRemove NodePhase = "Remove" // stale node
+	NodePhaseRemove    NodePhase = "Remove"    // stale node
 )
 
 // GatewayType is type of the gateway. It is used determining the internal event dispatch mechanism

@@ -47,7 +47,7 @@ required = [
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
-  version = "1.19.0"
+  version = "v1.20.0"
 
 [[constraint]]
   name = "github.com/stretchr/testify"

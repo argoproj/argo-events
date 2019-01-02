@@ -135,7 +135,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeploySpec is description of gateway",
-							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+							Ref:         ref("k8s.io/api/core/v1.Pod"),
 						},
 					},
 					"configMap": {
@@ -162,7 +162,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"serviceSpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServiceSpec is the specifications of the service to expose the gateway",
-							Ref:         ref("k8s.io/api/core/v1.ServiceSpec"),
+							Ref:         ref("k8s.io/api/core/v1.Service"),
 						},
 					},
 					"watchers": {
@@ -171,16 +171,9 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers"),
 						},
 					},
-					"rpcPort": {
+					"processorPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"httpServerPort": {
-						SchemaProps: spec.SchemaProps{
-							Description: "HTTPServerPort if provided is used to communicate between gateway client and server over http",
+							Description: "Port on which the gateway event source processor is running on.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -193,11 +186,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "eventVersion", "dispatchMechanism"},
+				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "dispatchMechanism"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.ServiceSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
 	}
 }
 

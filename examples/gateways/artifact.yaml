@@ -7,17 +7,23 @@ metadata:
     gateway-name: "artifact-gateway"
 spec:
   deploySpec:
-    containers:
-    - name: "artifact-events"
-      image: "argoproj/artifact-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/artifact-gateway"]
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      labels:
+        gateway-type: artifact
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "artifact-events"
+          image: "metalgearsolid/artifact-gateway:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/artifact-gateway"]
+      serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
   eventVersion: "1.0"
   imageVersion: "latest"
   type: "artifact"
+  processorPort: "9330"
   dispatchMechanism: "HTTP"
   watchers:
     sensors:
-    - name: "artifact-sensor"
+    - name: "artifact-with-param-sensor"
