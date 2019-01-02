@@ -24,7 +24,7 @@ import (
 
 func TestCalendarConfigExecutor_StopConfig(t *testing.T) {
 	ce := &FileWatcherConfigExecutor{}
-	ctx := &gateways.ConfigContext{
+	ctx := &gateways.EventSourceContext{
 		StopChan: make(chan struct{}),
 	}
 	ctx.Active = true

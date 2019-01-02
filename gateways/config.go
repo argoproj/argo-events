@@ -18,10 +18,13 @@ package gateways
 
 import (
 	"context"
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	zlog "github.com/rs/zerolog"
+	"google.golang.org/grpc"
+	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -30,7 +33,7 @@ import (
 	"time"
 )
 
-// GatewayConfig provides a generic configuration for a gateway
+// GatewayConfig provides a generic event source for a gateway
 type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
 	Log zlog.Logger
@@ -46,53 +49,41 @@ type GatewayConfig struct {
 	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
 	gwcs gwclientset.Interface
-	// transformerPort is gateway transformer port to dispatch event to
-	transformerPort string
-	// registeredConfigs stores information about current configurations that are running in the gateway
-	registeredConfigs map[string]*ConfigContext
-	// configName is name of configmap that contains run configuration/s for the gateway
+	// serverPort is gateway server port to listen events from
+	serverPort string
+	// registeredConfigs stores information about current event sources that are running in the gateway
+	registeredConfigs map[string]*EventSourceContext
+	// configName is name of configmap that contains run event source/s for the gateway
 	configName string
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
+
+	statusCh chan EventSourceStatus
 }
 
-// ConfigContext contains information of a configuration for gateway to run.
-type ConfigContext struct {
-	// Data holds the actual configuration
-	Data *ConfigData
-
-	StartChan chan struct{}
-	// StopCh is used to send a stop signal to configuration runner/executor
-	StopChan chan struct{}
-
-	DataChan chan []byte
-
-	DoneChan chan struct{}
-
-	ErrChan chan error
-
-	ShutdownChan chan struct{}
-
-	// Active tracks configuration state as running or stopped
+// EventSourceContext contains information of a event source for gateway to run.
+type EventSourceContext struct {
+	// Data holds the actual event source
+	Data *EventSourceData
+	// Active tracks event source state as running or stopped
 	Active bool
-	// Cancel is called to cancel the context used by client to communicate with gRPC server.
-	// Use it only if gateway is implemented as gRPC server.
+
+	Ctx context.Context
+	// Cancel is called to cancel the context used by client to communicate with gateway server.
 	Cancel context.CancelFunc
+
+	Client EventingClient
+
+	Conn *grpc.ClientConn
 }
 
-// ConfigData holds the actual configuration
-type ConfigData struct {
-	// Unique ID for configuration
+// EventSourceData holds the actual event source
+type EventSourceData struct {
+	// Unique ID for event source
 	ID string `json:"id"`
-	// TimeID is unique time id for configuration. It is used to resolve conflict between two k8 events arriving in different oder.
-	// Consider a configuration becomes stale, then as the configuration is stopped gateway processor server will generate Completed phase event,
-	// meanwhile gateway processor will generate Remove phase event, if remove is generated before complete and if complete ohase event is consumed first
-	// then it will disregard the remove event. this is not what is expected. TimeID will be used as override in such scenarios.
-	// This is because k8 events does not have temporal order.
-	TimeID string `json:"timeID"`
-	// Src contains name of the configuration
+	// Src contains name of the event source
 	Src string `json:"src"`
-	// Config contains the configuration
+	// Config contains the event source
 	Config string `json:"config"`
 }
 
@@ -104,62 +95,33 @@ type GatewayEvent struct {
 	Payload []byte `json:"payload"`
 }
 
-// HTTPGatewayServerConfig contains information regarding http ports, endpoints
-type HttpGatewayServerConfig struct {
-	// HTTPServerPort is the port on which gateway processor server is running
-	HttpServerPort string
-	// HTTPClientPort is the port on which gateway processor client is running
-	HttpClientPort string
-	// StartConfigEndpoint is REST endpoint listening for new configurations to run.
-	StartConfigEndpoint string
-	// StopConfigEndpoint is REST endpoint listening to stop active configuration
-	StopConfigEndpoint string
-	// EventEndpoint is REST endpoint on which gateway processor server sends events to gateway processor client
-	EventEndpoint string
-	// ConfigActivatedEndpoint is the REST endpoint on which gateway processor listens for activated notifications from configurations
-	ConfigActivatedEndpoint string
-	// ConfigErrorEndpoint is the REST endpoint on which gateway processor listens for errors from configurations
-	ConfigErrorEndpoint string
-	// GwConfig holds generic gateway configuration
-	GwConfig *GatewayConfig
-	// Data holds the actual configuration
-	Data *ConfigData
-}
-
-// ConfigExecutor is interface a gateway processor server must implement
-type ConfigExecutor interface {
-	StartConfig(configContext *ConfigContext)
-	StopConfig(configContext *ConfigContext)
-	Validate(configContext *ConfigContext) error
-}
-
-// NewGatewayConfiguration returns a new gateway configuration
+// NewGatewayConfiguration returns a new gateway event source
 func NewGatewayConfiguration() *GatewayConfig {
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
 		panic(err)
 	}
-	name, ok := os.LookupEnv(common.GatewayName)
+	name, ok := os.LookupEnv(common.EnvVarGatewayName)
 	if !ok {
 		panic("gateway name not provided")
 	}
 	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Caller().Logger()
-	namespace, ok := os.LookupEnv(common.GatewayNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("no namespace provided")
+		log.Panic().Str("gateway-name", name).Msg("no namespace provided")
 	}
-	transformerPort, ok := os.LookupEnv(common.EnvVarGatewayTransformerPort)
+	configName, ok := os.LookupEnv(common.EnvVarGatewayEventSourceConfigMap)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway transformer port is not provided")
-	}
-	configName, ok := os.LookupEnv(common.EnvVarGatewayProcessorConfigMap)
-	if !ok {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway processor configmap is not provided")
+		log.Panic().Str("gateway-name", name).Msg("gateway processor configmap is not provided")
 	}
 	controllerInstanceID, ok := os.LookupEnv(common.EnvVarGatewayControllerInstanceID)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("gateway controller instance ID is not provided")
+		log.Panic().Str("gateway-name", name).Msg("gateway controller instance ID is not provided")
+	}
+	serverPort, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
+	if !ok {
+		log.Panic().Str("gateway-name", name).Msg("server port is not provided")
 	}
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
@@ -168,100 +130,64 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if err != nil {
 		log.Panic().Str("gateway-name", name).Err(err).Msg("failed to get gateway resource")
 	}
+
 	return &GatewayConfig{
 		Log:                  log,
 		Clientset:            clientset,
 		Namespace:            namespace,
 		Name:                 name,
 		KubeConfig:           restConfig,
-		registeredConfigs:    make(map[string]*ConfigContext),
-		transformerPort:      transformerPort,
+		registeredConfigs:    make(map[string]*EventSourceContext),
 		configName:           configName,
 		gwcs:                 gwcs,
 		gw:                   gw,
 		controllerInstanceID: controllerInstanceID,
+		serverPort:           serverPort,
+		statusCh: make(chan EventSourceStatus),
 	}
 }
 
-// NewHttpGatewayServerConfig returns a new HTTPGatewayServerConfig
-func NewHttpGatewayServerConfig() *HttpGatewayServerConfig {
-	httpServerPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorServerHTTPPort)
-	if !ok {
-		panic("server port is not provided")
-	}
-	clientPort, ok := os.LookupEnv(common.EnvVarGatewayProcessorClientHTTPPort)
-	if !ok {
-		panic("client port is not provided")
-	}
-	startConfigEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStartEndpoint)
-	if !ok {
-		panic("start config endpoint is not provided")
-	}
-	stopConfigEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigStopEndpoint)
-	if !ok {
-		panic("stop config endpoint is not provided")
-	}
-	eventEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerEventEndpoint)
-	if !ok {
-		panic("event endpoint is not provided")
-	}
-	configActivatedEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigActivated)
-	if !ok {
-		panic("activated config endpoint is not provided")
-	}
-	configErrorEndpoint, ok := os.LookupEnv(common.EnvVarGatewayProcessorHTTPServerConfigError)
-	if !ok {
-		panic("config error endpoint is not provided")
-	}
-
-	httpGatewayServerConfig := &HttpGatewayServerConfig{
-		HttpServerPort:          httpServerPort,
-		HttpClientPort:          clientPort,
-		StartConfigEndpoint:     startConfigEndpoint,
-		StopConfigEndpoint:      stopConfigEndpoint,
-		EventEndpoint:           eventEndpoint,
-		ConfigActivatedEndpoint: configActivatedEndpoint,
-		ConfigErrorEndpoint:     configErrorEndpoint,
-	}
-	httpGatewayServerConfig.GwConfig = NewGatewayConfiguration()
-	return httpGatewayServerConfig
-}
-
-// createInternalConfigs creates an internal representation of configuration declared in the gateway configmap.
-// returned configurations are map of hash of configuration and configuration itself.
-// Creating a hash of configuration makes it easy to check equality of two configurations.
-func (gc *GatewayConfig) createInternalConfigs(cm *corev1.ConfigMap) (map[string]*ConfigContext, error) {
-	configs := make(map[string]*ConfigContext)
+// createInternalEventSources creates an internal representation of event source declared in the gateway configmap.
+// returned event sources are map of hash of event source and event source itself.
+// Creating a hash of event source makes it easy to check equality of two event sources.
+func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[string]*EventSourceContext, error) {
+	configs := make(map[string]*EventSourceContext)
 	for configKey, configValue := range cm.Data {
 		hashKey := Hasher(configKey + configValue)
-		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("configuration hash")
-		currentTimeStr := time.Now().String()
-		timeID := Hasher(currentTimeStr)
-		configs[hashKey] = &ConfigContext{
-			Data: &ConfigData{
+		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source hash")
+		ctx, cancel := context.WithCancel(context.Background())
+
+		// create a connection to gateway server
+		conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", gc.serverPort), grpc.WithBackoffConfig(grpc.BackoffConfig{
+			MaxDelay: time.Second * 10,
+		}))
+		if err != nil {
+			gc.Log.Panic().Err(err).Msg("failed to connect to gateway server")
+			return nil, err
+		}
+
+		configs[hashKey] = &EventSourceContext{
+			Data: &EventSourceData{
 				ID:     hashKey,
-				TimeID: timeID,
 				Src:    configKey,
 				Config: configValue,
 			},
-			StopChan:     make(chan struct{}),
-			DataChan:     make(chan []byte),
-			StartChan:    make(chan struct{}),
-			ErrChan:      make(chan error),
-			DoneChan:     make(chan struct{}),
-			ShutdownChan: make(chan struct{}),
+			Cancel: cancel,
+			Ctx: ctx,
+			Client: NewEventingClient(conn),
+			Conn: conn,
 		}
-		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configs[hashKey].Data).Msg("configuration")
+		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configs[hashKey].Data).Msg("event source")
 	}
 	return configs, nil
 }
 
-// diffConfig diffs currently registered configurations and the configurations in the gateway configmap
-// It simply matches the configuration strings. So, if configuration string differs through some sequence of definition
-// and although the configurations are actually same, this method will treat them as different configurations.
-// retunrs staleConfig - configurations to be removed from gateway
-// newConfig - new configurations to run
-func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext) (staleConfigKeys []string, newConfigKeys []string) {
+// diffConfig diffs currently registered event sources and the event sources in the gateway configmap
+// It simply matches the event source strings. So, if event source string differs through some sequence of definition
+// and although the event sources are actually same, this method will treat them as different event sources.
+// retunrs staleConfig - event sources to be removed from gateway
+// newConfig - new event sources to run
+func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*EventSourceContext) (staleConfigKeys []string, newConfigKeys []string) {
 	var currentConfigKeys []string
 	var updatedConfigKeys []string
 
@@ -276,9 +202,9 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext
 	gc.Log.Info().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
 
 	swapped := false
-	// iterates over current configurations and updated configurations
-	// and creates two arrays, first one containing configurations that need to removed
-	// and second containing new configurations that need to be added and run.
+	// iterates over current event sources and updated event sources
+	// and creates two arrays, first one containing event sources that need to removed
+	// and second containing new event sources that need to be added and run.
 	for i := 0; i < 2; i++ {
 		for _, cc := range currentConfigKeys {
 			found := false
@@ -304,94 +230,119 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*ConfigContext
 	return
 }
 
-// validateConfigs validates all configurations
-func (gc *GatewayConfig) validateConfigs(ce ConfigExecutor, configs map[string]*ConfigContext) error {
-	for _, config := range configs {
-		if err := ce.Validate(config); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// startConfigs starts new configurations added to gateway
-func (gc *GatewayConfig) startConfigs(ce ConfigExecutor, configs map[string]*ConfigContext, keys []string) error {
-	for _, key := range keys {
-		config := configs[key]
-		// register the configuration
-		gc.registeredConfigs[key] = config
-		gc.Log.Info().Str("config-key", config.Data.Src).Msg("activating new configuration")
-		// create k8 event for new configuration
-		newConfigEvent := gc.GetK8Event("new configuration", v1alpha1.NodePhaseInitialized, config.Data)
-		_, err := common.CreateK8Event(newConfigEvent, gc.Clientset)
+// validateEventSources validates all event sources
+func (gc *GatewayConfig) validateEventSources(eventSources map[string]*EventSourceContext) {
+	for _, eventSource := range eventSources {
+		_, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
+			Name: eventSource.Data.Src,
+			Data: eventSource.Data.Config,
+		})
 		if err != nil {
-			gc.Log.Error().Str("config-name", config.Data.Src).Err(err).Msg("failed to create k8 event to update gateway configurations.")
-			return err
+			eventSource.Cancel()
+			gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("event source is not valid")
 		}
-		gc.Log.Info().Str("config-key", config.Data.Src).Msg("created k8 event to mark init state for new configuration.")
-
-		go func() {
-			err := <-config.ErrChan
-			if err != nil && config.Active {
-				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred in active configuration")
-				go func() {
-					<-config.ShutdownChan
-					gc.GatewayCleanup(config, err)
-				}()
-				ce.StopConfig(config)
-			} else if err != nil {
-				gc.Log.Info().Str("config-key", config.Data.Src).Msg("error occurred before marking configuration as active")
-				gc.GatewayCleanup(config, err)
-			}
-			gc.Log.Debug().Str("config-key", config.Data.Src).Msg("configuration channels are closed")
-		}()
-
-		// start configuration
-		go ce.StartConfig(config)
 	}
-	return nil
 }
 
-// stopConfigs stops existing configurations
-func (gc *GatewayConfig) stopConfigs(ce ConfigExecutor, configs []string) {
-	for _, configKey := range configs {
-		staleConfig := gc.registeredConfigs[configKey]
+// startEventSources starts new event sources added to gateway
+func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceContext, keys []string) {
+	for _, key := range keys {
+		eventSource := eventSources[key]
+		// register the event source
+		gc.registeredConfigs[key] = eventSource
+		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("activating new event source")
 
 		go func() {
-			<-staleConfig.ShutdownChan
-			gc.Log.Info().Str("config", staleConfig.Data.Src).Interface("config", staleConfig.Data).Msg("configuration deactivated.")
-			delete(gc.registeredConfigs, configKey)
-			// create a k8 event to remove the node configuration from gateway resource
-			removeConfigEvent := gc.GetK8Event("stale configuration", v1alpha1.NodePhaseRemove, staleConfig.Data)
-			_, err := common.CreateK8Event(removeConfigEvent, gc.Clientset)
+			// validate event source
+			_, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
+				Data: eventSource.Data.Config,
+				Name: eventSource.Data.Src,
+			})
 			if err != nil {
-				gc.Log.Error().Err(err).Str("config", staleConfig.Data.Src).Msg("failed to create k8 event to remove configuration")
+				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("event source is not valid")
+				eventSource.Conn.Close()
+				gc.statusCh <- EventSourceStatus{
+					Phase: v1alpha1.NodePhaseError,
+					Id: eventSource.Data.ID,
+					Message: fmt.Sprintf("event source is not valid. err: %+v", err),
+				}
+				return
 			}
-			CloseChannels(staleConfig)
+
+			// listen to events from gateway server
+			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, &EventSource{
+				Name: eventSource.Data.Src,
+				Data: eventSource.Data.Config,
+			})
+			if err != nil {
+				gc.statusCh <- EventSourceStatus{
+					Phase: v1alpha1.NodePhaseError,
+					Message: fmt.Sprintf("failed to receive event stream from event source. err: %+v", err),
+					Id: eventSource.Data.ID,
+				}
+				return
+			}
+
+			for {
+				event, err := eventStream.Recv()
+				if err != nil {
+					if err == io.EOF {
+						gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("event source has stopped")
+						gc.statusCh <- EventSourceStatus{
+							Phase: v1alpha1.NodePhaseCompleted,
+							Message: "event source has been stopped",
+							Id: eventSource.Data.ID,
+						}
+						return
+					}
+
+					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to receive event from stream")
+					gc.statusCh <- EventSourceStatus{
+						Phase: v1alpha1.NodePhaseError,
+						Message: fmt.Sprintf("failed to receive event from event source stream. err: %v", err),
+						Id: eventSource.Data.ID,
+					}
+					return
+				}
+				err = gc.DispatchEvent(event)
+				if err != nil {
+					// todo: escalate through K8s event
+					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to dispatch event to watchers")
+				}
+			}
 		}()
-		ce.StopConfig(staleConfig)
 	}
 }
 
-// manageConfigurations syncs registered configurations and updated gateway configmap
-func (gc *GatewayConfig) manageConfigurations(ce ConfigExecutor, cm *corev1.ConfigMap) error {
-	newConfigs, err := gc.createInternalConfigs(cm)
+// stopEventSources stops existing event sources
+func (gc *GatewayConfig) stopEventSources(configs []string) {
+	for _, configKey := range configs {
+		eventSource := gc.registeredConfigs[configKey]
+		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("stopping event source")
+		eventSource.Cancel()
+		if err := eventSource.Conn.Close(); err != nil {
+			gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
+		}
+
+	}
+}
+
+// manageEventSources syncs registered event sources and updated gateway configmap
+func (gc *GatewayConfig) manageEventSources(cm *corev1.ConfigMap) error {
+	newConfigs, err := gc.createInternalEventSources(cm)
 	if err != nil {
 		return err
 	}
 
 	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
-	gc.Log.Info().Interface("stale-config-keys", staleConfigKeys).Msg("stale configurations")
-	gc.Log.Info().Interface("new-config-keys", newConfigKeys).Msg("new configurations")
+	gc.Log.Info().Interface("stale-config-keys", staleConfigKeys).Msg("stale event sources")
+	gc.Log.Info().Interface("new-config-keys", newConfigKeys).Msg("new event sources")
 
-	// stop existing configurations
-	gc.stopConfigs(ce, staleConfigKeys)
+	// stop existing event sources
+	gc.stopEventSources(staleConfigKeys)
 
-	// validate new configurations
-	gc.validateConfigs(ce, newConfigs)
-
-	// start new configurations
-	gc.startConfigs(ce, newConfigs, newConfigKeys)
+	// start new event sources
+	gc.startEventSources(newConfigs, newConfigKeys)
 
 	return nil
 }

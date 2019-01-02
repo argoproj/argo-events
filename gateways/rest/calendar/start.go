@@ -52,7 +52,7 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 // StartGateway runs given configuration and sends event back to gateway processor client
-func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {
+func (ce *CalendarConfigExecutor) StartGateway(config *gateways.EventSourceContext) {
 	ce.GwConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -113,7 +113,7 @@ func (ce *CalendarConfigExecutor) StartGateway(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *CalendarConfigExecutor) listenEvents(cal *calSchedule, config *gateways.ConfigContext) {
+func (ce *CalendarConfigExecutor) listenEvents(cal *calSchedule, config *gateways.EventSourceContext) {
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
 		config.ErrChan <- err

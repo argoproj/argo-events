@@ -9,7 +9,7 @@ import (
 )
 
 // Validate validates given webhook configuration
-func (wce *WebhookConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (wce *WebhookConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	w, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

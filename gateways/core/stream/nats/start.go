@@ -8,7 +8,7 @@ import (
 )
 
 // Runs a configuration
-func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *NatsConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	n, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -40,7 +40,7 @@ func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, config *gateways.ConfigContext) {
+func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, config *gateways.EventSourceContext) {
 	nc, err := nats.Connect(n.URL)
 	if err != nil {
 		ce.GatewayConfig.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")

@@ -42,8 +42,8 @@ func DefaultSensorJobName(jobName string) string {
 	return fmt.Sprintf("%s-sensor-job", jobName)
 }
 
-// DefaultGatewayDeploymentName returns a formulated name for a gateway deployment
-func DefaultGatewayDeploymentName(deploymentName string) string {
+// DefaultGatewayPodName returns a formulated name for a gateway deployment
+func DefaultGatewayPodName(deploymentName string) string {
 	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
 }
 

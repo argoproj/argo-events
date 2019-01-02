@@ -19,7 +19,7 @@ import (
 )
 
 // Validate validates gitlab gateway configuration
-func (ce *GitlabExecutor) Validate(config *gateways.ConfigContext) error {
+func (ce *GitlabExecutor) Validate(config *gateways.EventSourceContext) error {
 	g, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

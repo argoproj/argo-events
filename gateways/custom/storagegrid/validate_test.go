@@ -37,8 +37,8 @@ filter:
 
 func TestStorageGridConfigExecutor_Validate(t *testing.T) {
 	s3Config := &StorageGridConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
+	ctx := &gateways.EventSourceContext{
+		Data: &gateways.EventSourceData{},
 	}
 	ctx.Data.Config = configValue
 	err := s3Config.Validate(ctx)

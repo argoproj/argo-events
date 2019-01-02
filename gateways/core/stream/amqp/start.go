@@ -9,7 +9,7 @@ import (
 )
 
 // StartConfig runs a configuration
-func (ce *AMQPConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *AMQPConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	a, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -62,7 +62,7 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 	return delivery, nil
 }
 
-func (ce *AMQPConfigExecutor) listenEvents(a *amqp, config *gateways.ConfigContext) {
+func (ce *AMQPConfigExecutor) listenEvents(a *amqp, config *gateways.EventSourceContext) {
 	conn, err := amqplib.Dial(a.URL)
 	if err != nil {
 		config.ErrChan <- err

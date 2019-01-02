@@ -31,12 +31,12 @@ import (
 var (
 	mut sync.Mutex
 	// activeConfigs keeps track of configurations that are running in gateway.
-	activeConfigs = make(map[string]*gateways.ConfigContext)
+	activeConfigs = make(map[string]*gateways.EventSourceContext)
 )
 
 // returns a gateway configuration and its hash
-func getConfiguration(body io.ReadCloser) (*gateways.ConfigContext, *string, error) {
-	var configData gateways.ConfigData
+func getConfiguration(body io.ReadCloser) (*gateways.EventSourceContext, *string, error) {
+	var configData gateways.EventSourceData
 	config, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to read requested config to run. err %+v", err)
@@ -46,8 +46,8 @@ func getConfiguration(body io.ReadCloser) (*gateways.ConfigContext, *string, err
 		return nil, nil, fmt.Errorf("failed to parse config. err %+v", err)
 	}
 	// register configuration
-	gatewayConfig := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{
+	gatewayConfig := &gateways.EventSourceContext{
+		Data: &gateways.EventSourceData{
 			Config: configData.Config,
 			Src:    configData.Src,
 		},

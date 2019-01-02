@@ -85,7 +85,7 @@ func parseConfig(config string) (*testConfig, error) {
 	return t, err
 }
 
-func (ce *testConfigExecutor) StartConfig(config *ConfigContext) {
+func (ce *testConfigExecutor) StartConfig(config *EventSourceContext) {
 	fmt.Println("operating on configuration")
 	t, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -115,7 +115,7 @@ func (ce *testConfigExecutor) StartConfig(config *ConfigContext) {
 	}
 }
 
-func (ce *testConfigExecutor) listenEvents(t *testConfig, config *ConfigContext) {
+func (ce *testConfigExecutor) listenEvents(t *testConfig, config *EventSourceContext) {
 	config.StartChan <- struct{}{}
 	for {
 		select {
@@ -129,7 +129,7 @@ func (ce *testConfigExecutor) listenEvents(t *testConfig, config *ConfigContext)
 	}
 }
 
-func (ce *testConfigExecutor) Validate(config *ConfigContext) error {
+func (ce *testConfigExecutor) Validate(config *EventSourceContext) error {
 	t, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return err
@@ -143,7 +143,7 @@ func (ce *testConfigExecutor) Validate(config *ConfigContext) error {
 	return nil
 }
 
-func (ce *testConfigExecutor) StopConfig(config *ConfigContext) {
+func (ce *testConfigExecutor) StopConfig(config *EventSourceContext) {
 	fmt.Println("stop configuration received")
 	if config.Active {
 		config.Active = false
@@ -178,7 +178,7 @@ func newGatewayconfig(gw *v1alpha1.Gateway) *GatewayConfig {
 		controllerInstanceID: "test-id",
 		configName:           "test-gateway-configmap",
 		gwcs:                 gwFake.NewSimpleClientset(),
-		registeredConfigs:    make(map[string]*ConfigContext),
+		registeredConfigs:    make(map[string]*EventSourceContext),
 		transformerPort:      "9000",
 		gw:                   gw,
 	}
@@ -193,8 +193,8 @@ func Test_createInternalConfigs(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, configmap)
 
-	// test createInternalConfigs
-	configs, err := gc.createInternalConfigs(configmap)
+	// test createInternalEventSources
+	configs, err := gc.createInternalEventSources(configmap)
 	assert.Nil(t, err)
 	assert.NotNil(t, configs)
 
@@ -216,8 +216,8 @@ func Test_diffConfigurations(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, configmap)
 
-	// test createInternalConfigs
-	configs, err := gatewayConfig.createInternalConfigs(configmap)
+	// test createInternalEventSources
+	configs, err := gatewayConfig.createInternalEventSources(configmap)
 	assert.Nil(t, err)
 
 	staleConfigKeys, newConfigKeys := gatewayConfig.diffConfigurations(configs)
@@ -229,8 +229,8 @@ func Test_diffConfigurations(t *testing.T) {
 	assert.Equal(t, staleConfigKeys, newConfigKeys)
 
 	configName := "new-test-config"
-	newConfigContext := &ConfigContext{
-		Data: &ConfigData{
+	newConfigContext := &EventSourceContext{
+		Data: &EventSourceData{
 			ID:     Hasher(configName),
 			TimeID: Hasher(time.Now().String()),
 			Src:    "test.newConfig",
@@ -245,7 +245,7 @@ func Test_diffConfigurations(t *testing.T) {
 		StartChan: make(chan struct{}),
 	}
 
-	newConfigs := map[string]*ConfigContext{
+	newConfigs := map[string]*EventSourceContext{
 		Hasher(newConfigContext.Data.Src + newConfigContext.Data.Config): newConfigContext,
 	}
 	staleConfigKeys, newConfigKeys = gatewayConfig.diffConfigurations(newConfigs)
@@ -260,9 +260,9 @@ func Test_validateConfigs(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	configmap, err := gatewayConfigMap()
 	assert.Nil(t, err)
-	configs, err := gc.createInternalConfigs(configmap)
+	configs, err := gc.createInternalEventSources(configmap)
 	assert.Nil(t, err)
-	err = gc.validateConfigs(&testConfigExecutor{}, configs)
+	err = gc.validateEventSources(&testConfigExecutor{}, configs)
 	assert.Nil(t, err)
 }
 
@@ -273,12 +273,12 @@ func Test_startConfigs(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	configmap, err := gatewayConfigMap()
 	assert.Nil(t, err)
-	configs, err := gc.createInternalConfigs(configmap)
+	configs, err := gc.createInternalEventSources(configmap)
 	assert.Nil(t, err)
 
 	_, newConfigKeys := gc.diffConfigurations(configs)
 
-	err = gc.startConfigs(&testConfigExecutor{}, configs, newConfigKeys)
+	err = gc.startEventSources(&testConfigExecutor{}, configs, newConfigKeys)
 	assert.Nil(t, err)
 
 	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{})
@@ -314,21 +314,21 @@ func Test_stopConfigs(t *testing.T) {
 	gc := newGatewayconfig(gw)
 	configmap, err := gatewayConfigMap()
 	assert.Nil(t, err)
-	configs, err := gc.createInternalConfigs(configmap)
+	configs, err := gc.createInternalEventSources(configmap)
 	assert.Nil(t, err)
 
 	_, newConfigKeys := gc.diffConfigurations(configs)
 
-	err = gc.startConfigs(&testConfigExecutor{}, configs, newConfigKeys)
+	err = gc.startEventSources(&testConfigExecutor{}, configs, newConfigKeys)
 	assert.Nil(t, err)
 
 	time.Sleep(5 * time.Second)
 
-	keys, _ := gc.diffConfigurations(make(map[string]*ConfigContext))
+	keys, _ := gc.diffConfigurations(make(map[string]*EventSourceContext))
 
 	fmt.Println(keys)
 
-	gc.stopConfigs(&testConfigExecutor{}, keys)
+	gc.stopEventSources(&testConfigExecutor{}, keys)
 
 	time.Sleep(5 * time.Second)
 

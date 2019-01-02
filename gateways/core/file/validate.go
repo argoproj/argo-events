@@ -22,7 +22,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (fw *FileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (fw *FileWatcherConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	fwc, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

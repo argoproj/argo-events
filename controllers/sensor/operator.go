@@ -345,9 +345,9 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 		if soc.s.ObjectMeta.Annotations == nil {
 			soc.s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		soc.s.ObjectMeta.Labels[common.LabelKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Labels[common.LabelSensorKeyPhase] = string(phase)
 		// add annotations so a resource sensor can watch this sensor.
-		soc.s.ObjectMeta.Annotations[common.LabelKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Annotations[common.LabelSensorKeyPhase] = string(phase)
 	}
 	if soc.s.Status.StartedAt.IsZero() {
 		soc.s.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
@@ -367,8 +367,8 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			if soc.s.ObjectMeta.Labels == nil {
 				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
-			soc.s.ObjectMeta.Labels[common.LabelKeyComplete] = "true"
-			soc.s.ObjectMeta.Annotations[common.LabelKeyComplete] = string(phase)
+			soc.s.ObjectMeta.Labels[common.LabelSensorKeyComplete] = "true"
+			soc.s.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
 			soc.updated = true
 		}
 	}

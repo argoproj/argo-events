@@ -38,8 +38,8 @@ filter:
 
 func TestResourceConfigExecutor_Validate(t *testing.T) {
 	ce := &ResourceConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
+	ctx := &gateways.EventSourceContext{
+		Data: &gateways.EventSourceData{},
 	}
 	ctx.Data.Config = configValue
 	err := ce.Validate(ctx)

@@ -24,7 +24,7 @@ import (
 
 func TestResourceConfigExecutor_StopConfig(t *testing.T) {
 	ce := &ResourceConfigExecutor{}
-	ctx := &gateways.ConfigContext{
+	ctx := &gateways.EventSourceContext{
 		StopChan: make(chan struct{}),
 	}
 	ctx.Active = true

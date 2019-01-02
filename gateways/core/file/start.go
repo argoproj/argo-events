@@ -28,7 +28,7 @@ import (
 )
 
 // StartConfig runs a configuration
-func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	f, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -60,7 +60,7 @@ func (ce *FileWatcherConfigExecutor) StartConfig(config *gateways.ConfigContext)
 	}
 }
 
-func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.ConfigContext) {
+func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.EventSourceContext) {
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

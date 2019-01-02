@@ -22,7 +22,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (ce *CalendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (ce *CalendarConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

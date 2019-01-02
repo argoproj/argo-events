@@ -66,7 +66,7 @@ type server struct {
 
 type routeConfig struct {
 	sgConfig       *StorageGridEventConfig
-	gatewayConfig  *gateways.ConfigContext
+	gatewayConfig  *gateways.EventSourceContext
 	configExecutor *StorageGridConfigExecutor
 }
 
@@ -166,7 +166,7 @@ func (rc *routeConfig) startHttpServer() {
 }
 
 // StartConfig runs a configuration
-func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	defer func() {
 		gateways.Recover()
 	}()
@@ -280,7 +280,7 @@ func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, reques
 	common.SendErrorResponse(writer)
 }
 
-func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, config *gateways.ConfigContext) {
+func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, config *gateways.EventSourceContext) {
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {

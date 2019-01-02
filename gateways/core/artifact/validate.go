@@ -17,17 +17,32 @@ limitations under the License.
 package artifact
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
 )
 
-// Validate validates s3 configuration
-func (s3ce *S3ConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	artifact, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates a s3 event source
+func (ce *S3ConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return &gateways.ValidEventSource{
+			IsValid: false,
+		}, gateways.ErrConfigParseFailed
 	}
+	if err = ce.validate(artifact); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+		}, err
+	}
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
+}
+
+// validates an artifact
+func (ce *S3ConfigExecutor) validate(artifact *S3Artifact) error {
 	if artifact == nil {
 		return gateways.ErrEmptyConfig
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (ace *AMQPConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (ace *AMQPConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	a, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

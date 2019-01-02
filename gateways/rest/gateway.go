@@ -17,7 +17,7 @@ type httpConfigExecutor struct {
 	*gateways.HttpGatewayServerConfig
 }
 
-func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *httpConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 
 	errChan := make(chan error)
 
@@ -42,7 +42,7 @@ func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 
 	http.HandleFunc(ce.ConfigActivatedEndpoint, func(writer http.ResponseWriter, request *http.Request) {
 		ce.GwConfig.Log.Info().Msg("config running notification")
-		var c *gateways.ConfigData
+		var c *gateways.EventSourceData
 		body, err := ioutil.ReadAll(request.Body)
 		if err != nil {
 			ce.GwConfig.Log.Error().Err(err).Msg("failed to read request body")
@@ -78,7 +78,7 @@ func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	})
 
 	ce.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching configuration configuration to start")
-	err := ce.sendHttpRequest(&gateways.ConfigData{
+	err := ce.sendHttpRequest(&gateways.EventSourceData{
 		ID:     config.Data.ID,
 		TimeID: config.Data.TimeID,
 		Src:    config.Data.Src,
@@ -106,9 +106,9 @@ func (ce *httpConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) {
+func (ce *httpConfigExecutor) StopConfig(config *gateways.EventSourceContext) {
 	ce.GwConfig.Log.Info().Str("config-key", config.Data.Src).Msg("dispatching stop configuration notification")
-	err := ce.sendHttpRequest(&gateways.ConfigData{
+	err := ce.sendHttpRequest(&gateways.EventSourceData{
 		Src:    config.Data.Src,
 		Config: config.Data.Config,
 	}, ce.StopConfigEndpoint)
@@ -117,11 +117,11 @@ func (ce *httpConfigExecutor) StopConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *httpConfigExecutor) Validate(configContext *gateways.ConfigContext) error {
+func (ce *httpConfigExecutor) Validate(configContext *gateways.EventSourceContext) error {
 	return nil
 }
 
-func (ce *httpConfigExecutor) sendHttpRequest(config *gateways.ConfigData, endpoint string) error {
+func (ce *httpConfigExecutor) sendHttpRequest(config *gateways.EventSourceData, endpoint string) error {
 	payload, err := json.Marshal(config)
 	if err != nil {
 		ce.GwConfig.Log.Error().Str("config-key", config.Src).Err(err).Msg("failed to marshal configuration")

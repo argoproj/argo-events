@@ -107,7 +107,7 @@ func Test_updateGatewayResourceNoGateway(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", "test", &ConfigData{
+	e := gc.GetK8Event("test", "test", &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
@@ -116,7 +116,7 @@ func Test_updateGatewayResourceNoGateway(t *testing.T) {
 	e, err = common.CreateK8Event(e, gc.Clientset)
 	assert.Nil(t, err)
 
-	err = gc.updateGatewayResource(e)
+	err = gc.updateGatewayResourceState(e)
 	assert.NotNil(t, err)
 
 	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
@@ -129,7 +129,7 @@ func Test_updateGatewayResourceInit(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", v1alpha1.NodePhaseInitialized, &ConfigData{
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseInitialized, &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
@@ -141,7 +141,7 @@ func Test_updateGatewayResourceInit(t *testing.T) {
 	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gw)
 	assert.Nil(t, err)
 
-	err = gc.updateGatewayResource(e)
+	err = gc.updateGatewayResourceState(e)
 	assert.Nil(t, err)
 
 	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -161,7 +161,7 @@ func Test_updateGatewayResourceRunning(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", v1alpha1.NodePhaseRunning, &ConfigData{
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseRunning, &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
@@ -171,7 +171,7 @@ func Test_updateGatewayResourceRunning(t *testing.T) {
 	assert.Nil(t, err)
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayEventSourceID]] = v1alpha1.NodeStatus{
 		Name:   "test-node",
 		Phase:  v1alpha1.NodePhaseInitialized,
 		ID:     "1234",
@@ -181,7 +181,7 @@ func Test_updateGatewayResourceRunning(t *testing.T) {
 	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 	assert.Nil(t, err)
 
-	err = gc.updateGatewayResource(e)
+	err = gc.updateGatewayResourceState(e)
 	assert.Nil(t, err)
 
 	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -200,7 +200,7 @@ func Test_updateGatewayResourceRemove(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", v1alpha1.NodePhaseRemove, &ConfigData{
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseRemove, &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
@@ -210,7 +210,7 @@ func Test_updateGatewayResourceRemove(t *testing.T) {
 	assert.Nil(t, err)
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayEventSourceID]] = v1alpha1.NodeStatus{
 		Name:   "test-node",
 		Phase:  v1alpha1.NodePhaseRunning,
 		ID:     "1234",
@@ -220,7 +220,7 @@ func Test_updateGatewayResourceRemove(t *testing.T) {
 	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 	assert.Nil(t, err)
 
-	err = gc.updateGatewayResource(e)
+	err = gc.updateGatewayResourceState(e)
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(gc.gw.Status.Nodes))
 
@@ -234,7 +234,7 @@ func Test_updateGatewayResourceCompleted(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &ConfigData{
+	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
@@ -244,7 +244,7 @@ func Test_updateGatewayResourceCompleted(t *testing.T) {
 	assert.Nil(t, err)
 
 	gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayConfigID]] = v1alpha1.NodeStatus{
+	gc.gw.Status.Nodes[e.Labels[common.LabelGatewayEventSourceID]] = v1alpha1.NodeStatus{
 		Name:   "test-node",
 		Phase:  v1alpha1.NodePhaseRunning,
 		ID:     "1234",
@@ -254,7 +254,7 @@ func Test_updateGatewayResourceCompleted(t *testing.T) {
 	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 	assert.Nil(t, err)
 
-	err = gc.updateGatewayResource(e)
+	err = gc.updateGatewayResourceState(e)
 	assert.Nil(t, err)
 	for _, node := range gc.gw.Status.Nodes {
 		assert.Equal(t, string(v1alpha1.NodePhaseCompleted), string(node.Phase))

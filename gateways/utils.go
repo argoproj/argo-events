@@ -17,24 +17,13 @@ limitations under the License.
 package gateways
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/controllers/gateway/transform"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"hash/fnv"
+	"k8s.io/client-go/kubernetes"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// TransformerPayload creates a new payload from input data and adds source information
-func TransformerPayload(b []byte, source string) ([]byte, error) {
-	tp := &transform.TransformerPayload{
-		Src:     source,
-		Payload: b,
-	}
-	payload, err := json.Marshal(tp)
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
-}
 
 // Hasher hashes a string
 func Hasher(value string) string {
@@ -43,19 +32,38 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
-func Recover() {
-	if r := recover(); r != nil {
-		fmt.Println("Recovered", r)
+// GetSecret retrieves the secret value from the secret in namespace with name and key
+func GetSecret(client kubernetes.Interface, namespace string, name, key string) (string, error) {
+	secret, err := client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
 	}
+	val, ok := secret.Data[key]
+	if !ok {
+		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
+	}
+	return string(val), nil
 }
 
-// CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
-func CloseChannels(ctx *ConfigContext) {
-	defer Recover()
-	close(ctx.StartChan)
-	close(ctx.DoneChan)
-	close(ctx.ErrChan)
-	close(ctx.StopChan)
-	close(ctx.DataChan)
-	close(ctx.ShutdownChan)
+// ConsumeEventsFromEventSource consumes events from the event source.
+func ConsumeEventsFromEventSource(name string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error) error {
+	for {
+		select {
+		case data := <-dataCh:
+			err := eventStream.Send(&Event{
+				Name: name,
+				Payload: data,
+			})
+			if err != nil {
+				return status.Errorf(codes.Aborted, "failed to send event on stream", err)
+			}
+
+		case err := <-errorCh:
+			return status.Errorf(codes.Internal, "error occurred in event source", err)
+
+		case <-eventStream.Context().Done():
+			fmt.Println("connection is closed by client")
+			return nil
+		}
+	}
 }

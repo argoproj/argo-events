@@ -16,7 +16,7 @@ package gitlab
 import "github.com/argoproj/argo-events/gateways"
 
 // StopConfig stops the configuration
-func (sgce *GitlabExecutor) StopConfig(config *gateways.ConfigContext) {
+func (sgce *GitlabExecutor) StopConfig(config *gateways.EventSourceContext) {
 	if config.Active == true {
 		config.Active = false
 		config.StopChan <- struct{}{}

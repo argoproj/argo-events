@@ -22,7 +22,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (rce *ResourceConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (rce *ResourceConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	res, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

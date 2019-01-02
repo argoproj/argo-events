@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// S3ConfigExecutor implements ConfigExecutor interface
+// S3ConfigExecutor implements Eventing interface
 type S3ConfigExecutor struct {
 	*gateways.GatewayConfig
 }
@@ -63,7 +63,7 @@ type S3Filter struct {
 	Suffix string `json:"suffix"`
 }
 
-func parseConfig(config string) (*S3Artifact, error) {
+func parseEventSource(config string) (*S3Artifact, error) {
 	var s *S3Artifact
 	err := yaml.Unmarshal([]byte(config), &s)
 	if err != nil {

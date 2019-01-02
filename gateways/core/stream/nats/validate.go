@@ -6,7 +6,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (nce *NatsConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (nce *NatsConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	n, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

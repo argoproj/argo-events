@@ -99,7 +99,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 	assert.NotNil(t, cm.Data[common.GatewayWatchers])
 
 	// check whether gateway deployment is successful
-	gwDeployment, err := fakeController.kubeClientset.AppsV1().Deployments(fakeController.Config.Namespace).Get(common.DefaultGatewayDeploymentName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
+	gwDeployment, err := fakeController.kubeClientset.AppsV1().Deployments(fakeController.Config.Namespace).Get(common.DefaultGatewayPodName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, gwDeployment)
 
@@ -114,12 +114,6 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 	err = goc.operate()
 	assert.Nil(t, err)
 	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseError))
-
-	// mark gateway phase as service error
-	goc.gw.Status.Phase = v1alpha1.NodePhaseServiceError
-	err = goc.operate()
-	assert.Nil(t, err)
-	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseRunning))
 
 	// operate on gateway that is already running
 	err = goc.operate()

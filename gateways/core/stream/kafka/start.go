@@ -18,7 +18,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 }
 
 // Runs a configuration
-func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *KafkaConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	k, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -50,7 +50,7 @@ func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigContext) {
+func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.EventSourceContext) {
 	consumer, err := sarama.NewConsumer([]string{k.URL}, nil)
 	if err != nil {
 		config.ErrChan <- err

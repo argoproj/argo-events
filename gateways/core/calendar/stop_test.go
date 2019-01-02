@@ -24,7 +24,7 @@ import (
 
 func TestCalendarConfigExecutor_StopConfig(t *testing.T) {
 	ce := &CalendarConfigExecutor{}
-	ctx := &gateways.ConfigContext{}
+	ctx := &gateways.EventSourceContext{}
 	ctx.StopChan = make(chan struct{})
 	ctx.Active = true
 	go func() {

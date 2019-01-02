@@ -8,7 +8,7 @@ import (
 
 func TestKafkaConfigExecutor_StopConfig(t *testing.T) {
 	ce := &KafkaConfigExecutor{}
-	ctx := &gateways.ConfigContext{
+	ctx := &gateways.EventSourceContext{
 		StopChan: make(chan struct{}),
 	}
 	ctx.Active = true

@@ -44,8 +44,8 @@ secretKey:
 
 func TestS3ConfigExecutor_Validate(t *testing.T) {
 	s3Config := &S3ConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
+	ctx := &gateways.EventSourceContext{
+		Data: &gateways.EventSourceData{},
 	}
 	ctx.Data.Config = configValue
 	err := s3Config.Validate(ctx)

@@ -28,7 +28,7 @@ var (
 )
 
 // Runs a gateway configuration
-func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *WebhookConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	w, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -73,7 +73,7 @@ func (ce *WebhookConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.ConfigContext) {
+func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.EventSourceContext) {
 	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
 	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
 	if err != nil {

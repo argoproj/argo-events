@@ -22,7 +22,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (mce *MqttConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (mce *MqttConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	mqttConfig, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

@@ -21,18 +21,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// NodePhase is the label for the condition of a node
+// NodePhase is the label for the condition of a node.
 type NodePhase string
 
 // possible types of node phases
 const (
-	NodePhaseRunning      NodePhase = "Running"      // the node is running
-	NodePhaseError        NodePhase = "Error"        // the node has encountered an error in processing
-	NodePhaseNew          NodePhase = ""             // the node is new
-	NodePhaseServiceError NodePhase = "ServiceError" // failed to expose gateway using a service
-	NodePhaseCompleted    NodePhase = "Completed"    // node has completed running
-	NodePhaseInitialized  NodePhase = "Initialized"  // node has been initialized
-	NodePhaseRemove       NodePhase = "Remove"       // node should be removed
+	NodePhaseRunning   NodePhase = "Running"   // the node is running
+	NodePhaseError     NodePhase = "Error"     // the node has encountered an error in processing
+	NodePhaseNew       NodePhase = ""          // the node is new
+	NodePhaseCompleted NodePhase = "Completed" // node has completed running
+	NodePhaseRemove NodePhase = "Remove" // stale node
 )
 
 // GatewayType is type of the gateway. It is used determining the internal event dispatch mechanism
@@ -71,7 +69,7 @@ type GatewayList struct {
 // GatewaySpec represents gateway specifications
 type GatewaySpec struct {
 	// DeploySpec is description of gateway
-	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
+	DeploySpec *corev1.Pod `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
 
 	// ConfigMap is name of the configmap for gateway-processor
 	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
@@ -83,7 +81,7 @@ type GatewaySpec struct {
 	EventVersion string `json:"eventVersion" protobuf:"bytes,4,opt,name=eventVersion"`
 
 	// ServiceSpec is the specifications of the service to expose the gateway
-	ServiceSpec *corev1.ServiceSpec `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
+	ServiceSpec *corev1.Service `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
 
 	// Watchers are components which are interested listening to notifications from this gateway
 	// These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
@@ -91,14 +89,11 @@ type GatewaySpec struct {
 	// specifying watchers would be unnecessary.
 	Watchers *NotificationWatchers `json:"watchers,omitempty" protobuf:"bytes,6,opt,name=watchers"`
 
-	// RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server
-	RPCPort string `json:"rpcPort,omitempty" protobuf:"bytes,7,opt,name=rpcPort"`
-
-	// HTTPServerPort if provided is used to communicate between gateway client and server over http
-	HTTPServerPort string `json:"httpServerPort,omitempty" protobuf:"bytes,8,opt,name=httpServerPort"`
+	// Port on which the gateway event source processor is running on.
+	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
 	// DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	DispatchMechanism GatewayType `json:"dispatchMechanism" protobuf:"bytes,9,opt,name=dispatchMechanism"`
+	DispatchMechanism GatewayType `json:"dispatchMechanism" protobuf:"bytes,8,opt,name=dispatchMechanism"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

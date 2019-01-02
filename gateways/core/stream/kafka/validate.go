@@ -6,7 +6,7 @@ import (
 )
 
 // Validate validates the gateway configuration
-func (kce *KafkaConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (kce *KafkaConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	kafkaConfig, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

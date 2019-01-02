@@ -23,7 +23,7 @@ import (
 )
 
 // Validate validates gateway configuration
-func (sgce *StorageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
+func (sgce *StorageGridConfigExecutor) Validate(config *gateways.EventSourceContext) error {
 	sg, err := parseConfig(config.Data.Config)
 	if err != nil {
 		return gateways.ErrConfigParseFailed

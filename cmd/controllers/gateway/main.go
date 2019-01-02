@@ -37,7 +37,7 @@ func main() {
 		configMap = common.DefaultConfigMapName(common.DefaultGatewayControllerDeploymentName)
 	}
 
-	namespace, ok := os.LookupEnv(common.GatewayNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
 		namespace = common.DefaultControllerNamespace
 	}

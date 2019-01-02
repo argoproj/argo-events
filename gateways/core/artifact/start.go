@@ -19,125 +19,80 @@ package artifact
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/minio/minio-go"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-// getSecrets retrieves the secret value from the secret in namespace with name and key
-func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secretsIf := client.CoreV1().Secrets(namespace)
-	var secret *corev1.Secret
-	var err error
-	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		secret, err = secretsIf.Get(name, metav1.GetOptions{})
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
+// StartEventSource activates an event source and streams back events
+func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return "", err
+		return status.Errorf(codes.Internal, "failed to parse event source", err)
 	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
-}
+	ce.GatewayConfig.Log.Debug().Str("event-source-name", eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
-// StartConfig runs a configuration
-func (ce *S3ConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("operating on configuration")
-	artifact, err := parseConfig(config.Data.Config)
-	if err != nil {
-		config.ErrChan <- gateways.ErrConfigParseFailed
-	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *artifact).Msg("artifact configuration")
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{})
 
-	go ce.listenToEvents(artifact, config)
+	go ce.listenToEvents(artifact, dataCh, errorCh, doneCh)
 
 	for {
 		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-			config.Active = true
-
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
+		case data := <-dataCh:
+			err := eventStream.Send(&gateways.Event{
+				Name: eventSource.Name,
 				Payload: data,
 			})
+			if err != nil {
+				return status.Errorf(codes.Aborted, "failed to send event on stream", err)
+			}
 
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
+		case err := <-errorCh:
+			return status.Errorf(codes.Internal, "error occurred in event source", err)
+
+		case <-eventStream.Context().Done():
+			fmt.Println("connection is closed by client")
+			return nil
 		}
 	}
 }
 
 // listenEvents listens to minio bucket notifications
-func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, config *gateways.ConfigContext) {
+func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// retrieve access key id and secret access key
-	accessKey, err := getSecrets(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
+	accessKey, err := gateways.GetSecret(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-	secretKey, err := getSecrets(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
+	secretKey, err := gateways.GetSecret(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
 	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
 	if err != nil {
-		config.ErrChan <- err
-		return
-	}
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
-	// at this point configuration is successfully running
-	config.StartChan <- struct{}{}
-
-	ce.Log.Info().Str("config-key", config.Data.Src).Interface("config", artifact).Msg("artifact")
-
-	for {
-		select {
-		case notification := <-minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
-			string(artifact.S3EventConfig.Event),
-		}, make(chan struct{})):
-			if notification.Err != nil {
-				config.ErrChan <- notification.Err
-				return
-			}
-			payload, err := json.Marshal(notification.Records[0])
-			if err != nil {
-				config.ErrChan <- err
-				return
-			}
-			config.DataChan <- payload
-
-		case <-config.DoneChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-			config.ShutdownChan <- struct{}{}
+	for notification := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
+		string(artifact.S3EventConfig.Event),
+	}, doneCh) {
+		if notification.Err != nil {
+			errorCh <- notification.Err
 			return
 		}
+		payload, err := json.Marshal(notification.Records[0])
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		dataCh <- payload
 	}
 }

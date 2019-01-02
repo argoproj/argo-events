@@ -32,7 +32,7 @@ import (
 )
 
 // StartConfig runs a configuration
-func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *ResourceConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	res, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -64,7 +64,7 @@ func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.ConfigContext) {
+func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.EventSourceContext) {
 	resources, err := ce.discoverResources(res)
 	if err != nil {
 		config.ErrChan <- err

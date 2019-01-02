@@ -8,7 +8,7 @@ import (
 
 func TestGitlabExecutor_StopConfig(t *testing.T) {
 	ce := &GitlabExecutor{}
-	ctx := &gateways.ConfigContext{}
+	ctx := &gateways.EventSourceContext{}
 	ctx.StopChan = make(chan struct{})
 	ctx.Active = true
 	go func() {

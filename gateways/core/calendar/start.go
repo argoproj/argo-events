@@ -30,7 +30,7 @@ import (
 type Next func(time.Time) time.Time
 
 // StartConfig runs a configuration
-func (ce *CalendarConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *CalendarConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("parsing configuration...")
 	cal, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -84,7 +84,7 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 }
 
 // fireEvent fires an event when schedule is passed.
-func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.ConfigContext) {
+func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, config *gateways.EventSourceContext) {
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
 		config.ErrChan <- err

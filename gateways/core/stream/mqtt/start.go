@@ -24,7 +24,7 @@ import (
 )
 
 // StartConfig runs a configuration
-func (ce *MqttConfigExecutor) StartConfig(config *gateways.ConfigContext) {
+func (ce *MqttConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
 	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
 	m, err := parseConfig(config.Data.Config)
 	if err != nil {
@@ -55,7 +55,7 @@ func (ce *MqttConfigExecutor) StartConfig(config *gateways.ConfigContext) {
 	}
 }
 
-func (ce *MqttConfigExecutor) listenEvents(m *mqtt, config *gateways.ConfigContext) {
+func (ce *MqttConfigExecutor) listenEvents(m *mqtt, config *gateways.EventSourceContext) {
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
 		config.DataChan <- msg.Payload()
 	}

@@ -30,24 +30,24 @@ func TestGatewayConfig_GetK8Event(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, gw)
 	gc := newGatewayconfig(gw)
-	e := gc.GetK8Event("test", "test", &ConfigData{
+	e := gc.GetK8Event("test", "test", &EventSourceData{
 		Config: "testConfig",
 		Src:    "testSrc",
 		ID:     "1234",
 		TimeID: "4567",
 	})
 	assert.NotNil(t, e)
-	assert.Equal(t, "1234", e.Labels[common.LabelGatewayConfigID])
+	assert.Equal(t, "1234", e.Labels[common.LabelGatewayEventSourceID])
 }
 
-func GetConfigContext() *ConfigContext {
-	return &ConfigContext{
+func GetConfigContext() *EventSourceContext {
+	return &EventSourceContext{
 		StartChan: make(chan struct{}),
 		DataChan:  make(chan []byte),
 		ErrChan:   make(chan error),
 		DoneChan:  make(chan struct{}),
 		StopChan:  make(chan struct{}),
-		Data: &ConfigData{
+		Data: &EventSourceData{
 			Config: "testConfig",
 			Src:    "testSrc",
 			ID:     "1234",
@@ -67,7 +67,7 @@ func TestGatewayConfig_GatewayCleanup(t *testing.T) {
 	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, el.Items)
-	assert.Equal(t, "1234", el.Items[0].Labels[common.LabelGatewayConfigID])
+	assert.Equal(t, "1234", el.Items[0].Labels[common.LabelGatewayEventSourceID])
 	assert.Equal(t, string(v1alpha1.NodePhaseCompleted), el.Items[0].Action)
 
 	_, ok := <-ctx.DataChan
@@ -93,7 +93,7 @@ func TestGatewayConfig_GatewayCleanup2(t *testing.T) {
 	el, err := gc.Clientset.CoreV1().Events(gw.Namespace).List(metav1.ListOptions{})
 	assert.Nil(t, err)
 	assert.NotNil(t, el.Items)
-	assert.Equal(t, "1234", el.Items[0].Labels[common.LabelGatewayConfigID])
+	assert.Equal(t, "1234", el.Items[0].Labels[common.LabelGatewayEventSourceID])
 	assert.Equal(t, string(v1alpha1.NodePhaseError), el.Items[0].Action)
 
 	_, ok := <-ctx.DataChan

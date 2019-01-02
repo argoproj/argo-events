@@ -40,7 +40,7 @@ func (gc *GatewayConfig) WatchGatewayEvents(ctx context.Context) (cache.Controll
 				if newEvent, ok := obj.(*corev1.Event); ok {
 					if gc.filterEvent(newEvent) {
 						gc.Log.Info().Msg("detected new k8 Event. Updating gateway resource.")
-						err := gc.updateGatewayResource(newEvent)
+						err := gc.updateGatewayResourceState(newEvent)
 						if err != nil {
 							gc.Log.Error().Err(err).Msg("update of gateway resource failed")
 						}
@@ -51,7 +51,7 @@ func (gc *GatewayConfig) WatchGatewayEvents(ctx context.Context) (cache.Controll
 				if event, ok := new.(*corev1.Event); ok {
 					if gc.filterEvent(event) {
 						gc.Log.Info().Msg("detected k8 Event update. Updating gateway resource.")
-						err := gc.updateGatewayResource(event)
+						err := gc.updateGatewayResourceState(event)
 						if err != nil {
 							gc.Log.Error().Err(err).Msg("update of gateway resource failed")
 						}
@@ -103,7 +103,7 @@ func (gc *GatewayConfig) filterEvent(event *corev1.Event) bool {
 }
 
 // WatchGatewayConfigMap watches change in configuration for the gateway
-func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor ConfigExecutor) (cache.Controller, error) {
+func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context) (cache.Controller, error) {
 	source := gc.newConfigMapWatch(gc.configName)
 	_, controller := cache.NewInformer(
 		source,
@@ -113,7 +113,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 			AddFunc: func(obj interface{}) {
 				if newCm, ok := obj.(*corev1.ConfigMap); ok {
 					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
-					err := gc.manageConfigurations(executor, newCm)
+					err := gc.manageEventSources(newCm)
 					if err != nil {
 						gc.Log.Error().Err(err).Msg("add config failed")
 					}
@@ -122,7 +122,7 @@ func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context, executor Con
 			UpdateFunc: func(old, new interface{}) {
 				if cm, ok := new.(*corev1.ConfigMap); ok {
 					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
-					err := gc.manageConfigurations(executor, cm)
+					err := gc.manageEventSources(cm)
 					if err != nil {
 						gc.Log.Error().Err(err).Msg("update config failed")
 					}
