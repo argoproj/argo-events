@@ -18,11 +18,8 @@ package artifact
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 // StartEventSource activates an event source and streams back events
@@ -30,7 +27,7 @@ func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, 
 	ce.GatewayConfig.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return status.Errorf(codes.Internal, "failed to parse event source", err)
+		return err
 	}
 	ce.GatewayConfig.Log.Debug().Str("event-source-name", eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
@@ -48,14 +45,14 @@ func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, 
 				Payload: data,
 			})
 			if err != nil {
-				return status.Errorf(codes.Aborted, "failed to send event on stream", err)
+				return err
 			}
 
 		case err := <-errorCh:
-			return status.Errorf(codes.Internal, "error occurred in event source", err)
+			return err
 
 		case <-eventStream.Context().Done():
-			fmt.Println("connection is closed by client")
+			ce.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
 			return nil
 		}
 	}

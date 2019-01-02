@@ -50,7 +50,7 @@ func (gc *GatewayConfig) StartGateway(es EventingServer) error {
 	// handle event source's status
 	go func() {
 		for status := range gc.statusCh {
-			gc.markGatewayNodePhase(status.Id, status.Phase, status.Message)
+			gc.markGatewayNodePhase(&status)
 		}
 	}()
 

@@ -28,9 +28,13 @@ import (
 
 // EventSourceStatus encapsulates state of an event source
 type EventSourceStatus struct {
+	// Id of the event source
 	Id string
+	// Name of the event source
 	Name string
+	// Message
 	Message string
+	// Phase of the event source
 	Phase v1alpha1.NodePhase
 }
 
@@ -42,11 +46,11 @@ func (gc *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1
 		gc.Log.Warn().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Msg("node is not initialized")
 		return nil
 	}
-	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
-		gc.Log.Info().Str("node-id", nodeID).Str("old-phase", string(node.Phase)).Str("new-phase", string(phase)).Msg("phase marked")
-		node.Phase = phase
+	if node.Phase != nodeStatus.Phase {
+		gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("old-phase", string(node.Phase)).Str("new-phase", string(nodeStatus.Phase)).Msg("phase marked")
+		node.Phase = nodeStatus.Phase
 	}
-	node.Message = message
+	node.Message = nodeStatus.Message
 	gc.gw.Status.Nodes[node.ID] = *node
 	return node
 }

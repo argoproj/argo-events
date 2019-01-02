@@ -16,29 +16,25 @@ limitations under the License.
 
 package gateways
 
-import (
-	"github.com/stretchr/testify/assert"
-	"testing"
-)
-
-func Test_transformPayload(t *testing.T) {
-	payload := []byte("hello")
-	src := "test"
-	_, err := TransformerPayload(payload, src)
-	assert.Nil(t, err)
-}
-
-func TestCloseChannels(t *testing.T) {
-	ctx := GetConfigContext()
-	CloseChannels(ctx)
-	_, ok := <-ctx.DataChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.StopChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.DoneChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.StartChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.ErrChan
-	assert.Equal(t, false, ok)
-}
+//
+//func Test_transformPayload(t *testing.T) {
+//	payload := []byte("hello")
+//	src := "test"
+//	_, err := TransformerPayload(payload, src)
+//	assert.Nil(t, err)
+//}
+//
+//func TestCloseChannels(t *testing.T) {
+//	ctx := GetConfigContext()
+//	CloseChannels(ctx)
+//	_, ok := <-ctx.DataChan
+//	assert.Equal(t, false, ok)
+//	_, ok = <-ctx.StopChan
+//	assert.Equal(t, false, ok)
+//	_, ok = <-ctx.DoneChan
+//	assert.Equal(t, false, ok)
+//	_, ok = <-ctx.StartChan
+//	assert.Equal(t, false, ok)
+//	_, ok = <-ctx.ErrChan
+//	assert.Equal(t, false, ok)
+//}

@@ -57,7 +57,7 @@ type GatewayConfig struct {
 	configName string
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
-
+	// statusCh is used to communicate the status of an event source
 	statusCh chan EventSourceStatus
 }
 
@@ -65,11 +65,9 @@ type GatewayConfig struct {
 type EventSourceContext struct {
 	// Data holds the actual event source
 	Data *EventSourceData
-	// Active tracks event source state as running or stopped
-	Active bool
 
 	Ctx context.Context
-	// Cancel is called to cancel the context used by client to communicate with gateway server.
+
 	Cancel context.CancelFunc
 
 	Client EventingClient
@@ -260,13 +258,23 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			})
 			if err != nil {
 				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("event source is not valid")
-				eventSource.Conn.Close()
+				if err := eventSource.Conn.Close(); err != nil {
+					gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
+				}
 				gc.statusCh <- EventSourceStatus{
 					Phase: v1alpha1.NodePhaseError,
 					Id: eventSource.Data.ID,
 					Message: fmt.Sprintf("event source is not valid. err: %+v", err),
 				}
 				return
+			}
+
+			// mark event source as running
+			gc.statusCh <- EventSourceStatus{
+				Phase: v1alpha1.NodePhaseRunning,
+				Message: "event source is running",
+				Id: eventSource.Data.ID,
+				Name: eventSource.Data.Src,
 			}
 
 			// listen to events from gateway server
@@ -318,12 +326,15 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
-		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("stopping event source")
+		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("removing the event source")
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {
 			gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
 		}
-
+		gc.statusCh <- EventSourceStatus{
+			Phase: v1alpha1.NodePhaseRemove,
+			Id: eventSource.Data.ID,
+		}
 	}
 }
 
