@@ -1,6 +1,7 @@
 package kafka
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -17,15 +18,15 @@ partition: "0"
 
 func TestKafkaConfigExecutor_Validate(t *testing.T) {
 	ce := &KafkaConfigExecutor{}
-	ctx := &gateways.EventSourceContext{Data: &gateways.EventSourceData{}}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	es := &gateways.EventSource{Data: &configValue}
+	ctx := context.Background()
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 
 	configValue = `
 topic: foo
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }

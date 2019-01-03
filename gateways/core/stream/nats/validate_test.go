@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -16,15 +17,18 @@ subject: foo
 
 func TestNatsConfigExecutor_Validate(t *testing.T) {
 	ce := &NatsConfigExecutor{}
-	ctx := &gateways.EventSourceContext{Data: &gateways.EventSourceData{}}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	es := &gateways.EventSource{
+		Data: &configValue,
+	}
+	ctx := context.Background()
+	es.Data = &configValue
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 
 	configValue = `
 subject: foo
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }

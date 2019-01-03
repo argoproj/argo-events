@@ -1,80 +1,47 @@
 package nats
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/nats-io/go-nats"
 )
 
 // Runs a configuration
-func (ce *NatsConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	n, err := parseConfig(config.Data.Config)
+func (ce *NatsConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	n, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
+		return err
 	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *n).Msg("nats configuration")
 
-	go ce.listenEvents(n, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+	go ce.listenEvents(n, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-
-	}
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
-func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, config *gateways.EventSourceContext) {
+func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	nc, err := nats.Connect(n.URL)
 	if err != nil {
 		ce.GatewayConfig.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
-	config.StartChan <- struct{}{}
 
 	_, err = nc.Subscribe(n.Subject, func(msg *nats.Msg) {
-		ce.Log.Info().Str("config-key", config.Data.Src).Interface("msg", msg).Msg("received data")
-		config.DataChan <- msg.Data
+		dataCh <- msg.Data
 	})
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	nc.Flush()
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config", n).Msg("connected to cluster")
 	if err := nc.LastError(); err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
-	<-config.DoneChan
-	nc.Close()
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-	config.ShutdownChan <- struct{}{}
+	<-doneCh
 }

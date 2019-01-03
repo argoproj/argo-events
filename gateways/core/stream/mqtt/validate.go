@@ -17,27 +17,29 @@ limitations under the License.
 package mqtt
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (mce *MqttConfigExecutor) Validate(config *gateways.EventSourceContext) error {
-	mqttConfig, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (mce *MqttConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	mqttConfig, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrConfigParseFailed
 	}
 	if mqttConfig == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
 	}
 	if mqttConfig.URL == "" {
-		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
 	}
 	if mqttConfig.Topic == "" {
-		return fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidConfig)
 	}
 	if mqttConfig.ClientId == "" {
-		return fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidConfig)
 	}
-	return nil
+	return v, nil
 }

@@ -1,24 +1,26 @@
 package nats
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (nce *NatsConfigExecutor) Validate(config *gateways.EventSourceContext) error {
-	n, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (nce *NatsConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	n, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrConfigParseFailed
 	}
 	if n == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
 	}
 	if n.URL == "" {
-		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
 	}
 	if n.Subject == "" {
-		return fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidConfig)
 	}
-	return nil
+	return v, nil
 }

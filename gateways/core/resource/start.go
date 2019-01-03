@@ -33,7 +33,7 @@ import (
 // StartEventSource starts an event source
 func (ce *ResourceConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
-	res, err := parseEventSource(eventSource.Data)
+	pes, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (ce *ResourceConfigExecutor) StartEventSource(eventSource *gateways.EventSo
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(res, eventSource, dataCh, errorCh, doneCh)
+	go ce.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }

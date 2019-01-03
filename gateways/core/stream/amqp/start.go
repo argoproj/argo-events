@@ -2,41 +2,25 @@ package amqp
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	amqplib "github.com/streadway/amqp"
 )
 
-// StartConfig runs a configuration
-func (ce *AMQPConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	a, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ce *AMQPConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-stream-name", *eventSource.Name).Msg("operating on event source")
+	a, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *a).Msg("amqp configuration")
 
-	for {
-		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
+	go ce.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
 
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-	}
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
 func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
@@ -62,48 +46,34 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 	return delivery, nil
 }
 
-func (ce *AMQPConfigExecutor) listenEvents(a *amqp, config *gateways.EventSourceContext) {
+func (ce *AMQPConfigExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	conn, err := amqplib.Dial(a.URL)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
 	delivery, err := getDelivery(ch, a)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
-	config.StartChan <- struct{}{}
 
 	for {
 		select {
 		case msg := <-delivery:
-			config.DataChan <- msg.Body
-		case <-config.DoneChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.Active = false
+			dataCh <- msg.Body
+		case <-doneCh:
 			err = conn.Close()
 			if err != nil {
-				ce.GatewayConfig.Log.Error().Err(err).Str("config-name", config.Data.Src).Msg("failed to close connection")
+				ce.GatewayConfig.Log.Error().Err(err).Str("event-stream-name", *eventSource.Name).Msg("failed to close connection")
 			}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}

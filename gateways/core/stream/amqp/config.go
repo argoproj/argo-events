@@ -43,9 +43,9 @@ type amqp struct {
 	RoutingKey string `json:"routingKey"`
 }
 
-func parseConfig(config string) (*amqp, error) {
+func parseEventSource(eventSource *string) (*amqp, error) {
 	var a *amqp
-	err := yaml.Unmarshal([]byte(config), &a)
+	err := yaml.Unmarshal([]byte(*eventSource), &a)
 	if err != nil {
 		return nil, err
 	}

@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	ce := &kafka.KafkaConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	ce := &kafka.KafkaConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+		panic(err)
+	}
 }

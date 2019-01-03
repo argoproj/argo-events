@@ -22,11 +22,10 @@ import (
 )
 
 func main() {
-	gc := gateways.NewGatewayConfiguration()
-	ce := &calendar.CalendarConfigExecutor{}
-	ce.GatewayConfig = gc
-	err := gc.StartGateway(ce)
-	if err != nil {
+	ce := &calendar.CalendarConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
 		panic(err)
 	}
 }

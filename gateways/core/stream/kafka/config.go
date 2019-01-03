@@ -39,9 +39,9 @@ type kafka struct {
 	Topic string `json:"topic"`
 }
 
-func parseConfig(config string) (*kafka, error) {
+func parseEventSource(eventSource *string) (*kafka, error) {
 	var n *kafka
-	err := yaml.Unmarshal([]byte(config), &n)
+	err := yaml.Unmarshal([]byte(*eventSource), &n)
 	if err != nil {
 		return nil, err
 	}

@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	ce := &resource.ResourceConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	ce := &resource.ResourceConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+		panic(err)
+	}
 }

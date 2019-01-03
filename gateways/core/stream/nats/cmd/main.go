@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	ce := &nats.NatsConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	ce := &nats.NatsConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+		panic(err)
+	}
 }

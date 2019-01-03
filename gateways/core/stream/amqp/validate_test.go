@@ -1,6 +1,7 @@
 package amqp
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -18,11 +19,11 @@ routingKey: fooRoutingKey
 
 func TestAMQPConfigExecutor_Validate(t *testing.T) {
 	ce := &AMQPConfigExecutor{}
-	ctx := &gateways.EventSourceContext{
-		Data: &gateways.EventSourceData{},
+	es := &gateways.EventSource{
+		Data: &configValue,
 	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	ctx := context.Background()
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 
 	configValue = `
@@ -30,7 +31,7 @@ url: amqp://amqp.argo-events:5672
 exchangeName: fooExchangeName
 exchangeType: fanout
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }

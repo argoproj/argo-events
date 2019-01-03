@@ -36,9 +36,9 @@ type natsConfig struct {
 	Subject string `json:"subject"`
 }
 
-func parseConfig(config string) (*natsConfig, error) {
+func parseEventSource(es *string) (*natsConfig, error) {
 	var n *natsConfig
-	err := yaml.Unmarshal([]byte(config), &n)
+	err := yaml.Unmarshal([]byte(*es), &n)
 	if err != nil {
 		return nil, err
 	}

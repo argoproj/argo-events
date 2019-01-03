@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	ce := &amqp.AMQPConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	ce := &amqp.AMQPConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+		panic(err)
+	}
 }

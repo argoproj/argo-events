@@ -1,30 +1,32 @@
 package amqp
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (ace *AMQPConfigExecutor) Validate(config *gateways.EventSourceContext) error {
-	a, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (ace *AMQPConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	a, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrConfigParseFailed
 	}
 	if a == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
 	}
 	if a.URL == "" {
-		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
 	}
 	if a.RoutingKey == "" {
-		return fmt.Errorf("%+v, routing key must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, routing key must be specified", gateways.ErrInvalidConfig)
 	}
 	if a.ExchangeName == "" {
-		return fmt.Errorf("%+v, exchange name must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, exchange name must be specified", gateways.ErrInvalidConfig)
 	}
 	if a.ExchangeType == "" {
-		return fmt.Errorf("%+v, exchange type must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, exchange type must be specified", gateways.ErrInvalidConfig)
 	}
-	return nil
+	return v, nil
 }

@@ -17,6 +17,7 @@ limitations under the License.
 package file
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -33,21 +34,21 @@ path: x.txt
 
 func TestFileWatcherConfigExecutor_Validate(t *testing.T) {
 	ce := &FileWatcherConfigExecutor{}
-	ctx := &gateways.EventSourceContext{
-		Data: &gateways.EventSourceData{},
+	es := &gateways.EventSource{
+		Data: &configValue,
 	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	ctx := context.Background()
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 	configValue = `
 directory: "/bin/"
 type: CREATE
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 	configValue = ``
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }
