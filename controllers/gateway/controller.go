@@ -19,6 +19,7 @@ package gateway
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	zlog "github.com/rs/zerolog"
@@ -77,7 +78,16 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              zlog.New(os.Stdout).With().Caller().Logger(),
+		log:              zlog.New(os.Stdout).With().Caller().Logger().Output(zlog.ConsoleWriter{
+			Out: os.Stdout,
+			FormatCaller: func(i interface{}) string {
+				cwd, err := os.Getwd()
+				if err == nil {
+					return strings.TrimRight(cwd, "/go")
+				}
+				return ""
+			},
+		}),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),

@@ -22,8 +22,10 @@ import (
 )
 
 func main() {
-	ce := &file.FileWatcherConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	ce := &file.FileWatcherConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+		panic(err)
+	}
 }

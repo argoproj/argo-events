@@ -32,6 +32,7 @@ type ResourceConfigExecutor struct {
 type resource struct {
 	Namespace string          `json:"namespace"`
 	Filter    *ResourceFilter `json:"filter,omitempty"`
+	Version   string `json:"version"`
 	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`
 }
@@ -46,9 +47,9 @@ type ResourceFilter struct {
 	CreatedBy metav1.Time `json:"createdBy,omitempty"`
 }
 
-func parseConfig(config string) (*resource, error) {
+func parseEventSource(es *string) (*resource, error) {
 	var r *resource
-	err := yaml.Unmarshal([]byte(config), &r)
+	err := yaml.Unmarshal([]byte(*es), &r)
 	if err != nil {
 		return nil, err
 	}

@@ -17,9 +17,8 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/common"
+	"fmt"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -31,43 +30,28 @@ import (
 	"strings"
 )
 
-// StartConfig runs a configuration
-func (ce *ResourceConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	res, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ce *ResourceConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	res, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
 
-	go ce.listenEvents(res, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
-			config.Active = true
+	go ce.listenEvents(res, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-	}
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
-func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.EventSourceContext) {
-	resources, err := ce.discoverResources(res)
+func (ce *ResourceConfigExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	logger := ce.Log.With().Str("event-source-name", *eventSource.Name).Logger()
+	resource, err := ce.discoverResources(res)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	options := metav1.ListOptions{Watch: true}
@@ -75,67 +59,46 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.E
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
+	w, err := resource.Watch(options)
 	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
 
-	config.StartChan <- struct{}{}
-
-	// global quit channel
-	quitChan := make(chan struct{})
-
-	// start up listeners
-	for i := 0; i < len(resources); i++ {
-		resource := resources[i]
-		w, err := resource.Watch(options)
-		if err != nil {
-			config.ErrChan <- err
-			return
-		}
-
-		localQuitChan := quitChan
-
-		go func() {
-			for {
-				select {
-				case item := <-w.ResultChan():
-					if item.Object == nil {
-						ce.Log.Warn().Str("config-key", config.Data.Src).Msg("object to watch is nil")
-						return
-					}
-					itemObj := item.Object.(*unstructured.Unstructured)
-					b, err := itemObj.MarshalJSON()
-					if err != nil {
-						config.ErrChan <- err
-					}
-					if item.Type == watch.Error {
-						err = errors.FromObject(item.Object)
-						config.ErrChan <- err
-					}
-					if ce.passFilters(itemObj, res.Filter) {
-						config.DataChan <- b
-					}
-
-				case <-localQuitChan:
+	for {
+		select {
+		case item := <-w.ResultChan():
+			if item.Object == nil {
+				logger.Warn().Msg("object to watch is nil")
+				// renew watch due to it being ended with "too old resource version"
+				w, err = resource.Watch(options)
+				if err != nil {
+					errorCh <- err
 					return
 				}
+				continue
 			}
-		}()
+			itemObj := item.Object.(*unstructured.Unstructured)
+			b, err := itemObj.MarshalJSON()
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			if item.Type == watch.Error {
+				err = errors.FromObject(item.Object)
+				errorCh <- err
+				return
+			}
+			if ce.passFilters(itemObj, res.Filter) {
+				dataCh <- b
+			}
+		case <-doneCh:
+			return
+		}
 	}
-
-	<-config.DoneChan
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-	close(quitChan)
-	config.ShutdownChan <- struct{}{}
-	return
 }
 
-func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
+func (ce *ResourceConfigExecutor) discoverResources(obj *resource) (dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(ce.GatewayConfig.KubeConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(ce.GatewayConfig.KubeConfig)
 	if err != nil {
@@ -147,12 +110,11 @@ func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.Re
 	if err != nil {
 		return nil, err
 	}
-	resources := make([]dynamic.ResourceInterface, 0)
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
 		ce.GatewayConfig.Log.Info().Str("api-resource", gvk.String())
-		if apiResource.Kind != obj.Kind {
+		if apiResource.Kind != obj.Kind || apiResource.Version != obj.Version {
 			continue
 		}
 		canWatch := false
@@ -167,10 +129,10 @@ func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.Re
 			if err != nil {
 				return nil, err
 			}
-			resources = append(resources, client.Resource(&apiResource, obj.Namespace))
+			return client.Resource(&apiResource, obj.Namespace), nil
 		}
 	}
-	return resources, nil
+	return nil, fmt.Errorf("failed to list resource with group: %s, kined: %s and version: %s with watch capabilities", obj.Group, obj.Kind, obj.Version)
 }
 
 func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {

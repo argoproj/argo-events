@@ -17,12 +17,8 @@ limitations under the License.
 package file
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/fsnotify/fsnotify"
 	"strings"
 )
@@ -41,15 +37,14 @@ func (ce *FileWatcherConfigExecutor) StartEventSource(eventSource *gateways.Even
 
 	go ce.watchFileSystemEvents(f, eventSource, dataCh, errorCh, doneCh)
 
-	gateways.ConsumeEventsFromEventSource(eventSource.Name, )
-
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
-func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, config *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, es *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	defer watcher.Close()
@@ -57,30 +52,29 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
 	err = watcher.Add(fwc.Directory)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
-
 
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("fs watcher has stopped")
+				ce.GatewayConfig.Log.Info().Str("event-source", *es.Name).Msg("fs watcher has stopped")
 				// watcher stopped watching file events
+				errorCh <- fmt.Errorf("fs watcher stopped")
+				return
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			if fwc.Path == strings.TrimPrefix(event.Name, fwc.Directory) && fwc.Type == event.Op.String() {
-				ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
-				var buff bytes.Buffer
-				enc := gob.NewEncoder(&buff)
-				err := enc.Encode(event)
-				if err != nil {
-					return
-				}
-				 <- buff.Bytes()
+				ce.GatewayConfig.Log.Debug().Str("config-key", *es.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
+				dataCh <- []byte(fmt.Sprintf("%v", event))
 			}
 		case err := <-watcher.Errors:
-			 <- err
+			errorCh <- err
+			return
+		case <-doneCh:
+			return
+		}
 	}
 }

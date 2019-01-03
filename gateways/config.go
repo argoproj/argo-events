@@ -104,23 +104,26 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		panic("gateway name not provided")
 	}
-	log := zlog.New(os.Stdout).With().Str("gateway-name", name).Caller().Logger()
 	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Msg("no namespace provided")
+		panic("no namespace provided")
 	}
 	configName, ok := os.LookupEnv(common.EnvVarGatewayEventSourceConfigMap)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Msg("gateway processor configmap is not provided")
+		panic("gateway processor configmap is not provided")
 	}
 	controllerInstanceID, ok := os.LookupEnv(common.EnvVarGatewayControllerInstanceID)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Msg("gateway controller instance ID is not provided")
+		panic("gateway controller instance ID is not provided")
 	}
 	serverPort, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
 	if !ok {
-		log.Panic().Str("gateway-name", name).Msg("server port is not provided")
+		panic("server port is not provided")
 	}
+
+	log := zlog.New(os.Stdout).With().Caller().Str("gateway-name", name).Str("gateway-namespace", namespace).Logger().Output(zlog.ConsoleWriter{
+		Out: os.Stdout,
+	})
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gwcs := gwclientset.NewForConfigOrDie(restConfig)

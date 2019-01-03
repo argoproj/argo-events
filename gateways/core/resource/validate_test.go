@@ -17,6 +17,7 @@ limitations under the License.
 package resource
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -38,11 +39,11 @@ filter:
 
 func TestResourceConfigExecutor_Validate(t *testing.T) {
 	ce := &ResourceConfigExecutor{}
-	ctx := &gateways.EventSourceContext{
-		Data: &gateways.EventSourceData{},
+	es := &gateways.EventSource{
+		Data: &configValue,
 	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	ctx := context.Background()
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 	configValue = `
 group: "argoproj.io"
@@ -52,11 +53,11 @@ filter:
    workflows.argoproj.io/phase: Succeeded
    name: "my-workflow"
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 	configValue = ""
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
+	es.Data = &configValue
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }
