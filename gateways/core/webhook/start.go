@@ -1,156 +1,191 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package webhook
 
 import (
-	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"go.uber.org/atomic"
 	"io/ioutil"
 	"net/http"
 	"sync"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 var (
-	// whether http server has started or not
-	hasServerStarted atomic.Bool
-
-	// srv holds reference to http server
-	srv http.Server
-
-	// mutex synchronizes activeRoutes
+	// mutex synchronizes activeServers
 	mutex sync.Mutex
-	// as http package does not provide method for unregistering routes,
-	// this keeps track of configured http routes and their methods.
-	// keeps endpoints as keys and corresponding http methods as a map
-	activeRoutes = make(map[string]map[string]struct{})
+	// activeServers keeps track of currently running http servers.
+	activeServers = make(map[string]*activeServer)
+
+	// routeActivateChan handles assigning new route to server.
+	routeActivateChan = make(chan routeConfig)
+
+	// routeDeactivateChan handles deactivating existing route
+	routeDeactivateChan = make(chan routeConfig)
 )
 
-// Runs a gateway configuration
-func (ce *WebhookConfigExecutor) StartConfig(config *gateways.EventSourceContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	w, err := parseConfig(config.Data.Config)
-	if err != nil {
-		config.ErrChan <- err
-		return
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *w).Msg("webhook configuration")
-
-	go ce.listenEvents(w, config)
-
-	for {
-		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
-
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			mutex.Lock()
-			activeHTTPMethods, ok := activeRoutes[w.Endpoint]
-			if ok {
-				delete(activeHTTPMethods, w.Method)
-			}
-			if w.Port != "" && hasServerStarted.Load() {
-				ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("stopping http server")
-				err = srv.Shutdown(context.Background())
-				if err != nil {
-					ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("error occurred while shutting down server")
-				}
-			}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			mutex.Unlock()
-			config.DoneChan <- struct{}{}
-			return
-		}
-	}
+// HTTP Muxer
+type server struct {
+	mux *http.ServeMux
 }
 
-func (ce *WebhookConfigExecutor) listenEvents(w *webhook, config *gateways.EventSourceContext) {
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
+// activeServer contains reference to server and an error channel that is shared across all functions registering endpoints for the server.
+type activeServer struct {
+	srv     *http.ServeMux
+	errChan chan error
+}
 
-	config.StartChan <- struct{}{}
+type routeConfig struct {
+	wConfig        *webhook
+	eventSource    *gateways.EventSource
+	configExecutor *WebhookConfigExecutor
+	dataCh         chan []byte
+	doneCh         chan struct{}
+	errCh          chan error
+	startCh        chan struct{}
+}
 
-	// start a http server only if given configuration contains port information and no other
-	// configuration previously started the server
-	if w.Port != "" && !hasServerStarted.Load() {
-		// mark http server as started
-		hasServerStarted.Store(true)
-		go func() {
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("http-port", w.Port).Msg("http server started listening...")
-			srv := &http.Server{Addr: ":" + fmt.Sprintf("%s", w.Port)}
-			err := srv.ListenAndServe()
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("http server stopped")
-			if err == http.ErrServerClosed {
-				err = nil
+func init() {
+	go func() {
+		for {
+			select {
+			case config := <-routeActivateChan:
+				// start server if it has not been started on this port
+				_, ok := activeServers[config.wConfig.Port]
+				if !ok {
+					config.startHttpServer()
+				}
+				config.startCh <- struct{}{}
+
+			case config := <-routeDeactivateChan:
+				_, ok := activeServers[config.wConfig.Port]
+				if ok {
+					config.wConfig.mux.HandleFunc(config.wConfig.Endpoint, config.routeDeactivateHandler)
+				}
 			}
+		}
+	}()
+}
+
+// ServeHTTP implementation
+func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
+}
+
+// starts a http server
+func (rc *routeConfig) startHttpServer() {
+	// start a http server only if no other configuration previously started the server on given port
+	mutex.Lock()
+	if _, ok := activeServers[rc.wConfig.Port]; !ok {
+		s := &server{
+			mux: http.NewServeMux(),
+		}
+		rc.wConfig.mux = s.mux
+		rc.wConfig.srv = &http.Server{
+			Addr:    ":" + fmt.Sprintf("%s", rc.wConfig.Port),
+			Handler: s,
+		}
+		errChan := make(chan error, 1)
+		activeServers[rc.wConfig.Port] = &activeServer{
+			srv: s.mux,
+			errChan: errChan,
+		}
+
+		// start http server
+		go func() {
+			err := rc.wConfig.srv.ListenAndServe()
+			rc.configExecutor.Log.Info().Str("event-source", *rc.eventSource.Name).Str("port", rc.wConfig.Port).Msg("http server stopped")
 			if err != nil {
-				config.ErrChan <- err
-				return
+				errChan <- err
 			}
 		}()
 	}
+	mutex.Unlock()
+}
 
-	// configure endpoint and http method
-	if w.Endpoint != "" && w.Method != "" {
-		if _, ok := activeRoutes[w.Endpoint]; !ok {
-			mutex.Lock()
-			activeRoutes[w.Endpoint] = make(map[string]struct{})
-			// save event channel for this connection/configuration
-			activeRoutes[w.Endpoint][w.Method] = struct{}{}
-			mutex.Unlock()
+// routeActiveHandler handles new route
+func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
+	rc.configExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		rc.configExecutor.Log.Error().Err(err).Msg("failed to parse request body")
+		rc.errCh <- err
+		return
+	}
+	rc.dataCh <- body
+}
 
-			// add a handler for endpoint if not already added.
-			http.HandleFunc(w.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-				// check if http methods match and route and http method is registered.
-				if _, ok := activeRoutes[w.Endpoint]; ok {
-					if _, isActive := activeRoutes[w.Endpoint][request.Method]; isActive {
-						ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Str("endpoint", w.Endpoint).Str("http-method", w.Method).Msg("received a request")
-						body, err := ioutil.ReadAll(request.Body)
-						if err != nil {
-							ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to parse request body")
-							common.SendErrorResponse(writer)
-						} else {
-							common.SendSuccessResponse(writer)
-							ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Str("payload", string(body)).Msg("payload")
-							// dispatch event to gateway transformer
-							ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-								Src:     config.Data.Src,
-								Payload: body,
-							})
-						}
-					} else {
-						ce.GatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Str("endpoint", w.Endpoint).Str("http-method", request.Method).Msg("endpoint and http method is not an active route")
-						common.SendErrorResponse(writer)
-					}
-				} else {
-					ce.GatewayConfig.Log.Warn().Str("config-key", config.Data.Src).Str("endpoint", w.Endpoint).Msg("endpoint is not active")
-					common.SendErrorResponse(writer)
-				}
-			})
-		} else {
-			mutex.Lock()
-			activeRoutes[w.Endpoint][w.Method] = struct{}{}
-			mutex.Unlock()
-		}
+// routeDeactivateHandler handles routes that are not active
+func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, request *http.Request) {
+	rc.configExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
+	common.SendErrorResponse(writer)
+}
 
-		ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running.")
+// StartEventSource starts a event source
+func (ce *WebhookConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	h, err := parseEventSource(eventSource.Data)
+	if err != nil {
+		return err
 	}
 
-	<-config.DoneChan
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-	config.ShutdownChan <- struct{}{}
+	rc := routeConfig{
+		wConfig:        h,
+		eventSource:    eventSource,
+		configExecutor: ce,
+		errCh: make(chan error),
+		dataCh: make(chan []byte),
+		doneCh: make(chan struct{}),
+		startCh: make(chan struct{}),
+	}
+
+	routeActivateChan <- rc
+
+	<-rc.startCh
+
+	rc.wConfig.mux.HandleFunc(rc.wConfig.Endpoint, rc.routeActiveHandler)
+
+	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", h.Port).Str("endpoint", h.Endpoint).Str("method", h.Method).Msg("route handler added")
+
+	for {
+		select {
+		case data := <-rc.dataCh:
+			ce.Log.Info().Msg("received data")
+			err := eventStream.Send(&gateways.Event{
+				Name:    eventSource.Name,
+				Payload: data,
+			})
+			if err != nil {
+				return err
+			}
+
+		case err := <-rc.errCh:
+			routeDeactivateChan <- rc
+			return err
+
+		case <-eventStream.Context().Done():
+			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			routeDeactivateChan <- rc
+			return nil
+
+		// this error indicates that the server has stopped running
+		case err := <-activeServers[rc.wConfig.Port].errChan:
+			return err
+		}
+	}
 }

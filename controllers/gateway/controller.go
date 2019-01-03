@@ -19,10 +19,9 @@ package gateway
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 
-	zlog "github.com/rs/zerolog"
+	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -35,7 +34,6 @@ import (
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"os"
 )
 
 const (
@@ -60,7 +58,7 @@ type GatewayController struct {
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
-	log zlog.Logger
+	log zerolog.Logger
 
 	// kubernetes config and apis
 	kubeConfig       *rest.Config
@@ -78,16 +76,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              zlog.New(os.Stdout).With().Caller().Logger().Output(zlog.ConsoleWriter{
-			Out: os.Stdout,
-			FormatCaller: func(i interface{}) string {
-				cwd, err := os.Getwd()
-				if err == nil {
-					return strings.TrimRight(cwd, "/go")
-				}
-				return ""
-			},
-		}),
+		log:              zerolog.New(common.LoggerConf()).With().Timestamp().Str("controller-namespace", namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),

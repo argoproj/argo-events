@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	zlog "github.com/rs/zerolog"
+	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"io"
 	corev1 "k8s.io/api/core/v1"
@@ -36,7 +36,7 @@ import (
 // GatewayConfig provides a generic event source for a gateway
 type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
-	Log zlog.Logger
+	Log zerolog.Logger
 	// Clientset is client for kubernetes API
 	Clientset kubernetes.Interface
 	// Name is gateway name
@@ -121,19 +121,15 @@ func NewGatewayConfiguration() *GatewayConfig {
 		panic("server port is not provided")
 	}
 
-	log := zlog.New(os.Stdout).With().Caller().Str("gateway-name", name).Str("gateway-namespace", namespace).Logger().Output(zlog.ConsoleWriter{
-		Out: os.Stdout,
-	})
-
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gwcs := gwclientset.NewForConfigOrDie(restConfig)
 	gw, err := gwcs.ArgoprojV1alpha1().Gateways(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
-		log.Panic().Str("gateway-name", name).Err(err).Msg("failed to get gateway resource")
+		panic(err)
 	}
 
 	return &GatewayConfig{
-		Log:                  log,
+		Log:                  zerolog.New(common.LoggerConf()).With().Timestamp().Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
 		Clientset:            clientset,
 		Namespace:            namespace,
 		Name:                 name,

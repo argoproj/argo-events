@@ -22,11 +22,10 @@ import (
 )
 
 func main() {
-	gc := gateways.NewGatewayConfiguration()
-	ce := &artifact.S3ConfigExecutor{}
-	ce.GatewayConfig = gc
-	err := gc.StartGateway(ce)
-	if err != nil {
+	ce := &artifact.S3ConfigExecutor{
+		GatewayConfig: gateways.NewGatewayConfiguration(),
+	}
+	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
 		panic(err)
 	}
 }

@@ -61,7 +61,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 		Payload: gatewayEvent.Payload,
 	}
 
-	gc.Log.Info().Interface("event", ce).Msg("transformed into cloud event")
+	gc.Log.Info().Str("event-source", *gatewayEvent.Name).Msg("transformed into cloud event")
 	return ce, nil
 }
 

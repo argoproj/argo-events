@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
-	zlog "github.com/rs/zerolog"
+	"github.com/rs/zerolog"
 	appv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -32,7 +32,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"os"
 )
 
 // the context of an operation on a sensor.
@@ -43,7 +42,7 @@ type sOperationCtx struct {
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
 	// log is the logrus logging context to correlate logs with a sensor
-	log zlog.Logger
+	log zerolog.Logger
 	// reference to the sensor-controller
 	controller *SensorController
 }
@@ -53,7 +52,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
 		updated:    false,
-		log:        zlog.New(os.Stdout).With().Str("name", s.Name).Str("namespace", s.Namespace).Caller().Logger(),
+		log:        zerolog.New(common.LoggerConf()).With().Timestamp().Str("sensor-name", s.Name).Str("sensor-namespace", s.Namespace).Logger(),
 		controller: controller,
 	}
 }

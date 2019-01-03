@@ -3,6 +3,7 @@ package webhook
 import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"net/http"
 )
 
 // WebhookConfigExecutor implements ConfigExecutor
@@ -22,11 +23,17 @@ type webhook struct {
 
 	// Port on which HTTP server is listening for incoming events.
 	Port string `json:"port" protobuf:"bytes,3,opt,name=port"`
+
+	// srv holds reference to http server
+	// +k8s:openapi-gen=false
+	srv *http.Server `json:"srv,omitempty"`
+	// +k8s:openapi-gen=false
+	mux *http.ServeMux `json:"mux,omitempty"`
 }
 
-func parseConfig(config string) (*webhook, error) {
+func parseEventSource(es *string) (*webhook, error) {
 	var n *webhook
-	err := yaml.Unmarshal([]byte(config), &n)
+	err := yaml.Unmarshal([]byte(*es), &n)
 	if err != nil {
 		return nil, err
 	}

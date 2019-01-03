@@ -345,7 +345,8 @@
   packages = [
     ".",
     "internal/cbor",
-    "internal/json"
+    "internal/json",
+    "log"
   ]
   revision = "8747b7b3a51b5d08ee7ac50eaf4869edaf9f714a"
   version = "v1.11.0"
@@ -403,12 +404,6 @@
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
   revision = "198acc907a613748cc5c3a11891229b69dead8ca"
-
-[[projects]]
-  name = "go.uber.org/atomic"
-  packages = ["."]
-  revision = "1ea20fb1cbb1cc08cbd0d913a96dead89aa18289"
-  version = "v1.3.2"
 
 [[projects]]
   branch = "master"
@@ -818,6 +813,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b5b54c989d5bca99b7701391503e14e6fe3f257328b4ba8faba7372449645061"
+  inputs-digest = "9b83db63248173cd6add476ffe1a8d50323fd5a68860eec48a091c40a2ea5cb3"
   solver-name = "gps-cdcl"
   solver-version = 1

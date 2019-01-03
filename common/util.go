@@ -18,6 +18,9 @@ package common
 
 import (
 	"fmt"
+	"github.com/rs/zerolog"
+	"os"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -99,4 +102,22 @@ func SendSuccessResponse(writer http.ResponseWriter) {
 func SendErrorResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(ErrorResponse))
+}
+
+// LoggerConf returns standard logging configuration
+func LoggerConf() zerolog.ConsoleWriter {
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	output.FormatLevel = func(i interface{}) string {
+		return fmt.Sprintf("| %-6s|", i)
+	}
+	output.FormatMessage = func(i interface{}) string {
+		return fmt.Sprintf("msg: %s | ", i)
+	}
+	output.FormatFieldName = func(i interface{}) string {
+		return fmt.Sprintf("%s:", i)
+	}
+	output.FormatFieldValue = func(i interface{}) string {
+		return fmt.Sprintf("%s", i)
+	}
+	return  output
 }
