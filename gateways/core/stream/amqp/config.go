@@ -17,13 +17,13 @@ limitations under the License.
 package amqp
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// AMQPConfigExecutor implements ConfigExecutor interface
-type AMQPConfigExecutor struct {
-	*gateways.GatewayConfig
+// AMQPEventSourceExecutor implements Eventing
+type AMQPEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // amqp contains configuration required to connect to rabbitmq service and process messages

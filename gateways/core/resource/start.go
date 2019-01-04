@@ -31,8 +31,8 @@ import (
 )
 
 // StartEventSource starts an event source
-func (ce *ResourceConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	pes, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -42,14 +42,14 @@ func (ce *ResourceConfigExecutor) StartEventSource(eventSource *gateways.EventSo
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *ResourceConfigExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	logger := ce.Log.With().Str("event-source-name", *eventSource.Name).Logger()
-	resource, err := ce.discoverResources(res)
+func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	logger := ese.Log.With().Str("event-source-name", *eventSource.Name).Logger()
+	resource, err := ese.discoverResources(res)
 	if err != nil {
 		errorCh <- err
 		return
@@ -89,7 +89,7 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, eventSource *gatew
 				errorCh <- err
 				return
 			}
-			if ce.passFilters(itemObj, res.Filter) {
+			if ese.passFilters(itemObj, res.Filter) {
 				dataCh <- b
 			}
 		case <-doneCh:
@@ -98,14 +98,14 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, eventSource *gatew
 	}
 }
 
-func (ce *ResourceConfigExecutor) discoverResources(obj *resource) (dynamic.ResourceInterface, error) {
-	dynClientPool := dynamic.NewDynamicClientPool(ce.GatewayConfig.KubeConfig)
-	disco, err := discovery.NewDiscoveryClientForConfig(ce.GatewayConfig.KubeConfig)
+func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (dynamic.ResourceInterface, error) {
+	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
+	disco, err := discovery.NewDiscoveryClientForConfig(ese.K8RestConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	groupVersion := ce.resolveGroupVersion(obj)
+	groupVersion := ese.resolveGroupVersion(obj)
 	resourceInterfaces, err := disco.ServerResourcesForGroupVersion(groupVersion)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (ce *ResourceConfigExecutor) discoverResources(obj *resource) (dynamic.Reso
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		ce.GatewayConfig.Log.Info().Str("api-resource", gvk.String())
+		ese.Log.Info().Str("api-resource", gvk.String())
 		if apiResource.Kind != obj.Kind || apiResource.Version != obj.Version {
 			continue
 		}
@@ -135,7 +135,7 @@ func (ce *ResourceConfigExecutor) discoverResources(obj *resource) (dynamic.Reso
 	return nil, fmt.Errorf("failed to list resource with group: %s, kined: %s and version: %s with watch capabilities", obj.Group, obj.Kind, obj.Version)
 }
 
-func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {
+func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {
 	if obj.Version == "v1" {
 		return obj.Version
 	}
@@ -143,30 +143,30 @@ func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func (ce *ResourceConfigExecutor) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func (ese *ResourceEventSourceExecutor) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// no filters are applied.
 	if filter == nil {
 		return true
 	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		ce.GatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
+		ese.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		ce.GatewayConfig.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
+		ese.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		ce.GatewayConfig.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
+		ese.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		ce.GatewayConfig.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
+		ese.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
 		return false
 	}
 	return true

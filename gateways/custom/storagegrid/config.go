@@ -17,15 +17,15 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 	"net/http"
 	"time"
 )
 
-// StorageGridConfigExecutor implements ConfigExecutor interface
-type StorageGridConfigExecutor struct {
-	*gateways.GatewayConfig
+// StorageGridEventSourceExecutor implements ConfigExecutor interface
+type StorageGridEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // StorageGridEventConfig contains configuration for storage grid sns

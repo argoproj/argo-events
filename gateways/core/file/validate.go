@@ -23,7 +23,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (fw *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	fwc, err := parseEventSource(es.Data)
 	if err != nil {

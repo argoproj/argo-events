@@ -1,14 +1,14 @@
 package webhook
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 	"net/http"
 )
 
-// WebhookConfigExecutor implements ConfigExecutor
-type WebhookConfigExecutor struct {
-	*gateways.GatewayConfig
+// WebhookEventSourceExecutor implements Eventing
+type WebhookEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // webhook is a general purpose REST API

@@ -17,7 +17,7 @@ method: "POST"
 )
 
 func TestNatsConfigExecutor_Validate(t *testing.T) {
-	ce := &WebhookConfigExecutor{}
+	ce := &WebhookEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

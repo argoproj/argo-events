@@ -18,7 +18,7 @@ routingKey: fooRoutingKey
 )
 
 func TestAMQPConfigExecutor_Validate(t *testing.T) {
-	ce := &AMQPConfigExecutor{}
+	ce := &AMQPEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

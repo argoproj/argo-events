@@ -17,13 +17,13 @@ limitations under the License.
 package mqtt
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// MqttConfigExecutor implements ConfigExecutor
-type MqttConfigExecutor struct {
-	*gateways.GatewayConfig
+// MqttEventSourceExecutor implements Eventing
+type MqttEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // mqtt contains information to connect to MQTT broker

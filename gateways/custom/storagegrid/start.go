@@ -66,7 +66,7 @@ type server struct {
 type routeConfig struct {
 	sgConfig       *StorageGridEventConfig
 	eventSource    *gateways.EventSource
-	configExecutor *StorageGridConfigExecutor
+	configExecutor *StorageGridEventSourceExecutor
 	dataCh         chan []byte
 	doneCh         chan struct{}
 	errCh          chan error
@@ -173,21 +173,21 @@ func (rc *routeConfig) startHttpServer() {
 }
 
 // StartConfig runs a configuration
-func (ce *StorageGridConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	sg, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
 
 	rc := routeConfig{
-		sgConfig:        sg,
+		sgConfig:       sg,
 		eventSource:    eventSource,
-		configExecutor: ce,
-		errCh: make(chan error),
-		dataCh: make(chan []byte),
-		doneCh: make(chan struct{}),
-		startCh: make(chan struct{}),
+		configExecutor: ese,
+		errCh:          make(chan error),
+		dataCh:         make(chan []byte),
+		doneCh:         make(chan struct{}),
+		startCh:        make(chan struct{}),
 	}
 
 	routeActivateChan <- rc
@@ -196,12 +196,12 @@ func (ce *StorageGridConfigExecutor) StartEventSource(eventSource *gateways.Even
 
 	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
 
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
 
 	for {
 		select {
 		case data := <-rc.dataCh:
-			ce.Log.Info().Msg("received data")
+			ese.Log.Info().Msg("received data")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
 				Payload: data,
@@ -215,7 +215,7 @@ func (ce *StorageGridConfigExecutor) StartEventSource(eventSource *gateways.Even
 			return err
 
 		case <-eventStream.Context().Done():
-			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
 			routeDeactivateChan <- rc
 			return nil
 

@@ -38,7 +38,7 @@ filter:
 )
 
 func TestResourceConfigExecutor_Validate(t *testing.T) {
-	ce := &ResourceConfigExecutor{}
+	ce := &ResourceEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

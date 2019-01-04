@@ -24,7 +24,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (sgce *StorageGridConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	sg, err := parseEventSource(es.Data)
 	if err != nil {

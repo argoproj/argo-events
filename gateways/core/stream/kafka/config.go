@@ -17,13 +17,13 @@ limitations under the License.
 package kafka
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// KafkaConfigExecutor implements ConfigExecutor
-type KafkaConfigExecutor struct {
-	*gateways.GatewayConfig
+// KafkaEventSourceExecutor implements Eventing
+type KafkaEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // kafka defines configuration required to connect to kafka cluster

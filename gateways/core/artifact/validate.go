@@ -24,19 +24,19 @@ import (
 )
 
 // ValidateEventSource validates a s3 event source
-func (ce *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return &gateways.ValidEventSource{}, gateways.ErrEventSourceParseFailed
 	}
-	if err = ce.validate(artifact); err != nil {
+	if err = ese.validate(artifact); err != nil {
 		return &gateways.ValidEventSource{}, err
 	}
 	return &gateways.ValidEventSource{}, nil
 }
 
 // validates an artifact
-func (ce *S3EventSourceExecutor) validate(artifact *S3Artifact) error {
+func (ese *S3EventSourceExecutor) validate(artifact *S3Artifact) error {
 	if artifact == nil {
 		return gateways.ErrEmptyEventSource
 	}

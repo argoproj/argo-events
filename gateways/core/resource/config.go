@@ -17,14 +17,17 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 )
 
-// ResourceConfigExecutor implements ConfigExecutor interface
-type ResourceConfigExecutor struct {
-	*gateways.GatewayConfig
+// ResourceEventSourceExecutor implements Eventing
+type ResourceEventSourceExecutor struct {
+	Log zerolog.Logger
+	// K8RestConfig is kubernetes cluster config
+	K8RestConfig *rest.Config
 }
 
 // resource refers to a dependency on a k8s resource.

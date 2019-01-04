@@ -24,32 +24,32 @@ import (
 )
 
 // StartEventSource activates an event source and streams back events
-func (ce *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ce.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
+	ese.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(artifact, dataCh, errorCh, doneCh)
+	go ese.listenEvents(artifact, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 // listenEvents listens to minio bucket notifications
-func (ce *S3EventSourceExecutor) listenEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *S3EventSourceExecutor) listenEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// retrieve access key id and secret access key
-	accessKey, err := common.GetSecret(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
+	accessKey, err := common.GetSecret(ese.Clientset, ese.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
 	}
-	secretKey, err := common.GetSecret(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
+	secretKey, err := common.GetSecret(ese.Clientset, ese.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
 		errorCh <- err
 		return

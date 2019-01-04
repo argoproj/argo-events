@@ -20,7 +20,7 @@ import (
 )
 
 // ValidateEventSource validates gitlab gateway event source
-func (ce *GitlabExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	g, err := parseEventSource(es.Data)
 	if err != nil {

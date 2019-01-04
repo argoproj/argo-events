@@ -17,7 +17,7 @@ partition: "0"
 )
 
 func TestKafkaConfigExecutor_Validate(t *testing.T) {
-	ce := &KafkaConfigExecutor{}
+	ce := &KafkaEventSourceExecutor{}
 	es := &gateways.EventSource{Data: &configValue}
 	ctx := context.Background()
 	_, err := ce.ValidateEventSource(ctx, es)

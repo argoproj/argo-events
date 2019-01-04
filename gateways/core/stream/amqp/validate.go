@@ -7,7 +7,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (ace *AMQPConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *AMQPEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	a, err := parseEventSource(es.Data)
 	if err != nil {

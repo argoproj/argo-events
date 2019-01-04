@@ -16,7 +16,7 @@ subject: foo
 )
 
 func TestNatsConfigExecutor_Validate(t *testing.T) {
-	ce := &NatsConfigExecutor{}
+	ce := &NatsEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

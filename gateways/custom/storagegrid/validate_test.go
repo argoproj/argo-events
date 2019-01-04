@@ -37,7 +37,7 @@ filter:
 )
 
 func TestStorageGridConfigExecutor_Validate(t *testing.T) {
-	s3Config := &StorageGridConfigExecutor{}
+	s3Config := &StorageGridEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

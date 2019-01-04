@@ -6,8 +6,8 @@ import (
 )
 
 // Runs a configuration
-func (ce *NatsConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	n, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -17,15 +17,15 @@ func (ce *NatsConfigExecutor) StartEventSource(eventSource *gateways.EventSource
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(n, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(n, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	nc, err := nats.Connect(n.URL)
 	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
+		ese.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
 		errorCh <- err
 		return
 	}

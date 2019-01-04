@@ -22,8 +22,8 @@ import (
 )
 
 // StartEventSource starts an event source
-func (ce *MqttConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	m, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -33,12 +33,12 @@ func (ce *MqttConfigExecutor) StartEventSource(eventSource *gateways.EventSource
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(m, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(m, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *MqttConfigExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
 		dataCh <- msg.Payload()
 	}
@@ -57,6 +57,6 @@ func (ce *MqttConfigExecutor) listenEvents(m *mqtt, eventSource *gateways.EventS
 	token := client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
 		// nothing to do
-		ce.GatewayConfig.Log.Error().Err(token.Error()).Str("event-source-name", *eventSource.Name).Msg("failed to unsubscribe client")
+		ese.Log.Error().Err(token.Error()).Str("event-source-name", *eventSource.Name).Msg("failed to unsubscribe client")
 	}
 }

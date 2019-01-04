@@ -31,10 +31,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-const (
-	gatewayProcessor = "gateway-processor"
-)
-
 // the context of an operation on a gateway-controller.
 // the gateway-controller-controller creates this context each time it picks a Gateway off its queue.
 type gwOperationCtx struct {

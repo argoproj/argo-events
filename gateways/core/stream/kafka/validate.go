@@ -7,7 +7,7 @@ import (
 )
 
 // ValidateEventSource validates the gateway event source
-func (kce *KafkaConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *KafkaEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	kafkaConfig, err := parseEventSource(es.Data)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 )
 
 // ValidateEventSource validates webhook event source
-func (wce *WebhookConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	w, err := parseEventSource(es.Data)
 	if err != nil {

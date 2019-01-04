@@ -22,7 +22,7 @@ gitlabBaseUrl: "http://gitlab.com/"
 )
 
 func TestGitlabExecutor_Validate(t *testing.T) {
-	ce := &GitlabExecutor{}
+	ce := &GitlabEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

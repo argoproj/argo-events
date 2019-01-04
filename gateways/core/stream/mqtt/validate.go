@@ -23,7 +23,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (mce *MqttConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *MqttEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	mqttConfig, err := parseEventSource(es.Data)
 	if err != nil {

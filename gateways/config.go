@@ -24,6 +24,7 @@ import (
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -155,9 +156,8 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 		ctx, cancel := context.WithCancel(context.Background())
 
 		// create a connection to gateway server
-		conn, err := grpc.Dial(fmt.Sprintf("localhost:%s", gc.serverPort), grpc.WithBackoffConfig(grpc.BackoffConfig{
-			MaxDelay: time.Second * 10,
-		}), grpc.WithInsecure())
+		timeoutCtx, _ := context.WithTimeout(context.Background(), common.ServerConnTimeout * time.Second)
+		conn, err := grpc.DialContext(timeoutCtx, fmt.Sprintf("localhost:%s", gc.serverPort), grpc.WithBlock(), grpc.WithInsecure())
 		if err != nil {
 			gc.Log.Panic().Err(err).Msg("failed to connect to gateway server")
 			return nil, err
@@ -252,6 +252,17 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("activating new event source")
 
 		go func() {
+			// conn should be in READY state
+			if eventSource.Conn.GetState() != connectivity.Ready {
+				gc.Log.Error().Msg("connection is not in ready state.")
+				gc.StatusCh <- EventSourceStatus{
+					Phase: v1alpha1.NodePhaseError,
+					Id: eventSource.Data.ID,
+					Message: fmt.Sprintf("connection is not in ready state"),
+				}
+				return
+			}
+
 			// validate event source
 			_, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
 				Data: &eventSource.Data.Config,

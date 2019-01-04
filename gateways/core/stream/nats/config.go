@@ -17,13 +17,13 @@ limitations under the License.
 package nats
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// NatsConfigExecutor implements ConfigExecutor
-type NatsConfigExecutor struct {
-	*gateways.GatewayConfig
+// NatsEventSourceExecutor implements Eventing
+type NatsEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // Nats contains configuration to connect to NATS cluster

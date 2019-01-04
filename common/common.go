@@ -125,6 +125,9 @@ const (
 
 	// LabelGatewayEventSourceID is the label for gateway configuration ID
 	LabelGatewayEventSourceID = "event-source-id"
+
+	// Server Connection Timeout, 5 seconds
+	ServerConnTimeout = 5
 )
 
 // Gateway client constants

@@ -21,7 +21,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// CalendarConfigExecutor implements ConfigExecutor interface
+// CalendarConfigExecutor implements Eventing
 type CalendarConfigExecutor struct {
 	Log zerolog.Logger
 }

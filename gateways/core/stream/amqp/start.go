@@ -7,8 +7,8 @@ import (
 )
 
 // StartEventSource starts an event source
-func (ce *AMQPConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-stream-name", *eventSource.Name).Msg("operating on event source")
+func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-stream-name", *eventSource.Name).Msg("operating on event source")
 	a, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -18,9 +18,9 @@ func (ce *AMQPConfigExecutor) StartEventSource(eventSource *gateways.EventSource
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
@@ -46,7 +46,7 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 	return delivery, nil
 }
 
-func (ce *AMQPConfigExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	conn, err := amqplib.Dial(a.URL)
 	if err != nil {
 		errorCh <- err
@@ -72,7 +72,7 @@ func (ce *AMQPConfigExecutor) listenEvents(a *amqp, eventSource *gateways.EventS
 		case <-doneCh:
 			err = conn.Close()
 			if err != nil {
-				ce.GatewayConfig.Log.Error().Err(err).Str("event-stream-name", *eventSource.Name).Msg("failed to close connection")
+				ese.Log.Error().Err(err).Str("event-stream-name", *eventSource.Name).Msg("failed to close connection")
 			}
 			return
 		}

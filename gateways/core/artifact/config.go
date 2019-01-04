@@ -24,7 +24,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// S3EventSourceExecutor implements Eventing interface
+// S3EventSourceExecutor implements Eventing
 type S3EventSourceExecutor struct {
 	Log zerolog.Logger
 	// Clientset is kubernetes client

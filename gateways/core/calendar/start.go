@@ -29,21 +29,21 @@ import (
 type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
-func (ce *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+func (ese *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ce.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(cal, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(cal, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
@@ -68,7 +68,7 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 }
 
 // listenEvents fires an event when schedule is passed.
-func (ce *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
 		errorCh <- err
@@ -100,7 +100,7 @@ func (ce *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *ga
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ce.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
+		ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx

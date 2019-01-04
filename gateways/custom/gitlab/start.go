@@ -25,8 +25,8 @@ import (
 )
 
 // getCredentials for gitlab
-func (ce *GitlabExecutor) getCredentials(gs *GitlabSecret) (*cred, error) {
-	token, err := common.GetSecret(ce.Clientset, ce.Namespace, gs.Name, gs.Key)
+func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, error) {
+	token, err := common.GetSecret(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +36,8 @@ func (ce *GitlabExecutor) getCredentials(gs *GitlabSecret) (*cred, error) {
 }
 
 // StartEventSource starts an event source
-func (ce *GitlabExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	g, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
@@ -46,20 +46,20 @@ func (ce *GitlabExecutor) StartEventSource(eventSource *gateways.EventSource, ev
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenEvents(g, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(g, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	c, err := ce.getCredentials(g.AccessToken)
+func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	c, err := ese.getCredentials(g.AccessToken)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	ce.GitlabClient = gitlab.NewClient(nil, c.token)
-	if err = ce.GitlabClient.SetBaseURL(g.GitlabBaseURL); err != nil {
+	ese.GitlabClient = gitlab.NewClient(nil, c.token)
+	if err = ese.GitlabClient.SetBaseURL(g.GitlabBaseURL); err != nil {
 		errorCh <- err
 		return
 	}
@@ -80,15 +80,15 @@ func (ce *GitlabExecutor) listenEvents(g *GitlabConfig, eventSource *gateways.Ev
 	reflect.Indirect(iev).SetBool(true)
 	elem.Set(iev)
 
-	hook, _, err := ce.GitlabClient.Projects.AddProjectHook(g.ProjectId, opt)
+	hook, _, err := ese.GitlabClient.Projects.AddProjectHook(g.ProjectId, opt)
 
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	ce.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 
 	<-doneCh
-	_, err = ce.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID)
+	_, err = ese.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID)
 }

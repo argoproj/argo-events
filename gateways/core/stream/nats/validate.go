@@ -7,7 +7,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (nce *NatsConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	n, err := parseEventSource(es.Data)
 	if err != nil {

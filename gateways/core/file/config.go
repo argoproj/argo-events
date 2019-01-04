@@ -21,7 +21,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// FileEventSourceExecutor implements ConfigExecutor interface
+// FileEventSourceExecutor implements Eventing
 type FileEventSourceExecutor struct {
 	Log zerolog.Logger
 }

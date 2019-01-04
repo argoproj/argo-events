@@ -17,7 +17,7 @@ clientId: 1
 )
 
 func TestMqttConfigExecutor_Validate(t *testing.T) {
-	ce := &MqttConfigExecutor{}
+	ce := &MqttEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}
