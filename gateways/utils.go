@@ -34,6 +34,7 @@ func ConsumeEventsFromEventSource(name *string, eventStream Eventing_StartEventS
 	for {
 		select {
 		case data := <-dataCh:
+			log.Info().Str("event-source-name", *name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&Event{
 				Name: name,
 				Payload: data,

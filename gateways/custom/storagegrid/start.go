@@ -64,13 +64,13 @@ type server struct {
 }
 
 type routeConfig struct {
-	sgConfig       *StorageGridEventConfig
-	eventSource    *gateways.EventSource
-	configExecutor *StorageGridEventSourceExecutor
-	dataCh         chan []byte
-	doneCh         chan struct{}
-	errCh          chan error
-	startCh        chan struct{}
+	sgConfig            *StorageGridEventConfig
+	eventSource         *gateways.EventSource
+	eventSourceExecutor *StorageGridEventSourceExecutor
+	dataCh              chan []byte
+	doneCh              chan struct{}
+	errCh               chan error
+	startCh             chan struct{}
 }
 
 func init() {
@@ -163,7 +163,7 @@ func (rc *routeConfig) startHttpServer() {
 		// start http server
 		go func() {
 			err := rc.sgConfig.srv.ListenAndServe()
-			rc.configExecutor.Log.Info().Str("event-source", *rc.eventSource.Name).Str("port", rc.sgConfig.Port).Msg("http server stopped")
+			rc.eventSourceExecutor.Log.Info().Str("event-source", *rc.eventSource.Name).Str("port", rc.sgConfig.Port).Msg("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -181,13 +181,13 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 	}
 
 	rc := routeConfig{
-		sgConfig:       sg,
-		eventSource:    eventSource,
-		configExecutor: ese,
-		errCh:          make(chan error),
-		dataCh:         make(chan []byte),
-		doneCh:         make(chan struct{}),
-		startCh:        make(chan struct{}),
+		sgConfig:            sg,
+		eventSource:         eventSource,
+		eventSourceExecutor: ese,
+		errCh:               make(chan error),
+		dataCh:              make(chan []byte),
+		doneCh:              make(chan struct{}),
+		startCh:             make(chan struct{}),
 	}
 
 	routeActivateChan <- rc
@@ -228,15 +228,15 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 // routeActiveHandler handles new route
 func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.configExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		rc.configExecutor.Log.Error().Err(err).Msg("failed to parse request body")
+		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
 		rc.errCh <- err
 		return
 	}
 
-	rc.configExecutor.Log.Info().Str("event-source-name", *rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	rc.eventSourceExecutor.Log.Info().Str("event-source-name", *rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
 
 	switch request.Method {
 	case http.MethodHead:
@@ -266,16 +266,17 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	}
 
 	if filterEvent(notification, rc.sgConfig) && filterName(notification, rc.sgConfig) {
+		rc.eventSourceExecutor.Log.Info().Str("event-source-name", *rc.eventSource.Name).Msg("new event received, dispatching to gateway client")
 		rc.dataCh <- b
 		return
 	}
 
-	rc.configExecutor.Log.Warn().Str("event-source-name", *rc.eventSource.Name).Interface("notification", notification).
+	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", *rc.eventSource.Name).Interface("notification", notification).
 		Msg("discarding notification since it did not pass all filters")
 }
 
 // routeDeactivateHandler handles routes that are not active
 func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.configExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
 	common.SendErrorResponse(writer)
 }

@@ -165,7 +165,7 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	for {
 		select {
 		case data := <-rc.dataCh:
-			ese.Log.Info().Msg("received data")
+			ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
 				Payload: data,

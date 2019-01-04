@@ -30,7 +30,6 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 	if err != nil {
 		return err
 	}
-	ese.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
