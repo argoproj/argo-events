@@ -86,7 +86,7 @@ type GatewayConfig struct {
 
 * To send events back to framework for further processing, use
 ```go
-gatewayConfig.DispatchEvent(event []byte, src string) error
+eventSource.DispatchEvent(event []byte, src string) error
 ```
 
 For detailed implementation, check out [Core Gateways](https://github.com/argoproj/argo-events/tree/master/gateways/core)

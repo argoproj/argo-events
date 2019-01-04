@@ -83,10 +83,10 @@ type cred struct {
 	token string
 }
 
-// parseConfig parses a configuration of gateway
-func parseConfig(config string) (*GitlabConfig, error) {
+// parseEventSource parses an event sources of gateway
+func parseEventSource(config *string) (*GitlabConfig, error) {
 	var g *GitlabConfig
-	err := yaml.Unmarshal([]byte(config), &g)
+	err := yaml.Unmarshal([]byte(*config), &g)
 	if err != nil {
 		return nil, err
 	}

@@ -26,13 +26,13 @@ import (
 func (ce *CalendarConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return &gateways.ValidEventSource{}, gateways.ErrConfigParseFailed
+		return &gateways.ValidEventSource{}, gateways.ErrEventSourceParseFailed
 	}
 	if cal == nil {
-		return &gateways.ValidEventSource{}, gateways.ErrEmptyConfig
+		return &gateways.ValidEventSource{}, gateways.ErrEmptyEventSource
 	}
 	if cal.Schedule == "" && cal.Interval == "" {
-		return &gateways.ValidEventSource{}, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
+		return &gateways.ValidEventSource{}, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidEventSource)
 	}
 	_, err = resolveSchedule(cal)
 	if err != nil {

@@ -96,9 +96,9 @@ type storageGridNotification struct {
 	Version  string `json:"Version"`
 }
 
-func parseConfig(config string) (*StorageGridEventConfig, error) {
+func parseEventSource(eventSource *string) (*StorageGridEventConfig, error) {
 	var s *StorageGridEventConfig
-	err := yaml.Unmarshal([]byte(config), &s)
+	err := yaml.Unmarshal([]byte(*eventSource), &s)
 	if err != nil {
 		return nil, err
 	}

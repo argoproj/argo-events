@@ -44,14 +44,13 @@ secretKey:
 )
 
 func TestS3ConfigExecutor_Validate(t *testing.T) {
-	s3Config := &S3ConfigExecutor{}
+	s3Config := &S3EventSourceExecutor{}
 	ctx := &gateways.EventSource{
 		Data: &configValue,
 		Name: &configKey,
 	}
-	valid, err := s3Config.ValidateEventSource(context.Background(), ctx)
+	_, err := s3Config.ValidateEventSource(context.Background(), ctx)
 	assert.Nil(t, err)
-	assert.Equal(t, true, valid.IsValid)
 
 	badConfig := `
 s3EventConfig:
@@ -63,10 +62,8 @@ s3EventConfig:
         suffix: ""
 insecure: true
 `
-
 	ctx.Data = &badConfig
 
-	valid, err = s3Config.ValidateEventSource(context.Background(), ctx)
+	_, err = s3Config.ValidateEventSource(context.Background(), ctx)
 	assert.NotNil(t, err)
-	assert.Equal(t, false, valid.IsValid)
 }

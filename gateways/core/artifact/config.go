@@ -17,15 +17,20 @@ limitations under the License.
 package artifact
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
+	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
-// S3ConfigExecutor implements Eventing interface
-type S3ConfigExecutor struct {
-	*gateways.GatewayConfig
+// S3EventSourceExecutor implements Eventing interface
+type S3EventSourceExecutor struct {
+	Log zerolog.Logger
+	// Clientset is kubernetes client
+	Clientset kubernetes.Interface
+	// Namespace where gateway is deployed
+	Namespace string
 }
 
 // S3Artifact contains information about an artifact in S3

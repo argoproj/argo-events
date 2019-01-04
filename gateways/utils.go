@@ -20,8 +20,6 @@ import (
 	"fmt"
 	zlog "github.com/rs/zerolog"
 	"hash/fnv"
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Hasher hashes a string
@@ -29,19 +27,6 @@ func Hasher(value string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(value))
 	return fmt.Sprintf("%v", h.Sum32())
-}
-
-// GetSecret retrieves the secret value from the secret in namespace with name and key
-func GetSecret(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secret, err := client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return "", err
-	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
 }
 
 // ConsumeEventsFromEventSource consumes events from the event source.

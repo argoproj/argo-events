@@ -17,13 +17,13 @@ limitations under the License.
 package file
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// FileWatcherConfigExecutor implements ConfigExecutor interface
-type FileWatcherConfigExecutor struct {
-	*gateways.GatewayConfig
+// FileEventSourceExecutor implements ConfigExecutor interface
+type FileEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // FileWatcherConfig contains configuration information for this gateway

@@ -17,15 +17,27 @@ limitations under the License.
 package main
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/artifact"
+	"k8s.io/client-go/kubernetes"
+	"os"
 )
 
 func main() {
-	ce := &artifact.S3ConfigExecutor{
-		GatewayConfig: gateways.NewGatewayConfiguration(),
-	}
-	if err := ce.GatewayConfig.StartGateway(ce); err != nil {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
 		panic(err)
 	}
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
+	if !ok {
+		panic("namespace is not provided")
+	}
+	gateways.StartGateway(&artifact.S3EventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Clientset: clientset,
+		Namespace: namespace,
+	})
 }

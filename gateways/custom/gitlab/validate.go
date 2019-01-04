@@ -14,33 +14,35 @@ limitations under the License.
 package gitlab
 
 import (
+	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gitlab gateway configuration
-func (ce *GitlabExecutor) Validate(config *gateways.EventSourceContext) error {
-	g, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gitlab gateway event source
+func (ce *GitlabExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	g, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if g == nil {
-		return gateways.ErrEmptyConfig
+		return v, gateways.ErrEmptyEventSource
 	}
 	if g.ProjectId == "" {
-		return fmt.Errorf("project id can't be empty")
+		return v, fmt.Errorf("project id can't be empty")
 	}
 	if g.Event == "" {
-		return fmt.Errorf("event type can't be empty")
+		return v, fmt.Errorf("event type can't be empty")
 	}
 	if g.URL == "" {
-		return fmt.Errorf("url can't be empty")
+		return v, fmt.Errorf("url can't be empty")
 	}
 	if g.GitlabBaseURL == "" {
-		return fmt.Errorf("gitlab base url can't be empty")
+		return v, fmt.Errorf("gitlab base url can't be empty")
 	}
 	if g.AccessToken == nil {
-		return fmt.Errorf("access token can't be nil")
+		return v, fmt.Errorf("access token can't be nil")
 	}
-	return nil
+	return v, nil
 }

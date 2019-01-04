@@ -23,23 +23,23 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (fw *FileWatcherConfigExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (fw *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	fwc, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if fwc == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 	if fwc.Type == "" {
-		return v, fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidEventSource)
 	}
 	if fwc.Directory == "" {
-		return v, fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidEventSource)
 	}
 	if fwc.Path == "" {
-		return v, fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidEventSource)
 	}
 	return v, nil
 }

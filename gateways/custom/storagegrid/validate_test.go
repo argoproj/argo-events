@@ -17,6 +17,7 @@ limitations under the License.
 package storagegrid
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -37,11 +38,11 @@ filter:
 
 func TestStorageGridConfigExecutor_Validate(t *testing.T) {
 	s3Config := &StorageGridConfigExecutor{}
-	ctx := &gateways.EventSourceContext{
-		Data: &gateways.EventSourceData{},
+	es := &gateways.EventSource{
+		Data: &configValue,
 	}
-	ctx.Data.Config = configValue
-	err := s3Config.Validate(ctx)
+	ctx := context.Background()
+	_, err := s3Config.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 
 	badConfig := `
@@ -52,8 +53,8 @@ filter:
     prefix: "hello-"
 `
 
-	ctx.Data.Config = badConfig
+	es.Data = &badConfig
 
-	err = s3Config.Validate(ctx)
+	_, err = s3Config.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }

@@ -52,7 +52,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
 		updated:    false,
-		log:        zerolog.New(common.LoggerConf()).With().Timestamp().Str("sensor-name", s.Name).Str("sensor-namespace", s.Namespace).Logger(),
+		log:        common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", s.Name).Str("sensor-namespace", s.Namespace).Logger(),
 		controller: controller,
 	}
 }

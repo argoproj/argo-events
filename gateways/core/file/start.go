@@ -24,8 +24,8 @@ import (
 )
 
 // StartEventSource starts an event source
-func (ce *FileWatcherConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+func (ce *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	f, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -35,12 +35,12 @@ func (ce *FileWatcherConfigExecutor) StartEventSource(eventSource *gateways.Even
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.watchFileSystemEvents(f, eventSource, dataCh, errorCh, doneCh)
+	go ce.listenEvents(f, eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
-func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfig, es *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ce *FileEventSourceExecutor) listenEvents(fwc *FileWatcherConfig, es *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -60,14 +60,14 @@ func (ce *FileWatcherConfigExecutor) watchFileSystemEvents(fwc *FileWatcherConfi
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ce.GatewayConfig.Log.Info().Str("event-source", *es.Name).Msg("fs watcher has stopped")
+				ce.Log.Info().Str("event-source", *es.Name).Msg("fs watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("fs watcher stopped")
 				return
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			if fwc.Path == strings.TrimPrefix(event.Name, fwc.Directory) && fwc.Type == event.Op.String() {
-				ce.GatewayConfig.Log.Debug().Str("config-key", *es.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
+				ce.Log.Debug().Str("config-key", *es.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
 				dataCh <- []byte(fmt.Sprintf("%v", event))
 			}
 		case err := <-watcher.Errors:

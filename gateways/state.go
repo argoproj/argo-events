@@ -89,8 +89,8 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 	return node
 }
 
-// updateGatewayResourceState updates gateway resource nodes state
-func (gc *GatewayConfig) updateGatewayResourceState(status *EventSourceStatus) {
+// UpdateGatewayResourceState updates gateway resource nodes state
+func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 	defer func() {
 		err := gc.persistUpdates()
 		if err != nil {

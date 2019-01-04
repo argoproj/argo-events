@@ -136,7 +136,7 @@ package gateways;
 //		return err
 //	}
 //	if t == nil {
-//		return ErrEmptyConfig
+//		return ErrEmptyEventSource
 //	}
 //	if t.Msg == "" {
 //		return fmt.Errorf("msg cant be empty")

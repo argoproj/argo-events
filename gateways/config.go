@@ -57,8 +57,8 @@ type GatewayConfig struct {
 	configName string
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
-	// statusCh is used to communicate the status of an event source
-	statusCh chan EventSourceStatus
+	// StatusCh is used to communicate the status of an event source
+	StatusCh chan EventSourceStatus
 }
 
 // EventSourceContext contains information of a event source for gateway to run.
@@ -140,7 +140,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 		gw:                   gw,
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,
-		statusCh: make(chan EventSourceStatus),
+		StatusCh:             make(chan EventSourceStatus),
 	}
 }
 
@@ -262,7 +262,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				if err := eventSource.Conn.Close(); err != nil {
 					gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
 				}
-				gc.statusCh <- EventSourceStatus{
+				gc.StatusCh <- EventSourceStatus{
 					Phase: v1alpha1.NodePhaseError,
 					Id: eventSource.Data.ID,
 					Message: fmt.Sprintf("event source is not valid. err: %+v", err),
@@ -271,7 +271,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			}
 
 			// mark event source as running
-			gc.statusCh <- EventSourceStatus{
+			gc.StatusCh <- EventSourceStatus{
 				Phase: v1alpha1.NodePhaseRunning,
 				Message: "event source is running",
 				Id: eventSource.Data.ID,
@@ -284,7 +284,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				Data: &eventSource.Data.Config,
 			})
 			if err != nil {
-				gc.statusCh <- EventSourceStatus{
+				gc.StatusCh <- EventSourceStatus{
 					Phase: v1alpha1.NodePhaseError,
 					Message: fmt.Sprintf("failed to receive event stream from event source. err: %+v", err),
 					Id: eventSource.Data.ID,
@@ -297,7 +297,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				if err != nil {
 					if err == io.EOF {
 						gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("event source has stopped")
-						gc.statusCh <- EventSourceStatus{
+						gc.StatusCh <- EventSourceStatus{
 							Phase: v1alpha1.NodePhaseCompleted,
 							Message: "event source has been stopped",
 							Id: eventSource.Data.ID,
@@ -306,7 +306,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					}
 
 					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to receive event from stream")
-					gc.statusCh <- EventSourceStatus{
+					gc.StatusCh <- EventSourceStatus{
 						Phase: v1alpha1.NodePhaseError,
 						Message: fmt.Sprintf("failed to receive event from event source stream. err: %v", err),
 						Id: eventSource.Data.ID,
@@ -328,7 +328,7 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
 		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("removing the event source")
-		gc.statusCh <- EventSourceStatus{
+		gc.StatusCh <- EventSourceStatus{
 			Phase: v1alpha1.NodePhaseRemove,
 			Id: eventSource.Data.ID,
 		}

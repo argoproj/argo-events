@@ -18,7 +18,6 @@ package gateway
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,7 +54,7 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 	return &gwOperationCtx{
 		gw:         gw.DeepCopy(),
 		updated:    false,
-		log:        zlog.New(os.Stdout).With().Str("name", gw.Name).Str("namespace", gw.Namespace).Caller().Logger(),
+		log:        common.GetLoggerContext(common.LoggerConf()).Str("name", gw.Name).Str("namespace", gw.Namespace).Logger(),
 		controller: controller,
 	}
 }

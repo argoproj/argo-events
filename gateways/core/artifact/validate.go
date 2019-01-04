@@ -24,10 +24,10 @@ import (
 )
 
 // ValidateEventSource validates a s3 event source
-func (ce *S3ConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ce *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return &gateways.ValidEventSource{}, gateways.ErrConfigParseFailed
+		return &gateways.ValidEventSource{}, gateways.ErrEventSourceParseFailed
 	}
 	if err = ce.validate(artifact); err != nil {
 		return &gateways.ValidEventSource{}, err
@@ -36,27 +36,27 @@ func (ce *S3ConfigExecutor) ValidateEventSource(ctx context.Context, eventSource
 }
 
 // validates an artifact
-func (ce *S3ConfigExecutor) validate(artifact *S3Artifact) error {
+func (ce *S3EventSourceExecutor) validate(artifact *S3Artifact) error {
 	if artifact == nil {
-		return gateways.ErrEmptyConfig
+		return gateways.ErrEmptyEventSource
 	}
 	if artifact.S3EventConfig == nil {
-		return fmt.Errorf("%+v, s3 bucket configuration can't be empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("%+v, s3 bucket configuration can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if artifact.AccessKey == nil {
-		return fmt.Errorf("%+v, access key can't be empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("%+v, access key can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if artifact.SecretKey == nil {
-		return fmt.Errorf("%+v, secret key can't be empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("%+v, secret key can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if artifact.S3EventConfig.Endpoint == "" {
-		return fmt.Errorf("%+v, endpoint url can't be empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("%+v, endpoint url can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if artifact.S3EventConfig.Bucket == "" {
-		return fmt.Errorf("%+v, bucket name can't be empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("%+v, bucket name can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if artifact.S3EventConfig.Event != "" && minio.NotificationEventType(artifact.S3EventConfig.Event) == "" {
-		return fmt.Errorf("%+v, unknown event %s", gateways.ErrInvalidConfig, artifact.S3EventConfig.Event)
+		return fmt.Errorf("%+v, unknown event %s", gateways.ErrInvalidEventSource, artifact.S3EventConfig.Event)
 	}
 	return nil
 }

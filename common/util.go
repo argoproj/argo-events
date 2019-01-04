@@ -19,6 +19,7 @@ package common
 import (
 	"fmt"
 	"github.com/rs/zerolog"
+	"k8s.io/client-go/kubernetes"
 	"os"
 	"time"
 
@@ -48,11 +49,6 @@ func DefaultSensorJobName(jobName string) string {
 // DefaultGatewayPodName returns a formulated name for a gateway deployment
 func DefaultGatewayPodName(deploymentName string) string {
 	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
-}
-
-// DefaultGatewayTransformerConfigMapName returns a formulated name for a gateway transformer configmap
-func DefaultGatewayTransformerConfigMapName(configMapName string) string {
-	return fmt.Sprintf("%s-gateway-transformer-configmap", configMapName)
 }
 
 // DefaultGatewayServiceName returns a formulated name for a gateway service
@@ -120,4 +116,22 @@ func LoggerConf() zerolog.ConsoleWriter {
 		return fmt.Sprintf("%s", i)
 	}
 	return  output
+}
+
+// GetLoggerContext returns a logger with input options
+func GetLoggerContext(opt zerolog.ConsoleWriter) zerolog.Context {
+	return zerolog.New(opt).With().Timestamp()
+}
+
+// GetSecret retrieves the secret value from the secret in namespace with name and key
+func GetSecret(client kubernetes.Interface, namespace string, name, key string) (string, error) {
+	secret, err := client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	val, ok := secret.Data[key]
+	if !ok {
+		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
+	}
+	return string(val), nil
 }

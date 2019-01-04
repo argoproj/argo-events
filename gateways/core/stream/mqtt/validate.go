@@ -27,19 +27,19 @@ func (mce *MqttConfigExecutor) ValidateEventSource(ctx context.Context, es *gate
 	v := &gateways.ValidEventSource{}
 	mqttConfig, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if mqttConfig == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 	if mqttConfig.URL == "" {
-		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
 	}
 	if mqttConfig.Topic == "" {
-		return v, fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidEventSource)
 	}
 	if mqttConfig.ClientId == "" {
-		return v, fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidEventSource)
 	}
 	return v, nil
 }

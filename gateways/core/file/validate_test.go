@@ -33,7 +33,7 @@ path: x.txt
 )
 
 func TestFileWatcherConfigExecutor_Validate(t *testing.T) {
-	ce := &FileWatcherConfigExecutor{}
+	ce := &FileEventSourceExecutor{}
 	es := &gateways.EventSource{
 		Data: &configValue,
 	}

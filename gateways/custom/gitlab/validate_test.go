@@ -1,6 +1,7 @@
 package gitlab
 
 import (
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -22,11 +23,11 @@ gitlabBaseUrl: "http://gitlab.com/"
 
 func TestGitlabExecutor_Validate(t *testing.T) {
 	ce := &GitlabExecutor{}
-	ctx := &gateways.EventSourceContext{
-		Data: &gateways.EventSourceData{},
+	es := &gateways.EventSource{
+		Data: &configValue,
 	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
+	ctx := context.Background()
+	_, err := ce.ValidateEventSource(ctx, es)
 	assert.Nil(t, err)
 
 	badConfig := `
@@ -37,8 +38,7 @@ accessToken:
     name: gitlab-access
 `
 
-	ctx.Data.Config = badConfig
-
-	err = ce.Validate(ctx)
+	es.Data = &badConfig
+	_, err = ce.ValidateEventSource(ctx, es)
 	assert.NotNil(t, err)
 }

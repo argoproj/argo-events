@@ -30,39 +30,20 @@ type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
 func (ce *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+	ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
+	ce.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.fireEvent(cal, eventSource, dataCh, errorCh, doneCh)
+	go ce.listenEvents(cal, eventSource, dataCh, errorCh, doneCh)
 
-	for {
-		select {
-		case data := <-dataCh:
-			err := eventStream.Send(&gateways.Event{
-				Name: eventSource.Name,
-				Payload: data,
-			})
-			if err != nil {
-				return err
-			}
-
-		case err := <-errorCh:
-			return err
-
-		case <-eventStream.Context().Done():
-			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
-			doneCh <- struct{}{}
-			return nil
-		}
-	}
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
 func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
@@ -86,8 +67,8 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 	}
 }
 
-// fireEvent fires an event when schedule is passed.
-func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+// listenEvents fires an event when schedule is passed.
+func (ce *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
 		errorCh <- err
@@ -119,7 +100,7 @@ func (ce *CalendarConfigExecutor) fireEvent(cal *CalSchedule, eventSource *gatew
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
+		ce.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx

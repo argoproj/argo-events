@@ -14,34 +14,34 @@ func (wce *WebhookConfigExecutor) ValidateEventSource(ctx context.Context, es *g
 	v := &gateways.ValidEventSource{}
 	w, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 
 	if w == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 
 	switch w.Method {
 	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
 	default:
-		return v, fmt.Errorf("%+v, unknown HTTP method %s", gateways.ErrInvalidConfig, w.Method)
+		return v, fmt.Errorf("%+v, unknown HTTP method %s", gateways.ErrInvalidEventSource, w.Method)
 	}
 
 	if w.Endpoint == "" {
-		return v, fmt.Errorf("%+v, endpoint can't be empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, endpoint can't be empty", gateways.ErrInvalidEventSource)
 	}
 	if w.Port == "" {
-		return v, fmt.Errorf("%+v, port can't be empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, port can't be empty", gateways.ErrInvalidEventSource)
 	}
 
 	if !strings.HasPrefix(w.Endpoint, "/") {
-		return v, fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidEventSource)
 	}
 
 	if w.Port != "" {
 		_, err := strconv.Atoi(w.Port)
 		if err != nil {
-			return v, fmt.Errorf("%+v, failed to parse server port %s. err: %+v", gateways.ErrInvalidConfig, w.Port, err)
+			return v, fmt.Errorf("%+v, failed to parse server port %s. err: %+v", gateways.ErrInvalidEventSource, w.Port, err)
 		}
 	}
 	return v, nil

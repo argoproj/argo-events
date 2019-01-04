@@ -27,22 +27,22 @@ func (rce *ResourceConfigExecutor) ValidateEventSource(ctx context.Context, es *
 	v := &gateways.ValidEventSource{}
 	res, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if res == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 	if res.Version == "" {
-		return v, fmt.Errorf("%+v, resource version must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, resource version must be specified", gateways.ErrInvalidEventSource)
 	}
 	if res.Namespace == "" {
-		return v, fmt.Errorf("%+v, resource namespace must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, resource namespace must be specified", gateways.ErrInvalidEventSource)
 	}
 	if res.Kind == "" {
-		return v, fmt.Errorf("%+v, resource kind must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, resource kind must be specified", gateways.ErrInvalidEventSource)
 	}
 	if res.Group == "" {
-		return v, fmt.Errorf("%+v, resource group must be specified", gateways.ErrInvalidConfig)
+		return v, fmt.Errorf("%+v, resource group must be specified", gateways.ErrInvalidEventSource)
 	}
 	return v, nil
 }

@@ -17,14 +17,12 @@ limitations under the License.
 package gateways
 
 import (
-	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"net"
 	"os"
-	"time"
 )
 
 // DispatchEvent dispatches event to gateway transformer for further processing
@@ -47,54 +45,19 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 }
 
 // StartGateway start a gateway
-func (gc *GatewayConfig) StartGateway(es EventingServer) error {
-	// handle event source's status
-	go func() {
-		for status := range gc.statusCh {
-			gc.updateGatewayResourceState(&status)
-		}
-	}()
-
+func StartGateway(es EventingServer) {
 	port, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
 	if !ok {
-		return fmt.Errorf("port is not provided")
+		panic(fmt.Errorf("port is not provided"))
 	}
-
-	errCh := make(chan error)
-
-	go func() {
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-		if err != nil {
-			errCh <- err
-			return
-		}
-		srv := grpc.NewServer()
-		RegisterEventingServer(srv, es)
-
-		if err := srv.Serve(lis); err != nil{
-			errCh <- err
-		}
-	}()
-
-	// wait for server to get started
-	time.Sleep(time.Second * 2)
-
-	gc.Log.Info().Msg("gateway started")
-
-	_, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		panic(err)
 	}
+	srv := grpc.NewServer()
+	RegisterEventingServer(srv, es)
 
-	gc.Log.Info().Msg("server is up and running")
-
-	go func() {
-		_, err := gc.WatchGatewayConfigMap(context.Background())
-		if err != nil {
-			errCh <- err
-		}
-	}()
-
-	err = <-errCh
-	return err
+	if err := srv.Serve(lis); err != nil{
+		panic(err)
+	}
 }

@@ -18,56 +18,38 @@ package artifact
 
 import (
 	"encoding/json"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
 )
 
 // StartEventSource activates an event source and streams back events
-func (ce *S3ConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ce.GatewayConfig.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+func (ce *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
+	ce.Log.Debug().Str("event-source-name", *eventSource.Name).Interface("event-source-value", *artifact).Msg("artifact event source")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ce.listenToEvents(artifact, dataCh, errorCh, doneCh)
+	go ce.listenEvents(artifact, dataCh, errorCh, doneCh)
 
-	for {
-		select {
-		case data := <-dataCh:
-			err := eventStream.Send(&gateways.Event{
-				Name: eventSource.Name,
-				Payload: data,
-			})
-			if err != nil {
-				return err
-			}
-
-		case err := <-errorCh:
-			return err
-
-		case <-eventStream.Context().Done():
-			ce.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
-			doneCh <- struct{}{}
-			return nil
-		}
-	}
+	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ce.Log)
 }
 
 // listenEvents listens to minio bucket notifications
-func (ce *S3ConfigExecutor) listenToEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ce *S3EventSourceExecutor) listenEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// retrieve access key id and secret access key
-	accessKey, err := gateways.GetSecret(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
+	accessKey, err := common.GetSecret(ce.Clientset, ce.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
 	}
-	secretKey, err := gateways.GetSecret(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
+	secretKey, err := common.GetSecret(ce.Clientset, ce.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
 		errorCh <- err
 		return

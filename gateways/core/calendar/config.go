@@ -17,13 +17,13 @@ limitations under the License.
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
 // CalendarConfigExecutor implements ConfigExecutor interface
 type CalendarConfigExecutor struct {
-	*gateways.GatewayConfig
+	Log zerolog.Logger
 }
 
 // CalSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.

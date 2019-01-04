@@ -76,7 +76,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              zerolog.New(common.LoggerConf()).With().Timestamp().Str("controller-namespace", namespace).Logger(),
+		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
