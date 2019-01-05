@@ -27,8 +27,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -110,44 +108,20 @@ func (c *SensorController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		escalationEvent := &corev1.Event{
-			Reason: err.Error(),
-			Type:   string(common.EscalationEventType),
-			Action: "gateway is marked as failed",
-			EventTime: metav1.MicroTime{
-				Time: time.Now(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:    sensor.Namespace,
-				GenerateName: sensor.Name + "-",
-				Labels: map[string]string{
-					common.LabelEventSeen:    "",
-					common.LabelResourceName: sensor.Name,
-					common.LabelEventType:    string(common.EscalationEventType),
-				},
-			},
-			InvolvedObject: corev1.ObjectReference{
-				Namespace: sensor.Namespace,
-				Name:      sensor.Name,
-				Kind:      sensor.Kind,
-			},
-			Source: corev1.EventSource{
-				Component: sensor.Name,
-			},
-			ReportingInstance:   c.Config.InstanceID,
-			ReportingController: common.DefaultSensorControllerDeploymentName,
+		labels := map[string]string{
+			common.LabelSensorName: sensor.Name,
+			common.LabelEventType:  string(common.EscalationEventType),
+			common.LabelOperation:  "controller operation",
 		}
-
-		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating sensor error")
-		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
-		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to escalate error")
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("failed to operate on sensor %s, err :%+v", sensor.Name, err), common.EscalationEventType,
+			"sensor operation failed", sensor.Name, sensor.Namespace, c.Config.InstanceID, sensor.Kind, labels); err != nil {
+			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate sensor operation failure")
 		}
 	}
 
 	err = c.handleErr(err, key)
 	if err != nil {
-		ctx.log.Error().Interface("error", err).Msg("sensor controller is unable to handle the error")
+		ctx.log.Error().Err(err).Msg("sensor controller is unable to handle the error")
 	}
 	return true
 }

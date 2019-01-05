@@ -28,7 +28,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -41,73 +40,17 @@ const (
 	MediaTypeYAML string = "application/yaml"
 )
 
-// createFilterEscalationEvent creates a k8 event for escalation for filter failures
-func (sec *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
-	sec.log.Info().Interface("policy", policy).Msg("escalation policy")
-	escalationEvent := &corev1.Event{
-		Reason: policy.Message,
-		Type:   string(common.EscalationEventType),
-		Action: fmt.Sprintf("sensor filter failed. Cause: %s", string(policy.Level)),
-		EventTime: metav1.MicroTime{
-			Time: time.Now(),
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    sec.sensor.Namespace,
-			GenerateName: sec.sensor.Name + "-",
-			Labels: map[string]string{
-				common.LabelEventSeen:    "",
-				common.LabelResourceName: sec.sensor.Name,
-				common.LabelEventType:    string(common.EscalationEventType),
-				common.LabelSignalName:   signalFilterName,
-				common.LabelSensorName:   sec.sensor.Name,
-			},
-		},
-		InvolvedObject: corev1.ObjectReference{
-			Namespace: sec.sensor.Namespace,
-			Name:      sec.sensor.Name,
-			Kind:      sec.sensor.Kind,
-		},
-		Source: corev1.EventSource{
-			Component: sec.sensor.Name,
-		},
-		ReportingInstance:   sec.controllerInstanceID,
-		ReportingController: common.DefaultSensorControllerDeploymentName,
-	}
-	_, err := common.CreateK8Event(escalationEvent, sec.kubeClient)
-	return err
-}
-
 // apply the eventDependency filters to an event
 func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
 	dataRes, err := sec.filterData(f.Data, event)
-	// generate sensor failure event and mark sensor as failed
 	if err != nil {
 		return false, err
-	}
-	if !dataRes {
-		err = sec.createFilterEscalationEvent(f.Data.EscalationPolicy, f.Name)
-		if err != nil {
-			return false, err
-		}
 	}
 	timeRes, err := sec.filterTime(f.Time, &event.Context.EventTime)
-	// generate sensor failure event and mark sensor as failed
 	if err != nil {
 		return false, err
 	}
-	if !timeRes {
-		err = sec.createFilterEscalationEvent(f.Time.EscalationPolicy, f.Name)
-		if err != nil {
-			return false, err
-		}
-	}
 	ctxRes := sec.filterContext(f.Context, &event.Context)
-	if !ctxRes {
-		err = sec.createFilterEscalationEvent(f.Context.EscalationPolicy, f.Name)
-		if err != nil {
-			return false, err
-		}
-	}
 	return timeRes && ctxRes && dataRes, err
 }
 
@@ -269,7 +212,6 @@ func isJSON(b []byte) bool {
 	var js json.RawMessage
 	return json.Unmarshal(b, &js) == nil
 }
-
 
 // util method to render an event's data as a JSON []byte
 // json is a subset of yaml so this should work...

@@ -50,7 +50,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":                  schema_pkg_apis_sensor_v1alpha1_Signal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_Signal(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter":            schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),

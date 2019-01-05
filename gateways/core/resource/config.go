@@ -34,11 +34,11 @@ type ResourceEventSourceExecutor struct {
 // +k8s:openapi-gen=true
 type resource struct {
 	// Namespace where resource is deployed
-	Namespace string          `json:"namespace"`
+	Namespace string `json:"namespace"`
 	// Filter is applied on the metadata of the resource
-	Filter    *ResourceFilter `json:"filter,omitempty"`
+	Filter *ResourceFilter `json:"filter,omitempty"`
 	// Version of the source
-	Version   string          `json:"version"`
+	Version string `json:"version"`
 	// Group of the resource
 	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`

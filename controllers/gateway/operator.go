@@ -235,7 +235,7 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: common.DefaultGatewayControllerDeploymentName,
 		},
 		{
-			Name: common.EnvVarGatewayServerPort,
+			Name:  common.EnvVarGatewayServerPort,
 			Value: goc.gw.Spec.ProcessorPort,
 		},
 	}

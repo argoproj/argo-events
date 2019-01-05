@@ -104,7 +104,7 @@ func LoggerConf() zerolog.ConsoleWriter {
 	output.FormatFieldValue = func(i interface{}) string {
 		return fmt.Sprintf("%s", i)
 	}
-	return  output
+	return output
 }
 
 // GetLoggerContext returns a logger with input options

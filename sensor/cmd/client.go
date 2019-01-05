@@ -17,10 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	sc "github.com/argoproj/argo-events/sensor"
-	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -47,22 +47,20 @@ func main() {
 		panic("sensor controller instance ID is not provided")
 	}
 
-	// initialize logger
-	log := zerolog.New(os.Stdout).With().Str("sensor-name", sensorName).Caller().Logger()
 	sensorClient, err := sv1.NewForConfig(restConfig)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to get sensor client")
+		panic(fmt.Errorf("failed to get sensor client. err: %+v", err))
 	}
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	sensor, err := sensorClient.ArgoprojV1alpha1().Sensors(sensorNamespace).Get(sensorName, metav1.GetOptions{})
 	if err != nil {
-		log.Panic().Err(err).Msg("failed to retrieve sensor")
+		panic(fmt.Errorf("failed to retrieve sensor. err: %+v", err))
 	}
 
 	clientPool := dynamic.NewDynamicClientPool(restConfig)
 	disco := discovery.NewDiscoveryClientForConfigOrDie(restConfig)
 
 	// wait for sensor http server to shutdown
-	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, log, controllerInstanceID)
+	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, controllerInstanceID)
 	sensorExecutionCtx.WatchGatewayEvents()
 }

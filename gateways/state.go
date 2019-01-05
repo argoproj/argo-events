@@ -117,9 +117,9 @@ func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus
 		common.LabelGatewayEventSourceName: status.Name,
 		common.LabelGatewayName:            gc.Name,
 		common.LabelGatewayEventSourceID:   status.Id,
+		common.LabelOperation:              "update event source state",
 	}
-	// error is not returned as this operation does not affect gateway functionality.
-	if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("event source state changed to %s", string(status.Phase)), common.StateChangeEventType, status.Phase, gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+	if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("event source state changed to %s", string(status.Phase)), common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
 		gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
 	}
 }

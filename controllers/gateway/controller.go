@@ -19,6 +19,7 @@ package gateway
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -32,8 +33,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -112,37 +111,13 @@ func (c *GatewayController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		escalationEvent := &corev1.Event{
-			Reason: err.Error(),
-			Type:   string(common.EscalationEventType),
-			Action: "gateway is marked as failed",
-			EventTime: metav1.MicroTime{
-				Time: time.Now(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:    gateway.Namespace,
-				GenerateName: gateway.Name + "-",
-				Labels: map[string]string{
-					common.LabelEventSeen:    "",
-					common.LabelResourceName: gateway.Name,
-					common.LabelEventType:    string(common.EscalationEventType),
-				},
-			},
-			InvolvedObject: corev1.ObjectReference{
-				Namespace: gateway.Namespace,
-				Name:      gateway.Name,
-				Kind:      gateway.Kind,
-			},
-			Source: corev1.EventSource{
-				Component: gateway.Name,
-			},
-			ReportingInstance:   c.Config.InstanceID,
-			ReportingController: common.DefaultGatewayControllerDeploymentName,
+		labels := map[string]string{
+			common.LabelGatewayName: gateway.Name,
+			common.LabelEventType:   string(common.EscalationEventType),
 		}
-		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
-		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
-		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s, err: %+v", gateway.Name, err), common.StateChangeEventType,
+			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
+			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}
 	}
 

@@ -26,8 +26,10 @@ type K8sEventType string
 
 // Possible values for K8sEventType
 var (
-	EscalationEventType  K8sEventType = "Escalation"
-	StateChangeEventType K8sEventType = "StateChange"
+	EscalationEventType       K8sEventType = "Escalation"
+	StateChangeEventType      K8sEventType = "StateChange"
+	OperationFailureEventType K8sEventType = "Operation Failed"
+	OperationSuccessEventType K8sEventType = "Operation Successful"
 )
 
 const (

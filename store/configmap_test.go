@@ -46,7 +46,7 @@ spec:
 	cm, err := kubeClientset.CoreV1().ConfigMaps(cmArtifact.Namespace).Create(configmap)
 	assert.Nil(t, err)
 	assert.Equal(t, cm.Name, configmap.Name)
-	cmReader, err := NewConfigmapReader(kubeClientset, cmArtifact)
+	cmReader, err := NewConfigMapReader(kubeClientset, cmArtifact)
 	assert.Nil(t, err)
 	resourceBody, err := cmReader.Read()
 	assert.Nil(t, err)

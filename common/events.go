@@ -20,24 +20,23 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// GenerateK8sEvent returns a kubernetes event
-func GenerateK8sEvent(clientset kubernetes.Interface, reason string, eventType K8sEventType, action v1alpha1.NodePhase, name, namespace, instanceId, kind string, labels map[string]string) error {
+// GenerateK8sEvent generates a kubernetes event
+func GenerateK8sEvent(clientset kubernetes.Interface, reason string, eventType K8sEventType, action string, name, namespace, instanceId, kind string, labels map[string]string) error {
 	event := &corev1.Event{
 		Reason: reason,
 		Type:   string(eventType),
-		Action: string(action),
+		Action: action,
 		EventTime: metav1.MicroTime{
 			Time: time.Now(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    namespace,
 			GenerateName: name + "-",
-			Labels: labels,
+			Labels:       labels,
 		},
 		InvolvedObject: corev1.ObjectReference{
 			Namespace: namespace,

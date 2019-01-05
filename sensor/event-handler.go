@@ -17,13 +17,16 @@ limitations under the License.
 package sensor
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
+
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers/sensor"
+	sn "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -41,8 +44,7 @@ type sensorExecutionCtx struct {
 	kubeClient kubernetes.Interface
 	// ClientPool manages a pool of dynamic clients.
 	clientPool dynamic.ClientPool
-	// DiscoveryClient implements the functions that discover server-supported API groups,
-	// versions and resources.
+	// DiscoveryClient implements the functions that discover server-supported API groups, versions and resources.
 	discoveryClient discovery.DiscoveryInterface
 	// sensor object
 	sensor *v1alpha1.Sensor
@@ -66,14 +68,14 @@ type eventWrapper struct {
 // NewSensorExecutionCtx returns a new sensor execution context.
 func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface,
 	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
-	sensor *v1alpha1.Sensor, log zerolog.Logger, controllerInstanceID string) *sensorExecutionCtx {
+	sensor *v1alpha1.Sensor, controllerInstanceID string) *sensorExecutionCtx {
 	return &sensorExecutionCtx{
 		sensorClient:         sensorClient,
 		kubeClient:           kubeClient,
 		clientPool:           clientPool,
 		discoveryClient:      discoveryClient,
 		sensor:               sensor,
-		log:                  log,
+		log:                  common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", sensor.Name).Logger(),
 		queue:                make(chan *eventWrapper),
 		controllerInstanceID: controllerInstanceID,
 	}
@@ -81,12 +83,23 @@ func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 
 // processEvent processes event received by sensor, validates it, updates the state of the node representing the event dependency
 func (sec *sensorExecutionCtx) processEvent(ew *eventWrapper) {
-	sec.log.Info().Str("event-src", ew.event.Context.Source.Host).Msg("event source")
+	sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("event dependency")
 
 	// apply filters if any.
 	ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
 	if err != nil {
 		sec.log.Error().Err(err).Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
+		// escalate error
+		labels := map[string]string{
+			common.LabelEventType:  string(common.EscalationEventType),
+			common.LabelSignalName: ew.event.Context.Source.Host,
+			common.LabelSensorName: sec.sensor.Name,
+			common.LabelOperation:  "filter event",
+		}
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to apply filter on event. err: %+v", err), common.OperationFailureEventType,
+			"filtering", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log filtering error")
+		}
 		common.SendErrorResponse(ew.writer)
 		return
 	}
@@ -99,9 +112,10 @@ func (sec *sensorExecutionCtx) processEvent(ew *eventWrapper) {
 	// send success response back to gateway as it is a valid notification
 	common.SendSuccessResponse(ew.writer)
 
-	node := sensor.GetNodeByName(sec.sensor, ew.event.Context.Source.Host)
 	// mark this eventDependency/event as seen. this event will be set in sensor node.
+	node := sn.GetNodeByName(sec.sensor, ew.event.Context.Source.Host)
 	node.Event = ew.event
+	node.Phase = v1alpha1.NodePhaseComplete
 	sec.sensor.Status.Nodes[node.ID] = *node
 	sec.processTriggers()
 	return
@@ -117,6 +131,15 @@ func (sec *sensorExecutionCtx) WatchGatewayEvents() {
 		}
 	}()
 
+	// if a sensor resource is updated, syncSensor will take care of updating current sensor context
+	// note: updating sensor resource will result in loss of all existing events stored in nodes.
+	// Once the NATS streaming support is added, user can replay the events.
+	go func() {
+		if _, err := sec.syncSensor(context.Background()); err != nil {
+			sec.log.Error().Err(err).Msg("failed to sync sensor resource")
+		}
+	}()
+
 	// create a http server. this server listens for events from gateway.
 	sec.server = &http.Server{Addr: fmt.Sprintf(":%s", common.SensorServicePort)}
 
@@ -126,37 +149,43 @@ func (sec *sensorExecutionCtx) WatchGatewayEvents() {
 	sec.log.Info().Str("port", string(common.SensorServicePort)).Msg("sensor started listening")
 	if err := sec.server.ListenAndServe(); err != nil {
 		sec.log.Error().Err(err).Msg("sensor server stopped")
-		// todo: escalate using K8s event
-		// this K8s event will be used by controller to mark sensor resource as error.
+		// escalate error
+		labels := map[string]string{
+			common.LabelEventType:  string(common.EscalationEventType),
+			common.LabelSensorName: sec.sensor.Name,
+			common.LabelOperation:  "server shutdown",
+		}
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped running. err: %+v", err), common.EscalationEventType,
+			"server shutdown", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log server shutdown error")
+		}
 	}
 }
 
 // Handles events received from gateways
 func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Request) {
-	// parse the request body which contains the cloudevents specification compliant event received from gateway.
 	sec.log.Info().Msg("received an event from gateway")
 	body, err := ioutil.ReadAll(r.Body)
 	var event *ss_v1alpha1.Event
-	err = json.Unmarshal(body, &event)
-	if err != nil {
+	if err = json.Unmarshal(body, &event); err != nil {
 		sec.log.Error().Err(err).Msg("failed to parse event received from gateway")
 		common.SendErrorResponse(w)
 		return
 	}
 
-	// validate whether the event is indeed from gateway that this sensor is watching
-	eventDependency, isValidSignal := sec.validateEvent(event)
-	if isValidSignal {
+	// validate whether the event is from gateway that this sensor is watching
+	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
 		// process the event
 		sec.queue <- &eventWrapper{
 			event:           event,
 			writer:          w,
 			eventDependency: eventDependency,
 		}
-	} else {
-		sec.log.Warn().Msg("eventDependency from unknown source.")
-		common.SendErrorResponse(w)
+		return
 	}
+
+	sec.log.Warn().Str("event-source-name", event.Context.Source.Host).Msg("event is from unknown source")
+	common.SendErrorResponse(w)
 }
 
 // validate whether the event is indeed from gateway that this sensor is watching

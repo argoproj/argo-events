@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"net/http"
 	"time"
 
@@ -35,6 +36,25 @@ type TransformerPayload struct {
 	Src string `json:"src"`
 	// Payload is event data
 	Payload []byte `json:"payload"`
+}
+
+// DispatchEvent dispatches event to gateway transformer for further processing
+func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
+	transformedEvent, err := gc.transformEvent(gatewayEvent)
+	if err != nil {
+		return err
+	}
+	switch gc.gw.Spec.DispatchMechanism {
+	case v1alpha1.HTTPGateway:
+		err = gc.dispatchEventOverHttp(transformedEvent)
+		if err != nil {
+			return err
+		}
+	case v1alpha1.NATSGateway:
+	default:
+		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchMechanism)
+	}
+	return nil
 }
 
 // transformEvent transforms an event from event source into a CloudEvents specification compliant event
@@ -75,7 +95,7 @@ func (gc *GatewayConfig) dispatchEventOverHttp(event *sv1alpha.Event) error {
 		return fmt.Errorf("failed to dispatch event to watchers over http. marshalling failed. err: %+v", err)
 	}
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
-		err := gc.postCloudEventToWatcher(common.DefaultSensorServiceName(sensor.Name), common.SensorServicePort, common.SensorServiceEndpoint, payload)
+		err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), common.SensorServicePort, common.SensorServiceEndpoint, payload)
 		if err != nil {
 			return fmt.Errorf("failed to dispatch event to sensor watcher over http. communication error. err: %+v", err)
 		}

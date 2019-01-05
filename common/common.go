@@ -79,6 +79,9 @@ const (
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 
+	// LabelOperation is a label for an operation in framework
+	LabelOperation = "operation"
+
 	// LabelSignalName is label for signal name
 	LabelSignalName = "signal-name"
 
@@ -109,7 +112,6 @@ const (
 
 	// EnvVarGatewayNamespace is namespace where gateway controller is deployed
 	EnvVarGatewayNamespace = "GATEWAY_NAMESPACE"
-
 
 	//LabelKeyGatewayControllerInstanceID is the label which allows to separate application among multiple running gateway-controller controllers.
 	LabelKeyGatewayControllerInstanceID = gateway.FullName + "/gateway-controller-instanceid"

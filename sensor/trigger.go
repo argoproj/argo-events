@@ -17,8 +17,10 @@ limitations under the License.
 package sensor
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers/sensor"
+	sn "github.com/argoproj/argo-events/controllers/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
@@ -27,25 +29,52 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-
 // processTriggers checks if all event dependencies are complete and then starts executing triggers
 func (sec *sensorExecutionCtx) processTriggers() {
 	// to trigger the sensor action/s we need to check if all event dependencies are completed and sensor is active
 	if sec.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
-		sec.log.Info().Msg("all event dependencies are marked completed")
+		sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
+		labels := map[string]string{
+			common.LabelSensorName: sec.sensor.Name,
+			common.LabelOperation:  "process triggers",
+		}
+
 		for _, trigger := range sec.sensor.Spec.Triggers {
-			err := sec.executeTrigger(trigger)
-			if err != nil {
+			if err := sec.executeTrigger(trigger); err != nil {
 				sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
-				// todo: escalate using K8s event
+				// escalate
+				labels[common.LabelEventType] = string(common.EscalationEventType)
+				if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger. err: %+v", err), common.EscalationEventType,
+					"process trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+					sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
+				}
 				continue
 			}
 			// mark trigger as complete.
-			// todo: generate K8 event marking trigger as successful
+			labels[common.LabelEventType] = string(common.OperationSuccessEventType)
+			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Name), common.OperationSuccessEventType,
+				"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
+			}
+		}
+
+		// increment completion counter
+		sec.sensor.Status.CompletionCount = sec.sensor.Status.CompletionCount + 1
+		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("triggers execution round completed. completion count: %d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
+			"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
+		}
+
+		// Mark all signal nodes as active
+		for _, dep := range sec.sensor.Spec.EventDependencies {
+			node := sn.GetNodeByName(sec.sensor, dep.Name)
+			node.Phase = v1alpha1.NodePhaseActive
+			sec.sensor.Status.Nodes[node.ID] = *node
 		}
 		return
 	}
-	sec.log.Info().Msg("triggers can't be executed because either event dependencies are not complete")
+	sec.log.Info().Msg("triggers can't be executed because event dependencies are not complete")
 }
 
 // execute the trigger
@@ -63,8 +92,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		err = sec.createResourceObject(trigger.Resource, uObj)
-		if err != nil {
+		if err = sec.createResourceObject(trigger.Resource, uObj); err != nil {
 			return err
 		}
 	}
@@ -80,7 +108,6 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 		labels := obj.GetLabels()
 		if labels != nil {
 			for k, v := range resource.Labels {
-				//TODO: check if override?
 				labels[k] = v
 			}
 			obj.SetLabels(labels)
@@ -98,7 +125,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 		if err != nil {
 			return err
 		}
-		events := sec.extractSignalEvents(resource.Parameters)
+		events := sec.extractEvents(resource.Parameters)
 		jUpdatedObj, err := applyParams(jObj, resource.Parameters, events)
 		if err != nil {
 			return err
@@ -134,27 +161,26 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	if err != nil {
 		return err
 	}
-	//todo: implement a diff between obj and liveObj
 	sec.log.Warn().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("object already exist")
 	return nil
 }
 
-// helper method to extract the events from the signals associated with the resource params
-// returns a map of the events keyed by the eventDependency name
-func (sec *sensorExecutionCtx) extractSignalEvents(params []v1alpha1.ResourceParameter) map[string]v1alpha.Event {
+// helper method to extract the events from the event dependencies nodes associated with the resource params
+// returns a map of the events keyed by the event dependency name
+func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]v1alpha.Event {
 	events := make(map[string]v1alpha.Event)
 	for _, param := range params {
 		if param.Src != nil {
-			node := sensor.GetNodeByName(sec.sensor, param.Src.Signal)
+			node := sn.GetNodeByName(sec.sensor, param.Src.Signal)
 			if node == nil {
-				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: eventDependency node does not exist, cannot apply parameter")
+				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
 				continue
 			}
 			if node.Event == nil {
-				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: eventDependency node does not exist, cannot apply parameter")
+				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
 				continue
 			}
-			events[param.Src.Signal] = node.Event.Event
+			events[param.Src.Signal] = *node.Event
 		}
 	}
 	return events

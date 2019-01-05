@@ -18,9 +18,10 @@ package main
 
 import (
 	"context"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/sensor"
-	"os"
 )
 
 func main() {
@@ -51,7 +52,5 @@ func main() {
 	}
 
 	go controller.Run(context.Background(), 1, 1)
-
-	// Wait forever
 	select {}
 }

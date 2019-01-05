@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 package gateway
+
 //
 //import (
 //	"github.com/argoproj/argo-events/common"

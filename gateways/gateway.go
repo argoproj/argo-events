@@ -19,30 +19,10 @@ package gateways
 import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"net"
 	"os"
 )
-
-// DispatchEvent dispatches event to gateway transformer for further processing
-func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
-	transformedEvent, err := gc.transformEvent(gatewayEvent)
-	if err != nil {
-		return err
-	}
-	switch gc.gw.Spec.DispatchMechanism {
-	case v1alpha1.HTTPGateway:
-		err = gc.dispatchEventOverHttp(transformedEvent)
-		if err != nil {
-			return err
-		}
-	case v1alpha1.NATSGateway:
-	default:
-		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchMechanism)
-	}
-	return nil
-}
 
 // StartGateway start a gateway
 func StartGateway(es EventingServer) {
@@ -57,7 +37,7 @@ func StartGateway(es EventingServer) {
 	srv := grpc.NewServer()
 	RegisterEventingServer(srv, es)
 
-	if err := srv.Serve(lis); err != nil{
+	if err := srv.Serve(lis); err != nil {
 		panic(err)
 	}
 }
