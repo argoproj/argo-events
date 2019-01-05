@@ -82,15 +82,15 @@ func TestGetSecrets(t *testing.T) {
 	assert.Nil(t, err)
 
 	// get valid secret with present key
-	pValue, err := getSecrets(fakeClient, "testing", "test", "access")
+	pValue, err := GetSecrets(fakeClient, "testing", "test", "access")
 	assert.Nil(t, err)
 	assert.Equal(t, "token", pValue)
 
 	// get valid secret with non-present key
-	_, err = getSecrets(fakeClient, "testing", "test", "unknown")
+	_, err = GetSecrets(fakeClient, "testing", "test", "unknown")
 	assert.NotNil(t, err)
 
 	// get invalid secret
-	_, err = getSecrets(fakeClient, "testing", "unknown", "access")
+	_, err = GetSecrets(fakeClient, "testing", "unknown", "access")
 	assert.NotNil(t, err)
 }

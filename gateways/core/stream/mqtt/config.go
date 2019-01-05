@@ -31,10 +31,8 @@ type MqttEventSourceExecutor struct {
 type mqtt struct {
 	// URL to connect to broker
 	URL string `json:"url"`
-
 	// Topic name
 	Topic string `json:"topic"`
-
 	// Client ID
 	ClientId string `json:"clientId"`
 }

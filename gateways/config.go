@@ -19,19 +19,20 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"time"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
-	"io"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"os"
-	"time"
 )
 
 // GatewayConfig provides a generic event source for a gateway
@@ -66,13 +67,13 @@ type GatewayConfig struct {
 type EventSourceContext struct {
 	// Data holds the actual event source
 	Data *EventSourceData
-
+	// Ctx contains context for the connection
 	Ctx context.Context
-
+	// Cancel upon invocation cancels the connection context
 	Cancel context.CancelFunc
-
+	// Client is grpc client
 	Client EventingClient
-
+	// Conn is grpc connection
 	Conn *grpc.ClientConn
 }
 
@@ -94,7 +95,7 @@ type GatewayEvent struct {
 	Payload []byte `json:"payload"`
 }
 
-// NewGatewayConfiguration returns a new gateway event source
+// NewGatewayConfiguration returns a new gateway configuration
 func NewGatewayConfiguration() *GatewayConfig {
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
@@ -130,7 +131,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	return &GatewayConfig{
-		Log:                  zerolog.New(common.LoggerConf()).With().Timestamp().Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
+		Log:                  common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
 		Clientset:            clientset,
 		Namespace:            namespace,
 		Name:                 name,
@@ -152,18 +153,17 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 	configs := make(map[string]*EventSourceContext)
 	for configKey, configValue := range cm.Data {
 		hashKey := Hasher(configKey + configValue)
-		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source hash")
-		ctx, cancel := context.WithCancel(context.Background())
+		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source")
 
 		// create a connection to gateway server
-		timeoutCtx, _ := context.WithTimeout(context.Background(), common.ServerConnTimeout * time.Second)
+		ctx, cancel := context.WithCancel(context.Background())
+		timeoutCtx, _ := context.WithTimeout(context.Background(), common.ServerConnTimeout*time.Second)
 		conn, err := grpc.DialContext(timeoutCtx, fmt.Sprintf("localhost:%s", gc.serverPort), grpc.WithBlock(), grpc.WithInsecure())
 		if err != nil {
-			gc.Log.Panic().Err(err).Msg("failed to connect to gateway server")
+			gc.Log.Panic().Err(err).Str("conn-state", conn.GetState().String()).Msg("failed to connect to gateway server")
 			return nil, err
 		}
-
-		gc.Log.Info().Str("state", conn.GetState().String()).Msg("get state of the connection")
+		gc.Log.Info().Str("state", conn.GetState().String()).Msg("state of the connection")
 
 		configs[hashKey] = &EventSourceContext{
 			Data: &EventSourceData{
@@ -172,11 +172,10 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 				Config: configValue,
 			},
 			Cancel: cancel,
-			Ctx: ctx,
+			Ctx:    ctx,
 			Client: NewEventingClient(conn),
-			Conn: conn,
+			Conn:   conn,
 		}
-		gc.Log.Info().Str("config-key", configKey).Interface("config-data", configs[hashKey].Data).Msg("event source")
 	}
 	return configs, nil
 }
@@ -186,7 +185,7 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 // and although the event sources are actually same, this method will treat them as different event sources.
 // retunrs staleConfig - event sources to be removed from gateway
 // newConfig - new event sources to run
-func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*EventSourceContext) (staleConfigKeys []string, newConfigKeys []string) {
+func (gc *GatewayConfig) diffEventSources(newConfigs map[string]*EventSourceContext) (staleConfigKeys []string, newConfigKeys []string) {
 	var currentConfigKeys []string
 	var updatedConfigKeys []string
 
@@ -197,8 +196,8 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*EventSourceCo
 		updatedConfigKeys = append(updatedConfigKeys, updatedConfigKey)
 	}
 
-	gc.Log.Info().Interface("current-config-keys", currentConfigKeys).Msg("hashes")
-	gc.Log.Info().Interface("updated-config-keys", updatedConfigKeys).Msg("hashes")
+	gc.Log.Info().Interface("current-event-sources-keys", currentConfigKeys).Msg("event sources hashes")
+	gc.Log.Info().Interface("updated-event-sources--keys", updatedConfigKeys).Msg("event sources hashes")
 
 	swapped := false
 	// iterates over current event sources and updated event sources
@@ -229,20 +228,6 @@ func (gc *GatewayConfig) diffConfigurations(newConfigs map[string]*EventSourceCo
 	return
 }
 
-// validateEventSources validates all event sources
-func (gc *GatewayConfig) validateEventSources(eventSources map[string]*EventSourceContext) {
-	for _, eventSource := range eventSources {
-		_, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
-			Name: &eventSource.Data.Src,
-			Data: &eventSource.Data.Config,
-		})
-		if err != nil {
-			eventSource.Cancel()
-			gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("event source is not valid")
-		}
-	}
-}
-
 // startEventSources starts new event sources added to gateway
 func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceContext, keys []string) {
 	for _, key := range keys {
@@ -256,8 +241,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			if eventSource.Conn.GetState() != connectivity.Ready {
 				gc.Log.Error().Msg("connection is not in ready state.")
 				gc.StatusCh <- EventSourceStatus{
-					Phase: v1alpha1.NodePhaseError,
-					Id: eventSource.Data.ID,
+					Phase:   v1alpha1.NodePhaseError,
+					Id:      eventSource.Data.ID,
 					Message: fmt.Sprintf("connection is not in ready state"),
 				}
 				return
@@ -274,8 +259,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
 				}
 				gc.StatusCh <- EventSourceStatus{
-					Phase: v1alpha1.NodePhaseError,
-					Id: eventSource.Data.ID,
+					Phase:   v1alpha1.NodePhaseError,
+					Id:      eventSource.Data.ID,
 					Message: fmt.Sprintf("event source is not valid. err: %+v", err),
 				}
 				return
@@ -283,10 +268,10 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 
 			// mark event source as running
 			gc.StatusCh <- EventSourceStatus{
-				Phase: v1alpha1.NodePhaseRunning,
+				Phase:   v1alpha1.NodePhaseRunning,
 				Message: "event source is running",
-				Id: eventSource.Data.ID,
-				Name: eventSource.Data.Src,
+				Id:      eventSource.Data.ID,
+				Name:    eventSource.Data.Src,
 			}
 
 			// listen to events from gateway server
@@ -296,37 +281,38 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			})
 			if err != nil {
 				gc.StatusCh <- EventSourceStatus{
-					Phase: v1alpha1.NodePhaseError,
+					Phase:   v1alpha1.NodePhaseError,
 					Message: fmt.Sprintf("failed to receive event stream from event source. err: %+v", err),
-					Id: eventSource.Data.ID,
+					Id:      eventSource.Data.ID,
 				}
 				return
 			}
 
+			gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("started listening to events from gateway server")
 			for {
 				event, err := eventStream.Recv()
 				if err != nil {
 					if err == io.EOF {
 						gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("event source has stopped")
 						gc.StatusCh <- EventSourceStatus{
-							Phase: v1alpha1.NodePhaseCompleted,
+							Phase:   v1alpha1.NodePhaseCompleted,
 							Message: "event source has been stopped",
-							Id: eventSource.Data.ID,
+							Id:      eventSource.Data.ID,
 						}
 						return
 					}
 
 					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to receive event from stream")
 					gc.StatusCh <- EventSourceStatus{
-						Phase: v1alpha1.NodePhaseError,
+						Phase:   v1alpha1.NodePhaseError,
 						Message: fmt.Sprintf("failed to receive event from event source stream. err: %v", err),
-						Id: eventSource.Data.ID,
+						Id:      eventSource.Data.ID,
 					}
 					return
 				}
 				err = gc.DispatchEvent(event)
 				if err != nil {
-					// todo: escalate through K8s event
+					// todo: escalate using K8s event
 					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to dispatch event to watchers")
 				}
 			}
@@ -334,14 +320,14 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 	}
 }
 
-// stopEventSources stops existing event sources
+// stopEventSources stops an existing event sources
 func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
 		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("removing the event source")
 		gc.StatusCh <- EventSourceStatus{
 			Phase: v1alpha1.NodePhaseRemove,
-			Id: eventSource.Data.ID,
+			Id:    eventSource.Data.ID,
 		}
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {
@@ -352,20 +338,20 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 
 // manageEventSources syncs registered event sources and updated gateway configmap
 func (gc *GatewayConfig) manageEventSources(cm *corev1.ConfigMap) error {
-	newConfigs, err := gc.createInternalEventSources(cm)
+	eventSources, err := gc.createInternalEventSources(cm)
 	if err != nil {
 		return err
 	}
 
-	staleConfigKeys, newConfigKeys := gc.diffConfigurations(newConfigs)
-	gc.Log.Info().Interface("stale-config-keys", staleConfigKeys).Msg("stale event sources")
-	gc.Log.Info().Interface("new-config-keys", newConfigKeys).Msg("new event sources")
+	staleEventSources, newEventSources := gc.diffEventSources(eventSources)
+	gc.Log.Info().Interface("event-sources", staleEventSources).Msg("stale event sources")
+	gc.Log.Info().Interface("event-sources", newEventSources).Msg("new event sources")
 
 	// stop existing event sources
-	gc.stopEventSources(staleConfigKeys)
+	gc.stopEventSources(staleEventSources)
 
 	// start new event sources
-	gc.startEventSources(newConfigs, newConfigKeys)
+	gc.startEventSources(eventSources, newEventSources)
 
 	return nil
 }

@@ -25,7 +25,6 @@ import (
 	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	"github.com/rs/zerolog"
 	appv1 "k8s.io/api/apps/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -83,8 +82,8 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Initialize all signal nodes
-		for _, signal := range soc.s.Spec.Signals {
-			soc.initializeNode(signal.Name, v1alpha1.NodeTypeSignal, v1alpha1.NodePhaseNew)
+		for _, signal := range soc.s.Spec.EventDependencies {
+			soc.initializeNode(signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew)
 		}
 
 		// Initialize all trigger nodes
@@ -109,93 +108,53 @@ func (soc *sOperationCtx) operate() error {
 		}...,
 		)
 
-		// Todo: Make sensor as subscriber to a Pub-Sub system.
-		// if sensor is repeatable then create a deployment else create a job
-		if soc.s.Spec.Repeat {
-			_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
-			if err != nil && apierr.IsNotFound(err) {
-				sensorDeployment := &appv1.Deployment{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      soc.s.Name,
-						Namespace: soc.s.Namespace,
-						Labels: map[string]string{
-							common.LabelSensorName: soc.s.Name,
-						},
-						OwnerReferences: []metav1.OwnerReference{
-							*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-						},
-					},
-					Spec: appv1.DeploymentSpec{
-						Selector: &metav1.LabelSelector{
-							MatchLabels: map[string]string{
-								common.LabelSensorName: soc.s.Name,
-							},
-						},
-						Template: corev1.PodTemplateSpec{
-							ObjectMeta: metav1.ObjectMeta{
-								Name:        common.DefaultSensorDeploymentName(soc.s.Name),
-								Namespace:   soc.s.Name,
-								Annotations: soc.s.Annotations,
-
-								Labels: map[string]string{
-									common.LabelSensorName: soc.s.Name,
-								},
-							},
-							Spec: *soc.s.Spec.DeploySpec,
-						},
-					},
-				}
-				_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Create(sensorDeployment)
-				if err != nil {
-					soc.log.Error().Err(err).Msg("failed to create deployment")
-					return err
-				}
-				soc.log.Info().Msg("sensor deployment created")
+		// create a sensor pod
+		if _, err := soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) {
+			// default label on sensor
+			if soc.s.ObjectMeta.Labels == nil {
+				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
-		} else {
-			_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
-			if err != nil && apierr.IsNotFound(err) {
-				sensorJob := &batchv1.Job{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      soc.s.Name,
-						Namespace: soc.s.Namespace,
-						Labels: map[string]string{
-							common.LabelSensorName: soc.s.Name,
-						},
-						OwnerReferences: []metav1.OwnerReference{
-							*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-						},
+			soc.s.ObjectMeta.Labels[common.LabelSensorName] = soc.s.Name
+			sensorDeployment := &appv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      soc.s.Name,
+					Namespace: soc.s.Namespace,
+					Labels:    soc.s.Labels,
+					OwnerReferences: []metav1.OwnerReference{
+						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
 					},
-					Spec: batchv1.JobSpec{
-						Template: corev1.PodTemplateSpec{
-							ObjectMeta: metav1.ObjectMeta{
-								GenerateName: common.DefaultSensorJobName(soc.s.Name),
-								Annotations:  soc.s.Annotations,
-								Labels: map[string]string{
-									common.LabelSensorName: soc.s.Name,
-								},
-							},
-							Spec: *soc.s.Spec.DeploySpec,
-						},
+				},
+				Spec: appv1.DeploymentSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: soc.s.ObjectMeta.Labels,
 					},
-				}
-				_, err = soc.controller.kubeClientset.BatchV1().Jobs(soc.s.Namespace).Create(sensorJob)
-				if err != nil {
-					soc.log.Error().Err(err).Msg("failed to create sensor job")
-					return err
-				}
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							GenerateName: soc.s.Name,
+							Namespace:    soc.s.Name,
+							Annotations:  soc.s.Annotations,
+							Labels:       soc.s.Labels,
+						},
+						Spec: *soc.s.Spec.DeploySpec,
+					},
+				},
 			}
+			_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Create(sensorDeployment)
+			if err != nil {
+				soc.log.Error().Err(err).Msg("failed to create deployment")
+				return err
+			}
+			soc.log.Info().Msg("sensor deployment created")
 		}
 
 		// Create a ClusterIP service to expose sensor in cluster
 		// For now, sensor will receive event notifications through http server.
-		// And it will communicate the updates back to sensor controller.
-		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultSensorServiceName(soc.s.Name), metav1.GetOptions{})
+		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{})
 		if err != nil && apierr.IsNotFound(err) {
 			// Create sensor service
 			sensorSvc := &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      common.DefaultSensorServiceName(soc.s.Name),
+					Name:      common.DefaultServiceName(soc.s.Name),
 					Namespace: soc.s.Namespace,
 					OwnerReferences: []metav1.OwnerReference{
 						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
@@ -208,10 +167,8 @@ func (soc *sOperationCtx) operate() error {
 							TargetPort: intstr.FromInt(int(intstr.Parse(common.SensorServicePort).IntVal)),
 						},
 					},
-					Type: corev1.ServiceTypeClusterIP,
-					Selector: map[string]string{
-						common.LabelSensorName: soc.s.Name,
-					},
+					Type:     corev1.ServiceTypeClusterIP,
+					Selector: soc.s.Labels,
 				},
 			}
 			_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
@@ -222,7 +179,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Mark all signal nodes as active
-		for _, signal := range soc.s.Spec.Signals {
+		for _, signal := range soc.s.Spec.EventDependencies {
 			soc.markNodePhase(signal.Name, v1alpha1.NodePhaseActive, "node is active")
 		}
 
@@ -231,27 +188,25 @@ func (soc *sOperationCtx) operate() error {
 		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for signal events")
 
 	case v1alpha1.NodePhaseActive:
-		if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeSignal) {
+		if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
 			if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeTrigger) {
-				// todo: add spec level deadlines here
 				soc.markSensorPhase(v1alpha1.NodePhaseComplete, true)
 			}
 		}
+
 	case v1alpha1.NodePhaseError:
 		soc.log.Info().Msg("sensor is in error state. Check escalated K8 event for the error")
+
 	case v1alpha1.NodePhaseComplete:
 		soc.log.Info().Msg("sensor is in complete state")
 		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
-		if soc.s.Spec.Repeat {
-			soc.log.Info().Msg("re-run sensor")
-			soc.reRunSensor()
-		}
+		soc.log.Info().Msg("re-run sensor")
+		soc.reRunSensor()
 	}
 	return nil
 }
 
 func (soc *sOperationCtx) reRunSensor() {
-	// todo: persist changes in a transaction store somewhere, is it reasonable to put in the sensor object? probably not for scale
 	soc.log.Info().Msg("resetting nodes and re-running sensor")
 	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	soc.markSensorPhase(v1alpha1.NodePhaseNew, false)
@@ -284,7 +239,6 @@ func (soc *sOperationCtx) persistUpdates() {
 }
 
 // reapplyUpdate by fetching a new version of the sensor and updating the status
-// TODO: use patch here?
 func (soc *sOperationCtx) reapplyUpdate(sensorClient client.SensorInterface) error {
 	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
 		s, err := sensorClient.Get(soc.s.Name, metav1.GetOptions{})
@@ -375,7 +329,7 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 
 // markNodePhase marks the node with a phase, returns the node
 func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhase, message ...string) *v1alpha1.NodeStatus {
-	node := getNodeByName(soc.s, nodeName)
+	node := GetNodeByName(soc.s, nodeName)
 	if node == nil {
 		soc.log.Panic().Str("node-name", nodeName).Msg("node is uninitialized")
 	}

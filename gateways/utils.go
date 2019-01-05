@@ -18,8 +18,9 @@ package gateways
 
 import (
 	"fmt"
-	zlog "github.com/rs/zerolog"
 	"hash/fnv"
+
+	zlog "github.com/rs/zerolog"
 )
 
 // Hasher hashes a string
@@ -29,14 +30,14 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
-// ConsumeEventsFromEventSource consumes events from the event source.
-func ConsumeEventsFromEventSource(name *string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
+// HandleEventsFromEventSource handles events from the event source.
+func HandleEventsFromEventSource(name *string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
 	for {
 		select {
 		case data := <-dataCh:
 			log.Info().Str("event-source-name", *name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&Event{
-				Name: name,
+				Name:    name,
 				Payload: data,
 			})
 			if err != nil {
@@ -44,6 +45,7 @@ func ConsumeEventsFromEventSource(name *string, eventStream Eventing_StartEventS
 			}
 
 		case err := <-errorCh:
+			log.Info().Str("event-source-name", *name).Err(err).Msg("error occurred while getting event from event source")
 			return err
 
 		case <-eventStream.Context().Done():

@@ -19,6 +19,7 @@ package artifact
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
 )

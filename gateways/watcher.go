@@ -27,8 +27,8 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// WatchGatewayConfigMap watches change in configuration for the gateway
-func (gc *GatewayConfig) WatchGatewayConfigMap(ctx context.Context) (cache.Controller, error) {
+// WatchGatewayEventSources watches change in configuration for the gateway
+func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
 	source := gc.newConfigMapWatch(gc.configName)
 	_, controller := cache.NewInformer(
 		source,

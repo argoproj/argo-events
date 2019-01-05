@@ -33,9 +33,13 @@ type ResourceEventSourceExecutor struct {
 // resource refers to a dependency on a k8s resource.
 // +k8s:openapi-gen=true
 type resource struct {
+	// Namespace where resource is deployed
 	Namespace string          `json:"namespace"`
+	// Filter is applied on the metadata of the resource
 	Filter    *ResourceFilter `json:"filter,omitempty"`
-	Version   string `json:"version"`
+	// Version of the source
+	Version   string          `json:"version"`
+	// Group of the resource
 	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`
 }

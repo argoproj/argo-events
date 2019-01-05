@@ -41,8 +41,8 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
 	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
+	for _, signal := range sOpCtx.s.Spec.EventDependencies {
+		node := GetNodeByName(sOpCtx.s, signal.Name)
 		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
 	// check whether sensor deployment is created
@@ -56,13 +56,13 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	assert.NotNil(t, svc)
 
 	// mark sensor as complete by marking all nodes as complete
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
+	for _, signal := range sOpCtx.s.Spec.EventDependencies {
+		node := GetNodeByName(sOpCtx.s, signal.Name)
 		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
 	}
 
 	for _, signal := range sOpCtx.s.Spec.Triggers {
-		node := getNodeByName(sOpCtx.s, signal.Name)
+		node := GetNodeByName(sOpCtx.s, signal.Name)
 		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "trigger is completed")
 	}
 
@@ -80,8 +80,8 @@ func TestSensorOperateLifecycle(t *testing.T) {
 	err = sOpCtx.operate()
 	assert.Nil(t, err)
 
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
+	for _, signal := range sOpCtx.s.Spec.EventDependencies {
+		node := GetNodeByName(sOpCtx.s, signal.Name)
 		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
 	}
 

@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"fmt"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
@@ -43,7 +44,7 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 }
 
 // helper method to resolve the parameter's value from the src
-// returns an error if the Path is invalid/not found and the default value is nil OR if the signal event doesn't exist and default value is nil
+// returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
 func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]v1alpha.Event) (string, error) {
 	if e, ok := events[src.Signal]; ok {
 		// only convert payload to json when path is set.

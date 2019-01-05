@@ -29,7 +29,7 @@ import (
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
-	if err := validateSignals(s.Spec.Signals); err != nil {
+	if err := validateSignals(s.Spec.EventDependencies); err != nil {
 		return err
 	}
 	err := validateTriggers(s.Spec.Triggers)
@@ -61,7 +61,7 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 
 // perform a check to see that each signal defines one of and at most one of:
 // (stream, artifact, calendar, resource, webhook)
-func validateSignals(signals []v1alpha1.Signal) error {
+func validateSignals(signals []v1alpha1.EventDependency) error {
 	if len(signals) < 1 {
 		return fmt.Errorf("no signals found")
 	}

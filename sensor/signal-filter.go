@@ -17,9 +17,12 @@ limitations under the License.
 package sensor
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -30,9 +33,17 @@ import (
 	"time"
 )
 
+// various supported media types
+// TODO: add support for XML
+const (
+	MediaTypeJSON string = "application/json"
+	//MediaTypeXML  string = "application/xml"
+	MediaTypeYAML string = "application/yaml"
+)
+
 // createFilterEscalationEvent creates a k8 event for escalation for filter failures
-func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
-	se.log.Info().Interface("policy", policy).Msg("escalation policy")
+func (sec *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.EscalationPolicy, signalFilterName string) error {
+	sec.log.Info().Interface("policy", policy).Msg("escalation policy")
 	escalationEvent := &corev1.Event{
 		Reason: policy.Message,
 		Type:   string(common.EscalationEventType),
@@ -41,58 +52,58 @@ func (se *sensorExecutionCtx) createFilterEscalationEvent(policy *v1alpha1.Escal
 			Time: time.Now(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    se.sensor.Namespace,
-			GenerateName: se.sensor.Name + "-",
+			Namespace:    sec.sensor.Namespace,
+			GenerateName: sec.sensor.Name + "-",
 			Labels: map[string]string{
 				common.LabelEventSeen:    "",
-				common.LabelResourceName: se.sensor.Name,
+				common.LabelResourceName: sec.sensor.Name,
 				common.LabelEventType:    string(common.EscalationEventType),
 				common.LabelSignalName:   signalFilterName,
-				common.LabelSensorName:   se.sensor.Name,
+				common.LabelSensorName:   sec.sensor.Name,
 			},
 		},
 		InvolvedObject: corev1.ObjectReference{
-			Namespace: se.sensor.Namespace,
-			Name:      se.sensor.Name,
-			Kind:      se.sensor.Kind,
+			Namespace: sec.sensor.Namespace,
+			Name:      sec.sensor.Name,
+			Kind:      sec.sensor.Kind,
 		},
 		Source: corev1.EventSource{
-			Component: se.sensor.Name,
+			Component: sec.sensor.Name,
 		},
-		ReportingInstance:   se.controllerInstanceID,
+		ReportingInstance:   sec.controllerInstanceID,
 		ReportingController: common.DefaultSensorControllerDeploymentName,
 	}
-	_, err := common.CreateK8Event(escalationEvent, se.kubeClient)
+	_, err := common.CreateK8Event(escalationEvent, sec.kubeClient)
 	return err
 }
 
-// apply the signal filters to an event
-func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
-	dataRes, err := se.filterData(f.Data, event)
+// apply the eventDependency filters to an event
+func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
+	dataRes, err := sec.filterData(f.Data, event)
 	// generate sensor failure event and mark sensor as failed
 	if err != nil {
 		return false, err
 	}
 	if !dataRes {
-		err = se.createFilterEscalationEvent(f.Data.EscalationPolicy, f.Name)
+		err = sec.createFilterEscalationEvent(f.Data.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}
 	}
-	timeRes, err := se.filterTime(f.Time, &event.Context.EventTime)
+	timeRes, err := sec.filterTime(f.Time, &event.Context.EventTime)
 	// generate sensor failure event and mark sensor as failed
 	if err != nil {
 		return false, err
 	}
 	if !timeRes {
-		err = se.createFilterEscalationEvent(f.Time.EscalationPolicy, f.Name)
+		err = sec.createFilterEscalationEvent(f.Time.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}
 	}
-	ctxRes := se.filterContext(f.Context, &event.Context)
+	ctxRes := sec.filterContext(f.Context, &event.Context)
 	if !ctxRes {
-		err = se.createFilterEscalationEvent(f.Context.EscalationPolicy, f.Name)
+		err = sec.createFilterEscalationEvent(f.Context.EscalationPolicy, f.Name)
 		if err != nil {
 			return false, err
 		}
@@ -104,27 +115,27 @@ func (se *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alph
 // 1. the eventTime is greater than or equal to the start time
 // 2. the eventTime is less than the end time
 // returns true if 1 and 2 are true and false otherwise
-func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.MicroTime) (bool, error) {
+func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.MicroTime) (bool, error) {
 	if timeFilter != nil {
-		se.log.Info().Str("event-time", eventTime.String()).Msg("event time")
+		sec.log.Info().Str("event-time", eventTime.String()).Msg("event time")
 		currentT := time.Now().UTC()
 		currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
 		currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
-		se.log.Info().Str("date", currentTStr).Msg("current date")
+		sec.log.Info().Str("date", currentTStr).Msg("current date")
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
-			se.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
+			sec.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
 			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)
 			if err != nil {
 				return false, err
 			}
-			se.log.Info().Str("start time", startTime.String()).Msg("start time")
+			sec.log.Info().Str("start time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
-			se.log.Info().Str("stop time format", currentTStr+" "+timeFilter.Stop).Msg("stop time format")
+			sec.log.Info().Str("stop time format", currentTStr+" "+timeFilter.Stop).Msg("stop time format")
 			stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Stop)
 			if err != nil {
 				return false, err
 			}
-			se.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+			sec.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
 			stopTime = stopTime.UTC()
 			return (startTime.Before(eventTime.Time) || stopTime.Equal(eventTime.Time)) && eventTime.Time.Before(stopTime), nil
 		}
@@ -134,7 +145,7 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 			if err != nil {
 				return false, err
 			}
-			se.log.Info().Str("start time", startTime.String()).Msg("start time")
+			sec.log.Info().Str("start time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
 			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
@@ -143,7 +154,7 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 			if err != nil {
 				return false, err
 			}
-			se.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+			sec.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
 			stopTime = stopTime.UTC()
 			return eventTime.Time.Before(stopTime), nil
 		}
@@ -154,7 +165,7 @@ func (se *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventT
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func (se *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
+func (sec *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -187,7 +198,7 @@ func (se *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, actu
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
-func (se *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *v1alpha.Event) (bool, error) {
+func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *v1alpha.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
 	if data == nil {
@@ -252,4 +263,36 @@ func mapIsSubset(sub map[string]string, m map[string]string) bool {
 		}
 	}
 	return true
+}
+
+func isJSON(b []byte) bool {
+	var js json.RawMessage
+	return json.Unmarshal(b, &js) == nil
+}
+
+
+// util method to render an event's data as a JSON []byte
+// json is a subset of yaml so this should work...
+func renderEventDataAsJSON(e *v1alpha.Event) ([]byte, error) {
+	if e == nil {
+		return nil, fmt.Errorf("event is nil")
+	}
+	raw := e.Payload
+	// contentType is formatted as: '{type}; charset="xxx"'
+	contents := strings.Split(e.Context.ContentType, ";")
+	switch contents[0] {
+	case MediaTypeJSON:
+		if isJSON(raw) {
+			return raw, nil
+		}
+		return nil, fmt.Errorf("event data is not valid JSON")
+	case MediaTypeYAML:
+		data, err := yaml.YAMLToJSON(raw)
+		if err != nil {
+			return nil, fmt.Errorf("failed converting yaml event data to JSON: %s", err)
+		}
+		return data, nil
+	default:
+		return nil, fmt.Errorf("unsupported event content type: %s", e.Context.ContentType)
+	}
 }

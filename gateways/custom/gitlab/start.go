@@ -18,15 +18,16 @@ package gitlab
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/store"
+	"reflect"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/xanzy/go-gitlab"
-	"reflect"
 )
 
 // getCredentials for gitlab
 func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, error) {
-	token, err := common.GetSecret(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
+	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 
 	go ese.listenEvents(g, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
@@ -65,8 +66,8 @@ func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource 
 	}
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &g.URL,
-		Token: &c.token,
+		URL:                   &g.URL,
+		Token:                 &c.token,
 		EnableSSLVerification: &g.EnableSSLVerification,
 	}
 
@@ -90,5 +91,7 @@ func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource 
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 
 	<-doneCh
-	_, err = ese.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID)
+	if _, err = ese.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID); err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("failed to delete gitlab hook")
+	}
 }

@@ -19,7 +19,6 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
 	"github.com/argoproj/argo-events/gateways/core/stream/nats"
 )
 

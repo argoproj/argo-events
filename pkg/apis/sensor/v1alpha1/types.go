@@ -30,8 +30,8 @@ type NodeType string
 
 // possible node types
 const (
-	NodeTypeSignal  NodeType = "Signal"
-	NodeTypeTrigger NodeType = "Trigger"
+	NodeTypeEventDependency NodeType = "EventDependency"
+	NodeTypeTrigger         NodeType = "Trigger"
 )
 
 // NodePhase is the label for the condition of a node
@@ -71,21 +71,18 @@ type SensorList struct {
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// Signals is a list of the things that this sensor is dependent on. These are the inputs to this sensor.
-	Signals []Signal `json:"signals" protobuf:"bytes,1,rep,name=signals"`
+	// EventDependency is a list of the events that this sensor is dependent on.
+	EventDependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
 
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
-	// Repeat is a flag that determines if the sensor status should be reset after completion.
-	Repeat bool `json:"repeat,omitempty" protobuf:"bytes,4,opt,name=repeat"`
-
 	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,5,opt,name=deploySpec"`
+	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,opt,name=deploySpec"`
 }
 
-// Signal describes a dependency
-type Signal struct {
+// EventDependency describes a dependency
+type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
@@ -213,7 +210,7 @@ type ResourceParameter struct {
 
 // ResourceParameterSource defines the source for a resource parameter from a signal event
 type ResourceParameterSource struct {
-	// Signal is the name of the signal for which to retrieve this event
+	// EventDependency is the name of the signal for which to retrieve this event
 	Signal string `json:"signal" protobuf:"bytes,1,opt,name=signal"`
 
 	// Path is the JSONPath of the event's (JSON decoded) data key
@@ -336,14 +333,8 @@ type NodeStatus struct {
 	// store data or something to save for signal notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
-	// LatestEvent stores the last seen event for this node
-	LatestEvent *EventWrapper `json:"latestEvent,omitempty" protobuf:"bytes,9,opt,name=latestEvent"`
-}
-
-// EventWrapper wraps an event with an additional flag to check if we processed this event already
-type EventWrapper struct {
-	Event `json:"event" protobuf:"bytes,1,opt,name=event"`
-	Seen  bool `json:"seen" protobuf:"bytes,2,opt,name=seen"`
+	// Event stores the last seen event for this node
+	Event *Event `json:"latestEvent,omitempty" protobuf:"bytes,9,opt,name=latestEvent"`
 }
 
 // Event is a data record expressing an occurrence and its context.

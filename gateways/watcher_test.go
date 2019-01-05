@@ -22,7 +22,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",

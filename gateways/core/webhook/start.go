@@ -102,7 +102,7 @@ func (rc *routeConfig) startHttpServer() {
 		}
 		errChan := make(chan error, 1)
 		activeServers[rc.wConfig.Port] = &activeServer{
-			srv: s.mux,
+			srv:     s.mux,
 			errChan: errChan,
 		}
 

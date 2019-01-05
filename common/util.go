@@ -19,7 +19,6 @@ package common
 import (
 	"fmt"
 	"github.com/rs/zerolog"
-	"k8s.io/client-go/kubernetes"
 	"os"
 	"time"
 
@@ -36,14 +35,9 @@ func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
 }
 
-// DefaultSensorDeploymentName returns a formulated name for sensor deployment
-func DefaultSensorDeploymentName(deploymentName string) string {
-	return fmt.Sprintf("%s-sensor-deployement", deploymentName)
-}
-
-// DefaultSensorJobName returns a formulated name for a sensor job
-func DefaultSensorJobName(jobName string) string {
-	return fmt.Sprintf("%s-sensor-job", jobName)
+// DefaultDeploymentName returns a formulated name for deployment
+func DefaultDeploymentName(deploymentName string) string {
+	return fmt.Sprintf("%s-deployement", deploymentName)
 }
 
 // DefaultGatewayPodName returns a formulated name for a gateway deployment
@@ -51,14 +45,9 @@ func DefaultGatewayPodName(deploymentName string) string {
 	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
 }
 
-// DefaultGatewayServiceName returns a formulated name for a gateway service
-func DefaultGatewayServiceName(serviceName string) string {
+// DefaultServiceName returns a formulated name for a service
+func DefaultServiceName(serviceName string) string {
 	return fmt.Sprintf("%s-gateway-svc", serviceName)
-}
-
-// DefaultSensorServiceName returns a formulated name for a sensor service
-func DefaultSensorServiceName(serviceName string) string {
-	return fmt.Sprintf("%s-sensor-svc", serviceName)
 }
 
 // DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
@@ -121,17 +110,4 @@ func LoggerConf() zerolog.ConsoleWriter {
 // GetLoggerContext returns a logger with input options
 func GetLoggerContext(opt zerolog.ConsoleWriter) zerolog.Context {
 	return zerolog.New(opt).With().Timestamp()
-}
-
-// GetSecret retrieves the secret value from the secret in namespace with name and key
-func GetSecret(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secret, err := client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return "", err
-	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
 }

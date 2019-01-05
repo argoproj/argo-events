@@ -19,8 +19,9 @@ package storagegrid
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/gateways"
 	"strings"
+
+	"github.com/argoproj/argo-events/gateways"
 )
 
 // ValidateEventSource validates gateway event source

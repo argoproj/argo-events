@@ -133,7 +133,7 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 
 	fmt.Println(event)
 
-	selectedSignal, valid := se.validateSignal(event)
+	selectedSignal, valid := se.validateEvent(event)
 	assert.Equal(t, true, valid)
 	assert.NotNil(t, selectedSignal)
 	assert.Equal(t, event.Context.Source.Host, selectedSignal.Name)
@@ -158,7 +158,7 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 		StartedAt: metav1.MicroTime{
 			Time: time.Now(),
 		},
-		Type:        v1alpha1.NodeTypeSignal,
+		Type:        v1alpha1.NodeTypeEventDependency,
 		DisplayName: common.DefaultGatewayConfigurationName("test-gateway", "test-config"),
 	}
 	se.sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
@@ -166,12 +166,12 @@ func TestSensorExecutionCtx_signals_and_triggers(t *testing.T) {
 	}
 
 	for _, node := range se.sensor.Status.Nodes {
-		if node.Type == v1alpha1.NodeTypeSignal {
+		if node.Type == v1alpha1.NodeTypeEventDependency {
 			se.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "node is completed")
 		}
 	}
 
-	err = se.processTrigger()
+	err = se.processTriggers()
 	assert.Nil(t, err)
 
 	for _, node := range se.sensor.Status.Nodes {

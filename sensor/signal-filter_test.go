@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -262,6 +263,89 @@ func Test_mapIsSubset(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := mapIsSubset(tt.args.sub, tt.args.m); got != tt.want {
 				t.Errorf("mapIsSubset() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+
+// this test is meant to cover the missing cases for those not covered in eventDependency-filter_test.go and trigger-params_test.go
+func Test_renderEventDataAsJSON(t *testing.T) {
+	type args struct {
+		e *v1alpha1.Event
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name:    "nil event",
+			args:    args{e: nil},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "missing content type",
+			args:    args{e: &v1alpha1.Event{}},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "valid yaml content",
+			args: args{e: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: MediaTypeYAML,
+				},
+				Payload: []byte(`apiVersion: v1alpha1`),
+			}},
+			want:    []byte(`{"apiVersion":"v1alpha1"}`),
+			wantErr: false,
+		},
+		{
+			name: "json content marked as yaml",
+			args: args{e: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: MediaTypeYAML,
+				},
+				Payload: []byte(`{"apiVersion":5}`),
+			}},
+			want:    []byte(`{"apiVersion":5}`),
+			wantErr: false,
+		},
+		{
+			name: "invalid json content",
+			args: args{e: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: MediaTypeJSON,
+				},
+				Payload: []byte(`{5:"numberkey"}`),
+			}},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name: "invalid yaml content",
+			args: args{e: &v1alpha1.Event{
+				Context: v1alpha1.EventContext{
+					ContentType: MediaTypeYAML,
+				},
+				Payload: []byte(`%\x786`),
+			}},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := renderEventDataAsJSON(tt.args.e)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("renderEventDataAsJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("renderEventDataAsJSON() = %v, want %v", got, tt.want)
 			}
 		})
 	}

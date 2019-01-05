@@ -18,7 +18,8 @@ package artifact
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/store"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
 )
@@ -37,18 +38,18 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 
 	go ese.listenEvents(artifact, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 // listenEvents listens to minio bucket notifications
 func (ese *S3EventSourceExecutor) listenEvents(artifact *S3Artifact, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// retrieve access key id and secret access key
-	accessKey, err := common.GetSecret(ese.Clientset, ese.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
+	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
 	}
-	secretKey, err := common.GetSecret(ese.Clientset, ese.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
+	secretKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
 	if err != nil {
 		errorCh <- err
 		return

@@ -18,15 +18,14 @@ package main
 
 import (
 	"github.com/argoproj/argo-events/common"
-	sc "github.com/argoproj/argo-events/controllers/sensor"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	sc "github.com/argoproj/argo-events/sensor"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"os"
-	"sync"
 )
 
 func main() {
@@ -64,9 +63,6 @@ func main() {
 	disco := discovery.NewDiscoveryClientForConfigOrDie(restConfig)
 
 	// wait for sensor http server to shutdown
-	var wg sync.WaitGroup
-	wg.Add(1)
-	sensorExecutionCtx := sc.NewsensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, log, &wg, controllerInstanceID)
-	go sensorExecutionCtx.WatchSignalNotifications()
-	wg.Wait()
+	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, log, controllerInstanceID)
+	sensorExecutionCtx.WatchGatewayEvents()
 }

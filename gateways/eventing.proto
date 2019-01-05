@@ -2,6 +2,8 @@ syntax = "proto2";
 
 package gateways;
 
+option java_package = "com.gateway";
+
 service Eventing {
     // StartEventSource starts an event source and returns stream of events.
     rpc StartEventSource(EventSource) returns (stream Event);

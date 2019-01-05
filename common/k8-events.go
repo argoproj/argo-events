@@ -21,13 +21,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// K8EventType is the type of event generated to indicate change in state of resource
-type K8EventType string
+// K8sEventType is the type of event generated to indicate change in state of resource
+type K8sEventType string
 
-// Possible values for K8EventType
+// Possible values for K8sEventType
 var (
-	EscalationEventType          K8EventType = "Escalation"
-	ResourceStateChangeEventType K8EventType = "StateChange"
+	EscalationEventType  K8sEventType = "Escalation"
+	StateChangeEventType K8sEventType = "StateChange"
 )
 
 const (

@@ -50,7 +50,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal":                  schema_pkg_apis_sensor_v1alpha1_Signal(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":                  schema_pkg_apis_sensor_v1alpha1_Signal(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter":            schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
@@ -479,7 +479,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 					},
 					"latestEvent": {
 						SchemaProps: spec.SchemaProps{
-							Description: "LatestEvent stores the last seen event for this node",
+							Description: "Event stores the last seen event for this node",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper"),
 						},
 					},
@@ -601,7 +601,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"signal": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Signal is the name of the signal for which to retrieve this event",
+							Description: "EventDependency is the name of the signal for which to retrieve this event",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -794,12 +794,12 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 				Properties: map[string]spec.Schema{
 					"signals": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Signals is a list of the things that this sensor is dependent on. These are the inputs to this sensor.",
+							Description: "EventDependency is a list of the things that this sensor is dependent on. These are the inputs to this sensor.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency"),
 									},
 								},
 							},
@@ -836,7 +836,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Signal", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
 	}
 }
 
@@ -893,7 +893,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Signal describes a dependency",
+				Description: "EventDependency describes a dependency",
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{

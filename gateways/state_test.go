@@ -100,7 +100,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", "test", &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", "test", &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",
@@ -109,7 +109,7 @@ package gateways
 //	e, err = common.CreateK8Event(e, gc.Clientset)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayResourceState(e)
+//	err = gc.UpdateGatewayEventSourceState(e)
 //	assert.NotNil(t, err)
 //
 //	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
@@ -122,7 +122,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", v1alpha1.NodePhaseInitialized, &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseInitialized, &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",
@@ -134,7 +134,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayResourceState(e)
+//	err = gc.UpdateGatewayEventSourceState(e)
 //	assert.Nil(t, err)
 //
 //	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -154,7 +154,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", v1alpha1.NodePhaseRunning, &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseRunning, &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",
@@ -174,7 +174,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayResourceState(e)
+//	err = gc.UpdateGatewayEventSourceState(e)
 //	assert.Nil(t, err)
 //
 //	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -193,7 +193,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", v1alpha1.NodePhaseRemove, &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseRemove, &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",
@@ -213,7 +213,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayResourceState(e)
+//	err = gc.UpdateGatewayEventSourceState(e)
 //	assert.Nil(t, err)
 //	assert.Equal(t, 0, len(gc.gw.Status.Nodes))
 //
@@ -227,7 +227,7 @@ package gateways
 //	assert.Nil(t, err)
 //	assert.NotNil(t, gw)
 //	gc := newGatewayconfig(gw)
-//	e := gc.GetK8Event("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
+//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
 //		Config: "testConfig",
 //		Src:    "testSrc",
 //		ID:     "1234",
@@ -247,7 +247,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayResourceState(e)
+//	err = gc.UpdateGatewayEventSourceState(e)
 //	assert.Nil(t, err)
 //	for _, node := range gc.gw.Status.Nodes {
 //		assert.Equal(t, string(v1alpha1.NodePhaseCompleted), string(node.Phase))

@@ -39,21 +39,16 @@ type GitlabEventSourceExecutor struct {
 type GitlabConfig struct {
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
-
 	// URL of a http server which is listening for gitlab events.
 	// Refer webhook gateway for more details. https://github.com/argoproj/argo-events/blob/master/docs/tutorial.md#webhook
 	URL string `json:"url"`
-
 	// Event is a gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Event string `json:"event"`
-
 	// AccessToken is reference to k8 secret which holds the gitlab api access information
 	AccessToken *GitlabSecret `json:"accessToken"`
-
 	// EnableSSLVerification to enable ssl verification
 	EnableSSLVerification bool `json:"enableSSLVerification"`
-
 	// GitlabBaseURL is the base URL for API requests to a custom endpoint
 	GitlabBaseURL string `json:"gitlabBaseUrl"`
 }

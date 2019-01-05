@@ -19,6 +19,7 @@ package calendar
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 

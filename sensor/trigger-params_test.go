@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package sensor
 
 import (
@@ -20,6 +21,7 @@ import (
 	"testing"
 
 	"fmt"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
@@ -27,13 +29,13 @@ import (
 func Test_applyParams(t *testing.T) {
 	defaultValue := "default"
 	events := map[string]v1alpha.Event{
-		"simpleJSON": v1alpha.Event{
+		"simpleJSON": {
 			Context: v1alpha.EventContext{
 				ContentType: MediaTypeJSON,
 			},
 			Payload: []byte(`{"name":{"first":"matt","last":"magaldi"},"age":24}`),
 		},
-		"nonJSON": v1alpha.Event{
+		"nonJSON": {
 			Context: v1alpha.EventContext{
 				ContentType: MediaTypeJSON,
 			},
@@ -56,7 +58,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(""),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "missing",
 						},
@@ -72,7 +74,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(""),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "missing",
 							Value:  &defaultValue,
@@ -90,7 +92,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(""),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "missing",
 							Value:  &defaultValue,
@@ -107,7 +109,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(``),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "simpleJSON",
 							Path:   "name.last",
@@ -125,7 +127,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(`{"x":"before"}`),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "simpleJSON",
 							Path:   "name.last",
@@ -143,7 +145,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(``),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "nonJSON",
 						},
@@ -160,7 +162,7 @@ func Test_applyParams(t *testing.T) {
 			args: args{
 				jsonObj: []byte(``),
 				params: []v1alpha1.ResourceParameter{
-					v1alpha1.ResourceParameter{
+					{
 						Src: &v1alpha1.ResourceParameterSource{
 							Signal: "nonJSON",
 							Path:   "test",

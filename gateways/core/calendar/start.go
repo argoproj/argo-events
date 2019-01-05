@@ -18,11 +18,12 @@ package calendar
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	cronlib "github.com/robfig/cron"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 // Next is a function to compute the next signal time from a given time
@@ -43,7 +44,7 @@ func (ese *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventS
 
 	go ese.listenEvents(cal, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {

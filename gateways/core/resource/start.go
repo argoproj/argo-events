@@ -44,9 +44,10 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 
 	go ese.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
+// listenEvents watches resource updates and consume those events
 func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	logger := ese.Log.With().Str("event-source-name", *eventSource.Name).Logger()
 	resource, err := ese.discoverResources(res)

@@ -31,10 +31,8 @@ type KafkaEventSourceExecutor struct {
 type kafka struct {
 	// URL to kafka cluster
 	URL string `json:"url"`
-
 	// Partition name
 	Partition string `json:"partition"`
-
 	// Topic name
 	Topic string `json:"topic"`
 }

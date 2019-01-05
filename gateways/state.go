@@ -18,12 +18,15 @@ package gateways
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"time"
 )
 
 // EventSourceStatus encapsulates state of an event source
@@ -89,8 +92,8 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 	return node
 }
 
-// UpdateGatewayResourceState updates gateway resource nodes state
-func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
+// UpdateGatewayEventSourceState updates gateway resource nodes state
+func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus) {
 	defer func() {
 		err := gc.persistUpdates()
 		if err != nil {
@@ -106,6 +109,18 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 		gc.markGatewayNodePhase(status)
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
+	}
+
+	// generate a K8s event for event source state change
+	labels := map[string]string{
+		common.LabelEventType:              string(common.StateChangeEventType),
+		common.LabelGatewayEventSourceName: status.Name,
+		common.LabelGatewayName:            gc.Name,
+		common.LabelGatewayEventSourceID:   status.Id,
+	}
+	// error is not returned as this operation does not affect gateway functionality.
+	if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("event source state changed to %s", string(status.Phase)), common.StateChangeEventType, status.Phase, gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+		gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
 	}
 }
 

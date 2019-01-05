@@ -19,6 +19,7 @@ package resource
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 

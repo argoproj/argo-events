@@ -221,12 +221,12 @@ package gateways;
 //	configs, err := gatewayConfig.createInternalEventSources(configmap)
 //	assert.Nil(t, err)
 //
-//	staleConfigKeys, newConfigKeys := gatewayConfig.diffConfigurations(configs)
+//	staleConfigKeys, newConfigKeys := gatewayConfig.diffEventSources(configs)
 //	assert.Empty(t, staleConfigKeys)
 //	assert.NotNil(t, newConfigKeys)
 //
 //	gatewayConfig.registeredConfigs = configs
-//	staleConfigKeys, newConfigKeys = gatewayConfig.diffConfigurations(configs)
+//	staleConfigKeys, newConfigKeys = gatewayConfig.diffEventSources(configs)
 //	assert.Equal(t, staleConfigKeys, newConfigKeys)
 //
 //	configName := "new-test-config"
@@ -249,7 +249,7 @@ package gateways;
 //	newConfigs := map[string]*EventSourceContext{
 //		Hasher(newConfigContext.Data.Src + newConfigContext.Data.Config): newConfigContext,
 //	}
-//	staleConfigKeys, newConfigKeys = gatewayConfig.diffConfigurations(newConfigs)
+//	staleConfigKeys, newConfigKeys = gatewayConfig.diffEventSources(newConfigs)
 //	assert.NotNil(t, staleConfigKeys)
 //	assert.NotEqual(t, staleConfigKeys, newConfigKeys)
 //}
@@ -277,7 +277,7 @@ package gateways;
 //	configs, err := gc.createInternalEventSources(configmap)
 //	assert.Nil(t, err)
 //
-//	_, newConfigKeys := gc.diffConfigurations(configs)
+//	_, newConfigKeys := gc.diffEventSources(configs)
 //
 //	err = gc.startEventSources(&testConfigExecutor{}, configs, newConfigKeys)
 //	assert.Nil(t, err)
@@ -318,14 +318,14 @@ package gateways;
 //	configs, err := gc.createInternalEventSources(configmap)
 //	assert.Nil(t, err)
 //
-//	_, newConfigKeys := gc.diffConfigurations(configs)
+//	_, newConfigKeys := gc.diffEventSources(configs)
 //
 //	err = gc.startEventSources(&testConfigExecutor{}, configs, newConfigKeys)
 //	assert.Nil(t, err)
 //
 //	time.Sleep(5 * time.Second)
 //
-//	keys, _ := gc.diffConfigurations(make(map[string]*EventSourceContext))
+//	keys, _ := gc.diffEventSources(make(map[string]*EventSourceContext))
 //
 //	fmt.Println(keys)
 //

@@ -17,10 +17,11 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"net/http"
 	"time"
+
+	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
 // StorageGridEventSourceExecutor implements ConfigExecutor interface

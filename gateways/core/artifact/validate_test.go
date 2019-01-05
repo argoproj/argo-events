@@ -18,9 +18,10 @@ package artifact
 
 import (
 	"context"
+	"testing"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var (

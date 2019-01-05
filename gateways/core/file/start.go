@@ -18,9 +18,10 @@ package file
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/fsnotify/fsnotify"
-	"strings"
 )
 
 // StartEventSource starts an event source
@@ -37,7 +38,7 @@ func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 
 	go ese.listenEvents(f, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.ConsumeEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 func (ese *FileEventSourceExecutor) listenEvents(fwc *FileWatcherConfig, es *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
