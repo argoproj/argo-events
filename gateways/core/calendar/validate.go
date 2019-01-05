@@ -25,19 +25,20 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *CalendarConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return &gateways.ValidEventSource{}, gateways.ErrEventSourceParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if cal == nil {
-		return &gateways.ValidEventSource{}, gateways.ErrEmptyEventSource
+		return v, gateways.ErrEmptyEventSource
 	}
 	if cal.Schedule == "" && cal.Interval == "" {
-		return &gateways.ValidEventSource{}, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidEventSource)
+		return v, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidEventSource)
 	}
 	_, err = resolveSchedule(cal)
 	if err != nil {
-		return &gateways.ValidEventSource{}, err
+		return v, err
 	}
-	return &gateways.ValidEventSource{}, nil
+	return v, nil
 }

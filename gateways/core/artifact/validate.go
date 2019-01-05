@@ -26,14 +26,15 @@ import (
 
 // ValidateEventSource validates a s3 event source
 func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return &gateways.ValidEventSource{}, gateways.ErrEventSourceParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
 	if err = ese.validate(artifact); err != nil {
-		return &gateways.ValidEventSource{}, err
+		return v, err
 	}
-	return &gateways.ValidEventSource{}, nil
+	return v, nil
 }
 
 // validates an artifact
