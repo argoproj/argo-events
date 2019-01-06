@@ -449,8 +449,8 @@ func (m *GatewaySpec) MarshalTo(dAtA []byte) (int, error) {
 	i += copy(dAtA[i:], m.ProcessorPort)
 	dAtA[i] = 0x42
 	i++
-	i = encodeVarintGenerated(dAtA, i, uint64(len(m.DispatchMechanism)))
-	i += copy(dAtA[i:], m.DispatchMechanism)
+	i = encodeVarintGenerated(dAtA, i, uint64(len(m.DispatchProtocol)))
+	i += copy(dAtA[i:], m.DispatchProtocol)
 	return i, nil
 }
 
@@ -723,7 +723,7 @@ func (m *GatewaySpec) Size() (n int) {
 	}
 	l = len(m.ProcessorPort)
 	n += 1 + l + sovGenerated(uint64(l))
-	l = len(m.DispatchMechanism)
+	l = len(m.DispatchProtocol)
 	n += 1 + l + sovGenerated(uint64(l))
 	return n
 }
@@ -869,7 +869,7 @@ func (this *GatewaySpec) String() string {
 		`ServiceSpec:` + strings.Replace(fmt.Sprintf("%v", this.ServiceSpec), "Service", "v11.Service", 1) + `,`,
 		`Watchers:` + strings.Replace(fmt.Sprintf("%v", this.Watchers), "NotificationWatchers", "NotificationWatchers", 1) + `,`,
 		`ProcessorPort:` + fmt.Sprintf("%v", this.ProcessorPort) + `,`,
-		`DispatchMechanism:` + fmt.Sprintf("%v", this.DispatchMechanism) + `,`,
+		`DispatchProtocol:` + fmt.Sprintf("%v", this.DispatchProtocol) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -1577,7 +1577,7 @@ func (m *GatewaySpec) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 8:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DispatchMechanism", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DispatchProtocol", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1602,7 +1602,7 @@ func (m *GatewaySpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DispatchMechanism = GatewayType(dAtA[iNdEx:postIndex])
+			m.DispatchProtocol = DispatchProtocolType(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

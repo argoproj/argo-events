@@ -44,7 +44,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 	if err != nil {
 		return err
 	}
-	switch gc.gw.Spec.DispatchMechanism {
+	switch gc.gw.Spec.DispatchProtocol {
 	case v1alpha1.HTTPGateway:
 		err = gc.dispatchEventOverHttp(transformedEvent)
 		if err != nil {
@@ -52,7 +52,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 		}
 	case v1alpha1.NATSGateway:
 	default:
-		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchMechanism)
+		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchProtocol)
 	}
 	return nil
 }

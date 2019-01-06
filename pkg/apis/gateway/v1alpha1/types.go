@@ -33,14 +33,14 @@ const (
 	NodePhaseRemove    NodePhase = "Remove"    // stale node
 )
 
-// GatewayType is type of the gateway. It is used determining the internal event dispatch mechanism
-type GatewayType string
+// DispatchProtocolType is type of the event dispatch protocol. Used for dispatching events from gateway to watchers
+type DispatchProtocolType string
 
-// possible types of gateways
+// possible types of event dispatch protocol
 const (
-	HTTPGateway  GatewayType = "HTTP"
-	NATSGateway  GatewayType = "NATSGateway"
-	KafkaGateway GatewayType = "KafkaGateway"
+	HTTPGateway  DispatchProtocolType = "HTTP"
+	NATSGateway  DispatchProtocolType = "NATS"
+	KafkaGateway DispatchProtocolType = "KAFKA"
 )
 
 // Gateway is the definition of a gateway resource
@@ -68,19 +68,21 @@ type GatewayList struct {
 
 // GatewaySpec represents gateway specifications
 type GatewaySpec struct {
-	// DeploySpec is description of gateway
+	// DeploySpec is the pod specification for the gateway
+	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	DeploySpec *corev1.Pod `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
 
-	// ConfigMap is name of the configmap for gateway-processor
+	// ConfigMap is name of the configmap for gateway. This configmap contains event sources.
 	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
 
-	// Type is the type of gateway
+	// Type is the type of gateway. Used as metadata.
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 
 	// Version is used for marking event version
 	EventVersion string `json:"eventVersion" protobuf:"bytes,4,opt,name=eventVersion"`
 
 	// ServiceSpec is the specifications of the service to expose the gateway
+	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
 	ServiceSpec *corev1.Service `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
 
 	// Watchers are components which are interested listening to notifications from this gateway
@@ -92,8 +94,8 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
-	// DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	DispatchMechanism GatewayType `json:"dispatchMechanism" protobuf:"bytes,8,opt,name=dispatchMechanism"`
+	// DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
+	DispatchProtocol DispatchProtocolType `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -102,7 +104,6 @@ type GatewayStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this gateway was initiated
-	// +k8s:openapi-gen=false
 	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// Message is a human readable string indicating details about a gateway in its phase
@@ -119,9 +120,6 @@ type NodeStatus struct {
 	// ID is a unique identifier of a node within a sensor
 	// It is a hash of the node name
 	ID string `json:"id" protobuf:"bytes,1,opt,name=id"`
-
-	// TimeID is used to resolve events arriving out of order for same node
-	TimeID string `json:"timeID" protobuf:"bytes,2,opt,name=timeID"`
 
 	// Name is a unique name in the node tree used to generate the node ID
 	Name string `json:"name" protobuf:"bytes,3,opt,name=name"`

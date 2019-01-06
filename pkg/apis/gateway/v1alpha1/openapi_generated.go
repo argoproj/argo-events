@@ -180,7 +180,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"dispatchMechanism": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)",
+							Description: "DispatchProtocol is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)",
 							Type:        []string{"string"},
 							Format:      "",
 						},
