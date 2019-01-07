@@ -48,7 +48,6 @@ func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
 		c.Config.Namespace,
 		func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-
 			labelSelector := labels.NewSelector().Add(c.instanceIDReq())
 			options.LabelSelector = labelSelector.String()
 		},

@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -63,6 +64,56 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
 	resource := "configmaps"
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
+
+	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(gc.Namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Do().Get()
+	}
+	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
+		options.Watch = true
+		options.FieldSelector = fieldSelector.String()
+		req := x.Get().
+			Namespace(gc.Namespace).
+			Resource(resource).
+			VersionedParams(&options, metav1.ParameterCodec)
+		return req.Watch()
+	}
+	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
+}
+
+// WatchGatewayEventSources watches change in the gateway resource
+// This will act as replacement for old gateway-transformer-configmap. Changes to watchers, event version and event type will be reflected.
+func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, error) {
+	source := gc.newGatewayWatch(gc.Name)
+	_, controller := cache.NewInformer(
+		source,
+		&v1alpha1.Gateway{},
+		0,
+		cache.ResourceEventHandlerFuncs{
+			UpdateFunc: func(old, new interface{}) {
+				if g, ok := new.(*v1alpha1.Gateway); ok {
+					gc.Log.Info().Msg("detected gateway update. updating gateway watchers and event metadata")
+					gc.StatusCh <- EventSourceStatus{
+						Phase: v1alpha1.NodePhaseResourceUpdate,
+						Gw: g,
+					}
+				}
+			},
+		})
+
+	go controller.Run(ctx.Done())
+	return controller, nil
+}
+
+// newGatewayWatch creates a new gateway watcher
+func (gc *GatewayConfig) newGatewayWatch(name string) *cache.ListWatch {
+	x := gc.gwcs.ArgoprojV1alpha1().RESTClient()
+	resource := "gateways"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {

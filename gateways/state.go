@@ -39,6 +39,8 @@ type EventSourceStatus struct {
 	Message string
 	// Phase of the event source
 	Phase v1alpha1.NodePhase
+	// Gateway reference
+	Gw *v1alpha1.Gateway
 }
 
 // markGatewayNodePhase marks the node with a phase, returns the node
@@ -94,33 +96,60 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 
 // UpdateGatewayEventSourceState updates gateway resource nodes state
 func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus) {
-	defer func() {
+	var msg string
+
+	// create a deep copy of old gateway resource, so in the event of persist update failure, we can revert back
+	oldgw := gc.gw.DeepCopy()
+
+	// persist changes and create K8s event logging the change
+	defer func(msg *string) {
 		err := gc.persistUpdates()
 		if err != nil {
-			fmt.Println("failed to persist gateway resource updates", err)
+			fmt.Println("failed to persist gateway resource updates, reverting to old state", err)
+			gc.gw = oldgw
+			// escalate
+			labels := map[string]string{
+				common.LabelEventType:              string(common.EscalationEventType),
+				common.LabelGatewayEventSourceName: status.Name,
+				common.LabelGatewayName:            gc.Name,
+				common.LabelGatewayEventSourceID:   status.Id,
+				common.LabelOperation:              "failed to update event source state",
+			}
+			if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("failed to update event source state. err: %+v", err), common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+				gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change failure")
+			}
 		}
-	}()
+		// generate a K8s event for event source state change
+		labels := map[string]string{
+			common.LabelEventType:              string(common.StateChangeEventType),
+			common.LabelGatewayEventSourceName: status.Name,
+			common.LabelGatewayName:            gc.Name,
+			common.LabelGatewayEventSourceID:   status.Id,
+			common.LabelOperation:              "update event source state",
+		}
+		if err := common.GenerateK8sEvent(gc.Clientset, *msg, common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
+		}
+	}(&msg)
+
+	msg = fmt.Sprintf("event source state changed to %s", string(status.Phase))
 
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
 		// create a node and mark it as running
 		gc.initializeNode(status.Id, status.Name, status.Message)
+
 	case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
 		gc.markGatewayNodePhase(status)
+
+	case v1alpha1.NodePhaseResourceUpdate:
+		gc.gw.Spec.Watchers = status.Gw.Spec.Watchers
+		gc.gw.Spec.EventVersion = status.Gw.Spec.EventVersion
+		gc.gw.Spec.Type = status.Gw.Spec.Type
+		msg = "gateway watchers and event metadata updated"
+
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
-	}
-
-	// generate a K8s event for event source state change
-	labels := map[string]string{
-		common.LabelEventType:              string(common.StateChangeEventType),
-		common.LabelGatewayEventSourceName: status.Name,
-		common.LabelGatewayName:            gc.Name,
-		common.LabelGatewayEventSourceID:   status.Id,
-		common.LabelOperation:              "update event source state",
-	}
-	if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("event source state changed to %s", string(status.Phase)), common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
-		gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
 	}
 }
 

@@ -65,19 +65,21 @@ message GatewayNotificationWatcher {
 
 // GatewaySpec represents gateway specifications
 message GatewaySpec {
-  // DeploySpec is description of gateway
+  // DeploySpec is the pod specification for the gateway
+  // Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
   optional k8s.io.api.core.v1.Pod deploySpec = 1;
 
-  // ConfigMap is name of the configmap for gateway-processor
+  // ConfigMap is name of the configmap for gateway. This configmap contains event sources.
   optional string configmap = 2;
 
-  // Type is the type of gateway
+  // Type is the type of gateway. Used as metadata.
   optional string type = 3;
 
   // Version is used for marking event version
   optional string eventVersion = 4;
 
   // ServiceSpec is the specifications of the service to expose the gateway
+  // Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
   optional k8s.io.api.core.v1.Service serviceSpec = 5;
 
   // Watchers are components which are interested listening to notifications from this gateway
@@ -89,8 +91,8 @@ message GatewaySpec {
   // Port on which the gateway event source processor is running on.
   optional string processorPort = 7;
 
-  // DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)
-  optional string dispatchMechanism = 8;
+  // DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
+  optional string dispatchProtocol = 8;
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -99,7 +101,6 @@ message GatewayStatus {
   optional string phase = 1;
 
   // StartedAt is the time at which this gateway was initiated
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
   // Message is a human readable string indicating details about a gateway in its phase
@@ -116,9 +117,6 @@ message NodeStatus {
   // ID is a unique identifier of a node within a sensor
   // It is a hash of the node name
   optional string id = 1;
-
-  // TimeID is used to resolve events arriving out of order for same node
-  optional string timeID = 2;
 
   // Name is a unique name in the node tree used to generate the node ID
   optional string name = 3;

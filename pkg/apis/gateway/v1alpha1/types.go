@@ -31,6 +31,7 @@ const (
 	NodePhaseNew       NodePhase = ""          // the node is new
 	NodePhaseCompleted NodePhase = "Completed" // node has completed running
 	NodePhaseRemove    NodePhase = "Remove"    // stale node
+	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
 )
 
 // DispatchProtocolType is type of the event dispatch protocol. Used for dispatching events from gateway to watchers

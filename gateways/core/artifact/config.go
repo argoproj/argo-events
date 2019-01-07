@@ -35,6 +35,7 @@ type S3EventSourceExecutor struct {
 
 // S3Artifact contains information about an artifact in S3
 // +k8s:openapi-gen=true
+//proteus:generate
 type S3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
 	S3EventConfig *S3EventConfig `json:"s3EventConfig"`

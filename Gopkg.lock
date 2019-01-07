@@ -345,8 +345,7 @@
   packages = [
     ".",
     "internal/cbor",
-    "internal/json",
-    "log"
+    "internal/json"
   ]
   revision = "8747b7b3a51b5d08ee7ac50eaf4869edaf9f714a"
   version = "v1.11.0"
@@ -801,11 +800,9 @@
   name = "k8s.io/kube-openapi"
   packages = [
     "cmd/openapi-gen/args",
-    "pkg/builder",
     "pkg/common",
     "pkg/generators",
     "pkg/generators/rules",
-    "pkg/util",
     "pkg/util/sets"
   ]
   revision = "0317810137be915b9cf888946c6e115c1bfac693"
@@ -813,6 +810,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9b83db63248173cd6add476ffe1a8d50323fd5a68860eec48a091c40a2ea5cb3"
+  inputs-digest = "29ff5311774aaacc15b63fe4792425ffec35454e8558e3f2378ac36289e59a57"
   solver-name = "gps-cdcl"
   solver-version = 1
