@@ -25,6 +25,13 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type NotificationType string
+
+const (
+	EventNotification          NotificationType = "Event"
+	ResourceUpdateNotification NotificationType = "ResourceUpdate"
+)
+
 // NodeType is the type of a node
 type NodeType string
 

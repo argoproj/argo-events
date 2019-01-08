@@ -59,12 +59,15 @@ func (goc *gwOperationCtx) operate() error {
 	defer goc.persistUpdates()
 	goc.log.Info().Msg("operating on the gateway")
 
-	// performs a basic validation on gateway resource.
+	// perform one-time gateway validation
+	// non nil err indicates failed validation
+	// we do not want to requeue a gateway in this case
+	// since validation will fail every time
 	err := Validate(goc.gw)
 	if err != nil {
 		goc.log.Error().Err(err).Msg("gateway validation failed")
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
-		return err
+		return nil
 	}
 
 	// check the state of a gateway and take actions accordingly

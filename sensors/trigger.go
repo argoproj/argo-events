@@ -42,6 +42,9 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		for _, trigger := range sec.sensor.Spec.Triggers {
 			if err := sec.executeTrigger(trigger); err != nil {
 				sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
+
+				sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger. err: %+v", err))
+
 				// escalate
 				labels[common.LabelEventType] = string(common.EscalationEventType)
 				if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger. err: %+v", err), common.EscalationEventType,
@@ -50,7 +53,10 @@ func (sec *sensorExecutionCtx) processTriggers() {
 				}
 				continue
 			}
+
 			// mark trigger as complete.
+			sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
+
 			labels[common.LabelEventType] = string(common.OperationSuccessEventType)
 			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Name), common.OperationSuccessEventType,
 				"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
@@ -68,9 +74,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 
 		// Mark all signal nodes as active
 		for _, dep := range sec.sensor.Spec.EventDependencies {
-			node := sn.GetNodeByName(sec.sensor, dep.Name)
-			node.Phase = v1alpha1.NodePhaseActive
-			sec.sensor.Status.Nodes[node.ID] = *node
+			sn.MarkNodePhase(sec.sensor, dep.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-initialized")
 		}
 		return
 	}

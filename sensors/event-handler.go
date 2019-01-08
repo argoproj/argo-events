@@ -20,114 +20,125 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"io/ioutil"
 	"net/http"
-
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"github.com/rs/zerolog"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 )
 
-// sensorExecutionCtx contains execution context for sensor
-type sensorExecutionCtx struct {
-	// sensorClient is the client for sensor
-	sensorClient clientset.Interface
-	// kubeClient is the kubernetes client
-	kubeClient kubernetes.Interface
-	// ClientPool manages a pool of dynamic clients.
-	clientPool dynamic.ClientPool
-	// DiscoveryClient implements the functions that discover server-supported API groups, versions and resources.
-	discoveryClient discovery.DiscoveryInterface
-	// sensor object
-	sensor *v1alpha1.Sensor
-	// http server which exposes the sensor to gateway/s
-	server *http.Server
-	// logger for the sensor
-	log zerolog.Logger
-	// queue is internal queue to manage incoming events
-	queue chan *eventWrapper
-	// controllerInstanceID is the instance ID of sensor controller processing this sensor
-	controllerInstanceID string
-}
-
-// eventWrapper is a wrapper around event received from gateway and the event dependency
-type eventWrapper struct {
-	event           *ss_v1alpha1.Event
-	eventDependency *v1alpha1.EventDependency
-	writer          http.ResponseWriter
-}
-
-// NewSensorExecutionCtx returns a new sensor execution context.
-func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface,
-	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
-	sensor *v1alpha1.Sensor, controllerInstanceID string) *sensorExecutionCtx {
-	return &sensorExecutionCtx{
-		sensorClient:         sensorClient,
-		kubeClient:           kubeClient,
-		clientPool:           clientPool,
-		discoveryClient:      discoveryClient,
-		sensor:               sensor,
-		log:                  common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", sensor.Name).Logger(),
-		queue:                make(chan *eventWrapper),
-		controllerInstanceID: controllerInstanceID,
+// simple check to make sure two event dependencies list are equal
+func EqualEventDependencies(a, b []v1alpha1.EventDependency) bool {
+	if len(a) != len(b) {
+		return false
 	}
-}
-
-// processEvent processes event received by sensor, validates it, updates the state of the node representing the event dependency
-func (sec *sensorExecutionCtx) processEvent(ew *eventWrapper) {
-	sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("event dependency")
-
-	// apply filters if any.
-	ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
-	if err != nil {
-		sec.log.Error().Err(err).Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
-		// escalate error
-		labels := map[string]string{
-			common.LabelEventType:  string(common.EscalationEventType),
-			common.LabelSignalName: ew.event.Context.Source.Host,
-			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "filter_event",
+	for i, v := range a {
+		if v != b[i] {
+			return false
 		}
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to apply filter on event. err: %+v", err), common.OperationFailureEventType,
-			"filtering", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log filtering error")
-		}
-		common.SendErrorResponse(ew.writer)
-		return
 	}
-	if !ok {
-		sec.log.Error().Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
-		common.SendErrorResponse(ew.writer)
-		return
-	}
-
-	// send success response back to gateway as it is a valid notification
-	common.SendSuccessResponse(ew.writer)
-
-	// mark this eventDependency/event as seen. this event will be set in sensor node.
-	node := sn.GetNodeByName(sec.sensor, ew.event.Context.Source.Host)
-	node.Event = ew.event
-	node.Phase = v1alpha1.NodePhaseComplete
-	sec.sensor.Status.Nodes[node.ID] = *node
-	sec.processTriggers()
-	return
+	return true
 }
 
-// WatchNotifications watches and handles events received from the gateway.
-func (sec *sensorExecutionCtx) WatchGatewayEvents() {
-	// start processing the event queue
+// simple check to make sure two triggers list are equal
+func EqualTriggers(a, b []v1alpha1.Trigger) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
+func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification) {
+	defer sn.GeneratePersistUpdateEvent(sec.kubeClient, sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
+
+	switch ew.notificationType {
+	case v1alpha1.EventNotification:
+		sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("received event notification")
+
+		// apply filters if any.
+		ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
+		if err != nil {
+			sec.log.Error().Err(err).Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
+			// escalate error
+			labels := map[string]string{
+				common.LabelEventType:  string(common.EscalationEventType),
+				common.LabelSignalName: ew.event.Context.Source.Host,
+				common.LabelSensorName: sec.sensor.Name,
+				common.LabelOperation:  "filter_event",
+			}
+			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("apply filter failed"), common.OperationFailureEventType,"filtering event", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to log filtering error")
+			}
+
+			// change node state to error
+			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
+
+			common.SendErrorResponse(ew.writer)
+			return
+		}
+
+		// event is not valid
+		if !ok {
+			sec.log.Error().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("event did not pass filters")
+
+			// change node state to error
+			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, "event did not pass filters")
+
+			common.SendErrorResponse(ew.writer)
+			return
+		}
+
+		// send success response back to gateway as it is a valid notification
+		common.SendSuccessResponse(ew.writer)
+		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, &sec.log, "event is received")
+
+		// check if all event dependencies are complete and kick-off triggers
+		sec.processTriggers()
+
+	case v1alpha1.ResourceUpdateNotification:
+		sec.log.Info().Msg("sensor resource update")
+		// update event dependencies
+		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) {
+			sec.sensor.Spec.EventDependencies = ew.sensor.Spec.EventDependencies
+
+			// initialize new event dependencies
+			for _, ed := range sec.sensor.Spec.EventDependencies {
+				if node := sn.GetNodeByName(sec.sensor, ed.Name); node == nil {
+					sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &sec.log)
+				}
+			}
+		}
+
+		// update triggers
+		if !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers) {
+			sec.sensor.Spec.Triggers = ew.sensor.Spec.Triggers
+
+			// initialize new triggers
+			for _, t := range sec.sensor.Spec.Triggers {
+				if node := sn.GetNodeByName(sec.sensor, t.Name); node == nil {
+					sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew, &sec.log)
+				}
+			}
+		}
+	}
+}
+
+// WatchEventsFromGateways watches and handles events received from the gateway.
+func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
+	// start processing the update notification queue
 	go func() {
 		for {
 			e := <-sec.queue
-			sec.processEvent(e)
+			sec.processUpdateNotification(e)
 		}
 	}()
 
@@ -155,7 +166,7 @@ func (sec *sensorExecutionCtx) WatchGatewayEvents() {
 			common.LabelSensorName: sec.sensor.Name,
 			common.LabelOperation:  "server_shutdown",
 		}
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped running. err: %+v", err), common.EscalationEventType,
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped"), common.EscalationEventType,
 			"server shutdown", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 			sec.log.Error().Err(err).Msg("failed to create K8s event to log server shutdown error")
 		}
@@ -176,7 +187,7 @@ func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Reque
 	// validate whether the event is from gateway that this sensor is watching
 	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
 		// process the event
-		sec.queue <- &eventWrapper{
+		sec.queue <- &updateNotification{
 			event:           event,
 			writer:          w,
 			eventDependency: eventDependency,
@@ -188,7 +199,7 @@ func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Reque
 	common.SendErrorResponse(w)
 }
 
-// validate whether the event is indeed from gateway that this sensor is watching
+// validateEvent validates whether the event is indeed from gateway that this sensor is watching
 func (sec *sensorExecutionCtx) validateEvent(events *ss_v1alpha1.Event) (*ss_v1alpha1.EventDependency, bool) {
 	for _, event := range sec.sensor.Spec.EventDependencies {
 		if event.Name == events.Context.Source.Host {

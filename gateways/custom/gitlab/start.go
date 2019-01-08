@@ -66,8 +66,8 @@ func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource 
 	}
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:                   &g.URL,
-		Token:                 &c.token,
+		URL:   &g.URL,
+		Token: &c.token,
 		EnableSSLVerification: &g.EnableSSLVerification,
 	}
 

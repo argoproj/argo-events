@@ -127,11 +127,11 @@ package sensors
 //	assert.Nil(t, err)
 //	assert.Equal(t, v1alpha1.NodePhaseError, se.sensor.Status.Phase)
 //
-//	eventWrapper := &v1alpha1.EventWrapper{
+//	updateNotification := &v1alpha1.EventWrapper{
 //		Seen:  true,
 //		Event: *event,
 //	}
-//	eventWrapperBytes, err := yaml.Marshal(eventWrapper)
+//	eventWrapperBytes, err := yaml.Marshal(updateNotification)
 //	assert.Nil(t, err)
 //	assert.NotNil(t, eventWrapperBytes)
 //

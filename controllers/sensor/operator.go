@@ -22,15 +22,12 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	client "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
 	"github.com/rs/zerolog"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // the context of an operation on a sensor.
@@ -56,8 +53,8 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	}
 }
 
+// operate on sensor resource
 func (soc *sOperationCtx) operate() error {
-	defer soc.persistUpdates()
 	defer func() {
 		if r := recover(); r != nil {
 			if rerr, ok := r.(error); ok {
@@ -83,12 +80,12 @@ func (soc *sOperationCtx) operate() error {
 
 		// Initialize all signal nodes
 		for _, signal := range soc.s.Spec.EventDependencies {
-			soc.initializeNode(signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew)
+			InitializeNode(soc.s, signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, &soc.log)
 		}
 
 		// Initialize all trigger nodes
 		for _, trigger := range soc.s.Spec.Triggers {
-			soc.initializeNode(trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew)
+			InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew, &soc.log)
 		}
 
 		// add default env variables
@@ -180,113 +177,26 @@ func (soc *sOperationCtx) operate() error {
 
 		// Mark all signal nodes as active
 		for _, signal := range soc.s.Spec.EventDependencies {
-			soc.markNodePhase(signal.Name, v1alpha1.NodePhaseActive, "node is active")
+			MarkNodePhase(soc.s, signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
 		}
 
 		// if we get here - we know the signals are running
 		soc.log.Info().Msg("marking sensor as active")
-		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for signal events")
+		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for events")
 
 	case v1alpha1.NodePhaseActive:
-		if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
-			if soc.s.AreAllNodesSuccess(v1alpha1.NodeTypeTrigger) {
-				soc.markSensorPhase(v1alpha1.NodePhaseComplete, true)
-			}
-		}
+		soc.log.Info().Msg("sensor is already running")
 
 	case v1alpha1.NodePhaseError:
 		soc.log.Info().Msg("sensor is in error state. Check escalated K8 event for the error")
 
-	case v1alpha1.NodePhaseComplete:
-		soc.log.Info().Msg("sensor is in complete state")
-		soc.s.Status.CompletionCount = soc.s.Status.CompletionCount + 1
-		soc.log.Info().Msg("re-run sensor")
-		soc.reRunSensor()
 	}
 	return nil
 }
 
-func (soc *sOperationCtx) reRunSensor() {
-	soc.log.Info().Msg("resetting nodes and re-running sensor")
-	soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	soc.markSensorPhase(v1alpha1.NodePhaseNew, false)
-	soc.updated = true
-}
-
-// persist the updates to the Sensor resource
-func (soc *sOperationCtx) persistUpdates() {
-	var err error
-	if !soc.updated {
-		return
-	}
-	sensorClient := soc.controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.ObjectMeta.Namespace)
-	soc.s, err = sensorClient.Update(soc.s)
-	if err != nil {
-		soc.log.Warn().Err(err).Msg("error updating sensor")
-		if errors.IsConflict(err) {
-			return
-		}
-		soc.log.Info().Msg("re-applying updates on latest version and retrying update")
-		err = soc.reapplyUpdate(sensorClient)
-		if err != nil {
-			soc.log.Error().Err(err).Msg("failed to re-apply update")
-			return
-		}
-	}
-	soc.log.Info().Str("phase", string(soc.s.Status.Phase)).Msg("sensor state updated successfully")
-
-	time.Sleep(1 * time.Second)
-}
-
-// reapplyUpdate by fetching a new version of the sensor and updating the status
-func (soc *sOperationCtx) reapplyUpdate(sensorClient client.SensorInterface) error {
-	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		s, err := sensorClient.Get(soc.s.Name, metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-		s.Status = soc.s.Status
-		soc.s, err = sensorClient.Update(s)
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
-}
-
-// create a new node
-func (soc *sOperationCtx) initializeNode(nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, messages ...string) *v1alpha1.NodeStatus {
-	if soc.s.Status.Nodes == nil {
-		soc.s.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-	}
-	nodeID := soc.s.NodeID(nodeName)
-	oldNode, ok := soc.s.Status.Nodes[nodeID]
-	if ok {
-		soc.log.Info().Str("node-name", nodeName).Msg("node already initialized")
-		return &oldNode
-	}
-	node := v1alpha1.NodeStatus{
-		ID:          nodeID,
-		Name:        nodeName,
-		DisplayName: nodeName,
-		Type:        nodeType,
-		Phase:       phase,
-		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
-	}
-	if len(messages) > 0 {
-		node.Message = messages[0]
-	}
-	soc.s.Status.Nodes[nodeID] = node
-	soc.log.Info().Str("node-type", string(node.Type)).Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is initialized")
-	soc.updated = true
-	return &node
-}
-
 // mark the overall sensor phase
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
+	defer GeneratePersistUpdateEvent(soc.controller.kubeClientset, soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
 	justCompleted := soc.s.Status.Phase != phase
 	if justCompleted {
 		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg("sensor phase updated")
@@ -325,26 +235,4 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			soc.updated = true
 		}
 	}
-}
-
-// markNodePhase marks the node with a phase, returns the node
-func (soc *sOperationCtx) markNodePhase(nodeName string, phase v1alpha1.NodePhase, message ...string) *v1alpha1.NodeStatus {
-	node := GetNodeByName(soc.s, nodeName)
-	if node == nil {
-		soc.log.Panic().Str("node-name", nodeName).Msg("node is uninitialized")
-	}
-	if node.Phase != phase {
-		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase))
-		node.Phase = phase
-	}
-	if len(message) > 0 && node.Message != message[0] {
-		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase)).Str("message", message[0])
-		node.Message = message[0]
-	}
-	if node.IsComplete() && node.CompletedAt.IsZero() {
-		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
-		soc.log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Msg("completed")
-	}
-	soc.s.Status.Nodes[node.ID] = *node
-	return node
 }

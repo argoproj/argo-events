@@ -24,6 +24,22 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// K8sEventType is the type of event generated to indicate change in state of resource
+type K8sEventType string
+
+// Possible values for K8sEventType
+var (
+	EscalationEventType       K8sEventType = "Escalation"
+	StateChangeEventType      K8sEventType = "StateChange"
+	OperationFailureEventType K8sEventType = "Operation Failed"
+	OperationSuccessEventType K8sEventType = "Operation Successful"
+)
+
+const (
+	// LabelEventType is label for k8 event type
+	LabelEventType = "event-type"
+)
+
 // GenerateK8sEvent generates a kubernetes event
 func GenerateK8sEvent(clientset kubernetes.Interface, reason string, eventType K8sEventType, action string, name, namespace, instanceId, kind string, labels map[string]string) error {
 	event := &corev1.Event{
