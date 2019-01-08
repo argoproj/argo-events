@@ -8,7 +8,7 @@ metadata:
 spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
-  dispatchMechanism: "HTTP"
+  dispatchProtocol: "HTTP"
   eventVersion: "1.0"
   imageVersion: "v0.6.1"
   deploySpec:
@@ -18,10 +18,14 @@ spec:
         dispatch-mechanism: http
     spec:
       containers:
-        - name: "webhook-events"
+        - name: "webhook-events-server"
           image: "metalgearsolid/webhook-gateway:v0.6.1"
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
+        - name: "webhook-events-client"
+          image: "metalgearsolid/gateway-client:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
       serviceAccountName: "argo-events-sa"
   processorPort: "9330"
   serviceSpec:

@@ -113,7 +113,7 @@ func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus
 				common.LabelGatewayEventSourceName: status.Name,
 				common.LabelGatewayName:            gc.Name,
 				common.LabelGatewayEventSourceID:   status.Id,
-				common.LabelOperation:              "failed to update event source state",
+				common.LabelOperation:              "failed_to_update_event_source_state",
 			}
 			if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("failed to update event source state. err: %+v", err), common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
 				gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change failure")
@@ -125,7 +125,7 @@ func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus
 			common.LabelGatewayEventSourceName: status.Name,
 			common.LabelGatewayName:            gc.Name,
 			common.LabelGatewayEventSourceID:   status.Id,
-			common.LabelOperation:              "update event source state",
+			common.LabelOperation:              "update_event_source_state",
 		}
 		if err := common.GenerateK8sEvent(gc.Clientset, *msg, common.StateChangeEventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
 			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")

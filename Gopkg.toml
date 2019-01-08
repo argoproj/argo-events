@@ -12,6 +12,9 @@ required = [
   "github.com/gogo/protobuf/protoc-gen-gogofast",
 ]
 
+[[constraint]]
+  name = "github.com/golang/protobuf"
+  branch = "master"
 
 [[constraint]]
   name = "k8s.io/code-generator"

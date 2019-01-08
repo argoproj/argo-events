@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	sc "github.com/argoproj/argo-events/sensor"
+	sc "github.com/argoproj/argo-events/sensors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"

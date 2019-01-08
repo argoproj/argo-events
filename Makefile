@@ -43,19 +43,18 @@ all-controller-images: sensor-controller-image gateway-controller-image
 
 all-core-gateway-images: webhook-image calendar-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
-.PHONY: all clean test generate-spec-docs
+.PHONY: all clean test
 
 # Sensor
 sensor:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./controllers/sensor/cmd/
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/sensor ./sensors/cmd/client.go
 
 sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image: sensor-linux
-	 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./controllers/sensor/cmd/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./sensors/cmd/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
-
 
 # Sensor controller
 sensor-controller:
@@ -67,7 +66,6 @@ sensor-controller-linux:
 sensor-controller-image: sensor-controller-linux
 	 docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
-
 
 # Gateway controller
 gateway-controller:

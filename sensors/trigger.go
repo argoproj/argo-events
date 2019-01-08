@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensor
+package sensors
 
 import (
 	"fmt"
@@ -36,7 +36,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
 		labels := map[string]string{
 			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "process triggers",
+			common.LabelOperation:  "process_triggers",
 		}
 
 		for _, trigger := range sec.sensor.Spec.Triggers {

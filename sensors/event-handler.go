@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensor
+package sensors
 
 import (
 	"context"
@@ -94,7 +94,7 @@ func (sec *sensorExecutionCtx) processEvent(ew *eventWrapper) {
 			common.LabelEventType:  string(common.EscalationEventType),
 			common.LabelSignalName: ew.event.Context.Source.Host,
 			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "filter event",
+			common.LabelOperation:  "filter_event",
 		}
 		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to apply filter on event. err: %+v", err), common.OperationFailureEventType,
 			"filtering", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
@@ -153,7 +153,7 @@ func (sec *sensorExecutionCtx) WatchGatewayEvents() {
 		labels := map[string]string{
 			common.LabelEventType:  string(common.EscalationEventType),
 			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "server shutdown",
+			common.LabelOperation:  "server_shutdown",
 		}
 		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped running. err: %+v", err), common.EscalationEventType,
 			"server shutdown", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {

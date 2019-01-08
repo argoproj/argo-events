@@ -111,7 +111,7 @@ func (c *SensorController) processNextItem() bool {
 		labels := map[string]string{
 			common.LabelSensorName: sensor.Name,
 			common.LabelEventType:  string(common.EscalationEventType),
-			common.LabelOperation:  "controller operation",
+			common.LabelOperation:  "controller_operation",
 		}
 		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("failed to operate on sensor %s, err :%+v", sensor.Name, err), common.EscalationEventType,
 			"sensor operation failed", sensor.Name, sensor.Namespace, c.Config.InstanceID, sensor.Kind, labels); err != nil {

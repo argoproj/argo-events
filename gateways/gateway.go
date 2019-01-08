@@ -37,6 +37,8 @@ func StartGateway(es EventingServer) {
 	srv := grpc.NewServer()
 	RegisterEventingServer(srv, es)
 
+	fmt.Println("starting gateway server")
+
 	if err := srv.Serve(lis); err != nil {
 		panic(err)
 	}

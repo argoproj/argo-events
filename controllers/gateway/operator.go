@@ -46,7 +46,6 @@ type gwOperationCtx struct {
 
 // newGatewayOperationCtx creates and initializes a new gOperationCtx object
 func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController) *gwOperationCtx {
-	fmt.Println("namespace is ", gw.Namespace)
 	return &gwOperationCtx{
 		gw:         gw.DeepCopy(),
 		updated:    false,
@@ -88,6 +87,7 @@ func (goc *gwOperationCtx) operate() error {
 				},
 			},
 		}
+
 		gatewayPod.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
 			*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 		}
