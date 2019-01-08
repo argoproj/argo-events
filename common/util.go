@@ -40,11 +40,6 @@ func DefaultDeploymentName(deploymentName string) string {
 	return fmt.Sprintf("%s-deployement", deploymentName)
 }
 
-// DefaultGatewayPodName returns a formulated name for a gateway deployment
-func DefaultGatewayPodName(deploymentName string) string {
-	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
-}
-
 // DefaultServiceName returns a formulated name for a service
 func DefaultServiceName(serviceName string) string {
 	return fmt.Sprintf("%s-svc", serviceName)

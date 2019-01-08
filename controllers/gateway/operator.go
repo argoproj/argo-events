@@ -74,18 +74,6 @@ func (goc *gwOperationCtx) operate() error {
 		// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
 		// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
 		//                          compliant events and dispatch them to watchers.
-		//gatewayPod := &appsv1.Deployment{
-		//	ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
-		//	Spec: appsv1.DeploymentSpec{
-		//		Selector: &metav1.LabelSelector{
-		//			MatchLabels: goc.gw.Spec.DeploySpec.Labels,
-		//		},
-		//		Template: corev1.PodTemplateSpec{
-		//			Spec:       goc.gw.Spec.DeploySpec.Spec,
-		//			ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
-		//		},
-		//	},
-		//}
 
 		gatewayPod := goc.gw.Spec.DeploySpec
 
@@ -93,19 +81,17 @@ func (goc *gwOperationCtx) operate() error {
 			*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 		}
 		gatewayPod.Spec.Containers = *goc.getContainersForGatewayPod()
-		gatewayPod.Name = common.DefaultGatewayPodName(goc.gw.Name)
 
-		// we can now create the gateway deployment.
+		// we can now create the gateway pod.
 		// depending on user configuration gateway will be exposed outside the cluster or intra-cluster.
-		//_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Create(gatewayPod)
 		_, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(gatewayPod)
 		if err != nil {
-			goc.log.Error().Err(err).Msg("failed gateway deployment")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))
+			goc.log.Error().Err(err).Msg("failed gateway pod")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway pod. err: %s", err))
 			return err
 		}
 
-		goc.log.Info().Str("deployment-name", common.DefaultGatewayPodName(goc.gw.Name)).Msg("gateway deployment created")
+		goc.log.Info().Str("pod-name", goc.gw.Name).Msg("gateway pod created")
 
 		// expose gateway if service is configured
 		if goc.gw.Spec.ServiceSpec != nil {
