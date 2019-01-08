@@ -49,7 +49,8 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 
 // listenEvents watches resource updates and consume those events
 func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	logger := ese.Log.With().Str("event-source-name", *eventSource.Name).Logger()
+	defer gateways.Recover(eventSource.Name)
+
 	resource, err := ese.discoverResources(res)
 	if err != nil {
 		errorCh <- err
@@ -66,11 +67,12 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 		return
 	}
 
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to watch to resource notifications")
 	for {
 		select {
 		case item := <-w.ResultChan():
 			if item.Object == nil {
-				logger.Warn().Msg("object to watch is nil")
+				ese.Log.Warn().Str("event-source-name", *eventSource.Name).Msg("object to watch is nil")
 				// renew watch due to it being ended with "too old resource version"
 				w, err = resource.Watch(options)
 				if err != nil {
@@ -90,7 +92,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 				errorCh <- err
 				return
 			}
-			if ese.passFilters(itemObj, res.Filter) {
+			if ese.passFilters(*eventSource.Name, itemObj, res.Filter) {
 				dataCh <- b
 			}
 		case <-doneCh:
@@ -144,30 +146,30 @@ func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) strin
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func (ese *ResourceEventSourceExecutor) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// no filters are applied.
 	if filter == nil {
 		return true
 	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		ese.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
+		ese.Log.Info().Str("event-source-name", esName).Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		ese.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
+		ese.Log.Info().Str("event-source-name", esName).Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		ese.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
+		ese.Log.Info().Str("event-source-name", esName).Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		ese.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
+		ese.Log.Info().Str("event-source-name", esName).Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
 		return false
 	}
 	return true

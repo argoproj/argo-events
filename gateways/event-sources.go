@@ -150,6 +150,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				return
 			}
 
+			gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("event source is valid")
+
 			// mark event source as running
 			gc.StatusCh <- EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseRunning,

@@ -59,57 +59,57 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 	return nil
 }
 
-// perform a check to see that each signal defines one of and at most one of:
+// perform a check to see that each event dependency defines one of and at most one of:
 // (stream, artifact, calendar, resource, webhook)
-func validateSignals(signals []v1alpha1.EventDependency) error {
-	if len(signals) < 1 {
-		return fmt.Errorf("no signals found")
+func validateSignals(eventDependencies []v1alpha1.EventDependency) error {
+	if len(eventDependencies) < 1 {
+		return fmt.Errorf("no event dependencies found")
 	}
-	for _, signal := range signals {
-		if signal.Name == "" {
-			return fmt.Errorf("signal must define a name")
+	for _, ed := range eventDependencies {
+		if ed.Name == "" {
+			return fmt.Errorf("event dependency must define a name")
 		}
-		if err := validateSignalFilter(signal.Filters); err != nil {
+		if err := validateEventFilter(ed.Filters); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateSignalFilter(filter v1alpha1.SignalFilter) error {
+func validateEventFilter(filter v1alpha1.EventDependencyFilter) error {
 	if filter.Time != nil {
-		if err := validateSignalTimeFilter(filter.Time); err != nil {
+		if err := validateEventTimeFilter(filter.Time); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func validateSignalTimeFilter(tFilter *v1alpha1.TimeFilter) error {
+func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	currentT := time.Now().UTC()
 	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
 	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
 	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Start)
+		startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Start))
 		if err != nil {
 			return err
 		}
-		stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Stop)
+		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Stop))
 		if err != nil {
 			return err
 		}
 		if stopTime.Before(startTime) || startTime.Equal(stopTime) {
-			return fmt.Errorf("invalid signal time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
+			return fmt.Errorf("invalid event time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
 		}
 	}
 	if tFilter.Stop != "" {
-		stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+tFilter.Stop)
+		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTStr, tFilter.Stop))
 		if err != nil {
 			return err
 		}
 		stopTime = stopTime.UTC()
 		if stopTime.Before(currentT.UTC()) {
-			return fmt.Errorf("invalid signal time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
+			return fmt.Errorf("invalid event time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
 		}
 	}
 	return nil

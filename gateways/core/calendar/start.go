@@ -70,6 +70,8 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 
 // listenEvents fires an event when schedule is passed.
 func (ese *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	schedule, err := resolveSchedule(cal)
 	if err != nil {
 		errorCh <- err

@@ -33,10 +33,10 @@ var (
 	activeServers = make(map[string]*activeServer)
 
 	// routeActivateChan handles assigning new route to server.
-	routeActivateChan = make(chan routeConfig)
+	routeActivateChan = make(chan *routeConfig)
 
 	// routeDeactivateChan handles deactivating existing route
-	routeDeactivateChan = make(chan routeConfig)
+	routeDeactivateChan = make(chan *routeConfig)
 )
 
 // HTTP Muxer
@@ -66,10 +66,7 @@ func init() {
 			select {
 			case config := <-routeActivateChan:
 				// start server if it has not been started on this port
-				_, ok := activeServers[config.wConfig.Port]
-				if !ok {
-					config.startHttpServer()
-				}
+				config.startHttpServer()
 				config.startCh <- struct{}{}
 
 			case config := <-routeDeactivateChan:
@@ -138,13 +135,15 @@ func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, reques
 
 // StartEventSource starts a event source
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
 	h, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
 
-	rc := routeConfig{
+	rc := &routeConfig{
 		wConfig:             h,
 		eventSource:         eventSource,
 		eventSourceExecutor: ese,
@@ -157,6 +156,12 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	routeActivateChan <- rc
 
 	<-rc.startCh
+
+	if rc.wConfig.mux == nil {
+		mutex.Lock()
+		rc.wConfig.mux = activeServers[rc.wConfig.Port].srv
+		mutex.Unlock()
+	}
 
 	rc.wConfig.mux.HandleFunc(rc.wConfig.Endpoint, rc.routeActiveHandler)
 

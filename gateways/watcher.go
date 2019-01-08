@@ -100,7 +100,7 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 					gc.Log.Info().Msg("detected gateway update. updating gateway watchers and event metadata")
 					gc.StatusCh <- EventSourceStatus{
 						Phase: v1alpha1.NodePhaseResourceUpdate,
-						Gw: g,
+						Gw:    g,
 					}
 				}
 			},

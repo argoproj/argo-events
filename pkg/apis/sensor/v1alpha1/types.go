@@ -94,7 +94,7 @@ type EventDependency struct {
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters SignalFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
+	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
@@ -105,8 +105,8 @@ type GroupVersionKind struct {
 	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
 }
 
-// SignalFilter defines filters and constraints for a signal.
-type SignalFilter struct {
+// EventDependencyFilter defines filters and constraints for a signal.
+type EventDependencyFilter struct {
 	// Name is the name of signal filter
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 

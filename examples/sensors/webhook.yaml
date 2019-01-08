@@ -11,7 +11,7 @@ spec:
         image: "metalgearsolid/sensor:v0.6.1"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
-  signals:
+  dependencies:
     - name: webhook-gateway/foo
   triggers:
     - name: webhook-workflow-trigger

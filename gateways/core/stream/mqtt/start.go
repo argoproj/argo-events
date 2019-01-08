@@ -39,6 +39,8 @@ func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 }
 
 func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
 		dataCh <- msg.Payload()
 	}
@@ -48,6 +50,8 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 		errorCh <- token.Error()
 		return
 	}
+
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to topic")
 	if token := client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
 		errorCh <- token.Error()
 		return

@@ -51,6 +51,8 @@ func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 }
 
 func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	consumer, err := sarama.NewConsumer([]string{k.URL}, nil)
 	if err != nil {
 		errorCh <- err
@@ -80,6 +82,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		return
 	}
 
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():

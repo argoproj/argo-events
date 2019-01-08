@@ -19,17 +19,19 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/ghodss/yaml"
+
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 // various supported media types
@@ -41,7 +43,7 @@ const (
 )
 
 // apply the eventDependency filters to an event
-func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alpha.Event) (bool, error) {
+func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.EventDependencyFilter, event *v1alpha.Event) (bool, error) {
 	dataRes, err := sec.filterData(f.Data, event)
 	if err != nil {
 		return false, err
@@ -60,44 +62,48 @@ func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.SignalFilter, event *v1alp
 // returns true if 1 and 2 are true and false otherwise
 func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.MicroTime) (bool, error) {
 	if timeFilter != nil {
-		sec.log.Info().Str("event-time", eventTime.String()).Msg("event time")
-		currentT := time.Now().UTC()
-		currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
-		currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
-		sec.log.Info().Str("date", currentTStr).Msg("current date")
+		sec.log.Info().Str("time", eventTime.String()).Msg("event time")
+		utc := time.Now().UTC()
+		currentTime := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC).Format(common.StandardYYYYMMDDFormat)
+		sec.log.Info().Str("time", currentTime).Msg("current time")
+
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
-			sec.log.Info().Str("start time format", currentTStr+" "+timeFilter.Start).Msg("start time format")
-			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)
+			startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Start))
 			if err != nil {
 				return false, err
 			}
-			sec.log.Info().Str("start time", startTime.String()).Msg("start time")
+			sec.log.Info().Str("time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
-			sec.log.Info().Str("stop time format", currentTStr+" "+timeFilter.Stop).Msg("stop time format")
-			stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Stop)
+
+			stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Stop))
 			if err != nil {
 				return false, err
 			}
-			sec.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+			sec.log.Info().Str("time", stopTime.String()).Msg("stop time")
 			stopTime = stopTime.UTC()
+
 			return (startTime.Before(eventTime.Time) || stopTime.Equal(eventTime.Time)) && eventTime.Time.Before(stopTime), nil
 		}
+
 		if timeFilter.Start != "" {
 			// stop is nil - does not have an end
-			startTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Start)
+			startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Start))
 			if err != nil {
 				return false, err
 			}
-			sec.log.Info().Str("start time", startTime.String()).Msg("start time")
+
+			sec.log.Info().Str("time", startTime.String()).Msg("start time")
 			startTime = startTime.UTC()
 			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
+
 		if timeFilter.Stop != "" {
-			stopTime, err := time.Parse(common.StandardTimeFormat, currentTStr+" "+timeFilter.Stop)
+			stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Stop))
 			if err != nil {
 				return false, err
 			}
-			sec.log.Info().Str("stop time", stopTime.String()).Msg("stop time")
+
+			sec.log.Info().Str("time", stopTime.String()).Msg("stop time")
 			stopTime = stopTime.UTC()
 			return eventTime.Time.Before(stopTime), nil
 		}

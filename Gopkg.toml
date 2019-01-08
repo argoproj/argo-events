@@ -13,6 +13,10 @@ required = [
 ]
 
 [[constraint]]
+  name = "google.golang.org/grpc"
+  version = "v1.17.0"
+
+[[constraint]]
   name = "github.com/golang/protobuf"
   branch = "master"
 

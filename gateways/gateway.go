@@ -43,3 +43,10 @@ func StartGateway(es EventingServer) {
 		panic(err)
 	}
 }
+
+// Recover recovers from panics in event sources
+func Recover(eventSource *string) {
+	if r := recover(); r != nil {
+		fmt.Printf("recovered event source %s from error. recover: %v", *eventSource, r)
+	}
+}

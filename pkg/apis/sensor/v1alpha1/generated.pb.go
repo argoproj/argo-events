@@ -659,15 +659,15 @@ func (m *SensorStatus) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SensorStatus proto.InternalMessageInfo
 
-func (m *SignalFilter) Reset()      { *m = SignalFilter{} }
-func (*SignalFilter) ProtoMessage() {}
-func (*SignalFilter) Descriptor() ([]byte, []int) {
+func (m *EventDependencyFilter) Reset()      { *m = EventDependencyFilter{} }
+func (*EventDependencyFilter) ProtoMessage() {}
+func (*EventDependencyFilter) Descriptor() ([]byte, []int) {
 	return fileDescriptor_generated_33599d368e684661, []int{22}
 }
-func (m *SignalFilter) XXX_Unmarshal(b []byte) error {
+func (m *EventDependencyFilter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *SignalFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *EventDependencyFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	b = b[:cap(b)]
 	n, err := m.MarshalTo(b)
 	if err != nil {
@@ -675,13 +675,13 @@ func (m *SignalFilter) XXX_Marshal(b []byte, deterministic bool) ([]byte, error)
 	}
 	return b[:n], nil
 }
-func (dst *SignalFilter) XXX_Merge(src proto.Message) {
+func (dst *EventDependencyFilter) XXX_Merge(src proto.Message) {
 	xxx_messageInfo_SignalFilter.Merge(dst, src)
 }
-func (m *SignalFilter) XXX_Size() int {
+func (m *EventDependencyFilter) XXX_Size() int {
 	return m.Size()
 }
-func (m *SignalFilter) XXX_DiscardUnknown() {
+func (m *EventDependencyFilter) XXX_DiscardUnknown() {
 	xxx_messageInfo_SignalFilter.DiscardUnknown(m)
 }
 
@@ -825,7 +825,7 @@ func init() {
 	proto.RegisterType((*SensorSpec)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.SensorSpec")
 	proto.RegisterType((*SensorStatus)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.SensorStatus")
 	proto.RegisterMapType((map[string]NodeStatus)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.SensorStatus.NodesEntry")
-	proto.RegisterType((*SignalFilter)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.SignalFilter")
+	proto.RegisterType((*EventDependencyFilter)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependencyFilter")
 	proto.RegisterType((*TimeFilter)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TimeFilter")
 	proto.RegisterType((*Trigger)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Trigger")
 	proto.RegisterType((*URI)(nil), "github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.URI")
@@ -1810,7 +1810,7 @@ func (m *SensorStatus) MarshalTo(dAtA []byte) (int, error) {
 	return i, nil
 }
 
-func (m *SignalFilter) Marshal() (dAtA []byte, err error) {
+func (m *EventDependencyFilter) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalTo(dAtA)
@@ -1820,7 +1820,7 @@ func (m *SignalFilter) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *SignalFilter) MarshalTo(dAtA []byte) (int, error) {
+func (m *EventDependencyFilter) MarshalTo(dAtA []byte) (int, error) {
 	var i int
 	_ = i
 	var l int
@@ -2466,7 +2466,7 @@ func (m *SensorStatus) Size() (n int) {
 	return n
 }
 
-func (m *SignalFilter) Size() (n int) {
+func (m *EventDependencyFilter) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2685,7 +2685,7 @@ func (this *EventDependency) String() string {
 	s := strings.Join([]string{`&EventDependency{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Deadline:` + fmt.Sprintf("%v", this.Deadline) + `,`,
-		`Filters:` + strings.Replace(strings.Replace(this.Filters.String(), "SignalFilter", "SignalFilter", 1), `&`, ``, 1) + `,`,
+		`Filters:` + strings.Replace(strings.Replace(this.Filters.String(), "EventDependencyFilter", "EventDependencyFilter", 1), `&`, ``, 1) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2885,11 +2885,11 @@ func (this *SensorStatus) String() string {
 	}, "")
 	return s
 }
-func (this *SignalFilter) String() string {
+func (this *EventDependencyFilter) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&SignalFilter{`,
+	s := strings.Join([]string{`&EventDependencyFilter{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Time:` + strings.Replace(fmt.Sprintf("%v", this.Time), "TimeFilter", "TimeFilter", 1) + `,`,
 		`Context:` + strings.Replace(fmt.Sprintf("%v", this.Context), "EventContext", "EventContext", 1) + `,`,
@@ -6742,7 +6742,7 @@ func (m *SensorStatus) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *SignalFilter) Unmarshal(dAtA []byte) error {
+func (m *EventDependencyFilter) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -6765,10 +6765,10 @@ func (m *SignalFilter) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: SignalFilter: wiretype end group for non-group")
+			return fmt.Errorf("proto: EventDependencyFilter: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: SignalFilter: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: EventDependencyFilter: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

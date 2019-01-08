@@ -75,19 +75,16 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 	gc.Log.Info().Str("node-id", nodeID).Str("node-name", nodeName).Msg("node")
-	oldNode, ok := gc.gw.Status.Nodes[nodeID]
-	if ok {
-		gc.Log.Info().Str("node-name", nodeName).Msg("node already initialized")
-		return oldNode
+	node, ok := gc.gw.Status.Nodes[nodeID]
+	if !ok {
+		node = v1alpha1.NodeStatus{
+			ID:          nodeID,
+			Name:        nodeName,
+			DisplayName: nodeName,
+			StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
+		}
 	}
-
-	node := v1alpha1.NodeStatus{
-		ID:          nodeID,
-		Name:        nodeName,
-		DisplayName: nodeName,
-		Phase:       v1alpha1.NodePhaseRunning,
-		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
-	}
+	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
 	gc.gw.Status.Nodes[nodeID] = node
 	gc.Log.Info().Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is running")
@@ -136,7 +133,7 @@ func (gc *GatewayConfig) UpdateGatewayEventSourceState(status *EventSourceStatus
 
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
-		// create a node and mark it as running
+		// init the node and mark it as running
 		gc.initializeNode(status.Id, status.Name, status.Message)
 
 	case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:

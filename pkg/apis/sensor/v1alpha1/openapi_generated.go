@@ -51,7 +51,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_Signal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter":            schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI":                     schema_pkg_apis_sensor_v1alpha1_URI(ref),
@@ -912,7 +912,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 					"filters": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
 				},
@@ -920,7 +920,7 @@ func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SignalFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"},
 	}
 }
 
@@ -928,7 +928,7 @@ func schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SignalFilter defines filters and constraints for a signal.",
+				Description: "EventDependencyFilter defines filters and constraints for a signal.",
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{

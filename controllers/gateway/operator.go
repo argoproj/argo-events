@@ -24,7 +24,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	client "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
 	zlog "github.com/rs/zerolog"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -75,28 +74,31 @@ func (goc *gwOperationCtx) operate() error {
 		// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
 		// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
 		//                          compliant events and dispatch them to watchers.
-		gatewayPod := &appsv1.Deployment{
-			ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
-			Spec: appsv1.DeploymentSpec{
-				Selector: &metav1.LabelSelector{
-					MatchLabels: goc.gw.Spec.DeploySpec.Labels,
-				},
-				Template: corev1.PodTemplateSpec{
-					Spec:       goc.gw.Spec.DeploySpec.Spec,
-					ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
-				},
-			},
-		}
+		//gatewayPod := &appsv1.Deployment{
+		//	ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
+		//	Spec: appsv1.DeploymentSpec{
+		//		Selector: &metav1.LabelSelector{
+		//			MatchLabels: goc.gw.Spec.DeploySpec.Labels,
+		//		},
+		//		Template: corev1.PodTemplateSpec{
+		//			Spec:       goc.gw.Spec.DeploySpec.Spec,
+		//			ObjectMeta: goc.gw.Spec.DeploySpec.ObjectMeta,
+		//		},
+		//	},
+		//}
+
+		gatewayPod := goc.gw.Spec.DeploySpec
 
 		gatewayPod.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
 			*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
 		}
-		gatewayPod.Spec.Template.Spec.Containers = *goc.getContainersForGatewayPod()
+		gatewayPod.Spec.Containers = *goc.getContainersForGatewayPod()
 		gatewayPod.Name = common.DefaultGatewayPodName(goc.gw.Name)
 
 		// we can now create the gateway deployment.
 		// depending on user configuration gateway will be exposed outside the cluster or intra-cluster.
-		_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Create(gatewayPod)
+		//_, err = goc.controller.kubeClientset.AppsV1().Deployments(goc.gw.Namespace).Create(gatewayPod)
+		_, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(gatewayPod)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed gateway deployment")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway deployment. err: %s", err))

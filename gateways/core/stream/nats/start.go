@@ -39,6 +39,8 @@ func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 }
 
 func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	nc, err := nats.Connect(n.URL)
 	if err != nil {
 		ese.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
@@ -46,6 +48,7 @@ func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gat
 		return
 	}
 
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to messages")
 	_, err = nc.Subscribe(n.Subject, func(msg *nats.Msg) {
 		dataCh <- msg.Data
 	})

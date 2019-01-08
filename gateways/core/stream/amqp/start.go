@@ -64,6 +64,8 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 }
 
 func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	conn, err := amqplib.Dial(a.URL)
 	if err != nil {
 		errorCh <- err
@@ -82,6 +84,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		return
 	}
 
+	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-delivery:
