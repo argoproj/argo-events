@@ -58,7 +58,37 @@ func EqualTriggers(a, b []v1alpha1.Trigger) bool {
 
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
 func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification) {
-	defer sn.GeneratePersistUpdateEvent(sec.kubeClient, sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
+	defer func() {
+		// persist updates to sensor resource
+		if sec.updated {
+			labels := map[string]string{
+				common.LabelSensorName:                    sec.sensor.Name,
+				common.LabelSensorKeyPhase:                string(sec.sensor.Status.Phase),
+				common.LabelKeySensorControllerInstanceID: sec.controllerInstanceID,
+				common.LabelOperation:                     "persist_state_update",
+			}
+			eventType := common.StateChangeEventType
+
+			updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
+			if err != nil {
+				sec.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
+				// escalate failure
+				eventType = common.EscalationEventType
+			}
+
+			// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
+			sec.sensor = updatedSensor
+
+			labels[common.LabelEventType] = string(eventType)
+			if err := common.GenerateK8sEvent(sec.kubeClient, "persist update", eventType, "sensor resource update", sec.sensor.Name,
+				sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to log sensor resource persist operation")
+				return
+			}
+			sec.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
+		}
+		sec.updated = false
+	}()
 
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
@@ -68,14 +98,15 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
 		if err != nil {
 			sec.log.Error().Err(err).Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
+
 			// escalate error
 			labels := map[string]string{
-				common.LabelEventType:  string(common.EscalationEventType),
-				common.LabelSignalName: ew.event.Context.Source.Host,
-				common.LabelSensorName: sec.sensor.Name,
-				common.LabelOperation:  "filter_event",
+				common.LabelEventType:   string(common.EscalationEventType),
+				common.LabelEventSource: ew.event.Context.Source.Host,
+				common.LabelSensorName:  sec.sensor.Name,
+				common.LabelOperation:   "filter_event",
 			}
-			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("apply filter failed"), common.OperationFailureEventType,"filtering event", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			if err := common.GenerateK8sEvent(sec.kubeClient, "apply filter failed", common.OperationFailureEventType, "filtering event", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 				sec.log.Error().Err(err).Msg("failed to create K8s event to log filtering error")
 			}
 
@@ -103,6 +134,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		// check if all event dependencies are complete and kick-off triggers
 		sec.processTriggers()
+		sec.updated = true
 
 	case v1alpha1.ResourceUpdateNotification:
 		sec.log.Info().Msg("sensor resource update")
@@ -129,6 +161,10 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 				}
 			}
 		}
+		sec.updated = true
+
+	default:
+		sec.log.Error().Str("notification-type", string(ew.notificationType)).Msg("unknown notification type")
 	}
 }
 
@@ -136,8 +172,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 	// start processing the update notification queue
 	go func() {
-		for {
-			e := <-sec.queue
+		for e := range sec.queue {
 			sec.processUpdateNotification(e)
 		}
 	}()

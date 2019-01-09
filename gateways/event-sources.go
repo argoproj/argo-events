@@ -206,7 +206,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 						common.LabelGatewayEventSourceID:   eventSource.Data.ID,
 						common.LabelOperation:              "dispatch_event_to_watchers",
 					}
-					if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("failed to dispatch event to watchers. err: %+v", err), common.EscalationEventType, "event dispatch failed", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+					if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("failed to dispatch event to watchers"), common.EscalationEventType, "event dispatch failed", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
 						gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to create K8s event to escalate event dispatch failure")
 					}
 					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to dispatch event to watchers")

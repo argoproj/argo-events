@@ -33,6 +33,8 @@ type sensorExecutionCtx struct {
 	queue chan *updateNotification
 	// controllerInstanceID is the instance ID of sensor controller processing this sensor
 	controllerInstanceID string
+	// updated indicates update to sensor resource
+	updated bool
 }
 
 // updateNotification is servers as a notification message that can be used to update event dependency's state or the sensor resource
@@ -59,4 +61,3 @@ func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 		controllerInstanceID: controllerInstanceID,
 	}
 }
-

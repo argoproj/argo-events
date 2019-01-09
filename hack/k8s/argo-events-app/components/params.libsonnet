@@ -10,9 +10,9 @@
       serviceAccount: "argo-events",
       namespace: "default",
       replicas: 1,
-      controllerName: "sensor-controller",
-      controllerImage: "argoproj/sensor-controller:latest",
-      executorName: "sensor-executor",
+      controllerName: "gateway-controller",
+      controllerImage: "argoproj/gateway-controller:latest",
+      executorName: "gateway-executor",
       executorImage: "argoproj/executor-job:latest",
       executorResources: {
         limits: {

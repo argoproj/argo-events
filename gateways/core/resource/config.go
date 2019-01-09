@@ -44,7 +44,7 @@ type resource struct {
 	metav1.GroupVersionKind `json:",inline"`
 }
 
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
+// ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 // +k8s:openapi-gen=true
 type ResourceFilter struct {
 	Prefix      string            `json:"prefix,omitempty"`

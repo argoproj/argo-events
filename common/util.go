@@ -18,26 +18,23 @@ package common
 
 import (
 	"fmt"
-	"github.com/rs/zerolog"
 	"os"
 	"time"
+
+	"github.com/rs/zerolog"
+
+	"net/http"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"net/http"
 )
 
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
 func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
-}
-
-// DefaultDeploymentName returns a formulated name for deployment
-func DefaultDeploymentName(deploymentName string) string {
-	return fmt.Sprintf("%s-deployement", deploymentName)
 }
 
 // DefaultServiceName returns a formulated name for a service

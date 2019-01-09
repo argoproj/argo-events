@@ -56,10 +56,14 @@ func main() {
 	// handle event source's status updates
 	go func() {
 		for status := range gc.StatusCh {
-			gc.UpdateGatewayEventSourceState(&status)
+			gc.UpdateGatewayResourceState(&status)
 		}
 	}()
 
+	// watch updates to gateway resource
+	if _, err := gc.WatchGateway(context.Background()); err != nil {
+		panic(err)
+	}
 	// watch for event source updates
 	if _, err := gc.WatchGatewayEventSources(context.Background()); err != nil {
 		panic(err)

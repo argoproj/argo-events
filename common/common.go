@@ -82,8 +82,8 @@ const (
 	// LabelOperation is a label for an operation in framework
 	LabelOperation = "operation"
 
-	// LabelSignalName is label for signal name
-	LabelSignalName = "signal-name"
+	// LabelEventSource is label for event name
+	LabelEventSource = "event-name"
 
 	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"

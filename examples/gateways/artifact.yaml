@@ -24,10 +24,9 @@ spec:
       serviceAccountName: "argo-events-sa"
   configMap: "artifact-gateway-configmap"
   eventVersion: "1.0"
-  imageVersion: "latest"
   type: "artifact"
   processorPort: "9330"
-  dispatchMechanism: "HTTP"
+  dispatchProtocol: "HTTP"
   watchers:
     sensors:
     - name: "artifact-with-param-sensor"

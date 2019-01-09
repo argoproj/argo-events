@@ -17,7 +17,7 @@ limitations under the License.
 package sensor
 
 import (
-	"runtime/debug"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -55,16 +55,6 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 
 // operate on sensor resource
 func (soc *sOperationCtx) operate() error {
-	defer func() {
-		if r := recover(); r != nil {
-			if rerr, ok := r.(error); ok {
-				soc.markSensorPhase(v1alpha1.NodePhaseError, true, rerr.Error())
-				soc.log.Error().Err(rerr)
-			}
-			soc.log.Error().Interface("recover", r).Str("stack", string(debug.Stack())).Msg("recovered from panic")
-		}
-	}()
-
 	switch soc.s.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		// perform one-time sensor validation
@@ -78,9 +68,9 @@ func (soc *sOperationCtx) operate() error {
 			return nil
 		}
 
-		// Initialize all signal nodes
-		for _, signal := range soc.s.Spec.EventDependencies {
-			InitializeNode(soc.s, signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, &soc.log)
+		// Initialize all event dependency nodes
+		for _, eventDependency := range soc.s.Spec.EventDependencies {
+			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, &soc.log)
 		}
 
 		// Initialize all trigger nodes
@@ -175,9 +165,9 @@ func (soc *sOperationCtx) operate() error {
 			}
 		}
 
-		// Mark all signal nodes as active
-		for _, signal := range soc.s.Spec.EventDependencies {
-			MarkNodePhase(soc.s, signal.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+		// Mark all eventDependency nodes as active
+		for _, eventDependency := range soc.s.Spec.EventDependencies {
+			MarkNodePhase(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
 		}
 
 		// if we get here - we know the signals are running
@@ -188,20 +178,48 @@ func (soc *sOperationCtx) operate() error {
 		soc.log.Info().Msg("sensor is already running")
 
 	case v1alpha1.NodePhaseError:
-		soc.log.Info().Msg("sensor is in error state. Check escalated K8 event for the error")
-
+		soc.log.Info().Msg("sensor is in error state. check sensor resource status information and corresponding escalated K8 event for the error")
 	}
 	return nil
 }
 
 // mark the overall sensor phase
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
-	defer GeneratePersistUpdateEvent(soc.controller.kubeClientset, soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
+	defer func() {
+		// persist updates to sensor resource
+		labels := map[string]string{
+			common.LabelSensorName:                    soc.s.Name,
+			common.LabelSensorKeyPhase:                string(soc.s.Status.Phase),
+			common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
+			common.LabelOperation:                     "persist_state_update",
+		}
+		eventType := common.StateChangeEventType
+
+		updatedSensor, err := PersistUpdates(soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
+		if err != nil {
+			soc.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
+
+			// escalate failure
+			eventType = common.EscalationEventType
+		}
+
+		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
+		soc.s = updatedSensor
+
+		labels[common.LabelEventType] = string(eventType)
+		if err := common.GenerateK8sEvent(soc.controller.kubeClientset, "persist update", eventType, "sensor state update", soc.s.Name,
+			soc.s.Namespace, soc.controller.Config.InstanceID, sensor.Kind, labels); err != nil {
+			soc.log.Error().Err(err).Msg("failed to create K8s event to log sensor state persist operation")
+			return
+		}
+
+		soc.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
+	}()
+
 	justCompleted := soc.s.Status.Phase != phase
 	if justCompleted {
 		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg("sensor phase updated")
 		soc.s.Status.Phase = phase
-		soc.updated = true
 		if soc.s.ObjectMeta.Labels == nil {
 			soc.s.ObjectMeta.Labels = make(map[string]string)
 		}
@@ -214,12 +232,10 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 	}
 	if soc.s.Status.StartedAt.IsZero() {
 		soc.s.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
-		soc.updated = true
 	}
 	if len(message) > 0 && soc.s.Status.Message != message[0] {
 		soc.log.Info().Str("old-message", soc.s.Status.Message).Str("new-message", message[0]).Msg("sensor message updated")
 		soc.s.Status.Message = message[0]
-		soc.updated = true
 	}
 
 	switch phase {
@@ -232,7 +248,6 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			}
 			soc.s.ObjectMeta.Labels[common.LabelSensorKeyComplete] = "true"
 			soc.s.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
-			soc.updated = true
 		}
 	}
 }

@@ -57,7 +57,7 @@ message Data {
   // filter constraints
   repeated DataFilter filters = 1;
 
-  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the event filter fails
   optional EscalationPolicy escalationPolicy = 2;
 }
 
@@ -81,16 +81,16 @@ message DataFilter {
   // Nils this value is ignored
   optional string value = 3;
 
-  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the event filter fails
   optional EscalationPolicy escalationPolicy = 4;
 }
 
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// An escalation policy is associated with event filter. Whenever a event filter fails
 // escalation will be triggered
 message EscalationPolicy {
   // Name is name of the escalation policy
-  // This is referred by signal filter/s
+  // This is referred by event filter/s
   optional string name = 1;
 
   // Level is the degree of importance
@@ -150,7 +150,7 @@ message EventContext {
   // to test metadata before adding them to the CloudEvents specification.
   map<string, string> extensions = 9;
 
-  // EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
+  // EscalationPolicy is the name of escalation policy to trigger in case the event filter fails
   optional EscalationPolicy escalationPolicy = 10;
 }
 
@@ -159,15 +159,30 @@ message EventDependency {
   // Name is a unique name of this dependency
   optional string name = 1;
 
-  // Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated.
+  // Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated.
   // Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
-  // This trumps the recurrence patterns of calendar signals and allows any signal to have a strict defined life.
-  // After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed
+  // This trumps the recurrence patterns of calendar events and allows any event to have a strict defined life.
+  // After the deadline is reached and this event has not in a Resolved state, this event is marked as Failed
   // and proper escalations should proceed.
   optional int64 deadline = 2;
 
   // Filters and rules governing tolerations of success and constraints on the context and data of an event
-  optional SignalFilter filters = 3;
+  optional EventDependencyFilter filters = 3;
+}
+
+// EventDependencyFilter defines filters and constraints for a event.
+message EventDependencyFilter {
+  // Name is the name of event filter
+  optional string name = 1;
+
+  // Time filter on the event with escalation
+  optional TimeFilter time = 2;
+
+  // Context filter constraints with escalation
+  optional EventContext context = 3;
+
+  // Data filter constraints with escalation
+  optional Data data = 4;
 }
 
 // FileArtifact contains information about an artifact in a filesystem
@@ -186,7 +201,7 @@ message GroupVersionKind {
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.
-// A single node can represent the status for signal or a trigger.
+// A single node can represent the status for event or a trigger.
 message NodeStatus {
   // ID is a unique identifier of a node within a sensor
   // It is a hash of the node name
@@ -212,7 +227,7 @@ message NodeStatus {
   // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
-  // store data or something to save for signal notifications or trigger events
+  // store data or something to save for event notifications or trigger events
   optional string message = 8;
 
   // Event stores the last seen event for this node
@@ -242,7 +257,7 @@ message ResourceObject {
 
 // ResourceParameter indicates a passed parameter to a service template
 message ResourceParameter {
-  // Src contains a source reference to the value of the resource parameter from a signal event
+  // Src contains a source reference to the value of the resource parameter from a event event
   optional ResourceParameterSource src = 1;
 
   // Dest is the JSONPath of a resource key.
@@ -252,10 +267,10 @@ message ResourceParameter {
   optional string dest = 2;
 }
 
-// ResourceParameterSource defines the source for a resource parameter from a signal event
+// ResourceParameterSource defines the source for a resource parameter from a event event
 message ResourceParameterSource {
-  // EventDependency is the name of the signal for which to retrieve this event
-  optional string signal = 1;
+  // Event is the name of the event for which to retrieve this event
+  optional string event = 1;
 
   // Path is the JSONPath of the event's (JSON decoded) data key
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
@@ -368,37 +383,22 @@ message SensorStatus {
   map<string, NodeStatus> nodes = 5;
 }
 
-// SignalFilter defines filters and constraints for a signal.
-message SignalFilter {
-  // Name is the name of signal filter
-  optional string name = 1;
-
-  // Time filter on the signal with escalation
-  optional TimeFilter time = 2;
-
-  // Context filter constraints with escalation
-  optional EventContext context = 3;
-
-  // Data filter constraints with escalation
-  optional Data data = 4;
-}
-
 // TimeFilter describes a window in time.
-// Filters out signal events that occur outside the time limits.
+// Filters out event events that occur outside the time limits.
 // In other words, only events that occur after Start and before Stop
 // will pass this filter.
 message TimeFilter {
   // Start is the beginning of a time window.
-  // Before this time, events for this signal are ignored and
+  // Before this time, events for this event are ignored and
   // format is hh:mm:ss
   optional string start = 1;
 
   // StopPattern is the end of a time window.
-  // After this time, events for this signal are ignored and
+  // After this time, events for this event are ignored and
   // format is hh:mm:ss
   optional string stop = 2;
 
-  // EscalationPolicy is the escalation to trigger in case the signal filter fails
+  // EscalationPolicy is the escalation to trigger in case the event filter fails
   optional EscalationPolicy escalationPolicy = 3;
 }
 

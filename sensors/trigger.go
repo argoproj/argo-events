@@ -34,6 +34,8 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	// to trigger the sensor action/s we need to check if all event dependencies are completed and sensor is active
 	if sec.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
 		sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
+
+		// labels for K8s event
 		labels := map[string]string{
 			common.LabelSensorName: sec.sensor.Name,
 			common.LabelOperation:  "process_triggers",
@@ -45,10 +47,10 @@ func (sec *sensorExecutionCtx) processTriggers() {
 
 				sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger. err: %+v", err))
 
-				// escalate
+				// escalate using K8s event
 				labels[common.LabelEventType] = string(common.EscalationEventType)
-				if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger. err: %+v", err), common.EscalationEventType,
-					"process trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Name), common.EscalationEventType,
+					"trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 					sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
 				}
 				continue
@@ -66,10 +68,12 @@ func (sec *sensorExecutionCtx) processTriggers() {
 
 		// increment completion counter
 		sec.sensor.Status.CompletionCount = sec.sensor.Status.CompletionCount + 1
+
+		// create K8s event to mark the trigger round completion
 		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("triggers execution round completed. completion count: %d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
 			"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
 		}
 
 		// Mark all signal nodes as active
@@ -175,16 +179,16 @@ func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter
 	events := make(map[string]v1alpha.Event)
 	for _, param := range params {
 		if param.Src != nil {
-			node := sn.GetNodeByName(sec.sensor, param.Src.Signal)
+			node := sn.GetNodeByName(sec.sensor, param.Src.Event)
 			if node == nil {
-				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
+				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
 				continue
 			}
 			if node.Event == nil {
-				sec.log.Warn().Str("param-src", param.Src.Signal).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
+				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
 				continue
 			}
-			events[param.Src.Signal] = *node.Event
+			events[param.Src.Event] = *node.Event
 		}
 	}
 	return events

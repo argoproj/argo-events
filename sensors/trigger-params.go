@@ -46,7 +46,7 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
 func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]v1alpha.Event) (string, error) {
-	if e, ok := events[src.Signal]; ok {
+	if e, ok := events[src.Event]; ok {
 		// only convert payload to json when path is set.
 		if src.Path == "" {
 			return string(e.Payload), nil
@@ -66,5 +66,5 @@ func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]
 	if src.Value != nil {
 		return *src.Value, nil
 	}
-	return "", fmt.Errorf("unable to resolve '%s' parameter value. verify the path: '%s' is valid and/or set a default value for this param", src.Signal, src.Path)
+	return "", fmt.Errorf("unable to resolve '%s' parameter value. verify the path: '%s' is valid and/or set a default value for this param", src.Event, src.Path)
 }

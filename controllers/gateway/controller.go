@@ -140,8 +140,8 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	}
 
 	// due to the base delay of 5ms of the DefaultControllerRateLimiter
-	// requeues will happen very quickly even after a signal pod goes down
-	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
+	// requeues will happen very quickly even after a gateway pod goes down
+	// we want to give the event pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
 		c.log.Error().Str("gateway-controller", key.(string)).Err(err).Msg("error syncing gateway-controller")
 
@@ -153,7 +153,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 }
 
 // Run executes the gateway-controller
-func (c *GatewayController) Run(ctx context.Context, gwThreads, signalThreads int) {
+func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 	c.log.Info().Str("version", base.GetVersion().Version).Str("instance-id", c.Config.InstanceID).Msg("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)

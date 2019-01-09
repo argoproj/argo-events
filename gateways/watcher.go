@@ -97,7 +97,7 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
-					gc.Log.Info().Msg("detected gateway update. updating gateway watchers and event metadata")
+					gc.Log.Info().Msg("detected gateway update. updating gateway watchers")
 					gc.StatusCh <- EventSourceStatus{
 						Phase: v1alpha1.NodePhaseResourceUpdate,
 						Gw:    g,

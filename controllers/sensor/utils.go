@@ -21,7 +21,7 @@ import (
 )
 
 // GetNodeByName returns a copy of the node from this sensor for the nodename
-// for signals this node name should be the name of the signal
+// for events this node name should be the name of the event
 func GetNodeByName(sensor *v1alpha1.Sensor, nodename string) *v1alpha1.NodeStatus {
 	nodeID := sensor.NodeID(nodename)
 	node, ok := sensor.Status.Nodes[nodeID]

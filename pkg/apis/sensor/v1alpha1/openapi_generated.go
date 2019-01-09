@@ -35,7 +35,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy":        schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                   schema_pkg_apis_sensor_v1alpha1_Event(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":            schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper":            schema_pkg_apis_sensor_v1alpha1_EventWrapper(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":        schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":              schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
@@ -50,8 +51,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_Signal(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI":                     schema_pkg_apis_sensor_v1alpha1_URI(ref),
@@ -154,7 +153,7 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
@@ -196,7 +195,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
@@ -213,11 +212,11 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state. An escalation policy is associated with signal filter. Whenever a signal filter fails escalation will be triggered",
+				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state. An escalation policy is associated with event filter. Whenever a event filter fails escalation will be triggered",
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is name of the escalation policy This is referred by signal filter/s",
+							Description: "Name is name of the escalation policy This is referred by event filter/s",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -339,7 +338,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the name of escalation policy to trigger in case the event filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},
@@ -352,29 +351,78 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_EventWrapper(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "EventWrapper wraps an event with an additional flag to check if we processed this event already",
+				Description: "EventDependency describes a dependency",
 				Properties: map[string]spec.Schema{
-					"event": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"),
+							Description: "Name is a unique name of this dependency",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
-					"seen": {
+					"deadline": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"boolean"},
-							Format: "",
+							Description: "Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated. Note: this functionality is not yet respected, but it's theoretical behavior is as follows: This trumps the recurrence patterns of calendar events and allows any event to have a strict defined life. After the deadline is reached and this event has not in a Resolved state, this event is marked as Failed and proper escalations should proceed.",
+							Type:        []string{"integer"},
+							Format:      "int64",
+						},
+					},
+					"filters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
 				},
-				Required: []string{"event", "seen"},
+				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventDependencyFilter defines filters and constraints for a event.",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is the name of event filter",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"time": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Time filter on the event with escalation",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"),
+						},
+					},
+					"context": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Context filter constraints with escalation",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
+						},
+					},
+					"data": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Data filter constraints with escalation",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data"),
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
 	}
 }
 
@@ -433,7 +481,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for signal or a trigger.",
+				Description: "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for event or a trigger.",
 				Properties: map[string]spec.Schema{
 					"id": {
 						SchemaProps: spec.SchemaProps{
@@ -472,7 +520,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 					},
 					"message": {
 						SchemaProps: spec.SchemaProps{
-							Description: "store data or something to save for signal notifications or trigger events",
+							Description: "store data or something to save for event notifications or trigger events",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -480,7 +528,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 					"latestEvent": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Event stores the last seen event for this node",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"),
 						},
 					},
 				},
@@ -488,7 +536,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventWrapper"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"},
 	}
 }
 
@@ -573,7 +621,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref common.ReferenceCallb
 				Properties: map[string]spec.Schema{
 					"src": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Src contains a source reference to the value of the resource parameter from a signal event",
+							Description: "Src contains a source reference to the value of the resource parameter from a event event",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource"),
 						},
 					},
@@ -597,11 +645,11 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ResourceParameterSource defines the source for a resource parameter from a signal event",
+				Description: "ResourceParameterSource defines the source for a resource parameter from a event event",
 				Properties: map[string]spec.Schema{
-					"signal": {
+					"event": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventDependency is the name of the signal for which to retrieve this event",
+							Description: "Event is the name of the event for which to retrieve this event",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -621,7 +669,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"signal", "path"},
+				Required: []string{"event", "path"},
 			},
 		},
 		Dependencies: []string{},
@@ -792,9 +840,9 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorSpec represents desired sensor state",
 				Properties: map[string]spec.Schema{
-					"signals": {
+					"dependencies": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventDependency is a list of the things that this sensor is dependent on. These are the inputs to this sensor.",
+							Description: "EventDependency is a list of the events that this sensor is dependent on.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -818,13 +866,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
-					"repeat": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Repeat is a flag that determines if the sensor status should be reset after completion.",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
@@ -832,7 +873,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"signals", "triggers", "deploySpec"},
+				Required: []string{"dependencies", "triggers", "deploySpec"},
 			},
 		},
 		Dependencies: []string{
@@ -889,104 +930,29 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_Signal(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "EventDependency describes a dependency",
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is a unique name of this dependency",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"deadline": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated. Note: this functionality is not yet respected, but it's theoretical behavior is as follows: This trumps the recurrence patterns of calendar signals and allows any signal to have a strict defined life. After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed and proper escalations should proceed.",
-							Type:        []string{"integer"},
-							Format:      "int64",
-						},
-					},
-					"filters": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
-						},
-					},
-				},
-				Required: []string{"name"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_SignalFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "EventDependencyFilter defines filters and constraints for a signal.",
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is the name of signal filter",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"time": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Time filter on the signal with escalation",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"),
-						},
-					},
-					"context": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Context filter constraints with escalation",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
-						},
-					},
-					"data": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Data filter constraints with escalation",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data"),
-						},
-					},
-				},
-				Required: []string{"name"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TimeFilter describes a window in time. Filters out signal events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
+				Description: "TimeFilter describes a window in time. Filters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
 				Properties: map[string]spec.Schema{
 					"start": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Start is the beginning of a time window. Before this time, events for this signal are ignored and format is hh:mm:ss",
+							Description: "Start is the beginning of a time window. Before this time, events for this event are ignored and format is hh:mm:ss",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"stop": {
 						SchemaProps: spec.SchemaProps{
-							Description: "StopPattern is the end of a time window. After this time, events for this signal are ignored and format is hh:mm:ss",
+							Description: "StopPattern is the end of a time window. After this time, events for this event are ignored and format is hh:mm:ss",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"escalationPolicy": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the signal filter fails",
+							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
 						},
 					},

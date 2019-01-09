@@ -93,10 +93,10 @@ type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
-	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this signal is terminated.
+	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated.
 	// Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
-	// This trumps the recurrence patterns of calendar signals and allows any signal to have a strict defined life.
-	// After the deadline is reached and this signal has not in a Resolved state, this signal is marked as Failed
+	// This trumps the recurrence patterns of calendar events and allows any event to have a strict defined life.
+	// After the deadline is reached and this event has not in a Resolved state, this event is marked as Failed
 	// and proper escalations should proceed.
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
@@ -112,12 +112,12 @@ type GroupVersionKind struct {
 	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
 }
 
-// EventDependencyFilter defines filters and constraints for a signal.
+// EventDependencyFilter defines filters and constraints for a event.
 type EventDependencyFilter struct {
-	// Name is the name of signal filter
+	// Name is the name of event filter
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
-	// Time filter on the signal with escalation
+	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 
 	// Context filter constraints with escalation
@@ -128,21 +128,21 @@ type EventDependencyFilter struct {
 }
 
 // TimeFilter describes a window in time.
-// Filters out signal events that occur outside the time limits.
+// Filters out event events that occur outside the time limits.
 // In other words, only events that occur after Start and before Stop
 // will pass this filter.
 type TimeFilter struct {
 	// Start is the beginning of a time window.
-	// Before this time, events for this signal are ignored and
+	// Before this time, events for this event are ignored and
 	// format is hh:mm:ss
 	Start string `json:"start,omitempty" protobuf:"bytes,1,opt,name=start"`
 
 	// StopPattern is the end of a time window.
-	// After this time, events for this signal are ignored and
+	// After this time, events for this event are ignored and
 	// format is hh:mm:ss
 	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
 
-	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the event filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
@@ -160,7 +160,7 @@ type Data struct {
 	// filter constraints
 	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
 
-	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the event filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
 }
 
@@ -184,7 +184,7 @@ type DataFilter struct {
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
 
-	// EscalationPolicy is the escalation to trigger in case the signal filter fails
+	// EscalationPolicy is the escalation to trigger in case the event filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
@@ -205,7 +205,7 @@ type Trigger struct {
 
 // ResourceParameter indicates a passed parameter to a service template
 type ResourceParameter struct {
-	// Src contains a source reference to the value of the resource parameter from a signal event
+	// Src contains a source reference to the value of the resource parameter from a event event
 	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,opt,name=src"`
 
 	// Dest is the JSONPath of a resource key.
@@ -215,10 +215,10 @@ type ResourceParameter struct {
 	Dest string `json:"dest" protobuf:"bytes,2,opt,name=dest"`
 }
 
-// ResourceParameterSource defines the source for a resource parameter from a signal event
+// ResourceParameterSource defines the source for a resource parameter from a event event
 type ResourceParameterSource struct {
-	// EventDependency is the name of the signal for which to retrieve this event
-	Signal string `json:"signal" protobuf:"bytes,1,opt,name=signal"`
+	// Event is the name of the event for which to retrieve this event
+	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
 
 	// Path is the JSONPath of the event's (JSON decoded) data key
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
@@ -272,11 +272,11 @@ const (
 )
 
 // EscalationPolicy describes the policy for escalating sensors in an Error state.
-// An escalation policy is associated with signal filter. Whenever a signal filter fails
+// An escalation policy is associated with event filter. Whenever a event filter fails
 // escalation will be triggered
 type EscalationPolicy struct {
 	// Name is name of the escalation policy
-	// This is referred by signal filter/s
+	// This is referred by event filter/s
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 
 	// Level is the degree of importance
@@ -311,7 +311,7 @@ type SensorStatus struct {
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.
-// A single node can represent the status for signal or a trigger.
+// A single node can represent the status for event or a trigger.
 type NodeStatus struct {
 	// ID is a unique identifier of a node within a sensor
 	// It is a hash of the node name
@@ -337,7 +337,7 @@ type NodeStatus struct {
 	// +k8s:openapi-gen=false
 	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
-	// store data or something to save for signal notifications or trigger events
+	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// Event stores the last seen event for this node
@@ -393,7 +393,7 @@ type EventContext struct {
 	// to test metadata before adding them to the CloudEvents specification.
 	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
 
-	// EscalationPolicy is the name of escalation policy to trigger in case the signal filter fails
+	// EscalationPolicy is the name of escalation policy to trigger in case the event filter fails
 	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,10,opt,name=escalationPolicy"`
 }
 
@@ -500,7 +500,7 @@ func (s *Sensor) AreAllNodesSuccess(nodeType NodeType) bool {
 }
 
 // NodeID creates a deterministic node ID based on a node name
-// we support 3 kinds of "nodes" - sensors, signals, triggers
+// we support 3 kinds of "nodes" - sensors, events, triggers
 // each should pass it's name field
 func (s *Sensor) NodeID(name string) string {
 	if name == s.ObjectMeta.Name {

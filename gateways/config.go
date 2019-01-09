@@ -46,6 +46,8 @@ type GatewayConfig struct {
 	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
 	gwcs gwclientset.Interface
+	// updated indicates whether gateway resource is updated
+	updated bool
 	// serverPort is gateway server port to listen events from
 	serverPort string
 	// registeredConfigs stores information about current event sources that are running in the gateway

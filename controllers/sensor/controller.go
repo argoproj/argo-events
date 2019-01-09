@@ -137,8 +137,8 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 	}
 
 	// due to the base delay of 5ms of the DefaultControllerRateLimiter
-	// requeues will happen very quickly even after a signal pod goes down
-	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
+	// requeues will happen very quickly even after a sensor pod goes down
+	// we want to give the sensor pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
 		fmt.Printf("Error syncing sensor '%v': %v", key, err)
 
@@ -150,7 +150,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 }
 
 // Run executes the sensor-controller
-func (c *SensorController) Run(ctx context.Context, ssThreads, signalThreads int) {
+func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 
 	fmt.Printf("sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)

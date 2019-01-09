@@ -109,7 +109,7 @@ package gateways
 //	e, err = common.CreateK8Event(e, gc.Clientset)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayEventSourceState(e)
+//	err = gc.UpdateGatewayResourceState(e)
 //	assert.NotNil(t, err)
 //
 //	e, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Get(e.Name, metav1.GetOptions{})
@@ -134,7 +134,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayEventSourceState(e)
+//	err = gc.UpdateGatewayResourceState(e)
 //	assert.Nil(t, err)
 //
 //	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -174,7 +174,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayEventSourceState(e)
+//	err = gc.UpdateGatewayResourceState(e)
 //	assert.Nil(t, err)
 //
 //	gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
@@ -213,7 +213,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayEventSourceState(e)
+//	err = gc.UpdateGatewayResourceState(e)
 //	assert.Nil(t, err)
 //	assert.Equal(t, 0, len(gc.gw.Status.Nodes))
 //
@@ -247,7 +247,7 @@ package gateways
 //	_, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gw.Namespace).Create(gc.gw)
 //	assert.Nil(t, err)
 //
-//	err = gc.UpdateGatewayEventSourceState(e)
+//	err = gc.UpdateGatewayResourceState(e)
 //	assert.Nil(t, err)
 //	for _, node := range gc.gw.Status.Nodes {
 //		assert.Equal(t, string(v1alpha1.NodePhaseCompleted), string(node.Phase))

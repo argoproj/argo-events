@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Next is a function to compute the next signal time from a given time
+// Next is a function to compute the next event time from a given time
 type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
@@ -53,18 +53,18 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 		schedule, err := specParser.Parse(cal.Schedule)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse schedule %s from calendar signal. Cause: %+v", cal.Schedule, err.Error())
+			return nil, fmt.Errorf("failed to parse schedule %s from calendar event. Cause: %+v", cal.Schedule, err.Error())
 		}
 		return schedule, nil
 	} else if cal.Interval != "" {
 		intervalDuration, err := time.ParseDuration(cal.Interval)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse interval %s from calendar signal. Cause: %+v", cal.Interval, err.Error())
+			return nil, fmt.Errorf("failed to parse interval %s from calendar event. Cause: %+v", cal.Interval, err.Error())
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
 	} else {
-		return nil, fmt.Errorf("calendar signal must contain either a schedule or interval")
+		return nil, fmt.Errorf("calendar event must contain either a schedule or interval")
 	}
 }
 

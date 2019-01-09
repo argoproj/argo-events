@@ -148,7 +148,7 @@ A single node can represent one configuration.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) | optional | ID is a unique identifier of a node within a sensor It is a hash of the node name |
+| id | [string](#string) | optional | ID is a unique identifier of a node within a gateway It is a hash of the node name |
 | name | [string](#string) | optional | Name is a unique name in the node tree used to generate the node ID |
 | displayName | [string](#string) | optional | DisplayName is the human readable representation of the node |
 | phase | [string](#string) | optional | Phase of the node |
@@ -180,12 +180,12 @@ NotificationWatchers are components which are interested listening to notificati
 <a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.SensorNotificationWatcher"></a>
 
 ### SensorNotificationWatcher
-SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway
+SensorNotificationWatcher is the gateway interested in listening to notifications from this gateway
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) | optional | Name is name of the sensor |
+| name | [string](#string) | optional | Name is name of the gateway |
 
 
 

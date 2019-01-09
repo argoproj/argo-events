@@ -39,8 +39,10 @@ func (se *sensorExecutionCtx) syncSensor(ctx context.Context) (cache.Controller,
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if newSensor, ok := new.(*v1alpha1.Sensor); ok {
-					se.log.Info().Msg("detected Sensor update.")
-					se.sensor = newSensor
+					se.queue <- &updateNotification{
+						sensor:           newSensor,
+						notificationType: v1alpha1.ResourceUpdateNotification,
+					}
 				}
 			},
 		})

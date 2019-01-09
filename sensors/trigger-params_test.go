@@ -60,7 +60,7 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "missing",
+							Event: "missing",
 						},
 					},
 				},
@@ -76,8 +76,8 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "missing",
-							Value:  &defaultValue,
+							Event: "missing",
+							Value: &defaultValue,
 						},
 						Dest: "x",
 					},
@@ -94,8 +94,8 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "missing",
-							Value:  &defaultValue,
+							Event: "missing",
+							Value: &defaultValue,
 						},
 					},
 				},
@@ -111,8 +111,8 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "simpleJSON",
-							Path:   "name.last",
+							Event: "simpleJSON",
+							Path:  "name.last",
 						},
 						Dest: "x",
 					},
@@ -129,8 +129,8 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "simpleJSON",
-							Path:   "name.last",
+							Event: "simpleJSON",
+							Path:  "name.last",
 						},
 						Dest: "x",
 					},
@@ -147,7 +147,7 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "nonJSON",
+							Event: "nonJSON",
 						},
 						Dest: "x",
 					},
@@ -164,8 +164,8 @@ func Test_applyParams(t *testing.T) {
 				params: []v1alpha1.ResourceParameter{
 					{
 						Src: &v1alpha1.ResourceParameterSource{
-							Signal: "nonJSON",
-							Path:   "test",
+							Event: "nonJSON",
+							Path:  "test",
 						},
 						Dest: "x",
 					},
