@@ -31,8 +31,8 @@ type K8sEventType string
 var (
 	EscalationEventType       K8sEventType = "Escalation"
 	StateChangeEventType      K8sEventType = "StateChange"
-	OperationFailureEventType K8sEventType = "Operation Failed"
-	OperationSuccessEventType K8sEventType = "Operation Successful"
+	OperationFailureEventType K8sEventType = "OperationFailed"
+	OperationSuccessEventType K8sEventType = "OperationSuccessful"
 )
 
 const (

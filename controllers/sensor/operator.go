@@ -55,6 +55,39 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 
 // operate on sensor resource
 func (soc *sOperationCtx) operate() error {
+	defer func() {
+		if soc.updated {
+			// persist updates to sensor resource
+			labels := map[string]string{
+				common.LabelSensorName:                    soc.s.Name,
+				common.LabelSensorKeyPhase:                string(soc.s.Status.Phase),
+				common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
+				common.LabelOperation:                     "persist_state_update",
+			}
+			eventType := common.StateChangeEventType
+
+			updatedSensor, err := PersistUpdates(soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
+			if err != nil {
+				soc.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
+
+				// escalate failure
+				eventType = common.EscalationEventType
+			}
+
+			// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
+			soc.s = updatedSensor
+
+			labels[common.LabelEventType] = string(eventType)
+			if err := common.GenerateK8sEvent(soc.controller.kubeClientset, "persist update", eventType, "sensor state update", soc.s.Name,
+				soc.s.Namespace, soc.controller.Config.InstanceID, sensor.Kind, labels); err != nil {
+				soc.log.Error().Err(err).Msg("failed to create K8s event to log sensor state persist operation")
+				return
+			}
+			soc.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
+		}
+		soc.updated = false
+	}()
+
 	switch soc.s.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		// perform one-time sensor validation
@@ -185,37 +218,6 @@ func (soc *sOperationCtx) operate() error {
 
 // mark the overall sensor phase
 func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
-	defer func() {
-		// persist updates to sensor resource
-		labels := map[string]string{
-			common.LabelSensorName:                    soc.s.Name,
-			common.LabelSensorKeyPhase:                string(soc.s.Status.Phase),
-			common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
-			common.LabelOperation:                     "persist_state_update",
-		}
-		eventType := common.StateChangeEventType
-
-		updatedSensor, err := PersistUpdates(soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
-		if err != nil {
-			soc.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
-
-			// escalate failure
-			eventType = common.EscalationEventType
-		}
-
-		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
-		soc.s = updatedSensor
-
-		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(soc.controller.kubeClientset, "persist update", eventType, "sensor state update", soc.s.Name,
-			soc.s.Namespace, soc.controller.Config.InstanceID, sensor.Kind, labels); err != nil {
-			soc.log.Error().Err(err).Msg("failed to create K8s event to log sensor state persist operation")
-			return
-		}
-
-		soc.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
-	}()
-
 	justCompleted := soc.s.Status.Phase != phase
 	if justCompleted {
 		soc.log.Info().Str("old-phase", string(soc.s.Status.Phase)).Str("new-phase", string(phase)).Msg("sensor phase updated")
@@ -250,4 +252,5 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			soc.s.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
 		}
 	}
+	soc.updated = true
 }

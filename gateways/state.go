@@ -108,33 +108,39 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 	case v1alpha1.NodePhaseResourceUpdate:
 		if gc.gw.Spec.Watchers != status.Gw.Spec.Watchers {
+			gc.gw.Spec.Watchers = status.Gw.Spec.Watchers
 			msg = "gateway watchers updated"
+			gc.updated = true
 		}
 
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
+		gc.updated = true
 	}
 
-	// persist changes and create K8s event logging the change
-	eventType := common.StateChangeEventType
-	labels := map[string]string{
-		common.LabelGatewayEventSourceName: status.Name,
-		common.LabelGatewayName:            gc.Name,
-		common.LabelGatewayEventSourceID:   status.Id,
-		common.LabelOperation:              "persist_event_source_state",
-	}
-	updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, &gc.Log)
-	if err != nil {
-		gc.Log.Error().Err(err).Msg("failed to persist gateway resource updates, reverting to old state")
-		eventType = common.EscalationEventType
-	}
+	if gc.updated {
+		// persist changes and create K8s event logging the change
+		eventType := common.StateChangeEventType
+		labels := map[string]string{
+			common.LabelGatewayEventSourceName: status.Name,
+			common.LabelGatewayName:            gc.Name,
+			common.LabelGatewayEventSourceID:   status.Id,
+			common.LabelOperation:              "persist_event_source_state",
+		}
+		updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, &gc.Log)
+		if err != nil {
+			gc.Log.Error().Err(err).Msg("failed to persist gateway resource updates, reverting to old state")
+			eventType = common.EscalationEventType
+		}
 
-	// update gateway ref. in case of failure to persist updates, this is a deep copy of old gateway resource
-	gc.gw = updatedGw
-	labels[common.LabelEventType] = string(eventType)
+		// update gateway ref. in case of failure to persist updates, this is a deep copy of old gateway resource
+		gc.gw = updatedGw
+		labels[common.LabelEventType] = string(eventType)
 
-	// generate a K8s event for persist event source state change
-	if err := common.GenerateK8sEvent(gc.Clientset, msg, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
-		gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
+		// generate a K8s event for persist event source state change
+		if err := common.GenerateK8sEvent(gc.Clientset, msg, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
+		}
 	}
+	gc.updated = false
 }

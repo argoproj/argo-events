@@ -18,10 +18,10 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -54,8 +54,8 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 // operate checks the status of gateway resource and takes action based on it.
 func (goc *gwOperationCtx) operate() error {
 	defer func() {
-		// persist updates to gateway resource.
 		if goc.updated {
+			var err error
 			eventType := common.StateChangeEventType
 			labels := map[string]string{
 				common.LabelGatewayName:                    goc.gw.Name,
@@ -63,14 +63,13 @@ func (goc *gwOperationCtx) operate() error {
 				common.LabelKeyGatewayControllerInstanceID: goc.controller.Config.InstanceID,
 				common.LabelOperation:                      "persist_gateway_state",
 			}
-			updatedGw, err := PersistUpdates(goc.controller.gatewayClientset, goc.gw, &goc.log)
+			goc.gw, err = PersistUpdates(goc.controller.gatewayClientset, goc.gw, &goc.log)
 			if err != nil {
 				goc.log.Error().Err(err).Msg("failed to persist gateway update, escalating...")
 				// escalate
 				eventType = common.EscalationEventType
 			}
 
-			goc.gw = updatedGw
 			labels[common.LabelEventType] = string(eventType)
 			if err := common.GenerateK8sEvent(goc.controller.kubeClientset, "persist update", eventType, "gateway state update", goc.gw.Name, goc.gw.Namespace,
 				goc.controller.Config.InstanceID, gateway.Kind, labels); err != nil {
@@ -79,9 +78,10 @@ func (goc *gwOperationCtx) operate() error {
 			}
 			goc.log.Info().Msg("successfully persisted gateway resource update and created K8s event")
 		}
+		goc.updated = false
 	}()
 
-	goc.log.Info().Msg("operating on the gateway")
+	goc.log.Info().Str("phase", string(goc.gw.Status.Phase)).Msg("operating on the gateway")
 
 	// check the state of a gateway and take actions accordingly
 	switch goc.gw.Status.Phase {
@@ -120,7 +120,6 @@ func (goc *gwOperationCtx) operate() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed gateway pod. err: %s", err))
 			return err
 		}
-
 		goc.log.Info().Str("pod-name", goc.gw.Name).Msg("gateway pod created")
 
 		// expose gateway if service is configured

@@ -13,6 +13,10 @@ spec:
         dispatch-mechanism: http
     spec:
       containers:
+        - name: "gateway-client"
+          image: "metalgearsolid/gateway-client:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
         - name: "calendar-events"
           image: "metalgearsolid/calendar-gateway:v0.6.1"
           imagePullPolicy: "Always"

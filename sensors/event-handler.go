@@ -60,34 +60,31 @@ func EqualTriggers(a, b []v1alpha1.Trigger) bool {
 func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification) {
 	defer func() {
 		// persist updates to sensor resource
-		if sec.updated {
-			labels := map[string]string{
-				common.LabelSensorName:                    sec.sensor.Name,
-				common.LabelSensorKeyPhase:                string(sec.sensor.Status.Phase),
-				common.LabelKeySensorControllerInstanceID: sec.controllerInstanceID,
-				common.LabelOperation:                     "persist_state_update",
-			}
-			eventType := common.StateChangeEventType
-
-			updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
-			if err != nil {
-				sec.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
-				// escalate failure
-				eventType = common.EscalationEventType
-			}
-
-			// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
-			sec.sensor = updatedSensor
-
-			labels[common.LabelEventType] = string(eventType)
-			if err := common.GenerateK8sEvent(sec.kubeClient, "persist update", eventType, "sensor resource update", sec.sensor.Name,
-				sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-				sec.log.Error().Err(err).Msg("failed to create K8s event to log sensor resource persist operation")
-				return
-			}
-			sec.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
+		labels := map[string]string{
+			common.LabelSensorName:                    sec.sensor.Name,
+			common.LabelSensorKeyPhase:                string(sec.sensor.Status.Phase),
+			common.LabelKeySensorControllerInstanceID: sec.controllerInstanceID,
+			common.LabelOperation:                     "persist_state_update",
 		}
-		sec.updated = false
+		eventType := common.StateChangeEventType
+
+		updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
+		if err != nil {
+			sec.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
+			// escalate failure
+			eventType = common.EscalationEventType
+		}
+
+		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
+		sec.sensor = updatedSensor
+
+		labels[common.LabelEventType] = string(eventType)
+		if err := common.GenerateK8sEvent(sec.kubeClient, "persist update", eventType, "sensor resource update", sec.sensor.Name,
+			sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log sensor resource persist operation")
+			return
+		}
+		sec.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
 	}()
 
 	switch ew.notificationType {
@@ -134,7 +131,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		// check if all event dependencies are complete and kick-off triggers
 		sec.processTriggers()
-		sec.updated = true
 
 	case v1alpha1.ResourceUpdateNotification:
 		sec.log.Info().Msg("sensor resource update")
@@ -161,7 +157,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 				}
 			}
 		}
-		sec.updated = true
 
 	default:
 		sec.log.Error().Str("notification-type", string(ew.notificationType)).Msg("unknown notification type")
@@ -226,6 +221,7 @@ func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Reque
 			event:           event,
 			writer:          w,
 			eventDependency: eventDependency,
+			notificationType: v1alpha1.EventNotification,
 		}
 		return
 	}

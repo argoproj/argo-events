@@ -5,11 +5,13 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  imageVersion: "latest"
-  imagePullPolicy: Always
-  signals:
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "metalgearsolid/sensor:v0.6.1"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  dependencies:
     - name: artifact-gateway/input
   triggers:
     - name: artifact-workflow-trigger
