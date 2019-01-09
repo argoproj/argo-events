@@ -24,7 +24,7 @@ spec:
       serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
-  dispatchMechanism: "HTTP"
+  dispatchProtocol: "HTTP"
   eventVersion: "1.0"
   processorPort: "9330"
   imageVersion: "v0.6.1"

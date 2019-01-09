@@ -7,17 +7,26 @@ metadata:
     gateway-name: "file-gateway"
 spec:
   deploySpec:
-    containers:
-    - name: "file-events"
-      image: "argoproj/file-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/file-gateway"]
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      labels:
+        gateway-type: file
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "metalgearsolid/gateway-client:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "file-events"
+          image: "metalgearsolid/file-gateway:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/file-gateway"]
+      serviceAccountName: "argo-events-sa"
   configMap: "file-gateway-configmap"
+  dispatchProtocol: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
+  processorPort: "9330"
   type: "file"
-  dispatchMechanism: "HTTP"
   watchers:
     sensors:
     - name: "file-sensor"
