@@ -87,3 +87,7 @@ required = [
   [[prune.project]]
     name = "k8s.io/code-generator"
     unused-packages = false
+
+[[constraint]]
+  name = "github.com/google/go-github"
+  version = "21.0.0"
