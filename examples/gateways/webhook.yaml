@@ -8,42 +8,24 @@ metadata:
 spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
-  dispatchProtocol: "HTTP"
+  dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "v0.6.1"
+  imageVersion: "latest"
   deploySpec:
-    metadata:
-      labels:
-        gateway-type: webhook
-        dispatch-mechanism: http
-    spec:
-      containers:
-        - name: "webhook-events-server"
-          image: "metalgearsolid/webhook-gateway:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/webhook-gateway"]
-        - name: "webhook-events-client"
-          image: "metalgearsolid/gateway-client:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/gateway-client"]
-      serviceAccountName: "argo-events-sa"
-  processorPort: "9330"
+    containers:
+      - name: "webhook-events"
+        image: "argoproj/webhook-gateway"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/webhook-gateway"]
+    serviceAccountName: "argo-events-sa"
+  transformerImage: "argoproj/gateway-http-transformer"
   serviceSpec:
-    metadata:
-      name: webhook-gateway-svc
-      labels:
-        svc-type: gateway-svc
-    spec:
-      selector:
-        gateway-name: "webhook-gateway"
-      ports:
-        - port: 12000
-          targetPort: 12000
-          name: index
-        - port: 13000
-          targetPort: 13000
-          name: foo
-      type: LoadBalancer
+    selector:
+      gateway-name: "webhook-gateway"
+    ports:
+      - port: 12000
+        targetPort: 12000
+    type: LoadBalancer
   watchers:
     sensors:
-    - name: "webhook-sensor"
+      - name: "webhook-sensor"

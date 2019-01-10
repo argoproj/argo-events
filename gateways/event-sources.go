@@ -128,7 +128,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					Phase:   v1alpha1.NodePhaseError,
 					Id:      eventSource.Data.ID,
 					Message: "connection_is_not_in_ready_state",
-					Name: eventSource.Data.Src,
+					Name:    eventSource.Data.Src,
 				}
 				return
 			}
@@ -147,7 +147,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					Phase:   v1alpha1.NodePhaseError,
 					Id:      eventSource.Data.ID,
 					Message: "event_source_is_not_valid",
-					Name: eventSource.Data.Src,
+					Name:    eventSource.Data.Src,
 				}
 				return
 			}
@@ -171,7 +171,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
 					Message: "failed_to_receive_event_stream",
-					Name: eventSource.Data.Src,
+					Name:    eventSource.Data.Src,
 					Id:      eventSource.Data.ID,
 				}
 				return
@@ -186,7 +186,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 						gc.StatusCh <- EventSourceStatus{
 							Phase:   v1alpha1.NodePhaseCompleted,
 							Message: "event_source_has_been_stopped",
-							Name: eventSource.Data.Src,
+							Name:    eventSource.Data.Src,
 							Id:      eventSource.Data.ID,
 						}
 						return
@@ -196,7 +196,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					gc.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseError,
 						Message: "failed_to_receive_event_from_event_source_stream",
-						Name: eventSource.Data.Src,
+						Name:    eventSource.Data.Src,
 						Id:      eventSource.Data.ID,
 					}
 					return

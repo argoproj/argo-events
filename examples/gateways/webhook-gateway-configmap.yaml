@@ -8,6 +8,5 @@ data:
     endpoint: "/"
     method: "POST"
   foo: |-
-    port: "12000"
     endpoint: "/foo"
     method: "POST"

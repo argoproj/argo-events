@@ -18,18 +18,3 @@ data:
     secretKey:
       key: secretkey
       name: artifacts-minio
-  output: |-
-    s3EventConfig:
-      bucket: output
-      endpoint: minio-service.argo-events:9000
-      event: s3:ObjectCreated:Put
-      filter:
-        prefix: ""
-        suffix: ""
-    insecure: true
-    accessKey:
-      key: accesskey
-      name: artifacts-minio
-    secretKey:
-      key: secretkey
-      name: artifacts-minio

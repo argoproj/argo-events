@@ -7,26 +7,17 @@ metadata:
     gateway-name: "nats-gateway"
 spec:
   deploySpec:
-    metadata:
-      labels:
-        gateway-type: artifact
-        dispatch-mechanism: http
-    spec:
-      containers:
-        - name: "gateway-client"
-          image: "metalgearsolid/gateway-client:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/gateway-client"]
-        - name: "artifact-events"
-          image: "metalgearsolid/nats-gateway:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/nats-gateway"]
-      serviceAccountName: "argo-events-sa"
+    containers:
+      - name: "nats-events"
+        image: "argoproj/nats-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/nats-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "nats-gateway-configmap"
   type: "nats"
+  dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  processorPort: "9330"
-  dispatchProtocol: "HTTP"
+  imageVersion: "latest"
   watchers:
     sensors:
-    - name: "nats-sensor"
+      - name: "nats-sensor"

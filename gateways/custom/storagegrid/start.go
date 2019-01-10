@@ -194,6 +194,12 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 	<-rc.startCh
 
+	if rc.sgConfig.mux == nil {
+		mutex.Lock()
+		rc.sgConfig.mux = activeServers[rc.sgConfig.Port].srv
+		mutex.Unlock()
+	}
+
 	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
 
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")

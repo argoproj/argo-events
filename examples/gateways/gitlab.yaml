@@ -7,26 +7,17 @@ metadata:
     gateway-name: "gitlab-gateway"
 spec:
   deploySpec:
-    metadata:
-      labels:
-        gateway-type: gitlab
-        dispatch-mechanism: http
-    spec:
-      containers:
-        - name: "gateway-client"
-          image: "metalgearsolid/gateway-client:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/gateway-client"]
-        - name: "file-events"
-          image: "metalgearsolid/gitlab-gateway:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/file-gateway"]
-      serviceAccountName: "argo-events-sa"
+    containers:
+      - name: "gitlab-events"
+        image: "argoproj/gitlab-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/gitlab-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "gitlab-gateway-configmap"
   type: "gitlab"
-  dispatchProtocol: "HTTP"
+  dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  processorPort: "9330"
+  imageVersion: "latest"
   watchers:
-      sensors:
+    sensors:
       - name: "gitlab-sensor"

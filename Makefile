@@ -16,8 +16,8 @@ override LDFLAGS += \
 
 #  docker image publishing options
 DOCKER_PUSH=true
-IMAGE_NAMESPACE=metalgearsolid
-IMAGE_TAG=v0.6.1
+IMAGE_NAMESPACE=argoproj
+IMAGE_TAG=v0.7
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
@@ -222,11 +222,6 @@ coverage:
 
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
-
-generate-spec-docs:
-	 ./hack/update-openapigen.sh
-	 go run hack/spec-gen.go
-	 sudo sh ./hack/generate-spec-docs.sh
 
 .PHONY: protogen
 protogen:

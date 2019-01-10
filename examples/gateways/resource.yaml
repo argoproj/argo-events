@@ -1,3 +1,4 @@
+
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
@@ -7,26 +8,17 @@ metadata:
     gateway-name: "resource-gateway"
 spec:
   deploySpec:
-    metadata:
-      labels:
-        gateway-type: resource
-        dispatch-mechanism: http
-    spec:
-      containers:
-        - name: "gateway-client"
-          image: "metalgearsolid/gateway-client:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/gateway-client"]
-        - name: "artifact-events"
-          image: "metalgearsolid/resource-gateway:v0.6.1"
-          imagePullPolicy: "Always"
-          command: ["/bin/resource-gateway"]
-      serviceAccountName: "argo-events-sa"
+    containers:
+      - name: "resource-events"
+        image: "argoproj/resource-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/resource-gateway"]
+    serviceAccountName: "argo-events-sa"
   configMap: "resource-gateway-configmap"
   type: "resource"
-  dispatchProtocol: "HTTP"
+  dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  processorPort: "9330"
+  imageVersion: "latest"
   watchers:
     sensors:
-    - name: "resource-sensor"
+      - name: "resource-sensor"

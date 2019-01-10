@@ -218,9 +218,9 @@ func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Reque
 	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
 		// process the event
 		sec.queue <- &updateNotification{
-			event:           event,
-			writer:          w,
-			eventDependency: eventDependency,
+			event:            event,
+			writer:           w,
+			eventDependency:  eventDependency,
 			notificationType: v1alpha1.EventNotification,
 		}
 		return

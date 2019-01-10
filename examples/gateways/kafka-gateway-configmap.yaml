@@ -4,10 +4,10 @@ metadata:
   name: kafka-gateway-configmap
 data:
   foo: |-
-    url: kafka-service.argo-events:9092
+    url: kafka.argo-events:9092
     topic: foo
     partition: "0"
   bar: |-
-    url: kafka-service.argo-events:9092
+    url: kafka.argo-events:9092
     topic: bar
     partition: "1"
