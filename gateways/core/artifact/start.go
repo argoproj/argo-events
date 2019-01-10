@@ -42,7 +42,7 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 }
 
 // listenEvents listens to minio bucket notifications
-func (ese *S3EventSourceExecutor) listenEvents(artifact *S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *S3EventSourceExecutor) listenEvents(artifact *s3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("retrieving access and secret key")

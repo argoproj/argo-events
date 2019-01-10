@@ -7,6 +7,22 @@ metadata:
     gateway-name: "kafka-gateway"
 spec:
   deploySpec:
+    metadata:
+      labels:
+        gateway-type: artifact
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "metalgearsolid/gateway-client:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "artifact-events"
+          image: "metalgearsolid/kafka-gateway:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/kafka-gateway"]
+      serviceAccountName: "argo-events-sa"
+  deploySpec:
     containers:
     - name: "kafka-events"
       image: "argoproj/kafka-gateway"

@@ -34,9 +34,9 @@ type GitlabEventSourceExecutor struct {
 	Namespace string
 }
 
-// GitlabConfig contains information to setup a gitlab project integration
+// glab contains information to setup a gitlab project integration
 // +k8s:openapi-gen=true
-type GitlabConfig struct {
+type glab struct {
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
 	// URL of a http server which is listening for gitlab events.
@@ -69,8 +69,8 @@ type cred struct {
 }
 
 // parseEventSource parses an event sources of gateway
-func parseEventSource(config *string) (*GitlabConfig, error) {
-	var g *GitlabConfig
+func parseEventSource(config *string) (*glab, error) {
+	var g *glab
 	err := yaml.Unmarshal([]byte(*config), &g)
 	if err != nil {
 		return nil, err

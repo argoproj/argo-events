@@ -29,36 +29,39 @@ func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, event
 	v := &gateways.ValidEventSource{}
 	artifact, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
-	if err = ese.validate(artifact); err != nil {
-		return v, err
+	if err = validateArtifact(artifact); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
 	}
+	gateways.SetValidEventSource(v, "", true)
 	return v, nil
 }
 
 // validates an artifact
-func (ese *S3EventSourceExecutor) validate(artifact *S3Artifact) error {
+func validateArtifact(artifact *s3Artifact) error {
 	if artifact == nil {
 		return gateways.ErrEmptyEventSource
 	}
 	if artifact.S3EventConfig == nil {
-		return fmt.Errorf("%+v, s3 bucket configuration can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("s3 bucket configuration can't be empty")
 	}
 	if artifact.AccessKey == nil {
-		return fmt.Errorf("%+v, access key can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("access key can't be empty")
 	}
 	if artifact.SecretKey == nil {
-		return fmt.Errorf("%+v, secret key can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("secret key can't be empty")
 	}
 	if artifact.S3EventConfig.Endpoint == "" {
-		return fmt.Errorf("%+v, endpoint url can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("endpoint url can't be empty")
 	}
 	if artifact.S3EventConfig.Bucket == "" {
-		return fmt.Errorf("%+v, bucket name can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("bucket name can't be empty")
 	}
 	if artifact.S3EventConfig.Event != "" && minio.NotificationEventType(artifact.S3EventConfig.Event) == "" {
-		return fmt.Errorf("%+v, unknown event %s", gateways.ErrInvalidEventSource, artifact.S3EventConfig.Event)
+		return fmt.Errorf("unknown event %s", artifact.S3EventConfig.Event)
 	}
 	return nil
 }

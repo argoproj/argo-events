@@ -47,7 +47,7 @@ func (ese *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventS
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
+func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		// standard cron expression
 		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
@@ -69,7 +69,7 @@ func resolveSchedule(cal *CalSchedule) (cronlib.Schedule, error) {
 }
 
 // listenEvents fires an event when schedule is passed.
-func (ese *CalendarConfigExecutor) listenEvents(cal *CalSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *CalendarConfigExecutor) listenEvents(cal *calSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	schedule, err := resolveSchedule(cal)

@@ -28,19 +28,29 @@ func (ese *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es 
 	v := &gateways.ValidEventSource{}
 	fwc, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
+	if err = validateFileWatcher(fwc); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateFileWatcher(fwc *fileWatcher) error {
 	if fwc == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("configuration must be non empty")
 	}
 	if fwc.Type == "" {
-		return v, fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("type must be specified")
 	}
 	if fwc.Directory == "" {
-		return v, fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("directory must be specified")
 	}
 	if fwc.Path == "" {
-		return v, fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("path must be specified")
 	}
-	return v, nil
+	return nil
 }

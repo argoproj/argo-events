@@ -26,9 +26,9 @@ type FileEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
-// FileWatcherConfig contains configuration information for this gateway
+// fileWatcher contains configuration information for this gateway
 // +k8s:openapi-gen=true
-type FileWatcherConfig struct {
+type fileWatcher struct {
 	// Directory to watch for events
 	Directory string `json:"directory"`
 	// Path is relative path of object to watch with respect to the directory
@@ -38,8 +38,8 @@ type FileWatcherConfig struct {
 	Type string `json:"type"`
 }
 
-func parseEventSource(eventSource *string) (*FileWatcherConfig, error) {
-	var f *FileWatcherConfig
+func parseEventSource(eventSource *string) (*fileWatcher, error) {
+	var f *fileWatcher
 	err := yaml.Unmarshal([]byte(*eventSource), &f)
 	if err != nil {
 		return nil, err

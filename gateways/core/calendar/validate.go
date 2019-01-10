@@ -28,17 +28,26 @@ func (ese *CalendarConfigExecutor) ValidateEventSource(ctx context.Context, even
 	v := &gateways.ValidEventSource{}
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
+	if err := validateSchedule(cal); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateSchedule(cal *calSchedule) error {
 	if cal == nil {
-		return v, gateways.ErrEmptyEventSource
+		return gateways.ErrEmptyEventSource
 	}
 	if cal.Schedule == "" && cal.Interval == "" {
-		return v, fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("must have either schedule or interval")
 	}
-	_, err = resolveSchedule(cal)
-	if err != nil {
-		return v, err
+	if _, err := resolveSchedule(cal); err != nil {
+		return err
 	}
-	return v, nil
+	return nil
 }

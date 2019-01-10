@@ -17,7 +17,6 @@ limitations under the License.
 package gateways
 
 import (
-	"fmt"
 	gtw "github.com/argoproj/argo-events/controllers/gateway"
 	"time"
 
@@ -96,8 +95,6 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 	gc.Log.Info().Msg("received a gateway state update notification")
 
-	msg := fmt.Sprintf("event source state changed to %s", string(status.Phase))
-
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
 		// init the node and mark it as running
@@ -109,7 +106,6 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 	case v1alpha1.NodePhaseResourceUpdate:
 		if gc.gw.Spec.Watchers != status.Gw.Spec.Watchers {
 			gc.gw.Spec.Watchers = status.Gw.Spec.Watchers
-			msg = "gateway watchers updated"
 			gc.updated = true
 		}
 
@@ -138,7 +134,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 		labels[common.LabelEventType] = string(eventType)
 
 		// generate a K8s event for persist event source state change
-		if err := common.GenerateK8sEvent(gc.Clientset, msg, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+		if err := common.GenerateK8sEvent(gc.Clientset, status.Message, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
 			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
 		}
 	}

@@ -31,35 +31,44 @@ func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, 
 	v := &gateways.ValidEventSource{}
 	w, err := parseEventSource(es.Data)
 	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err = validateWebhook(w); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
 
+func validateWebhook(w *webhook) error {
 	if w == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 
 	switch w.Method {
 	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
 	default:
-		return v, fmt.Errorf("%+v, unknown HTTP method %s", gateways.ErrInvalidEventSource, w.Method)
+		return fmt.Errorf("unknown HTTP method %s", w.Method)
 	}
 
 	if w.Endpoint == "" {
-		return v, fmt.Errorf("%+v, endpoint can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("endpoint can't be empty")
 	}
 	if w.Port == "" {
-		return v, fmt.Errorf("%+v, port can't be empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("port can't be empty")
 	}
 
 	if !strings.HasPrefix(w.Endpoint, "/") {
-		return v, fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("endpoint must start with '/'")
 	}
 
 	if w.Port != "" {
 		_, err := strconv.Atoi(w.Port)
 		if err != nil {
-			return v, fmt.Errorf("%+v, failed to parse server port %s. err: %+v", gateways.ErrInvalidEventSource, w.Port, err)
+			return fmt.Errorf("failed to parse server port %s. err: %+v", w.Port, err)
 		}
 	}
-	return v, nil
+	return nil
 }

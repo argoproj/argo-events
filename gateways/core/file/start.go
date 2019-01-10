@@ -41,7 +41,7 @@ func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ese *FileEventSourceExecutor) listenEvents(fwc *FileWatcherConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	// create new fs watcher

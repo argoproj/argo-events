@@ -30,6 +30,12 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
+// SetValidateReason set the result of event source validation
+func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
+	v.Reason = &reason
+	v.IsValid = &valid
+}
+
 // HandleEventsFromEventSource handles events from the event source.
 func HandleEventsFromEventSource(name *string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
 	for {

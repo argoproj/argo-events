@@ -29,14 +29,27 @@ func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es 
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateNATS(n); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, nil
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateNATS(n *natsConfig) error {
 	if n == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
 	if n.URL == "" {
-		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
 	}
 	if n.Subject == "" {
-		return v, fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidEventSource)
 	}
-	return v, nil
+	return nil
 }

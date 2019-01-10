@@ -127,25 +127,27 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
 					Id:      eventSource.Data.ID,
-					Message: fmt.Sprintf("connection is not in ready state"),
+					Message: "connection_is_not_in_ready_state",
+					Name: eventSource.Data.Src,
 				}
 				return
 			}
 
 			// validate event source
-			_, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
+			valid, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
 				Data: &eventSource.Data.Config,
 				Name: &eventSource.Data.Src,
 			})
-			if err != nil {
-				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("event source is not valid")
+			if err != nil || !*valid.IsValid {
+				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Str("validation-failure", *valid.Reason).Msg("event source is not valid")
 				if err := eventSource.Conn.Close(); err != nil {
 					gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
 				}
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
 					Id:      eventSource.Data.ID,
-					Message: fmt.Sprintf("event source is not valid. err: %+v", err),
+					Message: "event_source_is_not_valid",
+					Name: eventSource.Data.Src,
 				}
 				return
 			}
@@ -155,7 +157,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			// mark event source as running
 			gc.StatusCh <- EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseRunning,
-				Message: "event source is running",
+				Message: "event_source_is_running",
 				Id:      eventSource.Data.ID,
 				Name:    eventSource.Data.Src,
 			}
@@ -168,7 +170,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			if err != nil {
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
-					Message: fmt.Sprintf("failed to receive event stream from event source. err: %+v", err),
+					Message: "failed_to_receive_event_stream",
+					Name: eventSource.Data.Src,
 					Id:      eventSource.Data.ID,
 				}
 				return
@@ -182,7 +185,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 						gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("event source has stopped")
 						gc.StatusCh <- EventSourceStatus{
 							Phase:   v1alpha1.NodePhaseCompleted,
-							Message: "event source has been stopped",
+							Message: "event_source_has_been_stopped",
+							Name: eventSource.Data.Src,
 							Id:      eventSource.Data.ID,
 						}
 						return
@@ -191,7 +195,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("failed to receive event from stream")
 					gc.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseError,
-						Message: fmt.Sprintf("failed to receive event from event source stream. err: %v", err),
+						Message: "failed_to_receive_event_from_event_source_stream",
+						Name: eventSource.Data.Src,
 						Id:      eventSource.Data.ID,
 					}
 					return

@@ -33,10 +33,10 @@ type S3EventSourceExecutor struct {
 	Namespace string
 }
 
-// S3Artifact contains information about an artifact in S3
+// s3Artifact contains information about an artifact in S3
 // +k8s:openapi-gen=true
 //proteus:generate
-type S3Artifact struct {
+type s3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
 	S3EventConfig *S3EventConfig `json:"s3EventConfig"`
 
@@ -69,8 +69,8 @@ type S3Filter struct {
 	Suffix string `json:"suffix"`
 }
 
-func parseEventSource(config *string) (*S3Artifact, error) {
-	var s *S3Artifact
+func parseEventSource(config *string) (*s3Artifact, error) {
+	var s *s3Artifact
 	err := yaml.Unmarshal([]byte(*config), &s)
 	if err != nil {
 		return nil, err

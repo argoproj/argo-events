@@ -60,7 +60,6 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	<-doneCh
 	token := client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
-		// nothing to do
 		ese.Log.Error().Err(token.Error()).Str("event-source-name", *eventSource.Name).Msg("failed to unsubscribe client")
 	}
 }

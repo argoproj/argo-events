@@ -31,17 +31,30 @@ func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Conte
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateStorageGrid(sg); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateStorageGrid(sg *storageGrid) error {
 	if sg == nil {
-		return v, gateways.ErrEmptyEventSource
+		return gateways.ErrEmptyEventSource
 	}
 	if sg.Port == "" {
-		return v, fmt.Errorf("%+v, must specify port", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("must specify port")
 	}
 	if sg.Endpoint == "" {
-		return v, fmt.Errorf("%+v, must specify endpoint", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("must specify endpoint")
 	}
 	if !strings.HasPrefix(sg.Endpoint, "/") {
-		return v, fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("endpoint must start with '/'")
 	}
-	return v, nil
+	return nil
 }

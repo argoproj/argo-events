@@ -25,21 +25,34 @@ import (
 // ValidateEventSource validates gateway event source
 func (ese *MqttEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
-	mqttConfig, err := parseEventSource(es.Data)
+	m, err := parseEventSource(es.Data)
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
-	if mqttConfig == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
-	if mqttConfig.URL == "" {
-		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
+	if err = validateMQTT(m); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
 	}
-	if mqttConfig.Topic == "" {
-		return v, fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidEventSource)
-	}
-	if mqttConfig.ClientId == "" {
-		return v, fmt.Errorf("%+v, client id must be specified", gateways.ErrInvalidEventSource)
-	}
+	gateways.SetValidEventSource(v, "", true)
 	return v, nil
+}
+
+func validateMQTT(m *mqtt) error {
+	if m == nil {
+		return fmt.Errorf("configuration must be non empty")
+	}
+	if m.URL == "" {
+		return fmt.Errorf("url must be specified")
+	}
+	if m.Topic == "" {
+		return fmt.Errorf("topic must be specified", gateways.ErrInvalidEventSource)
+	}
+	if m.ClientId == "" {
+		return fmt.Errorf("client id must be specified", gateways.ErrInvalidEventSource)
+	}
+	return nil
 }

@@ -30,20 +30,33 @@ func (ese *ResourceEventSourceExecutor) ValidateEventSource(ctx context.Context,
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateResource(res); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateResource(res *resource) error {
 	if res == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("configuration must be non empty")
 	}
 	if res.Version == "" {
-		return v, fmt.Errorf("%+v, resource version must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("resource version must be specified")
 	}
 	if res.Namespace == "" {
-		return v, fmt.Errorf("%+v, resource namespace must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("resource namespace must be specified")
 	}
 	if res.Kind == "" {
-		return v, fmt.Errorf("%+v, resource kind must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("resource kind must be specified")
 	}
 	if res.Group == "" {
-		return v, fmt.Errorf("%+v, resource group must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("resource group must be specified")
 	}
-	return v, nil
+	return nil
 }

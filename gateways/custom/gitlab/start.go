@@ -52,7 +52,7 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ese *GitlabEventSourceExecutor) listenEvents(g *GitlabConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *GitlabEventSourceExecutor) listenEvents(g *glab, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	c, err := ese.getCredentials(g.AccessToken)
 	if err != nil {
 		errorCh <- err

@@ -27,23 +27,36 @@ func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateGitlab(g); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, nil
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateGitlab(g *glab) error {
 	if g == nil {
-		return v, gateways.ErrEmptyEventSource
+		return gateways.ErrEmptyEventSource
 	}
 	if g.ProjectId == "" {
-		return v, fmt.Errorf("project id can't be empty")
+		return fmt.Errorf("project id can't be empty")
 	}
 	if g.Event == "" {
-		return v, fmt.Errorf("event type can't be empty")
+		return fmt.Errorf("event type can't be empty")
 	}
 	if g.URL == "" {
-		return v, fmt.Errorf("url can't be empty")
+		return fmt.Errorf("url can't be empty")
 	}
 	if g.GitlabBaseURL == "" {
-		return v, fmt.Errorf("gitlab base url can't be empty")
+		return fmt.Errorf("gitlab base url can't be empty")
 	}
 	if g.AccessToken == nil {
-		return v, fmt.Errorf("access token can't be nil")
+		return fmt.Errorf("access token can't be nil")
 	}
-	return v, nil
+	return nil
 }

@@ -27,7 +27,7 @@ import (
 var (
 	configKey   = "testConfig"
 	configValue = `
-url: nats://nats.argo-events:4222
+url: natsConfig://natsConfig.argo-events:4222
 subject: foo
 `
 )

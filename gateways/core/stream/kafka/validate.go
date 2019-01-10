@@ -26,21 +26,34 @@ import (
 // ValidateEventSource validates the gateway event source
 func (ese *KafkaEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
-	kafkaConfig, err := parseEventSource(es.Data)
+	k, err := parseEventSource(es.Data)
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
-	if kafkaConfig == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
-	if kafkaConfig.URL == "" {
-		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
+	if err = validateKafka(k); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
 	}
-	if kafkaConfig.Topic == "" {
-		return v, fmt.Errorf("%+v, topic must be specified", gateways.ErrInvalidEventSource)
-	}
-	if kafkaConfig.Partition == "" {
-		return v, fmt.Errorf("%+v, partition must be specified", gateways.ErrInvalidEventSource)
-	}
+	gateways.SetValidEventSource(v, "", true)
 	return v, nil
+}
+
+func validateKafka(k *kafka) error {
+	if k == nil {
+		return fmt.Errorf("configuration must be non empty")
+	}
+	if k.URL == "" {
+		return fmt.Errorf("url must be specified")
+	}
+	if k.Topic == "" {
+		return fmt.Errorf("topic must be specified")
+	}
+	if k.Partition == "" {
+		return fmt.Errorf("partition must be specified")
+	}
+	return nil
 }

@@ -29,7 +29,7 @@ type NatsEventSourceExecutor struct {
 // Nats contains configuration to connect to NATS cluster
 // +k8s:openapi-gen=true
 type natsConfig struct {
-	// URL to connect to nats cluster
+	// URL to connect to natsConfig cluster
 	URL string `json:"url"`
 
 	// Subject name

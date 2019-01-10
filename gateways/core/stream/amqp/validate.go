@@ -29,20 +29,33 @@ func (ese *AMQPEventSourceExecutor) ValidateEventSource(ctx context.Context, es 
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateAMQP(a); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateAMQP(a *amqp) error {
 	if a == nil {
-		return v, fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("configuration must be non empty")
 	}
 	if a.URL == "" {
-		return v, fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("url must be specified")
 	}
 	if a.RoutingKey == "" {
-		return v, fmt.Errorf("%+v, routing key must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("routing key must be specified")
 	}
 	if a.ExchangeName == "" {
-		return v, fmt.Errorf("%+v, exchange name must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("exchange name must be specified")
 	}
 	if a.ExchangeType == "" {
-		return v, fmt.Errorf("%+v, exchange type must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("exchange type must be specified")
 	}
-	return v, nil
+	return nil
 }

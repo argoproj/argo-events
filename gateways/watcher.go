@@ -101,6 +101,7 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 					gc.StatusCh <- EventSourceStatus{
 						Phase: v1alpha1.NodePhaseResourceUpdate,
 						Gw:    g,
+						Message: "gateway_resource_update",
 					}
 				}
 			},

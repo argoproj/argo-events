@@ -64,7 +64,7 @@ type server struct {
 }
 
 type routeConfig struct {
-	sgConfig            *StorageGridEventConfig
+	sgConfig            *storageGrid
 	eventSource         *gateways.EventSource
 	eventSourceExecutor *StorageGridEventSourceExecutor
 	dataCh              chan []byte
@@ -112,7 +112,7 @@ func generateUUID() uuid.UUID {
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *StorageGridEventConfig) bool {
+func filterEvent(notification *storageGridNotification, sg *storageGrid) bool {
 	if sg.Events == nil {
 		return true
 	}
@@ -125,7 +125,7 @@ func filterEvent(notification *storageGridNotification, sg *StorageGridEventConf
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *StorageGridEventConfig) bool {
+func filterName(notification *storageGridNotification, sg *storageGrid) bool {
 	if sg.Filter == nil {
 		return true
 	}
