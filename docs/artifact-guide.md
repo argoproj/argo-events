@@ -2,7 +2,7 @@
 This is a guide for help in utilizing artifacts within Argo Events. Sensors use artifacts for Resource Object store for use in `Resource` triggers
 
 ## Inline
-Inlined artifacts are included directly within the gateway resource and decoded as a string.
+Inlined artifacts are included directly within the sensor resource and decoded as a string.
 
 ## S3
 Amazon Simple Storage Service (S3) is a block/file/object store for the internet. The standardized [API](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) allows storage and retrieval of data at any time from anywhere on the web. There are a number of S3 providers that include, but are not limited to:
@@ -16,7 +16,7 @@ Amazon Simple Storage Service (S3) is a block/file/object store for the internet
 Argo Events uses the [minio-go](https://github.com/minio/minio-go) client for access to any Amazon S3 compatible object store. [Minio](https://www.minio.io/) is an distributed object storage server. Follow the Minio [Bucket Notification Guide](https://docs.minio.io/docs/minio-bucket-notification-guide) for help with configuring your minio server to listen and monitor for bucket event notifications. Note that you will need to setup a supported message queue for configuring your notification targets (i.e. NATS, WebHooks, Kafka, etc.). 
 
 #### Installation on Kubernetes
-The [Minio Deployment Quickstart Guide](https://docs.minio.io/docs/minio-deployment-quickstart-guide.html) is useful for help in getting Minio up & running on your orchestration platform. We've also outlined additional steps below to use Minio for eventDependency notifications and as an object store for trigger resources.
+The [Minio Deployment Quickstart Guide](https://docs.minio.io/docs/minio-deployment-quickstart-guide.html) is useful for help in getting Minio up & running on your orchestration platform. We've also outlined additional steps below to use Minio for signal notifications and as an object store for trigger resources.
 
 1. Install the Helm chart
 ```
@@ -59,7 +59,7 @@ $ k delete pod artifacts-minio
 ```
 
 ## File (future enhancement)
-This will enable access to file artifacts via a filesystem mounted as a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `gateway-controller` pod. 
+This will enable access to file artifacts via a filesystem mounted as a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `sensor-controller` pod. 
 
 ## URL (future enhancement)
 This will enable access to web artifacts via RESTful API.

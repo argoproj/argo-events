@@ -1,16 +1,16 @@
 # Trigger Guide
-Triggers are the gateway's actions. Triggers are only executed after all of the gateway's signals have been resolved.
+Triggers are the sensor's actions. Triggers are only executed after all of the sensor's signals have been resolved.
 
 The `resource` field in the trigger object has details of what to execute when the signals have been resolved. The `source` field in the `resource` object can have 3 types of values:
 
 - inline:
-In this case, the workflow to execute as part of the trigger is inlined in the gateway yaml itself. E.g. [inline-gateway](https://github.com/argoproj/argo-events/blob/master/examples/sensors/inline-gateway.yaml)
+In this case, the workflow to execute as part of the trigger is inlined in the sensor yaml itself. E.g. [inline-sensor](https://github.com/argoproj/argo-events/blob/master/examples/sensors/inline-sensor.yaml)
 
 - file:
-In this case, the workflow to execute is specified as a file-system path. This file-system path should exist in the gateway-controller deployment. The default gateway-controller does not have any volume mounts and therefore does not have any workflow yamls. If users are going to use this, they should explicitly mount appropriate volumes in the gateway-controller deployment. E.g. [file-gateway](https://github.com/argoproj/argo-events/blob/master/examples/sensors/file-gateway.yaml)
+In this case, the workflow to execute is specified as a file-system path. This file-system path should exist in the sensor-controller deployment. The default sensor-controller does not have any volume mounts and therefore does not have any workflow yamls. If users are going to use this, they should explicitly mount appropriate volumes in the sensor-controller deployment. E.g. [file-sensor](https://github.com/argoproj/argo-events/blob/master/examples/sensors/file-sensor.yaml)
 
 - url:
-In this case, the workflow to execute is specified as a url path. E.g. [url-gateway](https://github.com/argoproj/argo-events/blob/master/examples/sensors/url-gateway.yaml)
+In this case, the workflow to execute is specified as a url path. E.g. [url-sensor](https://github.com/argoproj/argo-events/blob/master/examples/sensors/url-sensor.yaml)
 
 
 ### Resource Object
