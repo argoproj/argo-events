@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: resource-gateway-configmap
 data:
-  foo: |-
+  workflow-success: |-
     namespace: argo-events
     group: "argoproj.io"
     version: "v1alpha1"
@@ -11,8 +11,7 @@ data:
     filter:
       labels:
         workflows.argoproj.io/phase: Succeeded
-        name: "my-workflow"
-  bar: |-
+  namespace: |-
     namespace: argo-events
     group: "k8s.io"
     version: "v1"

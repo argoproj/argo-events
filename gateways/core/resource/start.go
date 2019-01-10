@@ -17,7 +17,8 @@ limitations under the License.
 package resource
 
 import (
-	"fmt"
+	"strings"
+
 	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"strings"
 )
 
 // StartEventSource starts an event source
@@ -51,7 +51,7 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	resource, err := ese.discoverResources(res)
+	resources, err := ese.discoverResources(res)
 	if err != nil {
 		errorCh <- err
 		return
@@ -61,47 +61,63 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	w, err := resource.Watch(options)
-	if err != nil {
-		errorCh <- err
-		return
-	}
-
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to watch to resource notifications")
-	for {
-		select {
-		case item := <-w.ResultChan():
-			if item.Object == nil {
-				ese.Log.Warn().Str("event-source-name", *eventSource.Name).Msg("object to watch is nil")
-				// renew watch due to it being ended with "too old resource version"
-				w, err = resource.Watch(options)
-				if err != nil {
-					errorCh <- err
-					return
-				}
-				continue
-			}
-			itemObj := item.Object.(*unstructured.Unstructured)
-			b, err := itemObj.MarshalJSON()
-			if err != nil {
-				errorCh <- err
-				return
-			}
-			if item.Type == watch.Error {
-				err = errors.FromObject(item.Object)
-				errorCh <- err
-				return
-			}
-			if ese.passFilters(*eventSource.Name, itemObj, res.Filter) {
-				dataCh <- b
-			}
-		case <-doneCh:
+
+	// global quit channel
+	quitChan := make(chan struct{})
+	// start up listeners
+	for i := 0; i < len(resources); i++ {
+		resource := resources[i]
+		w, err := resource.Watch(options)
+		if err != nil {
+			errorCh <- err
 			return
 		}
+
+		localQuitChan := quitChan
+
+		go func() {
+			for {
+				select {
+				case item := <-w.ResultChan():
+					if item.Object == nil {
+						ese.Log.Warn().Str("event-source-name", *eventSource.Name).Msg("object to watch is nil")
+						// renew watch
+						newWatch, err := resource.Watch(options)
+						if err != nil {
+							continue
+						}
+						w = newWatch
+					}
+					itemObj := item.Object.(*unstructured.Unstructured)
+					b, err := itemObj.MarshalJSON()
+					if err != nil {
+						errorCh <- err
+						localQuitChan <- struct{}{}
+						return
+					}
+					if item.Type == watch.Error {
+						err = errors.FromObject(item.Object)
+						errorCh <- err
+						localQuitChan <- struct{}{}
+						return
+					}
+					if ese.passFilters(*eventSource.Name, itemObj, res.Filter) {
+						dataCh <- b
+					}
+
+				case <-localQuitChan:
+					return
+				}
+			}
+		}()
 	}
+
+	<-doneCh
+	close(quitChan)
 }
 
-func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (dynamic.ResourceInterface, error) {
+func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
 	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
 	disco, err := discovery.NewDiscoveryClientForConfig(ese.K8RestConfig)
 	if err != nil {
@@ -113,11 +129,13 @@ func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (dynami
 	if err != nil {
 		return nil, err
 	}
+
+	resources := make([]dynamic.ResourceInterface, 0)
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
 		ese.Log.Info().Str("api-resource", gvk.String())
-		if apiResource.Kind != obj.Kind || apiResource.Version != obj.Version {
+		if apiResource.Kind != obj.Kind {
 			continue
 		}
 		canWatch := false
@@ -132,10 +150,10 @@ func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (dynami
 			if err != nil {
 				return nil, err
 			}
-			return client.Resource(&apiResource, obj.Namespace), nil
+			resources = append(resources, client.Resource(&apiResource, obj.Namespace))
 		}
 	}
-	return nil, fmt.Errorf("failed to list resource with group: %s, kined: %s and version: %s with watch capabilities", obj.Group, obj.Kind, obj.Version)
+	return resources, nil
 }
 
 func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {

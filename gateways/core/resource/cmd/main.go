@@ -25,15 +25,11 @@ import (
 )
 
 func main() {
-	kubeConfig, ok := os.LookupEnv(common.EnvVarKubeConfig)
-	if !ok {
-		panic("k8s config is not provided")
-	}
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	rest, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
 		panic(err)
 	}
-
 	gateways.StartGateway(&resource.ResourceEventSourceExecutor{
 		Log:          common.GetLoggerContext(common.LoggerConf()).Logger(),
 		K8RestConfig: rest,
