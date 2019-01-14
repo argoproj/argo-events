@@ -2,10 +2,10 @@
 
 ## v0.6
 + Gitlab Gateway #120
-+ If sensor is repeatable then deploy it as deployment else job #109
++ If sn is repeatable then deploy it as deployment else job #109
 + Start gateway containers in correct order. Gateway transformer > gateway processor. Add readiness probe to gateway transformer #106
 + Kubernetes configmaps as artifact locations for triggers #104
-+ Let user set extra environment variable for sensor pod #103 
++ Let user set extra environment variable for sn pod #103 
 + Ability to provide complete Pod spec in gateway.
 + The schedule for calendar gateway is now in standard cron format   #102
 + FileWatcher as core gateway #98

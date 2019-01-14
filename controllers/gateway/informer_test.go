@@ -17,35 +17,29 @@ limitations under the License.
 package gateway
 
 import (
-	"github.com/argoproj/argo-events/common"
-	fake_gw "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
-	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/selection"
 	"testing"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
-func TestInstanceIDReq(t *testing.T) {
-	controller := &GatewayController{
-		Config: GatewayControllerConfig{
-			InstanceID: "argo-events",
-		},
-	}
+func TestInformer(t *testing.T) {
+	convey.Convey("Given a gateway controller", t, func() {
+		controller := getGatewayController()
+		convey.Convey("Instance ID required key must match", func() {
+			req := controller.instanceIDReq()
+			convey.So(req.Key(), convey.ShouldEqual, common.LabelKeyGatewayControllerInstanceID)
+			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
+			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
+		})
+	})
 
-	req := controller.instanceIDReq()
-	assert.Equal(t, common.LabelKeyGatewayControllerInstanceID, req.Key())
-
-	req = controller.instanceIDReq()
-	assert.Equal(t, selection.Equals, req.Operator())
-	assert.True(t, req.Values().Has("argo-events"))
-}
-
-func TestNewGatewayInformer(t *testing.T) {
-	controller := &GatewayController{
-		Config: GatewayControllerConfig{
-			Namespace:  "testing",
-			InstanceID: "argo-events",
-		},
-		gatewayClientset: fake_gw.NewSimpleClientset(),
-	}
-	controller.newGatewayInformer()
+	convey.Convey("Given a gateway controller", t, func() {
+		controller := getGatewayController()
+		convey.Convey("Get a new informer and make sure its not nil", func() {
+			i := controller.newGatewayInformer()
+			convey.So(i, convey.ShouldNotBeNil)
+		})
+	})
 }

@@ -2,7 +2,7 @@
 This is a guide for help in utilizing artifacts within Argo Events. Sensors use artifacts for Resource Object store for use in `Resource` triggers
 
 ## Inline
-Inlined artifacts are included directly within the sensor resource and decoded as a string.
+Inlined artifacts are included directly within the sn resource and decoded as a string.
 
 ## S3
 Amazon Simple Storage Service (S3) is a block/file/object store for the internet. The standardized [API](https://docs.aws.amazon.com/AmazonS3/latest/API/Welcome.html) allows storage and retrieval of data at any time from anywhere on the web. There are a number of S3 providers that include, but are not limited to:
@@ -59,7 +59,7 @@ $ k delete pod artifacts-minio
 ```
 
 ## File (future enhancement)
-This will enable access to file artifacts via a filesystem mounted as a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `sensor-controller` pod. 
+This will enable access to file artifacts via a filesystem mounted as a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `sn-controller` pod. 
 
 ## URL (future enhancement)
 This will enable access to web artifacts via RESTful API.

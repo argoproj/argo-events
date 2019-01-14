@@ -18,12 +18,13 @@ package gateway
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
-	"testing"
 )
 
 func getGatewayController() *GatewayController {
@@ -31,7 +32,8 @@ func getGatewayController() *GatewayController {
 		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
 		Config: GatewayControllerConfig{
-			Namespace: common.DefaultControllerNamespace,
+			Namespace:  common.DefaultControllerNamespace,
+			InstanceID: "argo-events",
 		},
 		kubeClientset:    fake.NewSimpleClientset(),
 		gatewayClientset: fakegateway.NewSimpleClientset(),
@@ -39,30 +41,46 @@ func getGatewayController() *GatewayController {
 	}
 }
 
-func TestProcessNextItem(t *testing.T) {
-	controller := getGatewayController()
-	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	controller.informer = controller.newGatewayInformer()
+func TestGatewayController(t *testing.T) {
+	convey.Convey("Given a gateway controller, process queue items", t, func() {
+		controller := getGatewayController()
 
-	controller.queue.Add("hi")
-	res := controller.processNextItem()
-	assert.True(t, res)
+		convey.Convey("Create a resource queue, add new item and process it", func() {
+			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			controller.informer = controller.newGatewayInformer()
+			controller.queue.Add("hi")
+			res := controller.processNextItem()
 
-	controller.queue.ShutDown()
-	res = controller.processNextItem()
-	assert.False(t, res)
-}
+			convey.Convey("Item from queue must be successfully processed", func() {
+				convey.So(res, convey.ShouldBeTrue)
+			})
 
-func TestHandleErr(t *testing.T) {
-	controller := getGatewayController()
-	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			convey.Convey("Shutdown queue and make sure queue does not process next item", func() {
+				controller.queue.ShutDown()
+				res := controller.processNextItem()
+				convey.So(res, convey.ShouldBeFalse)
+			})
+		})
+	})
 
-	controller.queue.Add("hi")
-	controller.handleErr(nil, "hi")
-
-	controller.queue.Add("bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
-	controller.handleErr(fmt.Errorf("real error"), "bye")
+	convey.Convey("Given a gateway controller, handle errors in queue", t, func() {
+		controller := getGatewayController()
+		convey.Convey("Create a resource queue and add an item", func() {
+			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			controller.queue.Add("hi")
+			convey.Convey("Handle an nil error", func() {
+				err := controller.handleErr(nil, "hi")
+				convey.So(err, convey.ShouldBeNil)
+			})
+			convey.Convey("Exceed max requeues", func() {
+				controller.queue.Add("bye")
+				var err error
+				for i := 0; i < 21; i++ {
+					err = controller.handleErr(fmt.Errorf("real error"), "bye")
+				}
+				convey.So(err, convey.ShouldNotBeNil)
+				convey.So(err.Error(), convey.ShouldEqual, "exceeded max requeues")
+			})
+		})
+	})
 }

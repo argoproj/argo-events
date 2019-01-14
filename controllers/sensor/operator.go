@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/rs/zerolog"
-	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -103,12 +102,12 @@ func (soc *sOperationCtx) operate() error {
 
 		// Initialize all event dependency nodes
 		for _, eventDependency := range soc.s.Spec.EventDependencies {
-			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, &soc.log)
+			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
 		}
 
 		// Initialize all trigger nodes
 		for _, trigger := range soc.s.Spec.Triggers {
-			InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew, &soc.log)
+			InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, &soc.log)
 		}
 
 		// add default env variables
@@ -129,43 +128,30 @@ func (soc *sOperationCtx) operate() error {
 		)
 
 		// create a sensor pod
-		if _, err := soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) {
-			// default label on sensor
-			if soc.s.ObjectMeta.Labels == nil {
-				soc.s.ObjectMeta.Labels = make(map[string]string)
-			}
-			soc.s.ObjectMeta.Labels[common.LabelSensorName] = soc.s.Name
-			sensorDeployment := &appv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      soc.s.Name,
-					Namespace: soc.s.Namespace,
-					Labels:    soc.s.Labels,
-					OwnerReferences: []metav1.OwnerReference{
-						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-					},
-				},
-				Spec: appv1.DeploymentSpec{
-					Selector: &metav1.LabelSelector{
-						MatchLabels: soc.s.ObjectMeta.Labels,
-					},
-					Template: corev1.PodTemplateSpec{
-						ObjectMeta: metav1.ObjectMeta{
-							GenerateName: soc.s.Name,
-							Namespace:    soc.s.Name,
-							Annotations:  soc.s.Annotations,
-							Labels:       soc.s.Labels,
-						},
-						Spec: *soc.s.Spec.DeploySpec,
-					},
-				},
-			}
-			_, err = soc.controller.kubeClientset.AppsV1().Deployments(soc.s.Namespace).Create(sensorDeployment)
-			if err != nil {
-				soc.log.Error().Err(err).Msg("failed to create deployment")
-				return err
-			}
-			soc.log.Info().Msg("sensor deployment created")
+		// default label on sensor
+		if soc.s.ObjectMeta.Labels == nil {
+			soc.s.ObjectMeta.Labels = make(map[string]string)
 		}
+		soc.s.ObjectMeta.Labels[common.LabelSensorName] = soc.s.Name
+
+		sensorPod := &corev1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      soc.s.Name,
+				Namespace: soc.s.Namespace,
+				Labels:    soc.s.Labels,
+				OwnerReferences: []metav1.OwnerReference{
+					*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
+				},
+			},
+			Spec: *soc.s.Spec.DeploySpec,
+		}
+		_, err = soc.controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).Create(sensorPod)
+		if err != nil {
+			soc.log.Error().Err(err).Msg("failed to create sensor pod")
+			return err
+		}
+		soc.log.Info().Msg("sensor pod created")
+
 
 		// Create a ClusterIP service to expose sensor in cluster
 		// For now, sensor will receive event notifications through http server.

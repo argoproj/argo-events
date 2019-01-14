@@ -140,8 +140,6 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a sensor pod goes down
 	// we want to give the sensor pod a chance to come back up so we give a genorous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		fmt.Printf("Error syncing sensor '%v': %v", key, err)
-
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
 		return nil

@@ -18,9 +18,9 @@ package github
 
 import (
 	"github.com/ghodss/yaml"
+	"github.com/google/go-github/github"
 	"github.com/rs/zerolog"
 	"k8s.io/client-go/kubernetes"
-	"github.com/google/go-github/github"
 )
 
 // GithubEventSourceExecutor implements ConfigExecutor

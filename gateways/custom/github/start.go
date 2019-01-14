@@ -118,7 +118,6 @@ func (ese *GithubEventSourceExecutor) listenEvents(g *GithubConfig, eventSource 
 
 	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
 
-
 	<-doneCh
 	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	if _, err = client.Repositories.DeleteHook(ctx, g.Owner, g.Repository, *hook.ID); err != nil {

@@ -16,12 +16,22 @@ limitations under the License.
 
 package gateway
 
-//
-//func TestGwOperationCtx_validate(t *testing.T) {
-//	fakeController := getGatewayController()
-//	gateway, err := getGateway()
-//	assert.Nil(t, err)
-//	goc := newGatewayOperationCtx(gateway, fakeController)
-//	err = Validate(goc.gw)
-//	assert.Nil(t, err)
-//}
+import (
+	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
+)
+
+func TestValidate(t *testing.T) {
+	convey.Convey("Given a gateway", t, func() {
+		gateway, err := getGateway()
+
+		convey.Convey("Make sure gateway is a valid gateway", func() {
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(gateway, convey.ShouldNotBeNil)
+
+			err := Validate(gateway)
+			convey.So(err, convey.ShouldBeNil)
+		})
+	})
+}

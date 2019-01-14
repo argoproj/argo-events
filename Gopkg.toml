@@ -13,6 +13,10 @@ required = [
 ]
 
 [[constraint]]
+  name = "github.com/smartystreets/goconvey"
+  version = "1.6.3"
+
+[[constraint]]
   name = "google.golang.org/grpc"
   version = "v1.17.0"
 

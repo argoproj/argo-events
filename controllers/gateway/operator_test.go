@@ -16,108 +16,133 @@ limitations under the License.
 
 package gateway
 
-//
-//import (
-//	"github.com/argoproj/argo-events/common"
-//	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-//	"github.com/ghodss/yaml"
-//	"github.com/stretchr/testify/assert"
-//	corev1 "k8s.io/api/core/v1"
-//	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-//	"testing"
-//)
-//
-//var sampleGatewayStr = `apiVersion: argoproj.io/v1alpha1
-//kind: Gateway
-//metadata:
-//  name: webhook-gateway
-//  labels:
-//    gateways.argoproj.io/gateway-controller-instanceid: argo-events
-//    gateway-name: "webhook-gateway"
-//spec:
-//  configMap: "webhook-gateway-configmap"
-//  type: "webhook"
-//  dispatchMechanism: "HTTP"
-//  eventVersion: "1.0"
-//  imageVersion: "latest"
-//  deploySpec:
-//    containers:
-//    - name: "webhook-events"
-//      image: "argoproj/webhook-gateway"
-//      imagePullPolicy: "Always"
-//      command: ["/bin/webhook-gateway"]
-//    serviceAccountName: "argo-events-sa"
-//  serviceSpec:
-//    selector:
-//      gateway-name: "webhook-gateway"
-//    ports:
-//      - port: 12000
-//        targetPort: 12000
-//    type: LoadBalancer
-//  watchers:
-//    gateways:
-//    - name: "webhook-gateway-2"
-//      port: "9070"
-//      endpoint: "/notifications"
-//    sensors:
-//    - name: "webhook-sensor"
-//    - name: "multi-signal-sensor"
-//    - name: "webhook-time-filter-sensor"`
-//
-//func getGateway() (*v1alpha1.Gateway, error) {
-//	gwBytes := []byte(sampleGatewayStr)
-//	var gateway v1alpha1.Gateway
-//	err := yaml.Unmarshal(gwBytes, &gateway)
-//	return &gateway, err
-//}
-//
-//func TestGatewayOperateLifecycle(t *testing.T) {
-//	fakeController := getGatewayController()
-//
-//	gateway, err := getGateway()
-//	assert.Nil(t, err)
-//
-//	gateway, err = fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(fakeController.Config.Namespace).Create(gateway)
-//	assert.Nil(t, err)
-//
-//	goc := newGatewayOperationCtx(gateway, fakeController)
-//
-//	// STEP 1: operate on new gateway
-//	err = goc.operate()
-//	assert.Nil(t, err)
-//
-//	// assert the status of sensor's signal is initializing
-//	assert.Equal(t, string(v1alpha1.NodePhaseRunning), string(goc.gw.Status.Phase))
-//	assert.Equal(t, 0, len(goc.gw.Status.Nodes))
-//
-//	// check whether gateway transformer configmap is created
-//	cm, err := fakeController.kubeClientset.CoreV1().ConfigMaps(fakeController.Config.Namespace).Get(common.DefaultGatewayTransformerConfigMapName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
-//	assert.Nil(t, err)
-//	assert.Equal(t, cm.Data[common.EventTypeVersion], goc.gw.Spec.EventVersion)
-//	assert.Equal(t, cm.Data[common.EventSource], goc.gw.ObjectMeta.Name)
-//	assert.Equal(t, cm.Data[common.EventType], string(goc.gw.Spec.Type))
-//	assert.NotNil(t, cm.Data[common.SensorWatchers])
-//	assert.NotNil(t, cm.Data[common.GatewayWatchers])
-//
-//	// check whether gateway deployment is successful
-//	gwDeployment, err := fakeController.kubeClientset.AppsV1().Deployments(fakeController.Config.Namespace).Get(common.DefaultGatewayPodName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
-//	assert.Nil(t, err)
-//	assert.NotNil(t, gwDeployment)
-//
-//	// check whether gateway service is created
-//	gwService, err := fakeController.kubeClientset.CoreV1().Services(fakeController.Config.Namespace).Get(common.DefaultGatewayServiceName(goc.gw.ObjectMeta.Name), metav1.GetOptions{})
-//	assert.Nil(t, err)
-//	assert.NotNil(t, gwService)
-//	assert.Equal(t, string(gwService.Spec.Type), string(corev1.ServiceTypeLoadBalancer))
-//
-//	// mark gateway phase as error
-//	goc.gw.Status.Phase = v1alpha1.NodePhaseError
-//	err = goc.operate()
-//	assert.Nil(t, err)
-//	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseError))
-//
-//	// operate on gateway that is already running
-//	err = goc.operate()
-//	assert.Nil(t, err)
-//	assert.Equal(t, string(goc.gw.Status.Phase), string(v1alpha1.NodePhaseRunning))
-//}
+import (
+	"testing"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+var testGatewayStr = `apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+ name: webhook-gateway
+ namespace: argo-events
+ labels:
+   gateways.argoproj.io/gateway-controller-instanceid: argo-events
+   gateway-name: "webhook-gateway"
+spec:
+ configMap: "webhook-gateway-configmap"
+ type: "webhook"
+ dispatchProtocol: "HTTP"
+ eventVersion: "1.0"
+ processorPort: "9330"
+ deploySpec:
+    metadata:
+      name: webhook-gateway
+      labels:
+        gateway-type: webhook
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client:v0.7"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "artifact-events"
+          image: "argoproj/webhook-gateway:v0.7"
+          imagePullPolicy: "Always"
+          command: ["/bin/webhook-gateway"]
+ serviceSpec:
+   metadata:
+     name: webhook-gateway-svc
+     namespace: argo-events
+   spec:
+     selector:
+       gateway-type: "webhook-gateway"
+       dispatch-mechanism: http
+     ports:
+       - port: 12000
+         targetPort: 12000
+     type: LoadBalancer
+ watchers:
+   gateways:
+   - name: "webhook-gateway"`
+
+func getGateway() (*v1alpha1.Gateway, error) {
+	gwBytes := []byte(testGatewayStr)
+	var gateway v1alpha1.Gateway
+	err := yaml.Unmarshal(gwBytes, &gateway)
+	return &gateway, err
+}
+
+func TestGatewayOperateLifecycle(t *testing.T) {
+	convey.Convey("Given a gateway resource spec, parse it", t, func() {
+		fakeController := getGatewayController()
+		gateway, err := getGateway()
+		convey.Convey("Make sure no error occurs", func() {
+			convey.So(err, convey.ShouldBeNil)
+
+			convey.Convey("Create the gateway", func() {
+				gateway, err = fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(fakeController.Config.Namespace).Create(gateway)
+
+				convey.Convey("No error should occur and gateway resource should not be empty", func() {
+					convey.So(err, convey.ShouldBeNil)
+					convey.So(gateway, convey.ShouldNotBeNil)
+
+					convey.Convey("Create a new gateway operation context", func() {
+						goc := newGatewayOperationCtx(gateway, fakeController)
+						convey.So(goc, convey.ShouldNotBeNil)
+
+						convey.Convey("Operate on new gateway", func() {
+							err := goc.operate()
+
+							convey.Convey("Operation must succeed", func() {
+								convey.So(err, convey.ShouldBeNil)
+
+								convey.Convey("A gateway pod and service must be created", func() {
+									pod, err := goc.controller.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(pod, convey.ShouldNotBeNil)
+
+									svc, err := goc.controller.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(svc, convey.ShouldNotBeNil)
+								})
+							})
+						})
+
+						convey.Convey("Operate on gateway in running state", func() {
+							err := goc.operate()
+							convey.So(err, convey.ShouldBeNil)
+						})
+
+						convey.Convey("Mark gateway state as error and operate", func() {
+							goc.markGatewayPhase(v1alpha1.NodePhaseError, "gateway is in error state")
+							err := goc.operate()
+							convey.So(err, convey.ShouldBeNil)
+							gateway, err := goc.controller.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+						})
+
+						convey.Convey("Delete gateway and make sure both pod and service gets deleted", func() {
+							err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Delete(gateway.Name, &metav1.DeleteOptions{})
+							convey.So(err, convey.ShouldBeNil)
+
+							gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+							convey.So(err, convey.ShouldNotBeNil)
+							convey.So(gatewayPod, convey.ShouldBeNil)
+
+							gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("wenhook-gateway-svc", metav1.GetOptions{})
+							convey.So(err, convey.ShouldNotBeNil)
+							convey.So(gatewaySvc, convey.ShouldBeNil)
+						})
+					})
+				})
+			})
+		})
+	})
+}

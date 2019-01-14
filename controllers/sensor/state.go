@@ -28,8 +28,19 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// GetNodeByName returns a copy of the node from this sensor for the nodename
+// for events this node name should be the name of the event
+func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatus {
+	nodeID := sensor.NodeID(nodeName)
+	node, ok := sensor.Status.Nodes[nodeID]
+	if !ok {
+		return nil
+	}
+	return node.DeepCopy()
+}
+
 // create a new node
-func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, log *zerolog.Logger, messages ...string) *v1alpha1.NodeStatus {
+func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *zerolog.Logger, messages ...string) *v1alpha1.NodeStatus {
 	if sensor.Status.Nodes == nil {
 		sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
@@ -44,7 +55,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 		Name:        nodeName,
 		DisplayName: nodeName,
 		Type:        nodeType,
-		Phase:       phase,
+		Phase:       v1alpha1.NodePhaseNew,
 		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
 	}
 	if len(messages) > 0 {
