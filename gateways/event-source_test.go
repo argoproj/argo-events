@@ -120,7 +120,6 @@ testKey: testValue
 					convey.So(i, convey.ShouldNotEqual, 0)
 					convey.So(event.Message, convey.ShouldEqual, "event_source_is_removed")
 					wg.Done()
-					close(gc.StatusCh)
 				})
 			}
 		}

@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -30,6 +31,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
+	"testing"
 )
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
@@ -226,14 +228,15 @@ var testTrigger = v1alpha1.Trigger{
 	},
 }
 
-//
-//func TestProcessTrigger(t *testing.T) {
-//	triggers := make([]v1alpha1.Trigger, 1)
-//	triggers[0] = testTrigger
-//	testSensor, err := getSensor()
-//	assert.Nil(t, err)
-//	testSensor.Spec.Triggers = triggers
-//	soc := getsensorExecutionCtx(testSensor)
-//	err = soc.executeTrigger(testTrigger)
-//	assert.NotNil(t, err)
-//}
+func TestProcessTrigger(t *testing.T) {
+	convey.Convey("Given a sensor", t, func() {
+		triggers := make([]v1alpha1.Trigger, 1)
+		triggers[0] = testTrigger
+		testSensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		testSensor.Spec.Triggers = triggers
+		soc := getsensorExecutionCtx(testSensor)
+		err = soc.executeTrigger(testTrigger)
+		convey.So(err, convey.ShouldNotBeNil)
+	})
+}
