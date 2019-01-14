@@ -38,7 +38,7 @@ func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, e
 
 // StartEventSource starts an event source
 func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	g, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
@@ -88,10 +88,10 @@ func (ese *GitlabEventSourceExecutor) listenEvents(g *glab, eventSource *gateway
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 
 	<-doneCh
 	if _, err = ese.GitlabClient.Projects.DeleteProjectHook(g.ProjectId, hook.ID); err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", *eventSource.Name).Interface("hook-id", hook.ID).Msg("failed to delete gitlab hook")
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Interface("hook-id", hook.ID).Msg("failed to delete gitlab hook")
 	}
 }

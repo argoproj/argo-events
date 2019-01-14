@@ -18,10 +18,12 @@ package gateways
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"google.golang.org/grpc"
 	"net"
 	"os"
+
+	"github.com/argoproj/argo-events/common"
+	zlog "github.com/rs/zerolog"
+	"google.golang.org/grpc"
 )
 
 // StartGateway start a gateway
@@ -45,8 +47,34 @@ func StartGateway(es EventingServer) {
 }
 
 // Recover recovers from panics in event sources
-func Recover(eventSource *string) {
+func Recover(eventSource string) {
 	if r := recover(); r != nil {
-		fmt.Printf("recovered event source %s from error. recover: %v", *eventSource, r)
+		fmt.Printf("recovered event source %s from error. recover: %v", eventSource, r)
+	}
+}
+
+// HandleEventsFromEventSource handles events from the event source.
+func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
+	for {
+		select {
+		case data := <-dataCh:
+			log.Info().Str("event-source-name", name).Msg("new event received, dispatching to gateway client")
+			err := eventStream.Send(&Event{
+				Name:    name,
+				Payload: data,
+			})
+			if err != nil {
+				return err
+			}
+
+		case err := <-errorCh:
+			log.Info().Str("event-source-name", name).Err(err).Msg("error occurred while getting event from event source")
+			return err
+
+		case <-eventStream.Context().Done():
+			log.Info().Str("event-source-name", name).Msg("connection is closed by client")
+			doneCh <- struct{}{}
+			return nil
+		}
 	}
 }

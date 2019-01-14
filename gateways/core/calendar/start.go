@@ -30,13 +30,13 @@ import (
 type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
-func (ese *CalendarConfigExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+func (ese *CalendarEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
@@ -69,7 +69,7 @@ func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
 }
 
 // listenEvents fires an event when schedule is passed.
-func (ese *CalendarConfigExecutor) listenEvents(cal *calSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	schedule, err := resolveSchedule(cal)
@@ -103,7 +103,7 @@ func (ese *CalendarConfigExecutor) listenEvents(cal *calSchedule, eventSource *g
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
+		ese.Log.Info().Str("event-source-name", eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx

@@ -21,11 +21,12 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 url: kafka.argo-events:9092
 topic: foo
@@ -33,17 +34,32 @@ partition: "0"
 `
 )
 
-func TestKafkaConfigExecutor_Validate(t *testing.T) {
-	ce := &KafkaEventSourceExecutor{}
-	es := &gateways.EventSource{Data: &configValue}
-	ctx := context.Background()
-	_, err := ce.ValidateEventSource(ctx, es)
-	assert.Nil(t, err)
+func TestValidateKafkaEventSource(t *testing.T) {
+	convey.Convey("Given a valid kafka event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &KafkaEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
 
-	configValue = `
+	convey.Convey("Given an invalid kafka event source spec, parse it and make sure error occurs", t, func() {
+		ese := &KafkaEventSourceExecutor{}
+		invalidConfig := `
 topic: foo
 `
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

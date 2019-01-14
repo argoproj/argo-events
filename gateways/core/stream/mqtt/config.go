@@ -37,9 +37,9 @@ type mqtt struct {
 	ClientId string `json:"clientId"`
 }
 
-func parseEventSource(eventSource *string) (*mqtt, error) {
+func parseEventSource(eventSource string) (*mqtt, error) {
 	var m *mqtt
-	err := yaml.Unmarshal([]byte(*eventSource), &m)
+	err := yaml.Unmarshal([]byte(eventSource), &m)
 	if err != nil {
 		return nil, err
 	}

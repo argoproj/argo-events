@@ -54,9 +54,9 @@ type ResourceFilter struct {
 	CreatedBy metav1.Time `json:"createdBy,omitempty"`
 }
 
-func parseEventSource(es *string) (*resource, error) {
+func parseEventSource(es string) (*resource, error) {
 	var r *resource
-	err := yaml.Unmarshal([]byte(*es), &r)
+	err := yaml.Unmarshal([]byte(es), &r)
 	if err != nil {
 		return nil, err
 	}

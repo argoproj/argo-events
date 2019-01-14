@@ -23,7 +23,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	n, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -48,7 +48,7 @@ func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gat
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to messages")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
 	_, err = nc.Subscribe(n.Subject, func(msg *nats.Msg) {
 		dataCh <- msg.Data
 	})

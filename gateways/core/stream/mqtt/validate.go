@@ -49,10 +49,10 @@ func validateMQTT(m *mqtt) error {
 		return fmt.Errorf("url must be specified")
 	}
 	if m.Topic == "" {
-		return fmt.Errorf("topic must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("topic must be specified")
 	}
 	if m.ClientId == "" {
-		return fmt.Errorf("client id must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("client id must be specified")
 	}
 	return nil
 }

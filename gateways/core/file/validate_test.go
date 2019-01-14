@@ -21,11 +21,12 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 directory: "/bin/"
 type: CREATE
@@ -33,23 +34,32 @@ path: x.txt
 `
 )
 
-func TestFileWatcherConfigExecutor_Validate(t *testing.T) {
-	ce := &FileEventSourceExecutor{}
-	es := &gateways.EventSource{
-		Data: &configValue,
-	}
-	ctx := context.Background()
-	_, err := ce.ValidateEventSource(ctx, es)
-	assert.Nil(t, err)
-	configValue = `
-directory: "/bin/"
+func TestValidateFileEventSource(t *testing.T) {
+	convey.Convey("Given a valid file event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &FileEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
+
+	convey.Convey("Given an invalid file event source spec, parse it and make sure error occurs", t, func() {
+		ese := &FileEventSourceExecutor{}
+		invalidConfig := `
 type: CREATE
-`
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
-	configValue = ``
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
+path: x.txt`
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

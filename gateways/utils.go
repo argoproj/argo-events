@@ -19,8 +19,6 @@ package gateways
 import (
 	"fmt"
 	"hash/fnv"
-
-	zlog "github.com/rs/zerolog"
 )
 
 // Hasher hashes a string
@@ -32,32 +30,6 @@ func Hasher(value string) string {
 
 // SetValidateReason set the result of event source validation
 func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
-	v.Reason = &reason
-	v.IsValid = &valid
-}
-
-// HandleEventsFromEventSource handles events from the event source.
-func HandleEventsFromEventSource(name *string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
-	for {
-		select {
-		case data := <-dataCh:
-			log.Info().Str("event-source-name", *name).Msg("new event received, dispatching to gateway client")
-			err := eventStream.Send(&Event{
-				Name:    name,
-				Payload: data,
-			})
-			if err != nil {
-				return err
-			}
-
-		case err := <-errorCh:
-			log.Info().Str("event-source-name", *name).Err(err).Msg("error occurred while getting event from event source")
-			return err
-
-		case <-eventStream.Context().Done():
-			log.Info().Str("event-source-name", *name).Msg("connection is closed by client")
-			doneCh <- struct{}{}
-			return nil
-		}
-	}
+	v.Reason = reason
+	v.IsValid = valid
 }

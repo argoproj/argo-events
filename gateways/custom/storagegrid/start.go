@@ -163,7 +163,7 @@ func (rc *routeConfig) startHttpServer() {
 		// start http server
 		go func() {
 			err := rc.sgConfig.srv.ListenAndServe()
-			rc.eventSourceExecutor.Log.Info().Str("event-source", *rc.eventSource.Name).Str("port", rc.sgConfig.Port).Msg("http server stopped")
+			rc.eventSourceExecutor.Log.Info().Str("event-source", rc.eventSource.Name).Str("port", rc.sgConfig.Port).Msg("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -174,7 +174,7 @@ func (rc *routeConfig) startHttpServer() {
 
 // StartConfig runs a configuration
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	sg, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -202,7 +202,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
 
 	for {
 		select {
@@ -221,7 +221,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 			return err
 
 		case <-eventStream.Context().Done():
-			ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
 			routeDeactivateChan <- rc
 			return nil
 
@@ -242,7 +242,7 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 		return
 	}
 
-	rc.eventSourceExecutor.Log.Info().Str("event-source-name", *rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
 
 	switch request.Method {
 	case http.MethodHead:
@@ -272,12 +272,12 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	}
 
 	if filterEvent(notification, rc.sgConfig) && filterName(notification, rc.sgConfig) {
-		rc.eventSourceExecutor.Log.Info().Str("event-source-name", *rc.eventSource.Name).Msg("new event received, dispatching to gateway client")
+		rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Msg("new event received, dispatching to gateway client")
 		rc.dataCh <- b
 		return
 	}
 
-	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", *rc.eventSource.Name).Interface("notification", notification).
+	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", rc.eventSource.Name).Interface("notification", notification).
 		Msg("discarding notification since it did not pass all filters")
 }
 

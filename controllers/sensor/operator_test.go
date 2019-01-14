@@ -89,7 +89,6 @@ func TestSensorOperations(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(sensor, convey.ShouldNotBeNil)
 
-
 			convey.Convey("Operate on a new sensor", func() {
 				err := soc.operate()
 				convey.So(err, convey.ShouldBeNil)

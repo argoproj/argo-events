@@ -21,8 +21,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// CalendarConfigExecutor implements Eventing
-type CalendarConfigExecutor struct {
+// CalendarEventSourceExecutor implements Eventing
+type CalendarEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
@@ -45,9 +45,9 @@ type calSchedule struct {
 	Recurrence []string `json:"recurrence,omitempty"`
 }
 
-func parseEventSource(eventSource *string) (*calSchedule, error) {
+func parseEventSource(eventSource string) (*calSchedule, error) {
 	var c *calSchedule
-	err := yaml.Unmarshal([]byte(*eventSource), &c)
+	err := yaml.Unmarshal([]byte(eventSource), &c)
 	if err != nil {
 		return nil, err
 	}

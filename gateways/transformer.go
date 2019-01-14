@@ -63,7 +63,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 	// Generate an event id
 	eventId := suuid.NewV1()
 
-	gc.Log.Info().Str("source", *gatewayEvent.Name).
+	gc.Log.Info().Str("source", gatewayEvent.Name).
 		Msg("converting gateway event into cloudevents specification compliant event")
 
 	// Create an CloudEvent
@@ -76,13 +76,13 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 			EventType:          gc.gw.Spec.Type,
 			EventTypeVersion:   gc.gw.Spec.EventVersion,
 			Source: &sv1alpha.URI{
-				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, *gatewayEvent.Name),
+				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, gatewayEvent.Name),
 			},
 		},
 		Payload: gatewayEvent.Payload,
 	}
 
-	gc.Log.Info().Str("event-source", *gatewayEvent.Name).Msg("event has been transformed into cloud event")
+	gc.Log.Info().Str("event-source", gatewayEvent.Name).Msg("event has been transformed into cloud event")
 	return ce, nil
 }
 

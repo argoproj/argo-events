@@ -43,7 +43,7 @@ type EventSourceStatus struct {
 
 // markGatewayNodePhase marks the node with a phase, returns the node
 func (gc *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
-	gc.Log.Debug().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("phase", string(nodeStatus.Phase)).Msg("marking node phase")
+	gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("phase", string(nodeStatus.Phase)).Msg("marking node phase")
 	node := gc.getNodeByID(nodeStatus.Id)
 	if node == nil {
 		gc.Log.Warn().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Msg("node is not initialized")
@@ -105,7 +105,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 	case v1alpha1.NodePhaseResourceUpdate:
 		if gc.gw.Spec.Watchers != status.Gw.Spec.Watchers {
-			gc.gw.Spec.Watchers = status.Gw.Spec.Watchers
+			gc.gw = status.Gw
 			gc.updated = true
 		}
 

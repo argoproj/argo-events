@@ -18,14 +18,15 @@ package resource
 
 import (
 	"context"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 namespace: "argo-events"
 group: "argoproj.io"
@@ -38,15 +39,22 @@ filter:
 `
 )
 
-func TestResourceConfigExecutor_Validate(t *testing.T) {
-	ce := &ResourceEventSourceExecutor{}
-	es := &gateways.EventSource{
-		Data: &configValue,
-	}
-	ctx := context.Background()
-	_, err := ce.ValidateEventSource(ctx, es)
-	assert.Nil(t, err)
-	configValue = `
+func TestValidateResourceEventSource(t *testing.T) {
+	convey.Convey("Given a valid resource event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &ResourceEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
+
+	convey.Convey("Given an invalid resource event source spec, parse it and make sure error occurs", t, func() {
+		ese := &ResourceEventSourceExecutor{}
+		invalidConfig := `
 group: "argoproj.io"
 version: "v1alpha1"
 filter:
@@ -54,11 +62,14 @@ filter:
    workflows.argoproj.io/phase: Succeeded
    name: "my-workflow"
 `
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
-	configValue = ""
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

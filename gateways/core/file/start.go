@@ -26,7 +26,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("activating event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
 	f, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -59,19 +59,19 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to watch to file notifications")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to file notifications")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ese.Log.Info().Str("event-source", *eventSource.Name).Msg("fs watcher has stopped")
+				ese.Log.Info().Str("event-source", eventSource.Name).Msg("fs watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("fs watcher stopped")
 				return
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			if fwc.Path == strings.TrimPrefix(event.Name, fwc.Directory) && fwc.Type == event.Op.String() {
-				ese.Log.Debug().Str("config-key", *eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
+				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
 				dataCh <- []byte(fmt.Sprintf("%v", event))
 			}
 		case err := <-watcher.Errors:

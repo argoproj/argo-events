@@ -16,39 +16,8 @@ limitations under the License.
 
 package gateways
 
-//
-//func Test_filterEvents(t *testing.T) {
-//	gw, err := getGateway()
-//	assert.Nil(t, err)
-//	assert.NotNil(t, gw)
-//	gc := newGatewayconfig(gw)
-//	e := gc.EventSourceStateChangeK8sEvent("test", v1alpha1.NodePhaseCompleted, &EventSourceData{
-//		Config: "testConfig",
-//		Src:    "testSrc",
-//		ID:     "1234",
-//		TimeID: "4567",
-//	})
-//	ok := gc.filterEvent(e)
-//	assert.Equal(t, true, ok)
-//
-//	e.Labels[common.LabelEventSeen] = "true"
-//	ok = gc.filterEvent(e)
-//	assert.Equal(t, false, ok)
-//
-//	e.Labels[common.LabelEventSeen] = ""
-//	e.Source.Component = "test"
-//	ok = gc.filterEvent(e)
-//	assert.Equal(t, false, ok)
-//
-//	e.Source.Component = gc.gw.Name
-//	ok = gc.filterEvent(e)
-//	assert.Equal(t, true, ok)
-//
-//	e.ReportingInstance = "testI"
-//	ok = gc.filterEvent(e)
-//	assert.Equal(t, false, ok)
-//	e.ReportingInstance = gc.controllerInstanceID
-//	e.ReportingController = "testC"
-//	ok = gc.filterEvent(e)
-//	assert.Equal(t, false, ok)
-//}
+import "testing"
+
+func TestGatewayWatcher(t *testing.T) {
+
+}

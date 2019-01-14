@@ -35,7 +35,7 @@ func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es 
 	}
 	if err = validateNATS(n); err != nil {
 		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, nil
+		return v, gateways.ErrInvalidEventSource
 	}
 	gateways.SetValidEventSource(v, "", true)
 	return v, nil
@@ -43,13 +43,13 @@ func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es 
 
 func validateNATS(n *natsConfig) error {
 	if n == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("configuration must be non empty")
 	}
 	if n.URL == "" {
-		return fmt.Errorf("%+v, url must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("url must be specified")
 	}
 	if n.Subject == "" {
-		return fmt.Errorf("%+v, subject must be specified", gateways.ErrInvalidEventSource)
+		return fmt.Errorf("subject must be specified")
 	}
 	return nil
 }

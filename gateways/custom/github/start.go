@@ -53,7 +53,7 @@ func (ese *GithubEventSourceExecutor) getCredentials(gs *GithubSecret) (*cred, e
 
 // StartEventSource starts an event source
 func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	g, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
@@ -116,13 +116,13 @@ func (ese *GithubEventSourceExecutor) listenEvents(g *GithubConfig, eventSource 
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
 
 	<-doneCh
 	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
 	if _, err = client.Repositories.DeleteHook(ctx, g.Owner, g.Repository, *hook.ID); err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", *eventSource.Name).Msg("failed to delete github hook")
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to delete github hook")
 	} else {
-		ese.Log.Info().Str("event-source-name", *eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook deleted")
+		ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook deleted")
 	}
 }

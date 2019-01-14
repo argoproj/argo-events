@@ -15,7 +15,7 @@ func TestSensorState(t *testing.T) {
 	logger := common.GetLoggerContext(common.LoggerConf()).Logger()
 	sn := &v1alpha1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-sensor",
+			Name:      "test-sensor",
 			Namespace: "test",
 		},
 	}

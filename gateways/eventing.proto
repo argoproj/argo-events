@@ -2,7 +2,7 @@
 * EventSource related messages
 *
 */
-syntax = "proto2";
+syntax = "proto3";
 
 package gateways;
 
@@ -21,11 +21,11 @@ service Eventing {
 */
 message EventSource {
     // ID of the event source. internally generated.
-    optional string id = 1;
+    string id = 1;
     // The event source name.
-    optional string name = 2;
+    string name = 2;
     // The event source configuration value.
-    optional string data = 3;
+    string data = 3;
 }
 
 /**
@@ -33,9 +33,9 @@ message EventSource {
 */
 message Event {
     // The event source name.
-    optional string name = 1;
+    string name = 1;
     // The event payload.
-    optional bytes payload = 2;
+    bytes payload = 2;
 }
 
 /**
@@ -43,7 +43,7 @@ message Event {
 */
 message ValidEventSource {
     // whether event source is valid
-    optional bool isValid = 1;
+    bool isValid = 1;
     // reason if an event source is invalid
-    optional string reason = 2;
+    string reason = 2;
 }

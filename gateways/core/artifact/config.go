@@ -69,9 +69,9 @@ type S3Filter struct {
 	Suffix string `json:"suffix"`
 }
 
-func parseEventSource(config *string) (*s3Artifact, error) {
+func parseEventSource(config string) (*s3Artifact, error) {
 	var s *s3Artifact
-	err := yaml.Unmarshal([]byte(*config), &s)
+	err := yaml.Unmarshal([]byte(config), &s)
 	if err != nil {
 		return nil, err
 	}

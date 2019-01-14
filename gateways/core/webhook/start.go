@@ -106,7 +106,7 @@ func (rc *routeConfig) startHttpServer() {
 		// start http server
 		go func() {
 			err := rc.wConfig.srv.ListenAndServe()
-			rc.eventSourceExecutor.Log.Info().Str("event-source", *rc.eventSource.Name).Str("port", rc.wConfig.Port).Msg("http server stopped")
+			rc.eventSourceExecutor.Log.Info().Str("event-source", rc.eventSource.Name).Str("port", rc.wConfig.Port).Msg("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -137,7 +137,7 @@ func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, reques
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	h, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -165,12 +165,12 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 
 	rc.wConfig.mux.HandleFunc(rc.wConfig.Endpoint, rc.routeActiveHandler)
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Str("port", h.Port).Str("endpoint", h.Endpoint).Str("method", h.Method).Msg("route handler added")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", h.Port).Str("endpoint", h.Endpoint).Str("method", h.Method).Msg("route handler added")
 
 	for {
 		select {
 		case data := <-rc.dataCh:
-			ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("new event received, dispatching to gateway client")
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
 				Payload: data,
@@ -184,7 +184,7 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 			return err
 
 		case <-eventStream.Context().Done():
-			ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("connection is closed by client")
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
 			routeDeactivateChan <- rc
 			return nil
 

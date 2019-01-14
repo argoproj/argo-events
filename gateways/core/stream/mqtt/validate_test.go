@@ -20,12 +20,14 @@ import (
 	"context"
 	"testing"
 
+	"github.com/smartystreets/goconvey/convey"
+
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 url: tcp://mqtt.argo-events:1883
 topic: foo
@@ -33,20 +35,33 @@ clientId: 1
 `
 )
 
-func TestMqttConfigExecutor_Validate(t *testing.T) {
-	ce := &MqttEventSourceExecutor{}
-	es := &gateways.EventSource{
-		Data: &configValue,
-	}
-	ctx := context.Background()
-	_, err := ce.ValidateEventSource(ctx, es)
-	assert.Nil(t, err)
+func TestValidateMqttEventSource(t *testing.T) {
+	convey.Convey("Given a valid mqtt event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &MqttEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
 
-	configValue = `
+	convey.Convey("Given an invalid mqtt event source spec, parse it and make sure error occurs", t, func() {
+		ese := &MqttEventSourceExecutor{}
+		invalidConfig := `
 url: tcp://mqtt.argo-events:1883
 topic: foo
 `
-	es.Data = &configValue
-	_, err = ce.ValidateEventSource(ctx, es)
-	assert.NotNil(t, err)
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

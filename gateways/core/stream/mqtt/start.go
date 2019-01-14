@@ -23,7 +23,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	m, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to topic")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to topic")
 	if token := client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
 		errorCh <- token.Error()
 		return
@@ -60,6 +60,6 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	<-doneCh
 	token := client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
-		ese.Log.Error().Err(token.Error()).Str("event-source-name", *eventSource.Name).Msg("failed to unsubscribe client")
+		ese.Log.Error().Err(token.Error()).Str("event-source-name", eventSource.Name).Msg("failed to unsubscribe client")
 	}
 }

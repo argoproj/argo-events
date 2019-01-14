@@ -152,7 +152,6 @@ func (soc *sOperationCtx) operate() error {
 		}
 		soc.log.Info().Msg("sensor pod created")
 
-
 		// Create a ClusterIP service to expose sensor in cluster
 		// For now, sensor will receive event notifications through http server.
 		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{})

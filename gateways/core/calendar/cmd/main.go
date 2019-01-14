@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&calendar.CalendarConfigExecutor{
+	gateways.StartGateway(&calendar.CalendarEventSourceExecutor{
 		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
 	})
 }

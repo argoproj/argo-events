@@ -18,14 +18,15 @@ package artifact
 
 import (
 	"context"
-	"github.com/smartystreets/goconvey/convey"
 	"testing"
 
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 s3EventConfig:
     bucket: input
@@ -47,22 +48,18 @@ secretKey:
 func TestValidateS3EventSource(t *testing.T) {
 	convey.Convey("Given a valid S3 artifact spec, parse the spec and make sure no error occurs", t, func() {
 		ese := &S3EventSourceExecutor{}
-		name := "artifact"
-		id := "1234"
 		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Name: &name,
-			Data: &configValue,
-			Id: &id,
+			Name: configKey,
+			Data: configValue,
+			Id:   configId,
 		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(*valid.IsValid, convey.ShouldBeTrue)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
-	convey.Convey("Given an invalid S3 artifact spec", t, func() {
+	convey.Convey("Given an invalid S3 artifact spec, parse it and error should occur", t, func() {
 		ese := &S3EventSourceExecutor{}
-		name := "artifact"
-		id := "1234"
 		invalidS3Artifact := `
 s3EventConfig:
     bucket: input
@@ -74,13 +71,13 @@ s3EventConfig:
 insecure: true
 `
 		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Id: &id,
-			Name: &name,
-			Data: &invalidS3Artifact,
+			Id:   configId,
+			Name: configKey,
+			Data: invalidS3Artifact,
 		})
 		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(*valid.IsValid, convey.ShouldBeFalse)
-		convey.So(*valid.Reason, convey.ShouldNotBeEmpty)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
 	})
 }

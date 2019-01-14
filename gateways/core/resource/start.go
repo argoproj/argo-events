@@ -32,7 +32,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	pes, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to watch to resource notifications")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to resource notifications")
 
 	// global quit channel
 	quitChan := make(chan struct{})
@@ -81,7 +81,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 				select {
 				case item := <-w.ResultChan():
 					if item.Object == nil {
-						ese.Log.Warn().Str("event-source-name", *eventSource.Name).Msg("object to watch is nil")
+						ese.Log.Warn().Str("event-source-name", eventSource.Name).Msg("object to watch is nil")
 						// renew watch
 						newWatch, err := resource.Watch(options)
 						if err != nil {
@@ -102,7 +102,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 						localQuitChan <- struct{}{}
 						return
 					}
-					if ese.passFilters(*eventSource.Name, itemObj, res.Filter) {
+					if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
 						dataCh <- b
 					}
 

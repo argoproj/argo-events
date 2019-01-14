@@ -80,9 +80,9 @@ type cred struct {
 }
 
 // parseEventSource parses a configuration of gateway
-func parseEventSource(config *string) (*GithubConfig, error) {
+func parseEventSource(config string) (*GithubConfig, error) {
 	var g *GithubConfig
-	err := yaml.Unmarshal([]byte(*config), &g)
+	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {
 		return nil, err
 	}

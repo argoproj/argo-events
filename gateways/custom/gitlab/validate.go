@@ -33,7 +33,7 @@ func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 	}
 	if err = validateGitlab(g); err != nil {
 		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, nil
+		return v, gateways.ErrInvalidEventSource
 	}
 	gateways.SetValidEventSource(v, "", true)
 	return v, nil

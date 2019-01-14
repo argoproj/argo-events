@@ -45,9 +45,9 @@ type webhook struct {
 	mux *http.ServeMux `json:"mux,omitempty"`
 }
 
-func parseEventSource(es *string) (*webhook, error) {
+func parseEventSource(es string) (*webhook, error) {
 	var n *webhook
-	err := yaml.Unmarshal([]byte(*es), &n)
+	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err
 	}

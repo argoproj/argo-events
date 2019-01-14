@@ -24,7 +24,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *CalendarConfigExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *CalendarEventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {

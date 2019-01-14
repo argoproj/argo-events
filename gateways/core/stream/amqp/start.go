@@ -25,7 +25,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-stream-name", *eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str("event-stream-name", eventSource.Name).Msg("operating on event source")
 	a, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -84,7 +84,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", *eventSource.Name).Msg("starting to subscribe to messages")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-delivery:
@@ -92,7 +92,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		case <-doneCh:
 			err = conn.Close()
 			if err != nil {
-				ese.Log.Error().Err(err).Str("event-stream-name", *eventSource.Name).Msg("failed to close connection")
+				ese.Log.Error().Err(err).Str("event-stream-name", eventSource.Name).Msg("failed to close connection")
 			}
 			return
 		}

@@ -26,29 +26,41 @@ func (ese *GithubEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 	if err != nil {
 		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateGithub(g); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateGithub(g *GithubConfig) error {
 	if g == nil {
-		return v, gateways.ErrEmptyEventSource
+		return gateways.ErrEmptyEventSource
 	}
 	if g.Repository == "" {
-		return v, fmt.Errorf("repository cannot be empty")
+		return fmt.Errorf("repository cannot be empty")
 	}
 	if g.Owner == "" {
-		return v, fmt.Errorf("owner cannot be empty")
+		return fmt.Errorf("owner cannot be empty")
 	}
 	if g.APIToken == nil {
-		return v, fmt.Errorf("api token can't be empty")
+		return fmt.Errorf("api token can't be empty")
 	}
 	if g.URL == "" {
-		return v, fmt.Errorf("url can't be empty")
+		return fmt.Errorf("url can't be empty")
 	}
 	if g.Events == nil || len(g.Events) < 1 {
-		return v, fmt.Errorf("events must be defined")
+		return fmt.Errorf("events must be defined")
 	}
 	if g.ContentType != "" {
 		if !(g.ContentType == "json" || g.ContentType == "form") {
-			return v, fmt.Errorf("content type must be \"json\" or \"form\"")
+			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
-
-	return v, nil
+	return nil
 }
