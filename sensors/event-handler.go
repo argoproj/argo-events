@@ -134,26 +134,22 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 	case v1alpha1.ResourceUpdateNotification:
 		sec.log.Info().Msg("sensor resource update")
-		// update event dependencies
-		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) {
-			sec.sensor.Spec.EventDependencies = ew.sensor.Spec.EventDependencies
+		// update sensor resource
+		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) || !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers){
+			sec.sensor = ew.sensor
 
 			// initialize new event dependencies
 			for _, ed := range sec.sensor.Spec.EventDependencies {
 				if node := sn.GetNodeByName(sec.sensor, ed.Name); node == nil {
-					sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &sec.log)
+					sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
+					sn.MarkNodePhase(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "event dependency is active")
 				}
 			}
-		}
-
-		// update triggers
-		if !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers) {
-			sec.sensor.Spec.Triggers = ew.sensor.Spec.Triggers
 
 			// initialize new triggers
 			for _, t := range sec.sensor.Spec.Triggers {
 				if node := sn.GetNodeByName(sec.sensor, t.Name); node == nil {
-					sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseNew, &sec.log)
+					sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, &sec.log)
 				}
 			}
 		}
