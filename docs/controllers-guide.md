@@ -22,7 +22,7 @@ data:
 
 If you don't provide namespace, controller will watch all namespaces for gateway resource. 
 
-<b>Note on `instance-id`</b>: it is used to map a gateway or sn to a controller. 
+<b>Note on `instance-id`</b>: it is used to map a gateway or sensor to a controller. 
 e.g. when you create a gateway with label `gateways.argoproj.io/gateway-controller-instanceid: argo-events`, a
  controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml)
 Basically `instance-id` is used to horizontally scale controllers, so you won't end up overwhelming a controller with large
@@ -64,24 +64,24 @@ spec:
   ![](gateway-controller-fsm.png)
 
 ### Sensor controller
-Sensor controller watches sn resource and manages lifecycle of a sn.
+Sensor controller watches sensor resource and manages lifecycle of a sensor.
 ```yaml
-# The sn-controller listens for changes on the sn CRD and creates sn executor jobs
+# The sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: sn-controller
+  name: sensor-controller
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: sn-controller
+        app: sensor-controller
     spec:
       serviceAccountName: argo-events-sa
       containers:
-      - name: sn-controller
-        image: argoproj/sn-controller:latest
+      - name: sensor-controller
+        image: argoproj/sensor-controller:latest
         imagePullPolicy: Always
         env:
           - name: SENSOR_NAMESPACE
@@ -89,16 +89,16 @@ spec:
               fieldRef:
                 fieldPath: metadata.namespace
           - name: SENSOR_CONFIG_MAP
-            value: sn-controller-configmap
+            value: sensor-controller-configmap
 ```
 
-* <b>Lifecycle of a Sensor managed by sn controller</b>
+* <b>Lifecycle of a Sensor managed by sensor controller</b>
 
-   ![](sn-fsm.png) 
+   ![](sensor-fsm.png) 
  
  <br/>
  
-* <b>Lifecycle of  Sensor within sn pod</b>
+* <b>Lifecycle of  Sensor within sensor pod</b>
    
-   ![](sn-pod-fsm.png)
+   ![](sensor-pod-fsm.png)
    

@@ -1,8 +1,8 @@
 # Guide
 
-1. [What are sn and gateway controllers](controllers-guide.md)
+1. [What are sensor and gateway controllers](controllers-guide.md)
 2. [Learn about gateways](gateway-guide.md)
-3. [Learn about sensors](sn-guide.md)
+3. [Learn about sensors](sensor-guide.md)
 4. [Learn about triggers](trigger-guide.md)
 5. [Install gateways and sensors](#gands)
     1. [Webhook](#webhook)
@@ -16,7 +16,7 @@
         4. [AMQP](#amqp)
 6. [Updating gateway configurations dynamically](#updating-configurations)
 7. [Passing payload from signal to trigger](#passing-payload-from-signal-to-trigger)
-8. [Sensor filters](#sn-filters)
+8. [Sensor filters](#sensor-filters)
 9. [Writing custom gateways](custom-gateway.md)
 
 ## <a name="gands">Install gateways and sensors</a>
@@ -108,7 +108,7 @@ Webhook gateway is useful when you want to listen to an incoming HTTP request an
           # watchers are components interested in listening to events produced by this gateway
           watchers:
             sensors:
-            - name: "webhook-sn"
+            - name: "webhook-sensor"
         ```
     
     2. Run following command,    
@@ -121,23 +121,23 @@ Webhook gateway is useful when you want to listen to an incoming HTTP request an
         kubectl get -n argo-events gateways webhook-gateway -o yaml
         ```
 
-3) <h5>Now its time to create webhook sn.</h5>
+3) <h5>Now its time to create webhook sensor.</h5>
     1. Sensor definition,
         
         ```yaml
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
         metadata:
-          # name of sn
-          name: webhook-sn
+          # name of sensor
+          name: webhook-sensor
           labels:
-            # instance-id must match with one of the deployed sn controller's instance-id
-            sensors.argoproj.io/sn-controller-instanceid: argo-events
+            # instance-id must match with one of the deployed sensor controller's instance-id
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
-          # make this sn as long running.
+          # make this sensor as long running.
           repeat: true
           serviceAccountName: argo-events-sa
-          # signals/notifications this sn is interested in.
+          # signals/notifications this sensor is interested in.
           signals:
             # event must be from webhook-gateway and the configuration that produced this event must be
             # webhook.fooConfig
@@ -167,7 +167,7 @@ Webhook gateway is useful when you want to listen to an incoming HTTP request an
                               image: "docker/whalesay:latest"
          ```
     
-        This sn defines only one signal called `webhook-gateway/webhook.fooConfig`, meaning, it is interested in listening
+        This sensor defines only one signal called `webhook-gateway/webhook.fooConfig`, meaning, it is interested in listening
         events from `webhook.fooConfig` configuration within `webhook-gateway` gateway.
     
     2. Run following command, 
@@ -175,9 +175,9 @@ Webhook gateway is useful when you want to listen to an incoming HTTP request an
         kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
         ```
 
-    3. Check whether all sn nodes are initialized,
+    3. Check whether all sensor nodes are initialized,
         ```bash
-        kubectl get -n argo-events sensors webhook-sn   
+        kubectl get -n argo-events sensors webhook-sensor   
         ```
 
     4. Get the service url for gateway,
@@ -340,7 +340,7 @@ Lets start with deploying Minio server standalone deployment. You can get the K8
           dispatchMechanism: "HTTP"
           watchers:
             sensors:
-            - name: "artifact-sn"
+            - name: "artifact-sensor"
         ```
         
         Execute following command to create artifact gateway,
@@ -353,14 +353,14 @@ Lets start with deploying Minio server standalone deployment. You can get the K8
         kubectl -n argo-events  get gateways artifact-gateway -o yaml
         ```
         
-   6. Below is the sn definition, 
+   6. Below is the sensor definition, 
         ```yaml
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
         metadata:
-          name: artifact-sn
+          name: artifact-sensor
           labels:
-            sensors.argoproj.io/sn-controller-instanceid: argo-events
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           repeat: true
           serviceAccountName: argo-events-sa
@@ -399,7 +399,7 @@ Lets start with deploying Minio server standalone deployment. You can get the K8
         
         Check that all signals and triggers are intialized,
         ```bash
-        kubectl -n argo-events get sensors artifact-sn -o yaml
+        kubectl -n argo-events get sensors artifact-sensor -o yaml
         ```
         
    7. Drop a file into `input` bucket and monitor namespace for argo workflow.
@@ -456,7 +456,7 @@ Calendar gateway either accepts `interval` or `cron schedules` as configuration.
       version: "1.0"
       watchers:
           sensors:
-          - name: "calendar-sn"
+          - name: "calendar-sensor"
     ```   
     
     Run,
@@ -474,9 +474,9 @@ Calendar gateway either accepts `interval` or `cron schedules` as configuration.
     apiVersion: argoproj.io/v1alpha1
     kind: Sensor
     metadata:
-      name: calendar-sn
+      name: calendar-sensor
       labels:
-        sensors.argoproj.io/sn-controller-instanceid: argo-events
+        sensors.argoproj.io/sensor-controller-instanceid: argo-events
     spec:
       serviceAccountName: argo-events-sa
       imagePullPolicy: Always
@@ -555,7 +555,7 @@ Resource gateway can monitor any K8 resource and any CRD.
     workflow with name  `my-workflow` is assigned label `workflows.argoproj.io/phase: Succeeded`, the configuration will
     send an event to watchers.
     
-    * Gateway configuration `resource.barConfig` will send event to watchers whenever a sn label `workflows.argoproj.io/phase: Failed` is added.
+    * Gateway configuration `resource.barConfig` will send event to watchers whenever a sensor label `workflows.argoproj.io/phase: Failed` is added.
     
     * You can create more such configurations that watch namespace, configmaps, deployments, pods etc.  
  
@@ -587,7 +587,7 @@ Resource gateway can monitor any K8 resource and any CRD.
       version: "1.0"
       watchers:
         sensors:
-        - name: "resource-sn"
+        - name: "resource-sensor"
     ```
     
     Run,
@@ -605,9 +605,9 @@ Resource gateway can monitor any K8 resource and any CRD.
     apiVersion: argoproj.io/v1alpha1
     kind: Sensor
     metadata:
-      name: resource-sn
+      name: resource-sensor
       labels:
-        sensors.argoproj.io/sn-controller-instanceid: argo-events
+        sensors.argoproj.io/sensor-controller-instanceid: argo-events
     spec:
       repeat: true
       serviceAccountName: argo-events-sa
@@ -671,7 +671,7 @@ Resource gateway can monitor any K8 resource and any CRD.
     kubectl -n argo-events -f https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml
     ```
     
-    Once workflow is created, resource sn will trigger workflow.
+    Once workflow is created, resource sensor will trigger workflow.
     
  5. Run `argo -n argo-events list`
 
@@ -745,7 +745,7 @@ Resource gateway can monitor any K8 resource and any CRD.
        kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/nats-gateway-configmap.yaml
        ```
    
-   3) Lets create a sn,
+   3) Lets create a sensor,
       ```bash
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/nats.yaml
       ```
@@ -771,7 +771,7 @@ Resource gateway can monitor any K8 resource and any CRD.
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/kafka.yaml
       ```
 
-   4) To create sn, run
+   4) To create sensor, run
       ```bash
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/kafka.yaml
       ```
@@ -826,9 +826,9 @@ Resource gateway can monitor any K8 resource and any CRD.
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateway/mqtt-gateway.yaml
       ```
       
-   4. Deploy the sn,
+   4. Deploy the sensor,
       ```bash
-      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/mqtt-sn.yaml
+      kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/mqtt-sensor.yaml
       ```  
    
    5. Send a message to correct topic the gateway is configured to listen, you will see the argo workflow getting created.
@@ -846,7 +846,7 @@ Resource gateway can monitor any K8 resource and any CRD.
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/amqp.yaml
       ``` 
       
-   4) Deploy sn,
+   4) Deploy sensor,
       ```bash
       kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/amqp.yaml
       ```
@@ -884,7 +884,7 @@ Resource gateway can monitor any K8 resource and any CRD.
   
   2) Run `kubectl -n argo-events get gateways webhook-gateway -o yaml`, you'll see gateway now has `webhook.myNewConfig` running.     
   
-  3) Update the webhook sn or create a new sn to listen to this new configuration.
+  3) Update the webhook sensor or create a new sensor to listen to this new configuration.
   
   4) Test the endpoint by firing a HTTP POST request to `/my`.
   
@@ -900,14 +900,14 @@ Resource gateway can monitor any K8 resource and any CRD.
 
  * ### Complete payload
 
-     1. Create a webhook sn,
+     1. Create a webhook sensor,
         ```yaml
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
         metadata:
-          name: webhook-with-resource-param-sn
+          name: webhook-with-resource-param-sensor
           labels:
-            sensors.argoproj.io/sn-controller-instanceid: argo-events
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           repeat: true
           serviceAccountName: argo-events-sa
@@ -955,7 +955,7 @@ Resource gateway can monitor any K8 resource and any CRD.
         kubectl create -f https://raw.githubusercontent.com/argoproj/argo-events/trigger-param-fix/examples/sensors/webhook-with-complete-payload.yaml
         ```
     
-     2. <b>Note that sn name is `webhook-with-resource-param-sn`. Update your gateway accordingly or create a new one.</b>
+     2. <b>Note that sensor name is `webhook-with-resource-param-sensor`. Update your gateway accordingly or create a new one.</b>
     
      3.  Send a POST request to your webhook gateway
         ```bash
@@ -971,14 +971,14 @@ Resource gateway can monitor any K8 resource and any CRD.
 
 
  ## Filter event payload
- 1. Create a webhook sn,
+ 1. Create a webhook sensor,
     ```yaml
     apiVersion: argoproj.io/v1alpha1
     kind: Sensor
     metadata:
-      name: webhook-with-resource-param-sn
+      name: webhook-with-resource-param-sensor
       labels:
-        sensors.argoproj.io/sn-controller-instanceid: argo-events
+        sensors.argoproj.io/sensor-controller-instanceid: argo-events
     spec:
       repeat: true
       serviceAccountName: argo-events-sa

@@ -1,6 +1,6 @@
 ## Sensor Guide
 
-Sensors define a set of dependencies (inputs) and actions (outputs). The sn's actions will only be triggered after it's dependencies have been resolved.
+Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
 [Sensor examples](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
 
 
@@ -12,7 +12,7 @@ signals:
     - name: webhook-gateway/webhook.barConfig
 ```
 
-### Repeating the sn
+### Repeating the sensor
 Sensor can be configured to rerun by setting repeat property to `true`
 ``` 
 spec:

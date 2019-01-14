@@ -14,16 +14,16 @@ cd $GOPATH/src/github.com/argoproj/argo-events
 ```
 
 ## 2. Deploy Argo Events SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller
-Note: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-events-cluster-roles.yaml) file to use the correct namespace that you wish to deploy the sn controller and gateway controller.
+Note: Modify the [argo-events-cluster-roles.yaml](../hack/k8s/manifests/argo-events-cluster-roles.yaml) file to use the correct namespace that you wish to deploy the sensor controller and gateway controller.
 
 ```
 kubectl create namespace argo-events
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sn-crd.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-crd.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sn-controller-configmap.yaml
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sn-controller-deployment.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-configmap.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-deployment.yaml
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml
 kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
 ```
@@ -42,7 +42,7 @@ kubectl apply -n argo-events -f examples/gateways/webhook-gateway-configmap.yaml
 kubectl apply -n argo-events -f examples/gateways/webhook.yaml
 ```
 
-## 5. Create a webhook sn
+## 5. Create a webhook sensor
 ```
 kubectl apply -n argo-events -f examples/sensors/webhook.yaml
 ```
@@ -68,12 +68,12 @@ Verify that the Argo workflow was run when the trigger was executed.
 argo list -n argo-events
 ```
 
-Verify that the sn was updated correctly and moved to a "Complete" phase.
+Verify that the sensor was updated correctly and moved to a "Complete" phase.
 ```
-kubectl get sn -n argo-events webhook-sn -o yaml
+kubectl get sensor -n argo-events webhook-sensor -o yaml
 ```
 
-Check the logs of the sn-controller pod, gateway-controller, associated gateways and sensors if there are problems.
+Check the logs of the sensor-controller pod, gateway-controller, associated gateways and sensors if there are problems.
 
 ## 7. Next steps
 * [Follow tutorial on gateways and sensors](tutorial.md)
