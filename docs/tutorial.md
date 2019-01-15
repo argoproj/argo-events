@@ -422,7 +422,7 @@ Calendar gateway either accepts `interval` or `cron schedules` as configuration.
       calendar.barConfig: |-
         interval: 10s
       calendar.fooConfig: |-
-        interval: 30 * * * *
+        schedule: 30 * * * *
     ```
 
     The `barConfig` defines an interval of `10s`, meaning, gateway configuration will run every 10s and send event to watchers.
