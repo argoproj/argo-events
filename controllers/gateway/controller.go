@@ -19,9 +19,10 @@ package gateway
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
-	zlog "github.com/rs/zerolog"
+	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -32,9 +33,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"os"
 )
 
 const (
@@ -59,7 +57,7 @@ type GatewayController struct {
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
-	log zlog.Logger
+	log zerolog.Logger
 
 	// kubernetes config and apis
 	kubeConfig       *rest.Config
@@ -77,7 +75,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              zlog.New(os.Stdout).With().Caller().Logger(),
+		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
@@ -113,37 +111,13 @@ func (c *GatewayController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		escalationEvent := &corev1.Event{
-			Reason: err.Error(),
-			Type:   string(common.EscalationEventType),
-			Action: "gateway is marked as failed",
-			EventTime: metav1.MicroTime{
-				Time: time.Now(),
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace:    gateway.Namespace,
-				GenerateName: gateway.Name + "-",
-				Labels: map[string]string{
-					common.LabelEventSeen:    "",
-					common.LabelResourceName: gateway.Name,
-					common.LabelEventType:    string(common.EscalationEventType),
-				},
-			},
-			InvolvedObject: corev1.ObjectReference{
-				Namespace: gateway.Namespace,
-				Name:      gateway.Name,
-				Kind:      gateway.Kind,
-			},
-			Source: corev1.EventSource{
-				Component: gateway.Name,
-			},
-			ReportingInstance:   c.Config.InstanceID,
-			ReportingController: common.DefaultGatewayControllerDeploymentName,
+		labels := map[string]string{
+			common.LabelGatewayName: gateway.Name,
+			common.LabelEventType:   string(common.EscalationEventType),
 		}
-		ctx.log.Error().Str("escalation-msg", err.Error()).Msg("escalating gateway error")
-		_, err = common.CreateK8Event(escalationEvent, c.kubeClientset)
-		if err != nil {
-			ctx.log.Error().Err(err).Msg("failed to escalate controller error")
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s, err: %+v", gateway.Name, err), common.StateChangeEventType,
+			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
+			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}
 	}
 
@@ -166,8 +140,8 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	}
 
 	// due to the base delay of 5ms of the DefaultControllerRateLimiter
-	// requeues will happen very quickly even after a signal pod goes down
-	// we want to give the signal pod a chance to come back up so we give a genorous number of retries
+	// requeues will happen very quickly even after a gateway pod goes down
+	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
 		c.log.Error().Str("gateway-controller", key.(string)).Err(err).Msg("error syncing gateway-controller")
 
@@ -179,7 +153,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 }
 
 // Run executes the gateway-controller
-func (c *GatewayController) Run(ctx context.Context, gwThreads, signalThreads int) {
+func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 	c.log.Info().Str("version", base.GetVersion().Version).Str("instance-id", c.Config.InstanceID).Msg("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)

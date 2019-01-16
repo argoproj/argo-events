@@ -17,20 +17,21 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/ghodss/yaml"
 	"net/http"
 	"time"
+
+	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// StorageGridConfigExecutor implements ConfigExecutor interface
-type StorageGridConfigExecutor struct {
-	*gateways.GatewayConfig
+// StorageGridEventSourceExecutor implements ConfigExecutor interface
+type StorageGridEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
-// StorageGridEventConfig contains configuration for storage grid sns
+// storageGrid contains configuration for storage grid sns
 // +k8s:openapi-gen=true
-type StorageGridEventConfig struct {
+type storageGrid struct {
 	// Port to run web server on
 	Port string `json:"port"`
 	// Endpoint to listen to events on
@@ -96,9 +97,9 @@ type storageGridNotification struct {
 	Version  string `json:"Version"`
 }
 
-func parseConfig(config string) (*StorageGridEventConfig, error) {
-	var s *StorageGridEventConfig
-	err := yaml.Unmarshal([]byte(config), &s)
+func parseEventSource(eventSource string) (*storageGrid, error) {
+	var s *storageGrid
+	err := yaml.Unmarshal([]byte(eventSource), &s)
 	if err != nil {
 		return nil, err
 	}

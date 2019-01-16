@@ -17,9 +17,9 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/common"
+	"strings"
+
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,46 +28,32 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"strings"
 )
 
-// StartConfig runs a configuration
-func (ce *ResourceConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	res, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	pes, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *res).Msg("resource configuration")
 
-	go ce.listenEvents(res, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running.")
-			config.Active = true
+	go ese.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-	}
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.ConfigContext) {
-	resources, err := ce.discoverResources(res)
+// listenEvents watches resource updates and consume those events
+func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
+	resources, err := ese.discoverResources(res)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	options := metav1.ListOptions{Watch: true}
@@ -75,26 +61,16 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("k8 event created marking configuration as running")
-
-	config.StartChan <- struct{}{}
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to resource notifications")
 
 	// global quit channel
 	quitChan := make(chan struct{})
-
 	// start up listeners
 	for i := 0; i < len(resources); i++ {
 		resource := resources[i]
 		w, err := resource.Watch(options)
 		if err != nil {
-			config.ErrChan <- err
+			errorCh <- err
 			return
 		}
 
@@ -105,20 +81,29 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 				select {
 				case item := <-w.ResultChan():
 					if item.Object == nil {
-						ce.Log.Warn().Str("config-key", config.Data.Src).Msg("object to watch is nil")
-						return
+						ese.Log.Warn().Str("event-source-name", eventSource.Name).Msg("object to watch is nil")
+						// renew watch
+						newWatch, err := resource.Watch(options)
+						if err != nil {
+							continue
+						}
+						w = newWatch
 					}
 					itemObj := item.Object.(*unstructured.Unstructured)
 					b, err := itemObj.MarshalJSON()
 					if err != nil {
-						config.ErrChan <- err
+						errorCh <- err
+						localQuitChan <- struct{}{}
+						return
 					}
 					if item.Type == watch.Error {
 						err = errors.FromObject(item.Object)
-						config.ErrChan <- err
+						errorCh <- err
+						localQuitChan <- struct{}{}
+						return
 					}
-					if ce.passFilters(itemObj, res.Filter) {
-						config.DataChan <- b
+					if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
+						dataCh <- b
 					}
 
 				case <-localQuitChan:
@@ -128,30 +113,28 @@ func (ce *ResourceConfigExecutor) listenEvents(res *resource, config *gateways.C
 		}()
 	}
 
-	<-config.DoneChan
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
+	<-doneCh
 	close(quitChan)
-	config.ShutdownChan <- struct{}{}
-	return
 }
 
-func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
-	dynClientPool := dynamic.NewDynamicClientPool(ce.GatewayConfig.KubeConfig)
-	disco, err := discovery.NewDiscoveryClientForConfig(ce.GatewayConfig.KubeConfig)
+func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
+	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
+	disco, err := discovery.NewDiscoveryClientForConfig(ese.K8RestConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	groupVersion := ce.resolveGroupVersion(obj)
+	groupVersion := ese.resolveGroupVersion(obj)
 	resourceInterfaces, err := disco.ServerResourcesForGroupVersion(groupVersion)
 	if err != nil {
 		return nil, err
 	}
+
 	resources := make([]dynamic.ResourceInterface, 0)
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		ce.GatewayConfig.Log.Info().Str("api-resource", gvk.String())
+		ese.Log.Info().Str("api-resource", gvk.String())
 		if apiResource.Kind != obj.Kind {
 			continue
 		}
@@ -173,7 +156,7 @@ func (ce *ResourceConfigExecutor) discoverResources(obj *resource) ([]dynamic.Re
 	return resources, nil
 }
 
-func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {
+func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {
 	if obj.Version == "v1" {
 		return obj.Version
 	}
@@ -181,30 +164,30 @@ func (ce *ResourceConfigExecutor) resolveGroupVersion(obj *resource) string {
 }
 
 // helper method to return a flag indicating if the object passed the client side filters
-func (ce *ResourceConfigExecutor) passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) bool {
+func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	// no filters are applied.
 	if filter == nil {
 		return true
 	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		ce.GatewayConfig.Log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
+		ese.Log.Info().Str("event-source-name", esName).Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		ce.GatewayConfig.Log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
+		ese.Log.Info().Str("event-source-name", esName).Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		ce.GatewayConfig.Log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
+		ese.Log.Info().Str("event-source-name", esName).Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		ce.GatewayConfig.Log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
+		ese.Log.Info().Str("event-source-name", esName).Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
 		return false
 	}
 	return true

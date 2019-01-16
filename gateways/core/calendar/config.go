@@ -17,19 +17,19 @@ limitations under the License.
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// CalendarConfigExecutor implements ConfigExecutor interface
-type CalendarConfigExecutor struct {
-	*gateways.GatewayConfig
+// CalendarEventSourceExecutor implements Eventing
+type CalendarEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
-// CalSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
+// calSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 // +k8s:openapi-gen=true
-type CalSchedule struct {
+type calSchedule struct {
 	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
 	Schedule string `json:"schedule"`
 
@@ -45,9 +45,9 @@ type CalSchedule struct {
 	Recurrence []string `json:"recurrence,omitempty"`
 }
 
-func parseConfig(config string) (*CalSchedule, error) {
-	var c *CalSchedule
-	err := yaml.Unmarshal([]byte(config), &c)
+func parseEventSource(eventSource string) (*calSchedule, error) {
+	var c *calSchedule
+	err := yaml.Unmarshal([]byte(eventSource), &c)
 	if err != nil {
 		return nil, err
 	}

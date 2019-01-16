@@ -17,13 +17,21 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/resource"
 )
 
 func main() {
-	ce := &resource.ResourceConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	rest, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
+	}
+	gateways.StartGateway(&resource.ResourceEventSourceExecutor{
+		Log:          common.GetLoggerContext(common.LoggerConf()).Logger(),
+		K8RestConfig: rest,
+	})
 }

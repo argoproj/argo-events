@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: github-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "github-gateway"
+spec:
+  deploySpec:
+    metadata:
+      labels:
+        gateway-type: github
+        dispatch-mechanism: http
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "metalgearsolid/gateway-client:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "file-events"
+          image: "metalgearsolid/github-gateway:v0.6.1"
+          imagePullPolicy: "Always"
+          command: ["/bin/github-gateway"]
+      serviceAccountName: "argo-events-sa"
+  configMap: "github-gateway-configmap"
+  type: "github"
+  dispatchProtocol: "HTTP"
+  eventVersion: "1.0"
+  processorPort: "9330"
+  watchers:
+    sensors:
+      - name: "github-sensor"

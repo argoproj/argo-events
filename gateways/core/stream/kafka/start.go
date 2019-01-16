@@ -1,11 +1,27 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package kafka
 
 import (
-	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"fmt"
 	"strconv"
+
+	"github.com/Shopify/sarama"
+	"github.com/argoproj/argo-events/gateways"
 )
 
 func verifyPartitionAvailable(part int32, partitions []int32) bool {
@@ -17,96 +33,70 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 	return false
 }
 
-// Runs a configuration
-func (ce *KafkaConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	k, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	k, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
-		return
+		return err
 	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *k).Msg("kafka configuration")
 
-	go ce.listenEvents(k, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+	go ese.listenEvents(k, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-	}
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *KafkaConfigExecutor) listenEvents(k *kafka, config *gateways.ConfigContext) {
+func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	consumer, err := sarama.NewConsumer([]string{k.URL}, nil)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
 	pInt, err := strconv.ParseInt(k.Partition, 10, 32)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	partition := int32(pInt)
 
 	availablePartitions, err := consumer.Partitions(k.Topic)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		config.ErrChan <- err
+		errorCh <- fmt.Errorf("partition %d is not available", partition)
 		return
 	}
 
 	partitionConsumer, err := consumer.ConsumePartition(k.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
-	config.StartChan <- struct{}{}
-
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
-			config.DataChan <- msg.Value
+			dataCh <- msg.Value
 
 		case err := <-partitionConsumer.Errors():
-			ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Str("partition", k.Partition).Str("topic", k.Topic).Err(err).Msg("received an error")
-			config.ErrChan <- err
+			errorCh <- err
 			return
 
-		case <-config.DoneChan:
+		case <-doneCh:
 			err = partitionConsumer.Close()
 			if err != nil {
-				ce.GatewayConfig.Log.Error().Err(err).Str("config-key", config.Data.Src).Msg("failed to close consumer")
+				ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to close consumer")
 			}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-			config.ShutdownChan <- struct{}{}
 			return
 		}
 	}

@@ -33,7 +33,7 @@ func Validate(gw *v1alpha1.Gateway) error {
 	if gw.Spec.EventVersion == "" {
 		return fmt.Errorf("gateway version is not specified")
 	}
-	switch gw.Spec.DispatchMechanism {
+	switch gw.Spec.DispatchProtocol {
 	case v1alpha1.HTTPGateway:
 		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {
 			return fmt.Errorf("no associated watchers with gateway")

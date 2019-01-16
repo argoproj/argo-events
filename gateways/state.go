@@ -17,31 +17,45 @@ limitations under the License.
 package gateways
 
 import (
-	"fmt"
+	gtw "github.com/argoproj/argo-events/controllers/gateway"
+	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"time"
 )
 
+// EventSourceStatus encapsulates state of an event source
+type EventSourceStatus struct {
+	// Id of the event source
+	Id string
+	// Name of the event source
+	Name string
+	// Message
+	Message string
+	// Phase of the event source
+	Phase v1alpha1.NodePhase
+	// Gateway reference
+	Gw *v1alpha1.Gateway
+}
+
 // markGatewayNodePhase marks the node with a phase, returns the node
-func (gc *GatewayConfig) markGatewayNodePhase(nodeID string, phase v1alpha1.NodePhase, message string) *v1alpha1.NodeStatus {
-	gc.Log.Debug().Str("node-id", nodeID).Str("phase", string(phase)).Msg("marking node phase")
-	gc.Log.Info().Interface("active-nodes", gc.gw.Status.Nodes).Msg("nodes")
-	node := gc.getNodeByID(nodeID)
+func (gc *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
+	gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("phase", string(nodeStatus.Phase)).Msg("marking node phase")
+	node := gc.getNodeByID(nodeStatus.Id)
 	if node == nil {
-		gc.Log.Warn().Str("node-id", nodeID).Msg("node is not initialized")
+		gc.Log.Warn().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Msg("node is not initialized")
 		return nil
 	}
-	if node.Phase != v1alpha1.NodePhaseCompleted && node.Phase != phase {
-		gc.Log.Info().Str("node-id", nodeID).Str("old-phase", string(node.Phase)).Str("new-phase", string(phase)).Msg("phase marked")
-		node.Phase = phase
+	if node.Phase != nodeStatus.Phase {
+		gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("old-phase", string(node.Phase)).Str("new-phase", string(nodeStatus.Phase)).Msg("phase marked")
+		node.Phase = nodeStatus.Phase
 	}
-	node.Message = message
+	node.Message = nodeStatus.Message
 	gc.gw.Status.Nodes[node.ID] = *node
+	gc.updated = true
 	return node
 }
 
@@ -55,150 +69,74 @@ func (gc *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
 }
 
 // create a new node
-func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, timeID string, messages string) v1alpha1.NodeStatus {
+func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
 	if gc.gw.Status.Nodes == nil {
 		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
-	gc.Log.Info().Str("node-id", nodeID).Str("node-name", nodeName).Str("time-id", timeID).Msg("node")
-	oldNode, ok := gc.gw.Status.Nodes[nodeID]
-	if ok {
-		gc.Log.Info().Str("node-name", nodeName).Msg("node already initialized")
-		return oldNode
+	gc.Log.Info().Str("node-id", nodeID).Str("node-name", nodeName).Msg("node")
+	node, ok := gc.gw.Status.Nodes[nodeID]
+	if !ok {
+		node = v1alpha1.NodeStatus{
+			ID:          nodeID,
+			Name:        nodeName,
+			DisplayName: nodeName,
+			StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
+		}
 	}
-
-	node := v1alpha1.NodeStatus{
-		ID:          nodeID,
-		TimeID:      timeID,
-		Name:        nodeName,
-		DisplayName: nodeName,
-		Phase:       v1alpha1.NodePhaseInitialized,
-		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
-	}
+	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
 	gc.gw.Status.Nodes[nodeID] = node
-	gc.Log.Info().Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is initialized")
+	gc.Log.Info().Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is running")
+	gc.updated = true
 	return node
 }
 
-// updateGatewayResource updates gateway resource
-func (gc *GatewayConfig) updateGatewayResource(event *corev1.Event) error {
-	var err error
+// UpdateGatewayResourceState updates gateway resource nodes state
+func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
+	gc.Log.Info().Msg("received a gateway state update notification")
 
-	defer func() {
-		gc.Log.Info().Str("event-name", event.Name).Str("action", event.Action).Msg("marking gateway k8 event as seen")
-		// mark event as seen
-		event.ObjectMeta.Labels[common.LabelEventSeen] = "true"
-		_, err = gc.Clientset.CoreV1().Events(gc.gw.Namespace).Update(event)
+	switch status.Phase {
+	case v1alpha1.NodePhaseRunning:
+		// init the node and mark it as running
+		gc.initializeNode(status.Id, status.Name, status.Message)
+
+	case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
+		gc.markGatewayNodePhase(status)
+
+	case v1alpha1.NodePhaseResourceUpdate:
+		if gc.gw.Spec.Watchers != status.Gw.Spec.Watchers {
+			gc.gw = status.Gw
+			gc.updated = true
+		}
+
+	case v1alpha1.NodePhaseRemove:
+		delete(gc.gw.Status.Nodes, status.Id)
+		gc.updated = true
+	}
+
+	if gc.updated {
+		// persist changes and create K8s event logging the change
+		eventType := common.StateChangeEventType
+		labels := map[string]string{
+			common.LabelGatewayEventSourceName: status.Name,
+			common.LabelGatewayName:            gc.Name,
+			common.LabelGatewayEventSourceID:   status.Id,
+			common.LabelOperation:              "persist_event_source_state",
+		}
+		updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, &gc.Log)
 		if err != nil {
-			gc.Log.Error().Err(err).Str("event-name", event.ObjectMeta.Name).Msg("failed to mark event as seen")
-		}
-	}()
-
-	// its better to get latest resource version in case user performed an gateway resource update using kubectl
-	gw, err := gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Get(gc.gw.Name, metav1.GetOptions{})
-	if err != nil {
-		gc.Log.Error().Err(err).Str("event-name", event.Name).Msg("failed to retrieve the gateway")
-		return err
-	}
-
-	gc.gw = gw
-
-	// get time id of configuration
-	timeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigTimeID]
-	if !ok {
-		return fmt.Errorf("failed to apply update to gateway configuration. time ID is not present. event ID: %s", event.ObjectMeta.Name)
-	}
-
-	// get node/configuration to update
-	nodeID, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigID]
-	if !ok {
-		return fmt.Errorf("failed to update gateway resource. no configuration name provided")
-	}
-	node, ok := gc.gw.Status.Nodes[nodeID]
-	gc.Log.Info().Str("config-id", nodeID).Str("action", string(event.Action)).Msg("k8 event")
-
-	// initialize the configuration
-	if !ok && v1alpha1.NodePhase(event.Action) == v1alpha1.NodePhaseInitialized {
-		nodeName, ok := event.ObjectMeta.Labels[common.LabelGatewayConfigurationName]
-		if !ok {
-			gc.Log.Warn().Str("config-id", nodeID).Msg("configuration name is not provided")
-			nodeName = nodeID
+			gc.Log.Error().Err(err).Msg("failed to persist gateway resource updates, reverting to old state")
+			eventType = common.EscalationEventType
 		}
 
-		gc.Log.Warn().Str("config-id", nodeID).Msg("configuration not registered with gateway resource. initializing configuration...")
-		gc.initializeNode(nodeID, nodeName, timeID, "initialized")
-		return gc.persistUpdates()
-	}
+		// update gateway ref. in case of failure to persist updates, this is a deep copy of old gateway resource
+		gc.gw = updatedGw
+		labels[common.LabelEventType] = string(eventType)
 
-	gc.Log.Info().Str("config-name", nodeID).Msg("updating gateway resource...")
-
-	// check if the event is actually valid and just arrived out of order
-	if ok {
-		if node.TimeID == timeID {
-			// precedence of states Remove > Complete/Error > Running > Initialized
-			switch v1alpha1.NodePhase(event.Action) {
-			case v1alpha1.NodePhaseRunning, v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
-				gc.gw.Status.Nodes[nodeID] = node
-				if node.Phase != v1alpha1.NodePhaseCompleted || node.Phase == v1alpha1.NodePhaseError {
-					gc.markGatewayNodePhase(nodeID, v1alpha1.NodePhase(event.Action), event.Reason)
-				}
-				return gc.persistUpdates()
-			case v1alpha1.NodePhaseRemove:
-				gc.Log.Info().Str("config-name", nodeID).Msg("removing configuration from gateway")
-				delete(gc.gw.Status.Nodes, nodeID)
-				return gc.persistUpdates()
-			default:
-				gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).Msg("unknown action for configuration")
-				return nil
-			}
-		} else {
-			gc.Log.Error().Str("config-name", nodeID).Str("event-name", event.Name).Str("event-action", event.Action).
-				Str("node-time-id", node.TimeID).Str("event-time-id", timeID).Msg("time ids mismatch")
-			return nil
-		}
-	} else {
-		gc.Log.Warn().Str("config-name", nodeID).Str("event-name", event.Name).Msg("skipping event")
-		return nil
-	}
-}
-
-// PersistUpdates persists the updates to the Gateway resource
-func (gc *GatewayConfig) persistUpdates() error {
-	var err error
-	gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Update(gc.gw)
-	if err != nil {
-		gc.Log.Warn().Err(err).Msg("error updating gateway")
-		if errors.IsConflict(err) {
-			return err
-		}
-		gc.Log.Info().Msg("re-applying updates on latest version and retrying update")
-		err = gc.reapplyUpdate()
-		if err != nil {
-			gc.Log.Error().Err(err).Msg("failed to re-apply update")
-			return err
+		// generate a K8s event for persist event source state change
+		if err := common.GenerateK8sEvent(gc.Clientset, status.Message, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
+			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
 		}
 	}
-	gc.Log.Info().Msg("gateway updated successfully")
-	time.Sleep(1 * time.Second)
-	return nil
-}
-
-// reapplyUpdate by fetching a new version of the sensor and updating the status
-func (gc *GatewayConfig) reapplyUpdate() error {
-	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		gwClient := gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace)
-		gw, err := gwClient.Get(gc.gw.Name, metav1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-		gc.gw.Status = gw.Status
-		gc.gw, err = gwClient.Update(gc.gw)
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		return true, nil
-	})
+	gc.updated = false
 }

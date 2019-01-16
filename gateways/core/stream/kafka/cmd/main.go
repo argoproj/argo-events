@@ -17,13 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/stream/kafka"
 )
 
 func main() {
-	ce := &kafka.KafkaConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	gateways.StartGateway(&kafka.KafkaEventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+	})
 }

@@ -17,13 +17,16 @@ limitations under the License.
 package artifact
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"context"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 s3EventConfig:
     bucket: input
@@ -42,16 +45,22 @@ secretKey:
 `
 )
 
-func TestS3ConfigExecutor_Validate(t *testing.T) {
-	s3Config := &S3ConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
-	ctx.Data.Config = configValue
-	err := s3Config.Validate(ctx)
-	assert.Nil(t, err)
+func TestValidateS3EventSource(t *testing.T) {
+	convey.Convey("Given a valid S3 artifact spec, parse the spec and make sure no error occurs", t, func() {
+		ese := &S3EventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Data: configValue,
+			Id:   configId,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
 
-	badConfig := `
+	convey.Convey("Given an invalid S3 artifact spec, parse it and error should occur", t, func() {
+		ese := &S3EventSourceExecutor{}
+		invalidS3Artifact := `
 s3EventConfig:
     bucket: input
     endpoint: minio-service.argo-events:9000
@@ -61,9 +70,14 @@ s3EventConfig:
         suffix: ""
 insecure: true
 `
-
-	ctx.Data.Config = badConfig
-
-	err = s3Config.Validate(ctx)
-	assert.NotNil(t, err)
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Id:   configId,
+			Name: configKey,
+			Data: invalidS3Artifact,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

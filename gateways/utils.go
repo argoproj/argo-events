@@ -17,24 +17,9 @@ limitations under the License.
 package gateways
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/controllers/gateway/transform"
 	"hash/fnv"
 )
-
-// TransformerPayload creates a new payload from input data and adds source information
-func TransformerPayload(b []byte, source string) ([]byte, error) {
-	tp := &transform.TransformerPayload{
-		Src:     source,
-		Payload: b,
-	}
-	payload, err := json.Marshal(tp)
-	if err != nil {
-		return nil, err
-	}
-	return payload, nil
-}
 
 // Hasher hashes a string
 func Hasher(value string) string {
@@ -43,19 +28,8 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
-func Recover() {
-	if r := recover(); r != nil {
-		fmt.Println("Recovered", r)
-	}
-}
-
-// CloseChannels performs cleanup by closing open channels in defaultConfigExecutor
-func CloseChannels(ctx *ConfigContext) {
-	defer Recover()
-	close(ctx.StartChan)
-	close(ctx.DoneChan)
-	close(ctx.ErrChan)
-	close(ctx.StopChan)
-	close(ctx.DataChan)
-	close(ctx.ShutdownChan)
+// SetValidateReason set the result of event source validation
+func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
+	v.Reason = reason
+	v.IsValid = valid
 }

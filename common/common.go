@@ -38,12 +38,6 @@ const (
 
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
-
-	// DefaultImageRepository is is the default image repository
-	DefaultImageRepository = "argoproj"
-
-	// ImageVersionLatest is the latest tag for image to pull
-	ImageVersionLatest = "latest"
 )
 
 // SENSOR CONTROLLER CONSTANTS
@@ -58,14 +52,14 @@ const (
 	//LabelKeySensorControllerInstanceID is the label which allows to separate application among multiple running sensor controllers.
 	LabelKeySensorControllerInstanceID = sensor.FullName + "/sensor-controller-instanceid"
 
-	// LabelKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
-	LabelKeyPhase = sensor.FullName + "/phase"
+	// LabelSensorKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
+	LabelSensorKeyPhase = sensor.FullName + "/phase"
 
-	// LabelKeyComplete is the label to mark sensors as complete
-	LabelKeyComplete = sensor.FullName + "/complete"
+	// LabelSensorKeyComplete is the label to mark sensors as complete
+	LabelSensorKeyComplete = sensor.FullName + "/complete"
 
-	// EnvVarConfigMap is the name of the configmap to use for the sensor-controller
-	EnvVarConfigMap = "SENSOR_CONFIG_MAP"
+	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
+	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
 )
 
 // SENSOR CONSTANTS
@@ -85,8 +79,11 @@ const (
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 
-	// LabelSignalName is label for signal name
-	LabelSignalName = "signal-name"
+	// LabelOperation is a label for an operation in framework
+	LabelOperation = "operation"
+
+	// LabelEventSource is label for event name
+	LabelEventSource = "event-name"
 
 	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
@@ -100,129 +97,50 @@ const (
 	// EnvVarGatewayControllerConfigMap contains name of the configmap to retrieve gateway-controller configuration from
 	EnvVarGatewayControllerConfigMap = "GATEWAY_CONTROLLER_CONFIG_MAP"
 
-	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
-	// Content encoding is expected to be YAML.
-	GatewayControllerConfigMapKey = "config"
-
-	//LabelKeyGatewayControllerInstanceID is the label which allows to separate application among multiple running gateway-controller controllers.
-	LabelKeyGatewayControllerInstanceID = gateway.FullName + "/gateway-controller-instanceid"
-
-	// GatewayLabelKeyPhase is a label applied to gateways to indicate the current phase of the gateway-controller (for filtering purposes)
-	GatewayLabelKeyPhase = gateway.FullName + "/phase"
-
-	// LabelGatewayName is the label for gateway name
-	LabelGatewayName = "gateway-name"
-
-	// GatewayName refers env var for name of gateway
-	GatewayName = "GATEWAY_NAME"
-
-	// GatewayNamespace is namespace where gateway controller is deployed
-	GatewayNamespace = "GATEWAY_NAMESPACE"
-
-	// LabelGatewayConfigurationName is the label for a configuration in gateway
-	LabelGatewayConfigurationName = "config-name"
-
 	// EnvVarGatewayControllerInstanceID is used to get gateway controller instance id
 	EnvVarGatewayControllerInstanceID = "GATEWAY_CONTROLLER_INSTANCE_ID"
 
 	// EnvVarGatewayControllerName is used to get name of gateway controller
 	EnvVarGatewayControllerName = "GATEWAY_CONTROLLER_NAME"
 
-	// LabelGatewayConfigID is the label for gateway configuration ID
-	LabelGatewayConfigID = "GATEWAY_CONFIG_ID"
+	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
+	// Content encoding is expected to be YAML.
+	GatewayControllerConfigMapKey = "config"
 
-	// LabelGatewayConfigTimeID is the label for gateway configuration time ID
-	LabelGatewayConfigTimeID = "GATEWAY_CONFIG_TIME_ID"
+	// EnvVarGatewayName refers env var for name of gateway
+	EnvVarGatewayName = "GATEWAY_NAME"
+
+	// EnvVarGatewayNamespace is namespace where gateway controller is deployed
+	EnvVarGatewayNamespace = "GATEWAY_NAMESPACE"
+
+	//LabelKeyGatewayControllerInstanceID is the label which allows to separate application among multiple running gateway-controller controllers.
+	LabelKeyGatewayControllerInstanceID = gateway.FullName + "/gateway-controller-instanceid"
+
+	// LabelGatewayKeyPhase is a label applied to gateways to indicate the current phase of the gateway-controller (for filtering purposes)
+	LabelGatewayKeyPhase = gateway.FullName + "/phase"
+
+	// LabelGatewayName is the label for gateway name
+	LabelGatewayName = "gateway-name"
+
+	// LabelGatewayEventSourceName is the label for a event source in gateway
+	LabelGatewayEventSourceName = "config-name"
+
+	// LabelGatewayEventSourceID is the label for gateway configuration ID
+	LabelGatewayEventSourceID = "event-source-id"
+
+	// Server Connection Timeout, 5 seconds
+	ServerConnTimeout = 10
 )
 
-// Gateway Processor constants
+// Gateway client constants
 const (
-	// EnvVarGatewayProcessorConfigMap is used to get map containing configurations to run in a gateway
-	EnvVarGatewayProcessorConfigMap = "GATEWAY_PROCESSOR_CONFIG_MAP"
-
-	// GatewayProcessorGRPCServerPort is used to get grpc server port for gateway processor server
-	GatewayProcessorGRPCServerPort = "GATEWAY_PROCESSOR_GRPC_SERVER_PORT"
-
-	// EnvVarGatewayProcessorClientHTTPPort is used to get http server port for gateway processor client
-	EnvVarGatewayProcessorClientHTTPPort = "GATEWAY_PROCESSOR_CLIENT_HTTP_PORT"
-
-	// GatewayProcessorClientHTTPPort is gateway processor client http server port
-	GatewayProcessorClientHTTPPort = "9393"
-
-	// EnvVarGatewayProcessorServerHTTPPort is used get http server port for gateway processor server
-	EnvVarGatewayProcessorServerHTTPPort = "GATEWAY_PROCESSOR_SERVER_HTTP_PORT"
-
-	// EnvVarGatewayProcessorHTTPServerConfigStartEndpoint is used to get REST endpoint to post new configuration to
-	EnvVarGatewayProcessorHTTPServerConfigStartEndpoint = "GATEWAY_HTTP_CONFIG_START"
-
-	// GatewayProcessorHTTPServerConfigStartEndpoint is REST endpoint to post new configuration to
-	GatewayProcessorHTTPServerConfigStartEndpoint = "/start"
-
-	// EnvVarGatewayProcessorHTTPServerConfigStopEndpoint is used to get REST endpoint to post to stop a configuration
-	EnvVarGatewayProcessorHTTPServerConfigStopEndpoint = "GATEWAY_HTTP_CONFIG_STOP"
-
-	// GatewayProcessorHTTPServerConfigStopEndpoint is REST endpoint to post to stop a configuration
-	GatewayProcessorHTTPServerConfigStopEndpoint = "/stop"
-
-	// EnvVarGatewayProcessorHTTPServerEventEndpoint is used to get the REST endpoint to send event to for gateway processor server
-	EnvVarGatewayProcessorHTTPServerEventEndpoint = "GATEWAY_HTTP_CONFIG_EVENT"
-
-	// GatewayProcessorHTTPServerEventEndpoint is REST endpoint to send event to for gateway processor server
-	GatewayProcessorHTTPServerEventEndpoint = "/event"
-
-	// EnvVarGatewayProcessorHTTPServerConfigActivated is used to get the REST endpoint to send  notifications for configuration that are successfully running
-	EnvVarGatewayProcessorHTTPServerConfigActivated = "GATEWAY_HTTP_CONFIG_RUNNING"
-
-	// GatewayProcessorHTTPServerConfigActivatedEndpoint is the REST endpoint on which gateway processor listens for activated notifications from configurations
-	GatewayProcessorHTTPServerConfigActivatedEndpoint = "/activated"
-
-	// EnvVarGatewayProcessorHTTPServerConfigError is used to get the REST endpoint on which gateway processor listens for errors from configurations
-	EnvVarGatewayProcessorHTTPServerConfigError = "GATEWAY_HTTP_CONFIG_ERROR"
-
-	// GatewayProcessorHTTPServerConfigErrorEndpoint is the REST endpoint on which gateway processor listens for errors from configurations
-	GatewayProcessorHTTPServerConfigErrorEndpoint = "/error"
-
-	// GatewayProcessorGRPCClientImage is gRPC gateway processor client image
-	GatewayProcessorGRPCClientImage = "gateway-processor-grpc-client"
-
-	// GatewayProcessorHTTPClientImage is HTTP gateway processor client image
-	GatewayProcessorHTTPClientImage = "gateway-processor-http-client"
+	// EnvVarGatewayEventSourceConfigMap is used to get map containing event sources to run in a gateway
+	EnvVarGatewayEventSourceConfigMap = "GATEWAY_EVENT_SOURCE_CONFIG_MAP"
 )
 
-// Gateway Transformer constants
+// Gateway server constants
 const (
-	// EnvVarGatewayTransformerConfigMap is used for gateway  configuration
-	EnvVarGatewayTransformerConfigMap = "GATEWAY_TRANSFORMER_CONFIG_MAP"
-
-	// GatewayHTTPEventTransformerImage is image for gateway http event transformer
-	GatewayHTTPEventTransformerImage = "gateway-http-transformer"
-
-	// GatewayNATSEventTransformerImage is image for gateway nats event transformer
-	GatewayNATSEventTransformerImage = "gateway-nats-transformer"
-
-	// GatewayKafkaEventTransformerImage is image for gateway kafka event transformer
-	GatewayKafkaEventTransformerImage = "gateway-kafka-transformer"
-
-	//  EnvVarGatewayTransformerPort is the env var for http server port
-	EnvVarGatewayTransformerPort = "TRANSFORMER_PORT"
-
-	// TransformerPort is http server port where transformer service is running
-	GatewayTransformerPort = "9300"
-
-	// EventTypeEnvVar contains the type of event
-	EventType = "EVENT_TYPE"
-
-	// EnvVarEventTypeVersion contains the event type version
-	EventTypeVersion = "EVENT_TYPE_VERSION"
-
-	// EnvVarEventSource contains the name of the gateway
-	EventSource = "EVENT_SOURCE"
-
-	// SensorWatchers is the list of sensors interested in listening to gateway notifications
-	SensorWatchers = "SENSOR_WATCHERS"
-
-	// GatewayWatchers is the list of gateways interested in listening to gateway notifications
-	GatewayWatchers = "GATEWAY_WATCHERS"
+	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 )
 
 // CloudEvents constants

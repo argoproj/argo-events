@@ -14,18 +14,34 @@ limitations under the License.
 package gitlab
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gitlab gateway configuration
-func (ce *GitlabExecutor) Validate(config *gateways.ConfigContext) error {
-	g, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gitlab gateway event source
+func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	g, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateGitlab(g); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateGitlab(g *glab) error {
 	if g == nil {
-		return gateways.ErrEmptyConfig
+		return gateways.ErrEmptyEventSource
 	}
 	if g.ProjectId == "" {
 		return fmt.Errorf("project id can't be empty")

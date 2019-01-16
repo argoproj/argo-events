@@ -19,85 +19,118 @@ package sensor
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/stretchr/testify/assert"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"testing"
 )
 
-func TestSensorOperateLifecycle(t *testing.T) {
-	controller := sensorController()
+var sensorStr = `
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: artifact-sensor
+  namespace: argo-events
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor:v0.7"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: artifact-gateway/input
+  triggers:
+    - name: artifact-workflow-trigger
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay
+`
 
-	// create a new sensor object
-	sensor, err := getSensor()
-	assert.Nil(t, err)
-	assert.NotNil(t, sensor)
+func getSensor() (*v1alpha1.Sensor, error) {
+	var sensor *v1alpha1.Sensor
+	err := yaml.Unmarshal([]byte(sensorStr), &sensor)
+	return sensor, err
+}
 
-	// create sensor resource
-	sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
-	assert.Nil(t, err)
-	assert.NotNil(t, sensor)
+func TestSensorOperations(t *testing.T) {
+	convey.Convey("Given a sensor, parse it", t, func() {
+		sensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(sensor, convey.ShouldNotBeNil)
 
-	sOpCtx := newSensorOperationCtx(sensor, controller)
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
-	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
-		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
-	}
-	// check whether sensor deployment is created
-	deployment, err := controller.kubeClientset.AppsV1().Deployments(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.NotNil(t, deployment)
+		controller := getSensorController()
+		soc := newSensorOperationCtx(sensor, controller)
+		convey.So(soc, convey.ShouldNotBeNil)
 
-	// check whether sensor service is created
-	svc, err := controller.kubeClientset.CoreV1().Services(sOpCtx.s.Namespace).Get(common.DefaultSensorServiceName(sOpCtx.s.Name), metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.NotNil(t, svc)
+		convey.Convey("Create the sensor", func() {
+			sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(sensor, convey.ShouldNotBeNil)
 
-	// mark sensor as complete by marking all nodes as complete
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
-		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "signal is completed")
-	}
+			convey.Convey("Operate on a new sensor", func() {
+				err := soc.operate()
+				convey.So(err, convey.ShouldBeNil)
 
-	for _, signal := range sOpCtx.s.Spec.Triggers {
-		node := getNodeByName(sOpCtx.s, signal.Name)
-		sOpCtx.markNodePhase(node.Name, v1alpha1.NodePhaseComplete, "trigger is completed")
-	}
+				convey.Convey("Sensor should be marked as active with it's nodes initialized", func() {
+					sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+					convey.So(err, convey.ShouldBeNil)
+					convey.So(sensor, convey.ShouldNotBeNil)
+					convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
-	assert.NotNil(t, sOpCtx.s)
-	assert.Equal(t, string(v1alpha1.NodePhaseComplete), string(sOpCtx.s.Status.Phase))
+					for _, node := range soc.s.Status.Nodes {
+						switch node.Type {
+						case v1alpha1.NodeTypeEventDependency:
+							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+						case v1alpha1.NodeTypeTrigger:
+							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseNew)
+						}
+					}
+				})
 
-	// check if sensor has rerun
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
-	assert.NotNil(t, sOpCtx.s)
-	assert.Equal(t, string(v1alpha1.NodePhaseNew), string(sOpCtx.s.Status.Phase))
+				convey.Convey("Sensor pod and service should be created", func() {
+					sensorDeployment, err := controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+					convey.So(err, convey.ShouldBeNil)
+					convey.So(sensorDeployment, convey.ShouldNotBeNil)
 
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
+					sensorSvc, err := controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{})
+					convey.So(err, convey.ShouldBeNil)
+					convey.So(sensorSvc, convey.ShouldNotBeNil)
+				})
 
-	for _, signal := range sOpCtx.s.Spec.Signals {
-		node := getNodeByName(sOpCtx.s, signal.Name)
-		assert.Equal(t, string(v1alpha1.NodePhaseActive), string(node.Phase))
-	}
+				convey.Convey("Operate on a running sensor", func() {
+					convey.So(soc.s.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+					err := soc.operate()
+					convey.So(err, convey.ShouldBeNil)
+				})
 
-	// mark sensor as error and check if it is escalated through k8 event
-	sOpCtx.markSensorPhase(v1alpha1.NodePhaseError, false, "sensor is in error state")
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
-	assert.Equal(t, string(v1alpha1.NodePhaseError), string(sOpCtx.s.Status.Phase))
-
-	sOpCtx.s.Spec.Repeat = false
-	sOpCtx.markSensorPhase(v1alpha1.NodePhaseNew, false, "sensor is in new state")
-	err = sOpCtx.operate()
-	assert.Nil(t, err)
-	assert.Equal(t, string(v1alpha1.NodePhaseActive), string(sOpCtx.s.Status.Phase))
-
-	job, err := controller.kubeClientset.BatchV1().Jobs(sOpCtx.s.Namespace).Get(sOpCtx.s.Name, metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.NotNil(t, job)
+				convey.Convey("Operate on a failed sensor", func() {
+					sensor.Status.Phase = v1alpha1.NodePhaseError
+					err := soc.operate()
+					convey.So(err, convey.ShouldBeNil)
+				})
+			})
+		})
+	})
 }

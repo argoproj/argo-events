@@ -17,26 +17,34 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 )
 
-// ResourceConfigExecutor implements ConfigExecutor interface
-type ResourceConfigExecutor struct {
-	*gateways.GatewayConfig
+// ResourceEventSourceExecutor implements Eventing
+type ResourceEventSourceExecutor struct {
+	Log zerolog.Logger
+	// K8RestConfig is kubernetes cluster config
+	K8RestConfig *rest.Config
 }
 
 // resource refers to a dependency on a k8s resource.
 // +k8s:openapi-gen=true
 type resource struct {
-	Namespace string          `json:"namespace"`
-	Filter    *ResourceFilter `json:"filter,omitempty"`
+	// Namespace where resource is deployed
+	Namespace string `json:"namespace"`
+	// Filter is applied on the metadata of the resource
+	Filter *ResourceFilter `json:"filter,omitempty"`
+	// Version of the source
+	Version string `json:"version"`
+	// Group of the resource
 	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`
 }
 
-// ResourceFilter contains K8 ObjectMeta information to further filter resource signal objects
+// ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 // +k8s:openapi-gen=true
 type ResourceFilter struct {
 	Prefix      string            `json:"prefix,omitempty"`
@@ -46,9 +54,9 @@ type ResourceFilter struct {
 	CreatedBy metav1.Time `json:"createdBy,omitempty"`
 }
 
-func parseConfig(config string) (*resource, error) {
+func parseEventSource(es string) (*resource, error) {
 	var r *resource
-	err := yaml.Unmarshal([]byte(config), &r)
+	err := yaml.Unmarshal([]byte(es), &r)
 	if err != nil {
 		return nil, err
 	}

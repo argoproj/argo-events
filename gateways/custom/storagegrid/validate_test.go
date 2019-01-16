@@ -17,14 +17,17 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"context"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways"
 )
 
 var (
 	configKey   = "testConfig"
-	configValue = `
+	configId    = "1234"
+	validConfig = `
 endpoint: "/"
 port: "8080"
 events:
@@ -33,27 +36,39 @@ filter:
     suffix: ".txt"
     prefix: "hello-"
 `
-)
 
-func TestStorageGridConfigExecutor_Validate(t *testing.T) {
-	s3Config := &StorageGridConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
-	ctx.Data.Config = configValue
-	err := s3Config.Validate(ctx)
-	assert.Nil(t, err)
-
-	badConfig := `
+	invalidConfig = `
 events:
     - "ObjectCreated:Put"
 filter:
     suffix: ".txt"
     prefix: "hello-"
 `
+)
 
-	ctx.Data.Config = badConfig
+func TestValidateStorageGridEventSource(t *testing.T) {
+	convey.Convey("Given a valid storage grid event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &StorageGridEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: validConfig,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
 
-	err = s3Config.Validate(ctx)
-	assert.NotNil(t, err)
+	convey.Convey("Given an invalid storage grid event source spec, parse it and make sure error occurs", t, func() {
+		ese := &StorageGridEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

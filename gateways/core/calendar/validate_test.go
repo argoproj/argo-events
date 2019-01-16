@@ -17,33 +17,45 @@ limitations under the License.
 package calendar
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"context"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 schedule: 30 * * * *
 `
 )
 
-func TestCalendarConfigExecutor_Validate(t *testing.T) {
-	ce := CalendarConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
-	assert.Nil(t, err)
-	configValue = `
-interval: 55s`
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.Nil(t, err)
-	configValue = ""
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.NotNil(t, err)
+func TestValidateCalendarEventSource(t *testing.T) {
+	convey.Convey("Given a valid calendar spec, parse it and make sure no error occurs", t, func() {
+		ese := &CalendarEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: configValue,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
+
+	convey.Convey("Given an invalid calendar spec, parse it and make sure error occurs", t, func() {
+		ese := &CalendarEventSourceExecutor{}
+		invalidConfig := ""
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

@@ -8,10 +8,10 @@ metadata:
 spec:
   deploySpec:
     containers:
-    - name: "calendar-events"
-      image: "argoproj/calendar-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/calendar-gateway"]
+      - name: "calendar-events"
+        image: "argoproj/calendar-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/calendar-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "calendar-gateway-configmap"
   type: "calendar"
@@ -19,5 +19,5 @@ spec:
   eventVersion: "1.0"
   imageVersion: "latest"
   watchers:
-      sensors:
+    sensors:
       - name: "calendar-sensor"

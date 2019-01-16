@@ -17,13 +17,16 @@ limitations under the License.
 package file
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"context"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 directory: "/bin/"
 type: CREATE
@@ -31,23 +34,32 @@ path: x.txt
 `
 )
 
-func TestFileWatcherConfigExecutor_Validate(t *testing.T) {
-	ce := &FileWatcherConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
-	assert.Nil(t, err)
-	configValue = `
-directory: "/bin/"
+func TestValidateFileEventSource(t *testing.T) {
+	convey.Convey("Given a valid file event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &FileEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
+
+	convey.Convey("Given an invalid file event source spec, parse it and make sure error occurs", t, func() {
+		ese := &FileEventSourceExecutor{}
+		invalidConfig := `
 type: CREATE
-`
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.NotNil(t, err)
-	configValue = ``
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.NotNil(t, err)
+path: x.txt`
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	wfv1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -43,16 +43,25 @@ spec:
 		},
 	}
 
-	cm, err := kubeClientset.CoreV1().ConfigMaps(cmArtifact.Namespace).Create(configmap)
-	assert.Nil(t, err)
-	assert.Equal(t, cm.Name, configmap.Name)
-	cmReader, err := NewConfigmapReader(kubeClientset, cmArtifact)
-	assert.Nil(t, err)
-	resourceBody, err := cmReader.Read()
-	assert.Nil(t, err)
+	convey.Convey("Given a configmap", t, func() {
+		cm, err := kubeClientset.CoreV1().ConfigMaps(cmArtifact.Namespace).Create(configmap)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cm, convey.ShouldNotBeNil)
 
-	var wf *wfv1.Workflow
-	err = yaml.Unmarshal(resourceBody, &wf)
-	assert.Nil(t, err)
-	assert.Equal(t, wf.Name, "hello-world")
+		convey.Convey("Make sure new configmap reader is not nil", func() {
+			cmReader, err := NewConfigMapReader(kubeClientset, cmArtifact)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(cmReader, convey.ShouldNotBeNil)
+
+			convey.Convey("Create a workflow from configmap artifact", func() {
+				resourceBody, err := cmReader.Read()
+				convey.So(err, convey.ShouldBeNil)
+
+				var wf *wfv1.Workflow
+				err = yaml.Unmarshal(resourceBody, &wf)
+				convey.So(err, convey.ShouldBeNil)
+				convey.So(wf.Name, convey.ShouldEqual, "hello-world")
+			})
+		})
+	})
 }

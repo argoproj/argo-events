@@ -134,20 +134,20 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeploySpec is description of gateway",
-							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+							Description: "DeploySpec is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Ref:         ref("k8s.io/api/core/v1.Pod"),
 						},
 					},
 					"configMap": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ConfigMap is name of the configmap for gateway-processor",
+							Description: "ConfigMap is name of the configmap for gateway. This configmap contains event sources.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type is the type of gateway",
+							Description: "Type is the type of gateway. Used as metadata.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -161,8 +161,8 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"serviceSpec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceSpec is the specifications of the service to expose the gateway",
-							Ref:         ref("k8s.io/api/core/v1.ServiceSpec"),
+							Description: "ServiceSpec is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
+							Ref:         ref("k8s.io/api/core/v1.Service"),
 						},
 					},
 					"watchers": {
@@ -171,33 +171,26 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers"),
 						},
 					},
-					"rpcPort": {
+					"processorPort": {
 						SchemaProps: spec.SchemaProps{
-							Description: "RPCPort if provided is used to communicate between gRPC gateway client and gRPC gateway server",
+							Description: "Port on which the gateway event source processor is running on.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
-					"httpServerPort": {
+					"dispatchProtocol": {
 						SchemaProps: spec.SchemaProps{
-							Description: "HTTPServerPort if provided is used to communicate between gateway client and server over http",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"dispatchMechanism": {
-						SchemaProps: spec.SchemaProps{
-							Description: "DispatchMechanism is the underlying mechanism used to send events from gateway to watchers(components interested in listening to event from this gateway)",
+							Description: "DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "eventVersion", "dispatchMechanism"},
+				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "dispatchProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.ServiceSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
 	}
 }
 
@@ -212,6 +205,12 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 							Description: "Phase is the high-level summary of the gateway",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"startedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StartedAt is the time at which this gateway was initiated",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"message": {
@@ -239,7 +238,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -252,13 +251,6 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 					"id": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ID is a unique identifier of a node within a sensor It is a hash of the node name",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"timeID": {
-						SchemaProps: spec.SchemaProps{
-							Description: "TimeID is used to resolve events arriving out of order for same node",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -292,7 +284,7 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 						},
 					},
 				},
-				Required: []string{"id", "timeID", "name", "displayName", "phase"},
+				Required: []string{"id", "name", "displayName", "phase"},
 			},
 		},
 		Dependencies: []string{},

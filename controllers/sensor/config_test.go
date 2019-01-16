@@ -17,41 +17,67 @@ limitations under the License.
 package sensor
 
 import (
+	"context"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/stretchr/testify/assert"
-
+	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestResyncConfig(t *testing.T) {
-	controller := sensorController()
-	err := controller.ResyncConfig(common.DefaultControllerNamespace)
-	assert.NotNil(t, err)
+func TestSensorControllerConfigWatch(t *testing.T) {
+	sc := getSensorController()
 
-	// fail when the configmap does not have key 'config'
-	configMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      SensorControllerConfigmap,
-			Namespace: common.DefaultControllerNamespace,
-		},
-		Data: map[string]string{},
-	}
-	_, err = controller.kubeClientset.CoreV1().ConfigMaps(common.DefaultControllerNamespace).Create(configMap)
-	assert.Nil(t, err)
-	err = controller.ResyncConfig(common.DefaultControllerNamespace)
-	assert.NotNil(t, err)
+	convey.Convey("Given a sensor", t, func() {
+		convey.Convey("Watch a configuration", func() {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			_, err := sc.watchControllerConfigMap(ctx)
+			convey.Convey("Make sure no error occurs", func() {
+				convey.So(err, convey.ShouldBeNil)
+			})
+		})
+	})
 
-	// succeed with no errors now that configmap has 'config' key
-	configMap.Data = map[string]string{"config": controllerConfig}
-	_, err = controller.kubeClientset.CoreV1().ConfigMaps(common.DefaultControllerNamespace).Update(configMap)
-	assert.Nil(t, err)
-	err = controller.ResyncConfig(common.DefaultControllerNamespace)
-	assert.Nil(t, err)
+	convey.Convey("Given a sensor", t, func() {
+		convey.Convey("Create a new watch and make sure watcher is not nil", func() {
+			watcher := sc.newControllerConfigMapWatch()
+			convey.So(watcher, convey.ShouldNotBeNil)
+		})
+	})
+
+	convey.Convey("Given a sensor, resync config", t, func() {
+		convey.Convey("Update a sensor configmap with new instance id and remove namespace", func() {
+			cmObj := &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: common.DefaultControllerNamespace,
+					Name:      sc.ConfigMap,
+				},
+				Data: map[string]string{
+					common.SensorControllerConfigMapKey: `instanceID: fake-instance-id`,
+				},
+			}
+			cm, err := sc.kubeClientset.CoreV1().ConfigMaps(sc.Namespace).Create(cmObj)
+			convey.Convey("Make sure no error occurs", func() {
+				convey.So(err, convey.ShouldBeNil)
+
+				convey.Convey("Updated sensor configmap must be non-nil", func() {
+					convey.So(cm, convey.ShouldNotBeNil)
+
+					convey.Convey("Resync the sensor configuration", func() {
+						err := sc.ResyncConfig(cmObj.Namespace)
+						convey.Convey("No error should occur while resyncing sensor configuration", func() {
+							convey.So(err, convey.ShouldBeNil)
+
+							convey.Convey("The updated instance id must be fake-instance-id", func() {
+								convey.So(sc.Config.InstanceID, convey.ShouldEqual, "fake-instance-id")
+								convey.So(sc.Config.Namespace, convey.ShouldBeEmpty)
+							})
+						})
+					})
+				})
+			})
+		})
+	})
 }
-
-var controllerConfig = `
-instanceID: argo-events
-`

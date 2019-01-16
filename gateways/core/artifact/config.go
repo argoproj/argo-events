@@ -17,20 +17,26 @@ limitations under the License.
 package artifact
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
+	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
-// S3ConfigExecutor implements ConfigExecutor interface
-type S3ConfigExecutor struct {
-	*gateways.GatewayConfig
+// S3EventSourceExecutor implements Eventing
+type S3EventSourceExecutor struct {
+	Log zerolog.Logger
+	// Clientset is kubernetes client
+	Clientset kubernetes.Interface
+	// Namespace where gateway is deployed
+	Namespace string
 }
 
-// S3Artifact contains information about an artifact in S3
+// s3Artifact contains information about an artifact in S3
 // +k8s:openapi-gen=true
-type S3Artifact struct {
+//proteus:generate
+type s3Artifact struct {
 	// S3EventConfig contains configuration for bucket notification
 	S3EventConfig *S3EventConfig `json:"s3EventConfig"`
 
@@ -63,8 +69,8 @@ type S3Filter struct {
 	Suffix string `json:"suffix"`
 }
 
-func parseConfig(config string) (*S3Artifact, error) {
-	var s *S3Artifact
+func parseEventSource(config string) (*s3Artifact, error) {
+	var s *s3Artifact
 	err := yaml.Unmarshal([]byte(config), &s)
 	if err != nil {
 		return nil, err

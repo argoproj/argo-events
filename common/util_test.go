@@ -17,7 +17,7 @@ limitations under the License.
 package common
 
 import (
-	"fmt"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -31,15 +31,20 @@ func TestDefaultConfigMapName(t *testing.T) {
 }
 
 func TestServerResourceForGroupVersionKind(t *testing.T) {
-	fakeClient := fake.NewSimpleClientset()
-	fakeDisco := fakeClient.Discovery()
-	gvk := schema.GroupVersionKind{
-		Group:   "",
-		Version: "v1",
-		Kind:    "Pod",
-	}
-	apiResource, err := ServerResourceForGroupVersionKind(fakeDisco, gvk)
-	fmt.Println(err)
-	assert.NotNil(t, err)
-	assert.Nil(t, apiResource)
+	convey.Convey("Given a k8s client", t, func() {
+		fakeClient := fake.NewSimpleClientset()
+		fakeDisco := fakeClient.Discovery()
+		gvk := schema.GroupVersionKind{
+			Group:   "",
+			Version: "v1",
+			Kind:    "Pod",
+		}
+		convey.Convey("Get a server resource for group, version and kind", func() {
+			apiresource, err := ServerResourceForGroupVersionKind(fakeDisco, gvk)
+			convey.Convey("Make sure error occurs and the resource is nil", func() {
+				convey.So(err, convey.ShouldNotBeNil)
+				convey.So(apiresource, convey.ShouldBeNil)
+			})
+		})
+	})
 }

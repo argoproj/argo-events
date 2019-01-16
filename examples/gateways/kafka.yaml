@@ -8,10 +8,10 @@ metadata:
 spec:
   deploySpec:
     containers:
-    - name: "kafka-events"
-      image: "argoproj/kafka-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/kafka-gateway"]
+      - name: "kafka-events"
+        image: "argoproj/kafka-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/kafka-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "kafka-gateway-configmap"
   type: "kafka"
@@ -20,4 +20,4 @@ spec:
   imageVersion: "latest"
   watchers:
     sensors:
-    - name: "kafka-sensor"
+      - name: "kafka-sensor"

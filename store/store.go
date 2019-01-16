@@ -32,9 +32,15 @@ import (
 
 // NOTE: custom resources must be manually added here
 func init() {
-	wf_v1alpha1.AddToScheme(scheme.Scheme)
-	ss_v1alpha1.AddToScheme(scheme.Scheme)
-	gw_v1alpha1.AddToScheme(scheme.Scheme)
+	if err := wf_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+		panic(err)
+	}
+	if err := ss_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+		panic(err)
+	}
+	if err := gw_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+		panic(err)
+	}
 }
 
 // ArtifactReader enables reading artifacts from an external store

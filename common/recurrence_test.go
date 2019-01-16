@@ -17,34 +17,45 @@ limitations under the License.
 package common
 
 import (
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestParseExclusionDate(t *testing.T) {
-	exDateString := "EXDATE:20060102T150405Z,20180510T021030Z"
+	convey.Convey("Given an exclusion date", t, func() {
+		exDateString := "EXDATE:20060102T150405Z,20180510T021030Z"
 
-	dates, err := ParseExclusionDates([]string{exDateString})
-	if err != nil {
-		t.Fatal(err)
-	}
-	assert.Equal(t, 2, len(dates))
+		convey.Convey("Parse exclusion dates", func() {
+			dates, err := ParseExclusionDates([]string{exDateString})
 
-	first := dates[0]
-	assert.Equal(t, 2006, first.Year())
-	assert.Equal(t, time.January, first.Month())
-	assert.Equal(t, 2, first.Day())
-	assert.Equal(t, 15, first.Hour())
-	assert.Equal(t, 4, first.Minute())
-	assert.Equal(t, 5, first.Second())
+			convey.Convey("Make sure no error occurs", func() {
+				convey.So(err, convey.ShouldBeEmpty)
 
-	second := dates[1]
-	assert.Equal(t, 2018, second.Year())
-	assert.Equal(t, time.May, second.Month())
-	assert.Equal(t, 10, second.Day())
-	assert.Equal(t, 2, second.Hour())
-	assert.Equal(t, 10, second.Minute())
-	assert.Equal(t, 30, second.Second())
+				convey.Convey("Make sure only two dates are parsed", func() {
+					convey.So(len(dates), convey.ShouldEqual, 2)
+
+					convey.Convey("The first date must be 2nd of January", func() {
+						first := dates[0]
+						convey.So(first.Year(), convey.ShouldEqual, 2006)
+						convey.So(first.Month(), convey.ShouldEqual, time.January)
+						convey.So(first.Day(), convey.ShouldEqual, 2)
+						convey.So(first.Hour(), convey.ShouldEqual, 15)
+						convey.So(first.Minute(), convey.ShouldEqual, 4)
+						convey.So(first.Second(), convey.ShouldEqual, 5)
+					})
+
+					convey.Convey("The second date must be 10th of May", func() {
+						second := dates[1]
+						convey.So(second.Year(), convey.ShouldEqual, 2018)
+						convey.So(second.Month(), convey.ShouldEqual, time.May)
+						convey.So(second.Day(), convey.ShouldEqual, 10)
+						convey.So(second.Hour(), convey.ShouldEqual, 2)
+						convey.So(second.Minute(), convey.ShouldEqual, 10)
+						convey.So(second.Second(), convey.ShouldEqual, 30)
+					})
+				})
+			})
+		})
+	})
 }
