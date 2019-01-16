@@ -18,9 +18,10 @@ package main
 
 import (
 	"context"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/gateway"
-	"os"
 )
 
 func main() {
@@ -37,7 +38,7 @@ func main() {
 		configMap = common.DefaultConfigMapName(common.DefaultGatewayControllerDeploymentName)
 	}
 
-	namespace, ok := os.LookupEnv(common.GatewayNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
 		namespace = common.DefaultControllerNamespace
 	}
@@ -51,7 +52,5 @@ func main() {
 	}
 
 	go controller.Run(context.Background(), 1, 1)
-
-	// Wait forever
 	select {}
 }

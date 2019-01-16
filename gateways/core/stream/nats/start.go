@@ -1,80 +1,66 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package nats
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/nats-io/go-nats"
 )
 
-// Runs a configuration
-func (ce *NatsConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("operating on configuration...")
-	n, err := parseConfig(config.Data.Config)
+// StartEventSource starts an event source
+func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	n, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- err
+		return err
 	}
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config-value", *n).Msg("nats configuration")
 
-	go ce.listenEvents(n, config)
+	dataCh := make(chan []byte)
+	errorCh := make(chan error)
+	doneCh := make(chan struct{}, 1)
 
-	for {
-		select {
-		case <-config.StartChan:
-			config.Active = true
-			ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is running")
+	go ese.listenEvents(n, eventSource, dataCh, errorCh, doneCh)
 
-		case data := <-config.DataChan:
-			ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-				Src:     config.Data.Src,
-				Payload: data,
-			})
-
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-			return
-		}
-
-	}
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ce *NatsConfigExecutor) listenEvents(n *natsConfig, config *gateways.ConfigContext) {
+func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+	defer gateways.Recover(eventSource.Name)
+
 	nc, err := nats.Connect(n.URL)
 	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
-		config.ErrChan <- err
+		ese.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
+		errorCh <- err
 		return
 	}
 
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err = common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
-	config.StartChan <- struct{}{}
-
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
 	_, err = nc.Subscribe(n.Subject, func(msg *nats.Msg) {
-		ce.Log.Info().Str("config-key", config.Data.Src).Interface("msg", msg).Msg("received data")
-		config.DataChan <- msg.Data
+		dataCh <- msg.Data
 	})
 	if err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 	nc.Flush()
-	ce.GatewayConfig.Log.Info().Str("config-key", config.Data.Src).Interface("config", n).Msg("connected to cluster")
 	if err := nc.LastError(); err != nil {
-		config.ErrChan <- err
+		errorCh <- err
 		return
 	}
 
-	<-config.DoneChan
-	nc.Close()
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration shutdown")
-	config.ShutdownChan <- struct{}{}
+	<-doneCh
 }

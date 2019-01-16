@@ -1,3 +1,4 @@
+
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
@@ -8,10 +9,10 @@ metadata:
 spec:
   deploySpec:
     containers:
-    - name: "resource-events"
-      image: "argoproj/resource-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/resource-gateway"]
+      - name: "resource-events"
+        image: "argoproj/resource-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/resource-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "resource-gateway-configmap"
   type: "resource"
@@ -20,4 +21,4 @@ spec:
   imageVersion: "latest"
   watchers:
     sensors:
-    - name: "resource-sensor"
+      - name: "resource-sensor"

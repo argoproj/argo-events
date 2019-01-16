@@ -20,32 +20,26 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	fake_ss "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
-func TestInstanceIDReq(t *testing.T) {
-	controller := &SensorController{
-		Config: SensorControllerConfig{
-			InstanceID: "argo-events",
-		},
-	}
+func TestInformer(t *testing.T) {
+	convey.Convey("Given a sensor controller", t, func() {
+		controller := getSensorController()
+		convey.Convey("Instance ID required key must match", func() {
+			req := controller.instanceIDReq()
+			convey.So(req.Key(), convey.ShouldEqual, common.LabelKeySensorControllerInstanceID)
+			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
+			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
+		})
+	})
 
-	req := controller.instanceIDReq()
-	assert.Equal(t, common.LabelKeySensorControllerInstanceID, req.Key())
-	req = controller.instanceIDReq()
-	assert.Equal(t, selection.Equals, req.Operator())
-	assert.True(t, req.Values().Has("argo-events"))
-}
-
-func TestNewSensorInformer(t *testing.T) {
-	controller := &SensorController{
-		Config: SensorControllerConfig{
-			Namespace:  "testing",
-			InstanceID: "argo-events",
-		},
-		sensorClientset: fake_ss.NewSimpleClientset(),
-	}
-	controller.newSensorInformer()
+	convey.Convey("Given a sensor controller", t, func() {
+		controller := getSensorController()
+		convey.Convey("Get a new informer and make sure its not nil", func() {
+			i := controller.newSensorInformer()
+			convey.So(i, convey.ShouldNotBeNil)
+		})
+	})
 }

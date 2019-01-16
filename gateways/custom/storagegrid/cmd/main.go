@@ -17,13 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/custom/storagegrid"
 )
 
 func main() {
-	gc := gateways.NewGatewayConfiguration()
-	ce := &storagegrid.StorageGridConfigExecutor{}
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	gateways.StartGateway(&storagegrid.StorageGridEventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+	})
 }

@@ -17,13 +17,18 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 )
 
-func Test_validateSensor(t *testing.T) {
-	sensor, err := getSensor()
-	assert.Nil(t, err)
-	err = ValidateSensor(sensor)
-	assert.Nil(t, err)
+func TestValidateSensor(t *testing.T) {
+	convey.Convey("Given a sensor", t, func() {
+		sensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		convey.Convey("Validate", func() {
+			err := ValidateSensor(sensor)
+			convey.So(err, convey.ShouldBeNil)
+		})
+	})
 }

@@ -106,12 +106,12 @@ func (in *GatewaySpec) DeepCopyInto(out *GatewaySpec) {
 	*out = *in
 	if in.DeploySpec != nil {
 		in, out := &in.DeploySpec, &out.DeploySpec
-		*out = new(v1.PodSpec)
+		*out = new(v1.Pod)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.ServiceSpec != nil {
 		in, out := &in.ServiceSpec, &out.ServiceSpec
-		*out = new(v1.ServiceSpec)
+		*out = new(v1.Service)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Watchers != nil {

@@ -8,10 +8,10 @@ metadata:
 spec:
   deploySpec:
     containers:
-    - name: "file-events"
-      image: "argoproj/file-gateway"
-      imagePullPolicy: "Always"
-      command: ["/bin/file-gateway"]
+      - name: "file-events"
+        image: "argoproj/file-gateway"
+        imagePullPolicy: "Always"
+        command: ["/bin/file-gateway"]
     serviceAccountName: "argo-events-sa"
   configMap: "file-gateway-configmap"
   eventVersion: "1.0"
@@ -20,4 +20,4 @@ spec:
   dispatchMechanism: "HTTP"
   watchers:
     sensors:
-    - name: "file-sensor"
+      - name: "file-sensor"

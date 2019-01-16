@@ -17,13 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/stream/mqtt"
 )
 
 func main() {
-	ce := &mqtt.MqttConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	gateways.StartGateway(&mqtt.MqttEventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+	})
 }

@@ -20,12 +20,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/util/workqueue"
-
 	"github.com/argoproj/argo-events/common"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/util/workqueue"
 )
 
 var (
@@ -33,7 +32,7 @@ var (
 	SensorControllerInstanceID = "argo-events"
 )
 
-func sensorController() *SensorController {
+func getSensorController() *SensorController {
 	return &SensorController{
 		ConfigMap: SensorControllerConfigmap,
 		Namespace: common.DefaultControllerNamespace,
@@ -47,28 +46,46 @@ func sensorController() *SensorController {
 	}
 }
 
-func TestProcessNextItem(t *testing.T) {
-	controller := sensorController()
-	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-	controller.informer = controller.newSensorInformer()
+func TestGatewayController(t *testing.T) {
+	convey.Convey("Given a sensor controller, process queue items", t, func() {
+		controller := getSensorController()
 
-	controller.queue.Add("hi")
-	res := controller.processNextItem()
-	assert.True(t, res)
+		convey.Convey("Create a resource queue, add new item and process it", func() {
+			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			controller.informer = controller.newSensorInformer()
+			controller.queue.Add("hi")
+			res := controller.processNextItem()
 
-	controller.queue.ShutDown()
-	res = controller.processNextItem()
-	assert.False(t, res)
-}
+			convey.Convey("Item from queue must be successfully processed", func() {
+				convey.So(res, convey.ShouldBeTrue)
+			})
 
-func TestHandleErr(t *testing.T) {
-	controller := sensorController()
-	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			convey.Convey("Shutdown queue and make sure queue does not process next item", func() {
+				controller.queue.ShutDown()
+				res := controller.processNextItem()
+				convey.So(res, convey.ShouldBeFalse)
+			})
+		})
+	})
 
-	controller.queue.Add("hi")
-	controller.handleErr(nil, "hi")
-
-	controller.queue.Add("bye")
-	err := controller.handleErr(fmt.Errorf("real error"), "bye")
-	assert.Nil(t, err)
+	convey.Convey("Given a sensor controller, handle errors in queue", t, func() {
+		controller := getSensorController()
+		convey.Convey("Create a resource queue and add an item", func() {
+			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+			controller.queue.Add("hi")
+			convey.Convey("Handle an nil error", func() {
+				err := controller.handleErr(nil, "hi")
+				convey.So(err, convey.ShouldBeNil)
+			})
+			convey.Convey("Exceed max requeues", func() {
+				controller.queue.Add("bye")
+				var err error
+				for i := 0; i < 21; i++ {
+					err = controller.handleErr(fmt.Errorf("real error"), "bye")
+				}
+				convey.So(err, convey.ShouldNotBeNil)
+				convey.So(err.Error(), convey.ShouldEqual, "exceeded max requeues")
+			})
+		})
+	})
 }

@@ -17,13 +17,13 @@ limitations under the License.
 package mqtt
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// MqttConfigExecutor implements ConfigExecutor
-type MqttConfigExecutor struct {
-	*gateways.GatewayConfig
+// MqttEventSourceExecutor implements Eventing
+type MqttEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // mqtt contains information to connect to MQTT broker
@@ -31,17 +31,15 @@ type MqttConfigExecutor struct {
 type mqtt struct {
 	// URL to connect to broker
 	URL string `json:"url"`
-
 	// Topic name
 	Topic string `json:"topic"`
-
 	// Client ID
 	ClientId string `json:"clientId"`
 }
 
-func parseConfig(config string) (*mqtt, error) {
+func parseEventSource(eventSource string) (*mqtt, error) {
 	var m *mqtt
-	err := yaml.Unmarshal([]byte(config), &m)
+	err := yaml.Unmarshal([]byte(eventSource), &m)
 	if err != nil {
 		return nil, err
 	}

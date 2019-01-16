@@ -18,13 +18,18 @@ package common
 
 import (
 	"fmt"
+	"os"
+	"time"
+
+	"github.com/rs/zerolog"
+
+	"net/http"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"net/http"
 )
 
 // DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
@@ -32,34 +37,9 @@ func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
 }
 
-// DefaultSensorDeploymentName returns a formulated name for sensor deployment
-func DefaultSensorDeploymentName(deploymentName string) string {
-	return fmt.Sprintf("%s-sensor-deployement", deploymentName)
-}
-
-// DefaultSensorJobName returns a formulated name for a sensor job
-func DefaultSensorJobName(jobName string) string {
-	return fmt.Sprintf("%s-sensor-job", jobName)
-}
-
-// DefaultGatewayDeploymentName returns a formulated name for a gateway deployment
-func DefaultGatewayDeploymentName(deploymentName string) string {
-	return fmt.Sprintf("%s-gateway-deployment", deploymentName)
-}
-
-// DefaultGatewayTransformerConfigMapName returns a formulated name for a gateway transformer configmap
-func DefaultGatewayTransformerConfigMapName(configMapName string) string {
-	return fmt.Sprintf("%s-gateway-transformer-configmap", configMapName)
-}
-
-// DefaultGatewayServiceName returns a formulated name for a gateway service
-func DefaultGatewayServiceName(serviceName string) string {
-	return fmt.Sprintf("%s-gateway-svc", serviceName)
-}
-
-// DefaultSensorServiceName returns a formulated name for a sensor service
-func DefaultSensorServiceName(serviceName string) string {
-	return fmt.Sprintf("%s-sensor-svc", serviceName)
+// DefaultServiceName returns a formulated name for a service
+func DefaultServiceName(serviceName string) string {
+	return fmt.Sprintf("%s-svc", serviceName)
 }
 
 // DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
@@ -99,4 +79,27 @@ func SendSuccessResponse(writer http.ResponseWriter) {
 func SendErrorResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(ErrorResponse))
+}
+
+// LoggerConf returns standard logging configuration
+func LoggerConf() zerolog.ConsoleWriter {
+	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	output.FormatLevel = func(i interface{}) string {
+		return fmt.Sprintf("| %-6s|", i)
+	}
+	output.FormatMessage = func(i interface{}) string {
+		return fmt.Sprintf("msg: %s | ", i)
+	}
+	output.FormatFieldName = func(i interface{}) string {
+		return fmt.Sprintf("%s:", i)
+	}
+	output.FormatFieldValue = func(i interface{}) string {
+		return fmt.Sprintf("%s", i)
+	}
+	return output
+}
+
+// GetLoggerContext returns a logger with input options
+func GetLoggerContext(opt zerolog.ConsoleWriter) zerolog.Context {
+	return zerolog.New(opt).With().Timestamp()
 }

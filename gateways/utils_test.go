@@ -17,28 +17,20 @@ limitations under the License.
 package gateways
 
 import (
-	"github.com/stretchr/testify/assert"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
-func Test_transformPayload(t *testing.T) {
-	payload := []byte("hello")
-	src := "test"
-	_, err := TransformerPayload(payload, src)
-	assert.Nil(t, err)
-}
+func TestGatewayUtil(t *testing.T) {
+	convey.Convey("Given a value, hash it", t, func() {
+		hash := Hasher("test")
+		convey.So(hash, convey.ShouldNotBeEmpty)
+	})
 
-func TestCloseChannels(t *testing.T) {
-	ctx := GetConfigContext()
-	CloseChannels(ctx)
-	_, ok := <-ctx.DataChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.StopChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.DoneChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.StartChan
-	assert.Equal(t, false, ok)
-	_, ok = <-ctx.ErrChan
-	assert.Equal(t, false, ok)
+	convey.Convey("Given a event source, set the validation message", t, func() {
+		v := ValidEventSource{}
+		SetValidEventSource(&v, "event source is valid", true)
+		convey.So(v.IsValid, convey.ShouldBeTrue)
+		convey.So(v.Reason, convey.ShouldEqual, "event source is valid")
+	})
 }

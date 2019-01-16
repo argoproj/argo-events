@@ -17,24 +17,36 @@ limitations under the License.
 package calendar
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (ce *CalendarConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	cal, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (ese *CalendarEventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	cal, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
+	if err := validateSchedule(cal); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateSchedule(cal *calSchedule) error {
 	if cal == nil {
-		return gateways.ErrEmptyConfig
+		return gateways.ErrEmptyEventSource
 	}
 	if cal.Schedule == "" && cal.Interval == "" {
-		return fmt.Errorf("%+v, must have either schedule or interval", gateways.ErrInvalidConfig)
+		return fmt.Errorf("must have either schedule or interval")
 	}
-	_, err = resolveSchedule(cal)
-	if err != nil {
+	if _, err := resolveSchedule(cal); err != nil {
 		return err
 	}
 	return nil

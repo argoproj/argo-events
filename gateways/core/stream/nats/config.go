@@ -17,28 +17,28 @@ limitations under the License.
 package nats
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// NatsConfigExecutor implements ConfigExecutor
-type NatsConfigExecutor struct {
-	*gateways.GatewayConfig
+// NatsEventSourceExecutor implements Eventing
+type NatsEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // Nats contains configuration to connect to NATS cluster
 // +k8s:openapi-gen=true
 type natsConfig struct {
-	// URL to connect to nats cluster
+	// URL to connect to natsConfig cluster
 	URL string `json:"url"`
 
 	// Subject name
 	Subject string `json:"subject"`
 }
 
-func parseConfig(config string) (*natsConfig, error) {
+func parseEventSource(es string) (*natsConfig, error) {
 	var n *natsConfig
-	err := yaml.Unmarshal([]byte(config), &n)
+	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err
 	}

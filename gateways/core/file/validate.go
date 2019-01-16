@@ -17,27 +17,40 @@ limitations under the License.
 package file
 
 import (
+	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (fw *FileWatcherConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	fwc, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (ese *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	fwc, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
 	}
+	if err = validateFileWatcher(fwc); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateFileWatcher(fwc *fileWatcher) error {
 	if fwc == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidConfig)
+		return fmt.Errorf("configuration must be non empty")
 	}
 	if fwc.Type == "" {
-		return fmt.Errorf("%+v, type must be specified", gateways.ErrInvalidConfig)
+		return fmt.Errorf("type must be specified")
 	}
 	if fwc.Directory == "" {
-		return fmt.Errorf("%+v, directory must be specified", gateways.ErrInvalidConfig)
+		return fmt.Errorf("directory must be specified")
 	}
 	if fwc.Path == "" {
-		return fmt.Errorf("%+v, path must be specified", gateways.ErrInvalidConfig)
+		return fmt.Errorf("path must be specified")
 	}
 	return nil
 }

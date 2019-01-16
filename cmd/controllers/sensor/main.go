@@ -18,9 +18,10 @@ package main
 
 import (
 	"context"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/sensor"
-	"os"
 )
 
 func main() {
@@ -32,7 +33,7 @@ func main() {
 	}
 
 	// sensor-controller configuration
-	configMap, ok := os.LookupEnv(common.EnvVarConfigMap)
+	configMap, ok := os.LookupEnv(common.EnvVarSensorControllerConfigMap)
 	if !ok {
 		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
 	}
@@ -51,7 +52,5 @@ func main() {
 	}
 
 	go controller.Run(context.Background(), 1, 1)
-
-	// Wait forever
 	select {}
 }

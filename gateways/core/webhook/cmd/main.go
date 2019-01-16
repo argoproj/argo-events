@@ -17,13 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/webhook"
 )
 
 func main() {
-	ce := &webhook.WebhookConfigExecutor{}
-	gc := gateways.NewGatewayConfiguration()
-	ce.GatewayConfig = gc
-	gc.StartGateway(ce)
+	gateways.StartGateway(&webhook.WebhookEventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+	})
 }

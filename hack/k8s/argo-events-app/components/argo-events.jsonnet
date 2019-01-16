@@ -8,7 +8,7 @@ local crd = k.apiextensions.v1beta1.customResourceDefinition;
 
 local labels = {app: params.controllerName};
 
-local sensor = crd.new();
+local gateway = crd.new();
 
 local configString = 
 "namespace: %s

@@ -17,6 +17,7 @@ limitations under the License.
 package store
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -50,7 +51,12 @@ func (reader *S3Reader) Read() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer obj.Close()
+	defer func() {
+		if err := obj.Close(); err != nil {
+			fmt.Printf("failed to close object. err: %+v", err)
+		}
+	}()
+
 	b, err := ioutil.ReadAll(obj)
 	if err != nil {
 		return nil, err

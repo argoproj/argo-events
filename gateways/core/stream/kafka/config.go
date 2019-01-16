@@ -17,13 +17,13 @@ limitations under the License.
 package kafka
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 )
 
-// KafkaConfigExecutor implements ConfigExecutor
-type KafkaConfigExecutor struct {
-	*gateways.GatewayConfig
+// KafkaEventSourceExecutor implements Eventing
+type KafkaEventSourceExecutor struct {
+	Log zerolog.Logger
 }
 
 // kafka defines configuration required to connect to kafka cluster
@@ -31,17 +31,15 @@ type KafkaConfigExecutor struct {
 type kafka struct {
 	// URL to kafka cluster
 	URL string `json:"url"`
-
 	// Partition name
 	Partition string `json:"partition"`
-
 	// Topic name
 	Topic string `json:"topic"`
 }
 
-func parseConfig(config string) (*kafka, error) {
+func parseEventSource(eventSource string) (*kafka, error) {
 	var n *kafka
-	err := yaml.Unmarshal([]byte(config), &n)
+	err := yaml.Unmarshal([]byte(eventSource), &n)
 	if err != nil {
 		return nil, err
 	}

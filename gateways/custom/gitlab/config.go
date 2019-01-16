@@ -17,53 +17,38 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
 	"github.com/xanzy/go-gitlab"
+	"k8s.io/client-go/kubernetes"
 )
 
-// GitlabEvent is the type of gitlab event to listen to
-type GitlabEvent string
-
-// Possible values for GitlabEvent
-var (
-	PushEvents               GitlabEvent = "PushEvents"
-	IssuesEvents             GitlabEvent = "IssuesEvents"
-	ConfidentialIssuesEvents GitlabEvent = "ConfidentialIssuesEvents"
-	MergeRequestsEvents      GitlabEvent = "MergeRequestsEvents"
-	TagPushEvents            GitlabEvent = "TagPushEvents"
-	NoteEvents               GitlabEvent = "NoteEvents"
-	JobEvents                GitlabEvent = "JobEvents"
-	PipelineEvents           GitlabEvent = "PipelineEvents"
-	WikiPageEvents           GitlabEvent = "WikiPageEvents"
-)
-
-// GitlabExecutor implements ConfigExecutor
-type GitlabExecutor struct {
-	*gateways.GatewayConfig
+// GitlabEventSourceExecutor implements ConfigExecutor
+type GitlabEventSourceExecutor struct {
+	Log zerolog.Logger
+	// GitlabClient is client for gitlab api
 	GitlabClient *gitlab.Client
+	// Clientset is kubernetes client
+	Clientset kubernetes.Interface
+	// Namespace where gateway is deployed
+	Namespace string
 }
 
-// GitlabConfig contains information to setup a gitlab project integration
+// glab contains information to setup a gitlab project integration
 // +k8s:openapi-gen=true
-type GitlabConfig struct {
+type glab struct {
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
-
 	// URL of a http server which is listening for gitlab events.
 	// Refer webhook gateway for more details. https://github.com/argoproj/argo-events/blob/master/docs/tutorial.md#webhook
 	URL string `json:"url"`
-
 	// Event is a gitlab event to listen to.
-	// Refer for supported events.
-	Event GitlabEvent `json:"event"`
-
+	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
+	Event string `json:"event"`
 	// AccessToken is reference to k8 secret which holds the gitlab api access information
 	AccessToken *GitlabSecret `json:"accessToken"`
-
 	// EnableSSLVerification to enable ssl verification
 	EnableSSLVerification bool `json:"enableSSLVerification"`
-
 	// GitlabBaseURL is the base URL for API requests to a custom endpoint
 	GitlabBaseURL string `json:"gitlabBaseUrl"`
 }
@@ -83,9 +68,9 @@ type cred struct {
 	token string
 }
 
-// parseConfig parses a configuration of gateway
-func parseConfig(config string) (*GitlabConfig, error) {
-	var g *GitlabConfig
+// parseEventSource parses an event sources of gateway
+func parseEventSource(config string) (*glab, error) {
+	var g *glab
 	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {
 		return nil, err

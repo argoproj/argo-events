@@ -17,13 +17,16 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/stretchr/testify/assert"
+	"context"
+	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways"
 )
 
 var (
 	configKey   = "testConfig"
+	configId    = "1234"
 	configValue = `
 namespace: "argo-events"
 group: "argoproj.io"
@@ -36,15 +39,22 @@ filter:
 `
 )
 
-func TestResourceConfigExecutor_Validate(t *testing.T) {
-	ce := &ResourceConfigExecutor{}
-	ctx := &gateways.ConfigContext{
-		Data: &gateways.ConfigData{},
-	}
-	ctx.Data.Config = configValue
-	err := ce.Validate(ctx)
-	assert.Nil(t, err)
-	configValue = `
+func TestValidateResourceEventSource(t *testing.T) {
+	convey.Convey("Given a valid resource event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &ResourceEventSourceExecutor{}
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Name: configKey,
+			Id:   configId,
+			Data: configValue,
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeTrue)
+	})
+
+	convey.Convey("Given an invalid resource event source spec, parse it and make sure error occurs", t, func() {
+		ese := &ResourceEventSourceExecutor{}
+		invalidConfig := `
 group: "argoproj.io"
 version: "v1alpha1"
 filter:
@@ -52,11 +62,14 @@ filter:
    workflows.argoproj.io/phase: Succeeded
    name: "my-workflow"
 `
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.NotNil(t, err)
-	configValue = ""
-	ctx.Data.Config = configValue
-	err = ce.Validate(ctx)
-	assert.NotNil(t, err)
+		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Data: invalidConfig,
+			Id:   configId,
+			Name: configKey,
+		})
+		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(valid, convey.ShouldNotBeNil)
+		convey.So(valid.IsValid, convey.ShouldBeFalse)
+		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+	})
 }

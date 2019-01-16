@@ -13,10 +13,10 @@ spec:
   imageVersion: "latest"
   deploySpec:
     containers:
-    - name: "webhook-events"
-      image: "argoproj/webhook-gateway"
-      imagePullPolicy: "IfNotPresent"
-      command: ["/bin/webhook-gateway"]
+      - name: "webhook-events"
+        image: "argoproj/webhook-gateway"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/webhook-gateway"]
     serviceAccountName: "argo-events-sa"
   transformerImage: "argoproj/gateway-http-transformer"
   serviceSpec:
@@ -28,4 +28,4 @@ spec:
     type: LoadBalancer
   watchers:
     sensors:
-    - name: "webhook-sensor"
+      - name: "webhook-sensor"

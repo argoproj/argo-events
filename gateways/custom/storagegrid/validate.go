@@ -17,28 +17,44 @@ limitations under the License.
 package storagegrid
 
 import (
+	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/gateways"
 	"strings"
+
+	"github.com/argoproj/argo-events/gateways"
 )
 
-// Validate validates gateway configuration
-func (sgce *StorageGridConfigExecutor) Validate(config *gateways.ConfigContext) error {
-	sg, err := parseConfig(config.Data.Config)
+// ValidateEventSource validates gateway event source
+func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	v := &gateways.ValidEventSource{}
+	sg, err := parseEventSource(es.Data)
 	if err != nil {
-		return gateways.ErrConfigParseFailed
+		return v, gateways.ErrEventSourceParseFailed
 	}
+	if err != nil {
+		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
+		return v, nil
+	}
+	if err = validateStorageGrid(sg); err != nil {
+		gateways.SetValidEventSource(v, err.Error(), false)
+		return v, gateways.ErrInvalidEventSource
+	}
+	gateways.SetValidEventSource(v, "", true)
+	return v, nil
+}
+
+func validateStorageGrid(sg *storageGrid) error {
 	if sg == nil {
-		return gateways.ErrEmptyConfig
+		return gateways.ErrEmptyEventSource
 	}
 	if sg.Port == "" {
-		return fmt.Errorf("%+v, must specify port", gateways.ErrInvalidConfig)
+		return fmt.Errorf("must specify port")
 	}
 	if sg.Endpoint == "" {
-		return fmt.Errorf("%+v, must specify endpoint", gateways.ErrInvalidConfig)
+		return fmt.Errorf("must specify endpoint")
 	}
 	if !strings.HasPrefix(sg.Endpoint, "/") {
-		return fmt.Errorf("%+v, endpoint must start with '/'", gateways.ErrInvalidConfig)
+		return fmt.Errorf("endpoint must start with '/'")
 	}
 	return nil
 }

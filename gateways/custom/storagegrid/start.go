@@ -27,7 +27,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/joncalhoun/qson"
 	"github.com/satori/go.uuid"
 )
@@ -36,7 +35,7 @@ var (
 	// mutex synchronizes activeServers
 	mutex sync.Mutex
 	// activeServers keeps track of currently running http servers.
-	activeServers = make(map[string]*http.ServeMux)
+	activeServers = make(map[string]*activeServer)
 
 	// mutex synchronizes activeRoutes
 	routesMutex sync.Mutex
@@ -65,9 +64,13 @@ type server struct {
 }
 
 type routeConfig struct {
-	sgConfig       *StorageGridEventConfig
-	gatewayConfig  *gateways.ConfigContext
-	configExecutor *StorageGridConfigExecutor
+	sgConfig            *storageGrid
+	eventSource         *gateways.EventSource
+	eventSourceExecutor *StorageGridEventSourceExecutor
+	dataCh              chan []byte
+	doneCh              chan struct{}
+	errCh               chan error
+	startCh             chan struct{}
 }
 
 func init() {
@@ -92,6 +95,12 @@ func init() {
 	}()
 }
 
+// activeServer contains reference to server and an error channel that is shared across all functions registering endpoints for the server.
+type activeServer struct {
+	srv     *http.ServeMux
+	errChan chan error
+}
+
 // ServeHTTP implementation
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
@@ -103,7 +112,7 @@ func generateUUID() uuid.UUID {
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *StorageGridEventConfig) bool {
+func filterEvent(notification *storageGridNotification, sg *storageGrid) bool {
 	if sg.Events == nil {
 		return true
 	}
@@ -116,7 +125,7 @@ func filterEvent(notification *storageGridNotification, sg *StorageGridEventConf
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *StorageGridEventConfig) bool {
+func filterName(notification *storageGridNotification, sg *storageGrid) bool {
 	if sg.Filter == nil {
 		return true
 	}
@@ -137,7 +146,6 @@ func (rc *routeConfig) startHttpServer() {
 	// start a http server only if no other configuration previously started the server on given port
 	mutex.Lock()
 	if _, ok := activeServers[rc.sgConfig.Port]; !ok {
-		rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Str("port", rc.sgConfig.Port).Msg("http server will start listening")
 		s := &server{
 			mux: http.NewServeMux(),
 		}
@@ -146,19 +154,18 @@ func (rc *routeConfig) startHttpServer() {
 			Addr:    ":" + fmt.Sprintf("%s", rc.sgConfig.Port),
 			Handler: s,
 		}
-		activeServers[rc.sgConfig.Port] = s.mux
+		errChan := make(chan error, 1)
+		activeServers[rc.sgConfig.Port] = &activeServer{
+			srv:     s.mux,
+			errChan: errChan,
+		}
 
 		// start http server
 		go func() {
 			err := rc.sgConfig.srv.ListenAndServe()
-			rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Str("port", rc.sgConfig.Port).Msg("http server stopped")
-			if err == http.ErrServerClosed {
-				err = nil
-				return
-			}
+			rc.eventSourceExecutor.Log.Info().Str("event-source", rc.eventSource.Name).Str("port", rc.sgConfig.Port).Msg("http server stopped")
 			if err != nil {
-				rc.gatewayConfig.ErrChan <- err
-				return
+				errChan <- err
 			}
 		}()
 	}
@@ -166,79 +173,79 @@ func (rc *routeConfig) startHttpServer() {
 }
 
 // StartConfig runs a configuration
-func (ce *StorageGridConfigExecutor) StartConfig(config *gateways.ConfigContext) {
-	defer func() {
-		gateways.Recover()
-	}()
-
-	ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("operating on configuration")
-	sg, err := parseConfig(config.Data.Config)
+func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	sg, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		config.ErrChan <- gateways.ErrConfigParseFailed
+		return err
 	}
-	ce.GatewayConfig.Log.Debug().Str("config-key", config.Data.Src).Interface("config-value", *sg).Msg("storage grid configuration")
 
-	go ce.listenEvents(sg, config)
+	rc := routeConfig{
+		sgConfig:            sg,
+		eventSource:         eventSource,
+		eventSourceExecutor: ese,
+		errCh:               make(chan error),
+		dataCh:              make(chan []byte),
+		doneCh:              make(chan struct{}),
+		startCh:             make(chan struct{}),
+	}
+
+	routeActivateChan <- rc
+
+	<-rc.startCh
+
+	if rc.sgConfig.mux == nil {
+		mutex.Lock()
+		rc.sgConfig.mux = activeServers[rc.sgConfig.Port].srv
+		mutex.Unlock()
+	}
+
+	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
+
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
 
 	for {
 		select {
-		case _, ok := <-config.StartChan:
-			if ok {
-				ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration is running")
-				config.Active = true
+		case data := <-rc.dataCh:
+			ese.Log.Info().Msg("received data")
+			err := eventStream.Send(&gateways.Event{
+				Name:    eventSource.Name,
+				Payload: data,
+			})
+			if err != nil {
+				return err
 			}
 
-		case data, ok := <-config.DataChan:
-			if ok {
-				err := ce.GatewayConfig.DispatchEvent(&gateways.GatewayEvent{
-					Src:     config.Data.Src,
-					Payload: data,
-				})
-				if err != nil {
-					config.ErrChan <- err
-				}
-			}
+		case err := <-rc.errCh:
+			routeDeactivateChan <- rc
+			return err
 
-		case <-config.StopChan:
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("stopping configuration")
-			ce.Log.Info().Str("config-key", config.Data.Src).Msg("stopping the configuration...")
+		case <-eventStream.Context().Done():
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
+			routeDeactivateChan <- rc
+			return nil
 
-			// remove the endpoint.
-			routeDeactivateChan <- routeConfig{
-				sgConfig:       sg,
-				gatewayConfig:  config,
-				configExecutor: ce,
-			}
-
-			config.DoneChan <- struct{}{}
-			ce.GatewayConfig.Log.Info().Str("config-name", config.Data.Src).Msg("configuration stopped")
-
-			return
+		// this error indicates that the server has stopped running
+		case err := <-activeServers[rc.sgConfig.Port].errChan:
+			return err
 		}
 	}
 }
 
 // routeActiveHandler handles new route
 func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.configExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		rc.configExecutor.Log.Error().Err(err).Msg("failed to parse request body")
-		rc.gatewayConfig.ErrChan <- err
+		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
+		rc.errCh <- err
 		return
 	}
 
-	switch request.Method {
-	case http.MethodPost, http.MethodPut:
-		body, err := ioutil.ReadAll(request.Body)
-		if err != nil {
-			rc.configExecutor.Log.Error().Err(err).Str("config-key", rc.gatewayConfig.Data.Src).Msg("failed to parse request body")
-		} else {
-			rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Str("msg", string(body)).Msg("msg body")
-		}
+	rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
 
+	switch request.Method {
 	case http.MethodHead:
-		rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Str("method", http.MethodHead).Msg("received a request")
 		respBody = ""
 	}
 	writer.WriteHeader(http.StatusOK)
@@ -248,57 +255,34 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		rc.gatewayConfig.ErrChan <- err
+		rc.errCh <- err
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		rc.gatewayConfig.ErrChan <- err
+		rc.errCh <- err
 		return
 	}
 
 	var notification *storageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		rc.gatewayConfig.ErrChan <- err
+		rc.errCh <- err
 		return
 	}
 
-	rc.configExecutor.Log.Info().Str("config-key", rc.gatewayConfig.Data.Src).Interface("notification", notification).Msg("parsed notification")
 	if filterEvent(notification, rc.sgConfig) && filterName(notification, rc.sgConfig) {
-		rc.gatewayConfig.DataChan <- b
+		rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Msg("new event received, dispatching to gateway client")
+		rc.dataCh <- b
 		return
 	}
 
-	rc.configExecutor.Log.Warn().Str("config-key", rc.gatewayConfig.Data.Src).Interface("notification", notification).
+	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", rc.eventSource.Name).Interface("notification", notification).
 		Msg("discarding notification since it did not pass all filters")
 }
 
 // routeDeactivateHandler handles routes that are not active
 func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.configExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
 	common.SendErrorResponse(writer)
-}
-
-func (ce *StorageGridConfigExecutor) listenEvents(sg *StorageGridEventConfig, config *gateways.ConfigContext) {
-	event := ce.GatewayConfig.GetK8Event("configuration running", v1alpha1.NodePhaseRunning, config.Data)
-	_, err := common.CreateK8Event(event, ce.GatewayConfig.Clientset)
-	if err != nil {
-		ce.GatewayConfig.Log.Error().Str("config-key", config.Data.Src).Err(err).Msg("failed to mark configuration as running")
-		config.ErrChan <- err
-		return
-	}
-
-	// at this point configuration is successfully running
-	config.StartChan <- struct{}{}
-
-	routeActivateChan <- routeConfig{
-		sgConfig:       sg,
-		gatewayConfig:  config,
-		configExecutor: ce,
-	}
-
-	<-config.DoneChan
-	ce.Log.Info().Str("config-key", config.Data.Src).Msg("configuration is stopped")
-	config.ShutdownChan <- struct{}{}
 }
