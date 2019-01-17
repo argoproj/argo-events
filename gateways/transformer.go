@@ -110,6 +110,11 @@ func (gc *GatewayConfig) dispatchEventOverHttp(event *sv1alpha.Event) error {
 	return nil
 }
 
+// dispatchEventOverNats dispatches event over nats streaming
+func (gc *GatewayConfig) dispatchEventOverNatsStreaming(event *sv1alpha.Event) error {
+
+}
+
 // postCloudEventToWatcher makes a HTTP POST call to watcher's service
 func (gc *GatewayConfig) postCloudEventToWatcher(host string, port string, endpoint string, payload []byte) error {
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s:%s%s", host, port, endpoint), bytes.NewBuffer(payload))

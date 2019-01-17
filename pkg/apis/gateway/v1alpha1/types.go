@@ -170,3 +170,20 @@ type SensorNotificationWatcher struct {
 	// Name is name of the sensor
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
 }
+
+// Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
+type DispatchProtocol struct {
+	Type string `json:"type" protobuf:"bytes,1,opt,name=type"`
+
+	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
+
+	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
+}
+
+type Http struct {
+	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
+}
+
+type Nats struct {
+	Nats string `json:"nats" protobuf:"bytes,1,opt,name=nats"`
+}
