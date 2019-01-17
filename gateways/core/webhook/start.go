@@ -32,6 +32,9 @@ var (
 	// activeServers keeps track of currently running http servers.
 	activeServers = make(map[string]*activeServer)
 
+	// activeEndpoints keep track of endpoints that are already registered with server and their status active or deactive
+	activeEndpoints = make(map[string]*endpoint)
+
 	// routeActivateChan handles assigning new route to server.
 	routeActivateChan = make(chan *routeConfig)
 
@@ -54,11 +57,12 @@ type routeConfig struct {
 	wConfig             *webhook
 	eventSource         *gateways.EventSource
 	eventSourceExecutor *WebhookEventSourceExecutor
-	validRoute          bool
-	dataCh              chan []byte
-	doneCh              chan struct{}
-	errCh               chan error
 	startCh             chan struct{}
+}
+
+type endpoint struct {
+	active bool
+	dataCh chan []byte
 }
 
 func init() {
@@ -73,7 +77,7 @@ func init() {
 			case config := <-routeDeactivateChan:
 				_, ok := activeServers[config.wConfig.Port]
 				if ok {
-					config.validRoute = false
+					activeEndpoints[config.wConfig.Endpoint].active = false
 				}
 			}
 		}
@@ -119,38 +123,35 @@ func (rc *routeConfig) startHttpServer() {
 // routeActiveHandler handles new route
 func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
 	var response string
-	logger := rc.eventSourceExecutor.Log.With().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method)
-	if !rc.validRoute {
+	if !activeEndpoints[rc.wConfig.Endpoint].active {
 		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.wConfig.Endpoint, rc.wConfig.Method)
-		logger.Str("response", response).Logger().Info().Msg("endpoint is not active")
+		rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
 	}
 	if rc.wConfig.Method != request.Method {
 		msg := fmt.Sprintf("the method %s is not defined for endpoint %s", rc.wConfig.Method, rc.wConfig.Endpoint)
-		logger.Str("response", response).Logger().Info().Msg("endpoint is not active")
+		rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("endpoint is not active")
 		common.SendErrorResponse(writer, msg)
 		return
 	}
 
-	logger.Str("response", response).Logger().Info().Msg("payload received")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Msg("payload received")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Logger().Error().Err(err).Msg("failed to parse request body")
+		rc.eventSourceExecutor.Log.Error().Err(err).Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("failed to parse request body")
 		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
 		return
 	}
 
+	activeEndpoints[rc.wConfig.Endpoint].dataCh <- body
 	response = "request successfully processed"
-	logger.Str("response", response).Logger().Info().Msg("request payload parsed successfully")
+	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.wConfig.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("request payload parsed successfully")
 	common.SendSuccessResponse(writer, response)
-	rc.dataCh <- body
 }
 
 // StartEventSource starts a event source
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer gateways.Recover(eventSource.Name)
-
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	h, err := parseEventSource(eventSource.Data)
 	if err != nil {
@@ -161,9 +162,6 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 		wConfig:             h,
 		eventSource:         eventSource,
 		eventSourceExecutor: ese,
-		validRoute:          true,
-		dataCh:              make(chan []byte),
-		doneCh:              make(chan struct{}),
 		startCh:             make(chan struct{}),
 	}
 
@@ -178,11 +176,19 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	}
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", h.Port).Str("endpoint", h.Endpoint).Str("method", h.Method).Msg("adding route handler")
-	rc.wConfig.mux.HandleFunc(rc.wConfig.Endpoint, rc.routeActiveHandler)
+	if _, ok := activeEndpoints[rc.wConfig.Endpoint]; !ok {
+		activeEndpoints[rc.wConfig.Endpoint] = &endpoint{
+			active: true,
+			dataCh: make(chan []byte),
+		}
+		rc.wConfig.mux.HandleFunc(rc.wConfig.Endpoint, rc.routeActiveHandler)
+	}
+	activeEndpoints[rc.wConfig.Endpoint].active = true
 
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", h.Port).Str("endpoint", h.Endpoint).Str("method", h.Method).Msg("route handler added")
 	for {
 		select {
-		case data := <-rc.dataCh:
+		case data := <-activeEndpoints[rc.wConfig.Endpoint].dataCh:
 			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
