@@ -135,7 +135,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 	case v1alpha1.ResourceUpdateNotification:
 		sec.log.Info().Msg("sensor resource update")
 		// update sensor resource
-		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) || !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers){
+		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) || !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers) {
 			sec.sensor = ew.sensor
 
 			// initialize new event dependencies

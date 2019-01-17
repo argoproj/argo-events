@@ -79,13 +79,13 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return &sensor, err
 }
 
-type mockHttpWriter struct {}
+type mockHttpWriter struct{}
 
 func (m *mockHttpWriter) Header() http.Header {
 	return http.Header{}
 }
 
-func (m *mockHttpWriter) Write([] byte) (int, error) {
+func (m *mockHttpWriter) Write([]byte) (int, error) {
 	return 0, nil
 }
 
@@ -96,12 +96,12 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
 	return &sensorExecutionCtx{
-		kubeClient:      kubeClientset,
-		discoveryClient: kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
-		clientPool:      NewFakeClientPool(),
-		log:             common.GetLoggerContext(common.LoggerConf()).Logger(),
-		sensorClient:    sensorFake.NewSimpleClientset(),
-		sensor:          sensor,
+		kubeClient:           kubeClientset,
+		discoveryClient:      kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
+		clientPool:           NewFakeClientPool(),
+		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
+		sensorClient:         sensorFake.NewSimpleClientset(),
+		sensor:               sensor,
 		controllerInstanceID: "test-1",
 	}
 }
@@ -136,7 +136,7 @@ func TestEventHandler(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		sec.sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-		fmt.Println(sensor.NodeID( "test-gateway/test"))
+		fmt.Println(sensor.NodeID("test-gateway/test"))
 
 		sensor2.InitializeNode(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
 		sensor2.MarkNodePhase(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
@@ -144,9 +144,9 @@ func TestEventHandler(t *testing.T) {
 		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, &sec.log, "trigger is init")
 
 		sec.processUpdateNotification(&updateNotification{
-			event: getCloudEvent(),
+			event:            getCloudEvent(),
 			notificationType: v1alpha1.EventNotification,
-			writer: &mockHttpWriter{},
+			writer:           &mockHttpWriter{},
 			eventDependency: &v1alpha1.EventDependency{
 				Name: "test-gateway/test",
 			},
@@ -158,9 +158,9 @@ func TestEventHandler(t *testing.T) {
 				Name: "test-gateway/test2",
 			})
 			sec.processUpdateNotification(&updateNotification{
-				event: nil,
+				event:            nil,
 				notificationType: v1alpha1.ResourceUpdateNotification,
-				writer: &mockHttpWriter{},
+				writer:           &mockHttpWriter{},
 				eventDependency: &v1alpha1.EventDependency{
 					Name: "test-gateway/test2",
 				},

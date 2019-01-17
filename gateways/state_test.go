@@ -53,14 +53,13 @@ func TestGatewayState(t *testing.T) {
 			},
 		}
 
-
 		convey.Convey("Update gateway watchers", func() {
 			gc.UpdateGatewayResourceState(&EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseResourceUpdate,
 				Name:    "test-node",
 				Message: "gateway resource is updated",
 				Id:      "test-node",
-				Gw: updatedGw,
+				Gw:      updatedGw,
 			})
 			convey.So(len(gc.gw.Spec.Watchers.Sensors), convey.ShouldEqual, 1)
 		})

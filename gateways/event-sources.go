@@ -227,10 +227,10 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 		eventSource := gc.registeredConfigs[configKey]
 		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("removing the event source")
 		gc.StatusCh <- EventSourceStatus{
-			Phase: v1alpha1.NodePhaseRemove,
-			Id:    eventSource.Data.ID,
+			Phase:   v1alpha1.NodePhaseRemove,
+			Id:      eventSource.Data.ID,
 			Message: "event_source_is_removed",
-			Name: eventSource.Data.Src,
+			Name:    eventSource.Data.Src,
 		}
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {

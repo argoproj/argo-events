@@ -8,21 +8,21 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
-	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 )
 
 func getGatewayConfig() *GatewayConfig {
 	return &GatewayConfig{
 		Log:        common.GetLoggerContext(common.LoggerConf()).Logger(),
 		serverPort: "1234",
-		StatusCh: make(chan EventSourceStatus),
+		StatusCh:   make(chan EventSourceStatus),
 		gw: &v1alpha1.Gateway{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "test-agteway",
+				Name:      "test-agteway",
 				Namespace: "test-nm",
 			},
 			Spec: v1alpha1.GatewaySpec{
@@ -32,7 +32,7 @@ func getGatewayConfig() *GatewayConfig {
 			},
 		},
 		Clientset: fake.NewSimpleClientset(),
-		gwcs: gwfake.NewSimpleClientset(),
+		gwcs:      gwfake.NewSimpleClientset(),
 	}
 }
 
@@ -40,7 +40,7 @@ type testEventSourceExecutor struct{}
 
 func (ese *testEventSourceExecutor) StartEventSource(eventSource *EventSource, eventStream Eventing_StartEventSourceServer) error {
 	_ = eventStream.Send(&Event{
-		Name: eventSource.Name,
+		Name:    eventSource.Name,
 		Payload: []byte("test payload"),
 	})
 	return nil
