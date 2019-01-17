@@ -19,13 +19,13 @@ package storagegrid
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/joncalhoun/qson"
 	"github.com/satori/go.uuid"
@@ -67,6 +67,7 @@ type routeConfig struct {
 	sgConfig            *storageGrid
 	eventSource         *gateways.EventSource
 	eventSourceExecutor *StorageGridEventSourceExecutor
+	validRoute          bool
 	dataCh              chan []byte
 	doneCh              chan struct{}
 	errCh               chan error
@@ -88,7 +89,7 @@ func init() {
 			case config := <-routeDeactivateChan:
 				_, ok := activeServers[config.sgConfig.Port]
 				if ok {
-					config.sgConfig.mux.HandleFunc(config.sgConfig.Endpoint, config.routeDeactivateHandler)
+					config.validRoute = false
 				}
 			}
 		}
@@ -184,6 +185,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		sgConfig:            sg,
 		eventSource:         eventSource,
 		eventSourceExecutor: ese,
+		validRoute:          true,
 		errCh:               make(chan error),
 		dataCh:              make(chan []byte),
 		doneCh:              make(chan struct{}),
@@ -202,7 +204,9 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
+	logger := ese.Log.With().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint)
+
+	logger.Logger().Info().Msg("route handler added")
 
 	for {
 		select {
@@ -213,15 +217,15 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 				Payload: data,
 			})
 			if err != nil {
+				logger.Logger().Error().Err(err).Msg("failed to send event")
 				return err
 			}
 
 		case err := <-rc.errCh:
-			routeDeactivateChan <- rc
-			return err
+			logger.Logger().Error().Err(err).Msg("internal error occurred")
 
 		case <-eventStream.Context().Done():
-			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
+			logger.Logger().Info().Msg("connection is closed by client")
 			routeDeactivateChan <- rc
 			return nil
 
@@ -234,15 +238,19 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 // routeActiveHandler handles new route
 func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
-	body, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
-		rc.errCh <- err
+	if !rc.validRoute {
+		rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("deactived route")
+		common.SendErrorResponse(writer, "route is not valid")
 		return
 	}
 
 	rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
+		common.SendErrorResponse(writer, "failed to parse request body")
+		return
+	}
 
 	switch request.Method {
 	case http.MethodHead:
@@ -279,10 +287,4 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 
 	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", rc.eventSource.Name).Interface("notification", notification).
 		Msg("discarding notification since it did not pass all filters")
-}
-
-// routeDeactivateHandler handles routes that are not active
-func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
-	common.SendErrorResponse(writer)
 }
