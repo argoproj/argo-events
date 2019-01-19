@@ -47,6 +47,11 @@ func DefaultGatewayConfigurationName(gatewayName string, configurationName strin
 	return fmt.Sprintf("%s/%s", gatewayName, configurationName)
 }
 
+// DefaultNatsQueueName returns a queue name for nats subject
+func DefaultNatsQueueName(subject string) string {
+	return fmt.Sprintf("%s-%s", subject, "queue")
+}
+
 // GetClientConfig return rest config, if path not specified, assume in cluster config
 func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 	if kubeconfig != "" {

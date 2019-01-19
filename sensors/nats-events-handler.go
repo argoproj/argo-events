@@ -11,6 +11,10 @@ import (
 )
 
 // NatsEventProtocol handles events sent over NATS
+// Queue subscription is used because lets say sensor is running with couple of dependencies and the subscription is
+// established for them and then sensor resource failed to persist updates. So for the next sensor resource update, the dependency connected
+// status will evaluate as false which will cause another subscription for that dependency. This will result in two subscriptions for the same dependency
+// trying to put a message twice on internal queue.
 func (sec *sensorExecutionCtx) NatsEventProtocol() {
 	var err error
 
@@ -27,7 +31,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 				continue
 			}
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
-				sec.log.Panic().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
 			}
 			dependency.Connected = true
 		}
@@ -44,7 +48,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 				continue
 			}
 			if _, err := sec.getNatsStreamingSubscription(dependency.Name); err != nil {
-				sec.log.Panic().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
 			}
 			dependency.Connected = true
 		}
@@ -53,7 +57,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 
 // getNatsStandardSubscription returns a standard nats subscription
 func (sec *sensorExecutionCtx) getNatsStandardSubscription(eventSource string) (*nats.Subscription, error) {
-	return sec.nconn.standard.QueueSubscribe(eventSource, eventSource, func(msg *nats.Msg) {
+	return sec.nconn.standard.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *nats.Msg) {
 		sec.processNatsMessage(msg.Data, eventSource)
 	})
 }
@@ -61,19 +65,19 @@ func (sec *sensorExecutionCtx) getNatsStandardSubscription(eventSource string) (
 // getNatsStreamingSubscription returns a streaming nats subscription
 func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) (snats.Subscription, error) {
 	if sec.sensor.Spec.EventProtocol.Nats.StartWithLastReceived {
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.StartWithLastReceived())
 	}
 
 	if sec.sensor.Spec.EventProtocol.Nats.DeliverAllAvailable {
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.DeliverAllAvailable())
 	}
 
 	if sec.sensor.Spec.EventProtocol.Nats.Durable {
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.DurableName(eventSource))
 	}
@@ -83,7 +87,7 @@ func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) 
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.StartAtSequence(uint64(sequence)))
 	}
@@ -93,7 +97,7 @@ func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) 
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.StartAtTime(startTime))
 	}
@@ -103,12 +107,12 @@ func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) 
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 			sec.processNatsMessage(msg.Data, eventSource)
 		}, snats.StartAtTimeDelta(duration))
 	}
 
-	return sec.nconn.stream.Subscribe(eventSource, func(msg *snats.Msg) {
+	return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
 		sec.processNatsMessage(msg.Data, eventSource)
 	})
 }
