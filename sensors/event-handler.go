@@ -29,32 +29,6 @@ import (
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-// simple check to make sure two event dependencies list are equal
-func EqualEventDependencies(a, b []v1alpha1.EventDependency) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-// simple check to make sure two triggers list are equal
-func EqualTriggers(a, b []v1alpha1.Trigger) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
 func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification) {
 	defer func() {
@@ -166,11 +140,8 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 		}
 	}()
 
-	go func() {
-		if _, err := sec.syncSensor(context.Background()); err != nil {
-			sec.log.Error().Err(err).Msg("failed to sync sensor resource")
-		}
-	}()
+	// sync sensor resource after updates
+	go sec.syncSensor(context.Background())
 
 	switch sec.sensor.Spec.EventProtocol.Type {
 	case v1alpha1.HTTP:
@@ -180,7 +151,16 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 		var err error
 		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log); err != nil {
 			sec.log.Error().Err(err).Msg("failed to persist sensor update")
+			labels := map[string]string{
+				common.LabelEventType:  string(common.OperationFailureEventType),
+				common.LabelSensorName: sec.sensor.Name,
+				common.LabelOperation:  "persist_after_nats_conn_update_failure",
+			}
+			if err := common.GenerateK8sEvent(sec.kubeClient, "persist updates nats connection update failed", common.OperationFailureEventType, "persist updates nats connection update", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to log persist updates nats connection update failure")
+			}
 		}
+		select {}
 	}
 }
 

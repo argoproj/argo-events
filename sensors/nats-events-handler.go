@@ -1,6 +1,23 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package sensors
 
 import (
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"strconv"
 	"time"
 
@@ -9,6 +26,54 @@ import (
 	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
 )
+
+func (sec *sensorExecutionCtx) successNatsConnection() {
+	labels := map[string]string{
+		common.LabelEventType:  string(common.OperationSuccessEventType),
+		common.LabelSensorName: sec.sensor.Name,
+		common.LabelOperation:  "nats_connection_setup",
+	}
+	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup successfully", common.OperationSuccessEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup success")
+	}
+}
+
+func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
+	// escalate error
+	labels := map[string]string{
+		common.LabelEventType:  string(common.EscalationEventType),
+		common.LabelSensorName: sec.sensor.Name,
+		common.LabelOperation:  "nats_connection_setup",
+	}
+	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup failed", common.EscalationEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup error")
+	}
+}
+
+func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
+	labels := map[string]string{
+		common.LabelEventType:   string(common.OperationSuccessEventType),
+		common.LabelSensorName:  sec.sensor.Name,
+		common.LabelEventSource: eventSource,
+		common.LabelOperation:   "nats_subscription_success",
+	}
+	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription success", common.OperationSuccessEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription success")
+	}
+}
+
+func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource string) {
+	// escalate error
+	labels := map[string]string{
+		common.LabelEventType:   string(common.OperationFailureEventType),
+		common.LabelSensorName:  sec.sensor.Name,
+		common.LabelEventSource: eventSource,
+		common.LabelOperation:   "nats_subscription_failure",
+	}
+	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription failed", common.OperationFailureEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription error")
+	}
+}
 
 // NatsEventProtocol handles events sent over NATS
 // Queue subscription is used because lets say sensor is running with couple of dependencies and the subscription is
@@ -23,34 +88,44 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 		if sec.nconn.standard == nil {
 			sec.nconn.standard, err = nats.Connect(sec.sensor.Spec.EventProtocol.Nats.URL)
 			if err != nil {
+				sec.escalateNatsConnectionFailure()
 				sec.log.Panic().Err(err).Msg("failed to connect to nats server")
 			}
+			sec.successNatsConnection()
 		}
 		for _, dependency := range sec.sensor.Spec.Dependencies {
 			if dependency.Connected {
 				continue
 			}
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
+				sec.escalateNatsSubscriptionFailure(dependency.Name)
 				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				continue
 			}
 			dependency.Connected = true
+			sec.successNatsSubscription(dependency.Name)
 		}
 
 	case v1alpha1.Streaming:
 		if sec.nconn.stream == nil {
 			sec.nconn.stream, err = snats.Connect(sec.sensor.Spec.EventProtocol.Nats.ClusterId, sec.sensor.Spec.EventProtocol.Nats.ClientId, snats.NatsURL(sec.sensor.Spec.EventProtocol.Nats.URL))
 			if err != nil {
+				sec.escalateNatsConnectionFailure()
 				sec.log.Panic().Err(err).Msg("failed to connect to nats streaming server")
 			}
+			sec.successNatsConnection()
 		}
 		for _, dependency := range sec.sensor.Spec.Dependencies {
 			if dependency.Connected {
 				continue
 			}
 			if _, err := sec.getNatsStreamingSubscription(dependency.Name); err != nil {
+				sec.escalateNatsSubscriptionFailure(dependency.Name)
 				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				continue
 			}
 			dependency.Connected = true
+			sec.successNatsSubscription(dependency.Name)
 		}
 	}
 }
