@@ -25,6 +25,15 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// EventProtocolType is type of the event dispatch protocol. Used for dispatching events
+type EventProtocolType string
+
+// possible types of event dispatch protocol
+const (
+	HTTP EventProtocolType = "HTTP"
+	NATS EventProtocolType = "NATS"
+)
+
 type NotificationType string
 
 const (
@@ -50,6 +59,15 @@ const (
 	NodePhaseActive   NodePhase = "Active"   // the node is active and waiting on dependencies to resolve
 	NodePhaseError    NodePhase = "Error"    // the node has encountered an error in processing
 	NodePhaseNew      NodePhase = ""         // the node is new
+)
+
+// Type of nats connection.
+type NatsType string
+
+// possible values of nats connection type
+const (
+	Standard  NatsType = "Standard"
+	Streaming NatsType = "Streaming"
 )
 
 // Sensor is the definition of a sensor resource
@@ -78,14 +96,68 @@ type SensorList struct {
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// EventDependency is a list of the events that this sensor is dependent on.
-	EventDependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
+	// Dependencies is a list of the events that this sensor is dependent on.
+	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
 
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,opt,name=deploySpec"`
+
+	// EventProtocol is the protocol through which sensor receives events from gateway
+	EventProtocol *EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
+}
+
+// EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols
+type EventProtocol struct {
+	// Type defines the type of protocol over which events will be receieved
+	Type EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
+
+	// Http contains the information required to setup a http server and listen to incoming events
+	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
+
+	// Nats contains the information required to connect to nats server and get subscriptions
+	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
+}
+
+// Http contains the information required to setup a http server and listen to incoming events
+type Http struct {
+	// Port on which server will run
+	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
+}
+
+// Nats contains the information required to connect to nats server and get subscriptions
+type Nats struct {
+	// URL is nats server/service URL
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+
+	// Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
+	StartWithLastReceived bool `json:"startWithLastReceived,omitempty" protobuf:"bytes,2,opt,name=startWithLastReceived"`
+
+	// Receive all stored values in order.
+	DeliverAllAvailable bool `json:"deliverAllAvailable,omitempty" protobuf:"bytes,3,opt,name=deliverAllAvailable"`
+
+	// Receive messages starting at a specific sequence number
+	StartAtSequence string `json:"startAtSequence,omitempty" protobuf:"bytes,4,opt,name=startAtSequence"`
+
+	// Subscribe starting at a specific time
+	StartAtTime string `json:"startAtTime,omitempty" protobuf:"bytes,5,opt,name=startAtTime"`
+
+	// Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
+	StartAtTimeDelta string `json:"startAtTimeDelta,omitempty" protobuf:"bytes,6,opt,name=startAtTimeDelta"`
+
+	// Durable subscriptions allow clients to assign a durable name to a subscription when it is created
+	Durable bool `json:"durable,omitempty" protobuf:"bytes,7,opt,name=durable"`
+
+	// The NATS Streaming cluster ID
+	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,8,opt,name=clusterId"`
+
+	// The NATS Streaming cluster ID
+	ClientId string `json:"clientId,omitempty" protobuf:"bytes,9,opt,name=clientId"`
+
+	// Type of the connection. either standard or streaming
+	Type NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
 }
 
 // EventDependency describes a dependency
@@ -102,6 +174,9 @@ type EventDependency struct {
 
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
 	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
+
+	// Connected tells if subscription is already setup in case of nats protocol.
+	Connected bool `json:"connected,omitempty" protobuf:"bytes,4,opt,name=connected"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
@@ -292,11 +367,9 @@ type SensorStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
-	// +k8s:openapi-gen=false
 	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
-	// +k8s:openapi-gen=false
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
@@ -341,7 +414,7 @@ type NodeStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// Event stores the last seen event for this node
-	Event *Event `json:"latestEvent,omitempty" protobuf:"bytes,9,opt,name=latestEvent"`
+	Event *Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
 }
 
 // Event is a data record expressing an occurrence and its context.

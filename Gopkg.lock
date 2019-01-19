@@ -79,8 +79,8 @@
     ".",
     "log"
   ]
-  revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
-  version = "v2.8.0"
+  revision = "e37671aced663c8d3a395bd301857e26dcf4340c"
+  version = "v2.8.1"
 
 [[projects]]
   branch = "master"
@@ -192,8 +192,8 @@
 [[projects]]
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "a5cb647b1fac8ba77e1cf25af2f9526658ab63e3"
-  version = "v21.0.0"
+  revision = "56cb1dd99043eba2e21c91aa8417d3ba2329259a"
+  version = "v21.0.1"
 
 [[projects]]
   name = "github.com/google/go-querystring"
@@ -318,6 +318,15 @@
   ]
   revision = "13c7fc7590db68b18f2015600f8765a02d705b5d"
   version = "v1.7.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/nats-io/go-nats-streaming"
+  packages = [
+    ".",
+    "pb"
+  ]
+  revision = "a0e3aee6fce1a77efe4024df3280416e9d99bb98"
 
 [[projects]]
   name = "github.com/nats-io/nkeys"
@@ -536,7 +545,7 @@
     "internal/gopathwalk",
     "internal/semver"
   ]
-  revision = "b258f6da23835bf37e95cc50af792447c7c67fe4"
+  revision = "16909d206f00da7d0d5ba28cd9dc7fb223648ecf"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -609,7 +618,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  branch = "release-1.10"
+  branch = "release-1.12"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -641,10 +650,10 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "c89978d5f86d7427bef2fc7752732c8c60b1d188"
+  revision = "6db15a15d2d3874a6c3ddb2140ac9f3bc7058428"
 
 [[projects]]
-  branch = "release-1.10"
+  branch = "release-1.12"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -675,6 +684,7 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
+    "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
@@ -686,7 +696,7 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "d49e237a2683fa6dc43a86c7b1b766e0219fb6e7"
+  revision = "49ce2735e5074ffc3f8190c8406cf51a96302dad"
 
 [[projects]]
   branch = "release-7.0"
@@ -782,7 +792,7 @@
   revision = "36368dede29baa5ecd253416d70ddc0c76bde69b"
 
 [[projects]]
-  branch = "release-1.10"
+  branch = "release-1.12"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -811,7 +821,7 @@
     "pkg/util",
     "third_party/forked/golang/reflect"
   ]
-  revision = "edc41f23fa918716df540b1486477d62237010e4"
+  revision = "b1289fc74931d4b6b04bd1a259acfc88a2cb0a66"
 
 [[projects]]
   branch = "master"
@@ -849,6 +859,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0279beee4b598248cdf46bb4d8e0bc6498ea338bf11af8f88d1eb8791c292a22"
+  inputs-digest = "7b07bc2e199faf8ba2c6fe985f78c1a65564dfcb077228e28f723aab5af83e7d"
   solver-name = "gps-cdcl"
   solver-version = 1

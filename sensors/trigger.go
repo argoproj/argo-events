@@ -77,7 +77,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		}
 
 		// Mark all signal nodes as active
-		for _, dep := range sec.sensor.Spec.EventDependencies {
+		for _, dep := range sec.sensor.Spec.Dependencies {
 			sn.MarkNodePhase(sec.sensor, dep.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-initialized")
 		}
 		return

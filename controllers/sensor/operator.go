@@ -101,7 +101,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Initialize all event dependency nodes
-		for _, eventDependency := range soc.s.Spec.EventDependencies {
+		for _, eventDependency := range soc.s.Spec.Dependencies {
 			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
 		}
 
@@ -184,7 +184,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Mark all eventDependency nodes as active
-		for _, eventDependency := range soc.s.Spec.EventDependencies {
+		for _, eventDependency := range soc.s.Spec.Dependencies {
 			MarkNodePhase(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
 		}
 

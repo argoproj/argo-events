@@ -154,7 +154,7 @@ func TestEventHandler(t *testing.T) {
 
 		convey.Convey("Update sensor event dependencies", func() {
 			sensor = sec.sensor.DeepCopy()
-			sensor.Spec.EventDependencies = append(sensor.Spec.EventDependencies, v1alpha1.EventDependency{
+			sensor.Spec.Dependencies = append(sensor.Spec.Dependencies, v1alpha1.EventDependency{
 				Name: "test-gateway/test2",
 			})
 			sec.processUpdateNotification(&updateNotification{

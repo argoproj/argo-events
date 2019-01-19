@@ -39,9 +39,8 @@ type DispatchProtocolType string
 
 // possible types of event dispatch protocol
 const (
-	HTTPGateway  DispatchProtocolType = "HTTP"
-	NATSGateway  DispatchProtocolType = "NATS"
-	KafkaGateway DispatchProtocolType = "KAFKA"
+	HTTPGateway DispatchProtocolType = "HTTP"
+	NATSGateway DispatchProtocolType = "NATS"
 )
 
 // Gateway is the definition of a gateway resource
@@ -95,8 +94,8 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
-	// DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	DispatchProtocol DispatchProtocolType `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
+	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
+	DispatchProtocol DispatchProtocol `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -173,7 +172,7 @@ type SensorNotificationWatcher struct {
 
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
 type DispatchProtocol struct {
-	Type string `json:"type" protobuf:"bytes,1,opt,name=type"`
+	Type DispatchProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
 
 	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
 
@@ -185,5 +184,5 @@ type Http struct {
 }
 
 type Nats struct {
-	Nats string `json:"nats" protobuf:"bytes,1,opt,name=nats"`
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
 }

@@ -37,8 +37,11 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":            schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventProtocol":           schema_pkg_apis_sensor_v1alpha1_EventProtocol(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":        schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Http":                    schema_pkg_apis_sensor_v1alpha1_Http(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Nats":                    schema_pkg_apis_sensor_v1alpha1_Nats(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":              schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":          schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter":       schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref),
@@ -63,6 +66,7 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ArtifactLocation describes the source location for an external artifact",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"s3": {
 						SchemaProps: spec.SchemaProps{
@@ -103,6 +107,7 @@ func schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref common.ReferenceCallb
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ConfigmapArtifact contains information about artifact in k8 configmap",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -137,6 +142,7 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
 					"filters": {
 						SchemaProps: spec.SchemaProps{
@@ -171,6 +177,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
 						SchemaProps: spec.SchemaProps{
@@ -213,6 +220,7 @@ func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallba
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state. An escalation policy is associated with event filter. Whenever a event filter fails escalation will be triggered",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -248,6 +256,7 @@ func schema_pkg_apis_sensor_v1alpha1_Event(ref common.ReferenceCallback) common.
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "Event is a data record expressing an occurrence and its context. Adheres to the CloudEvents v0.1 specification",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"context": {
 						SchemaProps: spec.SchemaProps{
@@ -274,6 +283,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "EventContext contains metadata that provides circumstantial information about the occurrence.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"eventType": {
 						SchemaProps: spec.SchemaProps{
@@ -356,6 +366,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "EventDependency describes a dependency",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -391,6 +402,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "EventDependencyFilter defines filters and constraints for a event.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -426,11 +438,47 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_EventProtocol(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type defines the type of protocol over which events will be receieved",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"http": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Http contains the information required to setup a http server and listen to incoming events",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Http"),
+						},
+					},
+					"nats": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Nats contains the information required to connect to nats server and get subscriptions",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Nats"),
+						},
+					},
+				},
+				Required: []string{"type", "http", "nats"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Http", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Nats"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "FileArtifact contains information about an artifact in a filesystem",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
 						SchemaProps: spec.SchemaProps{
@@ -450,6 +498,7 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"group": {
 						SchemaProps: spec.SchemaProps{
@@ -477,11 +526,119 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_Http(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Http contains the information required to setup a http server and listen to incoming events",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Port on which server will run",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"port"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_Nats(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Nats contains the information required to connect to nats server and get subscriptions",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "URL is nats server/service URL",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"startWithLastReceived": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"deliverAllAvailable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Receive all stored values in order.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"startAtSequence": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Receive messages starting at a specific sequence number",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"startAtTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subscribe starting at a specific time",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"startAtTimeDelta": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"durable": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Durable subscriptions allow clients to assign a durable name to a subscription when it is created",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"clusterId": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The NATS Streaming cluster ID",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientId": {
+						SchemaProps: spec.SchemaProps{
+							Description: "The NATS Streaming cluster ID",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type of the connection. either standard or streaming",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"url", "type"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for event or a trigger.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"id": {
 						SchemaProps: spec.SchemaProps{
@@ -525,7 +682,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"latestEvent": {
+					"event": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Event stores the last seen event for this node",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"),
@@ -545,6 +702,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ResourceObject is the resource object to create on kubernetes",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"group": {
 						SchemaProps: spec.SchemaProps{
@@ -618,6 +776,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref common.ReferenceCallb
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ResourceParameter indicates a passed parameter to a service template",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"src": {
 						SchemaProps: spec.SchemaProps{
@@ -646,6 +805,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "ResourceParameterSource defines the source for a resource parameter from a event event",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"event": {
 						SchemaProps: spec.SchemaProps{
@@ -681,6 +841,7 @@ func schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref common.ReferenceCallback)
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "RetryStrategy represents a strategy for retrying operations",
+				Type:        []string{"object"},
 				Properties:  map[string]spec.Schema{},
 			},
 		},
@@ -693,6 +854,7 @@ func schema_pkg_apis_sensor_v1alpha1_S3Artifact(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "S3Artifact contains information about an artifact in S3",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"key": {
 						SchemaProps: spec.SchemaProps{
@@ -724,6 +886,7 @@ func schema_pkg_apis_sensor_v1alpha1_S3Bucket(ref common.ReferenceCallback) comm
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "S3Bucket contains information for an S3 Bucket",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"endpoint": {
 						SchemaProps: spec.SchemaProps{
@@ -761,6 +924,7 @@ func schema_pkg_apis_sensor_v1alpha1_S3Filter(ref common.ReferenceCallback) comm
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"prefix": {
 						SchemaProps: spec.SchemaProps{
@@ -787,6 +951,7 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "Sensor is the definition of a sensor resource",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"spec": {
 						SchemaProps: spec.SchemaProps{
@@ -812,6 +977,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorList is the list of Sensor resources",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"items": {
 						SchemaProps: spec.SchemaProps{
@@ -839,10 +1005,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorSpec represents desired sensor state",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"dependencies": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventDependency is a list of the events that this sensor is dependent on.",
+							Description: "Dependencies is a list of the events that this sensor is dependent on.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -872,12 +1039,18 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
 						},
 					},
+					"eventProtocol": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventProtocol is the protocol through which sensor receives events from gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventProtocol"),
+						},
+					},
 				},
-				Required: []string{"dependencies", "triggers", "deploySpec"},
+				Required: []string{"dependencies", "triggers", "deploySpec", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
 	}
 }
 
@@ -886,12 +1059,25 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorStatus contains information about the status of a sensor.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Phase is the high-level summary of the sensor",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"startedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "StartedAt is the time at which this sensor was initiated",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"completedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CompletedAt is the time at which this sensor was completed",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 					"completionCount": {
@@ -926,7 +1112,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -935,6 +1121,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "TimeFilter describes a window in time. Filters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"start": {
 						SchemaProps: spec.SchemaProps{
@@ -969,6 +1156,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "Trigger is an action taken, output produced, an event created, a message sent",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -1010,6 +1198,7 @@ func schema_pkg_apis_sensor_v1alpha1_URI(ref common.ReferenceCallback) common.Op
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "URI is a Uniform Resource Identifier based on RFC 3986",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"scheme": {
 						SchemaProps: spec.SchemaProps{
@@ -1072,6 +1261,7 @@ func schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "URLArtifact contains information about an artifact at an http endpoint.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
 						SchemaProps: spec.SchemaProps{

@@ -29,7 +29,7 @@ import (
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
-	if err := validateSignals(s.Spec.EventDependencies); err != nil {
+	if err := validateSignals(s.Spec.Dependencies); err != nil {
 		return err
 	}
 	err := validateTriggers(s.Spec.Triggers)

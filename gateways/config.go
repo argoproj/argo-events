@@ -18,6 +18,8 @@ package gateways
 
 import (
 	"context"
+	"fmt"
+	"github.com/nats-io/go-nats"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
@@ -58,6 +60,10 @@ type GatewayConfig struct {
 	controllerInstanceID string
 	// StatusCh is used to communicate the status of an event source
 	StatusCh chan EventSourceStatus
+	// natsConn is the nast client used to publish events to cluster. Only used if dispatch protocol is NATS
+	natsConn *nats.Conn
+	// sensorHttpPort is the http server running in sensor that listens to event. Only used if dispatch protocol is HTTP
+	sensorHttpPort string
 }
 
 // EventSourceContext contains information of a event source for gateway to run.
@@ -127,7 +133,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 		panic(err)
 	}
 
-	return &GatewayConfig{
+	gc := &GatewayConfig{
 		Log:                  common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
 		Clientset:            clientset,
 		Namespace:            namespace,
@@ -141,4 +147,14 @@ func NewGatewayConfiguration() *GatewayConfig {
 		serverPort:           serverPort,
 		StatusCh:             make(chan EventSourceStatus),
 	}
+
+	switch gw.Spec.DispatchProtocol.Type {
+	case v1alpha1.HTTPGateway:
+		gc.sensorHttpPort = gw.Spec.DispatchProtocol.Http.Port
+	case v1alpha1.NATSGateway:
+		if gc.natsConn, err = nats.Connect(gw.Spec.DispatchProtocol.Nats.URL); err != nil {
+			panic(fmt.Errorf("failed to connect to NATS cluster. err: %+v", err))
+		}
+	}
+	return gc
 }
