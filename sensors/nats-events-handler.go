@@ -19,6 +19,7 @@ package sensors
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -35,7 +36,9 @@ func (sec *sensorExecutionCtx) successNatsConnection() {
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup successfully", common.OperationSuccessEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup success")
+		return
 	}
+	sec.log.Info().Msg("created event for nats connection setup success")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
@@ -47,19 +50,23 @@ func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup failed", common.EscalationEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup error")
+		return
 	}
+	sec.log.Warn().Msg("created event for nats connection failure")
 }
 
 func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
 	labels := map[string]string{
 		common.LabelEventType:   string(common.OperationSuccessEventType),
 		common.LabelSensorName:  sec.sensor.Name,
-		common.LabelEventSource: eventSource,
+		common.LabelEventSource: strings.Replace(eventSource, "/", "_", -1),
 		common.LabelOperation:   "nats_subscription_success",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription success", common.OperationSuccessEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription success")
+		return
 	}
+	sec.log.Info().Str("event-source", eventSource).Msg("created event for nats subscription success ")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource string) {
@@ -67,12 +74,14 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 	labels := map[string]string{
 		common.LabelEventType:   string(common.OperationFailureEventType),
 		common.LabelSensorName:  sec.sensor.Name,
-		common.LabelEventSource: eventSource,
+		common.LabelEventSource: strings.Replace(eventSource, "/", "_", -1),
 		common.LabelOperation:   "nats_subscription_failure",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription failed", common.OperationFailureEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription error")
+		return
 	}
+	sec.log.Warn().Str("event-source", eventSource).Msg("created event for nats subscription failure")
 }
 
 // NatsEventProtocol handles events sent over NATS
@@ -88,9 +97,11 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 		if sec.nconn.standard == nil {
 			sec.nconn.standard, err = nats.Connect(sec.sensor.Spec.EventProtocol.Nats.URL)
 			if err != nil {
+				// escalate failure
 				sec.escalateNatsConnectionFailure()
 				sec.log.Panic().Err(err).Msg("failed to connect to nats server")
 			}
+			// log success
 			sec.successNatsConnection()
 		}
 		for _, dependency := range sec.sensor.Spec.Dependencies {
@@ -98,11 +109,13 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 				continue
 			}
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
+				// escalate failure
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
 				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
+			// log success
 			sec.successNatsSubscription(dependency.Name)
 		}
 

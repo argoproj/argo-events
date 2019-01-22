@@ -461,7 +461,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+  revision = "64072686203f69e3fd20143576b27200f18ab0fa"
 
 [[projects]]
   branch = "master"
@@ -480,7 +480,7 @@
     "trace",
     "websocket"
   ]
-  revision = "915654e7eabcea33ae277abbecf52f0d8b7a9fdc"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
 
 [[projects]]
   branch = "master"
@@ -499,7 +499,7 @@
     "unix",
     "windows"
   ]
-  revision = "11f53e03133963fb11ae0588e08b5e0b85be8be5"
+  revision = "054c452bb702e465e95ce8e7a3d9a6cf0cd1188d"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -545,7 +545,7 @@
     "internal/gopathwalk",
     "internal/semver"
   ]
-  revision = "16909d206f00da7d0d5ba28cd9dc7fb223648ecf"
+  revision = "24cd39ecf74570612483b772d45cf9d53d908340"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -618,7 +618,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  branch = "release-1.12"
+  branch = "release-1.10"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -650,10 +650,10 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "6db15a15d2d3874a6c3ddb2140ac9f3bc7058428"
+  revision = "c89978d5f86d7427bef2fc7752732c8c60b1d188"
 
 [[projects]]
-  branch = "release-1.12"
+  branch = "release-1.10"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -684,7 +684,6 @@
     "pkg/util/framer",
     "pkg/util/intstr",
     "pkg/util/json",
-    "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
@@ -696,7 +695,7 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "49ce2735e5074ffc3f8190c8406cf51a96302dad"
+  revision = "d49e237a2683fa6dc43a86c7b1b766e0219fb6e7"
 
 [[projects]]
   branch = "release-7.0"
@@ -792,7 +791,7 @@
   revision = "36368dede29baa5ecd253416d70ddc0c76bde69b"
 
 [[projects]]
-  branch = "release-1.12"
+  branch = "release-1.10"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -821,7 +820,7 @@
     "pkg/util",
     "third_party/forked/golang/reflect"
   ]
-  revision = "b1289fc74931d4b6b04bd1a259acfc88a2cb0a66"
+  revision = "edc41f23fa918716df540b1486477d62237010e4"
 
 [[projects]]
   branch = "master"
@@ -859,6 +858,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7b07bc2e199faf8ba2c6fe985f78c1a65564dfcb077228e28f723aab5af83e7d"
+  inputs-digest = "28bc456cb7b54760f5cc30572c5b3bdb1ded4ca0cf62c7968f8b1236c0f75172"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -17,7 +17,6 @@ limitations under the License.
 package sensor
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"time"
 
@@ -33,7 +32,6 @@ import (
 // for events this node name should be the name of the event
 func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatus {
 	nodeID := sensor.NodeID(nodeName)
-	fmt.Println(nodeID)
 	node, ok := sensor.Status.Nodes[nodeID]
 	if !ok {
 		return nil
@@ -109,9 +107,7 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 
 // MarkNodePhase marks the node with a phase, returns the node
 func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *v1alpha1.Event, log *zerolog.Logger, message ...string) *v1alpha1.NodeStatus {
-	fmt.Println(nodeName)
 	node := GetNodeByName(sensor, nodeName)
-	fmt.Println(sensor.Status.Nodes)
 	if node.Phase != phase {
 		log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase))
 		node.Phase = phase

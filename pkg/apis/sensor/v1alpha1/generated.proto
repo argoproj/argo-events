@@ -23,6 +23,7 @@ import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
+import "k8s.io/apimachinery/pkg/util/intstr/generated.proto";
 
 // Package-wide variables from generator "generated".
 option go_package = "v1alpha1";
@@ -130,8 +131,6 @@ message EventContext {
   // Enables deduplication. Must be unique within scope of producer.
   optional string eventID = 5;
 
-  // Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6;
 
   // A link to the schema that the data attribute adheres to.
@@ -167,6 +166,9 @@ message EventDependency {
 
   // Filters and rules governing tolerations of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 3;
+
+  // Connected tells if subscription is already setup in case of nats protocol.
+  optional bool connected = 4;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -270,18 +272,16 @@ message NodeStatus {
   optional string phase = 5;
 
   // StartedAt is the time at which this node started
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
 
   // CompletedAt is the time at which this node completed
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
   // store data or something to save for event notifications or trigger events
   optional string message = 8;
 
   // Event stores the last seen event for this node
-  optional Event latestEvent = 9;
+  optional Event event = 9;
 }
 
 // ResourceObject is the resource object to create on kubernetes
@@ -290,7 +290,6 @@ message ResourceObject {
   optional GroupVersionKind groupVersionKind = 5;
 
   // Namespace in which to create this object
-  // optional
   // defaults to the service account namespace
   optional string namespace = 1;
 
@@ -360,10 +359,8 @@ message S3Bucket {
 
   optional bool insecure = 4;
 
-  // +k8s:openapi-gen=false
   optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
 
-  // +k8s:openapi-gen=false
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
 }
 
@@ -380,7 +377,6 @@ message S3Filter {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Sensor {
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional SensorSpec spec = 2;
@@ -391,7 +387,6 @@ message Sensor {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message SensorList {
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated Sensor items = 2;
@@ -399,7 +394,7 @@ message SensorList {
 
 // SensorSpec represents desired sensor state
 message SensorSpec {
-  // EventDependency is a list of the events that this sensor is dependent on.
+  // Dependencies is a list of the events that this sensor is dependent on.
   repeated EventDependency dependencies = 1;
 
   // Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
@@ -409,7 +404,7 @@ message SensorSpec {
   optional k8s.io.api.core.v1.PodSpec deploySpec = 3;
 
   // EventProtocol is the protocol through which sensor receives events from gateway
-  optional EventProtocol dispatchProtocol = 4;
+  optional EventProtocol eventProtocol = 4;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -418,11 +413,9 @@ message SensorStatus {
   optional string phase = 1;
 
   // StartedAt is the time at which this sensor was initiated
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
   // CompletedAt is the time at which this sensor was completed
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
 
   // CompletionCount is the count of sensor's successful runs.

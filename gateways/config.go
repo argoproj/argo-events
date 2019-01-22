@@ -155,6 +155,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 		if gc.natsConn, err = nats.Connect(gw.Spec.DispatchProtocol.Nats.URL); err != nil {
 			panic(fmt.Errorf("failed to connect to NATS cluster. err: %+v", err))
 		}
+		gc.Log.Info().Str("nats-url", gw.Spec.DispatchProtocol.Nats.URL).Msg("connected to nats")
 	}
 	return gc
 }

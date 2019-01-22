@@ -1,3 +1,3 @@
 FROM centos:7
-COPY dist/sn-controller /bin/
-ENTRYPOINT [ "/bin/sn-controller" ]
+COPY dist/sensor-controller /bin/
+ENTRYPOINT [ "/bin/sensor-controller" ]

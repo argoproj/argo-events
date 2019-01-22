@@ -28,12 +28,12 @@ import (
 // HttpEventProtocol handles events sent over HTTP
 func (sec *sensorExecutionCtx) HttpEventProtocol() {
 	// create a http server. this server listens for events from gateway.
-	sec.server = &http.Server{Addr: fmt.Sprintf(":%s", common.SensorServicePort)}
+	sec.server = &http.Server{Addr: fmt.Sprintf(":%s", sec.sensor.Spec.EventProtocol.Http.Port)}
 
 	// add a handler to handle incoming events
 	http.HandleFunc("/", sec.httpEventHandler)
 
-	sec.log.Info().Str("port", string(common.SensorServicePort)).Msg("sensor started listening")
+	sec.log.Info().Str("port", sec.sensor.Spec.EventProtocol.Http.Port).Msg("sensor started listening")
 	if err := sec.server.ListenAndServe(); err != nil {
 		sec.log.Error().Err(err).Msg("sensor server stopped")
 		// escalate error

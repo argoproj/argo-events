@@ -14,7 +14,7 @@ required = [
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.12"
+  branch = "release-1.10"
 
 [[constraint]]
   name = "github.com/nats-io/go-nats-streaming"
@@ -77,11 +77,11 @@ required = [
   branch = "master"
 
 [[override]]
-  branch = "release-1.12"
+  branch = "release-1.10"
   name = "k8s.io/api"
 
 [[override]]
-  branch = "release-1.12"
+  branch = "release-1.10"
   name = "k8s.io/apimachinery"
 
 [[override]]

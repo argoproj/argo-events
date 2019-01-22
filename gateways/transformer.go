@@ -56,6 +56,9 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 			return err
 		}
 	case v1alpha1.NATSGateway:
+		if err = gc.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
+			return err
+		}
 	default:
 		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchProtocol)
 	}
@@ -96,7 +99,7 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 	gc.Log.Info().Str("source", source).Msg("dispatching event to watchers")
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
-		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), common.SensorServicePort, common.SensorServiceEndpoint, eventPayload); err != nil {
+		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.DispatchProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
 			return fmt.Errorf("failed to dispatch event to sensor watcher over http. communication error. err: %+v", err)
 		}
 	}
@@ -109,8 +112,8 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 	return nil
 }
 
-// dispatchEventOverNats dispatches event over nats streaming
-func (gc *GatewayConfig) dispatchEventOverNatsStreaming(source string, eventPayload []byte) error {
+// dispatchEventOverNats dispatches event over nats
+func (gc *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byte) error {
 	if err := gc.natsConn.Publish(source, eventPayload); err != nil {
 		gc.Log.Error().Err(err).Str("source", source).Msg("failed to publish event")
 		return err
