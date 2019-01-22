@@ -99,12 +99,12 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
 		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
-			return fmt.Errorf("failed to dispatch event to sensor watcher over http. communication error. err: %+v", err)
+			gc.Log.Warn().Str("event-source", source).Str("sensor-name", sensor.Name).Err(err).Msg("failed to dispatch event to sensor watcher over http. communication error")
 		}
 	}
 	for _, gateway := range gc.gw.Spec.Watchers.Gateways {
 		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(gateway.Name), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
-			return fmt.Errorf("failed to dispatch event to gateway watcher over http. communication error. err: %+v", err)
+			gc.Log.Warn().Str("event-source", source).Str("gateway-name", gateway.Name).Err(err).Msg("failed to dispatch event to gateway watcher over http. communication error")
 		}
 	}
 	gc.Log.Info().Msg("successfully dispatched event to all watchers")
