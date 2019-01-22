@@ -85,11 +85,8 @@ func init() {
 			select {
 			case config := <-routeActivateChan:
 				// start server if it has not been started on this port
-				_, ok := activeServers[config.sgConfig.Port]
-				if !ok {
-					config.startHttpServer()
-				}
-				config.sgConfig.mux.HandleFunc(config.sgConfig.Endpoint, config.routeActiveHandler)
+				config.startHttpServer()
+				config.startCh <- struct{}{}
 
 			case config := <-routeDeactivateChan:
 				_, ok := activeServers[config.sgConfig.Port]
@@ -216,8 +213,6 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
-
 	for {
 		select {
 		case data := <-activeEndpoints[rc.sgConfig.Endpoint].dataCh:
@@ -269,6 +264,8 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Add("Content-Type", "text/plain")
 	writer.Write([]byte(respBody))
+
+	rc.eventSourceExecutor.Log.Info().Str("body", string(body)).Msg("response body")
 
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
