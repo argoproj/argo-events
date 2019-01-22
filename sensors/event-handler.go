@@ -144,9 +144,9 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 	go sec.syncSensor(context.Background())
 
 	switch sec.sensor.Spec.EventProtocol.Type {
-	case v1alpha1.HTTP:
+	case common.HTTP:
 		sec.HttpEventProtocol()
-	case v1alpha1.NATS:
+	case common.NATS:
 		sec.NatsEventProtocol()
 		var err error
 		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log); err != nil {

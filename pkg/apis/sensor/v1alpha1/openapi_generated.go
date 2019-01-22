@@ -32,7 +32,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":       schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data":                    schema_pkg_apis_sensor_v1alpha1_Data(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":              schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy":        schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                   schema_pkg_apis_sensor_v1alpha1_Event(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":            schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
@@ -157,18 +156,12 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 							},
 						},
 					},
-					"escalationPolicy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
-						},
-					},
 				},
 				Required: []string{"filters"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"},
 	}
 }
 
@@ -200,51 +193,8 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"escalationPolicy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
-						},
-					},
 				},
 				Required: []string{"path", "type", "value"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_EscalationPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "EscalationPolicy describes the policy for escalating sensors in an Error state. An escalation policy is associated with event filter. Whenever a event filter fails escalation will be triggered",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is name of the escalation policy This is referred by event filter/s",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"level": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Level is the degree of importance",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "need someway to progressively get more serious notifications",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"name", "level", "message"},
 			},
 		},
 		Dependencies: []string{},
@@ -351,18 +301,12 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 							},
 						},
 					},
-					"escalationPolicy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the name of escalation policy to trigger in case the event filter fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
-						},
-					},
 				},
 				Required: []string{"eventType", "eventTypeVersion", "cloudEventsVersion", "source", "eventID", "eventTime", "schemaURL", "contentType"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URI", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 
@@ -1210,17 +1154,10 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
-					"escalationPolicy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EscalationPolicy is the escalation to trigger in case the event filter fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"),
-						},
-					},
 				},
 			},
 		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EscalationPolicy"},
+		Dependencies: []string{},
 	}
 }
 

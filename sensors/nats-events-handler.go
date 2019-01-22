@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
 )
@@ -59,7 +58,7 @@ func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
 	labels := map[string]string{
 		common.LabelEventType:   string(common.OperationSuccessEventType),
 		common.LabelSensorName:  sec.sensor.Name,
-		common.LabelEventSource: strings.Replace(eventSource, "/", "_", -1),
+		common.LabelEventSource: strings.Replace(eventSource, ":", "_", -1),
 		common.LabelOperation:   "nats_subscription_success",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription success", common.OperationSuccessEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
@@ -74,7 +73,7 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 	labels := map[string]string{
 		common.LabelEventType:   string(common.OperationFailureEventType),
 		common.LabelSensorName:  sec.sensor.Name,
-		common.LabelEventSource: strings.Replace(eventSource, "/", "_", -1),
+		common.LabelEventSource: strings.Replace(eventSource, ":", "_", -1),
 		common.LabelOperation:   "nats_subscription_failure",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription failed", common.OperationFailureEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
@@ -93,7 +92,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 	var err error
 
 	switch sec.sensor.Spec.EventProtocol.Nats.Type {
-	case v1alpha1.Standard:
+	case common.Standard:
 		if sec.nconn.standard == nil {
 			sec.nconn.standard, err = nats.Connect(sec.sensor.Spec.EventProtocol.Nats.URL)
 			if err != nil {
@@ -119,7 +118,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			sec.successNatsSubscription(dependency.Name)
 		}
 
-	case v1alpha1.Streaming:
+	case common.Streaming:
 		if sec.nconn.stream == nil {
 			sec.nconn.stream, err = snats.Connect(sec.sensor.Spec.EventProtocol.Nats.ClusterId, sec.sensor.Spec.EventProtocol.Nats.ClientId, snats.NatsURL(sec.sensor.Spec.EventProtocol.Nats.URL))
 			if err != nil {

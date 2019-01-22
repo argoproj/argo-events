@@ -47,7 +47,7 @@ spec:
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
-    - name: test-gateway/test
+    - name: test-gateway:test
   triggers:
     - name: test-workflow-trigger
       resource:
@@ -136,10 +136,10 @@ func TestEventHandler(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		sec.sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-		fmt.Println(sensor.NodeID("test-gateway/test"))
+		fmt.Println(sensor.NodeID("test-gateway:test"))
 
-		sensor2.InitializeNode(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
-		sensor2.MarkNodePhase(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
+		sensor2.InitializeNode(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
+		sensor2.MarkNodePhase(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
 
 		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, &sec.log, "trigger is init")
 
@@ -148,21 +148,21 @@ func TestEventHandler(t *testing.T) {
 			notificationType: v1alpha1.EventNotification,
 			writer:           &mockHttpWriter{},
 			eventDependency: &v1alpha1.EventDependency{
-				Name: "test-gateway/test",
+				Name: "test-gateway:test",
 			},
 		})
 
 		convey.Convey("Update sensor event dependencies", func() {
 			sensor = sec.sensor.DeepCopy()
 			sensor.Spec.Dependencies = append(sensor.Spec.Dependencies, v1alpha1.EventDependency{
-				Name: "test-gateway/test2",
+				Name: "test-gateway:test2",
 			})
 			sec.processUpdateNotification(&updateNotification{
 				event:            nil,
 				notificationType: v1alpha1.ResourceUpdateNotification,
 				writer:           &mockHttpWriter{},
 				eventDependency: &v1alpha1.EventDependency{
-					Name: "test-gateway/test2",
+					Name: "test-gateway:test2",
 				},
 				sensor: sensor,
 			})

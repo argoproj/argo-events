@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"net/http"
 	"time"
 
@@ -50,17 +49,17 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 		return fmt.Errorf("failed to dispatch event to watchers over http. marshalling failed. err: %+v", err)
 	}
 
-	switch gc.gw.Spec.DispatchProtocol.Type {
-	case v1alpha1.HTTPGateway:
+	switch gc.gw.Spec.EventProtocol.Type {
+	case common.HTTP:
 		if err = gc.dispatchEventOverHttp(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
-	case v1alpha1.NATSGateway:
+	case common.NATS:
 		if err = gc.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
 	default:
-		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchProtocol)
+		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.EventProtocol)
 	}
 	return nil
 }
@@ -99,7 +98,7 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 	gc.Log.Info().Str("source", source).Msg("dispatching event to watchers")
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
-		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.DispatchProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
+		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
 			return fmt.Errorf("failed to dispatch event to sensor watcher over http. communication error. err: %+v", err)
 		}
 	}
@@ -114,7 +113,16 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 
 // dispatchEventOverNats dispatches event over nats
 func (gc *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byte) error {
-	if err := gc.natsConn.Publish(source, eventPayload); err != nil {
+	var err error
+
+	switch gc.gw.Spec.EventProtocol.Nats.Type {
+	case common.Standard:
+		err = gc.natsConn.Publish(source, eventPayload)
+	case common.Streaming:
+		err = gc.natsStreamingConn.Publish(source, eventPayload)
+	}
+
+	if err != nil {
 		gc.Log.Error().Err(err).Str("source", source).Msg("failed to publish event")
 		return err
 	}

@@ -28,11 +28,6 @@ import (
 
 func Test_filterTime(t *testing.T) {
 	timeFilter := &v1alpha1.TimeFilter{
-		EscalationPolicy: &v1alpha1.EscalationPolicy{
-			Name:    "time filter escalation",
-			Message: "filter failed",
-			Level:   v1alpha1.Alert,
-		},
 		Stop:  "17:14:00",
 		Start: "10:11:00",
 	}

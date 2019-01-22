@@ -153,7 +153,7 @@ func (soc *sOperationCtx) operate() error {
 		soc.log.Info().Msg("sensor pod created")
 
 		// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
-		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == v1alpha1.HTTP {
+		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == common.HTTP {
 			// Create sensor service
 			sensorSvc := &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{

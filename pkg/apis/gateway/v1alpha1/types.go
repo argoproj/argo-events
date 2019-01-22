@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/argoproj/argo-events/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -32,15 +33,6 @@ const (
 	NodePhaseCompleted      NodePhase = "Completed"      // node has completed running
 	NodePhaseRemove         NodePhase = "Remove"         // stale node
 	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
-)
-
-// DispatchProtocolType is type of the event dispatch protocol. Used for dispatching events from gateway to watchers
-type DispatchProtocolType string
-
-// possible types of event dispatch protocol
-const (
-	HTTPGateway DispatchProtocolType = "HTTP"
-	NATSGateway DispatchProtocolType = "NATS"
 )
 
 // Gateway is the definition of a gateway resource
@@ -95,7 +87,7 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	DispatchProtocol DispatchProtocol `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
+	EventProtocol DispatchProtocol `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -172,7 +164,7 @@ type SensorNotificationWatcher struct {
 
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
 type DispatchProtocol struct {
-	Type DispatchProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
+	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
 
 	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
 
@@ -185,4 +177,10 @@ type Http struct {
 
 type Nats struct {
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+
+	Type common.NatsType `json:"type" protobuf:"bytes,2,opt,name=type"`
+
+	ClientId string `json:"clientId,omitempty" protobuf:"bytes,3,opt,name=clientId"`
+
+	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,4,opt,name=clusterId"`
 }

@@ -313,8 +313,26 @@ func schema_pkg_apis_gateway_v1alpha1_Nats(ref common.ReferenceCallback) common.
 							Format: "",
 						},
 					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"clientId": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"clusterId": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
-				Required: []string{"url"},
+				Required: []string{"url", "type"},
 			},
 		},
 		Dependencies: []string{},

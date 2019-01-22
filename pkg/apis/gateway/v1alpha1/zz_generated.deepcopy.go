@@ -137,7 +137,7 @@ func (in *GatewaySpec) DeepCopyInto(out *GatewaySpec) {
 		*out = new(NotificationWatchers)
 		(*in).DeepCopyInto(*out)
 	}
-	out.DispatchProtocol = in.DispatchProtocol
+	out.EventProtocol = in.EventProtocol
 	return
 }
 

@@ -44,7 +44,7 @@ func DefaultServiceName(serviceName string) string {
 
 // DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
 func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
-	return fmt.Sprintf("%s/%s", gatewayName, configurationName)
+	return fmt.Sprintf("%s:%s", gatewayName, configurationName)
 }
 
 // DefaultNatsQueueName returns a queue name for nats subject

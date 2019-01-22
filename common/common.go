@@ -21,6 +21,24 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
+// EventProtocolType is type of the event dispatch protocol. Used for dispatching events
+type EventProtocolType string
+
+// possible types of event dispatch protocol
+const (
+	HTTP EventProtocolType = "HTTP"
+	NATS EventProtocolType = "NATS"
+)
+
+// Type of nats connection.
+type NatsType string
+
+// possible values of nats connection type
+const (
+	Standard  NatsType = "Standard"
+	Streaming NatsType = "Streaming"
+)
+
 const (
 	// EnvVarKubeConfig is the path to the Kubernetes configuration
 	EnvVarKubeConfig = "KUBE_CONFIG"

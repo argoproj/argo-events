@@ -19,6 +19,7 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1;
 
+import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
@@ -126,6 +127,12 @@ message Http {
 
 message Nats {
   optional string url = 1;
+
+  optional string type = 2;
+
+  optional string clientId = 3;
+
+  optional string clusterId = 4;
 }
 
 // NodeStatus describes the status for an individual node in the gateway configurations.

@@ -18,20 +18,12 @@ package v1alpha1
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"hash/fnv"
 
 	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-// EventProtocolType is type of the event dispatch protocol. Used for dispatching events
-type EventProtocolType string
-
-// possible types of event dispatch protocol
-const (
-	HTTP EventProtocolType = "HTTP"
-	NATS EventProtocolType = "NATS"
 )
 
 type NotificationType string
@@ -59,15 +51,6 @@ const (
 	NodePhaseActive   NodePhase = "Active"   // the node is active and waiting on dependencies to resolve
 	NodePhaseError    NodePhase = "Error"    // the node has encountered an error in processing
 	NodePhaseNew      NodePhase = ""         // the node is new
-)
-
-// Type of nats connection.
-type NatsType string
-
-// possible values of nats connection type
-const (
-	Standard  NatsType = "Standard"
-	Streaming NatsType = "Streaming"
 )
 
 // Sensor is the definition of a sensor resource
@@ -109,7 +92,7 @@ type SensorSpec struct {
 // EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols
 type EventProtocol struct {
 	// Type defines the type of protocol over which events will be receieved
-	Type EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
+	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
 
 	// Http contains the information required to setup a http server and listen to incoming events
 	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
@@ -154,7 +137,7 @@ type Nats struct {
 	ClientId string `json:"clientId,omitempty" protobuf:"bytes,9,opt,name=clientId"`
 
 	// Type of the connection. either standard or streaming
-	Type NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
+	Type common.NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
 }
 
 // EventDependency describes a dependency
@@ -213,9 +196,6 @@ type TimeFilter struct {
 	// After this time, events for this event are ignored and
 	// format is hh:mm:ss
 	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
 // JSONType contains the supported JSON types for data filtering
@@ -231,9 +211,6 @@ const (
 type Data struct {
 	// filter constraints
 	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
 }
 
 // DataFilter describes constraints and filters for event data
@@ -255,9 +232,6 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -327,34 +301,6 @@ type ResourceObject struct {
 // RetryStrategy represents a strategy for retrying operations
 // TODO: implement me
 type RetryStrategy struct {
-}
-
-// EscalationLevel is the degree of importance
-type EscalationLevel string
-
-// possible values for EscalationLevel
-const (
-	// level 0 of escalation
-	Alert EscalationLevel = "Alert"
-	// level 1 of escalation
-	Warning EscalationLevel = "Warning"
-	// level 2 of escalation
-	Critical EscalationLevel = "Critical"
-)
-
-// EscalationPolicy describes the policy for escalating sensors in an Error state.
-// An escalation policy is associated with event filter. Whenever a event filter fails
-// escalation will be triggered
-type EscalationPolicy struct {
-	// Name is name of the escalation policy
-	// This is referred by event filter/s
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-
-	// Level is the degree of importance
-	Level EscalationLevel `json:"level" protobuf:"bytes,2,opt,name=level"`
-
-	// need someway to progressively get more serious notifications
-	Message string `json:"message" protobuf:"bytes,3,opt,name=message"`
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -459,9 +405,6 @@ type EventContext struct {
 	// Enables a place for custom fields a producer or middleware might want to include and provides a place
 	// to test metadata before adding them to the CloudEvents specification.
 	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
-
-	// EscalationPolicy is the name of escalation policy to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,10,opt,name=escalationPolicy"`
 }
 
 // URI is a Uniform Resource Identifier based on RFC 3986

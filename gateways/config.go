@@ -19,12 +19,14 @@ package gateways
 import (
 	"context"
 	"fmt"
-	"github.com/nats-io/go-nats"
 	"os"
+
+	"github.com/nats-io/go-nats"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,8 +62,10 @@ type GatewayConfig struct {
 	controllerInstanceID string
 	// StatusCh is used to communicate the status of an event source
 	StatusCh chan EventSourceStatus
-	// natsConn is the nast client used to publish events to cluster. Only used if dispatch protocol is NATS
+	// natsConn is the standard nats connection used to publish events to cluster. Only used if dispatch protocol is NATS
 	natsConn *nats.Conn
+	// natsStreamingConn is the nats connection used for streaming.
+	natsStreamingConn snats.Conn
 	// sensorHttpPort is the http server running in sensor that listens to event. Only used if dispatch protocol is HTTP
 	sensorHttpPort string
 }
@@ -148,14 +152,22 @@ func NewGatewayConfiguration() *GatewayConfig {
 		StatusCh:             make(chan EventSourceStatus),
 	}
 
-	switch gw.Spec.DispatchProtocol.Type {
-	case v1alpha1.HTTPGateway:
-		gc.sensorHttpPort = gw.Spec.DispatchProtocol.Http.Port
-	case v1alpha1.NATSGateway:
-		if gc.natsConn, err = nats.Connect(gw.Spec.DispatchProtocol.Nats.URL); err != nil {
-			panic(fmt.Errorf("failed to connect to NATS cluster. err: %+v", err))
+	switch gw.Spec.EventProtocol.Type {
+	case common.HTTP:
+		gc.sensorHttpPort = gw.Spec.EventProtocol.Http.Port
+	case common.NATS:
+		if gc.natsConn, err = nats.Connect(gw.Spec.EventProtocol.Nats.URL); err != nil {
+			panic(fmt.Errorf("failed to obtain NATS standard connection. err: %+v", err))
 		}
-		gc.Log.Info().Str("nats-url", gw.Spec.DispatchProtocol.Nats.URL).Msg("connected to nats")
+		gc.Log.Info().Str("nats-url", gw.Spec.EventProtocol.Nats.URL).Msg("connected to nats service")
+
+		if gc.gw.Spec.EventProtocol.Nats.Type == common.Streaming {
+			gc.natsStreamingConn, err = snats.Connect(gc.gw.Spec.EventProtocol.Nats.ClusterId, gc.gw.Spec.EventProtocol.Nats.ClientId, snats.NatsConn(gc.natsConn))
+			if err != nil {
+				panic(fmt.Errorf("failed to obtain NATS streaming connection. err: %+v", err))
+			}
+			gc.Log.Info().Str("nats-url", gw.Spec.EventProtocol.Nats.URL).Msg("nats streaming connection successful")
+		}
 	}
 	return gc
 }

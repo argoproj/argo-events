@@ -56,9 +56,6 @@ message ConfigmapArtifact {
 message Data {
   // filter constraints
   repeated DataFilter filters = 1;
-
-  // EscalationPolicy is the escalation to trigger in case the event filter fails
-  optional EscalationPolicy escalationPolicy = 2;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -80,24 +77,6 @@ message DataFilter {
   // Strings are taken as is
   // Nils this value is ignored
   optional string value = 3;
-
-  // EscalationPolicy is the escalation to trigger in case the event filter fails
-  optional EscalationPolicy escalationPolicy = 4;
-}
-
-// EscalationPolicy describes the policy for escalating sensors in an Error state.
-// An escalation policy is associated with event filter. Whenever a event filter fails
-// escalation will be triggered
-message EscalationPolicy {
-  // Name is name of the escalation policy
-  // This is referred by event filter/s
-  optional string name = 1;
-
-  // Level is the degree of importance
-  optional string level = 2;
-
-  // need someway to progressively get more serious notifications
-  optional string message = 3;
 }
 
 // Event is a data record expressing an occurrence and its context.
@@ -147,9 +126,6 @@ message EventContext {
   // Enables a place for custom fields a producer or middleware might want to include and provides a place
   // to test metadata before adding them to the CloudEvents specification.
   map<string, string> extensions = 9;
-
-  // EscalationPolicy is the name of escalation policy to trigger in case the event filter fails
-  optional EscalationPolicy escalationPolicy = 10;
 }
 
 // EventDependency describes a dependency
@@ -443,9 +419,6 @@ message TimeFilter {
   // After this time, events for this event are ignored and
   // format is hh:mm:ss
   optional string stop = 2;
-
-  // EscalationPolicy is the escalation to trigger in case the event filter fails
-  optional EscalationPolicy escalationPolicy = 3;
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
