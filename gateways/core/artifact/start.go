@@ -18,16 +18,17 @@ package artifact
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/store"
 
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/store"
 	"github.com/minio/minio-go"
 )
 
 // StartEventSource activates an event source and streams back events
 func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
-	artifact, err := parseEventSource(eventSource.Data)
+	a, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
@@ -36,37 +37,37 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(artifact, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 // listenEvents listens to minio bucket notifications
-func (ese *S3EventSourceExecutor) listenEvents(artifact *s3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("retrieving access and secret key")
 	// retrieve access key id and secret access key
-	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, artifact.AccessKey.Name, artifact.AccessKey.Key)
+	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.SecretKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
 	}
-	secretKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, artifact.SecretKey.Name, artifact.SecretKey.Key)
+	secretKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.SecretKey.Name, a.SecretKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	minioClient, err := minio.New(artifact.S3EventConfig.Endpoint, accessKey, secretKey, !artifact.Insecure)
+	minioClient, err := minio.New(a.Endpoint, accessKey, secretKey, !a.Insecure)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to listen to bucket notifications")
-	for notification := range minioClient.ListenBucketNotification(artifact.S3EventConfig.Bucket, artifact.S3EventConfig.Filter.Prefix, artifact.S3EventConfig.Filter.Suffix, []string{
-		string(artifact.S3EventConfig.Event),
+	for notification := range minioClient.ListenBucketNotification(a.Bucket.Name, a.Filter.Prefix, a.Filter.Suffix, []string{
+		string(a.Event),
 	}, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err

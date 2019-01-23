@@ -24,9 +24,9 @@ import (
 	"github.com/nats-io/go-nats"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	pc "github.com/argoproj/argo-events/pkg/common"
 	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"

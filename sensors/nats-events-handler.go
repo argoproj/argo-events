@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	pc "github.com/argoproj/argo-events/pkg/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
 )
@@ -152,57 +152,50 @@ func (sec *sensorExecutionCtx) getNatsStandardSubscription(eventSource string) (
 
 // getNatsStreamingSubscription returns a streaming nats subscription
 func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) (snats.Subscription, error) {
+	subscriptionOption, err := sec.getNatsStreamingOption(eventSource)
+	if err != nil {
+		return nil, err
+	}
+	return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
+		sec.processNatsMessage(msg.Data, eventSource)
+	}, subscriptionOption)
+}
+
+// getNatsStreamingOption returns a streaming option
+func (sec *sensorExecutionCtx) getNatsStreamingOption(eventSource string) (snats.SubscriptionOption, error) {
 	if sec.sensor.Spec.EventProtocol.Nats.StartWithLastReceived {
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.StartWithLastReceived())
+		snats.StartWithLastReceived()
 	}
-
 	if sec.sensor.Spec.EventProtocol.Nats.DeliverAllAvailable {
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.DeliverAllAvailable())
+		snats.DeliverAllAvailable()
 	}
-
 	if sec.sensor.Spec.EventProtocol.Nats.Durable {
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.DurableName(eventSource))
+		snats.DurableName(eventSource)
 	}
-
 	if sec.sensor.Spec.EventProtocol.Nats.StartAtSequence != "" {
 		sequence, err := strconv.Atoi(sec.sensor.Spec.EventProtocol.Nats.StartAtSequence)
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.StartAtSequence(uint64(sequence)))
+		return snats.StartAtSequence(uint64(sequence)), nil
 	}
-
 	if sec.sensor.Spec.EventProtocol.Nats.StartAtTime != "" {
 		startTime, err := time.Parse(common.StandardTimeFormat, sec.sensor.Spec.EventProtocol.Nats.StartAtTime)
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.StartAtTime(startTime))
+		return snats.StartAtTime(startTime), nil
 	}
-
 	if sec.sensor.Spec.EventProtocol.Nats.StartAtTimeDelta != "" {
 		duration, err := time.ParseDuration(sec.sensor.Spec.EventProtocol.Nats.StartAtTimeDelta)
 		if err != nil {
 			return nil, err
 		}
-		return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-			sec.processNatsMessage(msg.Data, eventSource)
-		}, snats.StartAtTimeDelta(duration))
+		return snats.StartAtTimeDelta(duration), nil
 	}
-
-	return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
-		sec.processNatsMessage(msg.Data, eventSource)
-	})
+	return func(o *snats.SubscriptionOptions) error {
+		return nil
+	}, nil
 }
 
 // processNatsMessage handles a nats message payload

@@ -53,7 +53,7 @@ func (ese *testEventSourceExecutor) ValidateEventSource(ctx context.Context, eve
 }
 
 func TestEventSources(t *testing.T) {
-	os.Setenv(common.EnvVarGatewayServerPort, "1234")
+	_ = os.Setenv(common.EnvVarGatewayServerPort, "1234")
 	go StartGateway(&testEventSourceExecutor{})
 	gc := getGatewayConfig()
 

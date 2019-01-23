@@ -81,6 +81,25 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 				Description: "Gateway is the definition of a gateway resource",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus"),
@@ -92,11 +111,11 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 						},
 					},
 				},
-				Required: []string{"status", "spec"},
+				Required: []string{"metadata", "status", "spec"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -107,6 +126,25 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 				Description: "GatewayList is the list of Gateway resources",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
 					"items": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
@@ -120,11 +158,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"items"},
+				Required: []string{"metadata", "items"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -381,11 +419,18 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
+					"updateTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateTime is the time when node(gateway configuration) was updated",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
+						},
+					},
 				},
 				Required: []string{"id", "name", "displayName", "phase"},
 			},
 		},
-		Dependencies: []string{},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 

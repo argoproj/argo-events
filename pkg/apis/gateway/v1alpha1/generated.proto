@@ -19,7 +19,7 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1;
 
-import "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto";
+import "github.com/argoproj/argo-events/pkg/apis/common/generated.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
@@ -43,7 +43,6 @@ message EventProtocol {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Gateway {
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
   optional GatewayStatus status = 2;
@@ -54,7 +53,6 @@ message Gateway {
 // GatewayList is the list of Gateway resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message GatewayList {
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   repeated Gateway items = 2;
@@ -159,7 +157,6 @@ message NodeStatus {
   optional string message = 8;
 
   // UpdateTime is the time when node(gateway configuration) was updated
-  // +k8s:openapi-gen=false
   optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updateTime = 9;
 }
 

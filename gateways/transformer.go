@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	sv1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	pc "github.com/argoproj/argo-events/pkg/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	suuid "github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -67,7 +67,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 
 // transformEvent transforms an event from event source into a CloudEvents specification compliant event
 // See https://github.com/cloudevents/spec for more info.
-func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, error) {
+func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, error) {
 	// Generate an event id
 	eventId := suuid.NewV1()
 
@@ -75,15 +75,15 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 		Msg("converting gateway event into cloudevents specification compliant event")
 
 	// Create an CloudEvent
-	ce := &sv1alpha.Event{
-		Context: sv1alpha.EventContext{
+	ce := &apicommon.Event{
+		Context: apicommon.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", eventId),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          gc.gw.Spec.Type,
 			EventTypeVersion:   gc.gw.Spec.EventVersion,
-			Source: &sv1alpha.URI{
+			Source: &apicommon.URI{
 				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, gatewayEvent.Name),
 			},
 		},

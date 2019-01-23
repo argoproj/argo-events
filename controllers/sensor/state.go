@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	sclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,7 +107,7 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *v1alpha1.Event, log *zerolog.Logger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *zerolog.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
 		log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase))

@@ -18,19 +18,20 @@ package sensors
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	sensor2 "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
-	"k8s.io/client-go/kubernetes/fake"
 	"net/http"
 	"testing"
+	"time"
 
+	"github.com/argoproj/argo-events/common"
+	sensor2 "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	discoveryFake "k8s.io/client-go/discovery/fake"
-	"time"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 var sensorStr = `apiVersion: argoproj.io/v1alpha1
@@ -106,16 +107,16 @@ func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	}
 }
 
-func getCloudEvent() *v1alpha1.Event {
-	return &v1alpha1.Event{
-		Context: v1alpha1.EventContext{
+func getCloudEvent() *apicommon.Event {
+	return &apicommon.Event{
+		Context: apicommon.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", "123"),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          "test",
 			EventTypeVersion:   common.CloudEventsVersion,
-			Source: &v1alpha1.URI{
+			Source: &apicommon.URI{
 				Host: common.DefaultGatewayConfigurationName("test-gateway", "test"),
 			},
 		},

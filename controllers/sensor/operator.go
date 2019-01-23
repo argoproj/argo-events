@@ -20,9 +20,9 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	pc "github.com/argoproj/argo-events/pkg/common"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"

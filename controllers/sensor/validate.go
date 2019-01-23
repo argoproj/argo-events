@@ -21,8 +21,8 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	pc "github.com/argoproj/argo-events/pkg/common"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it

@@ -19,6 +19,7 @@ package artifact
 import (
 	"context"
 	"fmt"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/minio/minio-go"
@@ -27,12 +28,12 @@ import (
 // ValidateEventSource validates a s3 event source
 func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
-	artifact, err := parseEventSource(eventSource.Data)
+	a, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
 		return v, nil
 	}
-	if err = validateArtifact(artifact); err != nil {
+	if err = validateArtifact(a); err != nil {
 		gateways.SetValidEventSource(v, err.Error(), false)
 		return v, gateways.ErrInvalidEventSource
 	}
@@ -41,27 +42,24 @@ func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, event
 }
 
 // validates an artifact
-func validateArtifact(artifact *s3Artifact) error {
-	if artifact == nil {
+func validateArtifact(a *apicommon.S3Artifact) error {
+	if a == nil {
 		return gateways.ErrEmptyEventSource
 	}
-	if artifact.S3EventConfig == nil {
-		return fmt.Errorf("s3 bucket configuration can't be empty")
-	}
-	if artifact.AccessKey == nil {
+	if a.AccessKey == nil {
 		return fmt.Errorf("access key can't be empty")
 	}
-	if artifact.SecretKey == nil {
+	if a.SecretKey == nil {
 		return fmt.Errorf("secret key can't be empty")
 	}
-	if artifact.S3EventConfig.Endpoint == "" {
+	if a.Endpoint == "" {
 		return fmt.Errorf("endpoint url can't be empty")
 	}
-	if artifact.S3EventConfig.Bucket == "" {
+	if a.Bucket != nil && a.Bucket.Name == "" {
 		return fmt.Errorf("bucket name can't be empty")
 	}
-	if artifact.S3EventConfig.Event != "" && minio.NotificationEventType(artifact.S3EventConfig.Event) == "" {
-		return fmt.Errorf("unknown event %s", artifact.S3EventConfig.Event)
+	if a.Event != "" && minio.NotificationEventType(a.Event) == "" {
+		return fmt.Errorf("unknown event %s", a.Event)
 	}
 	return nil
 }

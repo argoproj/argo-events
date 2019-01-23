@@ -24,10 +24,11 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	pc "github.com/argoproj/argo-events/pkg/common"
 )
 
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
@@ -166,7 +167,7 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 }
 
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
-func (sec *sensorExecutionCtx) validateEvent(events *ss_v1alpha1.Event) (*ss_v1alpha1.EventDependency, bool) {
+func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
 	for _, event := range sec.sensor.Spec.Dependencies {
 		if event.Name == events.Context.Source.Host {
 			return &event, true
@@ -175,8 +176,8 @@ func (sec *sensorExecutionCtx) validateEvent(events *ss_v1alpha1.Event) (*ss_v1a
 	return nil, false
 }
 
-func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*v1alpha1.Event, error) {
-	var event *ss_v1alpha1.Event
+func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*apicommon.Event, error) {
+	var event *apicommon.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
 		response := "failed to parse event received from gateway"
 		sec.log.Error().Err(err).Msg(response)
@@ -185,7 +186,7 @@ func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*v1alpha1.Event, erro
 	return event, nil
 }
 
-func (sec *sensorExecutionCtx) sendEventToInternalQueue(event *v1alpha1.Event, writer http.ResponseWriter) bool {
+func (sec *sensorExecutionCtx) sendEventToInternalQueue(event *apicommon.Event, writer http.ResponseWriter) bool {
 	// validate whether the event is from gateway that this sensor is watching
 	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
 		// process the event

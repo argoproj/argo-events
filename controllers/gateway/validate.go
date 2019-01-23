@@ -18,8 +18,8 @@ package gateway
 
 import (
 	"fmt"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/common"
 )
 
 // Validate validates the gateway resource.
@@ -35,24 +35,24 @@ func Validate(gw *v1alpha1.Gateway) error {
 		return fmt.Errorf("gateway version is not specified")
 	}
 	switch gw.Spec.EventProtocol.Type {
-	case common.HTTP:
+	case apicommon.HTTP:
 		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {
 			return fmt.Errorf("no associated watchers with gateway")
 		}
 		if gw.Spec.EventProtocol.Http.Port == "" {
 			return fmt.Errorf("http server port is not defined")
 		}
-	case common.NATS:
+	case apicommon.NATS:
 		if gw.Spec.EventProtocol.Nats.URL == "" {
 			return fmt.Errorf("nats url is not defined")
 		}
 		if gw.Spec.EventProtocol.Nats.Type == "" {
 			return fmt.Errorf("nats service type is not defined")
 		}
-		if gw.Spec.EventProtocol.Nats.Type == common.Streaming && gw.Spec.EventProtocol.Nats.ClientId == "" {
+		if gw.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gw.Spec.EventProtocol.Nats.ClientId == "" {
 			return fmt.Errorf("client id must be specified when using nats streaming")
 		}
-		if gw.Spec.EventProtocol.Nats.Type == common.Streaming && gw.Spec.EventProtocol.Nats.ClusterId == "" {
+		if gw.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gw.Spec.EventProtocol.Nats.ClusterId == "" {
 			return fmt.Errorf("cluster id must be specified when using nats streaming")
 		}
 	default:

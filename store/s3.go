@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
 )
@@ -28,12 +28,12 @@ import (
 // S3Reader implements the ArtifactReader interface and allows reading artifacts from S3 compatible API store
 type S3Reader struct {
 	client *minio.Client
-	s3     *v1alpha1.S3Artifact
+	s3     *apicommon.S3Artifact
 	creds  *Credentials
 }
 
 // NewS3Reader creates a new ArtifactReader for an S3 compatible store
-func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, error) {
+func NewS3Reader(s3 *apicommon.S3Artifact, creds *Credentials) (ArtifactReader, error) {
 	client, err := NewMinioClient(s3, *creds)
 	if err != nil {
 		return nil, err
@@ -46,8 +46,8 @@ func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, e
 }
 
 func (reader *S3Reader) Read() ([]byte, error) {
-	log.Debugf("reading s3Artifact from %s/%s", reader.s3.S3Bucket.Bucket, reader.s3.Key)
-	obj, err := reader.client.GetObject(reader.s3.S3Bucket.Bucket, reader.s3.Key, minio.GetObjectOptions{})
+	log.Debugf("reading s3Artifact from %s/%s", reader.s3.Bucket.Name, reader.s3.Bucket.Key)
+	obj, err := reader.client.GetObject(reader.s3.Bucket.Name, reader.s3.Bucket.Key, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +65,13 @@ func (reader *S3Reader) Read() ([]byte, error) {
 }
 
 // NewMinioClient instantiates a new minio client object to access s3 compatible APIs
-func NewMinioClient(s3 *v1alpha1.S3Artifact, creds Credentials) (*minio.Client, error) {
+func NewMinioClient(s3 *apicommon.S3Artifact, creds Credentials) (*minio.Client, error) {
 	var minioClient *minio.Client
 	var err error
-	if s3.S3Bucket.Region != "" {
-		minioClient, err = minio.NewWithRegion(s3.S3Bucket.Endpoint, creds.accessKey, creds.secretKey, !s3.S3Bucket.Insecure, s3.S3Bucket.Region)
+	if s3.Region != "" {
+		minioClient, err = minio.NewWithRegion(s3.Endpoint, creds.accessKey, creds.secretKey, !s3.Insecure, s3.Region)
 	} else {
-		minioClient, err = minio.New(s3.S3Bucket.Endpoint, creds.accessKey, creds.secretKey, !s3.S3Bucket.Insecure)
+		minioClient, err = minio.New(s3.Endpoint, creds.accessKey, creds.secretKey, !s3.Insecure)
 	}
 	if err != nil {
 		return nil, err

@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -88,7 +89,7 @@ func Test_filterContext(t *testing.T) {
 func Test_filterData(t *testing.T) {
 	type args struct {
 		data  *v1alpha1.Data
-		event *v1alpha1.Event
+		event *apicommon.Event
 	}
 	tests := []struct {
 		name    string
@@ -104,14 +105,14 @@ func Test_filterData(t *testing.T) {
 		},
 		{
 			name:    "unsupported content type",
-			args:    args{data: nil, event: &v1alpha1.Event{Payload: []byte("a")}},
+			args:    args{data: nil, event: &apicommon.Event{Payload: []byte("a")}},
 			want:    true,
 			wantErr: false,
 		},
 		{
 			name: "empty data",
-			args: args{data: nil, event: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{data: nil, event: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: "application/json",
 				},
 			}},
@@ -120,8 +121,8 @@ func Test_filterData(t *testing.T) {
 		},
 		{
 			name: "nil filters, JSON data",
-			args: args{data: nil, event: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{data: nil, event: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: "application/json",
 				},
 				Payload: []byte("{\"k\": \"v\"}"),
@@ -141,8 +142,8 @@ func Test_filterData(t *testing.T) {
 						},
 					},
 				},
-				event: &v1alpha1.Event{
-					Context: v1alpha1.EventContext{
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
 						ContentType: "application/json",
 					},
 					Payload: []byte("{\"k\": \"v\"}"),
@@ -161,8 +162,8 @@ func Test_filterData(t *testing.T) {
 					},
 				},
 			},
-				event: &v1alpha1.Event{
-					Context: v1alpha1.EventContext{
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
 						ContentType: "application/json",
 					},
 					Payload: []byte("{\"k\": \"1.0\"}"),
@@ -192,8 +193,8 @@ func Test_filterData(t *testing.T) {
 						},
 					},
 				},
-				event: &v1alpha1.Event{
-					Context: v1alpha1.EventContext{
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
 						ContentType: "application/json",
 					},
 					Payload: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
@@ -267,7 +268,7 @@ func Test_mapIsSubset(t *testing.T) {
 // this test is meant to cover the missing cases for those not covered in eventDependency-filter_test.go and trigger-params_test.go
 func Test_renderEventDataAsJSON(t *testing.T) {
 	type args struct {
-		e *v1alpha1.Event
+		e *apicommon.Event
 	}
 	tests := []struct {
 		name    string
@@ -283,14 +284,14 @@ func Test_renderEventDataAsJSON(t *testing.T) {
 		},
 		{
 			name:    "missing content type",
-			args:    args{e: &v1alpha1.Event{}},
+			args:    args{e: &apicommon.Event{}},
 			want:    nil,
 			wantErr: true,
 		},
 		{
 			name: "valid yaml content",
-			args: args{e: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{e: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: MediaTypeYAML,
 				},
 				Payload: []byte(`apiVersion: v1alpha1`),
@@ -300,8 +301,8 @@ func Test_renderEventDataAsJSON(t *testing.T) {
 		},
 		{
 			name: "json content marked as yaml",
-			args: args{e: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{e: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: MediaTypeYAML,
 				},
 				Payload: []byte(`{"apiVersion":5}`),
@@ -311,8 +312,8 @@ func Test_renderEventDataAsJSON(t *testing.T) {
 		},
 		{
 			name: "invalid json content",
-			args: args{e: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{e: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: MediaTypeJSON,
 				},
 				Payload: []byte(`{5:"numberkey"}`),
@@ -322,8 +323,8 @@ func Test_renderEventDataAsJSON(t *testing.T) {
 		},
 		{
 			name: "invalid yaml content",
-			args: args{e: &v1alpha1.Event{
-				Context: v1alpha1.EventContext{
+			args: args{e: &apicommon.Event{
+				Context: apicommon.EventContext{
 					ContentType: MediaTypeYAML,
 				},
 				Payload: []byte(`%\x786`),

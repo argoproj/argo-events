@@ -21,9 +21,9 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -176,8 +176,8 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 
 // helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]v1alpha.Event {
-	events := make(map[string]v1alpha.Event)
+func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]apicommon.Event {
+	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
 			node := sn.GetNodeByName(sec.sensor, param.Src.Event)
