@@ -22,6 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	pc "github.com/argoproj/argo-events/pkg/common"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -40,21 +41,21 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		return fmt.Errorf("sensor pod specification can't have more than one container")
 	}
 	switch s.Spec.EventProtocol.Type {
-	case common.HTTP:
+	case pc.HTTP:
 		if s.Spec.EventProtocol.Http.Port == "" {
 			return fmt.Errorf("http server port is not defined")
 		}
-	case common.NATS:
+	case pc.NATS:
 		if s.Spec.EventProtocol.Nats.URL == "" {
 			return fmt.Errorf("nats url is not defined")
 		}
 		if s.Spec.EventProtocol.Nats.Type == "" {
 			return fmt.Errorf("nats type is not defined. either Standard or Streaming type should be defined")
 		}
-		if s.Spec.EventProtocol.Nats.Type == common.Streaming && s.Spec.EventProtocol.Nats.ClientId == "" {
+		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClientId == "" {
 			return fmt.Errorf("client id must be specified when using nats streaming")
 		}
-		if s.Spec.EventProtocol.Nats.Type == common.Streaming && s.Spec.EventProtocol.Nats.ClusterId == "" {
+		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClusterId == "" {
 			return fmt.Errorf("cluster id must be specified when using nats streaming")
 		}
 	default:

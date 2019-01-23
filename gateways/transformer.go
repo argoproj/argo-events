@@ -25,6 +25,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	sv1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	pc "github.com/argoproj/argo-events/pkg/common"
 	suuid "github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -50,11 +51,11 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 	}
 
 	switch gc.gw.Spec.EventProtocol.Type {
-	case common.HTTP:
+	case pc.HTTP:
 		if err = gc.dispatchEventOverHttp(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
-	case common.NATS:
+	case pc.NATS:
 		if err = gc.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
@@ -116,9 +117,9 @@ func (gc *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byt
 	var err error
 
 	switch gc.gw.Spec.EventProtocol.Nats.Type {
-	case common.Standard:
+	case pc.Standard:
 		err = gc.natsConn.Publish(source, eventPayload)
-	case common.Streaming:
+	case pc.Streaming:
 		err = gc.natsStreamingConn.Publish(source, eventPayload)
 	}
 

@@ -18,8 +18,8 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/common"
 )
 
 // Validate validates the gateway resource.

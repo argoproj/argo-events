@@ -17,11 +17,12 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	pc "github.com/argoproj/argo-events/pkg/common"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -153,7 +154,7 @@ func (soc *sOperationCtx) operate() error {
 		soc.log.Info().Msg("sensor pod created")
 
 		// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
-		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == common.HTTP {
+		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == pc.HTTP {
 			// Create sensor service
 			sensorSvc := &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{

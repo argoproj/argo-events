@@ -17,6 +17,8 @@ limitations under the License.
 package sensors
 
 import (
+	"testing"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -31,7 +33,6 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
-	"testing"
 )
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390

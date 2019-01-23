@@ -30,7 +30,7 @@ import "k8s.io/apimachinery/pkg/util/intstr/generated.proto";
 option go_package = "v1alpha1";
 
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
-message DispatchProtocol {
+message EventProtocol {
   optional string type = 1;
 
   optional Http http = 2;
@@ -102,7 +102,7 @@ message GatewaySpec {
   optional string processorPort = 7;
 
   // EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-  optional DispatchProtocol dispatchProtocol = 8;
+  optional EventProtocol eventProtocol = 8;
 }
 
 // GatewayStatus contains information about the status of a gateway.

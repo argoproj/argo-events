@@ -27,6 +27,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	pc "github.com/argoproj/argo-events/pkg/common"
 )
 
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
@@ -144,9 +145,9 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 	go sec.syncSensor(context.Background())
 
 	switch sec.sensor.Spec.EventProtocol.Type {
-	case common.HTTP:
+	case pc.HTTP:
 		sec.HttpEventProtocol()
-	case common.NATS:
+	case pc.NATS:
 		sec.NatsEventProtocol()
 		var err error
 		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log); err != nil {

@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	pc "github.com/argoproj/argo-events/pkg/common"
 	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
@@ -153,15 +154,15 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	switch gw.Spec.EventProtocol.Type {
-	case common.HTTP:
+	case pc.HTTP:
 		gc.sensorHttpPort = gw.Spec.EventProtocol.Http.Port
-	case common.NATS:
+	case pc.NATS:
 		if gc.natsConn, err = nats.Connect(gw.Spec.EventProtocol.Nats.URL); err != nil {
 			panic(fmt.Errorf("failed to obtain NATS standard connection. err: %+v", err))
 		}
 		gc.Log.Info().Str("nats-url", gw.Spec.EventProtocol.Nats.URL).Msg("connected to nats service")
 
-		if gc.gw.Spec.EventProtocol.Nats.Type == common.Streaming {
+		if gc.gw.Spec.EventProtocol.Nats.Type == pc.Streaming {
 			gc.natsStreamingConn, err = snats.Connect(gc.gw.Spec.EventProtocol.Nats.ClusterId, gc.gw.Spec.EventProtocol.Nats.ClientId, snats.NatsConn(gc.natsConn))
 			if err != nil {
 				panic(fmt.Errorf("failed to obtain NATS streaming connection. err: %+v", err))

@@ -28,7 +28,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.DispatchProtocol":           schema_pkg_apis_gateway_v1alpha1_DispatchProtocol(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol":              schema_pkg_apis_gateway_v1alpha1_EventProtocol(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
@@ -42,7 +42,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	}
 }
 
-func schema_pkg_apis_gateway_v1alpha1_DispatchProtocol(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_gateway_v1alpha1_EventProtocol(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -217,18 +217,18 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"dispatchProtocol": {
+					"eventProtocol": {
 						SchemaProps: spec.SchemaProps{
 							Description: "EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.DispatchProtocol"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol"),
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "dispatchProtocol"},
+				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.DispatchProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
 	}
 }
 

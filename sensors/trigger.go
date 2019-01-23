@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"

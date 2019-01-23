@@ -34,42 +34,41 @@ metadata:
    gateways.argoproj.io/gateway-controller-instanceid: argo-events
    gateway-name: "webhook-gateway"
 spec:
- configMap: "webhook-gateway-configmap"
- type: "webhook"
- dispatchProtocol: "HTTP"
- eventVersion: "1.0"
- processorPort: "9330"
- deploySpec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
+  processorPort: "9330"
+  eventProtocol:
+    type: "NATS"
+    nats:
+      url: "nats://nats.argo-events:4222"
+      type: "Standard"
+  eventVersion: "1.0"
+  deploySpec:
     metadata:
-      name: webhook-gateway
+      name: "webhook-gateway"
       labels:
-        gateway-type: webhook
-        dispatch-mechanism: http
+        gateway-name: "webhook-gateway"
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.7"
+          image: "argoproj/gateway-client:v0.6.2"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
-        - name: "artifact-events"
-          image: "argoproj/webhook-gateway:v0.7"
+        - name: "webhook-events"
+          image: "argoproj/webhook-gateway:v0.6.2"
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
- serviceSpec:
-   metadata:
-     name: webhook-gateway-svc
-     namespace: argo-events
-   spec:
-     selector:
-       gateway-type: "webhook-gateway"
-       dispatch-mechanism: http
-     ports:
-       - port: 12000
-         targetPort: 12000
-     type: LoadBalancer
- watchers:
-   gateways:
-   - name: "webhook-gateway"`
+      serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: webhook-gateway-svc
+    spec:
+      selector:
+        gateway-name: "webhook-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer`
 
 func getGateway() (*v1alpha1.Gateway, error) {
 	gwBytes := []byte(testGatewayStr)

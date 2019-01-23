@@ -18,7 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/common"
 	"hash/fnv"
 
 	"github.com/minio/minio-go"

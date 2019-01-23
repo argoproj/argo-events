@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/common"
 	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
 )
@@ -92,7 +93,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 	var err error
 
 	switch sec.sensor.Spec.EventProtocol.Nats.Type {
-	case common.Standard:
+	case pc.Standard:
 		if sec.nconn.standard == nil {
 			sec.nconn.standard, err = nats.Connect(sec.sensor.Spec.EventProtocol.Nats.URL)
 			if err != nil {
@@ -118,7 +119,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			sec.successNatsSubscription(dependency.Name)
 		}
 
-	case common.Streaming:
+	case pc.Streaming:
 		if sec.nconn.stream == nil {
 			sec.nconn.stream, err = snats.Connect(sec.sensor.Spec.EventProtocol.Nats.ClusterId, sec.sensor.Spec.EventProtocol.Nats.ClientId, snats.NatsURL(sec.sensor.Spec.EventProtocol.Nats.URL))
 			if err != nil {

@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -87,7 +87,7 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	EventProtocol DispatchProtocol `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
+	EventProtocol EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -163,7 +163,7 @@ type SensorNotificationWatcher struct {
 }
 
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
-type DispatchProtocol struct {
+type EventProtocol struct {
 	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
 
 	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
