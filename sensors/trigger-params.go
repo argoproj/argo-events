@@ -53,10 +53,11 @@ func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]
 		}
 		js, err := renderEventDataAsJSON(&e)
 		if err != nil {
+			fmt.Printf("failed to render event data as json. err: %+v", err)
 			if src.Value != nil {
 				return *src.Value, nil
 			}
-			return "", err
+			return "", fmt.Errorf("failed to render event payload as JSON. err:%+v", err)
 		}
 		res := gjson.GetBytes(js, src.Path)
 		if res.Exists() {

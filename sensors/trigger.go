@@ -132,35 +132,35 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	if len(resource.Parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal json. err: %+v", err)
 		}
 		events := sec.extractEvents(resource.Parameters)
 		jUpdatedObj, err := applyParams(jObj, resource.Parameters, events)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to apply params. err: %+v", err)
 		}
 		err = obj.UnmarshalJSON(jUpdatedObj)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to un-marshal json. err: %+v", err)
 		}
 	}
 
 	gvk := obj.GroupVersionKind()
 	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get client for given group verison and kind. err: %+v", err)
 	}
 
 	apiResource, err := common.ServerResourceForGroupVersionKind(sec.discoveryClient, gvk)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get server resource for given group verison and kind. err: %+v", err)
 	}
 	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
 
 	reIf := client.Resource(apiResource, resource.Namespace)
 	liveObj, err := reIf.Create(obj)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
 	sec.log.Info().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("created object")
 	if !errors.IsAlreadyExists(err) {
