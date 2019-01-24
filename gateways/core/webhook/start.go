@@ -152,6 +152,8 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 
 // StartEventSource starts a event source
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	h, err := parseEventSource(eventSource.Data)
 	if err != nil {

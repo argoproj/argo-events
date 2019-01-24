@@ -177,6 +177,8 @@ func (rc *routeConfig) startHttpServer() {
 
 // StartConfig runs a configuration
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	sg, err := parseEventSource(eventSource.Data)
 	if err != nil {

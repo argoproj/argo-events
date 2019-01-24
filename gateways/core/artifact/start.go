@@ -46,9 +46,9 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("retrieving access and secret key")
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("event-source", eventSource).Msg("retrieving access and secret key")
 	// retrieve access key id and secret access key
-	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.SecretKey.Key)
+	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.AccessKey.Key)
 	if err != nil {
 		errorCh <- err
 		return
