@@ -1,19 +1,24 @@
-
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor
+  name: artifact-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  imageVersion: "latest"
-  imagePullPolicy: Always
-  signals:
-    - name: webhook-gateway/foo
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  dependencies:
+    - name: "artifact-gateway:input"
   triggers:
-    - name: webhook-workflow-trigger
+    - name: artifact-workflow-trigger
       resource:
         namespace: argo-events
         group: argoproj.io
@@ -28,10 +33,11 @@ spec:
             spec:
               entrypoint: whalesay
               templates:
-                - name: whalesay
+                -
                   container:
                     args:
                       - "hello world"
                     command:
                       - cowsay
                     image: "docker/whalesay:latest"
+                  name: whalesay

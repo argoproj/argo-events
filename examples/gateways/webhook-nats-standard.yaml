@@ -1,44 +1,43 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: storage-grid-gateway
+  name: webhook-gateway-nats
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "storage-grid-gateway"
+    gateway-name: "webhook-gateway-nats"
 spec:
-  configMap: "storage-grid-gateway-configmap"
-  type: "storage_grid"
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
   processorPort: "9330"
-  dispatchProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+  eventProtocol:
+    type: "NATS"
+    nats:
+      url: "nats://nats.argo-events:4222"
+      type: "Standard"
   eventVersion: "1.0"
   deploySpec:
     metadata:
-      name: "storage-grid-gateway"
+      name: "webhook-gateway-nats"
       labels:
-        gateway-name: "storage-grid-gateway"
+        gateway-name: "webhook-gateway-nats"
     spec:
       containers:
         - name: "gateway-client"
           image: "argoproj/gateway-client"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
-        - name: "storage-grid-events"
-          image: "argoproj/storage-grid-gateway"
+        - name: "webhook-events"
+          image: "argoproj/webhook-gateway"
           imagePullPolicy: "Always"
+          command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
   serviceSpec:
     metadata:
-      name: storage-grid-gateway-svc
+      name: webhook-gateway-svc
     spec:
       selector:
-        gateway-name: "storage-grid-gateway"
+        gateway-name: "webhook-gateway-nats"
       ports:
-        - port: 8080
-          targetPort: 8080
+        - port: 12000
+          targetPort: 12000
       type: LoadBalancer
-  watchers:
-    sensors:
-    - name: "storage-grid-watcher-sensor"

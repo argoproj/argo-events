@@ -5,8 +5,9 @@ metadata:
 data:
   index: |-
     port: "12000"
-    endpoint: "/"
+    endpoint: "/index"
     method: "POST"
   foo: |-
+    port: "12000"
     endpoint: "/foo"
     method: "POST"

@@ -21,7 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/custom/gitlab"
+	"github.com/argoproj/argo-events/gateways/community/gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 

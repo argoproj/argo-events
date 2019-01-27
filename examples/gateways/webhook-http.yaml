@@ -1,21 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: webhook-gateway-multi-watchers
+  name: webhook-gateway-http
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "webhook-gateway-multi-watchers"
+    gateway-name: "webhook-gateway-http"
 spec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
     http:
       port: "9300"
+  eventVersion: "1.0"
   deploySpec:
     metadata:
-      name: "webhook-gateway"
+      name: "webhook-gateway-http"
       labels:
-        gateway-name: "webhook-gateway"
+        gateway-name: "webhook-gateway-http"
     spec:
       containers:
         - name: "gateway-client"
@@ -27,9 +30,6 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "webhook-gateway-configmap"
-  type: "webhook"
-  eventVersion: "1.0"
   serviceSpec:
     metadata:
       name: webhook-gateway-svc
@@ -41,14 +41,5 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   watchers:
-    # requirement for adding gateway as watcher is there should be a http server running in watcher gateway
-    # and user must provide port and endpoint on which event should be dispatched.
-    # Adding gateways as watchers are particularly useful when you want to chain events.
-    gateways:
-    - name: "webhook-gateway"
-      port: "9070"
-      endpoint: "/notifications"
     sensors:
-    - name: "webhook-sensor"
-    - name: "multi-signal-sensor"
-    - name: "webhook-time-filter-sensor"
+      - name: "webhook-sensor-http"

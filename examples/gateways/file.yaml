@@ -6,18 +6,30 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "file-gateway"
 spec:
+  processorPort: "9330"
+  dispatchProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
   deploySpec:
-    containers:
-      - name: "file-events"
-        image: "argoproj/file-gateway"
-        imagePullPolicy: "Always"
-        command: ["/bin/file-gateway"]
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      name: "file-gateway"
+      labels:
+        gateway-name: "file-gateway"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "file-events"
+          image: "argoproj/file-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/file-gateway"]
+      serviceAccountName: "argo-events-sa"
   configMap: "file-gateway-configmap"
   eventVersion: "1.0"
-  imageVersion: "latest"
   type: "file"
-  dispatchMechanism: "HTTP"
   watchers:
     sensors:
       - name: "file-sensor"

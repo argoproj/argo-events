@@ -1,35 +1,33 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: calendar-gateway
+  name: artifact-gateway-nats-standard
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "calendar-gateway"
+    gateway-name: "artifact-gateway-nats-standard"
 spec:
   processorPort: "9330"
   dispatchProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    type: "NATS"
+    nats:
+      url: "nats://example-nats.argo-events:4222"
+      type: "Standard"
   deploySpec:
     metadata:
-      name: "calendar-gateway"
+      name: "artifact-gateway-nats-standard"
       labels:
-        gateway-name: "calendar-gateway"
+        gateway-name: "artifact-gateway-nats-standard"
     spec:
       containers:
         - name: "gateway-client"
           image: "argoproj/gateway-client"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
-        - name: "calendar-events"
-          image: "argoproj/calendar-gateway"
+        - name: "artifact-events"
+          image: "argoproj/artifact-gateway"
           imagePullPolicy: "Always"
-          command: ["/bin/calendar-gateway"]
+          command: ["/bin/artifact-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "calendar-gateway-configmap"
-  type: "calendar"
+  configMap: "artifact-gateway-configmap"
   eventVersion: "1.0"
-  watchers:
-    sensors:
-      - name: "calendar-sensor"
+  type: "artifact"
