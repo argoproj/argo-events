@@ -26,21 +26,23 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
 	sg, err := parseEventSource(es.Data)
 	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  fmt.Sprintf("failed to parse event source. err: %+v", err),
+		}, nil
 	}
 	if err = validateStorageGrid(sg); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, nil
 	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return &gateways.ValidEventSource{
+		IsValid: true,
+		Reason:  "valid",
+	}, nil
 }
 
 func validateStorageGrid(sg *storageGrid) error {

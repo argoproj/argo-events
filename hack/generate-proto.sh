@@ -23,6 +23,7 @@ go build -i -o dist/protoc-gen-gogo ./vendor/k8s.io/code-generator/cmd/go-to-pro
 # --apimachinery-packages= option so that go-to-protobuf can locate the types, but prefixed with a
 # '-' so that go-to-protobuf will not generate .proto files for it.
 PACKAGES=(
+    github.com/argoproj/argo-events/pkg/apis/common
     github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1
     github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1
 )

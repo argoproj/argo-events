@@ -24,6 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -48,16 +49,17 @@ func TestGetCredentials(t *testing.T) {
 
 	// succeed for S3 artifact type
 	s3Artifact := &v1alpha1.ArtifactLocation{
-		S3: &v1alpha1.S3Artifact{
-			S3Bucket: &v1alpha1.S3Bucket{
-				AccessKey: &apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
-					Key:                  "access",
-				},
-				SecretKey: &apiv1.SecretKeySelector{
-					LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
-					Key:                  "secret",
-				},
+		S3: &apicommon.S3Artifact{
+			AccessKey: &apiv1.SecretKeySelector{
+				LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
+				Key:                  "access",
+			},
+			SecretKey: &apiv1.SecretKeySelector{
+				LocalObjectReference: apiv1.LocalObjectReference{Name: "test"},
+				Key:                  "secret",
+			},
+			Bucket: &apicommon.S3Bucket{
+				Name: "test-bucket",
 			},
 		},
 	}

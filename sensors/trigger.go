@@ -18,11 +18,12 @@ package sensors
 
 import (
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -77,7 +78,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		}
 
 		// Mark all signal nodes as active
-		for _, dep := range sec.sensor.Spec.EventDependencies {
+		for _, dep := range sec.sensor.Spec.Dependencies {
 			sn.MarkNodePhase(sec.sensor, dep.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-initialized")
 		}
 		return
@@ -131,35 +132,35 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	if len(resource.Parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to marshal json. err: %+v", err)
 		}
 		events := sec.extractEvents(resource.Parameters)
 		jUpdatedObj, err := applyParams(jObj, resource.Parameters, events)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to apply params. err: %+v", err)
 		}
 		err = obj.UnmarshalJSON(jUpdatedObj)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to un-marshal json. err: %+v", err)
 		}
 	}
 
 	gvk := obj.GroupVersionKind()
 	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get client for given group verison and kind. err: %+v", err)
 	}
 
 	apiResource, err := common.ServerResourceForGroupVersionKind(sec.discoveryClient, gvk)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get server resource for given group verison and kind. err: %+v", err)
 	}
 	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
 
 	reIf := client.Resource(apiResource, resource.Namespace)
 	liveObj, err := reIf.Create(obj)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
 	sec.log.Info().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("created object")
 	if !errors.IsAlreadyExists(err) {
@@ -175,8 +176,8 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 
 // helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]v1alpha.Event {
-	events := make(map[string]v1alpha.Event)
+func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]apicommon.Event {
+	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
 			node := sn.GetNodeByName(sec.sensor, param.Src.Event)

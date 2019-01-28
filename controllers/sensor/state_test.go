@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
@@ -39,7 +40,7 @@ func TestSensorState(t *testing.T) {
 		})
 
 		convey.Convey("Mark sn node state to active", func() {
-			status := MarkNodePhase(sn, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &v1alpha1.Event{
+			status := MarkNodePhase(sn, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
 				Payload: []byte("test payload"),
 			}, &logger)
 			convey.So(status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)

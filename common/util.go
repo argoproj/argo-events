@@ -44,7 +44,12 @@ func DefaultServiceName(serviceName string) string {
 
 // DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
 func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
-	return fmt.Sprintf("%s/%s", gatewayName, configurationName)
+	return fmt.Sprintf("%s:%s", gatewayName, configurationName)
+}
+
+// DefaultNatsQueueName returns a queue name for nats subject
+func DefaultNatsQueueName(subject string) string {
+	return fmt.Sprintf("%s-%s", subject, "queue")
 }
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
@@ -70,15 +75,15 @@ func ServerResourceForGroupVersionKind(disco discovery.DiscoveryInterface, gvk s
 }
 
 // SendSuccessResponse sends http success response
-func SendSuccessResponse(writer http.ResponseWriter) {
+func SendSuccessResponse(writer http.ResponseWriter, response string) {
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte(SuccessResponse))
+	writer.Write([]byte(response))
 }
 
 // SendErrorResponse sends http error response
-func SendErrorResponse(writer http.ResponseWriter) {
+func SendErrorResponse(writer http.ResponseWriter, response string) {
 	writer.WriteHeader(http.StatusBadRequest)
-	writer.Write([]byte(ErrorResponse))
+	writer.Write([]byte(response))
 }
 
 // LoggerConf returns standard logging configuration

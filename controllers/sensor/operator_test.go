@@ -41,7 +41,11 @@ spec:
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
-    - name: artifact-gateway/input
+    - name: artifact-gateway:input
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
   triggers:
     - name: artifact-workflow-trigger
       resource:

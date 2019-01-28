@@ -19,14 +19,14 @@ package sensors
 import (
 	"fmt"
 
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 )
 
 // apply the params to the resource json object
-func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map[string]v1alpha.Event) ([]byte, error) {
+func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
 		v, err := resolveParamValue(param.Src, events)
@@ -45,7 +45,7 @@ func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]v1alpha.Event) (string, error) {
+func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]apicommon.Event) (string, error) {
 	if e, ok := events[src.Event]; ok {
 		// only convert payload to json when path is set.
 		if src.Path == "" {
@@ -53,10 +53,11 @@ func resolveParamValue(src *v1alpha1.ResourceParameterSource, events map[string]
 		}
 		js, err := renderEventDataAsJSON(&e)
 		if err != nil {
+			fmt.Printf("failed to render event data as json. err: %+v", err)
 			if src.Value != nil {
 				return *src.Value, nil
 			}
-			return "", err
+			return "", fmt.Errorf("failed to render event payload as JSON. err:%+v", err)
 		}
 		res := gjson.GetBytes(js, src.Path)
 		if res.Exists() {

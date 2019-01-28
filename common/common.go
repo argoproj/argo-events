@@ -64,9 +64,6 @@ const (
 
 // SENSOR CONSTANTS
 const (
-	// Sensor service port
-	SensorServicePort = "9300"
-
 	// SensorServiceEndpoint is the endpoint to dispatch the event to
 	SensorServiceEndpoint = "/"
 

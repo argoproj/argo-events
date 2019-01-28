@@ -36,11 +36,11 @@ type Credentials struct {
 // GetCredentials for this artifact
 func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1alpha1.ArtifactLocation) (*Credentials, error) {
 	if art.S3 != nil {
-		accessKey, err := GetSecrets(kubeClient, namespace, art.S3.S3Bucket.AccessKey.Name, art.S3.S3Bucket.AccessKey.Key)
+		accessKey, err := GetSecrets(kubeClient, namespace, art.S3.AccessKey.Name, art.S3.AccessKey.Key)
 		if err != nil {
 			return nil, err
 		}
-		secretKey, err := GetSecrets(kubeClient, namespace, art.S3.S3Bucket.SecretKey.Name, art.S3.S3Bucket.SecretKey.Key)
+		secretKey, err := GetSecrets(kubeClient, namespace, art.S3.SecretKey.Name, art.S3.SecretKey.Key)
 		if err != nil {
 			return nil, err
 		}

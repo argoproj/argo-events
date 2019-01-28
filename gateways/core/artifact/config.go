@@ -17,10 +17,9 @@ limitations under the License.
 package artifact
 
 import (
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
-	"github.com/minio/minio-go"
 	"github.com/rs/zerolog"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -33,47 +32,11 @@ type S3EventSourceExecutor struct {
 	Namespace string
 }
 
-// s3Artifact contains information about an artifact in S3
-// +k8s:openapi-gen=true
-//proteus:generate
-type s3Artifact struct {
-	// S3EventConfig contains configuration for bucket notification
-	S3EventConfig *S3EventConfig `json:"s3EventConfig"`
-
-	// Mode of operation for s3 client
-	Insecure bool `json:"insecure,omitempty"`
-
-	// AccessKey
-	// +k8s:openapi-gen=false
-	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty"`
-
-	// SecretKey
-	// +k8s:openapi-gen=false
-	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty"`
-}
-
-// S3EventConfig contains configuration for bucket notification
-// +k8s:openapi-gen=true
-type S3EventConfig struct {
-	Endpoint string                      `json:"endpoint,omitempty"`
-	Bucket   string                      `json:"bucket,omitempty"`
-	Region   string                      `json:"region,omitempty"`
-	Event    minio.NotificationEventType `json:"event,omitempty"`
-	Filter   S3Filter                    `json:"filter,omitempty"`
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-// +k8s:openapi-gen=true
-type S3Filter struct {
-	Prefix string `json:"prefix"`
-	Suffix string `json:"suffix"`
-}
-
-func parseEventSource(config string) (*s3Artifact, error) {
-	var s *s3Artifact
-	err := yaml.Unmarshal([]byte(config), &s)
+func parseEventSource(config string) (*apicommon.S3Artifact, error) {
+	var a *apicommon.S3Artifact
+	err := yaml.Unmarshal([]byte(config), &a)
 	if err != nil {
 		return nil, err
 	}
-	return s, err
+	return a, err
 }

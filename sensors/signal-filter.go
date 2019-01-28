@@ -28,8 +28,8 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	v1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -43,7 +43,7 @@ const (
 )
 
 // apply the eventDependency filters to an event
-func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.EventDependencyFilter, event *v1alpha.Event) (bool, error) {
+func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.EventDependencyFilter, event *apicommon.Event) (bool, error) {
 	dataRes, err := sec.filterData(f.Data, event)
 	if err != nil {
 		return false, err
@@ -114,7 +114,7 @@ func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, event
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func (sec *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, actual *v1alpha.EventContext) bool {
+func (sec *sensorExecutionCtx) filterContext(expected *apicommon.EventContext, actual *apicommon.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -147,7 +147,7 @@ func (sec *sensorExecutionCtx) filterContext(expected *v1alpha.EventContext, act
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
-func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *v1alpha.Event) (bool, error) {
+func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *apicommon.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
 	if data == nil {
@@ -221,7 +221,7 @@ func isJSON(b []byte) bool {
 
 // util method to render an event's data as a JSON []byte
 // json is a subset of yaml so this should work...
-func renderEventDataAsJSON(e *v1alpha.Event) ([]byte, error) {
+func renderEventDataAsJSON(e *apicommon.Event) ([]byte, error) {
 	if e == nil {
 		return nil, fmt.Errorf("event is nil")
 	}

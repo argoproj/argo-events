@@ -37,12 +37,11 @@ method: "POST"
 func TestValidateNatsEventSource(t *testing.T) {
 	convey.Convey("Given a valid webhook event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &WebhookEventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
 			Data: configValue,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
@@ -53,12 +52,11 @@ func TestValidateNatsEventSource(t *testing.T) {
 endpoint: "/bar"
 port: "10000"
 `
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

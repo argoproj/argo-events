@@ -3,10 +3,13 @@ package sensors
 import (
 	"net/http"
 
+	"github.com/nats-io/go-nats"
+
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
@@ -35,11 +38,20 @@ type sensorExecutionCtx struct {
 	controllerInstanceID string
 	// updated indicates update to sensor resource
 	updated bool
+	// nconn is the nats connection
+	nconn natsconn
+}
+
+type natsconn struct {
+	// standard connection
+	standard *nats.Conn
+	// streaming connection
+	stream snats.Conn
 }
 
 // updateNotification is servers as a notification message that can be used to update event dependency's state or the sensor resource
 type updateNotification struct {
-	event            *ss_v1alpha1.Event
+	event            *apicommon.Event
 	eventDependency  *v1alpha1.EventDependency
 	writer           http.ResponseWriter
 	sensor           *v1alpha1.Sensor

@@ -28,14 +28,49 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol":              schema_pkg_apis_gateway_v1alpha1_EventProtocol(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":                schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":              schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Http":                       schema_pkg_apis_gateway_v1alpha1_Http(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Nats":                       schema_pkg_apis_gateway_v1alpha1_Nats(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers":       schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher":  schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref),
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_EventProtocol(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"http": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Http"),
+						},
+					},
+					"nats": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Nats"),
+						},
+					},
+				},
+				Required: []string{"type", "http", "nats"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Http", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Nats"},
 	}
 }
 
@@ -44,7 +79,27 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "Gateway is the definition of a gateway resource",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus"),
@@ -56,11 +111,11 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 						},
 					},
 				},
-				Required: []string{"status", "spec"},
+				Required: []string{"metadata", "status", "spec"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -69,7 +124,27 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "GatewayList is the list of Gateway resources",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
 					"items": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
@@ -83,11 +158,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"items"},
+				Required: []string{"metadata", "items"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
 	}
 }
 
@@ -96,6 +171,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.Refe
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -131,6 +207,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "GatewaySpec represents gateway specifications",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
@@ -178,19 +255,18 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"dispatchProtocol": {
+					"eventProtocol": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol"),
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "dispatchProtocol"},
+				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
 	}
 }
 
@@ -199,6 +275,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "GatewayStatus contains information about the status of a gateway.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
@@ -242,11 +319,70 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 	}
 }
 
+func schema_pkg_apis_gateway_v1alpha1_Http(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"port": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"port"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_Nats(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"clientId": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"clusterId": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"url", "type"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
 func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "NodeStatus describes the status for an individual node in the gateway configurations. A single node can represent one configuration.",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"id": {
 						SchemaProps: spec.SchemaProps{
@@ -283,11 +419,18 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
+					"updateTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdateTime is the time when node(gateway configuration) was updated",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
+						},
+					},
 				},
 				Required: []string{"id", "name", "displayName", "phase"},
 			},
 		},
-		Dependencies: []string{},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 
@@ -296,6 +439,7 @@ func schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref common.ReferenceC
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "NotificationWatchers are components which are interested listening to notifications from this gateway",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"gateways": {
 						SchemaProps: spec.SchemaProps{
@@ -336,6 +480,7 @@ func schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref common.Refer
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{

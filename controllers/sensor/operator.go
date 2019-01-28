@@ -17,10 +17,11 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -101,7 +102,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Initialize all event dependency nodes
-		for _, eventDependency := range soc.s.Spec.EventDependencies {
+		for _, eventDependency := range soc.s.Spec.Dependencies {
 			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
 		}
 
@@ -152,10 +153,8 @@ func (soc *sOperationCtx) operate() error {
 		}
 		soc.log.Info().Msg("sensor pod created")
 
-		// Create a ClusterIP service to expose sensor in cluster
-		// For now, sensor will receive event notifications through http server.
-		_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{})
-		if err != nil && apierr.IsNotFound(err) {
+		// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
+		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == pc.HTTP {
 			// Create sensor service
 			sensorSvc := &corev1.Service{
 				ObjectMeta: metav1.ObjectMeta{
@@ -168,8 +167,8 @@ func (soc *sOperationCtx) operate() error {
 				Spec: corev1.ServiceSpec{
 					Ports: []corev1.ServicePort{
 						{
-							Port:       intstr.Parse(common.SensorServicePort).IntVal,
-							TargetPort: intstr.FromInt(int(intstr.Parse(common.SensorServicePort).IntVal)),
+							Port:       intstr.Parse(soc.s.Spec.EventProtocol.Http.Port).IntVal,
+							TargetPort: intstr.FromInt(int(intstr.Parse(soc.s.Spec.EventProtocol.Http.Port).IntVal)),
 						},
 					},
 					Type:     corev1.ServiceTypeClusterIP,
@@ -184,7 +183,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Mark all eventDependency nodes as active
-		for _, eventDependency := range soc.s.Spec.EventDependencies {
+		for _, eventDependency := range soc.s.Spec.Dependencies {
 			MarkNodePhase(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
 		}
 
