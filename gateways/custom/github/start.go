@@ -53,6 +53,8 @@ func (ese *GithubEventSourceExecutor) getCredentials(gs *GithubSecret) (*cred, e
 
 // StartEventSource starts an event source
 func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	g, err := parseEventSource(eventSource.Data)
 	if err != nil {

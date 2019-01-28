@@ -28,11 +28,11 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	configValue = `
-s3EventConfig:
-    bucket: input
-    endpoint: minio-service.argo-events:9000
-    event: s3:ObjectCreated:Put
-    filter:
+bucket:
+    name: input
+endpoint: minio-service.argo-events:9000
+event: s3:ObjectCreated:Put
+filter:
     prefix: ""
     suffix: ""
 insecure: true

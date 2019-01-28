@@ -20,12 +20,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"net/http"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	sv1alpha "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	suuid "github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -44,22 +44,30 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 	if err != nil {
 		return err
 	}
-	switch gc.gw.Spec.DispatchProtocol {
-	case v1alpha1.HTTPGateway:
-		err = gc.dispatchEventOverHttp(transformedEvent)
-		if err != nil {
+
+	payload, err := json.Marshal(transformedEvent)
+	if err != nil {
+		return fmt.Errorf("failed to dispatch event to watchers over http. marshalling failed. err: %+v", err)
+	}
+
+	switch gc.gw.Spec.EventProtocol.Type {
+	case pc.HTTP:
+		if err = gc.dispatchEventOverHttp(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
-	case v1alpha1.NATSGateway:
+	case pc.NATS:
+		if err = gc.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
+			return err
+		}
 	default:
-		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.DispatchProtocol)
+		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.EventProtocol)
 	}
 	return nil
 }
 
 // transformEvent transforms an event from event source into a CloudEvents specification compliant event
 // See https://github.com/cloudevents/spec for more info.
-func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, error) {
+func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, error) {
 	// Generate an event id
 	eventId := suuid.NewV1()
 
@@ -67,15 +75,15 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 		Msg("converting gateway event into cloudevents specification compliant event")
 
 	// Create an CloudEvent
-	ce := &sv1alpha.Event{
-		Context: sv1alpha.EventContext{
+	ce := &apicommon.Event{
+		Context: apicommon.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", eventId),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          gc.gw.Spec.Type,
 			EventTypeVersion:   gc.gw.Spec.EventVersion,
-			Source: &sv1alpha.URI{
+			Source: &apicommon.URI{
 				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, gatewayEvent.Name),
 			},
 		},
@@ -87,26 +95,39 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*sv1alpha.Event, e
 }
 
 // dispatchEventOverHttp dispatches event to watchers over http.
-func (gc *GatewayConfig) dispatchEventOverHttp(event *sv1alpha.Event) error {
-	gc.Log.Info().Str("source", event.Context.Source.Host).Msg("dispatching event to watchers")
+func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byte) error {
+	gc.Log.Info().Str("source", source).Msg("dispatching event to watchers")
 
-	payload, err := json.Marshal(event)
-	if err != nil {
-		return fmt.Errorf("failed to dispatch event to watchers over http. marshalling failed. err: %+v", err)
-	}
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
-		err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), common.SensorServicePort, common.SensorServiceEndpoint, payload)
-		if err != nil {
-			return fmt.Errorf("failed to dispatch event to sensor watcher over http. communication error. err: %+v", err)
+		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
+			gc.Log.Warn().Str("event-source", source).Str("sensor-name", sensor.Name).Err(err).Msg("failed to dispatch event to sensor watcher over http. communication error")
 		}
 	}
 	for _, gateway := range gc.gw.Spec.Watchers.Gateways {
-		err := gc.postCloudEventToWatcher(common.DefaultServiceName(gateway.Name), gateway.Port, gateway.Endpoint, payload)
-		if err != nil {
-			return fmt.Errorf("failed to dispatch event to gateway watcher over http. communication error. err: %+v", err)
+		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(gateway.Name), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
+			gc.Log.Warn().Str("event-source", source).Str("gateway-name", gateway.Name).Err(err).Msg("failed to dispatch event to gateway watcher over http. communication error")
 		}
 	}
 	gc.Log.Info().Msg("successfully dispatched event to all watchers")
+	return nil
+}
+
+// dispatchEventOverNats dispatches event over nats
+func (gc *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byte) error {
+	var err error
+
+	switch gc.gw.Spec.EventProtocol.Nats.Type {
+	case pc.Standard:
+		err = gc.natsConn.Publish(source, eventPayload)
+	case pc.Streaming:
+		err = gc.natsStreamingConn.Publish(source, eventPayload)
+	}
+
+	if err != nil {
+		gc.Log.Error().Err(err).Str("source", source).Msg("failed to publish event")
+		return err
+	}
+	gc.Log.Info().Str("source", source).Msg("event published successfully")
 	return nil
 }
 

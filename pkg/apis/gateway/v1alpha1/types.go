@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,24 +35,12 @@ const (
 	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
 )
 
-// DispatchProtocolType is type of the event dispatch protocol. Used for dispatching events from gateway to watchers
-type DispatchProtocolType string
-
-// possible types of event dispatch protocol
-const (
-	HTTPGateway  DispatchProtocolType = "HTTP"
-	NATSGateway  DispatchProtocolType = "NATS"
-	KafkaGateway DispatchProtocolType = "KAFKA"
-)
-
 // Gateway is the definition of a gateway resource
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Gateway struct {
-	// +k8s:openapi-gen=false
-	metav1.TypeMeta `json:",inline"`
-	// +k8s:openapi-gen=false
+	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Status            GatewayStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
 	Spec              GatewaySpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
@@ -60,9 +49,7 @@ type Gateway struct {
 // GatewayList is the list of Gateway resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type GatewayList struct {
-	// +k8s:openapi-gen=false
 	metav1.TypeMeta `json:",inline"`
-	// +k8s:openapi-gen=false
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items           []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
@@ -95,8 +82,8 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
-	// DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	DispatchProtocol DispatchProtocolType `json:"dispatchProtocol" protobuf:"bytes,8,opt,name=dispatchProtocol"`
+	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
+	EventProtocol EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -139,7 +126,6 @@ type NodeStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// UpdateTime is the time when node(gateway configuration) was updated
-	// +k8s:openapi-gen=false
 	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,9,opt,name=updateTime"`
 }
 
@@ -169,4 +155,27 @@ type GatewayNotificationWatcher struct {
 type SensorNotificationWatcher struct {
 	// Name is name of the sensor
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+}
+
+// Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
+type EventProtocol struct {
+	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
+
+	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
+
+	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
+}
+
+type Http struct {
+	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
+}
+
+type Nats struct {
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+
+	Type common.NatsType `json:"type" protobuf:"bytes,2,opt,name=type"`
+
+	ClientId string `json:"clientId,omitempty" protobuf:"bytes,3,opt,name=clientId"`
+
+	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,4,opt,name=clusterId"`
 }

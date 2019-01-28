@@ -22,8 +22,8 @@
 [[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
-  revision = "879f631812a30a580659e8035e7cda9994bb99ac"
-  version = "v1.20.0"
+  revision = "03a43f93cd29dc549e6d9b11892795c206f9c38c"
+  version = "v1.20.1"
 
 [[projects]]
   name = "github.com/argoproj/argo"
@@ -31,7 +31,7 @@
     "pkg/apis/workflow",
     "pkg/apis/workflow/v1alpha1"
   ]
-  revision = "3b52b26190163d1f72f3aef1a39f9f291378dafb"
+  revision = "0a928e93dac6d8522682931a0a68c52add310cdb"
   version = "v2.2.1"
 
 [[projects]]
@@ -79,8 +79,8 @@
     ".",
     "log"
   ]
-  revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
-  version = "v2.8.0"
+  revision = "e37671aced663c8d3a395bd301857e26dcf4340c"
+  version = "v2.8.1"
 
 [[projects]]
   branch = "master"
@@ -181,7 +181,7 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "1d3f30b51784bec5aad268e59fd3c2fc1c2fe73f"
+  revision = "347cf4a86c1cb8d262994d8ef5924d4576c5b331"
 
 [[projects]]
   branch = "master"
@@ -192,8 +192,8 @@
 [[projects]]
   name = "github.com/google/go-github"
   packages = ["github"]
-  revision = "a5cb647b1fac8ba77e1cf25af2f9526658ab63e3"
-  version = "v21.0.0"
+  revision = "56cb1dd99043eba2e21c91aa8417d3ba2329259a"
+  version = "v21.0.1"
 
 [[projects]]
   name = "github.com/google/go-querystring"
@@ -216,6 +216,12 @@
   ]
   revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
   version = "v0.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gopherjs/gopherjs"
+  packages = ["js"]
+  revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
   name = "github.com/hashicorp/golang-lru"
@@ -251,6 +257,12 @@
   version = "v1.1.5"
 
 [[projects]]
+  name = "github.com/jtolds/gls"
+  packages = ["."]
+  revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
+  version = "v4.20"
+
+[[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
@@ -276,8 +288,8 @@
     "pkg/s3utils",
     "pkg/set"
   ]
-  revision = "39381cf62425050629c7264228fc2f9e0c6616f6"
-  version = "v6.0.11"
+  revision = "e6694bcc4a6b0c1756797be85b8458635a65924e"
+  version = "v6.0.13"
 
 [[projects]]
   name = "github.com/mitchellh/go-homedir"
@@ -306,6 +318,15 @@
   ]
   revision = "13c7fc7590db68b18f2015600f8765a02d705b5d"
   version = "v1.7.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/nats-io/go-nats-streaming"
+  packages = [
+    ".",
+    "pb"
+  ]
+  revision = "a0e3aee6fce1a77efe4024df3280416e9d99bb98"
 
 [[projects]]
   name = "github.com/nats-io/nkeys"
@@ -369,6 +390,26 @@
   version = "v1.3.0"
 
 [[projects]]
+  name = "github.com/smartystreets/assertions"
+  packages = [
+    ".",
+    "internal/go-render/render",
+    "internal/oglematchers"
+  ]
+  revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
+  version = "1.8.3"
+
+[[projects]]
+  name = "github.com/smartystreets/goconvey"
+  packages = [
+    "convey",
+    "convey/gotest",
+    "convey/reporting"
+  ]
+  revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
+  version = "1.6.3"
+
+[[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
@@ -389,8 +430,8 @@
 [[projects]]
   name = "github.com/tidwall/gjson"
   packages = ["."]
-  revision = "1e3f6aeaa5bad08d777ea7807b279a07885dd8b2"
-  version = "v1.1.3"
+  revision = "5a96cfda705e1762dc0671e26b0b78925ad97e29"
+  version = "v1.1.5"
 
 [[projects]]
   name = "github.com/tidwall/match"
@@ -408,7 +449,7 @@
   branch = "master"
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
-  revision = "294b2a04783ae9058544a6cba8642f335d6044bd"
+  revision = "d85a1530126065c71277db28196ec196daafc9dc"
 
 [[projects]]
   branch = "master"
@@ -420,7 +461,7 @@
     "ed25519/internal/edwards25519",
     "ssh/terminal"
   ]
-  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+  revision = "64072686203f69e3fd20143576b27200f18ab0fa"
 
 [[projects]]
   branch = "master"
@@ -435,10 +476,11 @@
     "internal/socks",
     "internal/timeseries",
     "proxy",
+    "publicsuffix",
     "trace",
     "websocket"
   ]
-  revision = "45ffb0cd1ba084b73e26dee67e667e1be5acce83"
+  revision = "ed066c81e75eba56dd9bd2139ade88125b855585"
 
 [[projects]]
   branch = "master"
@@ -447,7 +489,7 @@
     ".",
     "internal"
   ]
-  revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
+  revision = "5dab4167f31cbd76b407f1486c86b40748bc5073"
 
 [[projects]]
   branch = "master"
@@ -457,7 +499,7 @@
     "unix",
     "windows"
   ]
-  revision = "20be8e55dc7b4b7a1b1660728164a8509d8c9209"
+  revision = "054c452bb702e465e95ce8e7a3d9a6cf0cd1188d"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -503,7 +545,7 @@
     "internal/gopathwalk",
     "internal/semver"
   ]
-  revision = "e063def13b29c433b3c57fc99257c18c1f9399ce"
+  revision = "24cd39ecf74570612483b772d45cf9d53d908340"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -523,7 +565,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "bd9b4fb69e2ffd37621a6caa54dcbead29b546f2"
+  revision = "db91494dd46c1fdcbbde05e5ff5eb56df8f7d79a"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -560,8 +602,8 @@
     "status",
     "tap"
   ]
-  revision = "df014850f6dee74ba2fc94874043a9f3f75fbfd8"
-  version = "v1.17.0"
+  revision = "a02b0774206b209466313a0b525d2c738fe407eb"
+  version = "v1.18.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -608,7 +650,7 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "12444147eb1150aa5c80d2aae532cbc5b7be73d0"
+  revision = "c89978d5f86d7427bef2fc7752732c8c60b1d188"
 
 [[projects]]
   branch = "release-1.10"
@@ -653,7 +695,7 @@
     "pkg/watch",
     "third_party/forked/golang/reflect"
   ]
-  revision = "688d824527473e1e3f6c3f0b01171308393bdfe3"
+  revision = "d49e237a2683fa6dc43a86c7b1b766e0219fb6e7"
 
 [[projects]]
   branch = "release-7.0"
@@ -746,7 +788,7 @@
     "util/retry",
     "util/workqueue"
   ]
-  revision = "16a8a034ed284c656d27f043a57624e4873b7ad3"
+  revision = "36368dede29baa5ecd253416d70ddc0c76bde69b"
 
 [[projects]]
   branch = "release-1.10"
@@ -778,7 +820,7 @@
     "pkg/util",
     "third_party/forked/golang/reflect"
   ]
-  revision = "9de8e796a74d16d2a285165727d04c185ebca6dc"
+  revision = "edc41f23fa918716df540b1486477d62237010e4"
 
 [[projects]]
   branch = "master"
@@ -793,7 +835,7 @@
     "parser",
     "types"
   ]
-  revision = "fd15ee9cc2f77baa4f31e59e6acbf21146455073"
+  revision = "f8a0810f38afb8478882b3835a615aebfda39afa"
 
 [[projects]]
   name = "k8s.io/klog"
@@ -811,11 +853,11 @@
     "pkg/generators/rules",
     "pkg/util/sets"
   ]
-  revision = "0317810137be915b9cf888946c6e115c1bfac693"
+  revision = "ced9eb3070a5f1c548ef46e8dfe2a97c208d9f03"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "72e54b8ccdc9546fdfea32ef9f72045588d58ffd4c2fd2d4fb85a6f9f82f48aa"
+  inputs-digest = "28bc456cb7b54760f5cc30572c5b3bdb1ded4ca0cf62c7968f8b1236c0f75172"
   solver-name = "gps-cdcl"
   solver-version = 1

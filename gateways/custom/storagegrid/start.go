@@ -19,13 +19,13 @@ package storagegrid
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/joncalhoun/qson"
 	"github.com/satori/go.uuid"
@@ -36,6 +36,9 @@ var (
 	mutex sync.Mutex
 	// activeServers keeps track of currently running http servers.
 	activeServers = make(map[string]*activeServer)
+
+	// activeEndpoints keep track of endpoints that are already registered with server and their status active or deactive
+	activeEndpoints = make(map[string]*endpoint)
 
 	// mutex synchronizes activeRoutes
 	routesMutex sync.Mutex
@@ -67,10 +70,13 @@ type routeConfig struct {
 	sgConfig            *storageGrid
 	eventSource         *gateways.EventSource
 	eventSourceExecutor *StorageGridEventSourceExecutor
-	dataCh              chan []byte
-	doneCh              chan struct{}
-	errCh               chan error
 	startCh             chan struct{}
+}
+
+type endpoint struct {
+	active bool
+	dataCh chan []byte
+	errCh  chan error
 }
 
 func init() {
@@ -79,16 +85,13 @@ func init() {
 			select {
 			case config := <-routeActivateChan:
 				// start server if it has not been started on this port
-				_, ok := activeServers[config.sgConfig.Port]
-				if !ok {
-					config.startHttpServer()
-				}
-				config.sgConfig.mux.HandleFunc(config.sgConfig.Endpoint, config.routeActiveHandler)
+				config.startHttpServer()
+				config.startCh <- struct{}{}
 
 			case config := <-routeDeactivateChan:
 				_, ok := activeServers[config.sgConfig.Port]
 				if ok {
-					config.sgConfig.mux.HandleFunc(config.sgConfig.Endpoint, config.routeDeactivateHandler)
+					activeEndpoints[config.sgConfig.Endpoint].active = false
 				}
 			}
 		}
@@ -174,6 +177,8 @@ func (rc *routeConfig) startHttpServer() {
 
 // StartConfig runs a configuration
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	sg, err := parseEventSource(eventSource.Data)
 	if err != nil {
@@ -184,9 +189,6 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		sgConfig:            sg,
 		eventSource:         eventSource,
 		eventSourceExecutor: ese,
-		errCh:               make(chan error),
-		dataCh:              make(chan []byte),
-		doneCh:              make(chan struct{}),
 		startCh:             make(chan struct{}),
 	}
 
@@ -200,28 +202,37 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		mutex.Unlock()
 	}
 
-	rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("adding route handler")
+	if _, ok := activeEndpoints[rc.sgConfig.Endpoint]; !ok {
+		activeEndpoints[rc.sgConfig.Endpoint] = &endpoint{
+			active: true,
+			dataCh: make(chan []byte),
+			errCh:  make(chan error),
+		}
+		rc.sgConfig.mux.HandleFunc(rc.sgConfig.Endpoint, rc.routeActiveHandler)
+	}
+	activeEndpoints[rc.sgConfig.Endpoint].active = true
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("route handler added")
 
 	for {
 		select {
-		case data := <-rc.dataCh:
+		case data := <-activeEndpoints[rc.sgConfig.Endpoint].dataCh:
 			ese.Log.Info().Msg("received data")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
 				Payload: data,
 			})
 			if err != nil {
+				ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("failed to send event")
 				return err
 			}
 
-		case err := <-rc.errCh:
-			routeDeactivateChan <- rc
-			return err
+		case err := <-activeEndpoints[rc.sgConfig.Endpoint].errCh:
+			ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("internal error occurred")
 
 		case <-eventStream.Context().Done():
-			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("connection is closed by client")
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Str("port", sg.Port).Str("endpoint", sg.Endpoint).Msg("connection is closed by client")
 			routeDeactivateChan <- rc
 			return nil
 
@@ -234,15 +245,19 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 
 // routeActiveHandler handles new route
 func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("received a request")
-	body, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
-		rc.errCh <- err
+	if !activeEndpoints[rc.sgConfig.Endpoint].active {
+		rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("deactived route")
+		common.SendErrorResponse(writer, "route is not valid")
 		return
 	}
 
 	rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		rc.eventSourceExecutor.Log.Error().Err(err).Msg("failed to parse request body")
+		common.SendErrorResponse(writer, "failed to parse request body")
+		return
+	}
 
 	switch request.Method {
 	case http.MethodHead:
@@ -252,37 +267,33 @@ func (rc *routeConfig) routeActiveHandler(writer http.ResponseWriter, request *h
 	writer.Header().Add("Content-Type", "text/plain")
 	writer.Write([]byte(respBody))
 
+	rc.eventSourceExecutor.Log.Info().Str("body", string(body)).Msg("response body")
+
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		rc.errCh <- err
+		activeEndpoints[rc.sgConfig.Endpoint].errCh <- err
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		rc.errCh <- err
+		activeEndpoints[rc.sgConfig.Endpoint].errCh <- err
 		return
 	}
 
 	var notification *storageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		rc.errCh <- err
+		activeEndpoints[rc.sgConfig.Endpoint].errCh <- err
 		return
 	}
 
 	if filterEvent(notification, rc.sgConfig) && filterName(notification, rc.sgConfig) {
 		rc.eventSourceExecutor.Log.Info().Str("event-source-name", rc.eventSource.Name).Msg("new event received, dispatching to gateway client")
-		rc.dataCh <- b
+		activeEndpoints[rc.sgConfig.Endpoint].dataCh <- b
 		return
 	}
 
 	rc.eventSourceExecutor.Log.Warn().Str("event-source-name", rc.eventSource.Name).Interface("notification", notification).
 		Msg("discarding notification since it did not pass all filters")
-}
-
-// routeDeactivateHandler handles routes that are not active
-func (rc *routeConfig) routeDeactivateHandler(writer http.ResponseWriter, request *http.Request) {
-	rc.eventSourceExecutor.Log.Info().Str("endpoint", rc.sgConfig.Endpoint).Str("http-method", request.Method).Msg("route is not active")
-	common.SendErrorResponse(writer)
 }

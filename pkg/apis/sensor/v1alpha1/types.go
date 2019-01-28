@@ -18,9 +18,10 @@ package v1alpha1
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"hash/fnv"
 
-	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -58,9 +59,8 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
-	// +k8s:openapi-gen=false
 	v1.TypeMeta `json:",inline"`
-	// +k8s:openapi-gen=false
+
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
@@ -69,23 +69,75 @@ type Sensor struct {
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type SensorList struct {
-	// +k8s:openapi-gen=false
 	v1.TypeMeta `json:",inline"`
-	// +k8s:openapi-gen=false
 	v1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Items       []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// EventDependency is a list of the events that this sensor is dependent on.
-	EventDependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
+	// Dependencies is a list of the events that this sensor is dependent on.
+	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
 
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,opt,name=deploySpec"`
+
+	// EventProtocol is the protocol through which sensor receives events from gateway
+	EventProtocol *EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
+}
+
+// EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols
+type EventProtocol struct {
+	// Type defines the type of protocol over which events will be receieved
+	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
+
+	// Http contains the information required to setup a http server and listen to incoming events
+	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
+
+	// Nats contains the information required to connect to nats server and get subscriptions
+	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
+}
+
+// Http contains the information required to setup a http server and listen to incoming events
+type Http struct {
+	// Port on which server will run
+	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
+}
+
+// Nats contains the information required to connect to nats server and get subscriptions
+type Nats struct {
+	// URL is nats server/service URL
+	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
+
+	// Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
+	StartWithLastReceived bool `json:"startWithLastReceived,omitempty" protobuf:"bytes,2,opt,name=startWithLastReceived"`
+
+	// Receive all stored values in order.
+	DeliverAllAvailable bool `json:"deliverAllAvailable,omitempty" protobuf:"bytes,3,opt,name=deliverAllAvailable"`
+
+	// Receive messages starting at a specific sequence number
+	StartAtSequence string `json:"startAtSequence,omitempty" protobuf:"bytes,4,opt,name=startAtSequence"`
+
+	// Subscribe starting at a specific time
+	StartAtTime string `json:"startAtTime,omitempty" protobuf:"bytes,5,opt,name=startAtTime"`
+
+	// Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
+	StartAtTimeDelta string `json:"startAtTimeDelta,omitempty" protobuf:"bytes,6,opt,name=startAtTimeDelta"`
+
+	// Durable subscriptions allow clients to assign a durable name to a subscription when it is created
+	Durable bool `json:"durable,omitempty" protobuf:"bytes,7,opt,name=durable"`
+
+	// The NATS Streaming cluster ID
+	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,8,opt,name=clusterId"`
+
+	// The NATS Streaming cluster ID
+	ClientId string `json:"clientId,omitempty" protobuf:"bytes,9,opt,name=clientId"`
+
+	// Type of the connection. either standard or streaming
+	Type common.NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
 }
 
 // EventDependency describes a dependency
@@ -102,6 +154,9 @@ type EventDependency struct {
 
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
 	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
+
+	// Connected tells if subscription is already setup in case of nats protocol.
+	Connected bool `json:"connected,omitempty" protobuf:"bytes,4,opt,name=connected"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
@@ -121,7 +176,7 @@ type EventDependencyFilter struct {
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 
 	// Context filter constraints with escalation
-	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	Context *common.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 
 	// Data filter constraints with escalation
 	Data *Data `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
@@ -141,9 +196,6 @@ type TimeFilter struct {
 	// After this time, events for this event are ignored and
 	// format is hh:mm:ss
 	Stop string `json:"stop,omitempty" protobuf:"bytes,2,opt,name=stop"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,3,opt,name=escalationPolicy"`
 }
 
 // JSONType contains the supported JSON types for data filtering
@@ -159,9 +211,6 @@ const (
 type Data struct {
 	// filter constraints
 	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,2,opt,name=escalationPolicy"`
 }
 
 // DataFilter describes constraints and filters for event data
@@ -183,9 +232,6 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
-
-	// EscalationPolicy is the escalation to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,4,opt,name=escalationPolicy"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -238,7 +284,6 @@ type ResourceObject struct {
 	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
 
 	// Namespace in which to create this object
-	// optional
 	// defaults to the service account namespace
 	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
 
@@ -258,45 +303,15 @@ type ResourceObject struct {
 type RetryStrategy struct {
 }
 
-// EscalationLevel is the degree of importance
-type EscalationLevel string
-
-// possible values for EscalationLevel
-const (
-	// level 0 of escalation
-	Alert EscalationLevel = "Alert"
-	// level 1 of escalation
-	Warning EscalationLevel = "Warning"
-	// level 2 of escalation
-	Critical EscalationLevel = "Critical"
-)
-
-// EscalationPolicy describes the policy for escalating sensors in an Error state.
-// An escalation policy is associated with event filter. Whenever a event filter fails
-// escalation will be triggered
-type EscalationPolicy struct {
-	// Name is name of the escalation policy
-	// This is referred by event filter/s
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-
-	// Level is the degree of importance
-	Level EscalationLevel `json:"level" protobuf:"bytes,2,opt,name=level"`
-
-	// need someway to progressively get more serious notifications
-	Message string `json:"message" protobuf:"bytes,3,opt,name=message"`
-}
-
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	// Phase is the high-level summary of the sensor
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
-	// +k8s:openapi-gen=false
 	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
-	// +k8s:openapi-gen=false
 	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
@@ -330,118 +345,25 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	// +k8s:openapi-gen=false
 	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
-	// +k8s:openapi-gen=false
 	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 
 	// Event stores the last seen event for this node
-	Event *Event `json:"latestEvent,omitempty" protobuf:"bytes,9,opt,name=latestEvent"`
-}
-
-// Event is a data record expressing an occurrence and its context.
-// Adheres to the CloudEvents v0.1 specification
-type Event struct {
-	Context EventContext `json:"context" protobuf:"bytes,1,opt,name=context"`
-	Payload []byte       `json:"payload" protobuf:"bytes,2,opt,name=data"`
-}
-
-// EventContext contains metadata that provides circumstantial information about the occurrence.
-type EventContext struct {
-	// The type of occurrence which has happened. Often this attribute is used for
-	// routing, observability, policy enforcement, etc.
-	// should be prefixed with a reverse-DNS name. The prefixed domain dictates
-	// the organization which defines the semantics of this event type. ex: com.github.pull.create
-	EventType string `json:"eventType" protobuf:"bytes,1,opt,name=eventType"`
-
-	// The version of the eventType. Enables the interpretation of data by eventual consumers,
-	// requires the consumer to be knowledgeable about the producer.
-	EventTypeVersion string `json:"eventTypeVersion" protobuf:"bytes,2,opt,name=eventTypeVersion"`
-
-	// The version of the CloudEvents specification which the event uses.
-	// Enables the interpretation of the context.
-	CloudEventsVersion string `json:"cloudEventsVersion" protobuf:"bytes,3,opt,name=cloudEventsVersion"`
-
-	// This describes the event producer.
-	Source *URI `json:"source" protobuf:"bytes,4,opt,name=source"`
-
-	// ID of the event. The semantics are explicitly undefined to ease the implementation of producers.
-	// Enables deduplication. Must be unique within scope of producer.
-	EventID string `json:"eventID" protobuf:"bytes,5,opt,name=eventID"`
-
-	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
-	// +k8s:openapi-gen=false
-	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
-
-	// A link to the schema that the data attribute adheres to.
-	// Must adhere to the format specified in RFC 3986.
-	SchemaURL *URI `json:"schemaURL" protobuf:"bytes,7,opt,name=schemaURL"`
-
-	// Content type of the data attribute value. Enables the data attribute to carry any type of content,
-	// whereby format and encoding might differ from that of the chosen event format.
-	// For example, the data attribute may carry an XML or JSON payload and the consumer is informed
-	// by this attribute being set to "application/xml" or "application/json" respectively.
-	ContentType string `json:"contentType" protobuf:"bytes,8,opt,name=contentType"`
-
-	// This is for additional metadata and does not have a mandated structure.
-	// Enables a place for custom fields a producer or middleware might want to include and provides a place
-	// to test metadata before adding them to the CloudEvents specification.
-	Extensions map[string]string `json:"extensions,omitempty" protobuf:"bytes,9,rep,name=extensions"`
-
-	// EscalationPolicy is the name of escalation policy to trigger in case the event filter fails
-	EscalationPolicy *EscalationPolicy `json:"escalationPolicy,omitempty" protobuf:"bytes,10,opt,name=escalationPolicy"`
-}
-
-// URI is a Uniform Resource Identifier based on RFC 3986
-type URI struct {
-	Scheme   string `json:"scheme" protobuf:"bytes,1,opt,name=scheme"`
-	User     string `json:"user" protobuf:"bytes,2,opt,name=user"`
-	Password string `json:"password" protobuf:"bytes,3,opt,name=password"`
-	Host     string `json:"host" protobuf:"bytes,4,opt,name=host"`
-	Port     int32  `json:"port" protobuf:"bytes,5,opt,name=port"`
-	Path     string `json:"path" protobuf:"bytes,6,opt,name=path"`
-	Query    string `json:"query" protobuf:"bytes,7,opt,name=query"`
-	Fragment string `json:"fragment" protobuf:"bytes,8,opt,name=fragment"`
+	Event *apicommon.Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
 }
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
-	S3        *S3Artifact        `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
-	Inline    *string            `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
-	File      *FileArtifact      `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
-	URL       *URLArtifact       `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
-	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
-}
-
-// S3Artifact contains information about an artifact in S3
-type S3Artifact struct {
-	S3Bucket *S3Bucket                   `json:",inline" protobuf:"bytes,4,opt,name=s3Bucket"`
-	Key      string                      `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
-	Event    minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,2,opt,name=event"`
-	Filter   *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
-}
-
-// S3Bucket contains information for an S3 Bucket
-type S3Bucket struct {
-	Endpoint string `json:"endpoint,omitempty" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket   string `json:"bucket,omitempty" protobuf:"bytes,2,opt,name=bucket"`
-	Region   string `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Insecure bool   `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
-	// +k8s:openapi-gen=false
-	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,5,opt,name=accessKey"`
-	// +k8s:openapi-gen=false
-	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,6,opt,name=secretKey"`
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type S3Filter struct {
-	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
-	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
+	S3        *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	Inline    *string               `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
+	File      *FileArtifact         `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
+	URL       *URLArtifact          `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+	Configmap *ConfigmapArtifact    `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap

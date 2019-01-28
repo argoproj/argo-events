@@ -28,18 +28,24 @@ import (
 
 // ValidateEventSource validates webhook event source
 func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
 	w, err := parseEventSource(es.Data)
 	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, gateways.ErrEventSourceParseFailed
+		return &gateways.ValidEventSource{
+			Reason:  fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()),
+			IsValid: false,
+		}, nil
 	}
+
 	if err = validateWebhook(w); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, nil
 	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return &gateways.ValidEventSource{
+		IsValid: true,
+		Reason:  "valid",
+	}, nil
 }
 
 func validateWebhook(w *webhook) error {

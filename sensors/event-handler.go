@@ -20,41 +20,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
-
-// simple check to make sure two event dependencies list are equal
-func EqualEventDependencies(a, b []v1alpha1.EventDependency) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-// simple check to make sure two triggers list are equal
-func EqualTriggers(a, b []v1alpha1.Trigger) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
-}
 
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
 func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification) {
@@ -109,8 +84,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 			// change node state to error
 			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
-
-			common.SendErrorResponse(ew.writer)
 			return
 		}
 
@@ -120,13 +93,9 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 			// change node state to error
 			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, "event did not pass filters")
-
-			common.SendErrorResponse(ew.writer)
 			return
 		}
 
-		// send success response back to gateway as it is a valid notification
-		common.SendSuccessResponse(ew.writer)
 		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, &sec.log, "event is received")
 
 		// check if all event dependencies are complete and kick-off triggers
@@ -135,23 +104,28 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 	case v1alpha1.ResourceUpdateNotification:
 		sec.log.Info().Msg("sensor resource update")
 		// update sensor resource
-		if !EqualEventDependencies(sec.sensor.Spec.EventDependencies, ew.sensor.Spec.EventDependencies) || !EqualTriggers(sec.sensor.Spec.Triggers, ew.sensor.Spec.Triggers){
-			sec.sensor = ew.sensor
+		sec.sensor = ew.sensor
 
-			// initialize new event dependencies
-			for _, ed := range sec.sensor.Spec.EventDependencies {
-				if node := sn.GetNodeByName(sec.sensor, ed.Name); node == nil {
-					sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
-					sn.MarkNodePhase(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "event dependency is active")
-				}
-			}
+		hasDependenciesUpdated := false
 
-			// initialize new triggers
-			for _, t := range sec.sensor.Spec.Triggers {
-				if node := sn.GetNodeByName(sec.sensor, t.Name); node == nil {
-					sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, &sec.log)
-				}
+		// initialize new event dependencies
+		for _, ed := range sec.sensor.Spec.Dependencies {
+			if node := sn.GetNodeByName(sec.sensor, ed.Name); node == nil {
+				sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
+				sn.MarkNodePhase(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "event dependency is active")
 			}
+		}
+
+		// initialize new triggers
+		for _, t := range sec.sensor.Spec.Triggers {
+			if node := sn.GetNodeByName(sec.sensor, t.Name); node == nil {
+				hasDependenciesUpdated = true
+				sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, &sec.log)
+			}
+		}
+
+		if hasDependenciesUpdated {
+			sec.NatsEventProtocol()
 		}
 
 	default:
@@ -168,70 +142,61 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 		}
 	}()
 
-	// if a sensor resource is updated, syncSensor will take care of updating current sensor context
-	// note: updating sensor resource will result in loss of all existing events stored in nodes.
-	// Once the NATS streaming support is added, user can replay the events.
-	go func() {
-		if _, err := sec.syncSensor(context.Background()); err != nil {
-			sec.log.Error().Err(err).Msg("failed to sync sensor resource")
-		}
-	}()
+	// sync sensor resource after updates
+	go sec.syncSensor(context.Background())
 
-	// create a http server. this server listens for events from gateway.
-	sec.server = &http.Server{Addr: fmt.Sprintf(":%s", common.SensorServicePort)}
-
-	// add a handler to handle incoming events
-	http.HandleFunc("/", sec.eventHandler)
-
-	sec.log.Info().Str("port", string(common.SensorServicePort)).Msg("sensor started listening")
-	if err := sec.server.ListenAndServe(); err != nil {
-		sec.log.Error().Err(err).Msg("sensor server stopped")
-		// escalate error
-		labels := map[string]string{
-			common.LabelEventType:  string(common.EscalationEventType),
-			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "server_shutdown",
+	switch sec.sensor.Spec.EventProtocol.Type {
+	case pc.HTTP:
+		sec.HttpEventProtocol()
+	case pc.NATS:
+		sec.NatsEventProtocol()
+		var err error
+		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log); err != nil {
+			sec.log.Error().Err(err).Msg("failed to persist sensor update")
+			labels := map[string]string{
+				common.LabelEventType:  string(common.OperationFailureEventType),
+				common.LabelSensorName: sec.sensor.Name,
+				common.LabelOperation:  "persist_after_nats_conn_update_failure",
+			}
+			if err := common.GenerateK8sEvent(sec.kubeClient, "persist updates nats connection update failed", common.OperationFailureEventType, "persist updates nats connection update", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to log persist updates nats connection update failure")
+			}
 		}
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped"), common.EscalationEventType,
-			"server shutdown", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log server shutdown error")
-		}
+		select {}
 	}
-}
-
-// Handles events received from gateways
-func (sec *sensorExecutionCtx) eventHandler(w http.ResponseWriter, r *http.Request) {
-	sec.log.Info().Msg("received an event from gateway")
-	body, err := ioutil.ReadAll(r.Body)
-	var event *ss_v1alpha1.Event
-	if err = json.Unmarshal(body, &event); err != nil {
-		sec.log.Error().Err(err).Msg("failed to parse event received from gateway")
-		common.SendErrorResponse(w)
-		return
-	}
-
-	// validate whether the event is from gateway that this sensor is watching
-	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
-		// process the event
-		sec.queue <- &updateNotification{
-			event:            event,
-			writer:           w,
-			eventDependency:  eventDependency,
-			notificationType: v1alpha1.EventNotification,
-		}
-		return
-	}
-
-	sec.log.Warn().Str("event-source-name", event.Context.Source.Host).Msg("event is from unknown source")
-	common.SendErrorResponse(w)
 }
 
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
-func (sec *sensorExecutionCtx) validateEvent(events *ss_v1alpha1.Event) (*ss_v1alpha1.EventDependency, bool) {
-	for _, event := range sec.sensor.Spec.EventDependencies {
+func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
+	for _, event := range sec.sensor.Spec.Dependencies {
 		if event.Name == events.Context.Source.Host {
 			return &event, true
 		}
 	}
 	return nil, false
+}
+
+func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*apicommon.Event, error) {
+	var event *apicommon.Event
+	if err := json.Unmarshal(payload, &event); err != nil {
+		response := "failed to parse event received from gateway"
+		sec.log.Error().Err(err).Msg(response)
+		return nil, err
+	}
+	return event, nil
+}
+
+func (sec *sensorExecutionCtx) sendEventToInternalQueue(event *apicommon.Event, writer http.ResponseWriter) bool {
+	// validate whether the event is from gateway that this sensor is watching
+	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
+		// process the event
+		sec.queue <- &updateNotification{
+			event:            event,
+			writer:           writer,
+			eventDependency:  eventDependency,
+			notificationType: v1alpha1.EventNotification,
+		}
+		return true
+	}
+	return false
 }

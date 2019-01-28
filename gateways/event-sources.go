@@ -134,12 +134,11 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			}
 
 			// validate event source
-			valid, err := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
+			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
 				Data: eventSource.Data.Config,
 				Name: eventSource.Data.Src,
-			})
-			if err != nil || !valid.IsValid {
-				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Str("validation-failure", valid.Reason).Msg("event source is not valid")
+			}); !valid.IsValid {
+				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Str("validation-failure", valid.Reason).Msg("event source is not valid")
 				if err := eventSource.Conn.Close(); err != nil {
 					gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Err(err).Msg("failed to close client connection")
 				}
@@ -225,12 +224,13 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
+		delete(gc.registeredConfigs, configKey)
 		gc.Log.Info().Str("event-source-name", eventSource.Data.Src).Msg("removing the event source")
 		gc.StatusCh <- EventSourceStatus{
-			Phase: v1alpha1.NodePhaseRemove,
-			Id:    eventSource.Data.ID,
+			Phase:   v1alpha1.NodePhaseRemove,
+			Id:      eventSource.Data.ID,
 			Message: "event_source_is_removed",
-			Name: eventSource.Data.Src,
+			Name:    eventSource.Data.Src,
 		}
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {

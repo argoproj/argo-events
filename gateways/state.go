@@ -104,13 +104,11 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 		gc.markGatewayNodePhase(status)
 
 	case v1alpha1.NodePhaseResourceUpdate:
-		if gc.gw.Spec.Watchers != status.Gw.Spec.Watchers {
-			gc.gw = status.Gw
-			gc.updated = true
-		}
+		gc.gw = status.Gw
 
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
+		gc.Log.Info().Str("event-source-name", status.Name).Msg("event source is removed")
 		gc.updated = true
 	}
 

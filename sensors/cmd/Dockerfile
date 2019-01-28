@@ -1,3 +1,3 @@
 FROM centos:7
-COPY dist/sn /bin/
-ENTRYPOINT [ "/bin/sn" ]
+COPY dist/sensor /bin/
+ENTRYPOINT [ "/bin/sensor" ]

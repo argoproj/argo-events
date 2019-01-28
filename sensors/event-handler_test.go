@@ -18,19 +18,20 @@ package sensors
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	sensor2 "github.com/argoproj/argo-events/controllers/sensor"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
-	"k8s.io/client-go/kubernetes/fake"
 	"net/http"
 	"testing"
+	"time"
 
+	"github.com/argoproj/argo-events/common"
+	sensor2 "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	discoveryFake "k8s.io/client-go/discovery/fake"
-	"time"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 var sensorStr = `apiVersion: argoproj.io/v1alpha1
@@ -47,7 +48,7 @@ spec:
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
-    - name: test-gateway/test
+    - name: test-gateway:test
   triggers:
     - name: test-workflow-trigger
       resource:
@@ -79,13 +80,13 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return &sensor, err
 }
 
-type mockHttpWriter struct {}
+type mockHttpWriter struct{}
 
 func (m *mockHttpWriter) Header() http.Header {
 	return http.Header{}
 }
 
-func (m *mockHttpWriter) Write([] byte) (int, error) {
+func (m *mockHttpWriter) Write([]byte) (int, error) {
 	return 0, nil
 }
 
@@ -96,26 +97,26 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
 	return &sensorExecutionCtx{
-		kubeClient:      kubeClientset,
-		discoveryClient: kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
-		clientPool:      NewFakeClientPool(),
-		log:             common.GetLoggerContext(common.LoggerConf()).Logger(),
-		sensorClient:    sensorFake.NewSimpleClientset(),
-		sensor:          sensor,
+		kubeClient:           kubeClientset,
+		discoveryClient:      kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
+		clientPool:           NewFakeClientPool(),
+		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
+		sensorClient:         sensorFake.NewSimpleClientset(),
+		sensor:               sensor,
 		controllerInstanceID: "test-1",
 	}
 }
 
-func getCloudEvent() *v1alpha1.Event {
-	return &v1alpha1.Event{
-		Context: v1alpha1.EventContext{
+func getCloudEvent() *apicommon.Event {
+	return &apicommon.Event{
+		Context: apicommon.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
 			EventID:            fmt.Sprintf("%x", "123"),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          "test",
 			EventTypeVersion:   common.CloudEventsVersion,
-			Source: &v1alpha1.URI{
+			Source: &apicommon.URI{
 				Host: common.DefaultGatewayConfigurationName("test-gateway", "test"),
 			},
 		},
@@ -136,33 +137,33 @@ func TestEventHandler(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		sec.sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
-		fmt.Println(sensor.NodeID( "test-gateway/test"))
+		fmt.Println(sensor.NodeID("test-gateway:test"))
 
-		sensor2.InitializeNode(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
-		sensor2.MarkNodePhase(sec.sensor, "test-gateway/test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
+		sensor2.InitializeNode(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
+		sensor2.MarkNodePhase(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
 
 		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, &sec.log, "trigger is init")
 
 		sec.processUpdateNotification(&updateNotification{
-			event: getCloudEvent(),
+			event:            getCloudEvent(),
 			notificationType: v1alpha1.EventNotification,
-			writer: &mockHttpWriter{},
+			writer:           &mockHttpWriter{},
 			eventDependency: &v1alpha1.EventDependency{
-				Name: "test-gateway/test",
+				Name: "test-gateway:test",
 			},
 		})
 
 		convey.Convey("Update sensor event dependencies", func() {
 			sensor = sec.sensor.DeepCopy()
-			sensor.Spec.EventDependencies = append(sensor.Spec.EventDependencies, v1alpha1.EventDependency{
-				Name: "test-gateway/test2",
+			sensor.Spec.Dependencies = append(sensor.Spec.Dependencies, v1alpha1.EventDependency{
+				Name: "test-gateway:test2",
 			})
 			sec.processUpdateNotification(&updateNotification{
-				event: nil,
+				event:            nil,
 				notificationType: v1alpha1.ResourceUpdateNotification,
-				writer: &mockHttpWriter{},
+				writer:           &mockHttpWriter{},
 				eventDependency: &v1alpha1.EventDependency{
-					Name: "test-gateway/test2",
+					Name: "test-gateway:test2",
 				},
 				sensor: sensor,
 			})
