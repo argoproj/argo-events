@@ -39,12 +39,12 @@ Follow instructions from https://github.com/argoproj/argo/blob/master/demo.md
 ## 4. Create a webhook gateway
 ```
 kubectl apply -n argo-events -f examples/gateways/webhook-gateway-configmap.yaml
-kubectl apply -n argo-events -f examples/gateways/webhook.yaml
+kubectl apply -n argo-events -f examples/gateways/webhook-http.yaml
 ```
 
 ## 5. Create a webhook sensor
 ```
-kubectl apply -n argo-events -f examples/sensors/webhook.yaml
+kubectl apply -n argo-events -f examples/sensors/webhook-http.yaml
 ```
 
 ## 6. Trigger the webhook & corresponding Argo workflow
@@ -52,13 +52,13 @@ Trigger the webhook via sending a http POST request to `/foo` endpoint. You can 
 gateway configuration at run time as well.
 Note: the `WEBHOOK_SERVICE_URL` will differ based on the Kubernetes cluster.
 ```
-export WEBHOOK_SERVICE_URL=$(minikube service -n argo-events --url webhook-gateway-gateway-svc)
+export WEBHOOK_SERVICE_URL=$(minikube service -n argo-events --url <gateway_service_name>)
 echo $WEBHOOK_SERVICE_URL
 curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST $WEBHOOK_SERVICE_URL/foo
 ```
 
 <b>Note</b>: 
-   * If you are facing an issue getting service url by running `minikube service -n argo-events --url webhook-gateway-gateway-svc`, you can use `kubectl port-forward`
+   * If you are facing an issue getting service url by running `minikube service -n argo-events --url <gateway_service_name>`, you can use `kubectl port-forward`
    * Open another terminal window and enter `kubectl port-forward -n argo-events <name_of_the_webhook_gateway_pod> 9003:<port_on_which_gateway_server_is_running>`
    * You can now use `localhost:9003` to query webhook gateway
   

@@ -7,7 +7,7 @@ metadata:
     gateway-name: "github-gateway"
 spec:
   processorPort: "9330"
-  dispatchProtocol:
+  eventProtocol:
     type: "HTTP"
     http:
       port: "9300"

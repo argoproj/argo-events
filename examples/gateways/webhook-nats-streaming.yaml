@@ -9,7 +9,7 @@ spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
   processorPort: "9330"
-  dispatchProtocol:
+  eventProtocol:
     type: "NATS"
     nats:
       url: "nats://example-nats.argo-events:4222"

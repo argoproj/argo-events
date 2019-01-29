@@ -9,7 +9,7 @@ spec:
   configMap: "storage-grid-gateway-configmap"
   type: "storage_grid"
   processorPort: "9330"
-  dispatchProtocol:
+  eventProtocol:
     type: "HTTP"
     http:
       port: "9300"

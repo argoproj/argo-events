@@ -34,7 +34,25 @@ Argo Events is an event-based dependency manager for Kubernetes. The core concep
 ## Getting Started
 [![asciicast](https://asciinema.org/a/207973.png)](https://asciinema.org/a/207973)
 
-- [Installation](./docs/quickstart.md)
-- [Guide](./docs/tutorial.md)
-- [Want to contribute or develop/run locally?](./CONTRIBUTING.md)
-- See where the project is headed in the [roadmap](./ROADMAP.md)
+<br/>
+<br/>
+
+1. [Installation](./docs/quickstart.md)
+2. [Sensor and gateway controllers](controllers-guide.md)
+3. [Learn about gateways](gateway-guide.md)
+4. [Learn about sensors](sensor-guide.md)
+5. [Learn about triggers](trigger-guide.md)
+6. [Install Gateways and Sensors]()
+    1. [Webhook](gateways/core/webhook/install.md)
+    2. [Artifact](gateways/core/artifact/install.md)
+    3. [Calendar](gateways/core/calendar/install.md)
+    4. [Resource](gateways/core/resource/install.md)
+    5. [File](gateways/core/file/install.md)
+    6. [Streams]()
+        1. [NATS](gateways/core/stream/nats/install.md)
+        2. [KAFKA](gateways/core/stream/kafka/install.md)
+        3. [AMQP](gateways/core/stream/amqp/install.md)
+        4. [MQTT](gateways/core/stream/mqtt/install.md)
+7. [Write your own gateway](docs/custom-gateway.md)
+8. [Want to contribute or develop/run locally?](./CONTRIBUTING.md)
+9. See where the project is headed in the [roadmap](./ROADMAP.md)
