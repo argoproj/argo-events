@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: artifact-with-param-nats-streaming-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  eventProtocol:
+    type: "NATS"
+    nats:
+      type: "Streaming"
+      url: "nats://example-nats.argo-events:4222"
+      clusterId: "example-stan"
+      clientId: "myclient1"
+  dependencies:
+    - name: "artifact-gateway-nats-streaming:input"
+  triggers:
+    - name: argo-workflow
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        # The container args from the workflow are overridden by the s3 notification key
+        parameters:
+          - src:
+              event: "artifact-gateway-nats-streaming:input"
+              path: s3.object.key
+            dest: spec.templates.0.container.args.0
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: artifact-workflow-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"

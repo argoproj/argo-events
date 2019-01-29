@@ -4,12 +4,15 @@
 ## Table of Contents
 
 - [github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto](#github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto)
+    - [EventProtocol](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.EventProtocol)
     - [Gateway](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Gateway)
     - [GatewayList](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayList)
     - [GatewayNotificationWatcher](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayNotificationWatcher)
     - [GatewaySpec](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewaySpec)
     - [GatewayStatus](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayStatus)
     - [GatewayStatus.NodesEntry](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayStatus.NodesEntry)
+    - [Http](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Http)
+    - [Nats](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Nats)
     - [NodeStatus](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.NodeStatus)
     - [NotificationWatchers](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.NotificationWatchers)
     - [SensorNotificationWatcher](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.SensorNotificationWatcher)
@@ -29,6 +32,23 @@
 
 
 
+<a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.EventProtocol"></a>
+
+### EventProtocol
+Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| type | [string](#string) | optional |  |
+| http | [Http](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Http) | optional |  |
+| nats | [Nats](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Nats) | optional |  |
+
+
+
+
+
+
 <a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Gateway"></a>
 
 ### Gateway
@@ -40,7 +60,7 @@ Gateway is the definition of a gateway resource
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| metadata | [k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta](#k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta) | optional | &#43;k8s:openapi-gen=false |
+| metadata | [k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta](#k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta) | optional |  |
 | status | [GatewayStatus](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayStatus) | optional |  |
 | spec | [GatewaySpec](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewaySpec) | optional |  |
 
@@ -58,7 +78,7 @@ GatewayList is the list of Gateway resources
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| metadata | [k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta](#k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta) | optional | &#43;k8s:openapi-gen=false |
+| metadata | [k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta](#k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta) | optional |  |
 | items | [Gateway](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Gateway) | repeated |  |
 
 
@@ -98,7 +118,7 @@ GatewaySpec represents gateway specifications
 | serviceSpec | [k8s.io.api.core.v1.Service](#k8s.io.api.core.v1.Service) | optional | ServiceSpec is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core |
 | watchers | [NotificationWatchers](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.NotificationWatchers) | optional | Watchers are components which are interested listening to notifications from this gateway These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications. In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case specifying watchers would be unnecessary. |
 | processorPort | [string](#string) | optional | Port on which the gateway event source processor is running on. |
-| dispatchProtocol | [string](#string) | optional | DispatchProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway) |
+| eventProtocol | [EventProtocol](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.EventProtocol) | optional | EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway) |
 
 
 
@@ -139,6 +159,39 @@ GatewayStatus contains information about the status of a gateway.
 
 
 
+<a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Http"></a>
+
+### Http
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| port | [string](#string) | optional |  |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Nats"></a>
+
+### Nats
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| url | [string](#string) | optional |  |
+| type | [string](#string) | optional |  |
+| clientId | [string](#string) | optional |  |
+| clusterId | [string](#string) | optional |  |
+
+
+
+
+
+
 <a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.NodeStatus"></a>
 
 ### NodeStatus
@@ -148,13 +201,13 @@ A single node can represent one configuration.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| id | [string](#string) | optional | ID is a unique identifier of a node within a gateway It is a hash of the node name |
+| id | [string](#string) | optional | ID is a unique identifier of a node within a sensor It is a hash of the node name |
 | name | [string](#string) | optional | Name is a unique name in the node tree used to generate the node ID |
 | displayName | [string](#string) | optional | DisplayName is the human readable representation of the node |
 | phase | [string](#string) | optional | Phase of the node |
 | startedAt | [k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime](#k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime) | optional | StartedAt is the time at which this node started &#43;k8s:openapi-gen=false |
 | message | [string](#string) | optional | Message store data or something to save for configuration |
-| updateTime | [k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime](#k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime) | optional | UpdateTime is the time when node(gateway configuration) was updated &#43;k8s:openapi-gen=false |
+| updateTime | [k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime](#k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime) | optional | UpdateTime is the time when node(gateway configuration) was updated |
 
 
 
@@ -180,12 +233,12 @@ NotificationWatchers are components which are interested listening to notificati
 <a name="github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.SensorNotificationWatcher"></a>
 
 ### SensorNotificationWatcher
-SensorNotificationWatcher is the gateway interested in listening to notifications from this gateway
+SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| name | [string](#string) | optional | Name is name of the gateway |
+| name | [string](#string) | optional | Name is name of the sensor |
 
 
 

@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: artifact-gateway-nats-streaming
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "artifact-gateway-nats-streaming"
+spec:
+  processorPort: "9330"
+  eventProtocol:
+    type: "NATS"
+    nats:
+      url: "nats://example-nats.argo-events:4222"
+      clusterId: "example-stan"
+      clientId: "myclient"
+      type: "Streaming"
+  deploySpec:
+    metadata:
+      name: "artifact-gateway-nats-streaming"
+      labels:
+        gateway-name: "artifact-gateway-nats-streaming"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "artifact-events"
+          image: "argoproj/artifact-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/artifact-gateway"]
+      serviceAccountName: "argo-events-sa"
+  configMap: "artifact-gateway-configmap"
+  eventVersion: "1.0"
+  type: "artifact"

@@ -1,5 +1,5 @@
 /*
-Copyright 2018 KompiTech GmbH
+Copyright 2018 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,25 +19,11 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/custom/github"
-	"k8s.io/client-go/kubernetes"
-	"os"
+	"github.com/argoproj/argo-events/gateways/community/storagegrid"
 )
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
-	if !ok {
-		panic("namespace is not provided")
-	}
-	gateways.StartGateway(&github.GithubEventSourceExecutor{
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
-		Namespace: namespace,
-		Clientset: clientset,
+	gateways.StartGateway(&storagegrid.StorageGridEventSourceExecutor{
+		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
 	})
 }

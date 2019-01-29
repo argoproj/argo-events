@@ -31,7 +31,6 @@ type ResourceEventSourceExecutor struct {
 }
 
 // resource refers to a dependency on a k8s resource.
-// +k8s:openapi-gen=true
 type resource struct {
 	// Namespace where resource is deployed
 	Namespace string `json:"namespace"`
@@ -40,18 +39,15 @@ type resource struct {
 	// Version of the source
 	Version string `json:"version"`
 	// Group of the resource
-	// +k8s:openapi-gen=false
 	metav1.GroupVersionKind `json:",inline"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
-// +k8s:openapi-gen=true
 type ResourceFilter struct {
 	Prefix      string            `json:"prefix,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
-	// +k8s:openapi-gen=false
-	CreatedBy metav1.Time `json:"createdBy,omitempty"`
+	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
 }
 
 func parseEventSource(es string) (*resource, error) {

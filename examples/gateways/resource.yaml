@@ -1,4 +1,3 @@
-
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
@@ -7,18 +6,30 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "resource-gateway"
 spec:
+  processorPort: "9330"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
   deploySpec:
-    containers:
-      - name: "resource-events"
-        image: "argoproj/resource-gateway"
-        imagePullPolicy: "Always"
-        command: ["/bin/resource-gateway"]
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      name: "resource-gateway"
+      labels:
+        gateway-name: "resource-gateway"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "resource-events"
+          image: "argoproj/resource-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/resource-gateway"]
+      serviceAccountName: "argo-events-sa"
   configMap: "resource-gateway-configmap"
   type: "resource"
-  dispatchMechanism: "HTTP"
   eventVersion: "1.0"
-  imageVersion: "latest"
   watchers:
     sensors:
       - name: "resource-sensor"

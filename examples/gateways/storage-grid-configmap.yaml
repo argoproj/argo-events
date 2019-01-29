@@ -8,6 +8,3 @@ data:
     endpoint: "/"
     events:
       - "ObjectCreated:Put"
-    filter:
-      suffix: ".txt"
-      prefix: "hello-"
