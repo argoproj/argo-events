@@ -5,6 +5,7 @@ Intervals or cron schedules act as event sources for calendar gateway.
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -14,7 +15,7 @@ metadata:
   name: calendar-gateway-configmap
 data:
   interval: |-
-    interval: 10s # event is generated after every 10 seconds
+    interval: 55s # event is generated after every 10 seconds
   schedule: |-
     schedule: 30 * * * *  # event is generated after 30 min past every hour
 ```
@@ -42,3 +43,7 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/calendar.yaml
 ```
+
+## Trigger Workflow
+Wait for 55 seconds to pass or if the sensor has `calendar-gateway:schedule` as event dependency, then wait for 30 min past each hour
+for workflow to trigger.

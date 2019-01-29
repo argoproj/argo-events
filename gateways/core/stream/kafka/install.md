@@ -5,6 +5,7 @@ Kafka topics act as event sources for gateway
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -48,3 +49,6 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/kafka.yaml
 ```
+
+## Trigger Workflow
+Send a message to topic `foo` on partition `0`. You might find this useful https://kafka.apache.org/quickstart#quickstart_send 

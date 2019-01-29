@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Development Phase
+- Boolean logic for event dependencies in sensor
 - E2E testing
 
 ## Idea Phase

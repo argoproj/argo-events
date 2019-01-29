@@ -69,6 +69,3 @@ argo list -n argo-events
 ```
 
 To debug, check the logs of the sensor-controller pod, gateway-controller, associated gateways and sensors.
-
-## 7. Next steps
-* [Follow the tutorial on gateways and sensors](tutorial.md)

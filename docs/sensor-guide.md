@@ -12,7 +12,10 @@ Sensors define a set of dependencies (inputs) and actions (outputs). The sensor'
 https://github.com/argoproj/argo-events/blob/master/docs/sensor-protocol.md
 
 ## Dependencies
-A sensor can contain list of event dependencies and a dependency is defined as "gateway-name:event-source-name"
+A sensor can contain list of event dependencies and a dependency is defined as "gateway-name:event-source-name".
+
+**Note**: If a sensor defines more than one event dependencies then it will wait for all of these events to happen,
+then only it will trigger workflow/s. Basically, waiting for event dependencies is a `AND` operation.
 
 ## Triggers
 Refer [Triggers](trigger-guide.md) guide.

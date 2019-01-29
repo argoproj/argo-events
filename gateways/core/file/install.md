@@ -5,6 +5,7 @@ File system serves as event source for file gateway
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -18,6 +19,13 @@ data:
     type: CREATE # type of file event
     path: x.txt # file to watch to
 ```
+
+Supported file events are -
+* Create
+* Write
+* Remove
+* Rename
+* Chmod 
 
 ```yaml
 kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/file-gateway-configmap.yaml
@@ -44,3 +52,6 @@ Pre-requisite - The file system you want to watch must be mounted in gateway pod
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/file.yaml
 ```
+
+## Trigger Workflow
+Go to the directory specified in event source and create a file.

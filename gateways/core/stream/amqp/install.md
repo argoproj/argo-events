@@ -3,6 +3,7 @@
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -48,3 +49,6 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/amqp.yaml
 ```
+
+## Trigger workflow
+Send a message to exchange name `foo` with exchange type `fanout` and routing key as `fooK` on amqp://amqp.argo-events:5672

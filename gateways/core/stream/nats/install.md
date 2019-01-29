@@ -5,6 +5,7 @@ NATS subjects act as event sources for gateway
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -43,3 +44,6 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/nats.yaml
 ```
+
+## Trigger Workflow
+Publish message to subject `foo`. You might find this useful https://github.com/nats-io/go-nats/tree/master/examples/nats-pub

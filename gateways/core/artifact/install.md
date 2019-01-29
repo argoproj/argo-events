@@ -5,6 +5,7 @@ Minio bucket notifications acts as event sources for artifact gateway. To setup 
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -54,3 +55,6 @@ Pre-requisite - create necessary buckets in Minio.
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/artifact.yaml
 ```
+
+## Trigger workflow
+Drop a file onto `input` bucket and monitor workflows

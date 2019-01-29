@@ -5,6 +5,7 @@ K8s resources act as event sources for Resource gateway
 1. [Example event sources definition](#example-event-sources-definition)
 2. [Install gateway](#install-gateway)
 3. [Install sensor](#install-sensor)
+4. [Trigger Workflow](#trigger-workflow)
 
 ## Example event sources definition
 ```yaml
@@ -58,3 +59,6 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/resource.yaml
 ```
+
+## Trigger workflow
+Create an argo workflow with name `my-workflow`. As soon as `my-workflow` succeeds, a new workflow will be triggered.
