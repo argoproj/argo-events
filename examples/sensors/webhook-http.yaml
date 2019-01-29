@@ -10,7 +10,7 @@ spec:
       - name: "sensor"
         image: "argoproj/sensor"
         imagePullPolicy: Always
-    serviceAccountName: argo-events
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway-http:foo"
   eventProtocol:
