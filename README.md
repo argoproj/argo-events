@@ -38,10 +38,10 @@ Argo Events is an event-based dependency manager for Kubernetes. The core concep
 <br/>
 
 1. [Installation](./docs/quickstart.md)
-2. [Sensor and gateway controllers](controllers-guide.md)
-3. [Learn about gateways](gateway-guide.md)
-4. [Learn about sensors](sensor-guide.md)
-5. [Learn about triggers](trigger-guide.md)
+2. [Sensor and gateway controllers](docs/controllers-guide.md)
+3. [Learn about gateways](docs/gateway-guide.md)
+4. [Learn about sensors](docs/sensor-guide.md)
+5. [Learn about triggers](docs/trigger-guide.md)
 6. [Install Gateways and Sensors]()
     1. [Webhook](gateways/core/webhook/install.md)
     2. [Artifact](gateways/core/artifact/install.md)
