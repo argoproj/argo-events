@@ -194,33 +194,33 @@ mqtt-image: mqtt-linux
 
 # Custom gateways
 storage-grid:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/custom/storagegrid/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/community/storagegrid/cmd
 
 storage-grid-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
 
 storage-grid-image: storage-grid-linux
-	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/custom/storagegrid/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/community/storagegrid/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
 gitlab:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gitlab-gateway ./gateways/custom/gitlab/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gitlab-gateway ./gateways/community/gitlab/cmd
 
 gitlab-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gitlab
 
 gitlab-image: gitlab-linux
-	 docker build -t $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) -f ./gateways/custom/gitlab/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) -f ./gateways/community/gitlab/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) ; fi
 	
 github:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/github-gateway ./gateways/custom/github/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/github-gateway ./gateways/community/github/cmd
 
 github-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make github
 
 github-image: github-linux
-	 docker build -t $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) -f ./gateways/custom/github/Dockerfile .
+	 docker build -t $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) -f ./gateways/community/github/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) ; fi
 
 test:

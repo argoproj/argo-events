@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: webhook-gateway-nats-streaming
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "webhook-gateway-nats-streaming"
+spec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
+  processorPort: "9330"
+  eventProtocol:
+    type: "NATS"
+    nats:
+      url: "nats://example-nats.argo-events:4222"
+      clusterId: "example-stan"
+      clientId: "myclient"
+      type: "Streaming"
+  eventVersion: "1.0"
+  deploySpec:
+    metadata:
+      name: "webhook-gateway-nats-streaming"
+      labels:
+        gateway-name: "webhook-gateway-nats-streaming"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "webhook-events"
+          image: "argoproj/webhook-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/webhook-gateway"]
+      serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: webhook-gateway-svc
+    spec:
+      selector:
+        gateway-name: "webhook-gateway-nats-streaming"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer

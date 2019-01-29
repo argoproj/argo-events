@@ -8,22 +8,37 @@ metadata:
 spec:
   configMap: "storage-grid-gateway-configmap"
   type: "storage_grid"
-  dispatchMechanism: "HTTP"
+  processorPort: "9330"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
   eventVersion: "1.0"
-  imageVersion: "latest"
   deploySpec:
-    containers:
-    - name: "storage-grid-events"
-      image: "argoproj/storage-grid-gateway"
-      imagePullPolicy: "Always"
-    serviceAccountName: "argo-events-sa"
+    metadata:
+      name: "storage-grid-gateway"
+      labels:
+        gateway-name: "storage-grid-gateway"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "storage-grid-events"
+          image: "argoproj/storage-grid-gateway"
+          imagePullPolicy: "Always"
+      serviceAccountName: "argo-events-sa"
   serviceSpec:
-    selector:
-      gateway-name: "storage-grid-gateway"
-    ports:
-      - port: 8080
-        targetPort: 8080
-    type: LoadBalancer
+    metadata:
+      name: storage-grid-gateway-svc
+    spec:
+      selector:
+        gateway-name: "storage-grid-gateway"
+      ports:
+        - port: 8080
+          targetPort: 8080
+      type: LoadBalancer
   watchers:
     sensors:
     - name: "storage-grid-watcher-sensor"

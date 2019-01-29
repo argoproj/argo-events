@@ -5,12 +5,18 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  repeat: true
-  serviceAccountName: argo-events-sa
-  imageVersion: "latest"
-  imagePullPolicy: Always
-  signals:
-    - name: calendar-gateway/foo
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  dependencies:
+    - name: "calendar-gateway:interval"
   triggers:
     - name: inline-workflow-trigger
       resource:

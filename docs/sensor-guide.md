@@ -1,54 +1,32 @@
-## Sensor Guide
-
+# Sensor Guide
 Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
 [Sensor examples](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
 
+1. [Specifications](#specifications)
+2. [Dependencies](#dependencies)
+3. [Triggers](#triggers)
+4. [Passing event payload to trigger/s](#passing-event-payload-to-triggers)
+5. [Filters](#filters)
 
-### Dependencies
-Dependencies(also called signals) are defined as "gateway-name/specific-configuration"
-``` 
-signals:
-    - name: calendar-gateway/calendar.fooConfig
-    - name: webhook-gateway/webhook.barConfig
-```
+## Specifications
+https://github.com/argoproj/argo-events/blob/master/docs/sensor-protocol.md
 
-### Repeating the sensor
-Sensor can be configured to rerun by setting repeat property to `true`
-``` 
-spec:
-  repeat: true
-```
+## Dependencies
+A sensor can contain list of event dependencies and a dependency is defined as "gateway-name:event-source-name".
 
-### Triggers
+**Note**: If a sensor defines more than one event dependencies then it will wait for all of these events to happen,
+then only it will trigger workflow/s. Basically, waiting for event dependencies is a `AND` operation.
+
+## Triggers
 Refer [Triggers](trigger-guide.md) guide.
 
+## Passing event payload to trigger/s
+Event payload of any signal can be passed to any trigger.
 
-### Event payload
-Event payload of any signal can be passed to any trigger. To pass complete payload without applying any filter,
-do not set ```path```
-e.g.
-```yaml
-parameters:
-  - src:
-      signal: webhook-gateway/webhook.fooConfig
-      path:
-    dest: spec.templates.0.container.args.0
-``` 
+* Pass complete event payload https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-with-complete-payload.yaml
+* Extract particular key from event payload and pass to trigger https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-with-resource-param.yaml 
 
-Complete example to pass payload from signal to trigger can be found [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook.yaml) 
-
-To pass a particular field from payload to trigger, set ```path```. e.g.
-```yaml
-parameters:
-  - src:
-      signal: webhook-gateway/webhook.fooConfig
-      path: name
-    dest: spec.templates.0.container.args.0
-```
-
-In above example, the object/value corresponding to key ```name``` will be passed to trigger.  
-
-### Filters
+## Filters
 Additionally, you can apply filters on the payload.
 
 There are 3 types of filters:
@@ -59,7 +37,7 @@ There are 3 types of filters:
 |   EventContext    |   Filters metadata that provides circumstantial information about the signal.      |
 |   Data            |   Describes constraints and filters for payload      |
 
-#### Time Filter
+### Time Filter
 ``` 
 filters:
         time:
@@ -67,7 +45,7 @@ filters:
           stop: "2020-01-02T15:04:05Z07:00"
 ```
 
-#### EventContext Filter
+### EventContext Filter
 ``` 
 filters:
         context:
@@ -76,7 +54,7 @@ filters:
             contentType: application/json
 ```
 
-#### Data filter
+### Data filter
 ```
 filters:
         data:

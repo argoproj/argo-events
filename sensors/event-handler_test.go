@@ -44,9 +44,13 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "metalgearsolid/sensor:v0.6.1"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
   dependencies:
     - name: test-gateway:test
   triggers:

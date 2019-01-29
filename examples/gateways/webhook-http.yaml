@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: webhook-gateway-http
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "webhook-gateway-http"
+spec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
+  processorPort: "9330"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  eventVersion: "1.0"
+  deploySpec:
+    metadata:
+      name: "webhook-gateway-http"
+      labels:
+        gateway-name: "webhook-gateway-http"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "webhook-events"
+          image: "argoproj/webhook-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/webhook-gateway"]
+      serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: webhook-gateway-svc
+    spec:
+      selector:
+        gateway-name: "webhook-gateway-http"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
+  watchers:
+    sensors:
+      - name: "webhook-sensor-http"

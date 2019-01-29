@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.7
++ Refactor gateways #147
++ Fixed sensor error state recovery bug #145
++ Ability to add annotations on sensor and gateway pods #143
++ Github gateway
++ Added support for NATS standard and streaming as communication protocol between gateway
+  and sensor #99
+
 ## v0.6
 + Gitlab Gateway #120
 + If sensor is repeatable then deploy it as deployment else job #109
