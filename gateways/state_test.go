@@ -30,7 +30,6 @@ func TestGatewayState(t *testing.T) {
 			var err error
 			gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Create(gc.gw)
 			convey.So(err, convey.ShouldBeNil)
-
 		})
 
 		convey.Convey("Update gateway resource test-node node state to running", func() {

@@ -76,6 +76,54 @@ message EventContext {
   map<string, string> extensions = 9;
 }
 
+// Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
+message EventProtocol {
+  optional string type = 1;
+
+  optional Http http = 2;
+
+  optional Nats nats = 3;
+}
+
+// Http contains the information required to setup a http server and listen to incoming events
+message Http {
+  // Port on which server will run
+  optional string port = 1;
+}
+
+// Nats contains the information required to connect to nats server and get subscriptions
+message Nats {
+  // URL is nats server/service URL
+  optional string url = 1;
+
+  // Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
+  optional bool startWithLastReceived = 2;
+
+  // Receive all stored values in order.
+  optional bool deliverAllAvailable = 3;
+
+  // Receive messages starting at a specific sequence number
+  optional string startAtSequence = 4;
+
+  // Subscribe starting at a specific time
+  optional string startAtTime = 5;
+
+  // Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
+  optional string startAtTimeDelta = 6;
+
+  // Durable subscriptions allow clients to assign a durable name to a subscription when it is created
+  optional bool durable = 7;
+
+  // The NATS Streaming cluster ID
+  optional string clusterId = 8;
+
+  // The NATS Streaming cluster ID
+  optional string clientId = 9;
+
+  // Type of the connection. either standard or streaming
+  optional string type = 10;
+}
+
 // S3Artifact contains information about an artifact in S3
 message S3Artifact {
   optional string endpoint = 1;
