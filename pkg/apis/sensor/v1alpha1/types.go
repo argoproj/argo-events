@@ -40,6 +40,7 @@ type NodeType string
 const (
 	NodeTypeEventDependency NodeType = "EventDependency"
 	NodeTypeTrigger         NodeType = "Trigger"
+	NodeTypeDependencyGroup NodeType = "DependencyGroup"
 )
 
 // NodePhase is the label for the condition of a node
@@ -59,8 +60,7 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
-	v1.TypeMeta `json:",inline"`
-
+	v1.TypeMeta   `json:",inline"`
 	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
 	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
@@ -76,8 +76,8 @@ type SensorList struct {
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// Dependencies is a list of the events that this sensor is dependent on.
-	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
+	// DependencyGroups is a list of the groups of events.
+	DependencyGroups []DependencyGroup `json:"dependencyGroups" protobuf:"bytes,1,rep,name=dependencyGroups"`
 
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
@@ -87,6 +87,9 @@ type SensorSpec struct {
 
 	// EventProtocol is the protocol through which sensor receives events from gateway
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
+
+	// Circuit is a boolean expression of dependency groups
+	Circuit string `json:"circuit" protobuf:"bytes,5,rep,name=dependencyGroups"`
 }
 
 // EventDependency describes a dependency
@@ -106,6 +109,14 @@ type EventDependency struct {
 
 	// Connected tells if subscription is already setup in case of nats protocol.
 	Connected bool `json:"connected,omitempty" protobuf:"bytes,4,opt,name=connected"`
+}
+
+// DependencyGroup is the group of dependencies that must resolve before marking whole group as complete
+type DependencyGroup struct {
+	// Name of the dependency group
+	Name string `json:"name" protobuf:"bytes,2,name=name"`
+	// Dependencies is a list of the events that this sensor is dependent on.
+	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion

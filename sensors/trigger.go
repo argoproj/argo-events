@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"fmt"
+	"github.com/Knetic/govaluate"
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
@@ -30,60 +31,84 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// evaluateDependencyGroups marks status for each dependency group and evaluate circuit expression
+func (sec *sensorExecutionCtx) evaluateDependencyGroups() (bool, error) {
+	groups := make(map[string]interface{}, len(sec.sensor.Spec.DependencyGroups))
+	for _, group := range sec.sensor.Spec.DependencyGroups {
+		for _, dependency := range group.Dependencies {
+			if nodeStatus := sn.GetNodeByName(sec.sensor, dependency.Name); nodeStatus.Phase == v1alpha1.NodePhaseComplete {
+				continue
+			}
+			groups[group.Name] = true
+		}
+	}
+
+	expression, err := govaluate.NewEvaluableExpression(sec.sensor.Spec.Circuit)
+	if err != nil {
+		return false, fmt.Errorf("failed to create circuit expression. err: %+v", err)
+	}
+
+	result, err := expression.Evaluate(groups)
+	if err != nil {
+		return false, fmt.Errorf("failed to evaluate circuit expression. err: %+v", err)
+	}
+
+	return result == true, err
+}
+
 // processTriggers checks if all event dependencies are complete and then starts executing triggers
 func (sec *sensorExecutionCtx) processTriggers() {
 	// to trigger the sensor action/s we need to check if all event dependencies are completed and sensor is active
-	if sec.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
-		sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
+	sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
 
-		// labels for K8s event
-		labels := map[string]string{
-			common.LabelSensorName: sec.sensor.Name,
-			common.LabelOperation:  "process_triggers",
-		}
-
-		for _, trigger := range sec.sensor.Spec.Triggers {
-			if err := sec.executeTrigger(trigger); err != nil {
-				sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
-
-				sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger. err: %+v", err))
-
-				// escalate using K8s event
-				labels[common.LabelEventType] = string(common.EscalationEventType)
-				if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Name), common.EscalationEventType,
-					"trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-					sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
-				}
-				continue
-			}
-
-			// mark trigger as complete.
-			sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
-
-			labels[common.LabelEventType] = string(common.OperationSuccessEventType)
-			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Name), common.OperationSuccessEventType,
-				"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-				sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
-			}
-		}
-
-		// increment completion counter
-		sec.sensor.Status.CompletionCount = sec.sensor.Status.CompletionCount + 1
-
-		// create K8s event to mark the trigger round completion
-		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
-			"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
-		}
-
-		// Mark all signal nodes as active
-		for _, dep := range sec.sensor.Spec.Dependencies {
-			sn.MarkNodePhase(sec.sensor, dep.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-initialized")
-		}
-		return
+	// labels for K8s event
+	labels := map[string]string{
+		common.LabelSensorName: sec.sensor.Name,
+		common.LabelOperation:  "process_triggers",
 	}
-	sec.log.Info().Msg("triggers can't be executed because event dependencies are not complete")
+
+	for _, trigger := range sec.sensor.Spec.Triggers {
+		if err := sec.executeTrigger(trigger); err != nil {
+			sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
+
+			sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger. err: %+v", err))
+
+			// escalate using K8s event
+			labels[common.LabelEventType] = string(common.EscalationEventType)
+			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Name), common.EscalationEventType,
+				"trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+				sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
+			}
+			continue
+		}
+
+		// mark trigger as complete.
+		sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
+
+		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Name), common.OperationSuccessEventType,
+			"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
+		}
+	}
+
+	// increment completion counter
+	sec.sensor.Status.CompletionCount = sec.sensor.Status.CompletionCount + 1
+
+	// create K8s event to mark the trigger round completion
+	labels[common.LabelEventType] = string(common.OperationSuccessEventType)
+	if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
+		"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+		sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
+	}
+
+	// Mark all signal nodes as active
+	for _, group := range sec.sensor.Spec.DependencyGroups {
+		sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "group is re-activated")
+		for _, dependency := range group.Dependencies {
+			sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-activated")
+		}
+	}
 }
 
 // execute the trigger

@@ -107,6 +107,8 @@ func TestSensorOperations(t *testing.T) {
 						switch node.Type {
 						case v1alpha1.NodeTypeEventDependency:
 							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+						case v1alpha1.NodeTypeDependencyGroup:
+							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 						case v1alpha1.NodeTypeTrigger:
 							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseNew)
 						}

@@ -102,8 +102,11 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Initialize all event dependency nodes
-		for _, eventDependency := range soc.s.Spec.Dependencies {
-			InitializeNode(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
+		for _, group := range soc.s.Spec.DependencyGroups {
+			InitializeNode(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, &soc.log)
+			for _, dependency := range group.Dependencies {
+				InitializeNode(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
+			}
 		}
 
 		// Initialize all trigger nodes
@@ -183,8 +186,11 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 		// Mark all eventDependency nodes as active
-		for _, eventDependency := range soc.s.Spec.Dependencies {
-			MarkNodePhase(soc.s, eventDependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+		for _, group := range soc.s.Spec.DependencyGroups {
+			MarkNodePhase(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &soc.log, "group is active")
+			for _, dependency := range group.Dependencies {
+				MarkNodePhase(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+			}
 		}
 
 		// if we get here - we know the signals are running
