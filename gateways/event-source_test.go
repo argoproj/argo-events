@@ -2,12 +2,13 @@ package gateways
 
 import (
 	"context"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"os"
 	"sync"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -28,6 +29,12 @@ func getGatewayConfig() *GatewayConfig {
 			Spec: v1alpha1.GatewaySpec{
 				Watchers: &v1alpha1.NotificationWatchers{
 					Sensors: []v1alpha1.SensorNotificationWatcher{},
+				},
+				EventProtocol: &pc.EventProtocol{
+					Type: pc.HTTP,
+					Http: pc.Http{
+						Port: "9000",
+					},
 				},
 			},
 		},
