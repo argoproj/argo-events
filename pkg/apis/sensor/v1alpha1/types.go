@@ -86,58 +86,7 @@ type SensorSpec struct {
 	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,opt,name=deploySpec"`
 
 	// EventProtocol is the protocol through which sensor receives events from gateway
-	EventProtocol *EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
-}
-
-// EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols
-type EventProtocol struct {
-	// Type defines the type of protocol over which events will be receieved
-	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
-
-	// Http contains the information required to setup a http server and listen to incoming events
-	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
-
-	// Nats contains the information required to connect to nats server and get subscriptions
-	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
-}
-
-// Http contains the information required to setup a http server and listen to incoming events
-type Http struct {
-	// Port on which server will run
-	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
-}
-
-// Nats contains the information required to connect to nats server and get subscriptions
-type Nats struct {
-	// URL is nats server/service URL
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
-
-	// Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
-	StartWithLastReceived bool `json:"startWithLastReceived,omitempty" protobuf:"bytes,2,opt,name=startWithLastReceived"`
-
-	// Receive all stored values in order.
-	DeliverAllAvailable bool `json:"deliverAllAvailable,omitempty" protobuf:"bytes,3,opt,name=deliverAllAvailable"`
-
-	// Receive messages starting at a specific sequence number
-	StartAtSequence string `json:"startAtSequence,omitempty" protobuf:"bytes,4,opt,name=startAtSequence"`
-
-	// Subscribe starting at a specific time
-	StartAtTime string `json:"startAtTime,omitempty" protobuf:"bytes,5,opt,name=startAtTime"`
-
-	// Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
-	StartAtTimeDelta string `json:"startAtTimeDelta,omitempty" protobuf:"bytes,6,opt,name=startAtTimeDelta"`
-
-	// Durable subscriptions allow clients to assign a durable name to a subscription when it is created
-	Durable bool `json:"durable,omitempty" protobuf:"bytes,7,opt,name=durable"`
-
-	// The NATS Streaming cluster ID
-	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,8,opt,name=clusterId"`
-
-	// The NATS Streaming cluster ID
-	ClientId string `json:"clientId,omitempty" protobuf:"bytes,9,opt,name=clientId"`
-
-	// Type of the connection. either standard or streaming
-	Type common.NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
+	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
 }
 
 // EventDependency describes a dependency

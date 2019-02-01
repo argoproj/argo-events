@@ -32,3 +32,4 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
 					  "gateway:v1alpha1" \
 						  --go-header-file ./custom-boilerplate.go.txt
 
+go run ${GOPATH}/src/k8s.io/gengo/examples/deepcopy-gen/main.go -i github.com/argoproj/argo-events/pkg/apis/common -p github.com/argoproj/argo-events/pkg/apis/common

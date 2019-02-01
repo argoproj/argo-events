@@ -83,7 +83,7 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
 
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	EventProtocol EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
+	EventProtocol *common.EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.
@@ -155,27 +155,4 @@ type GatewayNotificationWatcher struct {
 type SensorNotificationWatcher struct {
 	// Name is name of the sensor
 	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
-}
-
-// Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
-type EventProtocol struct {
-	Type common.EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
-
-	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
-
-	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
-}
-
-type Http struct {
-	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
-}
-
-type Nats struct {
-	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
-
-	Type common.NatsType `json:"type" protobuf:"bytes,2,opt,name=type"`
-
-	ClientId string `json:"clientId,omitempty" protobuf:"bytes,3,opt,name=clientId"`
-
-	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,4,opt,name=clusterId"`
 }
