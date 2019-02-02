@@ -252,7 +252,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					},
 					"filters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+							Description: "DataFilters and rules governing tolerations of success and constraints on the context and data of an event",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
@@ -826,7 +826,7 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TimeFilter describes a window in time. Filters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
+				Description: "TimeFilter describes a window in time. DataFilters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"start": {

@@ -31,29 +31,38 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// evaluateDependencyGroups marks status for each dependency group and evaluate circuit expression
-func (sec *sensorExecutionCtx) evaluateDependencyGroups() (bool, error) {
-	groups := make(map[string]interface{}, len(sec.sensor.Spec.DependencyGroups))
-	for _, group := range sec.sensor.Spec.DependencyGroups {
-		for _, dependency := range group.Dependencies {
-			if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase == v1alpha1.NodePhaseComplete {
-				continue
+// canProcessTriggers evaluates whether triggers can be processed and executed
+func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
+	if sec.sensor.Spec.DependencyGroups != nil {
+		groups := make(map[string]interface{}, len(sec.sensor.Spec.DependencyGroups))
+	group:
+		for _, group := range sec.sensor.Spec.DependencyGroups {
+			for _, dependency := range group.Dependencies {
+				if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase != v1alpha1.NodePhaseComplete {
+					continue group
+				}
 			}
 			groups[group.Name] = true
 		}
+
+		expression, err := govaluate.NewEvaluableExpression(sec.sensor.Spec.Circuit)
+		if err != nil {
+			return false, fmt.Errorf("failed to create circuit expression. err: %+v", err)
+		}
+
+		result, err := expression.Evaluate(groups)
+		if err != nil {
+			return false, fmt.Errorf("failed to evaluate circuit expression. err: %+v", err)
+		}
+
+		return result == true, err
 	}
 
-	expression, err := govaluate.NewEvaluableExpression(sec.sensor.Spec.Circuit)
-	if err != nil {
-		return false, fmt.Errorf("failed to create circuit expression. err: %+v", err)
+	if sec.sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency) {
+		return true, nil
 	}
 
-	result, err := expression.Evaluate(groups)
-	if err != nil {
-		return false, fmt.Errorf("failed to evaluate circuit expression. err: %+v", err)
-	}
-
-	return result == true, err
+	return false, nil
 }
 
 // processTriggers checks if all event dependencies are complete and then starts executing triggers

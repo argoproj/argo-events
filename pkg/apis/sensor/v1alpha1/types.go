@@ -40,6 +40,7 @@ type NodeType string
 const (
 	NodeTypeEventDependency NodeType = "EventDependency"
 	NodeTypeTrigger         NodeType = "Trigger"
+	NodeTypeDependencyGroup NodeType = "DependencyGroup"
 )
 
 // NodePhase is the label for the condition of a node
@@ -88,7 +89,7 @@ type SensorSpec struct {
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
 
 	// Circuit is a boolean expression of dependency groups
-	Circuit string `json:"circuit" protobuf:"bytes,5,rep,name=circuit"`
+	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,rep,name=circuit"`
 
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
@@ -106,7 +107,7 @@ type EventDependency struct {
 	// and proper escalations should proceed.
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
-	// Filters and rules governing tolerations of success and constraints on the context and data of an event
+	// DataFilters and rules governing tolerations of success and constraints on the context and data of an event
 	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
 
 	// Connected tells if subscription is already setup in case of nats protocol.
@@ -145,7 +146,7 @@ type EventDependencyFilter struct {
 }
 
 // TimeFilter describes a window in time.
-// Filters out event events that occur outside the time limits.
+// DataFilters out event events that occur outside the time limits.
 // In other words, only events that occur after Start and before Stop
 // will pass this filter.
 type TimeFilter struct {
@@ -172,7 +173,7 @@ const (
 
 type Data struct {
 	// filter constraints
-	Filters []*DataFilter `json:"filters" protobuf:"bytes,1,rep,name=filters"`
+	DataFilters []*DataFilter `json:"dataFilters" protobuf:"bytes,1,rep,name=dataFilters"`
 }
 
 // DataFilter describes constraints and filters for event data

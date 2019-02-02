@@ -63,30 +63,23 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		return fmt.Errorf("unknown gateway type")
 	}
 
-	if s.Spec.Circuit == "" {
-		if len(s.Spec.DependencyGroups) > 1 {
+	if s.Spec.DependencyGroups != nil {
+		if s.Spec.Circuit == "" {
 			return fmt.Errorf("no circuit expression provided to resolve dependency groups")
 		}
-		s.Spec.DependencyGroups[0] = v1alpha1.DependencyGroup{
-			Name:         "default-group",
-			Dependencies: []string{s.Spec.Dependencies[0].Name},
+		expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
+		if err != nil {
+			return fmt.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
 		}
-		s.Spec.Circuit = s.Spec.DependencyGroups[0].Name
-	}
 
-	expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
-	if err != nil {
-		return fmt.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
+		groups := make(map[string]interface{}, len(s.Spec.DependencyGroups))
+		for _, group := range s.Spec.DependencyGroups {
+			groups[group.Name] = false
+		}
+		if _, err = expression.Evaluate(groups); err != nil {
+			return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
+		}
 	}
-
-	groups := make(map[string]interface{}, len(s.Spec.DependencyGroups))
-	for _, group := range s.Spec.DependencyGroups {
-		groups[group.Name] = false
-	}
-	if _, err = expression.Evaluate(groups); err != nil {
-		return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
-	}
-
 	return nil
 }
 

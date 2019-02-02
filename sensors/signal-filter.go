@@ -153,7 +153,7 @@ func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *apicommon.
 	if data == nil {
 		return true, nil
 	}
-	dataFilters := data.Filters
+	dataFilters := data.DataFilters
 	if dataFilters == nil {
 		return true, nil
 	}

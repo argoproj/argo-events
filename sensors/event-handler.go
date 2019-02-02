@@ -98,15 +98,15 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, &sec.log, "event is received")
 
-		// check if circuit expression resolves to true
-		circuitResult, err := sec.evaluateDependencyGroups()
+		// check if triggers can be processed and executed
+		canProcess, err := sec.canProcessTriggers()
 		if err != nil {
-			sec.log.Error().Err(err).Str("circuit-expression", sec.sensor.Spec.Circuit).Msg("failed to evaluate circuit expression")
+			sec.log.Error().Err(err).Msg("failed to evaluate circuit expression")
 			return
 		}
 
-		if !circuitResult {
-			sec.log.Info().Str("circuit-expression", sec.sensor.Spec.Circuit).Msg("circuit expression resolved to false, won't fire triggers")
+		if !canProcess {
+			sec.log.Info().Msg("triggers can't be processed at this time, won't fire triggers")
 			return
 		}
 		sec.processTriggers()
