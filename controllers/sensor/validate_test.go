@@ -28,7 +28,7 @@ import (
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	convey.Convey("Validate list sensor", t, func() {
+	convey.Convey("Validate list of sensor", t, func() {
 		files, err := ioutil.ReadDir(dir)
 		convey.So(err, convey.ShouldBeNil)
 		for _, file := range files {

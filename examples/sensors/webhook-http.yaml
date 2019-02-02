@@ -8,20 +8,11 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor:v0.7.1"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway-http:foo"
-    - name: "webhook-gateway-http:index"
-  dependencyGroups:
-    - name: "group_1"
-      dependencies:
-        - "webhook-gateway-http:foo"
-    - name: "group_2"
-      dependencies:
-        - "webhook-gateway-http:index"
-  circuit: "group_1 && group_2"
   eventProtocol:
     type: "HTTP"
     http:

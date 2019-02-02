@@ -118,11 +118,19 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		hasDependenciesUpdated := false
 
-		// initialize new dependency-groups/dependencies
+		// initialize new dependencies
 		for _, dependency := range sec.sensor.Spec.Dependencies {
 			if node := sn.GetNodeByName(sec.sensor, dependency.Name); node == nil {
 				sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
 				sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is active")
+			}
+		}
+
+		// initialize new dependency groups
+		for _, group := range sec.sensor.Spec.DependencyGroups {
+			if node := sn.GetNodeByName(sec.sensor, group.Name); node == nil {
+				sn.InitializeNode(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, &sec.log)
+				sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is active")
 			}
 		}
 
