@@ -36,7 +36,7 @@ func (sec *sensorExecutionCtx) evaluateDependencyGroups() (bool, error) {
 	groups := make(map[string]interface{}, len(sec.sensor.Spec.DependencyGroups))
 	for _, group := range sec.sensor.Spec.DependencyGroups {
 		for _, dependency := range group.Dependencies {
-			if nodeStatus := sn.GetNodeByName(sec.sensor, dependency.Name); nodeStatus.Phase == v1alpha1.NodePhaseComplete {
+			if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase == v1alpha1.NodePhaseComplete {
 				continue
 			}
 			groups[group.Name] = true
@@ -103,11 +103,8 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	}
 
 	// Mark all signal nodes as active
-	for _, group := range sec.sensor.Spec.DependencyGroups {
-		sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "group is re-activated")
-		for _, dependency := range group.Dependencies {
-			sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is re-activated")
-		}
+	for _, dependency := range sec.sensor.Spec.Dependencies {
+		sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is re-activated")
 	}
 }
 

@@ -107,6 +107,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		if !circuitResult {
 			sec.log.Info().Str("circuit-expression", sec.sensor.Spec.Circuit).Msg("circuit expression resolved to false, won't fire triggers")
+			return
 		}
 		sec.processTriggers()
 
@@ -118,16 +119,10 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		hasDependenciesUpdated := false
 
 		// initialize new dependency-groups/dependencies
-		for _, group := range sec.sensor.Spec.DependencyGroups {
-			if node := sn.GetNodeByName(sec.sensor, group.Name); node == nil {
-				sn.InitializeNode(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, &sec.log)
-				sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is active")
-			}
-			for _, dependency := range group.Dependencies {
-				if node := sn.GetNodeByName(sec.sensor, dependency.Name); node == nil {
-					sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
-					sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "event dependency is active")
-				}
+		for _, dependency := range sec.sensor.Spec.Dependencies {
+			if node := sn.GetNodeByName(sec.sensor, dependency.Name); node == nil {
+				sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
+				sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is active")
 			}
 		}
 
@@ -183,11 +178,9 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
 func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
-	for _, group := range sec.sensor.Spec.DependencyGroups {
-		for _, event := range group.Dependencies {
-			if event.Name == events.Context.Source.Host {
-				return &event, true
-			}
+	for _, dependency := range sec.sensor.Spec.Dependencies {
+		if dependency.Name == events.Context.Source.Host {
+			return &dependency, true
 		}
 	}
 	return nil, false

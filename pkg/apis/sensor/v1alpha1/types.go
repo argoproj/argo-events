@@ -40,7 +40,6 @@ type NodeType string
 const (
 	NodeTypeEventDependency NodeType = "EventDependency"
 	NodeTypeTrigger         NodeType = "Trigger"
-	NodeTypeDependencyGroup NodeType = "DependencyGroup"
 )
 
 // NodePhase is the label for the condition of a node
@@ -76,26 +75,29 @@ type SensorList struct {
 
 // SensorSpec represents desired sensor state
 type SensorSpec struct {
-	// DependencyGroups is a list of the groups of events.
-	DependencyGroups []DependencyGroup `json:"dependencyGroups" protobuf:"bytes,1,rep,name=dependencyGroups"`
+	// Dependencies is a list of the events that this sensor is dependent on.
+	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
 
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,opt,name=deploySpec"`
+	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,name=deploySpec"`
 
 	// EventProtocol is the protocol through which sensor receives events from gateway
-	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,opt,name=eventProtocol"`
+	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
 
 	// Circuit is a boolean expression of dependency groups
-	Circuit string `json:"circuit" protobuf:"bytes,5,rep,name=dependencyGroups"`
+	Circuit string `json:"circuit" protobuf:"bytes,5,rep,name=circuit"`
+
+	// DependencyGroups is a list of the groups of events.
+	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
 }
 
 // EventDependency describes a dependency
 type EventDependency struct {
 	// Name is a unique name of this dependency
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated.
 	// Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
@@ -111,26 +113,26 @@ type EventDependency struct {
 	Connected bool `json:"connected,omitempty" protobuf:"bytes,4,opt,name=connected"`
 }
 
-// DependencyGroup is the group of dependencies that must resolve before marking whole group as complete
+// DependencyGroup is the group of dependencies
 type DependencyGroup struct {
-	// Name of the dependency group
-	Name string `json:"name" protobuf:"bytes,2,name=name"`
-	// Dependencies is a list of the events that this sensor is dependent on.
-	Dependencies []EventDependency `json:"dependencies" protobuf:"bytes,1,rep,name=dependencies"`
+	// Name of the group
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	// Dependencies of events
+	Dependencies []string `json:"dependencies" protobuf:"bytes,2,name=dependencies"`
 }
 
 // GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
 // to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
 type GroupVersionKind struct {
-	Group   string `json:"group" protobuf:"bytes,1,opt,name=group"`
-	Version string `json:"version" protobuf:"bytes,2,opt,name=version"`
-	Kind    string `json:"kind" protobuf:"bytes,3,opt,name=kind"`
+	Group   string `json:"group" protobuf:"bytes,1,name=group"`
+	Version string `json:"version" protobuf:"bytes,2,name=version"`
+	Kind    string `json:"kind" protobuf:"bytes,3,name=kind"`
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
 type EventDependencyFilter struct {
 	// Name is the name of event filter
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
@@ -197,7 +199,7 @@ type DataFilter struct {
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
 	// Name is a unique name of the action to take
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// Resource describes the resource that will be created by this action
 	Resource *ResourceObject `json:"resource,omitempty" protobuf:"bytes,2,opt,name=resource"`
@@ -206,19 +208,19 @@ type Trigger struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
 
 	// RetryStrategy is the strategy to retry a trigger if it fails
-	RetryStrategy *RetryStrategy `json:"retryStrategy" protobuf:"bytes,4,opt,name=replyStrategy"`
+	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=replyStrategy"`
 }
 
 // ResourceParameter indicates a passed parameter to a service template
 type ResourceParameter struct {
 	// Src contains a source reference to the value of the resource parameter from a event event
-	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,opt,name=src"`
+	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
 	// The -1 key can be used to append a value to an existing array.
 	// See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.
-	Dest string `json:"dest" protobuf:"bytes,2,opt,name=dest"`
+	Dest string `json:"dest" protobuf:"bytes,2,name=dest"`
 }
 
 // ResourceParameterSource defines the source for a resource parameter from a event event
@@ -329,11 +331,11 @@ type ArtifactLocation struct {
 // ConfigmapArtifact contains information about artifact in k8 configmap
 type ConfigmapArtifact struct {
 	// Name of the configmap
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
 	// Namespace where configmap is deployed
-	Namespace string `json:"namespace" protobuf:"bytes,2,opt,name=namespace"`
+	Namespace string `json:"namespace" protobuf:"bytes,2,name=namespace"`
 	// Key within configmap data which contains trigger resource definition
-	Key string `json:"key" protobuf:"bytes,3,opt,name=key"`
+	Key string `json:"key" protobuf:"bytes,3,name=key"`
 }
 
 // FileArtifact contains information about an artifact in a filesystem
@@ -343,7 +345,7 @@ type FileArtifact struct {
 
 // URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
-	Path       string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+	Path       string `json:"path" protobuf:"bytes,1,name=path"`
 	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
 }
 

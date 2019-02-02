@@ -31,7 +31,7 @@ import (
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
-	if err := validateDependencyGroups(s.Spec.DependencyGroups); err != nil {
+	if err := validateSignals(s.Spec.Dependencies); err != nil {
 		return err
 	}
 	err := validateTriggers(s.Spec.Triggers)
@@ -67,15 +67,21 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		if len(s.Spec.DependencyGroups) > 1 {
 			return fmt.Errorf("no circuit expression provided to resolve dependency groups")
 		}
-		s.Spec.Circuit = s.Spec.DependencyGroups[1].Name
+		s.Spec.DependencyGroups[0] = v1alpha1.DependencyGroup{
+			Name:         "default-group",
+			Dependencies: []string{s.Spec.Dependencies[0].Name},
+		}
+		s.Spec.Circuit = s.Spec.DependencyGroups[0].Name
 	}
+
 	expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
 	if err != nil {
 		return fmt.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
 	}
+
 	groups := make(map[string]interface{}, len(s.Spec.DependencyGroups))
-	for key, _ := range groups {
-		groups[key] = false
+	for _, group := range s.Spec.DependencyGroups {
+		groups[group.Name] = false
 	}
 	if _, err = expression.Evaluate(groups); err != nil {
 		return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
@@ -101,28 +107,15 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 	return nil
 }
 
-func validateDependencyGroups(dependencyGroups []v1alpha1.DependencyGroup) error {
-	if len(dependencyGroups) < 1 {
-		return fmt.Errorf("no event dependency groups found")
+// perform a check to see that each event dependency defines one of and at most one of:
+// (stream, artifact, calendar, resource, webhook)
+func validateSignals(eventDependencies []v1alpha1.EventDependency) error {
+	if len(eventDependencies) < 1 {
+		return fmt.Errorf("no event dependencies found")
 	}
-	for _, group := range dependencyGroups {
-		if len(group.Dependencies) < 1 {
-			return fmt.Errorf("no event dependencies found in group")
-		}
-		if err := validateDependencyGroup(&group); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func validateDependencyGroup(group *v1alpha1.DependencyGroup) error {
-	if group.Name == "" {
-		return fmt.Errorf("no name provided for dependency group")
-	}
-	for _, ed := range group.Dependencies {
+	for _, ed := range eventDependencies {
 		if ed.Name == "" {
-			return fmt.Errorf("event name is not defined")
+			return fmt.Errorf("event dependency must define a name")
 		}
 		if err := validateEventFilter(ed.Filters); err != nil {
 			return err

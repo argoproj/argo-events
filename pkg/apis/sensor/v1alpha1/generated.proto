@@ -80,6 +80,15 @@ message DataFilter {
   optional string value = 3;
 }
 
+// DependencyGroup is the group of dependencies
+message DependencyGroup {
+  // Name of the group
+  optional string name = 1;
+
+  // Dependencies of events
+  repeated string group = 2;
+}
+
 // EventDependency describes a dependency
 message EventDependency {
   // Name is a unique name of this dependency
@@ -249,6 +258,12 @@ message SensorSpec {
 
   // EventProtocol is the protocol through which sensor receives events from gateway
   optional github.com.argoproj.argo_events.pkg.apis.common.EventProtocol eventProtocol = 4;
+
+  // Circuit is a boolean expression of dependency groups
+  optional string circuit = 5;
+
+  // DependencyGroups is a list of the groups of events.
+  repeated DependencyGroup dependencyGroups = 6;
 }
 
 // SensorStatus contains information about the status of a sensor.
