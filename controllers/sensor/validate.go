@@ -80,6 +80,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 			return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
 		}
 	}
+
 	return nil
 }
 
@@ -95,6 +96,9 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 		// each trigger must have a message or a resource
 		if trigger.Resource == nil {
 			return fmt.Errorf("trigger '%s' does not contain an absolute action", trigger.Name)
+		}
+		if trigger.When != nil && trigger.When.All != nil && trigger.When.Any != nil {
+			return fmt.Errorf("trigger condition can't have both any and all condition")
 		}
 	}
 	return nil

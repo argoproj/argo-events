@@ -210,6 +210,19 @@ type Trigger struct {
 
 	// RetryStrategy is the strategy to retry a trigger if it fails
 	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=replyStrategy"`
+
+	// When is the condition to execute the trigger
+	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,5,opt,name=when"`
+}
+
+// TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+// Depending upon condition type, status of dependency groups is used to evaluate the result.
+type TriggerCondition struct {
+	// Any acts as a OR operator between dependencies
+	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
+
+	// All acts as a AND operator between dependencies
+	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
 
 // ResourceParameter indicates a passed parameter to a service template

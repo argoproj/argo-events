@@ -317,6 +317,19 @@ message Trigger {
 
   // RetryStrategy is the strategy to retry a trigger if it fails
   optional RetryStrategy replyStrategy = 4;
+
+  // When is the condition to execute the trigger
+  optional TriggerCondition when = 5;
+}
+
+// TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+// Depending upon condition type, status of dependency groups is used to evaluate the result.
+message TriggerCondition {
+  // Any acts as a OR operator between dependencies
+  repeated string any = 1;
+
+  // All acts as a AND operator between dependencies
+  repeated string all = 2;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

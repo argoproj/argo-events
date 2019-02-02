@@ -101,7 +101,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		// check if triggers can be processed and executed
 		canProcess, err := sec.canProcessTriggers()
 		if err != nil {
-			sec.log.Error().Err(err).Msg("failed to evaluate circuit expression")
+			sec.log.Error().Err(err).Msg("error occurred while determining triggers can be processed")
 			return
 		}
 

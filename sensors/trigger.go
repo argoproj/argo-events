@@ -39,9 +39,11 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 		for _, group := range sec.sensor.Spec.DependencyGroups {
 			for _, dependency := range group.Dependencies {
 				if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase != v1alpha1.NodePhaseComplete {
+					groups[group.Name] = false
 					continue group
 				}
 			}
+			sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseComplete, nil, &sec.log, "dependency group is complete")
 			groups[group.Name] = true
 		}
 
@@ -65,6 +67,30 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 	return false, nil
 }
 
+// canExecuteTrigger determines whether a trigger is executable based on condition set on trigger
+func (sec *sensorExecutionCtx) canExecuteTrigger(trigger v1alpha1.Trigger) bool {
+	if trigger.When == nil {
+		return true
+	}
+	if trigger.When.Any != nil {
+		for _, group := range trigger.When.Any {
+			if status := sn.GetNodeByName(sec.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
+				return true
+			}
+			return false
+		}
+	}
+	if trigger.When.All != nil {
+		for _, group := range trigger.When.All {
+			if status := sn.GetNodeByName(sec.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
+				return false
+			}
+			return true
+		}
+	}
+	return true
+}
+
 // processTriggers checks if all event dependencies are complete and then starts executing triggers
 func (sec *sensorExecutionCtx) processTriggers() {
 	// to trigger the sensor action/s we need to check if all event dependencies are completed and sensor is active
@@ -77,6 +103,12 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	}
 
 	for _, trigger := range sec.sensor.Spec.Triggers {
+		// check if a trigger condition is set
+		if canExecute := sec.canExecuteTrigger(trigger); !canExecute {
+			sec.log.Info().Str("trigger-name", trigger.Name).Msg("trigger can't be executed because trigger condition failed")
+			continue
+		}
+
 		if err := sec.executeTrigger(trigger); err != nil {
 			sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
 
@@ -111,9 +143,13 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
 	}
 
-	// Mark all signal nodes as active
+	// Mark all dependency nodes as active
 	for _, dependency := range sec.sensor.Spec.Dependencies {
 		sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is re-activated")
+	}
+	// Mark all dependency groups as active
+	for _, group := range sec.sensor.Spec.DependencyGroups {
+		sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is re-activated")
 	}
 }
 

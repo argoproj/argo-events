@@ -48,6 +48,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition":        schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":             schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
 }
@@ -135,7 +136,7 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 			SchemaProps: spec.SchemaProps{
 				Type: []string{"object"},
 				Properties: map[string]spec.Schema{
-					"filters": {
+					"dataFilters": {
 						SchemaProps: spec.SchemaProps{
 							Description: "filter constraints",
 							Type:        []string{"array"},
@@ -149,7 +150,7 @@ func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.O
 						},
 					},
 				},
-				Required: []string{"filters"},
+				Required: []string{"dataFilters"},
 			},
 		},
 		Dependencies: []string{
@@ -752,7 +753,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "deploySpec", "eventProtocol", "circuit"},
+				Required: []string{"dependencies", "triggers", "deploySpec", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
@@ -883,12 +884,60 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"),
 						},
 					},
+					"when": {
+						SchemaProps: spec.SchemaProps{
+							Description: "When is the condition to execute the trigger",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TriggerCondition describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"any": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Any acts as a OR operator between dependencies",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"all": {
+						SchemaProps: spec.SchemaProps{
+							Description: "All acts as a AND operator between dependencies",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
 	}
 }
 
