@@ -73,7 +73,7 @@ required = [
   branch = "master"
 
 [[constraint]]
-  name = "github.com/xanzy/go-gitlab"
+  name = "github.com/Knetic/govaluate"
   branch = "master"
 
 [[override]]

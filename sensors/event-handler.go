@@ -98,7 +98,17 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, &sec.log, "event is received")
 
-		// check if all event dependencies are complete and kick-off triggers
+		// check if triggers can be processed and executed
+		canProcess, err := sec.canProcessTriggers()
+		if err != nil {
+			sec.log.Error().Err(err).Msg("error occurred while determining triggers can be processed")
+			return
+		}
+
+		if !canProcess {
+			sec.log.Info().Msg("triggers can't be processed at this time, won't fire triggers")
+			return
+		}
 		sec.processTriggers()
 
 	case v1alpha1.ResourceUpdateNotification:
@@ -108,11 +118,19 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		hasDependenciesUpdated := false
 
-		// initialize new event dependencies
-		for _, ed := range sec.sensor.Spec.Dependencies {
-			if node := sn.GetNodeByName(sec.sensor, ed.Name); node == nil {
-				sn.InitializeNode(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
-				sn.MarkNodePhase(sec.sensor, ed.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "event dependency is active")
+		// initialize new dependencies
+		for _, dependency := range sec.sensor.Spec.Dependencies {
+			if node := sn.GetNodeByName(sec.sensor, dependency.Name); node == nil {
+				sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
+				sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is active")
+			}
+		}
+
+		// initialize new dependency groups
+		for _, group := range sec.sensor.Spec.DependencyGroups {
+			if node := sn.GetNodeByName(sec.sensor, group.Name); node == nil {
+				sn.InitializeNode(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, &sec.log)
+				sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is active")
 			}
 		}
 
@@ -168,9 +186,9 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
 func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
-	for _, event := range sec.sensor.Spec.Dependencies {
-		if event.Name == events.Context.Source.Host {
-			return &event, true
+	for _, dependency := range sec.sensor.Spec.Dependencies {
+		if dependency.Name == events.Context.Source.Host {
+			return &dependency, true
 		}
 	}
 	return nil, false

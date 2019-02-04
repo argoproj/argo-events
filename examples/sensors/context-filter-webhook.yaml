@@ -31,8 +31,9 @@ spec:
         kind: Workflow
         source:
           s3:
-            bucket: workflows
-            key: hello-world.yaml
+            bucket:
+              name: workflows
+              key: hello-world.yaml
             endpoint: minio-service.argo-events:9000
             insecure: true
             accessKey:
