@@ -17,6 +17,8 @@ limitations under the License.
 package calendar
 
 import (
+	"time"
+
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 )
@@ -43,6 +45,23 @@ type calSchedule struct {
 	// the combination of these rules and dates combine to form a set of date times.
 	// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
 	Recurrence []string `json:"recurrence,omitempty"`
+
+	// Timezone in which to run the schedule
+	// +optional
+	Timezone string `json:"timezone,omitempty"`
+
+	// UserPayload will be sent to sensor as extra data once the event is triggered
+	// +optional
+	UserPayload string `json:"userPayload,omitempty"`
+}
+
+// calResponse is the event payload that is sent as response to sensor
+type calResponse struct {
+	// EventTime is time at which event occurred
+	EventTime time.Time `json:"eventTime"`
+
+	// UserPayload if any
+	UserPayload string `json:"userPayload"`
 }
 
 func parseEventSource(eventSource string) (*calSchedule, error) {
