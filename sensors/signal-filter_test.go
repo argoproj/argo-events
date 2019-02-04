@@ -134,7 +134,7 @@ func Test_filterData(t *testing.T) {
 			name: "string filter, JSON data",
 			args: args{
 				data: &v1alpha1.Data{
-					Filters: []*v1alpha1.DataFilter{
+					DataFilters: []*v1alpha1.DataFilter{
 						{
 							Path:  "k",
 							Type:  v1alpha1.JSONTypeString,
@@ -154,7 +154,7 @@ func Test_filterData(t *testing.T) {
 		{
 			name: "number filter, JSON data",
 			args: args{data: &v1alpha1.Data{
-				Filters: []*v1alpha1.DataFilter{
+				DataFilters: []*v1alpha1.DataFilter{
 					{
 						Path:  "k",
 						Type:  v1alpha1.JSONTypeNumber,
@@ -175,7 +175,7 @@ func Test_filterData(t *testing.T) {
 			name: "multiple filters, nested JSON data",
 			args: args{
 				data: &v1alpha1.Data{
-					Filters: []*v1alpha1.DataFilter{
+					DataFilters: []*v1alpha1.DataFilter{
 						{
 							Path:  "k",
 							Type:  v1alpha1.JSONTypeString,

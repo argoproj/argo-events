@@ -56,7 +56,7 @@ message ConfigmapArtifact {
 
 message Data {
   // filter constraints
-  repeated DataFilter filters = 1;
+  repeated DataFilter dataFilters = 1;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -80,6 +80,15 @@ message DataFilter {
   optional string value = 3;
 }
 
+// DependencyGroup is the group of dependencies
+message DependencyGroup {
+  // Name of the group
+  optional string name = 1;
+
+  // Dependencies of events
+  repeated string dependencies = 2;
+}
+
 // EventDependency describes a dependency
 message EventDependency {
   // Name is a unique name of this dependency
@@ -92,7 +101,7 @@ message EventDependency {
   // and proper escalations should proceed.
   optional int64 deadline = 2;
 
-  // Filters and rules governing tolerations of success and constraints on the context and data of an event
+  // DataFilters and rules governing tolerations of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 3;
 
   // Connected tells if subscription is already setup in case of nats protocol.
@@ -249,6 +258,12 @@ message SensorSpec {
 
   // EventProtocol is the protocol through which sensor receives events from gateway
   optional github.com.argoproj.argo_events.pkg.apis.common.EventProtocol eventProtocol = 4;
+
+  // Circuit is a boolean expression of dependency groups
+  optional string circuit = 5;
+
+  // DependencyGroups is a list of the groups of events.
+  repeated DependencyGroup dependencyGroups = 6;
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -274,7 +289,7 @@ message SensorStatus {
 }
 
 // TimeFilter describes a window in time.
-// Filters out event events that occur outside the time limits.
+// DataFilters out event events that occur outside the time limits.
 // In other words, only events that occur after Start and before Stop
 // will pass this filter.
 message TimeFilter {
@@ -302,6 +317,19 @@ message Trigger {
 
   // RetryStrategy is the strategy to retry a trigger if it fails
   optional RetryStrategy replyStrategy = 4;
+
+  // When is the condition to execute the trigger
+  optional TriggerCondition when = 5;
+}
+
+// TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+// Depending upon condition type, status of dependency groups is used to evaluate the result.
+message TriggerCondition {
+  // Any acts as a OR operator between dependencies
+  repeated string any = 1;
+
+  // All acts as a AND operator between dependencies
+  repeated string all = 2;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

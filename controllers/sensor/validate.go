@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"fmt"
+	"github.com/Knetic/govaluate"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -61,6 +62,25 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	default:
 		return fmt.Errorf("unknown gateway type")
 	}
+
+	if s.Spec.DependencyGroups != nil {
+		if s.Spec.Circuit == "" {
+			return fmt.Errorf("no circuit expression provided to resolve dependency groups")
+		}
+		expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
+		if err != nil {
+			return fmt.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
+		}
+
+		groups := make(map[string]interface{}, len(s.Spec.DependencyGroups))
+		for _, group := range s.Spec.DependencyGroups {
+			groups[group.Name] = false
+		}
+		if _, err = expression.Evaluate(groups); err != nil {
+			return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
+		}
+	}
+
 	return nil
 }
 
@@ -76,6 +96,9 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 		// each trigger must have a message or a resource
 		if trigger.Resource == nil {
 			return fmt.Errorf("trigger '%s' does not contain an absolute action", trigger.Name)
+		}
+		if trigger.When != nil && trigger.When.All != nil && trigger.When.Any != nil {
+			return fmt.Errorf("trigger condition can't have both any and all condition")
 		}
 	}
 	return nil

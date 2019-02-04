@@ -17,18 +17,29 @@ limitations under the License.
 package sensor
 
 import (
+	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/ghodss/yaml"
+	"io/ioutil"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestValidateSensor(t *testing.T) {
-	convey.Convey("Given a sensor", t, func() {
-		sensor, err := getSensor()
+	dir := "../../examples/sensors"
+	convey.Convey("Validate list of sensor", t, func() {
+		files, err := ioutil.ReadDir(dir)
 		convey.So(err, convey.ShouldBeNil)
-		convey.Convey("Validate", func() {
-			err := ValidateSensor(sensor)
+		for _, file := range files {
+			fmt.Println("filename: ", file.Name())
+			content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 			convey.So(err, convey.ShouldBeNil)
-		})
+			var sensor *v1alpha1.Sensor
+			err = yaml.Unmarshal([]byte(content), &sensor)
+			convey.So(err, convey.ShouldBeNil)
+			err = ValidateSensor(sensor)
+			convey.So(err, convey.ShouldBeNil)
+		}
 	})
 }

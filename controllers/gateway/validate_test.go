@@ -17,21 +17,33 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
+	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestValidate(t *testing.T) {
-	convey.Convey("Given a gateway", t, func() {
-		gateway, err := getGateway()
-
-		convey.Convey("Make sure gateway is a valid gateway", func() {
+	dir := "../../examples/gateways"
+	convey.Convey("Validate list of gateways", t, func() {
+		files, err := ioutil.ReadDir(dir)
+		convey.So(err, convey.ShouldBeNil)
+		for _, file := range files {
+			if strings.HasSuffix(file.Name(), "configmap.yaml") {
+				continue
+			}
+			fmt.Println("filename: ", file.Name())
+			content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(gateway, convey.ShouldNotBeNil)
-
-			err := Validate(gateway)
+			var gateway *v1alpha1.Gateway
+			err = yaml.Unmarshal([]byte(content), &gateway)
 			convey.So(err, convey.ShouldBeNil)
-		})
+			err = Validate(gateway)
+			convey.So(err, convey.ShouldBeNil)
+		}
 	})
 }

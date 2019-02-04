@@ -15,10 +15,12 @@ spec:
   dependencies:
     - name: "webhook-gateway:foo"
       filters:
+        name: "data-filter"
         data:
-          - path: bucket
-            type: string
-            value: argo-workflow-input
+          dataFilters:
+            - path: bucket
+              type: string
+              value: argo-workflow-input
   eventProtocol:
     type: "HTTP"
     http:
@@ -32,8 +34,9 @@ spec:
         kind: Workflow
         source:
           s3:
-            bucket: workflows
-            key: hello-world.yaml
+            bucket:
+              name: workflows
+              key: hello-world.yaml
             endpoint: minio-service.argo-events:9000
             insecure: true
             accessKey:
