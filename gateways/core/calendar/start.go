@@ -17,13 +17,13 @@ limitations under the License.
 package calendar
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	cronlib "github.com/robfig/cron"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Next is a function to compute the next event time from a given time
@@ -98,7 +98,16 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 		}
 		return nextT
 	}
+
 	lastT := time.Now()
+	if cal.Timezone != "" {
+		location, err := time.LoadLocation(cal.Timezone)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		lastT = lastT.In(location)
+	}
 
 	for {
 		t := next(lastT)
@@ -106,9 +115,11 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 		ese.Log.Info().Str("event-source-name", eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
-			lastT = tx
-			event := metav1.Time{Time: t}
-			payload, err := event.Marshal()
+			response := &calResponse{
+				EventTime:   tx,
+				UserPayload: cal.UserPayload,
+			}
+			payload, err := json.Marshal(response)
 			if err != nil {
 				errorCh <- err
 				return
