@@ -15,7 +15,7 @@ metadata:
   name: calendar-gateway-configmap
 data:
   interval: |-
-    interval: 55s # event is generated after every 10 seconds
+    interval: 55s # event is generated after every 55 seconds
   schedule: |-
     schedule: 30 * * * *  # event is generated after 30 min past every hour
 ```
