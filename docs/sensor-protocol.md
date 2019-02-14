@@ -6,7 +6,6 @@
 - [github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto](#github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto)
     - [ArtifactLocation](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ArtifactLocation)
     - [ConfigmapArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ConfigmapArtifact)
-    - [Data](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Data)
     - [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter)
     - [DependencyGroup](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DependencyGroup)
     - [EventDependency](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependency)
@@ -80,21 +79,6 @@ ConfigmapArtifact contains information about artifact in k8 configmap
 
 
 
-<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Data"></a>
-
-### Data
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| dataFilters | [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter) | repeated | filter constraints |
-
-
-
-
-
-
 <a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter"></a>
 
 ### DataFilter
@@ -159,7 +143,7 @@ EventDependencyFilter defines filters and constraints for a event.
 | name | [string](#string) | optional | Name is the name of event filter |
 | time | [TimeFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TimeFilter) | optional | Time filter on the event with escalation |
 | context | [github.com.argoproj.argo_events.pkg.apis.common.EventContext](#github.com.argoproj.argo_events.pkg.apis.common.EventContext) | optional | Context filter constraints with escalation |
-| data | [Data](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Data) | optional | Data filter constraints with escalation |
+| data | [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter) | repeated | Data filter constraints with escalation |
 
 
 

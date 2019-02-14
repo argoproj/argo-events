@@ -65,7 +65,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
 		sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("received event notification")
-		sec.log.Info().Interface("event-data", ew.eventDependency).Msg("event dependency")
 		// apply filters if any.
 		ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
 		if err != nil {
@@ -153,8 +152,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 // WatchEventsFromGateways watches and handles events received from the gateway.
 func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
-	sec.log.Info().Interface("sensor", sec.sensor).Msg("logging sensor")
-
 	// start processing the update notification queue
 	go func() {
 		for e := range sec.queue {
@@ -210,7 +207,6 @@ func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*apicommon.Event, err
 func (sec *sensorExecutionCtx) sendEventToInternalQueue(event *apicommon.Event, writer http.ResponseWriter) bool {
 	// validate whether the event is from gateway that this sensor is watching
 	if eventDependency, isValidEvent := sec.validateEvent(event); isValidEvent {
-		sec.log.Info().Interface("dep", eventDependency).Msg("return event dependency")
 		// process the event
 		sec.queue <- &updateNotification{
 			event:            event,

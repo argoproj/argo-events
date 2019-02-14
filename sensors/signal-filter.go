@@ -150,7 +150,6 @@ func (sec *sensorExecutionCtx) filterContext(expected *apicommon.EventContext, a
 func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
-	sec.log.Info().Interface("data", data).Interface("event", event).Msg("logging filter data")
 	if data == nil {
 		return true, nil
 	}
@@ -165,12 +164,12 @@ func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *api
 		return false, err
 	}
 	sec.log.Info().Interface("js", js).Msg("event as json")
+filter:
 	for _, f := range data {
 		res := gjson.GetBytes(js, f.Path)
 		if !res.Exists() {
 			return false, nil
 		}
-		sec.log.Info().Str("path", f.Path).Interface("value", f.Value).Str("type", f.Path).Str("res string", res.Str).Msg("data filters")
 		switch f.Type {
 		case v1alpha1.JSONTypeBool:
 			for _, value := range f.Value {
@@ -179,7 +178,7 @@ func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *api
 					return false, err
 				}
 				if val == res.Bool() {
-					return true, nil
+					continue filter
 				}
 			}
 			return false, nil
@@ -191,7 +190,7 @@ func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *api
 					return false, err
 				}
 				if val == res.Float() {
-					return true, nil
+					continue filter
 				}
 			}
 			return false, nil
@@ -199,7 +198,7 @@ func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *api
 		case v1alpha1.JSONTypeString:
 			for _, value := range f.Value {
 				if value == res.Str {
-					return true, nil
+					continue filter
 				}
 			}
 			return false, nil
