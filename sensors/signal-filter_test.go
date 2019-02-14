@@ -88,7 +88,7 @@ func Test_filterContext(t *testing.T) {
 
 func Test_filterData(t *testing.T) {
 	type args struct {
-		data  *v1alpha1.Data
+		data  []v1alpha1.DataFilter
 		event *apicommon.Event
 	}
 	tests := []struct {
@@ -133,13 +133,11 @@ func Test_filterData(t *testing.T) {
 		{
 			name: "string filter, JSON data",
 			args: args{
-				data: &v1alpha1.Data{
-					DataFilters: []*v1alpha1.DataFilter{
-						{
-							Path:  "k",
-							Type:  v1alpha1.JSONTypeString,
-							Value: "v",
-						},
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
 					},
 				},
 				event: &apicommon.Event{
@@ -147,19 +145,18 @@ func Test_filterData(t *testing.T) {
 						ContentType: "application/json",
 					},
 					Payload: []byte("{\"k\": \"v\"}"),
-				}},
+				},
+			},
 			want:    true,
 			wantErr: false,
 		},
 		{
 			name: "number filter, JSON data",
-			args: args{data: &v1alpha1.Data{
-				DataFilters: []*v1alpha1.DataFilter{
-					{
-						Path:  "k",
-						Type:  v1alpha1.JSONTypeNumber,
-						Value: "1.0",
-					},
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"1.0"},
 				},
 			},
 				event: &apicommon.Event{
@@ -174,23 +171,21 @@ func Test_filterData(t *testing.T) {
 		{
 			name: "multiple filters, nested JSON data",
 			args: args{
-				data: &v1alpha1.Data{
-					DataFilters: []*v1alpha1.DataFilter{
-						{
-							Path:  "k",
-							Type:  v1alpha1.JSONTypeString,
-							Value: "v",
-						},
-						{
-							Path:  "k1.k",
-							Type:  v1alpha1.JSONTypeNumber,
-							Value: "3.14",
-						},
-						{
-							Path:  "k1.k2",
-							Type:  v1alpha1.JSONTypeString,
-							Value: "hello,world",
-						},
+				data: []v1alpha1.DataFilter{
+					{
+						Path:  "k",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"v"},
+					},
+					{
+						Path:  "k1.k",
+						Type:  v1alpha1.JSONTypeNumber,
+						Value: []string{"3.14"},
+					},
+					{
+						Path:  "k1.k2",
+						Type:  v1alpha1.JSONTypeString,
+						Value: []string{"hello,world", "hello there"},
 					},
 				},
 				event: &apicommon.Event{

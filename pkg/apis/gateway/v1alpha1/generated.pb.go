@@ -17,19 +17,19 @@ limitations under the License.
 
 package v1alpha1
 
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "github.com/argoproj/argo-events/pkg/apis/common"
+import "github.com/gogo/protobuf/proto"
+import "fmt"
+import "math"
+import "github.com/argoproj/argo-events/pkg/apis/common"
 
 import v11 "k8s.io/api/core/v1"
 
 import github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 
-import strings "strings"
-import reflect "reflect"
+import "strings"
+import "reflect"
 
-import io "io"
+import "io"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -45,7 +45,7 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 func (m *Gateway) Reset()      { *m = Gateway{} }
 func (*Gateway) ProtoMessage() {}
 func (*Gateway) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{0}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{0}
 }
 func (m *Gateway) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -73,7 +73,7 @@ var xxx_messageInfo_Gateway proto.InternalMessageInfo
 func (m *GatewayList) Reset()      { *m = GatewayList{} }
 func (*GatewayList) ProtoMessage() {}
 func (*GatewayList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{1}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{1}
 }
 func (m *GatewayList) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -101,7 +101,7 @@ var xxx_messageInfo_GatewayList proto.InternalMessageInfo
 func (m *GatewayNotificationWatcher) Reset()      { *m = GatewayNotificationWatcher{} }
 func (*GatewayNotificationWatcher) ProtoMessage() {}
 func (*GatewayNotificationWatcher) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{2}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{2}
 }
 func (m *GatewayNotificationWatcher) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -129,7 +129,7 @@ var xxx_messageInfo_GatewayNotificationWatcher proto.InternalMessageInfo
 func (m *GatewaySpec) Reset()      { *m = GatewaySpec{} }
 func (*GatewaySpec) ProtoMessage() {}
 func (*GatewaySpec) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{3}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{3}
 }
 func (m *GatewaySpec) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -157,7 +157,7 @@ var xxx_messageInfo_GatewaySpec proto.InternalMessageInfo
 func (m *GatewayStatus) Reset()      { *m = GatewayStatus{} }
 func (*GatewayStatus) ProtoMessage() {}
 func (*GatewayStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{4}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{4}
 }
 func (m *GatewayStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -185,7 +185,7 @@ var xxx_messageInfo_GatewayStatus proto.InternalMessageInfo
 func (m *NodeStatus) Reset()      { *m = NodeStatus{} }
 func (*NodeStatus) ProtoMessage() {}
 func (*NodeStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{5}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{5}
 }
 func (m *NodeStatus) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -213,7 +213,7 @@ var xxx_messageInfo_NodeStatus proto.InternalMessageInfo
 func (m *NotificationWatchers) Reset()      { *m = NotificationWatchers{} }
 func (*NotificationWatchers) ProtoMessage() {}
 func (*NotificationWatchers) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{6}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{6}
 }
 func (m *NotificationWatchers) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -241,7 +241,7 @@ var xxx_messageInfo_NotificationWatchers proto.InternalMessageInfo
 func (m *SensorNotificationWatcher) Reset()      { *m = SensorNotificationWatcher{} }
 func (*SensorNotificationWatcher) ProtoMessage() {}
 func (*SensorNotificationWatcher) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_d7e7992cb16da963, []int{7}
+	return fileDescriptor_generated_d61eb949e4c0f5b3, []int{7}
 }
 func (m *SensorNotificationWatcher) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -2444,10 +2444,10 @@ var (
 )
 
 func init() {
-	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_d7e7992cb16da963)
+	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto", fileDescriptor_generated_d61eb949e4c0f5b3)
 }
 
-var fileDescriptor_generated_d7e7992cb16da963 = []byte{
+var fileDescriptor_generated_d61eb949e4c0f5b3 = []byte{
 	// 1073 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x5d, 0x6f, 0x1b, 0x45,
 	0x17, 0xce, 0xda, 0x71, 0x6c, 0x8f, 0x93, 0x7e, 0xcc, 0xdb, 0x57, 0x2c, 0x46, 0x72, 0x2a, 0x5f,

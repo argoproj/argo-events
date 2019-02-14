@@ -147,14 +147,10 @@ func (sec *sensorExecutionCtx) filterContext(expected *apicommon.EventContext, a
 // applyDataFilter runs the dataFilter against the event's data
 // returns (true, nil) when data passes filters, false otherwise
 // TODO: split this function up into smaller pieces
-func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *apicommon.Event) (bool, error) {
+func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error) {
 	// TODO: use the event.Context.SchemaURL to figure out correct data format to unmarshal to
 	// for now, let's just use a simple map[string]interface{} for arbitrary data
 	if data == nil {
-		return true, nil
-	}
-	dataFilters := data.DataFilters
-	if dataFilters == nil {
 		return true, nil
 	}
 	if event == nil {
@@ -167,32 +163,45 @@ func (sec *sensorExecutionCtx) filterData(data *v1alpha1.Data, event *apicommon.
 	if err != nil {
 		return false, err
 	}
-	for _, f := range dataFilters {
+filter:
+	for _, f := range data {
 		res := gjson.GetBytes(js, f.Path)
 		if !res.Exists() {
 			return false, nil
 		}
 		switch f.Type {
 		case v1alpha1.JSONTypeBool:
-			val, err := strconv.ParseBool(f.Value)
-			if err != nil {
-				return false, err
+			for _, value := range f.Value {
+				val, err := strconv.ParseBool(value)
+				if err != nil {
+					return false, err
+				}
+				if val == res.Bool() {
+					continue filter
+				}
 			}
-			if val != res.Bool() {
-				return false, nil
-			}
+			return false, nil
+
 		case v1alpha1.JSONTypeNumber:
-			val, err := strconv.ParseFloat(f.Value, 64)
-			if err != nil {
-				return false, err
+			for _, value := range f.Value {
+				val, err := strconv.ParseFloat(value, 64)
+				if err != nil {
+					return false, err
+				}
+				if val == res.Float() {
+					continue filter
+				}
 			}
-			if val != res.Float() {
-				return false, nil
-			}
+			return false, nil
+
 		case v1alpha1.JSONTypeString:
-			if f.Value != res.Str {
-				return false, nil
+			for _, value := range f.Value {
+				if value == res.Str {
+					continue filter
+				}
 			}
+			return false, nil
+
 		default:
 			return false, fmt.Errorf("unsupported JSON type %s", f.Type)
 		}

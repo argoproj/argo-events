@@ -17,9 +17,9 @@ limitations under the License.
 
 package common
 
-import proto "github.com/gogo/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import "github.com/gogo/protobuf/proto"
+import "fmt"
+import "math"
 
 import v11 "k8s.io/api/core/v1"
 
@@ -27,10 +27,10 @@ import github_com_minio_minio_go "github.com/minio/minio-go"
 
 import github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 
-import strings "strings"
-import reflect "reflect"
+import "strings"
+import "reflect"
 
-import io "io"
+import "io"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -46,7 +46,7 @@ const _ = proto.GoGoProtoPackageIsVersion2 // please upgrade the proto package
 func (m *Event) Reset()      { *m = Event{} }
 func (*Event) ProtoMessage() {}
 func (*Event) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{0}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{0}
 }
 func (m *Event) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -74,7 +74,7 @@ var xxx_messageInfo_Event proto.InternalMessageInfo
 func (m *EventContext) Reset()      { *m = EventContext{} }
 func (*EventContext) ProtoMessage() {}
 func (*EventContext) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{1}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{1}
 }
 func (m *EventContext) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -102,7 +102,7 @@ var xxx_messageInfo_EventContext proto.InternalMessageInfo
 func (m *EventProtocol) Reset()      { *m = EventProtocol{} }
 func (*EventProtocol) ProtoMessage() {}
 func (*EventProtocol) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{2}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{2}
 }
 func (m *EventProtocol) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -130,7 +130,7 @@ var xxx_messageInfo_EventProtocol proto.InternalMessageInfo
 func (m *Http) Reset()      { *m = Http{} }
 func (*Http) ProtoMessage() {}
 func (*Http) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{3}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{3}
 }
 func (m *Http) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -158,7 +158,7 @@ var xxx_messageInfo_Http proto.InternalMessageInfo
 func (m *Nats) Reset()      { *m = Nats{} }
 func (*Nats) ProtoMessage() {}
 func (*Nats) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{4}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{4}
 }
 func (m *Nats) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -186,7 +186,7 @@ var xxx_messageInfo_Nats proto.InternalMessageInfo
 func (m *S3Artifact) Reset()      { *m = S3Artifact{} }
 func (*S3Artifact) ProtoMessage() {}
 func (*S3Artifact) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{5}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{5}
 }
 func (m *S3Artifact) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -214,7 +214,7 @@ var xxx_messageInfo_S3Artifact proto.InternalMessageInfo
 func (m *S3Bucket) Reset()      { *m = S3Bucket{} }
 func (*S3Bucket) ProtoMessage() {}
 func (*S3Bucket) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{6}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{6}
 }
 func (m *S3Bucket) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -242,7 +242,7 @@ var xxx_messageInfo_S3Bucket proto.InternalMessageInfo
 func (m *S3Filter) Reset()      { *m = S3Filter{} }
 func (*S3Filter) ProtoMessage() {}
 func (*S3Filter) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{7}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{7}
 }
 func (m *S3Filter) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -270,7 +270,7 @@ var xxx_messageInfo_S3Filter proto.InternalMessageInfo
 func (m *URI) Reset()      { *m = URI{} }
 func (*URI) ProtoMessage() {}
 func (*URI) Descriptor() ([]byte, []int) {
-	return fileDescriptor_generated_fe300a967e896a62, []int{8}
+	return fileDescriptor_generated_1ecb42411ad60761, []int{8}
 }
 func (m *URI) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -3022,10 +3022,10 @@ var (
 )
 
 func init() {
-	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/common/generated.proto", fileDescriptor_generated_fe300a967e896a62)
+	proto.RegisterFile("github.com/argoproj/argo-events/pkg/apis/common/generated.proto", fileDescriptor_generated_1ecb42411ad60761)
 }
 
-var fileDescriptor_generated_fe300a967e896a62 = []byte{
+var fileDescriptor_generated_1ecb42411ad60761 = []byte{
 	// 1309 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0xcf, 0x6f, 0x1b, 0xc5,
 	0x17, 0x8f, 0x13, 0xdb, 0xb1, 0xc7, 0xed, 0x37, 0xe9, 0xf4, 0x5b, 0x61, 0x05, 0xd5, 0x09, 0x46,
