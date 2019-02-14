@@ -163,7 +163,6 @@ func (sec *sensorExecutionCtx) filterData(data []v1alpha1.DataFilter, event *api
 	if err != nil {
 		return false, err
 	}
-	sec.log.Info().Interface("js", js).Msg("event as json")
 filter:
 	for _, f := range data {
 		res := gjson.GetBytes(js, f.Path)

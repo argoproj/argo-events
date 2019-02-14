@@ -186,7 +186,6 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
 func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
 	for _, dependency := range sec.sensor.Spec.Dependencies {
-		sec.log.Info().Interface("dep", dependency).Msg("event dependency")
 		if dependency.Name == events.Context.Source.Host {
 			return &dependency, true
 		}
