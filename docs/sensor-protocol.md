@@ -8,13 +8,11 @@
     - [ConfigmapArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ConfigmapArtifact)
     - [Data](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Data)
     - [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter)
+    - [DependencyGroup](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DependencyGroup)
     - [EventDependency](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependency)
     - [EventDependencyFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependencyFilter)
-    - [EventProtocol](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventProtocol)
     - [FileArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.FileArtifact)
     - [GroupVersionKind](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GroupVersionKind)
-    - [Http](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Http)
-    - [Nats](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Nats)
     - [NodeStatus](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.NodeStatus)
     - [ResourceObject](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ResourceObject)
     - [ResourceObject.LabelsEntry](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ResourceObject.LabelsEntry)
@@ -28,6 +26,7 @@
     - [SensorStatus.NodesEntry](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.SensorStatus.NodesEntry)
     - [TimeFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TimeFilter)
     - [Trigger](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Trigger)
+    - [TriggerCondition](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TriggerCondition)
     - [URLArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.URLArtifact)
   
   
@@ -89,7 +88,7 @@ ConfigmapArtifact contains information about artifact in k8 configmap
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| filters | [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter) | repeated | filter constraints |
+| dataFilters | [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter) | repeated | filter constraints |
 
 
 
@@ -108,7 +107,23 @@ See Rob Pike&#39;s Post: https://commandcenter.blogspot.com/2011/08/regular-expr
 | ----- | ---- | ----- | ----------- |
 | path | [string](#string) | optional | Path is the JSONPath of the event&#39;s (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters &#39;*&#39; and &#39;?&#39;. To access an array value use the index as the key. The dot and wildcard characters can be escaped with &#39;\\&#39;. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this. |
 | type | [string](#string) | optional | Type contains the JSON type of the data |
-| value | [string](#string) | optional | Value is the expected string value for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored |
+| value | [string](#string) | repeated | Value is the allowed string values for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DependencyGroup"></a>
+
+### DependencyGroup
+DependencyGroup is the group of dependencies
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) | optional | Name of the group |
+| dependencies | [string](#string) | repeated | Dependencies of events |
 
 
 
@@ -151,23 +166,6 @@ EventDependencyFilter defines filters and constraints for a event.
 
 
 
-<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventProtocol"></a>
-
-### EventProtocol
-EventProtocol contains configuration necessary to receieve an event from gateway over different communication protocols
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| type | [string](#string) | optional | Type defines the type of protocol over which events will be receieved |
-| http | [Http](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Http) | optional | Http contains the information required to setup a http server and listen to incoming events |
-| nats | [Nats](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Nats) | optional | Nats contains the information required to connect to nats server and get subscriptions |
-
-
-
-
-
-
 <a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.FileArtifact"></a>
 
 ### FileArtifact
@@ -195,45 +193,6 @@ to avoid automatic coercion.  It doesn&#39;t use a GroupVersion to avoid custom 
 | group | [string](#string) | optional |  |
 | version | [string](#string) | optional |  |
 | kind | [string](#string) | optional |  |
-
-
-
-
-
-
-<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Http"></a>
-
-### Http
-Http contains the information required to setup a http server and listen to incoming events
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| port | [string](#string) | optional | Port on which server will run |
-
-
-
-
-
-
-<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Nats"></a>
-
-### Nats
-Nats contains the information required to connect to nats server and get subscriptions
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| url | [string](#string) | optional | URL is nats server/service URL |
-| startWithLastReceived | [bool](#bool) | optional | Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming |
-| deliverAllAvailable | [bool](#bool) | optional | Receive all stored values in order. |
-| startAtSequence | [string](#string) | optional | Receive messages starting at a specific sequence number |
-| startAtTime | [string](#string) | optional | Subscribe starting at a specific time |
-| startAtTimeDelta | [string](#string) | optional | Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago) |
-| durable | [bool](#bool) | optional | Durable subscriptions allow clients to assign a durable name to a subscription when it is created |
-| clusterId | [string](#string) | optional | The NATS Streaming cluster ID |
-| clientId | [string](#string) | optional | The NATS Streaming cluster ID |
-| type | [string](#string) | optional | Type of the connection. either standard or streaming |
 
 
 
@@ -392,7 +351,9 @@ SensorSpec represents desired sensor state
 | dependencies | [EventDependency](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependency) | repeated | Dependencies is a list of the events that this sensor is dependent on. |
 | triggers | [Trigger](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Trigger) | repeated | Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor. |
 | deploySpec | [k8s.io.api.core.v1.PodSpec](#k8s.io.api.core.v1.PodSpec) | optional | DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
-| eventProtocol | [EventProtocol](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventProtocol) | optional | EventProtocol is the protocol through which sensor receives events from gateway |
+| eventProtocol | [github.com.argoproj.argo_events.pkg.apis.common.EventProtocol](#github.com.argoproj.argo_events.pkg.apis.common.EventProtocol) | optional | EventProtocol is the protocol through which sensor receives events from gateway |
+| circuit | [string](#string) | optional | Circuit is a boolean expression of dependency groups |
+| dependencyGroups | [DependencyGroup](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DependencyGroup) | repeated | DependencyGroups is a list of the groups of events. |
 
 
 
@@ -439,7 +400,7 @@ SensorStatus contains information about the status of a sensor.
 
 ### TimeFilter
 TimeFilter describes a window in time.
-Filters out event events that occur outside the time limits.
+DataFilters out event events that occur outside the time limits.
 In other words, only events that occur after Start and before Stop
 will pass this filter.
 
@@ -466,6 +427,24 @@ Trigger is an action taken, output produced, an event created, a message sent
 | resource | [ResourceObject](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ResourceObject) | optional | Resource describes the resource that will be created by this action |
 | message | [string](#string) | optional | Message describes a message that will be sent on a queue |
 | replyStrategy | [RetryStrategy](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.RetryStrategy) | optional | RetryStrategy is the strategy to retry a trigger if it fails |
+| when | [TriggerCondition](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TriggerCondition) | optional | When is the condition to execute the trigger |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.TriggerCondition"></a>
+
+### TriggerCondition
+TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+Depending upon condition type, status of dependency groups is used to evaluate the result.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| any | [string](#string) | repeated | Any acts as a OR operator between dependencies |
+| all | [string](#string) | repeated | All acts as a AND operator between dependencies |
 
 
 
