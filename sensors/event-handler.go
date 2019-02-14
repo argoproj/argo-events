@@ -65,7 +65,6 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
 		sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("received event notification")
-
 		// apply filters if any.
 		ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
 		if err != nil {

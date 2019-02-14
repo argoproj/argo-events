@@ -107,7 +107,7 @@ type EventDependency struct {
 	// and proper escalations should proceed.
 	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
 
-	// DataFilters and rules governing tolerations of success and constraints on the context and data of an event
+	// Filters and rules governing tolerations of success and constraints on the context and data of an event
 	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
 
 	// Connected tells if subscription is already setup in case of nats protocol.
@@ -142,7 +142,7 @@ type EventDependencyFilter struct {
 	Context *common.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 
 	// Data filter constraints with escalation
-	Data *Data `json:"data,omitempty" protobuf:"bytes,4,rep,name=data"`
+	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,opt,name=data"`
 }
 
 // TimeFilter describes a window in time.
@@ -171,11 +171,6 @@ const (
 	JSONTypeString JSONType = "string"
 )
 
-type Data struct {
-	// filter constraints
-	DataFilters []*DataFilter `json:"dataFilters" protobuf:"bytes,1,rep,name=dataFilters"`
-}
-
 // DataFilter describes constraints and filters for event data
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
@@ -189,12 +184,12 @@ type DataFilter struct {
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type"`
 
-	// Value is the expected string value for this key
+	// Value is the allowed string values for this key
 	// Booleans are pased using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
 	// Strings are taken as is
 	// Nils this value is ignored
-	Value string `json:"value" protobuf:"bytes,3,opt,name=value"`
+	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent

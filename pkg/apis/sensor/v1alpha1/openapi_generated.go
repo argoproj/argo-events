@@ -22,15 +22,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	spec "github.com/go-openapi/spec"
-	common "k8s.io/kube-openapi/pkg/common"
+	"github.com/go-openapi/spec"
+	"k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":        schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":       schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data":                    schema_pkg_apis_sensor_v1alpha1_Data(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":              schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":         schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
@@ -130,34 +129,6 @@ func schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref common.ReferenceCallb
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_Data(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
-				Properties: map[string]spec.Schema{
-					"dataFilters": {
-						SchemaProps: spec.SchemaProps{
-							Description: "filter constraints",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"dataFilters"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -181,9 +152,16 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the expected string value for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Value is the allowed string values for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -253,7 +231,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					},
 					"filters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DataFilters and rules governing tolerations of success and constraints on the context and data of an event",
+							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
@@ -302,7 +280,14 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 					"data": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Data filter constraints with escalation",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data"),
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -310,7 +295,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Data", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
 	}
 }
 

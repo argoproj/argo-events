@@ -11,12 +11,13 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor:v0.7.1"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway-http:endpoint1"
       filters:
+        name: "context-filter"
         context:
           source:
             host: xyz.com
@@ -24,16 +25,17 @@ spec:
     - name: "webhook-gateway-http:endpoint2"
     - name: "webhook-gateway-http:endpoint3"
     - name: "webhook-gateway-http:endpoint4"
-    - name: "webhook-gateway-http:endpoint5"
-    - name: "webhook-gateway-http:endpoint6"
-    - name: "webhook-gateway-http:endpoint7"
       filters:
         name: "data-filter"
         data:
-          dataFilters:
-            - path: bucket
-              type: string
-              value: argo-workflow-input
+          - path: bucket
+            type: string
+            value:
+              - "argo-workflow-input"
+              - "argo-workflow-input1"
+    - name: "webhook-gateway-http:endpoint5"
+    - name: "webhook-gateway-http:endpoint6"
+    - name: "webhook-gateway-http:endpoint7"
     - name: "webhook-gateway-http:endpoint8"
     - name: "webhook-gateway-http:endpoint9"
   dependencyGroups:
@@ -49,13 +51,13 @@ spec:
         - "webhook-gateway-http:endpoint4"
         - "webhook-gateway-http:endpoint5"
     - name: "group_4"
-        dependencies:
-          - "webhook-gateway-http:endpoint6"
-          - "webhook-gateway-http:endpoint7"
-          - "webhook-gateway-http:endpoint8"
+      dependencies:
+        - "webhook-gateway-http:endpoint6"
+        - "webhook-gateway-http:endpoint7"
+        - "webhook-gateway-http:endpoint8"
     - name: "group_5"
-        dependencies:
-          - "webhook-gateway-http:endpoint9"
+      dependencies:
+        - "webhook-gateway-http:endpoint9"
   circuit: "group_1 || group_2 || ((group_3 || group_4) && group_5)"
   eventProtocol:
     type: "HTTP"

@@ -9,18 +9,19 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor"
+        image: "argoproj/sensor:v0.7.1"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:foo"
+    - name: "webhook-gateway-http:foo"
       filters:
         name: "data-filter"
         data:
-          dataFilters:
-            - path: bucket
-              type: string
-              value: argo-workflow-input
+          - path: bucket
+            type: string
+            value:
+              - "argo-workflow-input"
+              - "argo-workflow-input1"
   eventProtocol:
     type: "HTTP"
     http:
@@ -33,15 +34,18 @@ spec:
         version: v1alpha1
         kind: Workflow
         source:
-          s3:
-            bucket:
-              name: workflows
-              key: hello-world.yaml
-            endpoint: minio-service.argo-events:9000
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"

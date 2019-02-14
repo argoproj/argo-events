@@ -54,11 +54,6 @@ message ConfigmapArtifact {
   optional string key = 3;
 }
 
-message Data {
-  // filter constraints
-  repeated DataFilter dataFilters = 1;
-}
-
 // DataFilter describes constraints and filters for event data
 // Regular Expressions are purposefully not a feature as they are overkill for our uses here
 // See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html
@@ -72,12 +67,12 @@ message DataFilter {
   // Type contains the JSON type of the data
   optional string type = 2;
 
-  // Value is the expected string value for this key
+  // Value is the allowed string values for this key
   // Booleans are pased using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
   // Nils this value is ignored
-  optional string value = 3;
+  repeated string value = 3;
 }
 
 // DependencyGroup is the group of dependencies
@@ -101,7 +96,7 @@ message EventDependency {
   // and proper escalations should proceed.
   optional int64 deadline = 2;
 
-  // DataFilters and rules governing tolerations of success and constraints on the context and data of an event
+  // Filters and rules governing tolerations of success and constraints on the context and data of an event
   optional EventDependencyFilter filters = 3;
 
   // Connected tells if subscription is already setup in case of nats protocol.
@@ -120,7 +115,7 @@ message EventDependencyFilter {
   optional github.com.argoproj.argo_events.pkg.apis.common.EventContext context = 3;
 
   // Data filter constraints with escalation
-  optional Data data = 4;
+  repeated DataFilter data = 4;
 }
 
 // FileArtifact contains information about an artifact in a filesystem

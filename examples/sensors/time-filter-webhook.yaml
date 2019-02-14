@@ -21,10 +21,6 @@ spec:
         time:
           start: "22:14:05"
           stop: "23:04:05"
-          escalationPolicy:
-            name: "time-filter-escalation"
-            level: "Alert"
-            message: "time filter failed"
   triggers:
     - name: hello-world-workflow-trigger
       resource:
