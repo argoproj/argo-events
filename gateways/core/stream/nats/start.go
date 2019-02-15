@@ -18,7 +18,7 @@ package nats
 
 import (
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/nats-io/go-nats"
+	natslib "github.com/nats-io/go-nats"
 )
 
 // StartEventSource starts an event source
@@ -41,23 +41,29 @@ func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	nc, err := nats.Connect(n.URL)
-	if err != nil {
-		ese.Log.Error().Str("url", n.URL).Err(err).Msg("connection failed")
+	if err := gateways.Connect(n.Backoff, func() error {
+		var err error
+		if n.conn, err = natslib.Connect(n.URL); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		ese.Log.Error().Str("event-source-name", eventSource.Name).Str("url", n.URL).Err(err).Msg("connection failed")
 		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
-	_, err = nc.Subscribe(n.Subject, func(msg *nats.Msg) {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("subscribing to messages")
+	_, err := n.conn.Subscribe(n.Subject, func(msg *natslib.Msg) {
 		dataCh <- msg.Data
 	})
 	if err != nil {
+		ese.Log.Error().Str("event-source-name", eventSource.Name).Str("url", n.URL).Str("subject", n.Subject).Err(err).Msg("failed to subscribe")
 		errorCh <- err
 		return
 	}
-	nc.Flush()
-	if err := nc.LastError(); err != nil {
+	n.conn.Flush()
+	if err := n.conn.LastError(); err != nil {
 		errorCh <- err
 		return
 	}

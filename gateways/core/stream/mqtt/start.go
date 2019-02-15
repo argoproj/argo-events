@@ -18,7 +18,7 @@ package mqtt
 
 import (
 	"github.com/argoproj/argo-events/gateways"
-	MQTTlib "github.com/eclipse/paho.mqtt.golang"
+	mqttlib "github.com/eclipse/paho.mqtt.golang"
 )
 
 // StartEventSource starts an event source
@@ -41,24 +41,32 @@ func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	handler := func(c MQTTlib.Client, msg MQTTlib.Message) {
+	handler := func(c mqttlib.Client, msg mqttlib.Message) {
 		dataCh <- msg.Payload()
 	}
-	opts := MQTTlib.NewClientOptions().AddBroker(m.URL).SetClientID(m.ClientId)
-	client := MQTTlib.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		errorCh <- token.Error()
+	opts := mqttlib.NewClientOptions().AddBroker(m.URL).SetClientID(m.ClientId)
+
+	if err := gateways.Connect(m.Backoff, func() error {
+		client := mqttlib.NewClient(opts)
+		if token := client.Connect(); token.Wait() && token.Error() != nil {
+			return token.Error()
+		}
+		return nil
+	}); err != nil {
+		ese.Log.Error().Err(err).Str("url", m.URL).Str("client-id", m.ClientId).Msg("failed to connect")
+		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to topic")
-	if token := client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("subscribing to topic")
+	if token := m.client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
+		ese.Log.Error().Err(token.Error()).Str("url", m.URL).Str("client-id", m.ClientId).Msg("failed to subscribe")
 		errorCh <- token.Error()
 		return
 	}
 
 	<-doneCh
-	token := client.Unsubscribe(m.Topic)
+	token := m.client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
 		ese.Log.Error().Err(token.Error()).Str("event-source-name", eventSource.Name).Msg("failed to unsubscribe client")
 	}

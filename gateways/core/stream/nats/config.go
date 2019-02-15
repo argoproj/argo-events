@@ -18,7 +18,9 @@ package nats
 
 import (
 	"github.com/ghodss/yaml"
+	natslib "github.com/nats-io/go-nats"
 	"github.com/rs/zerolog"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NatsEventSourceExecutor implements Eventing
@@ -27,13 +29,15 @@ type NatsEventSourceExecutor struct {
 }
 
 // Nats contains configuration to connect to NATS cluster
-// +k8s:openapi-gen=true
 type natsConfig struct {
 	// URL to connect to natsConfig cluster
 	URL string `json:"url"`
-
 	// Subject name
 	Subject string `json:"subject"`
+	// Backoff holds parameters applied to connection.
+	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	// conn represents a bare connection to a nats-server.
+	conn *natslib.Conn
 }
 
 func parseEventSource(es string) (*natsConfig, error) {

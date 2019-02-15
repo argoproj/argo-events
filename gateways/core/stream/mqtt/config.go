@@ -17,8 +17,10 @@ limitations under the License.
 package mqtt
 
 import (
+	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // MqttEventSourceExecutor implements Eventing
@@ -27,7 +29,6 @@ type MqttEventSourceExecutor struct {
 }
 
 // mqtt contains information to connect to MQTT broker
-// +k8s:openapi-gen=true
 type mqtt struct {
 	// URL to connect to broker
 	URL string `json:"url"`
@@ -35,6 +36,10 @@ type mqtt struct {
 	Topic string `json:"topic"`
 	// Client ID
 	ClientId string `json:"clientId"`
+	// Backoff holds parameters applied to connection.
+	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	// It is an MQTT client for communicating with an MQTT server
+	client mqttlib.Client
 }
 
 func parseEventSource(eventSource string) (*mqtt, error) {
