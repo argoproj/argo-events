@@ -40,11 +40,6 @@ var (
 	// activeEndpoints keep track of endpoints that are already registered with server and their status active or deactive
 	activeEndpoints = make(map[string]*endpoint)
 
-	// mutex synchronizes activeRoutes
-	routesMutex sync.Mutex
-	// activeRoutes keep track of active routes for a http server
-	activeRoutes = make(map[string]map[string]struct{})
-
 	// routeActivateChan handles assigning new route to server.
 	routeActivateChan = make(chan routeConfig)
 
@@ -218,7 +213,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 	for {
 		select {
 		case data := <-activeEndpoints[rc.sgConfig.Endpoint].dataCh:
-			ese.Log.Info().Msg("received data")
+			ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    eventSource.Name,
 				Payload: data,
