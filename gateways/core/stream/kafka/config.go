@@ -17,8 +17,10 @@ limitations under the License.
 package kafka
 
 import (
+	"github.com/Shopify/sarama"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // KafkaEventSourceExecutor implements Eventing
@@ -27,7 +29,6 @@ type KafkaEventSourceExecutor struct {
 }
 
 // kafka defines configuration required to connect to kafka cluster
-// +k8s:openapi-gen=true
 type kafka struct {
 	// URL to kafka cluster
 	URL string `json:"url"`
@@ -35,6 +36,10 @@ type kafka struct {
 	Partition string `json:"partition"`
 	// Topic name
 	Topic string `json:"topic"`
+	// Backoff holds parameters applied to connection.
+	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	// Consumer manages PartitionConsumers which process Kafka messages from brokers.
+	consumer sarama.Consumer
 }
 
 func parseEventSource(eventSource string) (*kafka, error) {

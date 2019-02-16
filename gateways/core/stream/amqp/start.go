@@ -66,13 +66,19 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	conn, err := amqplib.Dial(a.URL)
-	if err != nil {
+	if err := gateways.Connect(a.Backoff, func() error {
+		var err error
+		a.conn, err = amqplib.Dial(a.URL)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		errorCh <- err
 		return
 	}
 
-	ch, err := conn.Channel()
+	ch, err := a.conn.Channel()
 	if err != nil {
 		errorCh <- err
 		return
@@ -90,7 +96,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		case msg := <-delivery:
 			dataCh <- msg.Body
 		case <-doneCh:
-			err = conn.Close()
+			err = a.conn.Close()
 			if err != nil {
 				ese.Log.Error().Err(err).Str("event-stream-name", eventSource.Name).Msg("failed to close connection")
 			}
