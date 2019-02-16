@@ -19,6 +19,8 @@ package gateways
 import (
 	"fmt"
 	"hash/fnv"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // Hasher hashes a string
@@ -32,4 +34,25 @@ func Hasher(value string) string {
 func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
 	v.Reason = reason
 	v.IsValid = valid
+}
+
+// InitBackoff initializes backoff
+func InitBackoff(backoff *wait.Backoff) {
+	if backoff == nil {
+		backoff = &wait.Backoff{
+			Steps: 1,
+		}
+	}
+}
+
+// General connection helper
+func Connect(backoff *wait.Backoff, conn func() error) error {
+	InitBackoff(backoff)
+	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
+		if err := conn(); err != nil {
+			return false, nil
+		}
+		return true, nil
+	})
+	return err
 }

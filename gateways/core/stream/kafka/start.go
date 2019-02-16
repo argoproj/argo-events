@@ -53,8 +53,15 @@ func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	consumer, err := sarama.NewConsumer([]string{k.URL}, nil)
-	if err != nil {
+	if err := gateways.Connect(k.Backoff, func() error {
+		var err error
+		k.consumer, err = sarama.NewConsumer([]string{k.URL}, nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Str("url", k.URL).Msg("failed to connect")
 		errorCh <- err
 		return
 	}
@@ -66,7 +73,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 	}
 	partition := int32(pInt)
 
-	availablePartitions, err := consumer.Partitions(k.Topic)
+	availablePartitions, err := k.consumer.Partitions(k.Topic)
 	if err != nil {
 		errorCh <- err
 		return
@@ -76,7 +83,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		return
 	}
 
-	partitionConsumer, err := consumer.ConsumePartition(k.Topic, partition, sarama.OffsetNewest)
+	partitionConsumer, err := k.consumer.ConsumePartition(k.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
 		errorCh <- err
 		return
