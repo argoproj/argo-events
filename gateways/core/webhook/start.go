@@ -38,7 +38,9 @@ func init() {
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
 
-	logger := rc.Log.With().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Logger()
+	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
+		Str("port", rc.Webhook.Port).
+		Str("http-method", request.Method).Logger()
 	logger.Info().Msg("request received")
 
 	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
@@ -78,12 +80,10 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	}
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook:     h,
-		Log:         ese.Log,
-		EventSource: eventSource,
-		PostActivate: func() error {
-			return nil
-		},
+		Webhook:            h,
+		Log:                ese.Log,
+		EventSource:        eventSource,
+		PostActivate:       gwcommon.DefaultPostActivate,
 		RouteActiveHandler: RouteActiveHandler,
 		StartCh:            make(chan struct{}),
 	}, helper, eventStream)

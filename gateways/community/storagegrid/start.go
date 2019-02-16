@@ -100,11 +100,9 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 			Port:     sg.Port,
 			Endpoint: sg.Endpoint,
 		},
-		Log:         ese.Log,
-		EventSource: eventSource,
-		PostActivate: func() error {
-			return nil
-		},
+		Log:                ese.Log,
+		EventSource:        eventSource,
+		PostActivate:       gwcommon.DefaultPostActivate,
 		RouteActiveHandler: RouteActiveHandler,
 		StartCh:            make(chan struct{}),
 	}, helper, eventStream)

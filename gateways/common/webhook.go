@@ -68,11 +68,12 @@ type activeServer struct {
 type RouteConfig struct {
 	Webhook            *Webhook
 	Config             interface{}
+	ExtraConfig        map[string]interface{}
 	EventSource        *gateways.EventSource
 	Log                zerolog.Logger
 	StartCh            chan struct{}
 	RouteActiveHandler func(writer http.ResponseWriter, request *http.Request, rc *RouteConfig)
-	PostActivate       func() error
+	PostActivate       func(rc *RouteConfig) error
 }
 
 // endpoint contains state of an http endpoint
@@ -202,9 +203,13 @@ func (rc *RouteConfig) processChannels(helper *WebhookHelper, eventStream gatewa
 	}
 }
 
+func DefaultPostActivate(rc *RouteConfig) error {
+	return nil
+}
+
 func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
 	rc.activateRoute(helper)
-	if err := rc.PostActivate(); err != nil {
+	if err := rc.PostActivate(rc); err != nil {
 		return err
 	}
 	if err := rc.processChannels(helper, eventStream); err != nil {

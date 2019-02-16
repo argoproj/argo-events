@@ -17,7 +17,12 @@ limitations under the License.
 package aws_sns
 
 import (
+	"k8s.io/client-go/kubernetes"
 	"time"
+
+	"github.com/ghodss/yaml"
+	"github.com/rs/zerolog"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -25,6 +30,19 @@ const (
 	MESSAGE_TYPE_UNSUBSCRIBE_CONFIRMATION  = "UnsubscribeConfirmation"
 	MESSAGE_TYPE_NOTIFICATION              = "Notification"
 )
+
+var (
+	snsProtocol = "http"
+)
+
+// SNSEventSourceExecutor implements Eventing
+type SNSEventSourceExecutor struct {
+	Log zerolog.Logger
+	// Clientset is kubernetes client
+	Clientset kubernetes.Interface
+	// Namespace where gateway is deployed
+	Namespace string
+}
 
 // Json http notifications
 // SNS posts those to your http url endpoint if http is selected as delivery method.
@@ -46,12 +64,24 @@ type httpNotification struct {
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
 }
 
-// SNS contains configuration to subscribe to SNS topic
-type SNS struct {
+// snsConfig contains configuration to subscribe to SNS topic
+type snsConfig struct {
 	// The ARN of the topic
 	TopicArn string `json:"topicArn"`
 	// Endpoint you wish to register
 	Endpoint string `json:"endpoint"`
 	// Port on which http server is running.
-	Port string `json:"port"`
+	Port      string                    `json:"port"`
+	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
+	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
+	Region    string                    `json:"region"`
+}
+
+func parseEventSource(es string) (*snsConfig, error) {
+	var n *snsConfig
+	err := yaml.Unmarshal([]byte(es), &n)
+	if err != nil {
+		return nil, err
+	}
+	return n, nil
 }

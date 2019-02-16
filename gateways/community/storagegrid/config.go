@@ -24,7 +24,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// StorageGridEventSourceExecutor implements ConfigExecutor interface
+// StorageGridEventSourceExecutor implements Eventing
 type StorageGridEventSourceExecutor struct {
 	Log zerolog.Logger
 }
