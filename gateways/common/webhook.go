@@ -67,13 +67,13 @@ type activeServer struct {
 // RouteConfig contains configuration about a http route
 type RouteConfig struct {
 	Webhook            *Webhook
-	Config             interface{}
-	ExtraConfig        map[string]interface{}
+	Configs            map[string]interface{}
 	EventSource        *gateways.EventSource
 	Log                zerolog.Logger
 	StartCh            chan struct{}
 	RouteActiveHandler func(writer http.ResponseWriter, request *http.Request, rc *RouteConfig)
 	PostActivate       func(rc *RouteConfig) error
+	PostStop           func(rc *RouteConfig) error
 }
 
 // endpoint contains state of an http endpoint
@@ -207,6 +207,10 @@ func DefaultPostActivate(rc *RouteConfig) error {
 	return nil
 }
 
+func DefaultPostStop(rc *RouteConfig) error {
+	return nil
+}
+
 func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
 	rc.activateRoute(helper)
 	if err := rc.PostActivate(rc); err != nil {
@@ -214,6 +218,9 @@ func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.E
 	}
 	if err := rc.processChannels(helper, eventStream); err != nil {
 		return err
+	}
+	if err := rc.PostStop(rc); err != nil {
+		rc.Log.Error().Err(err).Msg("error occurred while executing post stop logic")
 	}
 	return nil
 }

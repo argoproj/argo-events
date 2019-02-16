@@ -31,6 +31,10 @@ import (
 	"github.com/satori/go.uuid"
 )
 
+const (
+	LabelStorageGridConfig = "storageGridConfig"
+)
+
 var (
 	helper = gwcommon.NewWebhookHelper()
 
@@ -95,7 +99,9 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 	}
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Config: sg,
+		Configs: map[string]interface{}{
+			LabelStorageGridConfig: sg,
+		},
 		Webhook: &gwcommon.Webhook{
 			Port:     sg.Port,
 			Endpoint: sg.Endpoint,
@@ -103,6 +109,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		Log:                ese.Log,
 		EventSource:        eventSource,
 		PostActivate:       gwcommon.DefaultPostActivate,
+		PostStop:           gwcommon.DefaultPostStop,
 		RouteActiveHandler: RouteActiveHandler,
 		StartCh:            make(chan struct{}),
 	}, helper, eventStream)
@@ -153,7 +160,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	storageGridConfig := rc.Config.(*storageGrid)
+	storageGridConfig := rc.Configs[LabelStorageGridConfig].(*storageGrid)
 
 	if filterEvent(notification, storageGridConfig) && filterName(notification, storageGridConfig) {
 		logger.Info().Msg("new event received, dispatching to gateway client")

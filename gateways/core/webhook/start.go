@@ -84,6 +84,7 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 		Log:                ese.Log,
 		EventSource:        eventSource,
 		PostActivate:       gwcommon.DefaultPostActivate,
+		PostStop:           gwcommon.DefaultPostStop,
 		RouteActiveHandler: RouteActiveHandler,
 		StartCh:            make(chan struct{}),
 	}, helper, eventStream)

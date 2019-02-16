@@ -15,3 +15,30 @@ limitations under the License.
 */
 
 package main
+
+import (
+	"os"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/community/aws-sns"
+	"k8s.io/client-go/kubernetes"
+)
+
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	restConfig, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
+	}
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
+	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
+	if !ok {
+		panic("namespace is not provided")
+	}
+	gateways.StartGateway(&aws_sns.SNSEventSourceExecutor{
+		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Clientset: clientset,
+		Namespace: namespace,
+	})
+}

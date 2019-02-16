@@ -66,7 +66,6 @@ type httpNotification struct {
 
 // snsConfig contains configuration to subscribe to SNS topic
 type snsConfig struct {
-	// The ARN of the topic
 	TopicArn string `json:"topicArn"`
 	// Endpoint you wish to register
 	Endpoint string `json:"endpoint"`
