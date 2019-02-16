@@ -37,30 +37,33 @@ func init() {
 // routeActiveHandler handles new route
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
+
+	logger := rc.Log.With().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Logger()
+	logger.Info().Msg("request received")
+
 	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
 		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
-		rc.Log.Info().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("endpoint is not active")
+		logger.Info().Msg("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
 	}
+
 	if rc.Webhook.Method != request.Method {
-		msg := fmt.Sprintf("the method %s is not defined for endpoint %s", rc.Webhook.Method, rc.Webhook.Endpoint)
-		rc.Log.Info().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("endpoint is not active")
-		common.SendErrorResponse(writer, msg)
+		logger.Warn().Str("expected", rc.Webhook.Method).Str("actual", request.Method).Msg("method mismatch")
+		common.SendErrorResponse(writer, fmt.Sprintf("the method %s is not defined for endpoint %s", rc.Webhook.Method, rc.Webhook.Endpoint))
 		return
 	}
 
-	rc.Log.Info().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Msg("payload received")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		rc.Log.Error().Err(err).Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("failed to parse request body")
+		logger.Error().Err(err).Msg("failed to parse request body")
 		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
 		return
 	}
 
 	helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
 	response = "request successfully processed"
-	rc.Log.Info().Str("endpoint", rc.Webhook.Endpoint).Str("http-method", request.Method).Str("response", response).Msg("request payload parsed successfully")
+	logger.Info().Msg(response)
 	common.SendSuccessResponse(writer, response)
 }
 
