@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates webhook event source
@@ -48,7 +49,7 @@ func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, 
 	}, nil
 }
 
-func validateWebhook(w *webhook) error {
+func validateWebhook(w *gwcommon.Webhook) error {
 	if w == nil {
 		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
 	}
