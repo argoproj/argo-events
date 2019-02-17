@@ -106,21 +106,11 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 		pullOpts.ReferenceName = *refName
 	}
 
-	if err := w.Pull(pullOpts); err != nil {
+	if err := w.Pull(pullOpts); err != nil && err != git.NoErrAlreadyUpToDate {
 		return nil, fmt.Errorf("failed to pull latest updates. err: %+v", err)
 	}
 
-	file, err := w.Filesystem.Open(g.artifact.FilePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open resource file. err: %+v", err)
-	}
-
-	var data []byte
-	if _, err := file.Read(data); err != nil {
-		return nil, fmt.Errorf("failed to read resource file. err: %+v", err)
-	}
-
-	return data, nil
+	return ioutil.ReadFile(fmt.Sprintf("%s/%s", g.artifact.CloneDirectory, g.artifact.FilePath))
 }
 
 func (g *GitArtifactReader) getBranchOrTag(r *git.Repository, branch, tag string) (*plumbing.ReferenceName, error) {
@@ -145,35 +135,25 @@ func (g *GitArtifactReader) getBranchOrTag(r *git.Repository, branch, tag string
 func (g *GitArtifactReader) Read() ([]byte, error) {
 	r, err := git.PlainOpen(g.artifact.CloneDirectory)
 	if err != nil {
-		if err == git.ErrRepositoryNotExists {
-			cloneOpt := &git.CloneOptions{
-				URL:               g.artifact.URL,
-				RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-			}
-
-			auth, err := g.getGitAuth()
-			if err != nil {
-				return nil, err
-			}
-			if auth != nil {
-				cloneOpt.Auth = auth
-			}
-
-			refName, err := g.getBranchOrTag(r, g.artifact.Branch, g.artifact.Tag)
-			if err != nil {
-				return nil, err
-			}
-			if refName != nil {
-				cloneOpt.ReferenceName = *refName
-			}
-
-			r, err := git.PlainClone(g.artifact.CloneDirectory, false, cloneOpt)
-			if err != nil {
-				return nil, fmt.Errorf("failed to clone repository. err: %+v", err)
-			}
-			return g.readFromRepository(r)
+		if err != git.ErrRepositoryNotExists {
+			return nil, fmt.Errorf("failed to open repository. err: %+v", err)
 		}
-		return nil, fmt.Errorf("failed to open repository. err: %+v", err)
+		cloneOpt := &git.CloneOptions{
+			URL:               g.artifact.URL,
+			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+		}
+
+		auth, err := g.getGitAuth()
+		if err != nil {
+			return nil, err
+		}
+		if auth != nil {
+			cloneOpt.Auth = auth
+		}
+		r, err = git.PlainClone(g.artifact.CloneDirectory, false, cloneOpt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to clone repository. err: %+v", err)
+		}
 	}
 	return g.readFromRepository(r)
 }
