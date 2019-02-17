@@ -379,6 +379,12 @@ type GitArtifact struct {
 	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,5,opt,name=sshKeyPath"`
 	// Path to file that contains trigger resource definition
 	FilePath string `json:"filePath" protobuf:"bytes,6,name=filePath"`
+	// Branch to use to pull trigger resource
+	// +optional
+	Branch string `json:"branch,omitempty" protobuf:"bytes,7,opt,name=branch"`
+	// Tag to use to pull trigger resource
+	// +optional
+	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
 }
 
 // GitCreds contain reference to git username and password

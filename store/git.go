@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
@@ -97,6 +98,14 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 		pullOpts.Auth = auth
 	}
 
+	refName, err := g.getBranchOrTag(r, g.artifact.Branch, g.artifact.Tag)
+	if err != nil {
+		return nil, err
+	}
+	if refName != nil {
+		pullOpts.ReferenceName = *refName
+	}
+
 	if err := w.Pull(pullOpts); err != nil {
 		return nil, fmt.Errorf("failed to pull latest updates. err: %+v", err)
 	}
@@ -114,6 +123,25 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 	return data, nil
 }
 
+func (g *GitArtifactReader) getBranchOrTag(r *git.Repository, branch, tag string) (*plumbing.ReferenceName, error) {
+	if branch != "" {
+		branch, err := r.Branch(branch)
+		if err != nil {
+			return nil, fmt.Errorf("branch %s not found. err: %+v", branch, err)
+		}
+		return &branch.Merge, nil
+	}
+	if tag != "" {
+		tag, err := r.Tag(tag)
+		if err != nil {
+			return nil, fmt.Errorf("tag %s not found. err: %+v", tag, err)
+		}
+		refName := tag.Name()
+		return &refName, nil
+	}
+	return nil, nil
+}
+
 func (g *GitArtifactReader) Read() ([]byte, error) {
 	r, err := git.PlainOpen(g.artifact.CloneDirectory)
 	if err != nil {
@@ -129,6 +157,14 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 			}
 			if auth != nil {
 				cloneOpt.Auth = auth
+			}
+
+			refName, err := g.getBranchOrTag(r, g.artifact.Branch, g.artifact.Tag)
+			if err != nil {
+				return nil, err
+			}
+			if refName != nil {
+				cloneOpt.ReferenceName = *refName
 			}
 
 			r, err := git.PlainClone(g.artifact.CloneDirectory, false, cloneOpt)
