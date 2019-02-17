@@ -163,7 +163,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.Refe
 				Required: []string{"name", "port", "endpoint"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -267,6 +266,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 							Description: "Nodes is a mapping between a node ID and the node's status it records the states for the configurations of gateway.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus"),
@@ -400,6 +400,5 @@ func schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref common.Refer
 				Required: []string{"name"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }

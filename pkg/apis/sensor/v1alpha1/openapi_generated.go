@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/go-openapi/spec"
-	"k8s.io/kube-openapi/pkg/common"
+	spec "github.com/go-openapi/spec"
+	common "k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -35,6 +35,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":             schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":                schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":        schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":              schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":          schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
@@ -85,11 +87,16 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact"),
 						},
 					},
+					"git": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
 	}
 }
 
@@ -125,7 +132,6 @@ func schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref common.ReferenceCallb
 				Required: []string{"name", "namespace", "key"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -168,7 +174,6 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 				Required: []string{"path", "type", "value"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -204,7 +209,6 @@ func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallbac
 				Required: []string{"name", "dependencies"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -315,7 +319,103 @@ func schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref common.ReferenceCallback) 
 				},
 			},
 		},
-		Dependencies: []string{},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GitArtifact contains information about an artifact stored in git",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"url": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Git URL",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"cloneDirectory": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers. Hence we don't use any specific git provider client.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"creds": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Creds contain reference to git username and password",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds"),
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace where creds are stored.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"sshKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"filePath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Path to file that contains trigger resource definition",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"branch": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Branch to use to pull trigger resource",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"tag": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Tag to use to pull trigger resource",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"url", "cloneDirectory", "filePath"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_GitCreds(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GitCreds contain reference to git username and password",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+				},
+				Required: []string{"username", "password"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -348,7 +448,6 @@ func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallba
 				Required: []string{"group", "version", "kind"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -471,6 +570,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 							Description: "Map of string keys and values that can be used to organize and categorize (scope and select) objects. This overrides any labels in the unstructured object with the same key.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Type:   []string{"string"},
@@ -563,7 +663,6 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 				Required: []string{"event", "path"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -573,10 +672,8 @@ func schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref common.ReferenceCallback)
 			SchemaProps: spec.SchemaProps{
 				Description: "RetryStrategy represents a strategy for retrying operations",
 				Type:        []string{"object"},
-				Properties:  map[string]spec.Schema{},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -791,6 +888,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Description: "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus"),
@@ -832,7 +930,6 @@ func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) co
 				},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -922,7 +1019,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref common.ReferenceCallba
 				},
 			},
 		},
-		Dependencies: []string{},
 	}
 }
 
@@ -949,6 +1045,5 @@ func schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 				Required: []string{"path"},
 			},
 		},
-		Dependencies: []string{},
 	}
 }

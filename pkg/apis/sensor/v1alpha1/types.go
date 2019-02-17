@@ -389,8 +389,8 @@ type GitArtifact struct {
 
 // GitCreds contain reference to git username and password
 type GitCreds struct {
-	Username *corev1.SecretKeySelector `json:"username"`
-	Password *corev1.SecretKeySelector `json:"password"`
+	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
+	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
 }
 
 // HasLocation whether or not an artifact has a location defined
