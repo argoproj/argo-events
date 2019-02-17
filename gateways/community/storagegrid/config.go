@@ -24,13 +24,12 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// StorageGridEventSourceExecutor implements ConfigExecutor interface
+// StorageGridEventSourceExecutor implements Eventing
 type StorageGridEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
 // storageGrid contains configuration for storage grid sns
-// +k8s:openapi-gen=true
 type storageGrid struct {
 	// Port to run web server on
 	Port string `json:"port"`
@@ -43,9 +42,7 @@ type storageGrid struct {
 	// Filter on object key which caused the notification.
 	Filter *Filter `json:"filter,omitempty"`
 	// srv holds reference to http server
-	// +k8s:openapi-gen=false
-	srv *http.Server `json:"srv,omitempty"`
-	// +k8s:openapi-gen=false
+	srv *http.Server   `json:"srv,omitempty"`
 	mux *http.ServeMux `json:"mux,omitempty"`
 }
 
