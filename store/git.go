@@ -34,6 +34,14 @@ type GitArtifactReader struct {
 	artifact      *v1alpha1.GitArtifact
 }
 
+// NewGitReader returns a new git reader
+func NewGitReader(kubeClientset kubernetes.Interface, gitArtifact *v1alpha1.GitArtifact) (*GitArtifactReader, error) {
+	return &GitArtifactReader{
+		kubeClientset: kubeClientset,
+		artifact:      gitArtifact,
+	}, nil
+}
+
 func getSSHKeyAuth(privateSshKeyFile string) (transport.AuthMethod, error) {
 	var auth transport.AuthMethod
 	sshKey, err := ioutil.ReadFile(privateSshKeyFile)
