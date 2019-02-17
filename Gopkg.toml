@@ -21,6 +21,10 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/smartystreets/goconvey"
   version = "1.6.3"
 
