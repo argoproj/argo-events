@@ -18,62 +18,54 @@ package github
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/store"
 	gh "github.com/google/go-github/github"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
-// getSecrets retrieves the secret value from the secret in namespace with name and key
-func getSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
-	secret, err := client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
-	if err != nil {
-		return "", err
-	}
-	val, ok := secret.Data[key]
-	if !ok {
-		return "", fmt.Errorf("secret '%s' does not have the key '%s'", name, key)
-	}
-	return string(val), nil
+const (
+	LabelGithubConfig = "config"
+	LabelGithubClient = "client"
+	LabelWebhook      = "hook"
+)
+
+var (
+	helper = gwcommon.NewWebhookHelper()
+)
+
+func init() {
+	go gwcommon.InitRouteChannels(helper)
 }
 
 // getCredentials for github
 func (ese *GithubEventSourceExecutor) getCredentials(gs *GithubSecret) (*cred, error) {
-	secret, err := getSecrets(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
+	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
 	}
 	return &cred{
-		secret: secret,
+		secret: token,
 	}, nil
 }
 
-// StartEventSource starts an event source
-func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer gateways.Recover(eventSource.Name)
+func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
+	gc := rc.Configs[LabelGithubConfig].(*GithubConfig)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	g, err := parseEventSource(eventSource.Data)
+	c, err := ese.getCredentials(gc.APIToken)
 	if err != nil {
-		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
-	}
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
-
-	go ese.listenEvents(g, eventSource, dataCh, errorCh, doneCh)
-
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
-}
-
-func (ese *GithubEventSourceExecutor) listenEvents(g *GithubConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	c, err := ese.getCredentials(g.APIToken)
-	if err != nil {
-		errorCh <- err
-		return
+		return fmt.Errorf("failed to rtrieve github credentials. err: %+v", err)
 	}
 
 	PATTransport := TokenAuthTransport{
@@ -81,50 +73,163 @@ func (ese *GithubEventSourceExecutor) listenEvents(g *GithubConfig, eventSource 
 	}
 
 	hookConfig := map[string]interface{}{
-		"url": &g.URL,
+		"url": &gc.URL,
 	}
 
-	if g.ContentType != "" {
-		hookConfig["content_type"] = g.ContentType
+	if gc.ContentType != "" {
+		hookConfig["content_type"] = gc.ContentType
 	}
 
-	if g.Insecure {
+	if gc.Insecure {
 		hookConfig["insecure_ssl"] = "1"
 	} else {
 		hookConfig["insecure_ssl"] = "0"
 	}
 
-	if g.WebHookSecret != nil {
-		sc, err := ese.getCredentials(g.WebHookSecret)
+	if gc.WebHookSecret != nil {
+		sc, err := ese.getCredentials(gc.WebHookSecret)
 		if err != nil {
-			errorCh <- err
-			return
+			return fmt.Errorf("failed to retrieve webhook secret. err: %+v", err)
 		}
 		hookConfig["secret"] = sc.secret
 	}
 
 	hookSetup := &gh.Hook{
-		Events: g.Events,
-		Active: gh.Bool(g.Active),
+		Events: gc.Events,
+		Active: gh.Bool(gc.Active),
 		Config: hookConfig,
 	}
 
 	client := gh.NewClient(PATTransport.Client())
+	rc.Configs[LabelGithubClient] = client
+
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
-	hook, _, err := client.Repositories.CreateHook(ctx, g.Owner, g.Repository, hookSetup)
+	hook, _, err := client.Repositories.CreateHook(ctx, gc.Owner, gc.Repository, hookSetup)
 	if err != nil {
-		errorCh <- err
+		return fmt.Errorf("failed to create webhook. err: %+v", err)
+	}
+	rc.Configs[LabelWebhook] = hook
+
+	ese.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
+	return nil
+}
+
+func PostStop(rc *gwcommon.RouteConfig) error {
+	gc := rc.Configs[LabelGithubConfig].(*GithubConfig)
+	client := rc.Configs[LabelGithubClient].(*gh.Client)
+	hook := rc.Configs[LabelWebhook].(*gh.Hook)
+
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	if _, err := client.Repositories.DeleteHook(ctx, gc.Owner, gc.Repository, *hook.ID); err != nil {
+		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to delete github hook")
+		return err
+	}
+	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook deleted")
+	return nil
+}
+
+// StartEventSource starts an event source
+func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	defer gateways.Recover(eventSource.Name)
+
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	gc, err := parseEventSource(eventSource.Data)
+	if err != nil {
+		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
+	}
+
+	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
+		Webhook: &gwcommon.Webhook{
+			Port:     gc.Port,
+			Endpoint: gc.Endpoint,
+		},
+		Configs: map[string]interface{}{
+			LabelGithubConfig: gc,
+		},
+		Log:                ese.Log,
+		EventSource:        eventSource,
+		PostActivate:       ese.PostActivate,
+		PostStop:           PostStop,
+		RouteActiveHandler: RouteActiveHandler,
+		StartCh:            make(chan struct{}),
+	}, helper, eventStream)
+}
+
+func signBody(secret, body []byte) []byte {
+	computed := hmac.New(sha1.New, secret)
+	computed.Write(body)
+	return []byte(computed.Sum(nil))
+}
+
+func verifySignature(secret []byte, signature string, body []byte) bool {
+	const signaturePrefix = "sha1="
+	const signatureLength = 45
+
+	if len(signature) != signatureLength || !strings.HasPrefix(signature, signaturePrefix) {
+		return false
+	}
+
+	actual := make([]byte, 20)
+	hex.Decode(actual, []byte(signature[5:]))
+
+	return hmac.Equal(signBody(secret, body), actual)
+}
+
+func validatePayload(secret []byte, headers http.Header, body []byte) error {
+	signature := headers.Get("x-hub-signature")
+	if len(signature) == 0 {
+		return errors.New("no x-hub-signature header found")
+	}
+
+	if event := headers.Get("x-github-event"); len(event) == 0 {
+		return errors.New("no x-github-event header found")
+	}
+
+	if id := headers.Get("x-github-delivery"); len(id) == 0 {
+		return errors.New("no x-github-delivery header found")
+	}
+
+	if !verifySignature(secret, signature, body) {
+		return errors.New("invalid signature")
+	}
+	return nil
+}
+
+// routeActiveHandler handles new route
+func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
+	var response string
+
+	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
+		Str("port", rc.Webhook.Port).
+		Str("http-method", request.Method).Logger()
+	logger.Info().Msg("request received")
+
+	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
+		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
+		logger.Info().Msg("endpoint is not active")
+		common.SendErrorResponse(writer, response)
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
-
-	<-doneCh
-	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
-	if _, err = client.Repositories.DeleteHook(ctx, g.Owner, g.Repository, *hook.ID); err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to delete github hook")
-	} else {
-		ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook deleted")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		logger.Error().Err(err).Msg("failed to parse request body")
+		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
+		return
 	}
+
+	hook := rc.Configs[LabelWebhook].(*gh.Hook)
+	if secret, ok := hook.Config["secret"]; ok {
+		if err := validatePayload([]byte(secret.(string)), request.Header, body); err != nil {
+			logger.Error().Err(err).Msg("request is not valid event notification")
+			common.SendErrorResponse(writer, fmt.Sprintf("invalid event notification"))
+			return
+		}
+	}
+
+	helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
+	response = "request successfully processed"
+	logger.Info().Msg(response)
+	common.SendSuccessResponse(writer, response)
 }
