@@ -21,11 +21,11 @@ and trigger Kubernetes objects after successful event dependencies resolution
 <br/>
 
 ## Features 
-* Manages dependencies from a variety of event sources
+* Manage dependencies from a variety of event sources
 * Ability to customize business-level constraint logic for event dependencies resolution
-* Manages everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Ability to extends framework to add you own event source listener
-* Supports arbitrary boolean logic to resolve event dependencies
+* Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
+* Ability to extends framework to add your own event source listener
+* Define arbitrary boolean logic to resolve event dependencies
 * CloudEvents compliant
 * Ability to manage event sources at runtime
 
@@ -118,21 +118,11 @@ Lets deploy a webhook gateway and sensor,
 
  * More examples can be found at [examples](https://github.com/argoproj/argo-events/tree/master/examples)
 
-2. [Sensor and gateway controllers](docs/controllers-guide.md)
-3. [Learn about gateways](docs/gateway-guide.md)
-4. [Learn about sensors](docs/sensor-guide.md)
-5. [Learn about triggers](docs/trigger-guide.md)
-6. Install Gateways and Sensors
-    1. [Webhook](gateways/core/webhook/install.md)
-    2. [Artifact](gateways/core/artifact/install.md)
-    3. [Calendar](gateways/core/calendar/install.md)
-    4. [Resource](gateways/core/resource/install.md)
-    5. [File](gateways/core/file/install.md)
-    6. Streams
-        1. [NATS](gateways/core/stream/nats/install.md)
-        2. [KAFKA](gateways/core/stream/kafka/install.md)
-        3. [AMQP](gateways/core/stream/amqp/install.md)
-        4. [MQTT](gateways/core/stream/mqtt/install.md)
-7. [Write your own gateway](docs/custom-gateway.md)
-8. [Want to contribute or develop/run locally?](./CONTRIBUTING.md)
-9. See where the project is headed in the [roadmap](./ROADMAP.md)
+## Further Reading
+1. [Gateway](docs/gateway-guide.md)
+2. [Sensor](docs/sensor-guide.md)
+3. [Trigger](docs/trigger-guide.md)
+4. [Controllers](docs/controllers-guide.md)
+5. [Write your own gateway](docs/custom-gateway.md)
+6. [Want to contribute or develop/run locally?](./CONTRIBUTING.md)
+7. See where the project is headed in the [roadmap](./ROADMAP.md)
