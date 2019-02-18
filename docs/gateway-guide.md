@@ -8,7 +8,16 @@
 6. [Examples](#examples)
 
 ## What is a gateway?
-A gateway is a long running/repeatable process whcih consumes events from event sources, transform them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatch them to watchers(sensors and/or gateways).
+A gateway component consumes events from event sources, transform them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatch them to watchers(sensors and/or gateways).
+
+<br/>
+</br>
+
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/gateways.png?raw=true" alt="Gateway"/>
+</p>
+
+<br/>
 
 ### Components
 A gateway has two components:
