@@ -8,7 +8,7 @@
 6. [Examples](#examples)
 
 ## What is a gateway?
-A gateway component consumes events from event sources, transforms them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatches them to watchers(sensors and/or gateways).
+A gateway consumes events from event sources, transforms them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatches them to watchers(sensors and/or gateways).
 
 <br/>
 </br>
@@ -71,8 +71,8 @@ https://github.com/argoproj/argo-events/blob/master/docs/gateway-protocol.md
 
 ## Managing Event Sources
   * The event sources configurations are managed using K8s configmap. Once the gateway resource is created with the configmap reference in it's spec, it starts watching the configmap.
-  The `gateway-client` sends each event source configuration to `gateway-server` over gRPC. The `gateway-server` then parses the configuration and use it to start consuming events from 
-  external event producing entity like s3, steams, git etc. 
+  The `gateway-client` sends each event source configuration to `gateway-server` over gRPC. The `gateway-server` then parses the configuration to start consuming events from 
+  external event producing entity.
 
   * You can modify K8s configmap containing event sources configurations anytime and `gateway-client` will intelligently pick new/deleted configurations and send them over to `gateway-server` to either
   start or stop the event sources.

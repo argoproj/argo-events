@@ -4,7 +4,7 @@
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-logo.png?raw=true" alt="Sublime's custom image"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-logo.png?raw=true" alt="Logo"/>
 </p>
 
 ## What is Argo Events?
@@ -15,7 +15,7 @@ and trigger Kubernetes objects after successful event dependencies resolution
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-top-level.png?raw=true" alt="Sublime's custom image"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-top-level.png?raw=true" alt="High Level Overview"/>
 </p>
 
 <br/>
@@ -122,8 +122,9 @@ Lets deploy a webhook gateway and sensor,
 1. [Gateway](docs/gateway-guide.md)
 2. [Sensor](docs/sensor-guide.md)
 3. [Trigger](docs/trigger-guide.md)
-4. [Controllers](docs/controllers-guide.md)
-5. [Write your own gateway](docs/custom-gateway.md)
+4. [Communication between gateway and sensor](docs/communication.md)
+5. [Controllers](docs/controllers-guide.md)
+6. [Write your own gateway](docs/custom-gateway.md)
 
 ## Contribute
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look to our [Contributing Guidelines](./CONTRIBUTING.md).
