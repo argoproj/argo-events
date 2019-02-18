@@ -19,6 +19,8 @@ package common
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/argoproj/argo-events/gateways"
@@ -221,6 +223,27 @@ func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.E
 	}
 	if err := rc.PostStop(rc); err != nil {
 		rc.Log.Error().Err(err).Msg("error occurred while executing post stop logic")
+	}
+	return nil
+}
+
+func ValidateWebhook(endpoint, port string) error {
+	if endpoint == "" {
+		return fmt.Errorf("endpoint can't be empty")
+	}
+	if port == "" {
+		return fmt.Errorf("port can't be empty")
+	}
+
+	if !strings.HasPrefix(endpoint, "/") {
+		return fmt.Errorf("endpoint must start with '/'")
+	}
+
+	if port != "" {
+		_, err := strconv.Atoi(port)
+		if err != nil {
+			return fmt.Errorf("failed to parse server port %s. err: %+v", port, err)
+		}
 	}
 	return nil
 }

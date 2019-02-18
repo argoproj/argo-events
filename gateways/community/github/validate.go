@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // Validate validates github gateway configuration
@@ -62,5 +63,5 @@ func validateGithub(g *GithubConfig) error {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
-	return nil
+	return gwcommon.ValidateWebhook(g.Endpoint, g.Port)
 }
