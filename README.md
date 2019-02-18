@@ -124,5 +124,9 @@ Lets deploy a webhook gateway and sensor,
 3. [Trigger](docs/trigger-guide.md)
 4. [Controllers](docs/controllers-guide.md)
 5. [Write your own gateway](docs/custom-gateway.md)
-6. [Want to contribute or develop/run locally?](./CONTRIBUTING.md)
-7. See where the project is headed in the [roadmap](./ROADMAP.md)
+
+## Contribute
+[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look to our [Contributing Guidelines](./CONTRIBUTING.md).
+
+## License
+Apache License Version 2.0, see [LICENSE](./LICENSE)
