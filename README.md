@@ -3,6 +3,10 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/argoproj/argo-events)](https://goreportcard.com/report/github.com/argoproj/argo-events)
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
 
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-logo.png?raw=true" alt="Sublime's custom image"/>
+</p>
+
 ## What is Argo Events?
 Argo Events is an event-based dependency manager for Kubernetes. The core concept of the project are
  * `gateways` which are implemented as a Kubernetes-native Custom Resource Definition that process events from event source.
