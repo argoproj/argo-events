@@ -8,34 +8,30 @@
 </p>
 
 ## What is Argo Events?
-Argo Events is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
+**Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
 and trigger Kubernetes objects after successful event dependencies resolution
 
+<br/>
+<br/>
 
 <p align="center">
   <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/argo-events-top-level.png?raw=true" alt="Sublime's custom image"/>
 </p>
 
-## Features
-- Runtime agnostic. The first runtime and package agnostic event framework for Kubernetes.
-- Containers. Designed from the ground-up as Kubernetes-native. 
-- Extremely lightweight. All gateways, with the exception of calendar-based gateways, are event-driven, meaning that there is no polling involved.
-- Configurable. Configure gateways at runtime
-- Scalable & Resilient.
-- Simple or Complex dependencies. Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
+## Features 
+* Manages dependencies from a variety of event sources
+* Ability to customize business-level constraint logic for event dependencies resolution
+* Manages everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
+* Ability to extends framework to add you own event source listener
+* Supports arbitrary boolean logic to resolve event dependencies
+* CloudEvents compliant
 
 <br/>
 <br/>
 
-![](docs/architecture.png)
+## Installation
 
-<br/>
-<br/>
 
-## Getting Started
-[![asciicast](https://asciinema.org/a/207973.png)](https://asciinema.org/a/207973)
-
-<br/>
 <br/>
 
 1. [Installation](./docs/quickstart.md)
