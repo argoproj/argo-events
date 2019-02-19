@@ -9,7 +9,7 @@ spec:
     containers:
       - name: "sensor"
         # this is an experimental image
-        image: "argoproj/sensor:v0.7.2"
+        image: "argoproj/sensor:v0.7.3"
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /git/argoproj
@@ -25,7 +25,7 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: workflow-trigger
+    - name: workflow-trigger-1
       resource:
         namespace: argo-events
         group: argoproj.io
@@ -44,4 +44,29 @@ spec:
                 key: password
             namespace: argo-events
             filePath: "examples/hello-world.yaml"
-            branch: "master"
+            tag: "v2.2.1"
+    - name: workflow-trigger-2
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          git:
+            url: "https://github.com/argoproj/argo.git"
+            cloneDirectory: "/git/argoproj"
+            creds:
+              username:
+                name: github-secret
+                key: username
+              password:
+                name: github-secret
+                key: password
+            namespace: argo-events
+            filePath: "examples/hello-world.yaml"
+            branch: "release-2.0"
+            # optional
+            remote:
+              name: "myremote"
+              urls:
+                - "https://github.com/VaibhavPage/argo.git"
