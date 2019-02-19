@@ -72,7 +72,6 @@ func getSSHKeyAuth(privateSshKeyFile string) (transport.AuthMethod, error) {
 
 func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
-		// retrieve access key id and secret access key
 		username, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Username.Name, g.artifact.Creds.Username.Key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve username: err: %+v", err)
