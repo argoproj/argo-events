@@ -18,6 +18,7 @@ package store
 
 import (
 	"fmt"
+	"gopkg.in/src-d/go-git.v4/config"
 	"io/ioutil"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -28,6 +29,11 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"k8s.io/client-go/kubernetes"
+)
+
+const (
+	DefaultRemote = "origin"
+	DefaultBranch = "master"
 )
 
 type GitArtifactReader struct {
@@ -41,6 +47,13 @@ func NewGitReader(kubeClientset kubernetes.Interface, gitArtifact *v1alpha1.GitA
 		kubeClientset: kubeClientset,
 		artifact:      gitArtifact,
 	}, nil
+}
+
+func (g *GitArtifactReader) getRemote() string {
+	if g.artifact.Remote != nil {
+		return g.artifact.Remote.Name
+	}
+	return DefaultRemote
 }
 
 func getSSHKeyAuth(privateSshKeyFile string) (transport.AuthMethod, error) {
@@ -59,7 +72,6 @@ func getSSHKeyAuth(privateSshKeyFile string) (transport.AuthMethod, error) {
 
 func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 	if g.artifact.Creds != nil {
-		// retrieve access key id and secret access key
 		username, err := GetSecrets(g.kubeClientset, g.artifact.Namespace, g.artifact.Creds.Username.Name, g.artifact.Creds.Username.Key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve username: err: %+v", err)
@@ -80,30 +92,46 @@ func (g *GitArtifactReader) getGitAuth() (transport.AuthMethod, error) {
 }
 
 func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error) {
+	auth, err := g.getGitAuth()
+	if err != nil {
+		return nil, err
+	}
+
+	if g.artifact.Remote != nil {
+		_, err := r.CreateRemote(&config.RemoteConfig{
+			Name: g.artifact.Remote.Name,
+			URLs: g.artifact.Remote.URLS,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to create remote. err: %+v", err)
+		}
+
+		fetchOptions := &git.FetchOptions{
+			RemoteName: g.artifact.Remote.Name,
+		}
+		if auth != nil {
+			fetchOptions.Auth = auth
+		}
+
+		if err := r.Fetch(fetchOptions); err != nil {
+			return nil, fmt.Errorf("failed to fetch remote %s. err: %+v", g.artifact.Remote.Name, err)
+		}
+	}
+
 	w, err := r.Worktree()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get working tree. err: %+v", err)
 	}
 
-	pullOpts := &git.PullOptions{
-		RemoteName:        "origin",
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+	if err := w.Checkout(g.getBranchOrTag()); err != nil {
+		return nil, fmt.Errorf("failed to checkout. err: %+v", err)
 	}
 
-	auth, err := g.getGitAuth()
-	if err != nil {
-		return nil, err
+	pullOpts := &git.PullOptions{
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	}
 	if auth != nil {
 		pullOpts.Auth = auth
-	}
-
-	refName, err := g.getBranchOrTag(r, g.artifact.Branch, g.artifact.Tag)
-	if err != nil {
-		return nil, err
-	}
-	if refName != nil {
-		pullOpts.ReferenceName = *refName
 	}
 
 	if err := w.Pull(pullOpts); err != nil && err != git.NoErrAlreadyUpToDate {
@@ -113,23 +141,16 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 	return ioutil.ReadFile(fmt.Sprintf("%s/%s", g.artifact.CloneDirectory, g.artifact.FilePath))
 }
 
-func (g *GitArtifactReader) getBranchOrTag(r *git.Repository, branch, tag string) (*plumbing.ReferenceName, error) {
-	if branch != "" {
-		branch, err := r.Branch(branch)
-		if err != nil {
-			return nil, fmt.Errorf("branch %s not found. err: %+v", branch, err)
-		}
-		return &branch.Merge, nil
+func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
+	opts := &git.CheckoutOptions{}
+	if g.artifact.Branch != "" {
+		opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), g.artifact.Branch)
 	}
-	if tag != "" {
-		tag, err := r.Tag(tag)
-		if err != nil {
-			return nil, fmt.Errorf("tag %s not found. err: %+v", tag, err)
-		}
-		refName := tag.Name()
-		return &refName, nil
+	if g.artifact.Tag != "" {
+		opts.Branch = plumbing.NewTagReferenceName(g.artifact.Tag)
 	}
-	return nil, nil
+	opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), DefaultBranch)
+	return opts
 }
 
 func (g *GitArtifactReader) Read() ([]byte, error) {
@@ -138,6 +159,7 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 		if err != git.ErrRepositoryNotExists {
 			return nil, fmt.Errorf("failed to open repository. err: %+v", err)
 		}
+
 		cloneOpt := &git.CloneOptions{
 			URL:               g.artifact.URL,
 			RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
@@ -150,6 +172,7 @@ func (g *GitArtifactReader) Read() ([]byte, error) {
 		if auth != nil {
 			cloneOpt.Auth = auth
 		}
+
 		r, err = git.PlainClone(g.artifact.CloneDirectory, false, cloneOpt)
 		if err != nil {
 			return nil, fmt.Errorf("failed to clone repository. err: %+v", err)

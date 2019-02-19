@@ -385,6 +385,18 @@ type GitArtifact struct {
 	// Tag to use to pull trigger resource
 	// +optional
 	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
+	// Git remote to manage set of tracked repositories. Defaults to "origin".
+	// Refer https://git-scm.com/docs/git-remote
+	// +optional
+	Remote *GitRemoteConfig `json:"remote" protobuf:"bytes,9,opt,name=remote"`
+}
+
+type GitRemoteConfig struct {
+	// Name of the remote to fetch from.
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	// URLs the URLs of a remote repository. It must be non-empty. Fetch will
+	// always use the first URL, while push will use all of them.
+	URLS []string `json:"urls" protobuf:"bytes,2,rep,name=urls"`
 }
 
 // GitCreds contain reference to git username and password
