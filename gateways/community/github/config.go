@@ -20,6 +20,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
 	"github.com/rs/zerolog"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -49,23 +50,15 @@ type GithubConfig struct {
 	// External URL for hooks
 	URL string `json:"url"`
 	// K8s secret containing github api token
-	APIToken *GithubSecret `json:"apiToken"`
+	APIToken *corev1.SecretKeySelector `json:"apiToken"`
 	// K8s secret containing WebHook Secret
-	WebHookSecret *GithubSecret `json:"webHookSecret"`
+	WebHookSecret *corev1.SecretKeySelector `json:"webHookSecret"`
 	// Insecure tls verification
 	Insecure bool `json:"insecure"`
 	// Active
 	Active bool `json:"active"`
 	// ContentType json or form
 	ContentType string `json:"contentType"`
-}
-
-// GithubSecret contains information of k8 secret which holds the github api access token key
-type GithubSecret struct {
-	// Name of k8 secret containing api token or webhook secret
-	Name string
-	// Key for api token/webhook secret
-	Key string
 }
 
 // cred stores the api access token or webhook secret

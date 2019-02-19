@@ -33,6 +33,7 @@ import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/argoproj/argo-events/store"
 	gh "github.com/google/go-github/github"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -50,7 +51,7 @@ func init() {
 }
 
 // getCredentials for github
-func (ese *GithubEventSourceExecutor) getCredentials(gs *GithubSecret) (*cred, error) {
+func (ese *GithubEventSourceExecutor) getCredentials(gs *corev1.SecretKeySelector) (*cred, error) {
 	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
