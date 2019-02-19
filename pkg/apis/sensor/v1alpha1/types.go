@@ -18,9 +18,10 @@ package v1alpha1
 
 import (
 	"fmt"
+	"hash/fnv"
+
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"hash/fnv"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -335,6 +336,7 @@ type ArtifactLocation struct {
 	File      *FileArtifact         `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
 	URL       *URLArtifact          `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
 	Configmap *ConfigmapArtifact    `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+	Git       *GitArtifact          `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
@@ -356,6 +358,51 @@ type FileArtifact struct {
 type URLArtifact struct {
 	Path       string `json:"path" protobuf:"bytes,1,name=path"`
 	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
+}
+
+// GitArtifact contains information about an artifact stored in git
+type GitArtifact struct {
+	// Git URL
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers.
+	// Hence we don't use any specific git provider client.
+	CloneDirectory string `json:"cloneDirectory" protobuf:"bytes,2,name=cloneDirectory"`
+	// Creds contain reference to git username and password
+	// +optional
+	Creds *GitCreds `json:"creds,omitempty" protobuf:"bytes,3,opt,name=creds"`
+	// Namespace where creds are stored.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	// SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
+	// ssh key path must be mounted in sensor pod.
+	// +optional
+	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,5,opt,name=sshKeyPath"`
+	// Path to file that contains trigger resource definition
+	FilePath string `json:"filePath" protobuf:"bytes,6,name=filePath"`
+	// Branch to use to pull trigger resource
+	// +optional
+	Branch string `json:"branch,omitempty" protobuf:"bytes,7,opt,name=branch"`
+	// Tag to use to pull trigger resource
+	// +optional
+	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
+	// Git remote to manage set of tracked repositories. Defaults to "origin".
+	// Refer https://git-scm.com/docs/git-remote
+	// +optional
+	Remote *GitRemoteConfig `json:"remote" protobuf:"bytes,9,opt,name=remote"`
+}
+
+type GitRemoteConfig struct {
+	// Name of the remote to fetch from.
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	// URLs the URLs of a remote repository. It must be non-empty. Fetch will
+	// always use the first URL, while push will use all of them.
+	URLS []string `json:"urls" protobuf:"bytes,2,rep,name=urls"`
+}
+
+// GitCreds contain reference to git username and password
+type GitCreds struct {
+	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
+	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
 }
 
 // HasLocation whether or not an artifact has a location defined

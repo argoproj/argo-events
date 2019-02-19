@@ -18,6 +18,7 @@ package store
 
 import (
 	"fmt"
+	"k8s.io/client-go/kubernetes"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -60,7 +61,7 @@ func FetchArtifact(reader ArtifactReader, gvk ss_v1alpha1.GroupVersionKind) (*un
 }
 
 // GetArtifactReader returns the ArtifactReader for this location
-func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (ArtifactReader, error) {
+func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, clientset kubernetes.Interface) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
 	} else if loc.Inline != nil {
@@ -69,6 +70,10 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials) (A
 		return NewFileReader(loc.File)
 	} else if loc.URL != nil {
 		return NewURLReader(loc.URL)
+	} else if loc.Git != nil {
+		return NewGitReader(clientset, loc.Git)
+	} else if loc.Configmap != nil {
+		return NewConfigMapReader(clientset, loc.Configmap)
 	}
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
