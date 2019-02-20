@@ -1,6 +1,10 @@
 # Sensor Guide
 Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
-[Sensor examples](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
+
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/sensor.png?raw=true" alt="Sensor"/>
+</p>
+
 
 1. [Specifications](#specifications)
 2. [Dependencies](#dependencies)
@@ -62,3 +66,6 @@ filters:
               type: string
               value: argo-workflow-input
 ```
+
+## Examples
+You can find more sensor examples [here](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
