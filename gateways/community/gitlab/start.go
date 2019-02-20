@@ -70,8 +70,8 @@ func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	rc.Configs[LabelGitlabClient] = client
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:                   &gl.URL,
-		Token:                 &c.token,
+		URL:   &gl.URL,
+		Token: &c.token,
 		EnableSSLVerification: &gl.EnableSSLVerification,
 	}
 
@@ -148,7 +148,7 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: &gwcommon.Webhook{
-			Endpoint: gl.Endpoint,
+			Endpoint: gwcommon.FormatWebhookEndpoint(gl.Endpoint),
 			Port:     gl.Port,
 		},
 		Configs: map[string]interface{}{

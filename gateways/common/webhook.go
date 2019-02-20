@@ -234,11 +234,6 @@ func ValidateWebhook(endpoint, port string) error {
 	if port == "" {
 		return fmt.Errorf("port can't be empty")
 	}
-
-	if !strings.HasPrefix(endpoint, "/") {
-		return fmt.Errorf("endpoint must start with '/'")
-	}
-
 	if port != "" {
 		_, err := strconv.Atoi(port)
 		if err != nil {
@@ -246,4 +241,11 @@ func ValidateWebhook(endpoint, port string) error {
 		}
 	}
 	return nil
+}
+
+func FormatWebhookEndpoint(endpoint string) string {
+	if !strings.HasPrefix(endpoint, "/") {
+		return fmt.Sprintf("/%s", endpoint)
+	}
+	return endpoint
 }

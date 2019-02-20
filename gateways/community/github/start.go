@@ -42,6 +42,12 @@ const (
 	LabelWebhook      = "hook"
 )
 
+const (
+	GithubSignatureHeader = "x-hub-signature"
+	GithubEventHeader     = "x-github-event"
+	GithubDeliveryHeader  = "x-github-delivery"
+)
+
 var (
 	helper = gwcommon.NewWebhookHelper()
 )
@@ -143,7 +149,7 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: &gwcommon.Webhook{
 			Port:     gc.Port,
-			Endpoint: gc.Endpoint,
+			Endpoint: gwcommon.FormatWebhookEndpoint(gc.Endpoint),
 		},
 		Configs: map[string]interface{}{
 			LabelGithubConfig: gc,
@@ -178,16 +184,16 @@ func verifySignature(secret []byte, signature string, body []byte) bool {
 }
 
 func validatePayload(secret []byte, headers http.Header, body []byte) error {
-	signature := headers.Get("x-hub-signature")
+	signature := headers.Get(GithubSignatureHeader)
 	if len(signature) == 0 {
 		return errors.New("no x-hub-signature header found")
 	}
 
-	if event := headers.Get("x-github-event"); len(event) == 0 {
+	if event := headers.Get(GithubEventHeader); len(event) == 0 {
 		return errors.New("no x-github-event header found")
 	}
 
-	if id := headers.Get("x-github-delivery"); len(id) == 0 {
+	if id := headers.Get(GithubDeliveryHeader); len(id) == 0 {
 		return errors.New("no x-github-delivery header found")
 	}
 
