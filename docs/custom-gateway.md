@@ -1,4 +1,4 @@
-# Implement a Custom Gateway
+# Custom Gateway
 
 To implement a custom gateway, you need to create a gRPC server and implement the service defined below.
 The framework code acts as a gRPC client consuming event stream from gateway server.
@@ -7,6 +7,13 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 2. [Available environment variables](#available-environment-variables-to-server)
 3. [Implementation](#implementation)
 
+<br/>
+
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/custom-gateway.png?raw=true" alt="Sensor"/>
+</p>
+
+<br/>
 
 ## Proto Definition
 1. The proto file is located at https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto 
@@ -40,4 +47,3 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
  | GATEWAY_SERVER_PORT                         | Port on which the gateway gRPC server should run 
  
 ## Implementation
-You can find existing gateway implementation at https://github.com/argoproj/argo-events/tree/master/gateways/core
