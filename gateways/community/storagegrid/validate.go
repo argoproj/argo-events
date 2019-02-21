@@ -19,9 +19,8 @@ package storagegrid
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
@@ -49,14 +48,5 @@ func validateStorageGrid(sg *storageGrid) error {
 	if sg == nil {
 		return gateways.ErrEmptyEventSource
 	}
-	if sg.Port == "" {
-		return fmt.Errorf("must specify port")
-	}
-	if sg.Endpoint == "" {
-		return fmt.Errorf("must specify endpoint")
-	}
-	if !strings.HasPrefix(sg.Endpoint, "/") {
-		return fmt.Errorf("endpoint must start with '/'")
-	}
-	return nil
+	return gwcommon.ValidateWebhook(sg.Endpoint, sg.Port)
 }

@@ -160,7 +160,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		reader, err := store.GetArtifactReader(&trigger.Resource.Source, creds)
+		reader, err := store.GetArtifactReader(&trigger.Resource.Source, creds, sec.kubeClient)
 		if err != nil {
 			return err
 		}

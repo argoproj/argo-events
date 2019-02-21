@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gitlab gateway event source
@@ -58,5 +59,5 @@ func validateGitlab(g *glab) error {
 	if g.AccessToken == nil {
 		return fmt.Errorf("access token can't be nil")
 	}
-	return nil
+	return gwcommon.ValidateWebhook(g.Endpoint, g.Port)
 }

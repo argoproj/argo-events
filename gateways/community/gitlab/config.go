@@ -19,15 +19,12 @@ package gitlab
 import (
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
-	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
 // GitlabEventSourceExecutor implements ConfigExecutor
 type GitlabEventSourceExecutor struct {
 	Log zerolog.Logger
-	// GitlabClient is client for gitlab api
-	GitlabClient *gitlab.Client
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
@@ -35,8 +32,11 @@ type GitlabEventSourceExecutor struct {
 }
 
 // glab contains information to setup a gitlab project integration
-// +k8s:openapi-gen=true
 type glab struct {
+	// REST API endpoint
+	Endpoint string `json:"endpoint"`
+	// Port on which HTTP server is listening for incoming events.
+	Port string `json:"port"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
 	// URL of a http server which is listening for gitlab events.
@@ -54,7 +54,6 @@ type glab struct {
 }
 
 // GitlabSecret contains information of k8 secret which holds the gitlab api access information
-// +k8s:openapi-gen=true
 type GitlabSecret struct {
 	// Key within the K8 secret for access token
 	Key string
