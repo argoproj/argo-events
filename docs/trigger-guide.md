@@ -7,10 +7,7 @@
 5. [How can I add my custom resource as trigger?](#how-can-i-add-my-custom-resource-as-trigger)
 
 ## What is a trigger?
-Trigger is the resource executed by sensor once the event dependencies are resolved.
-
-## What can be a trigger?
-Any K8s resource can act as a trigger (Custom Resources included). 
+Trigger is the resource executed by sensor once the event dependencies are resolved. Any K8s resource can act as a trigger (Custom Resources included). 
 
 ## How to define a trigger?
 The `resource` field in the trigger object has details of what to execute when the event dependencies have been resolved. 
