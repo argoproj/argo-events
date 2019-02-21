@@ -1,5 +1,11 @@
-# Sensor Guide
+# Sensor
 Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
+
+1. [Specifications](https://github.com/argoproj/argo-events/blob/master/docs/sensor-protocol.md)
+2. [Terminology](#terminology)
+3. [How it works?](#how-it-works)
+4. [How to pass an event payload to a trigger?](#how-to-pass-an-event-payload-to-a-trigger)
+5. [Examples](#examples)
 
 <br/>
 
@@ -9,16 +15,10 @@ Sensors define a set of dependencies (inputs) and actions (outputs). The sensor'
 
 <br/>
 
-1. [Specifications](https://github.com/argoproj/argo-events/blob/master/docs/sensor-protocol.md)
-2. [Terminology](#terminology)
-3. [How it works?](#how-it-works)
-4. [How to pass an event payload to a trigger?](#how-to-pass-an-event-payload-to-a-trigger)
-5. [Examples](#examples)
-
 ## Terminology
 
   * ### What is a event dependency?
-    A dependency is an event sensor is waiting to happen. It is defined as "gateway-name:event-source-name".
+    A dependency is an event the sensor is waiting to happen. It is defined as "gateway-name:event-source-name".
 
   * ### What is a dependency group?
     A dependency group is basically a group of dependencies.
@@ -49,12 +49,12 @@ Sensors define a set of dependencies (inputs) and actions (outputs). The sensor'
   5. You may not want to fire all triggers every time but rather selected triggers only when some of the dependency groups are resolved.
   For that, sensor offers `when` switch on triggers. Basically `when` switch is way to control when to fire certain trigger depending upon which dependency group is resolved. 
 
-  6. After sensor fires triggers, it initialized it's state back to running and start the process all over again. Any event that is received in-between are stored on the internal queue.
+  6. After sensor fires all triggers, it initializes it's state back to running and start the process all over again. Any event that is received in-between are stored on the internal queue.
 
   **Note**: If you don't provide dependency groups and `circuit`, sensor performs an `AND` operation on event dependencies.
 
 ## Filters
-There are 3 types of filters:
+There are 3 types of filters that you can apply on event payload:
 
 |   Type   |   Description      |
 |----------|-------------------|
@@ -95,7 +95,6 @@ There are 3 types of filters:
     ```
     
     [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/data-filter-webhook.yaml)
-
 
 
 ## How to pass an event payload to a trigger?

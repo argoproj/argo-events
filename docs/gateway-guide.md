@@ -1,4 +1,4 @@
-# Gateway Guide
+# Gateway
 
 1. [What is a gateway](#what-is-a-gateway)
 2. [Components](#components)
