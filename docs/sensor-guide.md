@@ -1,7 +1,7 @@
 # Sensor
-Sensors define a set of dependencies (inputs) and actions (outputs). The sensor's actions will only be triggered after it's dependencies have been resolved.
+Sensors define a set of event dependencies (inputs) and triggers (outputs). 
 
-1. [Specifications](https://github.com/argoproj/argo-events/blob/master/docs/sensor-protocol.md)
+1. [Specifications](sensor-protocol.md)
 2. [Terminology](#terminology)
 3. [How it works?](#how-it-works)
 4. [How to pass an event payload to a trigger?](#how-to-pass-an-event-payload-to-a-trigger)
@@ -17,11 +17,11 @@ Sensors define a set of dependencies (inputs) and actions (outputs). The sensor'
 
 ## Terminology
 
-  * ### What is a event dependency?
+  * ### What is an event dependency?
     A dependency is an event the sensor is waiting to happen. It is defined as "gateway-name:event-source-name".
 
   * ### What is a dependency group?
-    A dependency group is basically a group of dependencies.
+    A dependency group is basically a group of event dependencies.
 
   * ### What is a circuit?
     Circuit is any arbitrary boolean logic that can be applied on dependency groups.
@@ -38,18 +38,15 @@ Sensors define a set of dependencies (inputs) and actions (outputs). The sensor'
   and then kicks off triggers in sequence. If filters are defined, sensor applies the filter on target event 
   and if events pass the filters, triggers are fired.
   
-  3. If you have defined dependency groups, sensor upon receiving an event evaluates the group/s to which the event belongs to
-  and marks groups as resolved if all other event dependencies in these groups are already satisfied.
+  3. If you have defined dependency groups, sensor upon receiving an event evaluates the group to which the event belongs to
+  and marks the group as resolved if all other event dependencies in the group are already resolved.
   
   4. Whenever a dependency group is resolved, sensor evaluates the `circuit` defined in spec. If the `circuit` resolves to true, the
-  triggers are fired.
+  triggers are fired. Sensor always waits for `circuit` to resolve to true before firing triggers.
   
-  5. Sensor always waits for `circuit` to resolve to true before firing triggers.
-  
-  5. You may not want to fire all triggers every time but rather selected triggers only when some of the dependency groups are resolved.
-  For that, sensor offers `when` switch on triggers. Basically `when` switch is way to control when to fire certain trigger depending upon which dependency group is resolved. 
+  5. You may not want to fire all the triggers defined in sensor spec. For that, sensor offers `when` switch on triggers. Basically `when` switch is way to control when to fire certain trigger depending upon which dependency group is resolved. 
 
-  6. After sensor fires all triggers, it initializes it's state back to running and start the process all over again. Any event that is received in-between are stored on the internal queue.
+  6. After sensor fires triggers, it transitions into `complete` state, increments completion counter and initializes it's state back to running and start the process all over again. Any event that is received in-between are stored on the internal queue.
 
   **Note**: If you don't provide dependency groups and `circuit`, sensor performs an `AND` operation on event dependencies.
 

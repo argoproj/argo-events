@@ -127,7 +127,6 @@ Lets deploy a webhook gateway and sensor,
 3. [Trigger](docs/trigger-guide.md)
 4. [Communication between gateway and sensor](docs/communication.md)
 5. [Controllers](docs/controllers-guide.md)
-6. [Write your own gateway](docs/custom-gateway.md)
 
 ## Contribute
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
