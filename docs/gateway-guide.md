@@ -2,7 +2,7 @@
 
 1. [What is a gateway](#what-is-a-gateway)
 2. [Components](#components)
-2. [Specification](#specification)
+2. [Specification](gateway-protocol.md)
 4. [Managing Event Sources](#managing-event-sources)
 5. [How to write a custom gateway?](#how-to-write-a-custom-gateway)
 6. [Examples](#examples)
@@ -64,9 +64,6 @@ A gateway has two components:
 
 ### Community gateways
 You can find gateways built by the community [here](https://github.com/argoproj/argo-events/tree/master/gateways/community). New gateway contributions are always welcome.
-
-## Spec
-https://github.com/argoproj/argo-events/blob/master/docs/gateway-protocol.md
 
 ## Managing Event Sources
   * The event sources configurations are managed using K8s configmap. Once the gateway resource is created with the configmap reference in it's spec, it starts watching the configmap.
