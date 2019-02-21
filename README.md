@@ -9,7 +9,7 @@
 
 ## What is Argo Events?
 **Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
-and trigger Kubernetes objects after successful event dependencies resolution
+and trigger Kubernetes objects after successful event dependencies resolution.
 
 <br/>
 <br/>
@@ -21,20 +21,20 @@ and trigger Kubernetes objects after successful event dependencies resolution
 <br/>
 
 ## Features 
-* Manage dependencies from a variety of event sources
-* Ability to customize business-level constraint logic for event dependencies resolution
+* Manage dependencies from a variety of event sources.
+* Ability to customize business-level constraint logic for event dependencies resolution.
 * Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Ability to extends framework to add your own event source listener
-* Define arbitrary boolean logic to resolve event dependencies
-* CloudEvents compliant
-* Ability to manage event sources at runtime
+* Ability to extends framework to add your own event source listener.
+* Define arbitrary boolean logic to resolve event dependencies.
+* CloudEvents compliant.
+* Ability to manage event sources at runtime.
 
 ## Core Concepts
 The framework is made up of two components: 
 
- 1. **`Gateway`** which is implemented as a Kubernetes-native Custom Resource Definition that processes events from event source.
+ 1. **`Gateway`** which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
 
- 2. **`Sensor`** which is implemented as a Kubernetes-native Custom Resource Definition that defines a set of event dependencies and triggers actions.
+ 2. **`Sensor`** which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
 
 ## Install
 
@@ -55,7 +55,7 @@ The framework is made up of two components:
     2. Install `argo-events` chart
     
     ```bash
-    helm install argo/argo-events -name argo-events
+    helm install argo/argo-events
     ```   
 
 * ### Using kubectl
@@ -73,10 +73,13 @@ The framework is made up of two components:
     kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
     ```
 
+**Note**: If you have already deployed the argo workflow controller in another namespace
+and the controller is namespace scoped, make sure to deploy a new controller in `argo-events` namespace.  
+
 ## Get Started
 Lets deploy a webhook gateway and sensor,
 
- * First, we need to setup event sources for gateway to listen. The event sources for any gateway are managed using K8s configmaps.
+ * First, we need to setup event sources for gateway to listen. The event sources for any gateway are managed using K8s configmap.
    
    ```bash
    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml 
@@ -98,7 +101,7 @@ Lets deploy a webhook gateway and sensor,
     
    Once sensor resource is created, sensor controller will create corresponding sensor pod and a ClusterIP service. 
     
- * Once the gateway and sensor pod are running, trigger the webhook via sending a http POST request to `/foo` endpoint.
+ * Once the gateway and sensor pods are running, trigger the webhook via a http POST request to `/foo` endpoint.
    Note: the `WEBHOOK_SERVICE_URL` will differ based on the Kubernetes cluster.
    ```
     export WEBHOOK_SERVICE_URL=$(minikube service -n argo-events --url <gateway_service_name>)
@@ -116,7 +119,7 @@ Lets deploy a webhook gateway and sensor,
    argo list -n argo-events
    ```
 
- * More examples can be found at [examples](https://github.com/argoproj/argo-events/tree/master/examples)
+ * More examples can be found at [examples](./examples)
 
 ## Further Reading
 1. [Gateway](docs/gateway-guide.md)
@@ -127,7 +130,7 @@ Lets deploy a webhook gateway and sensor,
 6. [Write your own gateway](docs/custom-gateway.md)
 
 ## Contribute
-[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look to our [Contributing Guidelines](./CONTRIBUTING.md).
+[Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
 
 ## License
 Apache License Version 2.0, see [LICENSE](./LICENSE)
