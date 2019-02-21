@@ -18,6 +18,7 @@ package store
 
 import (
 	"io/ioutil"
+	"k8s.io/client-go/kubernetes/fake"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -50,7 +51,8 @@ func TestGetArtifactReader(t *testing.T) {
 		accessKey: "access",
 		secretKey: "secret",
 	}
-	_, err := GetArtifactReader(location, creds)
+	clientset := fake.NewSimpleClientset()
+	_, err := GetArtifactReader(location, creds, clientset)
 	assert.NotNil(t, err)
 }
 

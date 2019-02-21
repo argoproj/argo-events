@@ -19,9 +19,8 @@ package aws_sns
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
@@ -49,15 +48,6 @@ func validateSNSConfig(sc *snsConfig) error {
 	if sc == nil {
 		return gateways.ErrEmptyEventSource
 	}
-	if sc.Port == "" {
-		return fmt.Errorf("must specify port")
-	}
-	if sc.Endpoint == "" {
-		return fmt.Errorf("must specify endpoint")
-	}
-	if !strings.HasPrefix(sc.Endpoint, "/") {
-		return fmt.Errorf("endpoint must start with '/'")
-	}
 	if sc.TopicArn == "" {
 		return fmt.Errorf("must specify topic arn")
 	}
@@ -70,5 +60,5 @@ func validateSNSConfig(sc *snsConfig) error {
 	if sc.SecretKey == nil {
 		return fmt.Errorf("must specify secret key")
 	}
-	return nil
+	return gwcommon.ValidateWebhook(sc.Endpoint, sc.Port)
 }

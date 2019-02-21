@@ -19,12 +19,9 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"net/http"
 )
 
 // ValidateEventSource validates webhook event source
@@ -60,22 +57,5 @@ func validateWebhook(w *gwcommon.Webhook) error {
 		return fmt.Errorf("unknown HTTP method %s", w.Method)
 	}
 
-	if w.Endpoint == "" {
-		return fmt.Errorf("endpoint can't be empty")
-	}
-	if w.Port == "" {
-		return fmt.Errorf("port can't be empty")
-	}
-
-	if !strings.HasPrefix(w.Endpoint, "/") {
-		return fmt.Errorf("endpoint must start with '/'")
-	}
-
-	if w.Port != "" {
-		_, err := strconv.Atoi(w.Port)
-		if err != nil {
-			return fmt.Errorf("failed to parse server port %s. err: %+v", w.Port, err)
-		}
-	}
-	return nil
+	return gwcommon.ValidateWebhook(w.Endpoint, w.Port)
 }

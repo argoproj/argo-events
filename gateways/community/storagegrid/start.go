@@ -104,7 +104,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		},
 		Webhook: &gwcommon.Webhook{
 			Port:     sg.Port,
-			Endpoint: sg.Endpoint,
+			Endpoint: gwcommon.FormatWebhookEndpoint(sg.Endpoint),
 		},
 		Log:                ese.Log,
 		EventSource:        eventSource,

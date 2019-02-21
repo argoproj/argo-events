@@ -11,9 +11,11 @@ var (
 	configKey  = "testConfig"
 	configId   = "1234"
 	goodConfig = `
+endpoint: "/push"
+port: "12000"
 owner: "asd"
 repository: "dsa"
-url: "http://webhook-gateway-gateway-svc/push"
+url: "http://webhook-gateway-svc/push"
 events:
 - PushEvents
 apiToken:
@@ -22,7 +24,7 @@ apiToken:
 `
 
 	badConfig = `
-url: "http://webhook-gateway-gateway-svc/push"
+url: "http://webhook-gateway-svc/push"
 events:
 - PushEvents
 accessToken:
