@@ -43,12 +43,12 @@ This gives you ability to replay events in future for any reasons. Read more abo
 * For a sensor to consume the events from NATS, the `eventProtocol` needs to specified as NATS. You can then configure the Standard or Streaming connection in details further in `eventProtocol`.
 
   1. Standard NATS example
-     [**Gateway Example**](https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-nats-standard.yaml)
-     [**Sensor Example**](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-nats.yaml)
+      * [**Gateway Example**](https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-nats-standard.yaml)
+      * [**Sensor Example**](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-nats.yaml)
    
   2. Streaming NATS example
-     [**Gateway Example**](https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-nats-streaming.yaml)
-     [**Sensor Example**](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-nats-streaming.yaml)
+      * [**Gateway Example**](https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-nats-streaming.yaml)
+      * [**Sensor Example**](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-nats-streaming.yaml)
  
  **Note**: The framework **_does not_** provide a NATS installation. You can follow [this guide](https://github.com/nats-io/nats-streaming-operator) to install NATS onto your cluster.
   
