@@ -8,6 +8,7 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 3. [Implementation](#implementation)
 
 <br/>
+<br/>
 
 <p align="center">
   <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/custom-gateway.png?raw=true" alt="Sensor"/>
@@ -47,3 +48,4 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
  | GATEWAY_SERVER_PORT                         | Port on which the gateway gRPC server should run 
  
 ## Implementation
+You can follow existing implementations [here](../gateways)
