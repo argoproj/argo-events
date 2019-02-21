@@ -78,6 +78,7 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	if err != nil {
 		return err
 	}
+	h.Endpoint = gwcommon.FormatWebhookEndpoint(h.Endpoint)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook:            h,
