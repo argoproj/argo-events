@@ -26,6 +26,10 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "cloud.google.com/go"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/smartystreets/goconvey"
   version = "1.6.3"
 

@@ -20,3 +20,4 @@
 |     stretchr/testify         |     https://github.com/stretchr/testify/blob/master/LICENSE |
 |     tidwall/gjson            |     MIT                 |
 |     tidwall/sjson            |     MIT                 |
+|     cloud.google.com/go      |     Apache-2.0          |
