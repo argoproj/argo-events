@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws_sns
+package slack
 
 import (
 	"context"
@@ -24,26 +24,17 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *SNSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSNSConfig)
+func (ese *SlackEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSlack)
 }
 
-func validateSNSConfig(config interface{}) error {
-	sc := config.(*snsConfig)
+func validateSlack(config interface{}) error {
+	sc := config.(*slackConfig)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.TopicArn == "" {
-		return fmt.Errorf("must specify topic arn")
-	}
-	if sc.Region == "" {
-		return fmt.Errorf("must specify region")
-	}
-	if sc.AccessKey == nil {
-		return fmt.Errorf("must specify access key")
-	}
-	if sc.SecretKey == nil {
-		return fmt.Errorf("must specify secret key")
+	if sc.Token == nil {
+		return fmt.Errorf("token not provided")
 	}
 	return gwcommon.ValidateWebhook(sc.Endpoint, sc.Port)
 }

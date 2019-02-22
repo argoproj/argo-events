@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gitlab
+package slack
 
 import (
 	"context"
@@ -27,29 +27,21 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-endpoint: "/push"
-port: "12000"
-projectId: "28"
-url: "http://webhook-gateway-gateway-svc/push"
-event: "PushEvents"
-accessToken:
-    key: accesskey
-    name: gitlab-access
-enableSSLVerification: false   
-gitlabBaseUrl: "http://gitlab.com/"
+endpoint: "/"
+port: "8080"
+token: 
+  name: fake-token
+  key: fake
 `
+
 	invalidConfig = `
-url: "http://webhook-gateway-gateway-svc/push"
-event: "PushEvents"
-accessToken:
-    key: accesskey
-    name: gitlab-access
+endpoint: "/"
 `
 )
 
-func TestValidateGitlabEventSource(t *testing.T) {
-	convey.Convey("Given a valid gitlab event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &GitlabEventSourceExecutor{}
+func TestValidateStorageGridEventSource(t *testing.T) {
+	convey.Convey("Given a valid slack event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &SlackEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
@@ -59,8 +51,8 @@ func TestValidateGitlabEventSource(t *testing.T) {
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
-	convey.Convey("Given an invalid gitlab event source spec, parse it and make sure error occurs", t, func() {
-		ese := &GitlabEventSourceExecutor{}
+	convey.Convey("Given an invalid slack event source spec, parse it and make sure error occurs", t, func() {
+		ese := &SlackEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,

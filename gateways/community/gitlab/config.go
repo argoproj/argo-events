@@ -68,7 +68,7 @@ type cred struct {
 }
 
 // parseEventSource parses an event sources of gateway
-func parseEventSource(config string) (*glab, error) {
+func parseEventSource(config string) (interface{}, error) {
 	var g *glab
 	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {

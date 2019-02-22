@@ -93,10 +93,11 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	sg, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
 	}
+	sg := config.(*storageGrid)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Configs: map[string]interface{}{

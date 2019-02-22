@@ -19,6 +19,7 @@ package gateways
 import (
 	"fmt"
 	"hash/fnv"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -40,9 +41,11 @@ func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
 func InitBackoff(backoff *wait.Backoff) {
 	if backoff == nil {
 		backoff = &wait.Backoff{
-			Steps: 1,
+			Steps:    1,
+			Duration: 1,
 		}
 	}
+	backoff.Duration = backoff.Duration * time.Second
 }
 
 // General connection helper

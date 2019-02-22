@@ -141,10 +141,11 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	gl, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
 	}
+	gl := config.(*glab)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: &gwcommon.Webhook{
