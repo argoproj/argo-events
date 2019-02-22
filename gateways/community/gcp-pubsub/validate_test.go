@@ -14,35 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package slack
+package pubsub
 
 import (
 	"context"
-	"testing"
-
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-endpoint: "/"
-port: "8080"
-token: 
-  name: fake-token
-  key: fake
+projectID: "1234"
+topic: "test"
+credentialsFile: "test-file"
 `
-
 	invalidConfig = `
-endpoint: "/"
+projectID: "1234"
+topic: "test"
 `
 )
 
-func TestValidateStorageGridEventSource(t *testing.T) {
-	convey.Convey("Given a valid slack event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &SlackEventSourceExecutor{}
+func TestGcpPubSubEventSourceExecutor_ValidateEventSource(t *testing.T) {
+	convey.Convey("Given a valid gcp pub-sub event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &GcpPubSubEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
@@ -52,8 +49,8 @@ func TestValidateStorageGridEventSource(t *testing.T) {
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
-	convey.Convey("Given an invalid slack event source spec, parse it and make sure error occurs", t, func() {
-		ese := &SlackEventSourceExecutor{}
+	convey.Convey("Given an invalid gcp pub-sub event source spec, parse it and make sure error occurs", t, func() {
+		ese := &GcpPubSubEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,

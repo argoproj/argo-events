@@ -20,12 +20,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/argoproj/argo-events/store"
 	"github.com/nlopes/slack/slackevents"
-	"net/http"
 )
 
 const (
