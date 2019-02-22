@@ -143,7 +143,8 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		return err
 	}
 	gl := config.(*glab)
 

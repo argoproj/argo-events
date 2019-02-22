@@ -99,8 +99,8 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 	defer gateways.Recover(eventSource.Name)
 
 	logger := ese.Log.With().Str("event-source-name", eventSource.Name).Logger()
-
 	logger.Info().Msg("operating on event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse event source")

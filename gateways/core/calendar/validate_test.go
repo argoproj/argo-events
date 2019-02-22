@@ -35,12 +35,11 @@ schedule: 30 * * * *
 func TestValidateCalendarEventSource(t *testing.T) {
 	convey.Convey("Given a valid calendar spec, parse it and make sure no error occurs", t, func() {
 		ese := &CalendarEventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: configValue,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
@@ -48,12 +47,11 @@ func TestValidateCalendarEventSource(t *testing.T) {
 	convey.Convey("Given an invalid calendar spec, parse it and make sure error occurs", t, func() {
 		ese := &CalendarEventSourceExecutor{}
 		invalidConfig := ""
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

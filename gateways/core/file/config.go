@@ -38,7 +38,7 @@ type fileWatcher struct {
 	Type string `json:"type"`
 }
 
-func parseEventSource(eventSource string) (*fileWatcher, error) {
+func parseEventSource(eventSource string) (interface{}, error) {
 	var f *fileWatcher
 	err := yaml.Unmarshal([]byte(eventSource), &f)
 	if err != nil {

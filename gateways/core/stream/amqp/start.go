@@ -26,8 +26,9 @@ import (
 // StartEventSource starts an event source
 func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-stream-name", eventSource.Name).Msg("operating on event source")
-	a, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -35,7 +36,7 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*amqp), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }

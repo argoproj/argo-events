@@ -32,17 +32,18 @@ type Next func(time.Time) time.Time
 // StartEventSource starts an event source
 func (ese *CalendarEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
-	cal, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+
 		return err
 	}
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("config-value", *cal).Msg("calendar configuration")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(cal, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*calSchedule), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }

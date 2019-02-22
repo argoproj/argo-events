@@ -26,29 +26,13 @@ import (
 
 // ValidateEventSource validates webhook event source
 func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	w, err := parseEventSource(es.Data)
-	if err != nil {
-		return &gateways.ValidEventSource{
-			Reason:  fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()),
-			IsValid: false,
-		}, nil
-	}
-
-	if err = validateWebhook(w); err != nil {
-		return &gateways.ValidEventSource{
-			Reason:  err.Error(),
-			IsValid: false,
-		}, nil
-	}
-	return &gateways.ValidEventSource{
-		IsValid: true,
-		Reason:  "valid",
-	}, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateWebhook)
 }
 
-func validateWebhook(w *gwcommon.Webhook) error {
+func validateWebhook(config interface{}) error {
+	w := config.(*gwcommon.Webhook)
 	if w == nil {
-		return fmt.Errorf("%+v, configuration must be non empty", gateways.ErrInvalidEventSource)
+		return gwcommon.ErrNilEventSource
 	}
 
 	switch w.Method {
