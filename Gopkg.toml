@@ -26,6 +26,10 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/nlopes/slack"
+  branch = "master"
+
+[[constraint]]
   name = "cloud.google.com/go"
   branch = "master"
 
