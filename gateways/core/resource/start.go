@@ -33,8 +33,9 @@ import (
 // StartEventSource starts an event source
 func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	pes, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -42,7 +43,7 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(pes, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*resource), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }

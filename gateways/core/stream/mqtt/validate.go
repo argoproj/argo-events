@@ -20,30 +20,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
 func (ese *MqttEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	m, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateMQTT(m); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateMQTT)
 }
 
-func validateMQTT(m *mqtt) error {
+func validateMQTT(config interface{}) error {
+	m := config.(*mqtt)
 	if m == nil {
-		return fmt.Errorf("configuration must be non empty")
+		return gwcommon.ErrNilEventSource
 	}
 	if m.URL == "" {
 		return fmt.Errorf("url must be specified")

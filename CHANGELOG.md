@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.8
++ Support for arbitrary boolean logic to resolve event dependencies #12
++ Ability to add timezone and extra user payload to calendar gateway #164
++ Data filter bug fix #165
++ Added multi-fields/multi-values data filter #167
++ Added support for backoff option when making connections in stream gateway #168
++ AWS SNS Gateway #169
++ GCP PubSub Gateway #176
++ Support for git as trigger source #171
++ Enhance Gitlan & Github gateway with in-build http server #172
+
+
 ## v0.7
 + Refactor gateways #147
 + Fixed sensor error state recovery bug #145

@@ -42,12 +42,11 @@ filter:
 func TestValidateResourceEventSource(t *testing.T) {
 	convey.Convey("Given a valid resource event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &ResourceEventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
 			Data: configValue,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
@@ -62,12 +61,11 @@ filter:
    workflows.argoproj.io/phase: Succeeded
    name: "my-workflow"
 `
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

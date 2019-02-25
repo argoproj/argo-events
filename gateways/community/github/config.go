@@ -35,8 +35,8 @@ type GithubEventSourceExecutor struct {
 	Namespace string
 }
 
-// GithubConfig contains information to setup a github project integration
-type GithubConfig struct {
+// githubConfig contains information to setup a github project integration
+type githubConfig struct {
 	// REST API endpoint
 	Endpoint string `json:"endpoint"`
 	// Port on which HTTP server is listening for incoming events.
@@ -67,8 +67,8 @@ type cred struct {
 }
 
 // parseEventSource parses a configuration of gateway
-func parseEventSource(config string) (*GithubConfig, error) {
-	var g *GithubConfig
+func parseEventSource(config string) (interface{}, error) {
+	var g *githubConfig
 	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {
 		return nil, err

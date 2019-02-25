@@ -21,30 +21,18 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates the gateway event source
 func (ese *KafkaEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	k, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateKafka(k); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateKafka)
 }
 
-func validateKafka(k *kafka) error {
+func validateKafka(config interface{}) error {
+	k := config.(*kafka)
 	if k == nil {
-		return fmt.Errorf("configuration must be non empty")
+		return gwcommon.ErrNilEventSource
 	}
 	if k.URL == "" {
 		return fmt.Errorf("url must be specified")

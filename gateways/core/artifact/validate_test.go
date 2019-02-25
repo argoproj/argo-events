@@ -48,12 +48,11 @@ secretKey:
 func TestValidateS3EventSource(t *testing.T) {
 	convey.Convey("Given a valid S3 artifact spec, parse the spec and make sure no error occurs", t, func() {
 		ese := &S3EventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Data: configValue,
 			Id:   configId,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
@@ -70,12 +69,11 @@ s3EventConfig:
         suffix: ""
 insecure: true
 `
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Id:   configId,
 			Name: configKey,
 			Data: invalidS3Artifact,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

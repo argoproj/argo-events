@@ -46,7 +46,7 @@ type amqp struct {
 	conn *amqplib.Connection
 }
 
-func parseEventSource(eventSource string) (*amqp, error) {
+func parseEventSource(eventSource string) (interface{}, error) {
 	var a *amqp
 	err := yaml.Unmarshal([]byte(eventSource), &a)
 	if err != nil {

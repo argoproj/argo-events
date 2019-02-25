@@ -42,7 +42,7 @@ type kafka struct {
 	consumer sarama.Consumer
 }
 
-func parseEventSource(eventSource string) (*kafka, error) {
+func parseEventSource(eventSource string) (interface{}, error) {
 	var n *kafka
 	err := yaml.Unmarshal([]byte(eventSource), &n)
 	if err != nil {

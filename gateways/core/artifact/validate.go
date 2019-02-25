@@ -19,32 +19,23 @@ package artifact
 import (
 	"context"
 	"fmt"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/minio/minio-go"
 )
 
 // ValidateEventSource validates a s3 event source
 func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	a, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateArtifact(a); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(eventSource.Data, parseEventSource, validateArtifact)
 }
 
 // validates an artifact
-func validateArtifact(a *apicommon.S3Artifact) error {
+func validateArtifact(config interface{}) error {
+	a := config.(*apicommon.S3Artifact)
 	if a == nil {
-		return gateways.ErrEmptyEventSource
+		return gwcommon.ErrNilEventSource
 	}
 	if a.AccessKey == nil {
 		return fmt.Errorf("access key can't be empty")

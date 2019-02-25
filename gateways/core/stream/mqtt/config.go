@@ -42,7 +42,7 @@ type mqtt struct {
 	client mqttlib.Client
 }
 
-func parseEventSource(eventSource string) (*mqtt, error) {
+func parseEventSource(eventSource string) (interface{}, error) {
 	var m *mqtt
 	err := yaml.Unmarshal([]byte(eventSource), &m)
 	if err != nil {

@@ -25,28 +25,13 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *SNSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	sc, err := parseEventSource(es.Data)
-	if err != nil {
-		return &gateways.ValidEventSource{
-			IsValid: false,
-			Reason:  fmt.Sprintf("failed to parse event source. err: %+v", err),
-		}, nil
-	}
-	if err = validateSNSConfig(sc); err != nil {
-		return &gateways.ValidEventSource{
-			Reason:  err.Error(),
-			IsValid: false,
-		}, nil
-	}
-	return &gateways.ValidEventSource{
-		IsValid: true,
-		Reason:  "valid",
-	}, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSNSConfig)
 }
 
-func validateSNSConfig(sc *snsConfig) error {
+func validateSNSConfig(config interface{}) error {
+	sc := config.(*snsConfig)
 	if sc == nil {
-		return gateways.ErrEmptyEventSource
+		return gwcommon.ErrNilEventSource
 	}
 	if sc.TopicArn == "" {
 		return fmt.Errorf("must specify topic arn")

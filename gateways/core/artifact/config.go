@@ -32,7 +32,7 @@ type S3EventSourceExecutor struct {
 	Namespace string
 }
 
-func parseEventSource(config string) (*apicommon.S3Artifact, error) {
+func parseEventSource(config string) (interface{}, error) {
 	var a *apicommon.S3Artifact
 	err := yaml.Unmarshal([]byte(config), &a)
 	if err != nil {
