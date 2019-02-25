@@ -165,10 +165,12 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	sc, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
+	sc := config.(*snsConfig)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: &gwcommon.Webhook{

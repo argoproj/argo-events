@@ -23,26 +23,13 @@ import (
 
 // ValidateEventSource validates gitlab gateway event source
 func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	g, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateGitlab(g); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateGitlab)
 }
 
-func validateGitlab(g *glab) error {
+func validateGitlab(config interface{}) error {
+	g := config.(*glab)
 	if g == nil {
-		return gateways.ErrEmptyEventSource
+		return gwcommon.ErrNilEventSource
 	}
 	if g.ProjectId == "" {
 		return fmt.Errorf("project id can't be empty")

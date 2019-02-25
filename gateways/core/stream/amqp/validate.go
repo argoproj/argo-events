@@ -20,30 +20,18 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
 func (ese *AMQPEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	a, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateAMQP(a); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateAMQP)
 }
 
-func validateAMQP(a *amqp) error {
+func validateAMQP(config interface{}) error {
+	a := config.(*amqp)
 	if a == nil {
-		return fmt.Errorf("configuration must be non empty")
+		return gwcommon.ErrNilEventSource
 	}
 	if a.URL == "" {
 		return fmt.Errorf("url must be specified")

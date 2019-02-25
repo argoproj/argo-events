@@ -28,8 +28,9 @@ import (
 // StartEventSource activates an event source and streams back events
 func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
-	a, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -37,7 +38,7 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(a, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*apicommon.S3Artifact), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
@@ -45,6 +46,8 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 // listenEvents listens to minio bucket notifications
 func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("event-source", eventSource).Msg("operating on event source")
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("event-source", eventSource).Msg("retrieving access and secret key")
 	// retrieve access key id and secret access key

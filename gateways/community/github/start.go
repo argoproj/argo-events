@@ -68,7 +68,7 @@ func (ese *GithubEventSourceExecutor) getCredentials(gs *corev1.SecretKeySelecto
 }
 
 func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	gc := rc.Configs[LabelGithubConfig].(*GithubConfig)
+	gc := rc.Configs[LabelGithubConfig].(*githubConfig)
 
 	c, err := ese.getCredentials(gc.APIToken)
 	if err != nil {
@@ -123,7 +123,7 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 }
 
 func PostStop(rc *gwcommon.RouteConfig) error {
-	gc := rc.Configs[LabelGithubConfig].(*GithubConfig)
+	gc := rc.Configs[LabelGithubConfig].(*githubConfig)
 	client := rc.Configs[LabelGithubClient].(*gh.Client)
 	hook := rc.Configs[LabelWebhook].(*gh.Hook)
 
@@ -141,10 +141,11 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	gc, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		return fmt.Errorf("%s, err: %+v", gateways.ErrEventSourceParseFailed, err)
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 	}
+	gc := config.(*githubConfig)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: &gwcommon.Webhook{

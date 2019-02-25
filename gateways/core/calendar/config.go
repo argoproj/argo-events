@@ -64,7 +64,7 @@ type calResponse struct {
 	UserPayload string `json:"userPayload"`
 }
 
-func parseEventSource(eventSource string) (*calSchedule, error) {
+func parseEventSource(eventSource string) (interface{}, error) {
 	var c *calSchedule
 	err := yaml.Unmarshal([]byte(eventSource), &c)
 	if err != nil {

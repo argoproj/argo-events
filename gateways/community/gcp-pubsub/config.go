@@ -19,7 +19,7 @@ package pubsub
 import (
 	"cloud.google.com/go/pubsub"
 	"github.com/rs/zerolog"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
 // GcpPubSubEventSourceExecutor implements Eventing
@@ -39,7 +39,7 @@ type pubSubConfig struct {
 	CredentialsFile string `json:"credentialsFile"`
 }
 
-func parseEventSource(es string) (*pubSubConfig, error) {
+func parseEventSource(es string) (interface{}, error) {
 	var n *pubSubConfig
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {

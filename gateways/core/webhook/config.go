@@ -27,7 +27,7 @@ type WebhookEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
-func parseEventSource(es string) (*common.Webhook, error) {
+func parseEventSource(es string) (interface{}, error) {
 	var n *common.Webhook
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {

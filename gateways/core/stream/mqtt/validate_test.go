@@ -38,12 +38,11 @@ clientId: 1
 func TestValidateMqttEventSource(t *testing.T) {
 	convey.Convey("Given a valid mqtt event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &MqttEventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
 			Data: configValue,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
@@ -54,12 +53,11 @@ func TestValidateMqttEventSource(t *testing.T) {
 url: tcp://mqtt.argo-events:1883
 topic: foo
 `
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

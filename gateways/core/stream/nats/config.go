@@ -40,7 +40,7 @@ type natsConfig struct {
 	conn *natslib.Conn
 }
 
-func parseEventSource(es string) (*natsConfig, error) {
+func parseEventSource(es string) (interface{}, error) {
 	var n *natsConfig
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {

@@ -21,30 +21,18 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
 func (ese *ResourceEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	res, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateResource(res); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateResource)
 }
 
-func validateResource(res *resource) error {
+func validateResource(config interface{}) error {
+	res := config.(*resource)
 	if res == nil {
-		return fmt.Errorf("configuration must be non empty")
+		return gwcommon.ErrNilEventSource
 	}
 	if res.Version == "" {
 		return fmt.Errorf("resource version must be specified")

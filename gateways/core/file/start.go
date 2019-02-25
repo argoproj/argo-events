@@ -27,8 +27,9 @@ import (
 // StartEventSource starts an event source
 func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
-	f, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -36,7 +37,7 @@ func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(f, eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*fileWatcher), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }

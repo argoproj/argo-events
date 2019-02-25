@@ -22,26 +22,13 @@ import (
 
 // Validate validates github gateway configuration
 func (ese *GithubEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	v := &gateways.ValidEventSource{}
-	g, err := parseEventSource(es.Data)
-	if err != nil {
-		return v, gateways.ErrEventSourceParseFailed
-	}
-	if err != nil {
-		gateways.SetValidEventSource(v, fmt.Sprintf("%s. err: %s", gateways.ErrEventSourceParseFailed, err.Error()), false)
-		return v, nil
-	}
-	if err = validateGithub(g); err != nil {
-		gateways.SetValidEventSource(v, err.Error(), false)
-		return v, gateways.ErrInvalidEventSource
-	}
-	gateways.SetValidEventSource(v, "", true)
-	return v, nil
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateGithub)
 }
 
-func validateGithub(g *GithubConfig) error {
+func validateGithub(config interface{}) error {
+	g := config.(*githubConfig)
 	if g == nil {
-		return gateways.ErrEmptyEventSource
+		return gwcommon.ErrNilEventSource
 	}
 	if g.Repository == "" {
 		return fmt.Errorf("repository cannot be empty")

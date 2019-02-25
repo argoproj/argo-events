@@ -27,7 +27,6 @@ import (
 
 const (
 	MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION = "SubscriptionConfirmation"
-	MESSAGE_TYPE_UNSUBSCRIBE_CONFIRMATION  = "UnsubscribeConfirmation"
 	MESSAGE_TYPE_NOTIFICATION              = "Notification"
 )
 
@@ -76,7 +75,7 @@ type snsConfig struct {
 	Region    string                    `json:"region"`
 }
 
-func parseEventSource(es string) (*snsConfig, error) {
+func parseEventSource(es string) (interface{}, error) {
 	var n *snsConfig
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {

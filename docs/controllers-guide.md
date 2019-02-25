@@ -5,8 +5,7 @@
 
 
 ### Controller configmap
-Provide the `instance-id` and the namespace for controller
-controller configmap
+Defines the `instance-id` and the `namespace` for controller configmap
 e.g. 
 ```yaml
 # The gateway-controller configmap includes configuration information for the gateway-controller
@@ -24,7 +23,7 @@ data:
 
 <b>`instance-id`</b>: it is used to map a gateway or sensor to a controller. 
 e.g. when you create a gateway with label `gateways.argoproj.io/gateway-controller-instanceid: argo-events`, a
- controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml)
+ controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml).
 Basically `instance-id` is used to horizontally scale controllers, so you won't end up overwhelming a controller with large
  number of gateways or sensors. Also keep in mind that `instance-id` has nothing to do with namespace where you are
  deploying controllers and gateways/sensors.

@@ -74,10 +74,12 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	defer gateways.Recover(eventSource.Name)
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
-	h, err := parseEventSource(eventSource.Data)
+	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
+		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
+	h := config.(*gwcommon.Webhook)
 	h.Endpoint = gwcommon.FormatWebhookEndpoint(h.Endpoint)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
