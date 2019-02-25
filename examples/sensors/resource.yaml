@@ -8,7 +8,7 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor"
+        image: "argoproj/sensor:v0.7.4"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   eventProtocol:
@@ -16,7 +16,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "resource-gateway:foo"
+    - name: "resource-gateway:workflow-success"
   triggers:
     - name: argo-workflow
       resource:
