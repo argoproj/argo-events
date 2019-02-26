@@ -1,3 +1,3 @@
 FROM scratch
-COPY dist/sns-gateway /bin/
-ENTRYPOINT [ "/bin/sns-gateway" ]
+COPY dist/aws-sns-gateway /bin/
+ENTRYPOINT [ "/bin/aws-sns-gateway" ]
