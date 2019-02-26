@@ -19,10 +19,7 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
-	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/client-go/dynamic/dynamicinformer"
 	"strings"
-	"time"
 
 	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -33,11 +30,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/tools/cache"
-)
-
-const (
-	resyncPeriod = 20 * time.Minute
 )
 
 // StartEventSource starts an event source
@@ -102,12 +94,17 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 	}
 
 	watchCh := make(chan struct{})
+	// key is group version kind name
+	resourceObjects := make(map[string]string)
 
 	localDoneCh := doneCh
 
-	go ese.watchObjectChannel(watcher, res, eventSource, dataCh, errorCh, watchCh, localDoneCh)
+	go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
 
 	// renews watch
+	// Todo: we shouldn't keep on renewing watch by ourselves but rather use dynamicinformer NewFilteredDynamicSharedInformerFactory https://github.com/kubernetes/client-go/blob/master/dynamic/dynamicinformer/informer.go
+	// But this is available from go client release 1.10. It is not possible to upgrade without upgrading Argo, because it has dependency on release 1.9
+	// Resolution- Create PR for Argo to upgrade go client version.
 	go func() {
 		for {
 			select {
@@ -117,7 +114,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 					errorCh <- err
 					return
 				}
-				go ese.watchObjectChannel(watcher, res, eventSource, dataCh, errorCh, watchCh, localDoneCh)
+				go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
 			case <-localDoneCh:
 				return
 			}
@@ -128,7 +125,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 	close(doneCh)
 }
 
-func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interface, res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, watchCh chan struct{}, doneCh chan struct{}) {
+func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interface, res *resource, eventSource *gateways.EventSource, resourceObjects map[string]string, dataCh chan []byte, errorCh chan error, watchCh chan struct{}, doneCh chan struct{}) {
 	for {
 		select {
 		case item := <-watcher.ResultChan():
@@ -146,92 +143,32 @@ func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interfa
 				errorCh <- err
 				return
 			}
-			ese.Log.Info().Msg(string(b))
 			if item.Type == watch.Error {
 				err = errors.FromObject(item.Object)
 				errorCh <- err
 				return
 			}
+
+			resourceKey := fmt.Sprintf("%s%s%s%s", res.GroupVersionKind.Group, res.GroupVersionKind.Version, res.GroupVersionKind.Kind, itemObj.GetName())
+
+			watchedObj, _ := json.Marshal((*itemObj).DeepCopyObject())
+
+			if obj, ok := resourceObjects[resourceKey]; ok {
+				if string(watchedObj) == obj {
+					ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("update is already watched")
+					continue
+				}
+			}
+			resourceObjects[resourceKey] = string(watchedObj)
+
 			if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
 				dataCh <- b
 			}
+
 		case <-doneCh:
 			return
 		}
 	}
-}
-
-func (ese *ResourceEventSourceExecutor) createWatchFactory(client dynamic.Interface, syncPeriod time.Duration, gvr schema.GroupVersionResource, res *resource) cache.SharedIndexInformer {
-	// todo: change it to filtered informer factory
-	dynamicinformer.NewFilteredDynamicSharedInformerFactory(
-		client,
-		syncPeriod,
-		res.Namespace,
-		func(options *metav1.ListOptions) {
-			options.FieldSelector = fields.Everything().String()
-			options.LabelSelector = labels.NewSelector().String()
-		},
-	)
-	factory := dynamicinformer.NewDynamicSharedInformerFactory(client, syncPeriod)
-	genericInformer := factory.ForResource(gvr)
-	informer := genericInformer.Informer()
-	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			key, err := cache.MetaNamespaceKeyFunc(obj)
-			if err == nil {
-				res.queue.Add(key)
-			}
-		},
-		UpdateFunc: func(old, new interface{}) {
-			key, err := cache.MetaNamespaceKeyFunc(new)
-			if err == nil {
-				res.queue.Add(key)
-			}
-		},
-		DeleteFunc: func(obj interface{}) {
-			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
-			if err == nil {
-				res.queue.Add(key)
-			}
-		},
-	},
-	)
-	return informer
-}
-
-func startResourceInformer(eventSource *gateways.EventSource, res *resource, informer cache.SharedIndexInformer, dataCh chan []byte, errCh chan error, stopCh chan struct{}) {
-	go informer.Run(stopCh)
-	for processNextItem(eventSource, res, informer, dataCh, errCh, stopCh) {
-	}
-}
-
-func processNextItem(eventSource *gateways.EventSource, res *resource, informer cache.SharedIndexInformer, dataCh chan []byte, errCh chan error, stopCh chan struct{}) bool {
-	key, quit := res.queue.Get()
-	if quit {
-		stopCh <- struct{}{}
-		return false
-	}
-	defer res.queue.Done(key)
-
-	obj, exists, err := informer.GetIndexer().GetByKey(key.(string))
-	if err != nil {
-		stopCh <- struct{}{}
-		return false
-	}
-
-	if !exists {
-		return true
-	}
-
-	data, err := json.Marshal(obj)
-	if err != nil {
-		stopCh <- struct{}{}
-		errCh <- err
-		return false
-	}
-
-	dataCh <- data
-	return true
 }
 
 func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (*metav1.APIResourceList, error) {
