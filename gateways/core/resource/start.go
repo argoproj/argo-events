@@ -17,8 +17,12 @@ limitations under the License.
 package resource
 
 import (
+	"encoding/json"
 	"fmt"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/client-go/dynamic/dynamicinformer"
 	"strings"
+	"time"
 
 	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -29,6 +33,11 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/tools/cache"
+)
+
+const (
+	resyncPeriod = 20 * time.Minute
 )
 
 // StartEventSource starts an event source
@@ -150,6 +159,79 @@ func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interfa
 			return
 		}
 	}
+}
+
+func (ese *ResourceEventSourceExecutor) createWatchFactory(client dynamic.Interface, syncPeriod time.Duration, gvr schema.GroupVersionResource, res *resource) cache.SharedIndexInformer {
+	// todo: change it to filtered informer factory
+	dynamicinformer.NewFilteredDynamicSharedInformerFactory(
+		client,
+		syncPeriod,
+		res.Namespace,
+		func(options *metav1.ListOptions) {
+			options.FieldSelector = fields.Everything().String()
+			options.LabelSelector = labels.NewSelector().String()
+		},
+	)
+	factory := dynamicinformer.NewDynamicSharedInformerFactory(client, syncPeriod)
+	genericInformer := factory.ForResource(gvr)
+	informer := genericInformer.Informer()
+	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(obj)
+			if err == nil {
+				res.queue.Add(key)
+			}
+		},
+		UpdateFunc: func(old, new interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(new)
+			if err == nil {
+				res.queue.Add(key)
+			}
+		},
+		DeleteFunc: func(obj interface{}) {
+			key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
+			if err == nil {
+				res.queue.Add(key)
+			}
+		},
+	},
+	)
+	return informer
+}
+
+func startResourceInformer(eventSource *gateways.EventSource, res *resource, informer cache.SharedIndexInformer, dataCh chan []byte, errCh chan error, stopCh chan struct{}) {
+	go informer.Run(stopCh)
+	for processNextItem(eventSource, res, informer, dataCh, errCh, stopCh) {
+	}
+}
+
+func processNextItem(eventSource *gateways.EventSource, res *resource, informer cache.SharedIndexInformer, dataCh chan []byte, errCh chan error, stopCh chan struct{}) bool {
+	key, quit := res.queue.Get()
+	if quit {
+		stopCh <- struct{}{}
+		return false
+	}
+	defer res.queue.Done(key)
+
+	obj, exists, err := informer.GetIndexer().GetByKey(key.(string))
+	if err != nil {
+		stopCh <- struct{}{}
+		return false
+	}
+
+	if !exists {
+		return true
+	}
+
+	data, err := json.Marshal(obj)
+	if err != nil {
+		stopCh <- struct{}{}
+		errCh <- err
+		return false
+	}
+
+	dataCh <- data
+	return true
 }
 
 func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (*metav1.APIResourceList, error) {

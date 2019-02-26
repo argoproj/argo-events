@@ -21,6 +21,7 @@ import (
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/workqueue"
 )
 
 // ResourceEventSourceExecutor implements Eventing
@@ -39,7 +40,9 @@ type resource struct {
 	// Version of the source
 	Version string `json:"version"`
 	// Group of the resource
-	metav1.GroupVersionKind `json:",inline"`
+	metav1.GroupVersionResource `json:",inline"`
+	//
+	queue workqueue.RateLimitingInterface
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
@@ -56,5 +59,6 @@ func parseEventSource(es string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
+	r.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
 	return r, err
 }
