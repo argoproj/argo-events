@@ -105,6 +105,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 	// Todo: we shouldn't keep on renewing watch by ourselves but rather use dynamicinformer NewFilteredDynamicSharedInformerFactory https://github.com/kubernetes/client-go/blob/master/dynamic/dynamicinformer/informer.go
 	// But this is available from go client release 1.10. It is not possible to upgrade without upgrading Argo, because it has dependency on release 1.9
 	// Resolution- Create PR for Argo to upgrade go client version.
+
 	go func() {
 		for {
 			select {
