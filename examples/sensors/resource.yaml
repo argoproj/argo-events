@@ -16,7 +16,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "resource-gateway:foo"
+    - name: "resource-gateway:workflow-success"
   triggers:
     - name: argo-workflow
       resource:
