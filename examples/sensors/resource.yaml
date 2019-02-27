@@ -8,7 +8,7 @@ spec:
   deploySpec:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor:v0.7.4"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   eventProtocol:
