@@ -15,7 +15,7 @@ metadata:
   name: resource-gateway-configmap
 data:
   successWorkflow: |-
-    namespace: argo-events # namespace where wf is deloyef
+    namespace: argo-events # namespace where wf is deloyed
     group: "argoproj.io" # wf group
     version: "v1alpha1" # wf version
     kind: "Workflow" # object kind
