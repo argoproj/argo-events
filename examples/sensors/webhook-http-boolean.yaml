@@ -1,0 +1,85 @@
+# The dependency grouping and selective workflow trigger execution is not supported in latest release
+# This feature will be released in next release v0.8.
+# You can try this example with sensor and sensor controller image v0.7.1
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor-http-boolean-op
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  # defines list of all events sensor will accept
+  dependencies:
+    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway-http:index"
+  # divides event dependencies into groups
+  dependencyGroups:
+    - name: "group_1"
+      dependencies:
+        - "webhook-gateway-http:foo"
+    - name: "group_2"
+      dependencies:
+        - "webhook-gateway-http:index"
+  # either "webhook-gateway-http:foo" or "webhook-gateway-http:index" happens
+  circuit: "group_1 || group_2"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  triggers:
+    - name: webhook-workflow-trigger
+      when:
+        all:
+          - "group_1"
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
+    - name: webhook-workflow-trigger-2
+      when:
+        all:
+          - "group_2"
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-2-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"

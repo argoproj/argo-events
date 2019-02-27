@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: aws-sns-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+    gateway-name: "aws-sns-gateway"
+spec:
+  processorPort: "9330"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  deploySpec:
+    metadata:
+      name: "aws-sns-gateway"
+      labels:
+        gateway-name: "aws-sns-gateway"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "aws-sns-events"
+          image: "argoproj/aws-sns-gateway"
+          imagePullPolicy: "Always"
+          command: ["/bin/aws-sns-gateway"]
+      serviceAccountName: "argo-events-sa"
+  configMap: "aws-sns-gateway-configmap"
+  eventVersion: "1.0"
+  type: "aws-sns"
+  watchers:
+    sensors:
+      - name: "aws-sns-sensor"

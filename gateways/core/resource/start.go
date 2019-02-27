@@ -17,6 +17,8 @@ limitations under the License.
 package resource
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
@@ -52,11 +54,6 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	resources, err := ese.discoverResources(res)
-	if err != nil {
-		errorCh <- err
-		return
-	}
 	options := metav1.ListOptions{Watch: true}
 	if res.Filter != nil {
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
@@ -64,97 +61,146 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to resource notifications")
 
-	// global quit channel
-	quitChan := make(chan struct{})
-	// start up listeners
-	for i := 0; i < len(resources); i++ {
-		resource := resources[i]
-		w, err := resource.Watch(options)
-		if err != nil {
-			errorCh <- err
-			return
-		}
-
-		localQuitChan := quitChan
-
-		go func() {
-			for {
-				select {
-				case item := <-w.ResultChan():
-					if item.Object == nil {
-						ese.Log.Warn().Str("event-source-name", eventSource.Name).Msg("object to watch is nil")
-						// renew watch
-						newWatch, err := resource.Watch(options)
-						if err != nil {
-							continue
-						}
-						w = newWatch
-					}
-					itemObj := item.Object.(*unstructured.Unstructured)
-					b, err := itemObj.MarshalJSON()
-					if err != nil {
-						errorCh <- err
-						localQuitChan <- struct{}{}
-						return
-					}
-					if item.Type == watch.Error {
-						err = errors.FromObject(item.Object)
-						errorCh <- err
-						localQuitChan <- struct{}{}
-						return
-					}
-					if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
-						dataCh <- b
-					}
-
-				case <-localQuitChan:
-					return
-				}
-			}
-		}()
+	resourceList, err := ese.discoverResources(res)
+	if err != nil {
+		errorCh <- err
+		return
 	}
 
+	apiResource, err := ese.serverResourceForGVK(resourceList, res.Kind)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	if !ese.canWatchResource(apiResource) {
+		errorCh <- fmt.Errorf("watch functionality is not allowed on resource")
+		return
+	}
+
+	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
+
+	gvk := schema.FromAPIVersionAndKind(resourceList.GroupVersion, apiResource.Kind)
+	client, err := dynClientPool.ClientForGroupVersionKind(gvk)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	watcher, err := client.Resource(apiResource, res.Namespace).Watch(options)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	watchCh := make(chan struct{})
+	// key is group version kind name
+	resourceObjects := make(map[string]string)
+
+	localDoneCh := doneCh
+
+	go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
+
+	// renews watch
+	// Todo: we shouldn't keep on renewing watch by ourselves but rather use dynamicinformer NewFilteredDynamicSharedInformerFactory https://github.com/kubernetes/client-go/blob/master/dynamic/dynamicinformer/informer.go
+	// But this is available from go client release 1.10. It is not possible to upgrade without upgrading Argo, because it has dependency on release 1.9
+	// Resolution- Create PR for Argo to upgrade go client version.
+
+	go func() {
+		for {
+			select {
+			case <-watchCh:
+				watcher, err := client.Resource(apiResource, res.Namespace).Watch(options)
+				if err != nil {
+					errorCh <- err
+					return
+				}
+				go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
+			case <-localDoneCh:
+				return
+			}
+		}
+	}()
+
 	<-doneCh
-	close(quitChan)
+	close(doneCh)
 }
 
-func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) ([]dynamic.ResourceInterface, error) {
-	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
+func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interface, res *resource, eventSource *gateways.EventSource, resourceObjects map[string]string, dataCh chan []byte, errorCh chan error, watchCh chan struct{}, doneCh chan struct{}) {
+	for {
+		select {
+		case item := <-watcher.ResultChan():
+			if item.Object == nil {
+				ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("watch ended, creating a new watch")
+				watchCh <- struct{}{}
+				return
+			}
+			itemObj, isUnst := item.Object.(*unstructured.Unstructured)
+			if !isUnst {
+				continue
+			}
+			b, err := itemObj.MarshalJSON()
+			if err != nil {
+				errorCh <- err
+				return
+			}
+			if item.Type == watch.Error {
+				err = errors.FromObject(item.Object)
+				errorCh <- err
+				return
+			}
+
+			resourceKey := fmt.Sprintf("%s%s%s%s", res.GroupVersionKind.Group, res.GroupVersionKind.Version, res.GroupVersionKind.Kind, itemObj.GetName())
+
+			watchedObj, _ := json.Marshal((*itemObj).DeepCopyObject())
+
+			if obj, ok := resourceObjects[resourceKey]; ok {
+				if string(watchedObj) == obj {
+					ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("update is already watched")
+					continue
+				}
+			}
+			resourceObjects[resourceKey] = string(watchedObj)
+
+			if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
+				dataCh <- b
+			}
+
+		case <-doneCh:
+			return
+		}
+	}
+}
+
+func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (*metav1.APIResourceList, error) {
 	disco, err := discovery.NewDiscoveryClientForConfig(ese.K8RestConfig)
 	if err != nil {
 		return nil, err
 	}
-
 	groupVersion := ese.resolveGroupVersion(obj)
-	resourceInterfaces, err := disco.ServerResourcesForGroupVersion(groupVersion)
-	if err != nil {
-		return nil, err
-	}
+	return disco.ServerResourcesForGroupVersion(groupVersion)
+}
 
-	resources := make([]dynamic.ResourceInterface, 0)
+func (ese *ResourceEventSourceExecutor) serverResourceForGVK(resourceInterfaces *metav1.APIResourceList, kind string) (*metav1.APIResource, error) {
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
 		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
 		ese.Log.Info().Str("api-resource", gvk.String())
-		if apiResource.Kind != obj.Kind {
-			continue
-		}
-		canWatch := false
-		for _, verb := range apiResource.Verbs {
-			if verb == "watch" {
-				canWatch = true
-				break
-			}
-		}
-		if canWatch {
-			client, err := dynClientPool.ClientForGroupVersionKind(gvk)
-			if err != nil {
-				return nil, err
-			}
-			resources = append(resources, client.Resource(&apiResource, obj.Namespace))
+		if apiResource.Kind == kind {
+			return &apiResource, nil
 		}
 	}
-	return resources, nil
+	ese.Log.Warn().Str("kind", kind).Msg("no resource found")
+	return nil, fmt.Errorf("no resource found")
+}
+
+func (ese *ResourceEventSourceExecutor) canWatchResource(apiResource *metav1.APIResource) bool {
+	for _, verb := range apiResource.Verbs {
+		if verb == "watch" {
+			return true
+		}
+	}
+	return false
 }
 
 func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {

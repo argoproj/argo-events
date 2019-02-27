@@ -113,9 +113,10 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ese.Log.Info().Str("event-source-name", eventSource.Name).Str("time", t.String()).Msg("expected next calendar event")
+		ese.Log.Info().Str("event-source-name", eventSource.Name).Str("time", t.UTC().String()).Msg("expected next calendar event")
 		select {
 		case tx := <-timer:
+			lastT = tx
 			response := &calResponse{
 				EventTime:   tx,
 				UserPayload: cal.UserPayload,
