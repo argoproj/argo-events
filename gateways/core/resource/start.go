@@ -135,6 +135,12 @@ func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interfa
 				watchCh <- struct{}{}
 				return
 			}
+
+			if res.Type != "" && item.Type != res.Type {
+				ese.Log.Warn().Str("event-source-name", eventSource.Name).Str("actual-event-type", string(item.Type)).Str("expected-event-type", string(res.Type)).Msg("event type mismatched. won't consume the event")
+				continue
+			}
+
 			itemObj, isUnst := item.Object.(*unstructured.Unstructured)
 			if !isUnst {
 				continue
