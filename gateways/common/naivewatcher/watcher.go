@@ -173,12 +173,16 @@ func (w *Watcher) Check() error {
 				var op Op
 				if path != lastPathAndInfo.path {
 					op |= Rename
-				} else if !info.ModTime().Equal(lastInfo.ModTime()) || info.Size() != lastInfo.Size() {
+				}
+				if !info.ModTime().Equal(lastInfo.ModTime()) || info.Size() != lastInfo.Size() {
 					op |= Write
-				} else if info.Mode() != lastInfo.Mode() {
+				}
+				if info.Mode() != lastInfo.Mode() {
 					op |= Chmod
 				}
-				w.Events <- Event{Op: op, Name: path}
+				if op != 0 {
+					w.Events <- Event{Op: op, Name: path}
+				}
 				walkedFiles[fileID].path = path
 				walkedFiles[fileID].info = info
 				walkedFiles[fileID].found = true

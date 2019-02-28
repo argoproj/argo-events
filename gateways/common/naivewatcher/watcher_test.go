@@ -99,15 +99,34 @@ func TestWatcherAutoCheck(t *testing.T) {
 		{Op: Chmod, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
-	// Remove a file
-	err = os.Remove(filepath.Join(tmpdir, "bar"))
+	// Rename & Write & Chmod a file
+	err = os.Rename(filepath.Join(tmpdir, "bar"), filepath.Join(tmpdir, "foo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = ioutil.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Chmod(filepath.Join(tmpdir, "foo"), 0770)
 	if err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
 	assert.Equal(t, []Event{
-		{Op: Remove, Name: filepath.Join(tmpdir, "bar")},
+		{Op: Write | Rename | Chmod, Name: filepath.Join(tmpdir, "foo")},
+	}, events)
+
+	// Remove a file
+	err = os.Remove(filepath.Join(tmpdir, "foo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(200 * time.Millisecond)
+	events = readEvents(t, watcher)
+	assert.Equal(t, []Event{
+		{Op: Remove, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	err = watcher.Stop()
@@ -182,14 +201,32 @@ func TestWatcherManualCheck(t *testing.T) {
 		{Op: Chmod, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
-	// Remove a file
-	err = os.Remove(filepath.Join(tmpdir, "bar"))
+	// Rename & Write & Chmod a file
+	err = os.Rename(filepath.Join(tmpdir, "bar"), filepath.Join(tmpdir, "foo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = ioutil.WriteFile(filepath.Join(tmpdir, "foo"), []byte("wowwow"), 0666)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Chmod(filepath.Join(tmpdir, "foo"), 0770)
 	if err != nil {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
 	assert.Equal(t, []Event{
-		{Op: Remove, Name: filepath.Join(tmpdir, "bar")},
+		{Op: Write | Rename | Chmod, Name: filepath.Join(tmpdir, "foo")},
+	}, events)
+
+	// Remove a file
+	err = os.Remove(filepath.Join(tmpdir, "foo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	events = checkAndReadEvents(t, watcher)
+	assert.Equal(t, []Event{
+		{Op: Remove, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	err = watcher.Remove(tmpdir)
