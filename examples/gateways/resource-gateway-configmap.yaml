@@ -9,6 +9,7 @@ data:
     group: "argoproj.io"
     version: "v1alpha1"
     kind: "Workflow"
+    type: ADDED
     filter:
       labels:
         workflows.argoproj.io/phase: Succeeded
