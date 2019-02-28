@@ -21,3 +21,5 @@
 |     tidwall/gjson            |     MIT                 |
 |     tidwall/sjson            |     MIT                 |
 |     cloud.google.com/go      |     Apache-2.0          |
+|     colinmarc/hdfs           |     MIT                 |
+|     jcmturner/gokrb5         |     Apache-2.0          |
