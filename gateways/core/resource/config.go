@@ -20,6 +20,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
 )
 
@@ -40,6 +41,9 @@ type resource struct {
 	Version string `json:"version"`
 	// Group of the resource
 	metav1.GroupVersionKind `json:",inline"`
+	// Type is the event type. Refer https://github.com/kubernetes/apimachinery/blob/dcb391cde5ca0298013d43336817d20b74650702/pkg/watch/watch.go#L43
+	// If not provided, the gateway will watch all events for a resource.
+	Type watch.EventType `json:"type,omitempty"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
