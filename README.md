@@ -4,7 +4,7 @@
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/argo-events-logo.png?raw=true" alt="Logo"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-logo.png?raw=true" alt="Logo"/>
 </p>
 
 ## What is Argo Events?
@@ -15,7 +15,7 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/argo-events-top-level.png?raw=true" alt="High Level Overview"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-top-level.png?raw=true" alt="High Level Overview"/>
 </p>
 
 <br/>
