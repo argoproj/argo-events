@@ -1,0 +1,17 @@
+# For more information, https://github.com/argoproj/argo-events/blob/e0242e7b00f7edc7e0cff314abd3a728ddf3c62b/gateways/community/aws-sns/config.go#L68
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trello-gateway-configmap
+data:
+  notification_1: |-
+    endpoint: "/"
+    port: "9600"
+    apiKey:
+      name: trello-secret
+      key: apikey
+    token:
+      name trello-secret
+      key: tokenkey
+    url: "URL_TO_REGISTER"
+    description: "test webhook"

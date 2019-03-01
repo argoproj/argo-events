@@ -14,6 +14,10 @@ required = [
 ]
 
 [[constraint]]
+  name = "github.com/adlio/trello"
+  branch = "master"
+
+[[constraint]]
   name = "k8s.io/code-generator"
   branch = "release-1.10"
 
