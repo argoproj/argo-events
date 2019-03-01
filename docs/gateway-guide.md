@@ -14,7 +14,7 @@ A gateway consumes events from event sources, transforms them into the [cloudeve
 </br>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/gateways.png?raw=true" alt="Gateway"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/gateways.png?raw=true" alt="Gateway"/>
 </p>
 
 <br/>
@@ -81,7 +81,7 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/custom-gateway.png?raw=true" alt="Sensor"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/custom-gateway.png?raw=true" alt="Sensor"/>
 </p>
 
 <br/>
