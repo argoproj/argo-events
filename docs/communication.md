@@ -14,7 +14,7 @@ There are two ways an event is dispatched from gateway to sensor:
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/communication.png?raw=true" alt="Sensor"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/communication.png?raw=true" alt="Sensor"/>
 </p>
 
 <br/>
