@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -98,6 +99,14 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 	}
 
 	op := naivewatcher.NewOp(config.Type)
+	var pathRegexp *regexp.Regexp
+	if config.PathRegexp != "" {
+		pathRegexp, err = regexp.Compile(config.PathRegexp)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+	}
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to HDFS notifications")
 	for {
 		select {
@@ -108,7 +117,14 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 				errorCh <- fmt.Errorf("HDFS watcher stopped")
 				return
 			}
-			if config.Path == strings.TrimPrefix(event.Name, config.Directory) && (op&event.Op != 0) {
+			matched := false
+			relPath := strings.TrimPrefix(event.Name, config.Directory)
+			if config.Path != "" && config.Path == relPath {
+				matched = true
+			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
+				matched = true
+			}
+			if matched && (op&event.Op != 0) {
 				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("HDFS event")
 				dataCh <- []byte(fmt.Sprintf("%v", event))
 			}

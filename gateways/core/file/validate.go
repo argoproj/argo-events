@@ -37,11 +37,6 @@ func validateFileWatcher(config interface{}) error {
 	if fwc.Type == "" {
 		return fmt.Errorf("type must be specified")
 	}
-	if fwc.Directory == "" {
-		return fmt.Errorf("directory must be specified")
-	}
-	if fwc.Path == "" {
-		return fmt.Errorf("path must be specified")
-	}
-	return nil
+	err := fwc.WatchPathConfig.Validate()
+	return err
 }
