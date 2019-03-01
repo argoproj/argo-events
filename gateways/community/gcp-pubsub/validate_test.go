@@ -38,6 +38,7 @@ projectID: "1234"
 func TestGcpPubSubEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	convey.Convey("Given a valid gcp pub-sub event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &GcpPubSubEventSourceExecutor{}
+
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
