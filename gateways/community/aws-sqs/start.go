@@ -1,3 +1,19 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package aws_sqs
 
 import (
@@ -115,7 +131,15 @@ func (ese *SQSEventSourceExecutor) listenEvents(s *sqs, eventSource *gateways.Ev
 			if s.DeleteAfterProcess {
 
 			}
-			sqsClient.DeleteMessage()
+			if s.DeleteAfterProcess {
+				if _, err := sqsClient.DeleteMessage(&sqslib.DeleteMessageInput{
+					QueueUrl:      queueURL.QueueUrl,
+					ReceiptHandle: msg.Messages[0].ReceiptHandle,
+				}); err != nil {
+					ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to delete message")
+				}
+			}
+
 		case <-doneCh:
 			return
 		}

@@ -14,38 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pubsub
+package aws_sqs
 
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *GcpPubSubEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validatePubSubConfig)
+func (ese *SQSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSQSConfig)
 }
 
-func validatePubSubConfig(config interface{}) error {
-	sc := config.(*pubSubConfig)
+func validateSQSConfig(config interface{}) error {
+	sc := config.(*sqs)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.ProjectID == "" {
-		return fmt.Errorf("must specify projectId")
+	if sc.Frequency == "" {
+		return fmt.Errorf("must specify polling frequency")
 	}
-	if sc.Topic == "" {
-		return fmt.Errorf("must specify topic")
+	if sc.Region == "" {
+		return fmt.Errorf("must specify region")
 	}
-	if sc.CredentialsFile != "" {
-		if _, err := os.Stat(sc.CredentialsFile); err != nil {
-			fmt.Println(err)
-			return err
-		}
+	if sc.AccessKey == nil {
+		return fmt.Errorf("must specify access key")
+	}
+	if sc.SecretKey == nil {
+		return fmt.Errorf("must specify secret key")
+	}
+	if sc.Queue == "" {
+		return fmt.Errorf("must specify queue name")
 	}
 	return nil
 }

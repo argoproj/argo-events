@@ -34,9 +34,6 @@ type SQSEventSourceExecutor struct {
 
 // sqs contains information to listen to AWS SQS
 type sqs struct {
-	// URL is queue url
-	URL string `json:"url"`
-
 	// AccessKey refers K8 secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey"`
 
