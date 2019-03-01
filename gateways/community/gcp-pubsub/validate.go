@@ -43,7 +43,6 @@ func validatePubSubConfig(config interface{}) error {
 	}
 	if sc.CredentialsFile != "" {
 		if _, err := os.Stat(sc.CredentialsFile); err != nil {
-			fmt.Println(err)
 			return err
 		}
 	}
