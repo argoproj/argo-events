@@ -1,10 +1,14 @@
 package hdfs
 
 import (
+	"errors"
+
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/argoproj/argo-events/gateways/common"
 )
 
 // EventSourceExecutor implements Eventing
@@ -18,10 +22,8 @@ type EventSourceExecutor struct {
 
 // GatewayConfig contains information to setup a HDFS integration
 type GatewayConfig struct {
-	// Directory to watch for events
-	Directory string `json:"directory"`
-	// Path is relative path of object to watch with respect to the directory
-	Path string `json:"path"`
+	common.WatchPathConfig `json:",inline"`
+
 	// Type of file operations to watch
 	Type string `json:"type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
@@ -71,4 +73,26 @@ func parseEventSource(eventSource string) (interface{}, error) {
 		return nil, err
 	}
 	return f, err
+}
+
+// Validate validates GatewayClientConfig
+func (c *GatewayClientConfig) Validate() error {
+	if len(c.Addresses) == 0 {
+		return errors.New("addresses is required")
+	}
+
+	hasKrbCCache := c.KrbCCacheSecret != nil
+	hasKrbKeytab := c.KrbKeytabSecret != nil
+
+	if c.HDFSUser == "" && !hasKrbCCache && !hasKrbKeytab {
+		return errors.New("either hdfsUser, krbCCacheSecret or krbKeytabSecret is required")
+	}
+	if hasKrbKeytab && (c.KrbServicePrincipalName == "" || c.KrbConfigConfigMap == nil || c.KrbUsername == "" || c.KrbRealm == "") {
+		return errors.New("krbServicePrincipalName, krbConfigConfigMap, krbUsername and krbRealm are required with krbKeytabSecret")
+	}
+	if hasKrbCCache && (c.KrbServicePrincipalName == "" || c.KrbConfigConfigMap == nil) {
+		return errors.New("krbServicePrincipalName and krbConfigConfigMap are required with krbCCacheSecret")
+	}
+
+	return nil
 }

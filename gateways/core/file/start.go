@@ -18,6 +18,7 @@ package file
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
@@ -60,6 +61,14 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 		return
 	}
 
+	var pathRegexp *regexp.Regexp
+	if fwc.PathRegexp != "" {
+		pathRegexp, err = regexp.Compile(fwc.PathRegexp)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+	}
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to file notifications")
 	for {
 		select {
@@ -71,7 +80,14 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 				return
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
-			if fwc.Path == strings.TrimPrefix(event.Name, fwc.Directory) && fwc.Type == event.Op.String() {
+			matched := false
+			relPath := strings.TrimPrefix(event.Name, fwc.Directory)
+			if fwc.Path != "" && fwc.Path == relPath {
+				matched = true
+			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
+				matched = true
+			}
+			if matched && fwc.Type == event.Op.String() {
 				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
 				dataCh <- []byte(fmt.Sprintf("%v", event))
 			}
