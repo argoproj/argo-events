@@ -34,9 +34,6 @@ type SQSEventSourceExecutor struct {
 
 // sqs contains information to listen to AWS SQS
 type sqs struct {
-	// URL is queue url
-	URL string `json:"url"`
-
 	// AccessKey refers K8 secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey"`
 
@@ -49,11 +46,9 @@ type sqs struct {
 	// Queue is AWS SQS queue to listen to for messages
 	Queue string `json:"queue"`
 
-	// Frequency is polling frequency
-	Frequency string `json:"frequency"`
-
-	// DeleteAfterProcess decides whether to delete item from queue once it is processed
-	DeleteAfterProcess bool `json:"deleteAfterProcess"`
+	// WaitTimeSeconds is The duration (in seconds) for which the call waits for a message to arrive
+	// in the queue before returning.
+	WaitTimeSeconds int64 `json:"waitTimeSeconds"`
 }
 
 func parseEventSource(es string) (interface{}, error) {

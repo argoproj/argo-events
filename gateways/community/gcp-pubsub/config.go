@@ -18,8 +18,8 @@ package pubsub
 
 import (
 	"cloud.google.com/go/pubsub"
+	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
-	"gopkg.in/yaml.v2"
 )
 
 // GcpPubSubEventSourceExecutor implements Eventing

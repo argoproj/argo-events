@@ -1,20 +1,29 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package aws_sqs
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/store"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
-	cronlib "github.com/robfig/cron"
 )
-
-// Next is a function to compute the next event time from a given time
-type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
 func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -33,15 +42,6 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	go ese.listenEvents(config.(*sqs), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
-}
-
-func resolveSchedule(s *sqs) (cronlib.Schedule, error) {
-	intervalDuration, err := time.ParseDuration(s.Frequency)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse interval %s. Cause: %+v", s.Frequency, err.Error())
-	}
-	schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
-	return schedule, nil
 }
 
 // listenEvents fires an event when interval completes and item is processed from queue.
@@ -83,41 +83,32 @@ func (ese *SQSEventSourceExecutor) listenEvents(s *sqs, eventSource *gateways.Ev
 		return
 	}
 
-	schedule, err := resolveSchedule(s)
-	if err != nil {
-		errorCh <- err
-		return
-	}
-
-	var next Next
-	next = func(last time.Time) time.Time {
-		return schedule.Next(last)
-	}
-
-	lastT := time.Now()
-
 	for {
-		t := next(lastT)
-		timer := time.After(time.Until(t))
-		ese.Log.Info().Str("event-source-name", eventSource.Name).Str("time", t.UTC().String()).Msg("expected time to consume item from queue")
 		select {
-		case tx := <-timer:
-			lastT = tx
+		case <-doneCh:
+			return
+
+		default:
 			msg, err := sqsClient.ReceiveMessage(&sqslib.ReceiveMessageInput{
 				QueueUrl:            queueURL.QueueUrl,
 				MaxNumberOfMessages: aws.Int64(1),
+				WaitTimeSeconds:     aws.Int64(s.WaitTimeSeconds),
 			})
 			if err != nil {
-				ese.Log.Warn().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to process item from queue, waiting for next interval")
+				ese.Log.Warn().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to process item from queue, waiting for next timeout")
 				continue
 			}
-			dataCh <- []byte(*msg.Messages[0].Body)
-			if s.DeleteAfterProcess {
 
+			if msg != nil && len(msg.Messages) > 0 {
+				dataCh <- []byte(*msg.Messages[0].Body)
+
+				if _, err := sqsClient.DeleteMessage(&sqslib.DeleteMessageInput{
+					QueueUrl:      queueURL.QueueUrl,
+					ReceiptHandle: msg.Messages[0].ReceiptHandle,
+				}); err != nil {
+					ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to delete message")
+				}
 			}
-			sqsClient.DeleteMessage()
-		case <-doneCh:
-			return
 		}
 	}
 }
