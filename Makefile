@@ -37,7 +37,7 @@ endif
 .DELETE_ON_ERROR:
 all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux artifact-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image sns-image pubsub-image hdfs-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -212,7 +212,7 @@ gitlab-linux:
 gitlab-image: gitlab-linux
 	docker build -t $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) -f ./gateways/community/gitlab/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) ; fi
-	
+
 github:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/github-gateway ./gateways/community/github/cmd
 
@@ -246,6 +246,14 @@ hdfs-linux:
 hdfs-image: hdfs-linux
 	 docker build -t $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) -f ./gateways/community/hdfs/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) ; fi
+
+
+sqs-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/aws-sqs-gateway ./gateways/community/aws-sqs/cmd
+
+sqs-image: sqs-linux
+	docker build -t $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) -f ./gateways/community/aws-sqs/Dockerfile .
+    @if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v

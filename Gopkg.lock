@@ -15,7 +15,7 @@
     "pubsub/internal/distribution",
   ]
   pruneopts = "UT"
-  revision = "e2c125ceac8b663cfcf4610477d4d67827377cb7"
+  revision = "7e92b4d51047c91ec65bab1144f1c3183d7db9d6"
 
 [[projects]]
   digest = "1:ed77032e4241e3b8329c9304d66452ed196e795876e14be677a546f36b94e67a"
@@ -70,7 +70,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:26f031e25ab4b7b87e461e2a9f011e407367980b6fc9df3304418f3fd4aed776"
+  digest = "1:69c834f987eb88f876116920a0448a53a2466d22510a8a765d7c257a60d840c0"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -102,10 +102,11 @@
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
     "service/sns",
+    "service/sqs",
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "b9fa1724922ca124b6492e9db0c977f0ca8f7455"
+  revision = "156429b830182a72b11ee9452d327db97fa68e97"
 
 [[projects]]
   digest = "1:357f4baa5f50bb2a9d9d01600c8dadebf1cb890b59b53a4c810301fc7bf3736c"
@@ -308,7 +309,7 @@
     "ptypes/timestamp",
   ]
   pruneopts = "UT"
-  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
+  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
 
 [[projects]]
   digest = "1:e4f5819333ac698d294fe04dbf640f84719658d5c7ce195b10060cc37292ce79"
@@ -387,15 +388,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:8ec8d88c248041a6df5f6574b87bc00e7e0b493881dad2e7ef47b11dc69093b5"
+  digest = "1:d15ee511aa0f56baacc1eb4c6b922fa1c03b38413b6be18166b996d82a0156ea"
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
     "simplelru",
   ]
   pruneopts = "UT"
-  revision = "20f1fb78b0740ba8c3cb143a61e86ba5c8669768"
-  version = "v0.5.0"
+  revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
+  version = "v0.5.1"
 
 [[projects]]
   branch = "master"
@@ -472,12 +473,12 @@
   version = "0.5"
 
 [[projects]]
-  digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
+  digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
-  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
-  version = "v1.0.1"
+  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
+  version = "v1.0.2"
 
 [[projects]]
   branch = "master"
@@ -571,7 +572,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:41336e76c7729b34d6e02cbc6e6f8bd2ea46154f5c787e5261bb2228f09b2394"
+  digest = "1:6dd624a8671468c160bae2737e8f4976741cb76b86c15153242097e1b3e36a0e"
   name = "github.com/nlopes/slack"
   packages = [
     ".",
@@ -579,7 +580,7 @@
     "slackutilsx",
   ]
   pruneopts = "UT"
-  revision = "0bc5d873f8a59fa3ec3aee907b833e25e44c52c6"
+  revision = "71a00675abf36a35bb4ff7c0fdd3172c9b191b23"
 
 [[projects]]
   digest = "1:b2ee62e09bec113cf086d2ce0769efcc7bf79481aba8373fd8f7884e94df3462"
@@ -633,7 +634,7 @@
   version = "v1.1"
 
 [[projects]]
-  digest = "1:6112a5eaec2ec65df289ccbb7a730aaf03e3c5cce6c906d367ccf9b7ac567604"
+  digest = "1:9be615b2a72fc4a99e623c6776cce3afe3451741c34ea1805ea4a9b58604b9df"
   name = "github.com/rs/zerolog"
   packages = [
     ".",
@@ -641,8 +642,8 @@
     "internal/json",
   ]
   pruneopts = "UT"
-  revision = "8747b7b3a51b5d08ee7ac50eaf4869edaf9f714a"
-  version = "v1.11.0"
+  revision = "6d6350a51143b5c0d0a6a3b736ee2b41315f7269"
+  version = "v1.12.0"
 
 [[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
@@ -754,12 +755,12 @@
   revision = "65a9db5fad5105a89e17f38adcc9878685be6d78"
 
 [[projects]]
-  digest = "1:ea8da5f44f5e15bb589cca1bd9b85ceb9c05257e83824a725fb0243665e3ce1c"
+  digest = "1:b70c951ba6fdeecfbd50dabe95aa5e1b973866ae9abbece46ad60348112214f2"
   name = "github.com/tidwall/sjson"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c943cc8c8d751d9b33444adf78ae04c2fc8be754"
-  version = "v1.0.3"
+  revision = "25fb082a20e29e83fb7b7ef5f5919166aad1f084"
+  version = "v1.0.4"
 
 [[projects]]
   digest = "1:9a89389cfcb4290761df037aeac1e6daf680ffdc87486baa19f99f17c0056b9b"
@@ -803,7 +804,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:23e8deac346067dc49c6c0b7df1adf5ef9ca7050bdd6d45c87ad6a7d6368e7a1"
+  digest = "1:852c8eafaeaeb1067d3538bd99443d3eef056cf4d6b589f35ebe5583f4b11ca6"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
@@ -829,7 +830,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "7f87c0fbb88b590338857bcb720678c2583d4dea"
+  revision = "8dd112bcdc25174059e45e07517d9fc663123347"
 
 [[projects]]
   branch = "master"
@@ -850,11 +851,11 @@
     "websocket",
   ]
   pruneopts = "UT"
-  revision = "66a96c8a540e84140eaf74e38bb3a0a2ff5e5c53"
+  revision = "16b79f2e4e95ea23b2bf9903c9809ff7b013ce85"
 
 [[projects]]
   branch = "master"
-  digest = "1:6fc46996d9e7c73a4bbaa3ba0b1c3371e22836ca49c5a2ee717889def21c1d41"
+  digest = "1:5e9f22cf754ab20a5dff0ae04b12516b112c5b81cd44dccccde148865084d730"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -864,7 +865,7 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "529b322ea34655aa15fb32e063f3d4d3cf803cac"
+  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
 
 [[projects]]
   branch = "master"
@@ -875,11 +876,11 @@
     "semaphore",
   ]
   pruneopts = "UT"
-  revision = "37e7f081c4d4c64e13b10787722085407fe5d15f"
+  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
 
 [[projects]]
   branch = "master"
-  digest = "1:bdec0cac19c2981f8962586869eab879a5abb7adde65f71715a40a66edcf37d9"
+  digest = "1:3e05d78c0f71922115e3f0bc4740e8e46e0919c27551be4b51d05a3ba998a948"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -887,7 +888,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "cc5685c2db1239775905f3911f0067c0fa74762f"
+  revision = "d455e41777fca6e8a5a79e34a14b8368bc11d9ba"
 
 [[projects]]
   digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
@@ -923,7 +924,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:140022d2962ee039f4a27e5ad9e2dce1262f263c922cf450af0175750631e202"
+  digest = "1:e46d8e20161401a9cf8765dfa428494a3492a0b56fe114156b7da792bf41ba78"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -940,7 +941,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "f727befe758c04ce68d52abc6e69ad111e2c6797"
+  revision = "589c23e65e65055d47b9ad4a99723bc389136265"
 
 [[projects]]
   digest = "1:2e81813e8e072aa700e101369890e55539729d817d32dbc3fab228d6b40c4d83"
@@ -993,7 +994,7 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "fc2db5cae922db113989ef87b5b859cc8a179f59"
+  revision = "4f5b463f9597cbe0dd13a6a2cd4f85e788d27508"
 
 [[projects]]
   digest = "1:9153ffce82afcac3bf963f2aac8df53a34859e293e7329b00ef42eea00fe100f"
@@ -1446,7 +1447,7 @@
     "pkg/util/sets",
   ]
   pruneopts = "UT"
-  revision = "d50a959ae76a85c7c262a9767ef29f37093c2b8a"
+  revision = "b3a7cee44a305be0a69e1b9ac03018307287e1b0"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -1460,6 +1461,7 @@
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/sns",
+    "github.com/aws/aws-sdk-go/service/sqs",
     "github.com/colinmarc/hdfs",
     "github.com/eclipse/paho.mqtt.golang",
     "github.com/fsnotify/fsnotify",
@@ -1502,7 +1504,6 @@
     "gopkg.in/src-d/go-git.v4/plumbing/transport",
     "gopkg.in/src-d/go-git.v4/plumbing/transport/http",
     "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh",
-    "gopkg.in/yaml.v2",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

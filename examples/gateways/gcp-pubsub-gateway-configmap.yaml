@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gcp-pubsub-gateway-configmap
+data:
+  notification_1: |-
+    projectId: "your-project-id"
+    topic: "your-topic"
+    credentialsFile: "path to credential files"
