@@ -19,7 +19,6 @@ package hdfs
 import (
 	"context"
 	"errors"
-	"path"
 	"time"
 
 	"github.com/argoproj/argo-events/gateways/common/naivewatcher"
@@ -38,18 +37,6 @@ func validateGatewayConfig(config interface{}) error {
 	if gwc == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if gwc.Directory == "" {
-		return errors.New("directory is required")
-	}
-	if !path.IsAbs(gwc.Directory) {
-		return errors.New("directory must be an absolute file path")
-	}
-	if gwc.Path == "" {
-		return errors.New("path is required")
-	}
-	if path.IsAbs(gwc.Path) {
-		return errors.New("path must be a relative file path")
-	}
 	if gwc.Type == "" {
 		return errors.New("type is required")
 	}
@@ -63,29 +50,10 @@ func validateGatewayConfig(config interface{}) error {
 			return errors.New("failed to parse interval")
 		}
 	}
-
-	err := validateHDFSConfig(gwc)
-
+	err := gwc.WatchPathConfig.Validate()
+	if err != nil {
+		return err
+	}
+	err = gwc.GatewayClientConfig.Validate()
 	return err
-}
-
-func validateHDFSConfig(gwc *GatewayConfig) error {
-	if len(gwc.Addresses) == 0 {
-		return errors.New("addresses is required")
-	}
-
-	hasKrbCCache := gwc.KrbCCacheSecret != nil
-	hasKrbKeytab := gwc.KrbKeytabSecret != nil
-
-	if gwc.HDFSUser == "" && !hasKrbCCache && !hasKrbKeytab {
-		return errors.New("either hdfsUser, krbCCacheSecret or krbKeytabSecret is required")
-	}
-	if hasKrbKeytab && (gwc.KrbServicePrincipalName == "" || gwc.KrbConfigConfigMap == nil || gwc.KrbUsername == "" || gwc.KrbRealm == "") {
-		return errors.New("krbServicePrincipalName, krbConfigConfigMap, krbUsername and krbRealm are required with krbKeytabSecret")
-	}
-	if hasKrbCCache && (gwc.KrbServicePrincipalName == "" || gwc.KrbConfigConfigMap == nil) {
-		return errors.New("krbServicePrincipalName and krbConfigConfigMap are required with krbCCacheSecret")
-	}
-
-	return nil
 }

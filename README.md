@@ -96,7 +96,7 @@ Lets deploy a webhook gateway and sensor,
  * Create webhook sensor,
     
     ```bash
-    kubectl apply -n argo-events https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-http.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-http.yaml
     ```
     
    Once sensor resource is created, sensor controller will create corresponding sensor pod and a ClusterIP service. 

@@ -34,24 +34,22 @@ hdfsUser: roots
 func TestValidateEventSource(t *testing.T) {
 	convey.Convey("Given a valid github event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &EventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
 			Data: goodConfig,
 		})
-		convey.So(err, convey.ShouldBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
 	convey.Convey("Given an invalid github event source spec, parse it and make sure error occurs", t, func() {
 		ese := &EventSourceExecutor{}
-		valid, err := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: badConfig,
 			Id:   configId,
 			Name: configKey,
 		})
-		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(valid, convey.ShouldNotBeNil)
 		convey.So(valid.IsValid, convey.ShouldBeFalse)
 		convey.So(valid.Reason, convey.ShouldNotBeEmpty)

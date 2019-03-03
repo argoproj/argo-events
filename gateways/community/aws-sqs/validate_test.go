@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pubsub
+package aws_sqs
 
 import (
 	"context"
@@ -27,18 +27,31 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-projectID: "1234"
-topic: "test"
+region: "us-east-1"
+accessKey:
+    key: accesskey
+    name: sns
+secretKey:
+    key: secretkey
+    name: sns
+queue: "test-queue"
+frequency: "10s"
 `
+
 	invalidConfig = `
-projectID: "1234"
+region: "us-east-1"
+accessKey:
+    key: accesskey
+    name: sns
+secretKey:
+    key: secretkey
+    name: sns
 `
 )
 
-func TestGcpPubSubEventSourceExecutor_ValidateEventSource(t *testing.T) {
-	convey.Convey("Given a valid gcp pub-sub event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &GcpPubSubEventSourceExecutor{}
-
+func TestSQSEventSourceExecutor_ValidateEventSource(t *testing.T) {
+	convey.Convey("Given a valid sqs event source spec, parse it and make sure no error occurs", t, func() {
+		ese := &SQSEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
 			Id:   configId,
@@ -48,8 +61,8 @@ func TestGcpPubSubEventSourceExecutor_ValidateEventSource(t *testing.T) {
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
-	convey.Convey("Given an invalid gcp pub-sub event source spec, parse it and make sure error occurs", t, func() {
-		ese := &GcpPubSubEventSourceExecutor{}
+	convey.Convey("Given an invalid sqs event source spec, parse it and make sure error occurs", t, func() {
+		ese := &SQSEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,
 			Id:   configId,
