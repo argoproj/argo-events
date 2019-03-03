@@ -32,4 +32,4 @@ spec:
   eventVersion: "1.0"
   watchers:
     sensors:
-      - name: "natrellots-sensor"
+      - name: "trello-sensor"

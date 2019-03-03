@@ -18,7 +18,7 @@ spec:
   dependencies:
     - name: "trello-gateway:notification_1"
   triggers:
-    - name: argo-workflow
+    - name: trello-workflow
       resource:
         namespace: argo-events
         group: argoproj.io
@@ -33,7 +33,7 @@ spec:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: trello-via-webhook-event
+              generateName: trello-
             spec:
               entrypoint: whalesay
               arguments:
