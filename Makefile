@@ -35,9 +35,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux artifact-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux artifact-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux trello-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image trello-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -93,7 +93,7 @@ gateway-client-image: gateway-client-linux
 
 # gateway binaries
 webhook:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/cmd/
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/webhook-gateway ./gateways/core/webhook/cmd/
 
 webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
@@ -104,7 +104,7 @@ webhook-image: webhook-linux
 
 
 calendar:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./gateways/core/calendar/cmd/
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/calendar-gateway ./gateways/core/calendar/cmd/
 
 calendar-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar
@@ -115,7 +115,7 @@ calendar-image: calendar-linux
 
 
 resource:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/resource-gateway ./gateways/core/resource/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/resource-gateway ./gateways/core/resource/cmd
 
 resource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make resource
@@ -126,7 +126,7 @@ resource-image: resource-linux
 
 
 artifact:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/artifact-gateway ./gateways/core/artifact/cmd
 
 artifact-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make artifact
@@ -137,7 +137,7 @@ artifact-image: artifact-linux
 
 
 file:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/file/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/file-gateway ./gateways/core/file/cmd
 
 file-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file
@@ -149,7 +149,7 @@ file-image: file-linux
 
 #Stream gateways
 nats:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/core/stream/nats/cmd
 
 nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
@@ -160,7 +160,7 @@ nats-image: nats-linux
 
 
 kafka:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/core/stream/kafka/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/core/stream/kafka/cmd
 
 kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
@@ -171,7 +171,7 @@ kafka-image: kafka-linux
 
 
 amqp:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/core/stream/amqp/cmd
 
 amqp-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
@@ -182,7 +182,7 @@ amqp-image: amqp-linux
 
 
 mqtt:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/core/stream/mqtt/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/core/stream/mqtt/cmd
 
 mqtt-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
@@ -194,7 +194,7 @@ mqtt-image: mqtt-linux
 
 # Custom gateways
 storage-grid:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/community/storagegrid/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/storagegrid-gateway ./gateways/community/storagegrid/cmd
 
 storage-grid-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
@@ -204,7 +204,7 @@ storage-grid-image: storage-grid-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
 gitlab:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gitlab-gateway ./gateways/community/gitlab/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gitlab-gateway ./gateways/community/gitlab/cmd
 
 gitlab-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gitlab
@@ -214,7 +214,7 @@ gitlab-image: gitlab-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) ; fi
 
 github:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/github-gateway ./gateways/community/github/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/github-gateway ./gateways/community/github/cmd
 
 github-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make github
@@ -223,22 +223,28 @@ github-image: github-linux
 	docker build -t $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) -f ./gateways/community/github/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) ; fi
 
+sns:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/aws-sns-gateway ./gateways/community/aws-sns/cmd
+
 sns-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/aws-sns-gateway ./gateways/community/aws-sns/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sns
 
 sns-image:
 	docker build -t $(IMAGE_PREFIX)aws-sns-gateway:$(IMAGE_TAG) -f ./gateways/community/aws-sns/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sns-gateway:$(IMAGE_TAG) ; fi
 
+pubsub:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gcp-pubsub-gateway ./gateways/community/gcp-pubsub/cmd
+
 pubsub-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/gcp-pubsub-gateway ./gateways/community/gcp-pubsub/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make pubsub
 
 pubsub-image: pubsub-linux
 	docker build -t $(IMAGE_PREFIX)gcp-pubsub-gateway:$(IMAGE_TAG) -f ./gateways/community/gcp-pubsub/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gcp-pubsub-gateway:$(IMAGE_TAG) ; fi
 
 hdfs:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/hdfs-gateway ./gateways/community/hdfs/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/hdfs-gateway ./gateways/community/hdfs/cmd
 
 hdfs-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make hdfs
@@ -247,13 +253,15 @@ hdfs-image: hdfs-linux
 	 docker build -t $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) -f ./gateways/community/hdfs/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) ; fi
 
+sqs:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/aws-sqs-gateway ./gateways/community/aws-sqs/cmd
 
 sqs-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/aws-sqs-gateway ./gateways/community/aws-sqs/cmd
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sqs
 
 sqs-image: sqs-linux
 	docker build -t $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) -f ./gateways/community/aws-sqs/Dockerfile .
-    @if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
 
 trello:
 	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/trello-gateway ./gateways/community/trello/cmd

@@ -35,7 +35,7 @@ secretKey:
     key: secretkey
     name: sns
 queue: "test-queue"
-frequency: "10s"
+waitTimeSeconds: 10
 `
 
 	invalidConfig = `
