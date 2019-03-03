@@ -55,12 +55,12 @@ The framework provides support to fetch trigger resources from different sources
     * The [example](../examples/sensors/trigger-standard-k8s-resource.yaml) showcases how you can trigger different standard K8s resources.
       You can find K8s API reference [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/).
 
-    * To trigger other standard K8s resources, change the group and version in `triggers/resources` accordingly.
+    * To trigger other standard K8s resources, change the group and version in `triggers/resource` accordingly.
 
   * ### Trigger Gateway
-    You can trigger a gateway in a sensor. Follow the [example](../examples/sensors/trigger-gateway.yaml)
+    Follow the [example](../examples/sensors/trigger-gateway.yaml) to trigger a gateway. 
 
-    In the example, the sensor creates an artifact gateway configmap and gateway resource.
+    In the example, the sensor creates a configmap and gateway resource for artifact gateway.
  
     Because a gateway depends on `gateway-configmap` which stores the event source configurations, the first trigger in sensor is a configmap
     and the second trigger is actual gateway.
