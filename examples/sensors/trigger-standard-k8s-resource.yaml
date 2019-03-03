@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor-http
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  deploySpec:
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: "webhook-gateway-http:foo"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  # To add other standard K8s resources, change the version and pod in triggers/resource accordingly.
+  triggers:
+    - name: webhook-pod-trigger
+      resource:
+        namespace: argo-events
+        group: ""
+        version: v1
+        kind: Pod
+        source:
+          inline: |
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              generateName: hello-world-
+            spec:
+              containers:
+                - name: hello-container
+                  args:
+                    - "hello-world"
+                  command:
+                    - cowsay
+                  image: "docker/whalesay:latest"
+    - name: webhook-deployment-trigger
+      resource:
+        namespace: argo-events
+        group: apps
+        version: v1
+        kind: Deployment
+        source:
+          inline: |
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              generateName: hello-world-
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: nginx
+              template:
+                metadata:
+                  labels:
+                    app: nginx
+                spec:
+                  containers:
+                    - name: hello-container
+                      args:
+                       - "hello world"
+                      command:
+                       - cowsay
+                      image: "docker/whalesay:latest"
