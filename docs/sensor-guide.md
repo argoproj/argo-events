@@ -10,7 +10,7 @@ Sensors define a set of event dependencies (inputs) and triggers (outputs).
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/sensor.png?raw=true" alt="Sensor"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/sensor.png?raw=true" alt="Sensor"/>
 </p>
 
 <br/>
