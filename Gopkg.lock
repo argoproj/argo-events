@@ -58,6 +58,14 @@
   version = "v1.21.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:797da30d559e1fbc24acfe026226cfb49f129216fb65db1fa6b786f2ace0cc2c"
+  name = "github.com/adlio/trello"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "b0faddb69566d3b80c1b70aa6daf2677b3f7a551"
+
+[[projects]]
   digest = "1:4b9792d4bd04b67ce23f3d8a896df2f3ae49e1574ea2722501959f2b86f35002"
   name = "github.com/argoproj/argo"
   packages = [
@@ -880,7 +888,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3e05d78c0f71922115e3f0bc4740e8e46e0919c27551be4b51d05a3ba998a948"
+  digest = "1:8c41805cf4d0776e4e4aaedd60cb7b184113a265054433bc39644f289f7c86cc"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -888,7 +896,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "d455e41777fca6e8a5a79e34a14b8368bc11d9ba"
+  revision = "c2f5717e611cf8e89a852a41081355194d80c943"
 
 [[projects]]
   digest = "1:0c56024909189aee3364b7f21a95a27459f718aa7c199a5c111c36cfffd9eaef"
@@ -1456,6 +1464,7 @@
     "cloud.google.com/go/pubsub",
     "github.com/Knetic/govaluate",
     "github.com/Shopify/sarama",
+    "github.com/adlio/trello",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/credentials",

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trello-gateway-configmap
+data:
+  notification_1: |-
+    endpoint: "/"
+    port: "9600"
+    apiKey:
+      name: trello-secret
+      key: apikey
+    token:
+      name trello-secret
+      key: tokenkey
+    url: "URL_TO_REGISTER"
+    description: "test webhook"
