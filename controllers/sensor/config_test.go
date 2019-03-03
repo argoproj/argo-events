@@ -17,7 +17,6 @@ limitations under the License.
 package sensor
 
 import (
-	"context"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -28,17 +27,6 @@ import (
 
 func TestSensorControllerConfigWatch(t *testing.T) {
 	sc := getSensorController()
-
-	convey.Convey("Given a sensor", t, func() {
-		convey.Convey("Watch a configuration", func() {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			_, err := sc.watchControllerConfigMap(ctx)
-			convey.Convey("Make sure no error occurs", func() {
-				convey.So(err, convey.ShouldBeNil)
-			})
-		})
-	})
 
 	convey.Convey("Given a sensor", t, func() {
 		convey.Convey("Create a new watch and make sure watcher is not nil", func() {
