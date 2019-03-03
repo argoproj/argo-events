@@ -255,6 +255,16 @@ sqs-image: sqs-linux
 	docker build -t $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) -f ./gateways/community/aws-sqs/Dockerfile .
     @if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
 
+trello:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/trello-gateway ./gateways/community/trello/cmd
+
+trello-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make trello
+
+trello-image: trello-linux
+	docker build -t $(IMAGE_PREFIX)trello-gateway:$(IMAGE_TAG) -f ./gateways/community/trello/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)trello-gateway:$(IMAGE_TAG) ; fi
+
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
 
