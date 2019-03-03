@@ -106,7 +106,8 @@ func (ese *SQSEventSourceExecutor) listenEvents(s *sqs, eventSource *gateways.Ev
 					QueueUrl:      queueURL.QueueUrl,
 					ReceiptHandle: msg.Messages[0].ReceiptHandle,
 				}); err != nil {
-					ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to delete message")
+					errorCh <- err
+					return
 				}
 			}
 		}
