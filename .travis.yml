@@ -1,0 +1,19 @@
+language: go
+go:
+  - "1.10"
+
+install:
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+  - dep version
+  - dep ensure -vendor-only
+
+script:
+  - make all
+  - make test coverage
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_OAUTH_TOKEN
+  skip_cleanup: true
+  on:
+    tags: true
