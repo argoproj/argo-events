@@ -38,7 +38,7 @@ The framework provides support to fetch trigger resources from different sources
         [Example](../examples/sensors/trigger-source-configmap.yaml)
    
    * ### Git
-        Artifact stored in either public or private Gir repository
+        Artifact stored in either public or private Git repository
    
         [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
 
