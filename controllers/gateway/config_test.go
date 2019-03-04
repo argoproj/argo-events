@@ -17,7 +17,6 @@ limitations under the License.
 package gateway
 
 import (
-	"context"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -32,17 +31,6 @@ var (
 
 func TestGatewayControllerConfigWatch(t *testing.T) {
 	gc := getGatewayController()
-
-	convey.Convey("Given a gateway", t, func() {
-		convey.Convey("Watch a configuration", func() {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			_, err := gc.watchControllerConfigMap(ctx)
-			convey.Convey("Make sure no error occurs", func() {
-				convey.So(err, convey.ShouldBeNil)
-			})
-		})
-	})
 
 	convey.Convey("Given a gateway", t, func() {
 		convey.Convey("Create a new watch and make sure watcher is not nil", func() {
