@@ -277,8 +277,8 @@ test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
 
 coverage:
-	go test -covermode=count -coverprofile=coverage.out $(shell go list ./... | grep -v /vendor/)
-	go tool cover -func=coverage.out
+	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
+	go tool cover -func=profile.cov
 
 clean:
 	-rm -rf ${CURRENT_DIR}/dist

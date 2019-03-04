@@ -1,6 +1,9 @@
 language: go
 go:
-  - "1.10"
+  - 1.x
+
+before_install:
+  - go get github.com/mattn/goveralls
 
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -9,7 +12,7 @@ install:
 
 script:
   - make all
-  - make test coverage
+  - $GOPATH/bin/goveralls -service=travis-ci
 
 deploy:
   provider: releases
