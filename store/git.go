@@ -143,13 +143,15 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 
 func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
 	opts := &git.CheckoutOptions{}
+
+	opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), DefaultBranch)
+
 	if g.artifact.Branch != "" {
 		opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), g.artifact.Branch)
 	}
 	if g.artifact.Tag != "" {
 		opts.Branch = plumbing.NewTagReferenceName(g.artifact.Tag)
 	}
-	opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), DefaultBranch)
 	return opts
 }
 
