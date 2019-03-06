@@ -19,9 +19,10 @@ package gateways
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"io"
 	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
@@ -36,7 +37,7 @@ import (
 func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[string]*EventSourceContext, error) {
 	configs := make(map[string]*EventSourceContext)
 	for configKey, configValue := range cm.Data {
-		hashKey := Hasher(configKey + configValue)
+		hashKey := common.Hasher(configKey + configValue)
 		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source")
 
 		// create a connection to gateway server

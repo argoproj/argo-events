@@ -18,6 +18,7 @@ package common
 
 import (
 	"fmt"
+	"hash/fnv"
 	"os"
 	"time"
 
@@ -107,4 +108,11 @@ func LoggerConf() zerolog.ConsoleWriter {
 // GetLoggerContext returns a logger with input options
 func GetLoggerContext(opt zerolog.ConsoleWriter) zerolog.Context {
 	return zerolog.New(opt).With().Timestamp()
+}
+
+// Hasher hashes a string
+func Hasher(value string) string {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(value))
+	return fmt.Sprintf("%v", h.Sum32())
 }

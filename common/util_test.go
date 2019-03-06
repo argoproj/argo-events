@@ -17,13 +17,21 @@ limitations under the License.
 package common
 
 import (
-	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
 )
+
+func TestHasher(t *testing.T) {
+	convey.Convey("Given a value, hash it", t, func() {
+		hash := Hasher("test")
+		convey.So(hash, convey.ShouldNotBeEmpty)
+	})
+}
 
 func TestDefaultConfigMapName(t *testing.T) {
 	res := DefaultConfigMapName("sensor-controller")
