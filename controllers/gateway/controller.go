@@ -23,7 +23,11 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/informers"
+	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -36,7 +40,8 @@ import (
 )
 
 const (
-	gatewayResyncPeriod = 20 * time.Minute
+	gatewayResyncPeriod         = 20 * time.Minute
+	gatewayResourceResyncPeriod = 30 * time.Minute
 )
 
 // GatewayControllerConfig contain the configuration settings for the gateway-controller
@@ -65,8 +70,10 @@ type GatewayController struct {
 	gatewayClientset clientset.Interface
 
 	// gateway-controller informer and queue
-	informer cache.SharedIndexInformer
-	queue    workqueue.RateLimitingInterface
+	podInformer informersv1.PodInformer
+	svcInformer informersv1.ServiceInformer
+	informer    cache.SharedIndexInformer
+	queue       workqueue.RateLimitingInterface
 }
 
 // NewGatewayController creates a new Controller
@@ -166,7 +173,29 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync")
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateways")
+		return
+	}
+
+	listOptionsFunc := func(options *metav1.ListOptions) {
+		labelSelector := labels.NewSelector().Add(c.instanceIDReq())
+		options.LabelSelector = labelSelector.String()
+	}
+	informerFactory := informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Namespace, listOptionsFunc)
+
+	c.podInformer = c.newGatewayPodInformer(informerFactory)
+	go c.podInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway pods")
+		return
+	}
+
+	c.svcInformer = c.newGatewayServiceInformer(informerFactory)
+	go c.svcInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway services")
 		return
 	}
 
