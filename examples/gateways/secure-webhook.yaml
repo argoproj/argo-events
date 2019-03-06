@@ -29,11 +29,11 @@ spec:
           image: "argoproj/webhook-gateway"
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
-          # there will be `cert` and `private` files available at this path
+          # there will be `cert` and `key` files available at this path
           volumeMounts:
             - name: secret-volume
               mountPath: /etc/secret-volume
-      # make sure to create the secret with two keys- cert and private
+      # make sure to create the secret with two keys- cert and key
       volumes:
         - name: secret-volume
           secret:
