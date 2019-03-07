@@ -99,7 +99,7 @@ func (goc *gwOperationCtx) operate() error {
 		if err != nil {
 			goc.log.Error().Err(err).Msg("gateway validation failed")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
-			return nil
+			return err
 		}
 
 		// Gateway pod has two components,
@@ -111,13 +111,13 @@ func (goc *gwOperationCtx) operate() error {
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
-			return nil
+			return err
 		}
 		pod, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(pod)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
-			return nil
+			return err
 		}
 		goc.log.Info().Str("pod-name", pod.ObjectMeta.Name).Msg("gateway pod created")
 
@@ -151,11 +151,13 @@ func (goc *gwOperationCtx) operate() error {
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
-			return nil
+			return err
 		}
 		pod, err := goc.getGatewayPod()
 		if err != nil {
-			return nil
+			goc.log.Error().Err(err).Msg("failed to get pod for gateway")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to get gateway pod. err: %s", err))
+			return err
 		}
 		if pod != nil {
 			if pod.Annotations != nil && pod.Annotations[common.AnnotationGatewayResourceHashName] != newPod.Annotations[common.AnnotationGatewayResourceHashName] {
@@ -164,7 +166,7 @@ func (goc *gwOperationCtx) operate() error {
 				if err != nil {
 					goc.log.Error().Err(err).Msg("failed to delete pod for gateway")
 					goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to delete gateway pod. err: %s", err))
-					return nil
+					return err
 				}
 			}
 		} else {
@@ -173,7 +175,7 @@ func (goc *gwOperationCtx) operate() error {
 			if err != nil {
 				goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 				goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
-				return nil
+				return err
 			}
 			goc.log.Info().Str("pod-name", pod.ObjectMeta.Name).Msg("gateway pod created")
 		}
@@ -189,7 +191,9 @@ func (goc *gwOperationCtx) operate() error {
 		}
 		svc, err := goc.getGatewayService()
 		if err != nil {
-			return nil
+			goc.log.Error().Err(err).Msg("failed to get service for gateway")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to get gateway service. err: %s", err))
+			return err
 		}
 		if svc != nil {
 			if newSvc == nil || svc.Annotations != nil && svc.Annotations[common.AnnotationGatewayResourceHashName] != newSvc.Annotations[common.AnnotationGatewayResourceHashName] {
@@ -198,7 +202,7 @@ func (goc *gwOperationCtx) operate() error {
 				if err != nil {
 					goc.log.Error().Err(err).Msg("failed to delete service for gateway")
 					goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to delete gateway service. err: %s", err))
-					return nil
+					return err
 				}
 			}
 		} else {
