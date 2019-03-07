@@ -23,19 +23,29 @@ import (
 	"log"
 	"time"
 
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/informers"
+	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
+
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	ccommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 const (
-	sensorResyncPeriod = 20 * time.Minute
+	sensorResyncPeriod         = 20 * time.Minute
+	sensorResourceResyncPeriod = 30 * time.Minute
+	rateLimiterBaseDelay       = 5 * time.Second
+	rateLimiterMaxDelay        = 1000 * time.Second
 )
 
 // SensorControllerConfig contain the configuration settings for the sensor-controller
@@ -60,22 +70,25 @@ type SensorController struct {
 	// kubernetes config and apis
 	kubeConfig      *rest.Config
 	kubeClientset   kubernetes.Interface
-	sensorClientset sensorclientset.Interface
+	sensorClientset clientset.Interface
 
 	// sensor informer and queue
-	informer cache.SharedIndexInformer
-	queue    workqueue.RateLimitingInterface
+	podInformer informersv1.PodInformer
+	svcInformer informersv1.ServiceInformer
+	informer    cache.SharedIndexInformer
+	queue       workqueue.RateLimitingInterface
 }
 
 // NewSensorController creates a new Controller
 func NewSensorController(rest *rest.Config, configMap, namespace string) *SensorController {
+	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &SensorController{
 		ConfigMap:       configMap,
 		Namespace:       namespace,
 		kubeConfig:      rest,
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
-		sensorClientset: sensorclientset.NewForConfigOrDie(rest),
-		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		sensorClientset: clientset.NewForConfigOrDie(rest),
+		queue:           workqueue.NewRateLimitingQueue(rateLimiter),
 	}
 }
 
@@ -113,7 +126,7 @@ func (c *SensorController) processNextItem() bool {
 			common.LabelEventType:  string(common.EscalationEventType),
 			common.LabelOperation:  "controller_operation",
 		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("failed to operate on sensor %s, err :%+v", sensor.Name, err), common.EscalationEventType,
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("failed to operate on sensor %s", sensor.Name), common.EscalationEventType,
 			"sensor operation failed", sensor.Name, sensor.Namespace, c.Config.InstanceID, sensor.Kind, labels); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate sensor operation failure")
 		}
@@ -163,6 +176,33 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
 		log.Panicf("timed out waiting for the caches to sync")
+		return
+	}
+
+	listOptionsFunc := func(options *metav1.ListOptions) {
+		labelSelector := labels.NewSelector().Add(c.instanceIDReq())
+		options.LabelSelector = labelSelector.String()
+	}
+	factory := ccommon.ArgoEventInformerFactory{
+		OwnerKind:             sensor.Kind,
+		OwnerInformer:         c.informer,
+		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, sensorResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
+		Queue: c.queue,
+	}
+
+	c.podInformer = factory.NewPodInformer()
+	go c.podInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
+		log.Panic("timed out waiting for the caches to sync for sensor pods")
+		return
+	}
+
+	c.svcInformer = factory.NewServiceInformer()
+	go c.svcInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
+		log.Panic("timed out waiting for the caches to sync for sensor services")
 		return
 	}
 

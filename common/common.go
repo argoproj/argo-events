@@ -60,6 +60,9 @@ const (
 
 	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
 	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
+
+	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
+	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
 )
 
 // SENSOR CONSTANTS
