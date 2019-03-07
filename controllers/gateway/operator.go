@@ -178,18 +178,21 @@ func (goc *gwOperationCtx) operate() error {
 			goc.log.Info().Str("pod-name", pod.ObjectMeta.Name).Msg("gateway pod created")
 		}
 
-		newSvc, err := goc.newGatewayService()
-		if err != nil {
-			goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
-			return err
+		var newSvc *corev1.Service
+		if goc.gw.Spec.ServiceSpec != nil {
+			newSvc, err = goc.newGatewayService()
+			if err != nil {
+				goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
+				goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
+				return err
+			}
 		}
 		svc, err := goc.getGatewayService()
 		if err != nil {
 			return nil
 		}
 		if svc != nil {
-			if svc.Annotations != nil && svc.Annotations[common.AnnotationGatewayResourceHashName] != newSvc.Annotations[common.AnnotationGatewayResourceHashName] {
+			if newSvc == nil || svc.Annotations != nil && svc.Annotations[common.AnnotationGatewayResourceHashName] != newSvc.Annotations[common.AnnotationGatewayResourceHashName] {
 				goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service spec changed")
 				err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
 				if err != nil {
@@ -199,7 +202,7 @@ func (goc *gwOperationCtx) operate() error {
 				}
 			}
 		} else {
-			if goc.gw.Spec.ServiceSpec != nil {
+			if newSvc != nil {
 				goc.log.Info().Str("gateway-name", goc.gw.ObjectMeta.Name).Msg("gateway service is deleted")
 				svc, err = goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(newSvc)
 				if err != nil {
