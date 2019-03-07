@@ -125,6 +125,9 @@ const (
 	// LabelGatewayEventSourceID is the label for gateway configuration ID
 	LabelGatewayEventSourceID = "event-source-id"
 
+	// AnnotationGatewayResourceHashName is the annotation of a gateway resource hash
+	AnnotationGatewayResourceHashName = gateway.FullName + "/gateway-resource-hash"
+
 	// Server Connection Timeout, 5 seconds
 	ServerConnTimeout = 10
 )

@@ -17,6 +17,7 @@ limitations under the License.
 package gateway
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -28,6 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
@@ -105,7 +107,13 @@ func (goc *gwOperationCtx) operate() error {
 		// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
 		//                          compliant events and dispatch them to watchers.
 
-		pod, err := goc.createGatewayPod()
+		pod, err := goc.newGatewayPod()
+		if err != nil {
+			goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
+			return nil
+		}
+		pod, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(pod)
 		if err != nil {
 			goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
@@ -115,7 +123,13 @@ func (goc *gwOperationCtx) operate() error {
 
 		// expose gateway if service is configured
 		if goc.gw.Spec.ServiceSpec != nil {
-			svc, err := goc.createGatewayService()
+			svc, err := goc.newGatewayService()
+			if err != nil {
+				goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
+				goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
+				return err
+			}
+			svc, err = goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(svc)
 			if err != nil {
 				goc.log.Error().Err(err).Msg("failed to create service for gateway")
 				goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway service. err: %s", err))
@@ -133,13 +147,29 @@ func (goc *gwOperationCtx) operate() error {
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Msg("gateway is running")
 
+		newPod, err := goc.newGatewayPod()
+		if err != nil {
+			goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
+			return nil
+		}
 		pod, err := goc.getGatewayPod()
 		if err != nil {
 			return nil
 		}
-		if pod == nil {
+		if pod != nil {
+			if pod.Annotations != nil && pod.Annotations[common.AnnotationGatewayResourceHashName] != newPod.Annotations[common.AnnotationGatewayResourceHashName] {
+				goc.log.Info().Str("pod-name", pod.ObjectMeta.Name).Msg("gateway pod spec changed")
+				err := goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
+				if err != nil {
+					goc.log.Error().Err(err).Msg("failed to delete pod for gateway")
+					goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to delete gateway pod. err: %s", err))
+					return nil
+				}
+			}
+		} else {
 			goc.log.Info().Str("gateway-name", goc.gw.ObjectMeta.Name).Msg("gateway pod is deleted")
-			pod, err := goc.createGatewayPod()
+			pod, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(newPod)
 			if err != nil {
 				goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 				goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
@@ -148,13 +178,30 @@ func (goc *gwOperationCtx) operate() error {
 			goc.log.Info().Str("pod-name", pod.ObjectMeta.Name).Msg("gateway pod created")
 		}
 
-		if goc.gw.Spec.ServiceSpec != nil {
-			svc, err := goc.getGatewayService()
-			if err != nil {
-				return nil
+		newSvc, err := goc.newGatewayService()
+		if err != nil {
+			goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
+			return err
+		}
+		svc, err := goc.getGatewayService()
+		if err != nil {
+			return nil
+		}
+		if svc != nil {
+			if svc.Annotations != nil && svc.Annotations[common.AnnotationGatewayResourceHashName] != newSvc.Annotations[common.AnnotationGatewayResourceHashName] {
+				goc.log.Info().Str("svc-name", svc.ObjectMeta.Name).Msg("gateway service spec changed")
+				err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
+				if err != nil {
+					goc.log.Error().Err(err).Msg("failed to delete service for gateway")
+					goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to delete gateway service. err: %s", err))
+					return nil
+				}
 			}
-			if svc == nil {
-				svc, err := goc.createGatewayService()
+		} else {
+			if goc.gw.Spec.ServiceSpec != nil {
+				goc.log.Info().Str("gateway-name", goc.gw.ObjectMeta.Name).Msg("gateway service is deleted")
+				svc, err = goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(newSvc)
 				if err != nil {
 					goc.log.Error().Err(err).Msg("failed to create service for gateway")
 					goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway service. err: %s", err))
@@ -182,7 +229,7 @@ func (goc *gwOperationCtx) getGatewayService() (*corev1.Service, error) {
 		return nil, err
 	}
 	labelSelector := labels.NewSelector().Add(*req)
-	svcs, err := goc.controller.svcInformer.Lister().List(labelSelector)
+	svcs, err := goc.controller.svcInformer.Lister().Services(goc.gw.Namespace).List(labelSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +240,7 @@ func (goc *gwOperationCtx) getGatewayService() (*corev1.Service, error) {
 }
 
 // createGatewayPod creates a service that exposes gateway.
-func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
+func (goc *gwOperationCtx) newGatewayService() (*corev1.Service, error) {
 	gatewayService := goc.gw.Spec.ServiceSpec.DeepCopy()
 	gatewayService.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
@@ -202,9 +249,15 @@ func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	svc, err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(gatewayService)
-	return svc, err
+	hash, err := goc.getGatewayResourceHash(gatewayService)
+	if err != nil {
+		return nil, err
+	}
+	if gatewayService.ObjectMeta.Annotations == nil {
+		gatewayService.ObjectMeta.Annotations = make(map[string]string)
+	}
+	gatewayService.ObjectMeta.Annotations[common.AnnotationGatewayResourceHashName] = hash
+	return gatewayService, nil
 }
 
 // getGatewayPod returns the pod of gateway
@@ -214,7 +267,7 @@ func (goc *gwOperationCtx) getGatewayPod() (*corev1.Pod, error) {
 		return nil, err
 	}
 	labelSelector := labels.NewSelector().Add(*req)
-	pods, err := goc.controller.podInformer.Lister().List(labelSelector)
+	pods, err := goc.controller.podInformer.Lister().Pods(goc.gw.Namespace).List(labelSelector)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +278,7 @@ func (goc *gwOperationCtx) getGatewayPod() (*corev1.Pod, error) {
 }
 
 // createGatewayPod creates a pod of gateway
-func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
+func (goc *gwOperationCtx) newGatewayPod() (*corev1.Pod, error) {
 	gatewayPod := goc.gw.Spec.DeploySpec.DeepCopy()
 	gatewayPod.ObjectMeta.OwnerReferences = []metav1.OwnerReference{
 		*metav1.NewControllerRef(goc.gw, v1alpha1.SchemaGroupVersionKind),
@@ -238,11 +291,7 @@ func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// we can now create the gateway pod.
-	// depending on user configuration gateway will be exposed outside the cluster or intra-cluster.
-	pod, err := goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(gatewayPod)
-	return pod, err
+	return gatewayPod, nil
 }
 
 // setGatewayLabels sets labels on a given resource for the gateway
@@ -253,6 +302,15 @@ func (goc *gwOperationCtx) setGatewayLabels(meta *metav1.ObjectMeta) error {
 	meta.Labels[common.LabelGatewayName] = goc.gw.Name
 	meta.Labels[common.LabelKeyGatewayControllerInstanceID] = goc.controller.Config.InstanceID
 	return nil
+}
+
+// getGatewayResourceHash returns the resource hash on a given resource for the gateway
+func (goc *gwOperationCtx) getGatewayResourceHash(obj runtime.Object) (string, error) {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal resource")
+	}
+	return common.Hasher(string(b)), nil
 }
 
 // mark the overall gateway phase
