@@ -36,6 +36,13 @@ const (
 	DefaultBranch = "master"
 )
 
+var (
+	fetchRefSpec = []config.RefSpec{
+		"refs/*:refs/*",
+		"HEAD:refs/heads/HEAD",
+	}
+)
+
 type GitArtifactReader struct {
 	kubeClientset kubernetes.Interface
 	artifact      *v1alpha1.GitArtifact
@@ -108,6 +115,7 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 
 		fetchOptions := &git.FetchOptions{
 			RemoteName: g.artifact.Remote.Name,
+			RefSpecs:   fetchRefSpec,
 		}
 		if auth != nil {
 			fetchOptions.Auth = auth
@@ -123,12 +131,21 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 		return nil, fmt.Errorf("failed to get working tree. err: %+v", err)
 	}
 
+	if err := r.Fetch(&git.FetchOptions{
+		RemoteName: g.getRemote(),
+		RefSpecs:   fetchRefSpec,
+	}); err != nil && err != git.NoErrAlreadyUpToDate {
+		return nil, fmt.Errorf("failed to fetch. err: %v", err)
+	}
+
 	if err := w.Checkout(g.getBranchOrTag()); err != nil {
 		return nil, fmt.Errorf("failed to checkout. err: %+v", err)
 	}
 
 	pullOpts := &git.PullOptions{
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+		ReferenceName:     g.getBranchOrTag().Branch,
+		Force:             true,
 	}
 	if auth != nil {
 		pullOpts.Auth = auth
@@ -144,14 +161,15 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 func (g *GitArtifactReader) getBranchOrTag() *git.CheckoutOptions {
 	opts := &git.CheckoutOptions{}
 
-	opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), DefaultBranch)
+	opts.Branch = plumbing.NewBranchReferenceName(DefaultBranch)
 
 	if g.artifact.Branch != "" {
-		opts.Branch = plumbing.NewRemoteReferenceName(g.getRemote(), g.artifact.Branch)
+		opts.Branch = plumbing.NewBranchReferenceName(g.artifact.Branch)
 	}
 	if g.artifact.Tag != "" {
 		opts.Branch = plumbing.NewTagReferenceName(g.artifact.Tag)
 	}
+
 	return opts
 }
 
