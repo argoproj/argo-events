@@ -124,7 +124,7 @@ func (c *GatewayController) processNextItem() bool {
 			common.LabelGatewayName: gateway.Name,
 			common.LabelEventType:   string(common.EscalationEventType),
 		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s, err: %+v", gateway.Name, err), common.StateChangeEventType,
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name), common.StateChangeEventType,
 			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}

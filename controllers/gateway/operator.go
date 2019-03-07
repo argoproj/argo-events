@@ -96,29 +96,25 @@ func (goc *gwOperationCtx) operate() error {
 	// check the state of a gateway and take actions accordingly
 	switch goc.gw.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		err := Validate(goc.gw)
-		if err != nil {
-			goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
-			return err
-		}
-
-		err = goc.createGatewayResources()
+		err := goc.createGatewayResources()
 		if err != nil {
 			return err
 		}
-
-		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		goc.log.Error().Msg("gateway is in error state. please check escalated K8 event for the error")
+		goc.log.Error().Str("gateway-name", goc.gw.Name).Msg("gateway is in error state. please check escalated K8 event for the error")
+
+		err := goc.updateGatewayResources()
+		if err != nil {
+			return err
+		}
 
 	// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
 		goc.log.Info().Str("gateway-name", goc.gw.Name).Msg("gateway is running")
 
-		err := goc.handleRunningGatewayResources()
+		err := goc.updateGatewayResources()
 		if err != nil {
 			return err
 		}
@@ -130,6 +126,12 @@ func (goc *gwOperationCtx) operate() error {
 }
 
 func (goc *gwOperationCtx) createGatewayResources() error {
+	err := Validate(goc.gw)
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
+		goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
+		return err
+	}
 	// Gateway pod has two components,
 	// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
 	// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
@@ -153,10 +155,19 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 		goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
 	}
 
+	goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	return nil
 }
 
-func (goc *gwOperationCtx) handleRunningGatewayResources() error {
+func (goc *gwOperationCtx) updateGatewayResources() error {
+	err := Validate(goc.gw)
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
+		if goc.gw.Status.Phase != v1alpha1.NodePhaseError {
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
+		}
+		return err
+	}
 	pod, err := goc.getGatewayPod()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get pod for gateway")
@@ -228,6 +239,9 @@ func (goc *gwOperationCtx) handleRunningGatewayResources() error {
 			}
 			goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
 		}
+	}
+	if goc.gw.Status.Phase != v1alpha1.NodePhaseRunning {
+		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	}
 	return nil
 }
