@@ -41,7 +41,7 @@ type gwOperationCtx struct {
 	log zlog.Logger
 	// reference to the gateway-controller-controller
 	controller *GatewayController
-	//
+	// crctx is the context to handle child resource
 	crctx controllerscommon.ChildResourceContext
 }
 
@@ -53,9 +53,10 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 		log:        common.GetLoggerContext(common.LoggerConf()).Str("name", gw.Name).Str("namespace", gw.Namespace).Logger(),
 		controller: controller,
 		crctx: controllerscommon.ChildResourceContext{
+			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
 			LabelOwnerName:                    common.LabelGatewayName,
 			LabelKeyOwnerControllerInstanceID: common.LabelKeyGatewayControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationGatewayResourceHashName,
+			AnnotationOwnerResourceHashName:   common.AnnotationSensorResourceSpecHashName,
 			InstanceID:                        controller.Config.InstanceID,
 		},
 	}
@@ -155,6 +156,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 		goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
 	}
 
+	goc.log.Info().Str("gateway-name", goc.gw.Name).Msg("marking gateway as active")
 	goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	return nil
 }
@@ -181,7 +183,7 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
 			return err
 		}
-		if pod.Annotations == nil || pod.Annotations[common.AnnotationGatewayResourceHashName] != newPod.Annotations[common.AnnotationGatewayResourceHashName] {
+		if pod.Annotations == nil || pod.Annotations[common.AnnotationSensorResourceSpecHashName] != newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod spec changed")
 			err := goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
 			if err != nil {
@@ -218,7 +220,7 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 				return err
 			}
 		}
-		if newSvc == nil || svc.Annotations == nil || svc.Annotations[common.AnnotationGatewayResourceHashName] != newSvc.Annotations[common.AnnotationGatewayResourceHashName] {
+		if newSvc == nil || svc.Annotations == nil || svc.Annotations[common.AnnotationSensorResourceSpecHashName] != newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service spec changed")
 			err := goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
 			if err != nil {

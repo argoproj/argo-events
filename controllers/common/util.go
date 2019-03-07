@@ -2,12 +2,13 @@ package common
 
 import (
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// ChildContext holds necessary information for child resource setup
+// ChildResourceContext holds necessary information for child resource setup
 type ChildResourceContext struct {
+	SchemaGroupVersionKind            schema.GroupVersionKind
 	LabelOwnerName                    string
 	LabelKeyOwnerControllerInstanceID string
 	AnnotationOwnerResourceHashName   string
@@ -18,7 +19,7 @@ type ChildResourceContext struct {
 func (ctx *ChildResourceContext) SetObjectMeta(owner, obj metav1.Object) error {
 	references := obj.GetOwnerReferences()
 	references = append(references,
-		*metav1.NewControllerRef(owner, v1alpha1.SchemaGroupVersionKind),
+		*metav1.NewControllerRef(owner, ctx.SchemaGroupVersionKind),
 	)
 	obj.SetOwnerReferences(references)
 
