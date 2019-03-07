@@ -18,6 +18,7 @@ package store
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -45,8 +46,8 @@ func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1al
 			return nil, err
 		}
 		return &Credentials{
-			accessKey: accessKey,
-			secretKey: secretKey,
+			accessKey: strings.TrimSpace(accessKey),
+			secretKey: strings.TrimSpace(secretKey),
 		}, nil
 	}
 
