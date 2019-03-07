@@ -35,6 +35,8 @@ import (
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
+	ccommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
@@ -181,9 +183,14 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 		labelSelector := labels.NewSelector().Add(c.instanceIDReq())
 		options.LabelSelector = labelSelector.String()
 	}
-	informerFactory := informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Namespace, listOptionsFunc)
+	factory := ccommon.ArgoEventInformerFactory{
+		OwnerKind:             gateway.Kind,
+		OwnerInformer:         c.informer,
+		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
+		Queue: c.queue,
+	}
 
-	c.podInformer = c.newGatewayPodInformer(informerFactory)
+	c.podInformer = factory.NewPodInformer()
 	go c.podInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
@@ -191,7 +198,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 		return
 	}
 
-	c.svcInformer = c.newGatewayServiceInformer(informerFactory)
+	c.svcInformer = factory.NewServiceInformer()
 	go c.svcInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {

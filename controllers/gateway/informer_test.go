@@ -22,7 +22,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/selection"
-	"k8s.io/client-go/informers"
 )
 
 func TestInformer(t *testing.T) {
@@ -40,24 +39,6 @@ func TestInformer(t *testing.T) {
 		controller := getGatewayController()
 		convey.Convey("Get a new gateway informer and make sure its not nil", func() {
 			i := controller.newGatewayInformer()
-			convey.So(i, convey.ShouldNotBeNil)
-		})
-	})
-
-	convey.Convey("Given a gateway controller", t, func() {
-		controller := getGatewayController()
-		informerFactory := informers.NewSharedInformerFactory(controller.kubeClientset, 0)
-		convey.Convey("Get a new gateway pod informer and make sure its not nil", func() {
-			i := controller.newGatewayPodInformer(informerFactory)
-			convey.So(i, convey.ShouldNotBeNil)
-		})
-	})
-
-	convey.Convey("Given a gateway controller", t, func() {
-		controller := getGatewayController()
-		informerFactory := informers.NewSharedInformerFactory(controller.kubeClientset, 0)
-		convey.Convey("Get a new gateway service informer and make sure its not nil", func() {
-			i := controller.newGatewayServiceInformer(informerFactory)
 			convey.So(i, convey.ShouldNotBeNil)
 		})
 	})

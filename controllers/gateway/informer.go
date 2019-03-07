@@ -16,21 +16,14 @@ limitations under the License.
 package gateway
 
 import (
-	"fmt"
-
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/informers"
-	informersv1 "k8s.io/client-go/informers/core/v1"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
-	"k8s.io/apimachinery/pkg/selection"
 )
 
 func (c *GatewayController) instanceIDReq() labels.Requirement {
@@ -83,77 +76,4 @@ func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
 		},
 	)
 	return informer
-}
-
-// newGatewayPodInformer returns a pod informer to watch pods of gateways
-func (c *GatewayController) newGatewayPodInformer(informerFactory informers.SharedInformerFactory) informersv1.PodInformer {
-	podInformer := informerFactory.Core().V1().Pods()
-	podInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			DeleteFunc: func(obj interface{}) {
-				gw, err := c.getOwnerGateway(obj)
-				if err != nil {
-					return
-				}
-				key, err := cache.MetaNamespaceKeyFunc(gw)
-				if err == nil {
-					// queue the gateway key to examine
-					c.queue.Add(key)
-				}
-			},
-		},
-	)
-	return podInformer
-}
-
-// newGatewayServiceInformer returns a service informer to watch services of gateways
-func (c *GatewayController) newGatewayServiceInformer(informerFactory informers.SharedInformerFactory) informersv1.ServiceInformer {
-	svcInformer := informerFactory.Core().V1().Services()
-	svcInformer.Informer().AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			DeleteFunc: func(obj interface{}) {
-				gw, err := c.getOwnerGateway(obj)
-				if err != nil {
-					return
-				}
-				key, err := cache.MetaNamespaceKeyFunc(gw)
-				if err == nil {
-					// queue the gateway key to examine
-					c.queue.Add(key)
-				}
-			},
-		},
-	)
-	return svcInformer
-}
-
-// getOwnerGateway returns gateway of a given resource
-func (c *GatewayController) getOwnerGateway(obj interface{}) (*v1alpha1.Gateway, error) {
-	m, err := meta.Accessor(obj)
-	if err != nil {
-		return nil, err
-	}
-	for _, owner := range m.GetOwnerReferences() {
-		if owner.Kind == gateway.Kind {
-			key := owner.Name
-			if c.Namespace != "" {
-				key = c.Namespace + "/" + key
-			}
-			obj, exists, err := c.informer.GetIndexer().GetByKey(key)
-			if err != nil {
-				return nil, err
-			}
-			if !exists {
-				gatewayClient := c.gatewayClientset.ArgoprojV1alpha1().Gateways(c.Namespace)
-				gw, err := gatewayClient.Get(owner.Name, metav1.GetOptions{})
-				return gw, err
-			}
-			gw, ok := obj.(*v1alpha1.Gateway)
-			if !ok {
-				return nil, fmt.Errorf("failed to cast gateway")
-			}
-			return gw, nil
-		}
-	}
-	return nil, fmt.Errorf("no gateway owner found")
 }

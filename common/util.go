@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
 	"os"
@@ -115,4 +116,13 @@ func Hasher(value string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(value))
 	return fmt.Sprintf("%v", h.Sum32())
+}
+
+// GetObjectHash returns hash of a given object
+func GetObjectHash(obj metav1.Object) (string, error) {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal resource")
+	}
+	return Hasher(string(b)), nil
 }
