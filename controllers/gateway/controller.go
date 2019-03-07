@@ -44,6 +44,8 @@ import (
 const (
 	gatewayResyncPeriod         = 20 * time.Minute
 	gatewayResourceResyncPeriod = 30 * time.Minute
+	rateLimiterBaseDelay        = 5 * time.Second
+	rateLimiterMaxDelay         = 1000 * time.Second
 )
 
 // GatewayControllerConfig contain the configuration settings for the gateway-controller
@@ -80,6 +82,7 @@ type GatewayController struct {
 
 // NewGatewayController creates a new Controller
 func NewGatewayController(rest *rest.Config, configMap, namespace string) *GatewayController {
+	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &GatewayController{
 		ConfigMap:        configMap,
 		Namespace:        namespace,
@@ -87,7 +90,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
-		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		queue:            workqueue.NewRateLimitingQueue(rateLimiter),
 	}
 }
 
