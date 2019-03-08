@@ -42,8 +42,8 @@ func DefaultServiceName(serviceName string) string {
 	return fmt.Sprintf("%s-svc", serviceName)
 }
 
-// DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
-func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
+// DefaultEventSourceName returns a formulated name for a gateway configuration
+func DefaultEventSourceName(gatewayName string, configurationName string) string {
 	return fmt.Sprintf("%s:%s", gatewayName, configurationName)
 }
 

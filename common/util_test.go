@@ -17,7 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"github.com/smartystreets/goconvey/convey"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,9 +27,57 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
+type fakeHttpWriter struct {
+	header  int
+	payload []byte
+}
+
+func (f *fakeHttpWriter) Header() http.Header {
+	return http.Header{}
+}
+
+func (f *fakeHttpWriter) Write(body []byte) (int, error) {
+	f.payload = body
+	return len(body), nil
+}
+
+func (f *fakeHttpWriter) WriteHeader(status int) {
+	f.header = status
+}
+
 func TestDefaultConfigMapName(t *testing.T) {
 	res := DefaultConfigMapName("sensor-controller")
 	assert.Equal(t, "sensor-controller-configmap", res)
+}
+
+func TestDefaultServiceName(t *testing.T) {
+	convey.Convey("Given a service, get the default name", t, func() {
+		convey.So(DefaultServiceName("default"), convey.ShouldEqual, fmt.Sprintf("%s-svc", "default"))
+	})
+}
+
+func TestDefaultNatsQueueName(t *testing.T) {
+	convey.Convey("Given a nats queue, get the default name", t, func() {
+		convey.So(DefaultNatsQueueName("default"), convey.ShouldEqual, "default-queue")
+	})
+}
+
+func TestHTTPMethods(t *testing.T) {
+	convey.Convey("Given a http write", t, func() {
+		convey.Convey("Write a success response", func() {
+			f := &fakeHttpWriter{}
+			SendSuccessResponse(f, "hello")
+			convey.So(string(f.payload), convey.ShouldEqual, "hello")
+			convey.So(f.header, convey.ShouldEqual, http.StatusOK)
+		})
+
+		convey.Convey("Write a failure response", func() {
+			f := &fakeHttpWriter{}
+			SendErrorResponse(f, "failure")
+			convey.So(string(f.payload), convey.ShouldEqual, "failure")
+			convey.So(f.header, convey.ShouldEqual, http.StatusBadRequest)
+		})
+	})
 }
 
 func TestServerResourceForGroupVersionKind(t *testing.T) {

@@ -121,7 +121,7 @@ func getCloudEvent() *apicommon.Event {
 			EventType:          "test",
 			EventTypeVersion:   common.CloudEventsVersion,
 			Source: &apicommon.URI{
-				Host: common.DefaultGatewayConfigurationName("test-gateway", "test"),
+				Host: common.DefaultEventSourceName("test-gateway", "test"),
 			},
 		},
 		Payload: []byte(`{
