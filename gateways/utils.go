@@ -17,8 +17,6 @@ limitations under the License.
 package gateways
 
 import (
-	"fmt"
-	"hash/fnv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/wait"
