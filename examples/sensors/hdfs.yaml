@@ -20,6 +20,7 @@ spec:
   triggers:
     - name: hdfs-workflow-trigger
       resource:
+        namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
