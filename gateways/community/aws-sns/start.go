@@ -125,7 +125,6 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
 
 	awsSession, err := session.NewSession(&aws.Config{
-		Endpoint:    &formattedUrl,
 		Region:      &sc.Region,
 		Credentials: creds,
 		HTTPClient:  &http.Client{},
