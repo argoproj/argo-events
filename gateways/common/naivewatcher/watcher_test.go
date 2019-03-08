@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/argoproj/argo-events/gateways/common/fsevent"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -62,8 +63,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events := readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Create, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Create, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	// Rename a file
@@ -73,8 +74,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Rename, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Rename, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Write a file
@@ -84,8 +85,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Write, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Write, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Chmod a file
@@ -95,8 +96,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Chmod, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Chmod, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Rename & Write & Chmod a file
@@ -114,8 +115,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Write | Rename | Chmod, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Write | fsevent.Rename | fsevent.Chmod, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	// Remove a file
@@ -125,8 +126,8 @@ func TestWatcherAutoCheck(t *testing.T) {
 	}
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Remove, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Remove, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	err = watcher.Stop()
@@ -159,7 +160,7 @@ func TestWatcherManualCheck(t *testing.T) {
 	}
 
 	events := checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{}, events)
+	assert.Equal(t, []fsevent.Event{}, events)
 
 	// Create a file
 	_, err = os.Create(filepath.Join(tmpdir, "foo"))
@@ -167,8 +168,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Create, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Create, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	// Rename a file
@@ -177,8 +178,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Rename, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Rename, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Write a file
@@ -187,8 +188,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Write, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Write, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Chmod a file
@@ -197,8 +198,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Chmod, Name: filepath.Join(tmpdir, "bar")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Chmod, Name: filepath.Join(tmpdir, "bar")},
 	}, events)
 
 	// Rename & Write & Chmod a file
@@ -215,8 +216,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Write | Rename | Chmod, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Write | fsevent.Rename | fsevent.Chmod, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	// Remove a file
@@ -225,8 +226,8 @@ func TestWatcherManualCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	events = checkAndReadEvents(t, watcher)
-	assert.Equal(t, []Event{
-		{Op: Remove, Name: filepath.Join(tmpdir, "foo")},
+	assert.Equal(t, []fsevent.Event{
+		{Op: fsevent.Remove, Name: filepath.Join(tmpdir, "foo")},
 	}, events)
 
 	err = watcher.Remove(tmpdir)
@@ -235,7 +236,7 @@ func TestWatcherManualCheck(t *testing.T) {
 	}
 }
 
-func checkAndReadEvents(t *testing.T, watcher *Watcher) []Event {
+func checkAndReadEvents(t *testing.T, watcher *Watcher) []fsevent.Event {
 	err := watcher.Check()
 	if err != nil {
 		t.Fatal(err)
@@ -243,8 +244,8 @@ func checkAndReadEvents(t *testing.T, watcher *Watcher) []Event {
 	return readEvents(t, watcher)
 }
 
-func readEvents(t *testing.T, watcher *Watcher) []Event {
-	events := []Event{}
+func readEvents(t *testing.T, watcher *Watcher) []fsevent.Event {
+	events := []fsevent.Event{}
 L:
 	for {
 		select {
