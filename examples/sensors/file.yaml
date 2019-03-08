@@ -24,6 +24,11 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        parameters:
+          - src:
+              event: "file-gateway:bindir"
+              path: name
+            dest: spec.templates.0.container.args.1
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -36,7 +41,7 @@ spec:
                 -
                   container:
                     args:
-                      - "hello world"
+                      - "hello "
                     command:
                       - cowsay
                     image: "docker/whalesay:latest"
