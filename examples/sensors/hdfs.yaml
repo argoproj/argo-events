@@ -23,6 +23,11 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        parameters:
+          - src:
+              event: "hdfs-gateway:tmpdir"
+              path: name
+            dest: spec.templates.0.container.args.1
         source:
           inline: |
               apiVersion: argoproj.io/v1alpha1
@@ -35,7 +40,7 @@ spec:
                   - name: whalesay
                     container:
                       args:
-                        - "hello world"
+                        - "hello "
                       command:
                         - cowsay
                       image: "docker/whalesay:latest"
