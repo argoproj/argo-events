@@ -21,7 +21,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/argoproj/argo-events/gateways/common/naivewatcher"
+	"github.com/argoproj/argo-events/gateways/common/fileevent"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -40,7 +40,7 @@ func validateGatewayConfig(config interface{}) error {
 	if gwc.Type == "" {
 		return errors.New("type is required")
 	}
-	op := naivewatcher.NewOp(gwc.Type)
+	op := fileevent.NewOp(gwc.Type)
 	if op == 0 {
 		return errors.New("type is invalid")
 	}

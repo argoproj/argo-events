@@ -1,4 +1,4 @@
-package naivewatcher
+package fileevent
 
 import (
 	"bytes"
@@ -8,8 +8,10 @@ import (
 
 // Event represents a single file system notification.
 type Event struct {
-	Name string // Relative path to the file or directory.
-	Op   Op     // File operation that triggered the event.
+	// Relative path to the file or directory.
+	Name string `json:"name"`
+	// File operation that triggered the event.
+	Op Op `json:"op"`
 }
 
 // Op describes a set of file operations.

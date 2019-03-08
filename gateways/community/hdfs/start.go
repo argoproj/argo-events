@@ -1,6 +1,7 @@
 package hdfs
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/common/fileevent"
 	"github.com/argoproj/argo-events/gateways/common/naivewatcher"
 	"github.com/colinmarc/hdfs"
 )
@@ -98,7 +100,7 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 		return
 	}
 
-	op := naivewatcher.NewOp(config.Type)
+	op := fileevent.NewOp(config.Type)
 	var pathRegexp *regexp.Regexp
 	if config.PathRegexp != "" {
 		pathRegexp, err = regexp.Compile(config.PathRegexp)
@@ -126,7 +128,12 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 			}
 			if matched && (op&event.Op != 0) {
 				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("HDFS event")
-				dataCh <- []byte(fmt.Sprintf("%v", event))
+				payload, err := json.Marshal(event)
+				if err != nil {
+					errorCh <- err
+					return
+				}
+				dataCh <- payload
 			}
 		case err := <-watcher.Errors:
 			errorCh <- err
