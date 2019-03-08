@@ -23,11 +23,19 @@ import (
 	"github.com/argoproj/argo-events/common"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 )
 
 func getGatewayController() *GatewayController {
+	clientset := fake.NewSimpleClientset()
+	factory := informers.NewSharedInformerFactory(clientset, 0)
+	done := make(chan struct{})
+	podInformer := factory.Core().V1().Pods()
+	go podInformer.Informer().Run(done)
+	svcInformer := factory.Core().V1().Services()
+	go svcInformer.Informer().Run(done)
 	return &GatewayController{
 		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
@@ -35,8 +43,10 @@ func getGatewayController() *GatewayController {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
-		kubeClientset:    fake.NewSimpleClientset(),
+		kubeClientset:    clientset,
 		gatewayClientset: fakegateway.NewSimpleClientset(),
+		podInformer:      podInformer,
+		svcInformer:      svcInformer,
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 	}
 }

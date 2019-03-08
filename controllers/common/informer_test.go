@@ -21,16 +21,18 @@ func getInformerFactory() *ArgoEventInformerFactory {
 	}
 }
 
-func TestInformer(t *testing.T) {
-	convey.Convey("Given a gateway controller", t, func() {
+func TestNewPodInformer(t *testing.T) {
+	convey.Convey("Given an informer factory", t, func() {
 		factory := getInformerFactory()
 		convey.Convey("Get a new gateway pod informer and make sure its not nil", func() {
 			i := factory.NewPodInformer()
 			convey.So(i, convey.ShouldNotBeNil)
 		})
 	})
+}
 
-	convey.Convey("Given a gateway controller", t, func() {
+func TestNewServiceInformer(t *testing.T) {
+	convey.Convey("Given an informer factory", t, func() {
 		factory := getInformerFactory()
 		convey.Convey("Get a new gateway service informer and make sure its not nil", func() {
 			i := factory.NewServiceInformer()

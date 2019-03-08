@@ -339,7 +339,10 @@ func (soc *sOperationCtx) getServiceSpec() *corev1.ServiceSpec {
 				},
 			},
 			Type:     corev1.ServiceTypeClusterIP,
-			Selector: soc.s.Labels,
+			Selector: map[string]string{
+				common.LabelSensorName:                    soc.s.Name,
+				common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
+			},
 		}
 	}
 	return serviceSpec

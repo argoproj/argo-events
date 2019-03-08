@@ -96,7 +96,6 @@ func (soc *sOperationCtx) newSensorPod() (*corev1.Pod, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      soc.s.Name,
 			Namespace: soc.s.Namespace,
-			Labels:    soc.s.Labels,
 		},
 		Spec: *podSpec,
 	}

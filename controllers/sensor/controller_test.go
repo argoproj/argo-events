@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 )
@@ -33,6 +34,13 @@ var (
 )
 
 func getSensorController() *SensorController {
+	clientset := fake.NewSimpleClientset()
+	factory := informers.NewSharedInformerFactory(clientset, 0)
+	done := make(chan struct{})
+	podInformer := factory.Core().V1().Pods()
+	go podInformer.Informer().Run(done)
+	svcInformer := factory.Core().V1().Services()
+	go svcInformer.Informer().Run(done)
 	return &SensorController{
 		ConfigMap: SensorControllerConfigmap,
 		Namespace: common.DefaultControllerNamespace,
@@ -40,8 +48,10 @@ func getSensorController() *SensorController {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: SensorControllerInstanceID,
 		},
-		kubeClientset:   fake.NewSimpleClientset(),
+		kubeClientset:   clientset,
 		sensorClientset: fakesensor.NewSimpleClientset(),
+		podInformer:     podInformer,
+		svcInformer:     svcInformer,
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 	}
 }
