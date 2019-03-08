@@ -45,5 +45,5 @@ func validateSNSConfig(config interface{}) error {
 	if sc.SecretKey == nil {
 		return fmt.Errorf("must specify secret key")
 	}
-	return gwcommon.ValidateWebhook(sc.Endpoint, sc.Port)
+	return gwcommon.ValidateWebhook(sc.Hook)
 }

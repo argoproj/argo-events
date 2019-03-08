@@ -69,8 +69,10 @@ func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 
 	rc.Configs[LabelGitlabClient] = client
 
+	formattedUrl := gwcommon.GenerateFormattedURL(gl.Hook)
+
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &gl.URL,
+		URL:   &formattedUrl,
 		Token: &c.token,
 		EnableSSLVerification: &gl.EnableSSLVerification,
 	}
@@ -149,10 +151,7 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	gl := config.(*glab)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Endpoint: gwcommon.FormatWebhookEndpoint(gl.Endpoint),
-			Port:     gl.Port,
-		},
+		Webhook: gl.Hook,
 		Configs: map[string]interface{}{
 			LabelGitlabConfig: gl,
 		},

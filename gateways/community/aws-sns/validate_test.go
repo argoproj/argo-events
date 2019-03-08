@@ -27,8 +27,10 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-endpoint: "/"
-port: "8080"
+hook:
+ endpoint: "/test"
+ port: "8080"
+ url: "myurl/test"
 topicArn: "test-arn"
 region: "us-east-1"
 accessKey:

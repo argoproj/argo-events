@@ -27,6 +27,16 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/gitlab-gateway"]
       serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: gitlab-gateway-svc
+    spec:
+      selector:
+        gateway-name: "gitlab-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
   configMap: "gitlab-gateway-configmap"
   type: "gitlab"
   eventVersion: "1.0"

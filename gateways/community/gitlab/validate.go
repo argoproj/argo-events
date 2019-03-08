@@ -37,14 +37,11 @@ func validateGitlab(config interface{}) error {
 	if g.Event == "" {
 		return fmt.Errorf("event type can't be empty")
 	}
-	if g.URL == "" {
-		return fmt.Errorf("url can't be empty")
-	}
 	if g.GitlabBaseURL == "" {
 		return fmt.Errorf("gitlab base url can't be empty")
 	}
 	if g.AccessToken == nil {
 		return fmt.Errorf("access token can't be nil")
 	}
-	return gwcommon.ValidateWebhook(g.Endpoint, g.Port)
+	return gwcommon.ValidateWebhook(g.Hook)
 }

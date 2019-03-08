@@ -27,6 +27,16 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/github-gateway"]
       serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: github-gateway-svc
+    spec:
+      selector:
+        gateway-name: "github-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
   configMap: "github-gateway-configmap"
   type: "github"
   eventVersion: "1.0"
