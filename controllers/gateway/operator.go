@@ -170,6 +170,10 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 		}
 		return err
 	}
+
+	deleted := false
+	created := false
+
 	pod, err := goc.getGatewayPod()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get pod for gateway")
@@ -192,6 +196,7 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 				return err
 			}
 			goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod is deleted")
+			deleted = true
 		}
 	} else {
 		goc.log.Info().Str("gateway-name", goc.gw.Name).Msg("gateway pod has been deleted")
@@ -202,6 +207,7 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 			return err
 		}
 		goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod is created")
+		created = true
 	}
 
 	svc, err := goc.getGatewayService()
@@ -229,6 +235,7 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 				return err
 			}
 			goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is deleted")
+			deleted = true
 		}
 	} else {
 		if goc.gw.Spec.ServiceSpec != nil {
@@ -240,9 +247,11 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 				return err
 			}
 			goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
+			created = true
 		}
 	}
-	if goc.gw.Status.Phase != v1alpha1.NodePhaseRunning {
+
+	if created && !deleted && goc.gw.Status.Phase != v1alpha1.NodePhaseRunning {
 		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	}
 	return nil

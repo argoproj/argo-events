@@ -166,6 +166,10 @@ func (soc *sOperationCtx) updateSensorResources() error {
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return nil
 	}
+
+	created := false
+	deleted := false
+
 	pod, err := soc.getSensorPod()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get pod for sensor")
@@ -188,6 +192,7 @@ func (soc *sOperationCtx) updateSensorResources() error {
 				return err
 			}
 			soc.log.Info().Str("pod-name", pod.Name).Msg("sensor pod is deleted")
+			deleted = true
 		}
 	} else {
 		soc.log.Info().Str("sensor-name", soc.s.Name).Msg("sensor pod has been deleted")
@@ -200,6 +205,7 @@ func (soc *sOperationCtx) updateSensorResources() error {
 		}
 		soc.markAllNodePhases()
 		soc.log.Info().Str("pod-name", pod.Name).Msg("sensor pod is created")
+		created = true
 	}
 
 	svc, err := soc.getSensorService()
@@ -227,6 +233,7 @@ func (soc *sOperationCtx) updateSensorResources() error {
 				return err
 			}
 			soc.log.Info().Str("svc-name", svc.Name).Msg("sensor service is deleted")
+			deleted = true
 		}
 	} else {
 		if soc.getServiceSpec() != nil {
@@ -238,9 +245,11 @@ func (soc *sOperationCtx) updateSensorResources() error {
 				return err
 			}
 			soc.log.Info().Str("svc-name", svc.Name).Msg("sensor service is created")
+			created = true
 		}
 	}
-	if soc.s.Status.Phase != v1alpha1.NodePhaseActive {
+
+	if created && !deleted && soc.s.Status.Phase != v1alpha1.NodePhaseActive {
 		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
 	}
 	return nil
