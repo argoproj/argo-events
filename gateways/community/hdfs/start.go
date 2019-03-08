@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/common/fileevent"
+	"github.com/argoproj/argo-events/gateways/common/fsevent"
 	"github.com/argoproj/argo-events/gateways/common/naivewatcher"
 	"github.com/colinmarc/hdfs"
 )
@@ -100,7 +100,7 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 		return
 	}
 
-	op := fileevent.NewOp(config.Type)
+	op := fsevent.NewOp(config.Type)
 	var pathRegexp *regexp.Regexp
 	if config.PathRegexp != "" {
 		pathRegexp, err = regexp.Compile(config.PathRegexp)

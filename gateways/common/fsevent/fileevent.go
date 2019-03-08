@@ -1,4 +1,4 @@
-package fileevent
+package fsevent
 
 import (
 	"bytes"

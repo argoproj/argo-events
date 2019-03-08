@@ -23,7 +23,7 @@ import (
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/common/fileevent"
+	"github.com/argoproj/argo-events/gateways/common/fsevent"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -92,7 +92,7 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 			if matched && fwc.Type == event.Op.String() {
 				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
 				// Assume fsnotify event has the same Op spec of our file event
-				fileEvent := fileevent.Event{Name: event.Name, Op: fileevent.NewOp(event.Op.String())}
+				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String())}
 				payload, err := json.Marshal(fileEvent)
 				if err != nil {
 					errorCh <- err
