@@ -2,15 +2,41 @@ package gateway
 
 import (
 	"github.com/argoproj/argo-events/common"
+	controllerscommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
+type gwResourceCtx struct {
+	// gw is the gateway-controller object
+	gw *v1alpha1.Gateway
+	// reference to the gateway-controller-controller
+	controller *GatewayController
+
+	controllerscommon.ChildResourceContext
+}
+
+// NewGatewayResourceContext returns new gwResourceCtx
+func NewGatewayResourceContext(gw *v1alpha1.Gateway, controller *GatewayController) gwResourceCtx {
+	return gwResourceCtx{
+		gw:         gw,
+		controller: controller,
+		ChildResourceContext: controllerscommon.ChildResourceContext{
+			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
+			LabelOwnerName:                    common.LabelGatewayName,
+			LabelKeyOwnerControllerInstanceID: common.LabelKeyGatewayControllerInstanceID,
+			AnnotationOwnerResourceHashName:   common.AnnotationSensorResourceSpecHashName,
+			InstanceID:                        controller.Config.InstanceID,
+		},
+	}
+}
+
 // gatewayResourceLabelSelector returns label selector of the gateway of the context
-func (goc *gwOperationCtx) gatewayResourceLabelSelector() (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelGatewayName, selection.Equals, []string{goc.gw.Name})
+func (grc *gwResourceCtx) gatewayResourceLabelSelector() (labels.Selector, error) {
+	req, err := labels.NewRequirement(common.LabelGatewayName, selection.Equals, []string{grc.gw.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -18,22 +44,22 @@ func (goc *gwOperationCtx) gatewayResourceLabelSelector() (labels.Selector, erro
 }
 
 // createGatewayService creates a given service
-func (goc *gwOperationCtx) createGatewayService(svc *corev1.Service) (*corev1.Service, error) {
-	return goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(svc)
+func (grc *gwResourceCtx) createGatewayService(svc *corev1.Service) (*corev1.Service, error) {
+	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Create(svc)
 }
 
 // deleteGatewayService deletes a given service
-func (goc *gwOperationCtx) deleteGatewayService(svc *corev1.Service) error {
-	return goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
+func (grc *gwResourceCtx) deleteGatewayService(svc *corev1.Service) error {
+	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
 }
 
 // getGatewayService returns the service of gateway
-func (goc *gwOperationCtx) getGatewayService() (*corev1.Service, error) {
-	selector, err := goc.gatewayResourceLabelSelector()
+func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
+	selector, err := grc.gatewayResourceLabelSelector()
 	if err != nil {
 		return nil, err
 	}
-	svcs, err := goc.controller.svcInformer.Lister().Services(goc.gw.Namespace).List(selector)
+	svcs, err := grc.controller.svcInformer.Lister().Services(grc.gw.Namespace).List(selector)
 	if err != nil {
 		return nil, err
 	}
@@ -44,19 +70,19 @@ func (goc *gwOperationCtx) getGatewayService() (*corev1.Service, error) {
 }
 
 // newGatewayService returns a new service that exposes gateway.
-func (goc *gwOperationCtx) newGatewayService() (*corev1.Service, error) {
-	service := goc.gw.Spec.ServiceSpec.DeepCopy()
-	err := goc.crctx.SetObjectMeta(goc.gw, service)
+func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
+	service := grc.gw.Spec.ServiceSpec.DeepCopy()
+	err := grc.SetObjectMeta(grc.gw, service)
 	return service, err
 }
 
 // getGatewayPod returns the pod of gateway
-func (goc *gwOperationCtx) getGatewayPod() (*corev1.Pod, error) {
-	selector, err := goc.gatewayResourceLabelSelector()
+func (grc *gwResourceCtx) getGatewayPod() (*corev1.Pod, error) {
+	selector, err := grc.gatewayResourceLabelSelector()
 	if err != nil {
 		return nil, err
 	}
-	pods, err := goc.controller.podInformer.Lister().Pods(goc.gw.Namespace).List(selector)
+	pods, err := grc.controller.podInformer.Lister().Pods(grc.gw.Namespace).List(selector)
 	if err != nil {
 		return nil, err
 	}
@@ -67,42 +93,42 @@ func (goc *gwOperationCtx) getGatewayPod() (*corev1.Pod, error) {
 }
 
 // createGatewayPod creates a given pod
-func (goc *gwOperationCtx) createGatewayPod(pod *corev1.Pod) (*corev1.Pod, error) {
-	return goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(pod)
+func (grc *gwResourceCtx) createGatewayPod(pod *corev1.Pod) (*corev1.Pod, error) {
+	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Create(pod)
 }
 
 // deleteGatewayPod deletes a given pod
-func (goc *gwOperationCtx) deleteGatewayPod(pod *corev1.Pod) error {
-	return goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
+func (grc *gwResourceCtx) deleteGatewayPod(pod *corev1.Pod) error {
+	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
 }
 
 // newGatewayPod returns a new pod of gateway
-func (goc *gwOperationCtx) newGatewayPod() (*corev1.Pod, error) {
-	pod := goc.gw.Spec.DeploySpec.DeepCopy()
-	pod.Spec.Containers = *goc.getContainersForGatewayPod()
-	err := goc.crctx.SetObjectMeta(goc.gw, pod)
+func (grc *gwResourceCtx) newGatewayPod() (*corev1.Pod, error) {
+	pod := grc.gw.Spec.DeploySpec.DeepCopy()
+	pod.Spec.Containers = *grc.getContainersForGatewayPod()
+	err := grc.SetObjectMeta(grc.gw, pod)
 	return pod, err
 }
 
 // containers required for gateway deployment
-func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
+func (grc *gwResourceCtx) getContainersForGatewayPod() *[]corev1.Container {
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarGatewayNamespace,
-			Value: goc.gw.Namespace,
+			Value: grc.gw.Namespace,
 		},
 		{
 			Name:  common.EnvVarGatewayEventSourceConfigMap,
-			Value: goc.gw.Spec.ConfigMap,
+			Value: grc.gw.Spec.ConfigMap,
 		},
 		{
 			Name:  common.EnvVarGatewayName,
-			Value: goc.gw.Name,
+			Value: grc.gw.Name,
 		},
 		{
 			Name:  common.EnvVarGatewayControllerInstanceID,
-			Value: goc.controller.Config.InstanceID,
+			Value: grc.controller.Config.InstanceID,
 		},
 		{
 			Name:  common.EnvVarGatewayControllerName,
@@ -110,11 +136,11 @@ func (goc *gwOperationCtx) getContainersForGatewayPod() *[]corev1.Container {
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,
-			Value: goc.gw.Spec.ProcessorPort,
+			Value: grc.gw.Spec.ProcessorPort,
 		},
 	}
-	containers := make([]corev1.Container, len(goc.gw.Spec.DeploySpec.Spec.Containers))
-	for i, container := range goc.gw.Spec.DeploySpec.Spec.Containers {
+	containers := make([]corev1.Container, len(grc.gw.Spec.DeploySpec.Spec.Containers))
+	for i, container := range grc.gw.Spec.DeploySpec.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
 		containers[i] = container
 	}

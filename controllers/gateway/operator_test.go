@@ -185,8 +185,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
-								goc.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
 
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
@@ -274,8 +274,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
-								goc.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
 
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
