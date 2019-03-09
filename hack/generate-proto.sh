@@ -13,7 +13,6 @@ PROJECT_ROOT=$(cd $(dirname ${BASH_SOURCE})/..; pwd)
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${PROJECT_ROOT}; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
 PATH="${PROJECT_ROOT}/dist:${PATH}"
 
-
 # protbuf tooling required to build .proto files from go annotations from k8s-like api types
 go build -i -o dist/go-to-protobuf ./vendor/k8s.io/code-generator/cmd/go-to-protobuf
 go build -i -o dist/protoc-gen-gogo ./vendor/k8s.io/code-generator/cmd/go-to-protobuf/protoc-gen-gogo
@@ -35,7 +34,7 @@ APIMACHINERY_PKGS=(
     k8s.io/apimachinery/pkg/apis/meta/v1
     k8s.io/api/core/v1
 )
-$(go run /Users/vpage/go/src/github.com/argoproj/argo-events/vendor/k8s.io/code-generator/cmd/go-to-protobuf/main.go \
+$(go run ${PROJECT_ROOT}/vendor/k8s.io/code-generator/cmd/go-to-protobuf/main.go \
     --logtostderr \
     --go-header-file=${PROJECT_ROOT}/hack/custom-boilerplate.go.txt \
     --packages=$(IFS=, ; echo "${PACKAGES[*]}") \

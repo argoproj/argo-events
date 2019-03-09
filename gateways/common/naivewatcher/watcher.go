@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/common/fsevent"
 )
 
 const (
@@ -37,7 +39,7 @@ type Watcher struct {
 	// internal use
 	mCheck       *Mutex
 	mutexRunning *Mutex
-	Events       chan Event
+	Events       chan fsevent.Event
 	Errors       chan error
 	stop         chan struct{}
 	stopResp     chan struct{}
@@ -51,7 +53,7 @@ func NewWatcher(watchable Watchable) (*Watcher, error) {
 		watchList:    map[string]map[interface{}]*filePathAndInfo{},
 		mCheck:       new(Mutex),
 		mutexRunning: new(Mutex),
-		Events:       make(chan Event, eventsQueueSize),
+		Events:       make(chan fsevent.Event, eventsQueueSize),
 		Errors:       make(chan error, errorsQueueSize),
 		stop:         make(chan struct{}),
 		stopResp:     make(chan struct{}),
@@ -166,22 +168,22 @@ func (w *Watcher) Check() error {
 			fileID := w.watchable.GetFileID(info)
 			lastPathAndInfo := walkedFiles[fileID]
 			if lastPathAndInfo == nil {
-				w.Events <- Event{Op: Create, Name: path}
+				w.Events <- fsevent.Event{Op: fsevent.Create, Name: path}
 				walkedFiles[fileID] = &filePathAndInfo{path, info, true}
 			} else {
 				lastInfo := lastPathAndInfo.info
-				var op Op
+				var op fsevent.Op
 				if path != lastPathAndInfo.path {
-					op |= Rename
+					op |= fsevent.Rename
 				}
 				if !info.ModTime().Equal(lastInfo.ModTime()) || info.Size() != lastInfo.Size() {
-					op |= Write
+					op |= fsevent.Write
 				}
 				if info.Mode() != lastInfo.Mode() {
-					op |= Chmod
+					op |= fsevent.Chmod
 				}
 				if op != 0 {
-					w.Events <- Event{Op: op, Name: path}
+					w.Events <- fsevent.Event{Op: op, Name: path}
 				}
 				walkedFiles[fileID].path = path
 				walkedFiles[fileID].info = info
@@ -197,7 +199,7 @@ func (w *Watcher) Check() error {
 
 		for fileID, pathAndInfo := range walkedFiles {
 			if !pathAndInfo.found {
-				w.Events <- Event{Op: Remove, Name: pathAndInfo.path}
+				w.Events <- fsevent.Event{Op: fsevent.Remove, Name: pathAndInfo.path}
 				delete(walkedFiles, fileID)
 			}
 		}
