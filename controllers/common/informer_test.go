@@ -1,42 +1,179 @@
 package common
 
 import (
+	"fmt"
+	"math/rand"
 	"testing"
 
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-func getInformerFactory() *ArgoEventInformerFactory {
-	clientset := fake.NewSimpleClientset()
+func getInformerFactory(clientset kubernetes.Interface, queue workqueue.RateLimitingInterface) *ArgoEventInformerFactory {
 	informerFactory := informers.NewSharedInformerFactory(clientset, 0)
 	ownerInformer := informerFactory.Core().V1().Pods().Informer()
+	done := make(chan struct{})
+	go ownerInformer.Run(done)
 	return &ArgoEventInformerFactory{
-		OwnerKind:             "foo",
+		OwnerKind:             "Pod",
 		OwnerInformer:         ownerInformer,
 		SharedInformerFactory: informerFactory,
-		Queue: workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		Queue: queue,
+	}
+}
+
+func getCommonPodSpec() corev1.PodSpec {
+	return corev1.PodSpec{
+		Containers: []corev1.Container{
+			{
+				Name:  "whalesay",
+				Image: "docker/whalesay:latest",
+			},
+		},
+	}
+}
+
+func getPod(owner *corev1.Pod) *corev1.Pod {
+	var ownerReferneces = []metav1.OwnerReference{}
+	if owner != nil {
+		ownerReferneces = append(ownerReferneces, *metav1.NewControllerRef(owner, owner.GroupVersionKind()))
+	}
+	return &corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Pod",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            fmt.Sprintf("pod-%d", rand.Uint32()),
+			OwnerReferences: ownerReferneces,
+		},
+		Spec: getCommonPodSpec(),
+	}
+}
+
+func getService(owner *corev1.Pod) *corev1.Service {
+	var ownerReferneces = []metav1.OwnerReference{}
+	if owner != nil {
+		ownerReferneces = append(ownerReferneces, *metav1.NewControllerRef(owner, owner.GroupVersionKind()))
+	}
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "Service",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            fmt.Sprintf("svc-%d", rand.Uint32()),
+			OwnerReferences: ownerReferneces,
+		},
+		Spec: corev1.ServiceSpec{},
 	}
 }
 
 func TestNewPodInformer(t *testing.T) {
+	done := make(chan struct{})
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	defer queue.ShutDown()
+	namespace := "namespace"
+	clientset := fake.NewSimpleClientset()
+	factory := getInformerFactory(clientset, queue)
 	convey.Convey("Given an informer factory", t, func() {
-		factory := getInformerFactory()
 		convey.Convey("Get a new gateway pod informer and make sure its not nil", func() {
-			i := factory.NewPodInformer()
-			convey.So(i, convey.ShouldNotBeNil)
+			podInformer := factory.NewPodInformer()
+			convey.So(podInformer, convey.ShouldNotBeNil)
+
+			convey.Convey("Handle event", func() {
+				go podInformer.Informer().Run(done)
+				ownerPod := getPod(nil)
+				ownerPod, err := clientset.CoreV1().Pods(namespace).Create(ownerPod)
+				convey.So(err, convey.ShouldBeNil)
+				cache.WaitForCacheSync(done, factory.OwnerInformer.HasSynced)
+
+				convey.Convey("Not enqueue owner key on creation", func() {
+					pod := getPod(ownerPod)
+					pod, err := clientset.CoreV1().Pods(namespace).Create(pod)
+					convey.So(err, convey.ShouldBeNil)
+					cache.WaitForCacheSync(done, podInformer.Informer().HasSynced)
+
+					convey.So(queue.Len(), convey.ShouldEqual, 0)
+
+					convey.Convey("Not enqueue owner key on update", func() {
+						pod.Labels = map[string]string{"foo": "bar"}
+						_, err = clientset.CoreV1().Pods(namespace).Update(pod)
+						convey.So(err, convey.ShouldBeNil)
+						cache.WaitForCacheSync(done, podInformer.Informer().HasSynced)
+
+						convey.So(queue.Len(), convey.ShouldEqual, 0)
+					})
+
+					convey.Convey("Enqueue owner key on deletion", func() {
+						err := clientset.CoreV1().Pods(namespace).Delete(pod.Name, &metav1.DeleteOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						cache.WaitForCacheSync(done, podInformer.Informer().HasSynced)
+
+						convey.So(queue.Len(), convey.ShouldEqual, 1)
+						key, _ := queue.Get()
+						queue.Done(key)
+						convey.So(key, convey.ShouldEqual, fmt.Sprintf("%s/%s", namespace, ownerPod.Name))
+					})
+				})
+			})
 		})
 	})
 }
 
 func TestNewServiceInformer(t *testing.T) {
+	done := make(chan struct{})
+	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	defer queue.ShutDown()
+	namespace := "namespace"
+	clientset := fake.NewSimpleClientset()
+	factory := getInformerFactory(clientset, queue)
 	convey.Convey("Given an informer factory", t, func() {
-		factory := getInformerFactory()
 		convey.Convey("Get a new gateway service informer and make sure its not nil", func() {
-			i := factory.NewServiceInformer()
-			convey.So(i, convey.ShouldNotBeNil)
+			svcInformer := factory.NewServiceInformer()
+			convey.So(svcInformer, convey.ShouldNotBeNil)
+
+			convey.Convey("Handle event", func() {
+				go svcInformer.Informer().Run(done)
+				ownerPod := getPod(nil)
+				ownerPod, err := clientset.CoreV1().Pods(namespace).Create(ownerPod)
+				convey.So(err, convey.ShouldBeNil)
+				cache.WaitForCacheSync(done, factory.OwnerInformer.HasSynced)
+
+				convey.Convey("Not enqueue owner key on creation", func() {
+					service := getService(ownerPod)
+					service, err := clientset.CoreV1().Services(namespace).Create(service)
+					convey.So(err, convey.ShouldBeNil)
+					cache.WaitForCacheSync(done, svcInformer.Informer().HasSynced)
+					convey.So(queue.Len(), convey.ShouldEqual, 0)
+
+					convey.Convey("Not enqueue owner key on update", func() {
+						service.Labels = map[string]string{"foo": "bar"}
+						service, err = clientset.CoreV1().Services(namespace).Update(service)
+						convey.So(err, convey.ShouldBeNil)
+						cache.WaitForCacheSync(done, svcInformer.Informer().HasSynced)
+						convey.So(queue.Len(), convey.ShouldEqual, 0)
+					})
+
+					convey.Convey("Enqueue owner key on deletion", func() {
+						err := clientset.CoreV1().Services(namespace).Delete(service.Name, &metav1.DeleteOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						cache.WaitForCacheSync(done, svcInformer.Informer().HasSynced)
+
+						convey.So(queue.Len(), convey.ShouldEqual, 1)
+						key, _ := queue.Get()
+						queue.Done(key)
+						convey.So(key, convey.ShouldEqual, fmt.Sprintf("%s/%s", namespace, ownerPod.Name))
+					})
+				})
+			})
 		})
 	})
 }
