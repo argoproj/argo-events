@@ -23,11 +23,6 @@ import (
 	"google.golang.org/api/option"
 )
 
-const (
-	// LabelGcpPubSubConfig is the label name of the GCP PubSub Config
-	LabelGcpPubSubConfig = "pubSubConfig"
-)
-
 // StartEventSource starts the GCP PubSub Gateway
 func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)

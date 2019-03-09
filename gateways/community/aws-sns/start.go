@@ -83,6 +83,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		})
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to send confirmation response to amazon")
+			common.SendErrorResponse(writer, "failed to confirm subscription")
 			return
 		}
 		rc.Configs[LabelSubscriptionArn] = out.SubscriptionArn

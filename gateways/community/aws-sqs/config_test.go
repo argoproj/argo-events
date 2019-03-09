@@ -14,19 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws_sns
+package aws_sqs
 
 import (
-	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var es = `
-hook:
- endpoint: "/test"
- port: "8080"
- url: "myurl/test"
-topicArn: "test-arn"
 region: "us-east-1"
 accessKey:
     key: accesskey
@@ -34,14 +30,16 @@ accessKey:
 secretKey:
     key: secretkey
     name: sns
+queue: "test-queue"
+waitTimeSeconds: 10
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a aws-sns event source, parse it", t, func() {
+	convey.Convey("Given a aws-sqs event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*snsConfig)
+		_, ok := ps.(*sqs)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

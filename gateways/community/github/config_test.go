@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2018 KompiTech GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws_sns
+package github
 
 import (
 	"github.com/smartystreets/goconvey/convey"
@@ -23,25 +23,24 @@ import (
 
 var es = `
 hook:
- endpoint: "/test"
- port: "8080"
- url: "myurl/test"
-topicArn: "test-arn"
-region: "us-east-1"
-accessKey:
-    key: accesskey
-    name: sns
-secretKey:
-    key: secretkey
-    name: sns
+ endpoint: "/push"
+ port: "12000"
+ url: "http://webhook-gateway-svc"
+owner: "asd"
+repository: "dsa"
+events:
+- PushEvents
+apiToken:
+  key: accesskey
+  name: githab-access
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a aws-sns event source, parse it", t, func() {
+	convey.Convey("Given a github event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*snsConfig)
+		_, ok := ps.(*githubConfig)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

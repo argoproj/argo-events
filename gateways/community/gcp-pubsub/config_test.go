@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package aws_sns
+package pubsub
 
 import (
 	"github.com/smartystreets/goconvey/convey"
@@ -22,26 +22,16 @@ import (
 )
 
 var es = `
-hook:
- endpoint: "/test"
- port: "8080"
- url: "myurl/test"
-topicArn: "test-arn"
-region: "us-east-1"
-accessKey:
-    key: accesskey
-    name: sns
-secretKey:
-    key: secretkey
-    name: sns
+projectID: "1234"
+topic: "test"
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a aws-sns event source, parse it", t, func() {
+	convey.Convey("Given a gcp-pubsub event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*snsConfig)
+		_, ok := ps.(*pubSubConfig)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
