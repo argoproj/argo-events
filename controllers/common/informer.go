@@ -25,11 +25,11 @@ func (c *ArgoEventInformerFactory) NewPodInformer() informersv1.PodInformer {
 	podInformer.Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			DeleteFunc: func(obj interface{}) {
-				gw, err := c.getOwner(obj)
+				owner, err := c.getOwner(obj)
 				if err != nil {
 					return
 				}
-				key, err := cache.MetaNamespaceKeyFunc(gw)
+				key, err := cache.MetaNamespaceKeyFunc(owner)
 				if err == nil {
 					c.Queue.Add(key)
 				}
@@ -45,11 +45,11 @@ func (c *ArgoEventInformerFactory) NewServiceInformer() informersv1.ServiceInfor
 	svcInformer.Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			DeleteFunc: func(obj interface{}) {
-				obj, err := c.getOwner(obj)
+				owner, err := c.getOwner(obj)
 				if err != nil {
 					return
 				}
-				key, err := cache.MetaNamespaceKeyFunc(obj)
+				key, err := cache.MetaNamespaceKeyFunc(owner)
 				if err == nil {
 					c.Queue.Add(key)
 				}
