@@ -3,6 +3,7 @@ package gateway
 import (
 	"github.com/argoproj/argo-events/common"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 )
@@ -16,14 +17,14 @@ func (goc *gwOperationCtx) gatewayResourceLabelSelector() (labels.Selector, erro
 	return labels.NewSelector().Add(*req), nil
 }
 
-// createGatewayService creates a service
-func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
-	svc, err := goc.newGatewayService()
-	if err != nil {
-		return nil, err
-	}
-	svc, err = goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(svc)
-	return svc, err
+// createGatewayService creates a given service
+func (goc *gwOperationCtx) createGatewayService(svc *corev1.Service) (*corev1.Service, error) {
+	return goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Create(svc)
+}
+
+// deleteGatewayService deletes a given service
+func (goc *gwOperationCtx) deleteGatewayService(svc *corev1.Service) error {
+	return goc.controller.kubeClientset.CoreV1().Services(goc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
 }
 
 // getGatewayService returns the service of gateway
@@ -65,17 +66,14 @@ func (goc *gwOperationCtx) getGatewayPod() (*corev1.Pod, error) {
 	return pods[0], nil
 }
 
-// createGatewayPod creates a pod of gateway
-func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
-	pod, err := goc.newGatewayPod()
-	if err != nil {
-		return nil, err
-	}
-	pod, err = goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(pod)
-	if err != nil {
-		return nil, err
-	}
-	return pod, nil
+// createGatewayPod creates a given pod
+func (goc *gwOperationCtx) createGatewayPod(pod *corev1.Pod) (*corev1.Pod, error) {
+	return goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Create(pod)
+}
+
+// deleteGatewayPod deletes a given pod
+func (goc *gwOperationCtx) deleteGatewayPod(pod *corev1.Pod) error {
+	return goc.controller.kubeClientset.CoreV1().Pods(goc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
 }
 
 // newGatewayPod returns a new pod of gateway

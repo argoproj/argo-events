@@ -194,12 +194,12 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 
 									convey.Convey("Delete pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
-										convey.So(err, convey.ShouldBeError, "pods \"webhook-gateway\" not found")
-										convey.So(gatewayPod, convey.ShouldBeNil)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
 
 										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
-										convey.So(err, convey.ShouldBeError, "services \"webhook-gateway-svc\" not found")
-										convey.So(gatewaySvc, convey.ShouldBeNil)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
 
 										convey.Convey("Stay in running state", func() {
 											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
@@ -283,17 +283,17 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 
 									convey.Convey("Delete pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
-										convey.So(err, convey.ShouldBeError, "pods \"webhook-gateway\" not found")
-										convey.So(gatewayPod, convey.ShouldBeNil)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
 
 										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
-										convey.So(err, convey.ShouldBeError, "services \"webhook-gateway-svc\" not found")
-										convey.So(gatewaySvc, convey.ShouldBeNil)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
 
-										convey.Convey("Stay in error state", func() {
+										convey.Convey("Go to running state", func() {
 											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
 											convey.So(err, convey.ShouldBeNil)
-											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
 										})
 									})
 								})
