@@ -24,10 +24,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/argoproj/argo-events/store"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 )
@@ -105,39 +101,24 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 		Str("port", rc.Webhook.Port).Logger()
 
 	sc := rc.Configs[LabelSNSConfig].(*snsConfig)
-	// retrieve access key id and secret access key
-	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, sc.AccessKey.Name, sc.AccessKey.Key)
+
+	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, sc.AccessKey, sc.SecretKey)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to retrieve access key")
-		return err
-	}
-	secretKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, sc.SecretKey.Name, sc.SecretKey.Key)
-	if err != nil {
-		logger.Error().Err(err).Msg("failed to retrieve secret key")
-		return err
+		logger.Error().Err(err).Msg("failed to get aws credentials")
 	}
 
-	creds := credentials.NewStaticCredentialsFromCreds(credentials.Value{
-		AccessKeyID:     accessKey,
-		SecretAccessKey: secretKey,
-	})
-
-	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
-
-	awsSession, err := session.NewSession(&aws.Config{
-		Region:      &sc.Region,
-		Credentials: creds,
-		HTTPClient:  &http.Client{},
-	})
+	awsSession, err := gwcommon.GetAWSSession(creds, sc.Region)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to create new session")
 		return err
 	}
 
+	logger.Info().Msg("subscribing to sns topic")
+
 	snsSession := snslib.New(awsSession)
 	rc.Configs[LabelSNSSession] = snsSession
+	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
 
-	logger.Info().Msg("subscribing to snsConfig topic")
 	if _, err := snsSession.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
