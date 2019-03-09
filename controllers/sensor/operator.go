@@ -338,7 +338,7 @@ func (soc *sOperationCtx) getServiceSpec() *corev1.ServiceSpec {
 					TargetPort: intstr.FromInt(int(intstr.Parse(soc.s.Spec.EventProtocol.Http.Port).IntVal)),
 				},
 			},
-			Type:     corev1.ServiceTypeClusterIP,
+			Type: corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{
 				common.LabelSensorName:                    soc.s.Name,
 				common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,

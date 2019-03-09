@@ -36,7 +36,6 @@ import (
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
 	ccommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
@@ -187,7 +186,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 		options.LabelSelector = labelSelector.String()
 	}
 	factory := ccommon.ArgoEventInformerFactory{
-		OwnerKind:             gateway.Kind,
+		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
 		OwnerInformer:         c.informer,
 		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
 		Queue: c.queue,

@@ -10,6 +10,7 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
@@ -22,7 +23,7 @@ func getInformerFactory(clientset kubernetes.Interface, queue workqueue.RateLimi
 	done := make(chan struct{})
 	go ownerInformer.Run(done)
 	return &ArgoEventInformerFactory{
-		OwnerKind:             "Pod",
+		OwnerGroupVersionKind: schema.GroupVersionKind{Version: "v1", Kind: "Pod"},
 		OwnerInformer:         ownerInformer,
 		SharedInformerFactory: informerFactory,
 		Queue: queue,

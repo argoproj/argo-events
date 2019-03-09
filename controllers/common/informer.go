@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/informers"
 	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -12,8 +13,8 @@ import (
 
 // ArgoEventInformerFactory holds values to create SharedInformerFactory of argo-events
 type ArgoEventInformerFactory struct {
-	OwnerKind     string
-	OwnerInformer cache.SharedIndexInformer
+	OwnerGroupVersionKind schema.GroupVersionKind
+	OwnerInformer         cache.SharedIndexInformer
 	informers.SharedInformerFactory
 	Queue workqueue.RateLimitingInterface
 }
@@ -64,7 +65,9 @@ func (c *ArgoEventInformerFactory) getOwner(obj interface{}) (interface{}, error
 		return nil, err
 	}
 	for _, owner := range m.GetOwnerReferences() {
-		if owner.Kind == c.OwnerKind {
+
+		if owner.APIVersion == c.OwnerGroupVersionKind.GroupVersion().String() &&
+			owner.Kind == c.OwnerGroupVersionKind.Kind {
 			key := owner.Name
 			if len(m.GetNamespace()) > 0 {
 				key = m.GetNamespace() + "/" + key
