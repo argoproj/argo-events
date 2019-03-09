@@ -14,14 +14,16 @@ import (
 	"time"
 )
 
+var webhook = &Webhook{
+	Endpoint: "/fake",
+	Port:     "12000",
+	URL:      "test-url",
+	Method:   http.MethodGet,
+}
+
 func getFakeRouteConfig() *RouteConfig {
 	return &RouteConfig{
-		Webhook: &Webhook{
-			Endpoint: "/fake",
-			Port:     "12000",
-			URL:      "test-url",
-			Method:   http.MethodGet,
-		},
+		Webhook: webhook,
 		EventSource: &gateways.EventSource{
 			Name: "fake-event-source",
 			Data: "hello",
@@ -214,5 +216,23 @@ func TestProcessRouteChannels(t *testing.T) {
 			newErr := <-errCh
 			convey.So(newErr.Error(), convey.ShouldEqual, err.Error())
 		})
+	})
+}
+
+func TestFormatWebhookEndpoint(t *testing.T) {
+	convey.Convey("Given a webhook endpoint, format it", t, func() {
+		convey.So(FormatWebhookEndpoint("hello"), convey.ShouldEqual, "/hello")
+	})
+}
+
+func TestValidateWebhook(t *testing.T) {
+	convey.Convey("Given a webhook, validate it", t, func() {
+		convey.So(ValidateWebhook(webhook), convey.ShouldBeNil)
+	})
+}
+
+func TestGenerateFormattedURL(t *testing.T) {
+	convey.Convey("Given a webhook, generate formatted URL", t, func() {
+		convey.So(GenerateFormattedURL(webhook), convey.ShouldEqual, "test-url/fake")
 	})
 }
