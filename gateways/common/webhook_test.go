@@ -1,9 +1,12 @@
 package common
 
 import (
+	"context"
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/smartystreets/goconvey/convey"
+	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -28,6 +31,38 @@ func getFakeRouteConfig() *RouteConfig {
 		Configs: make(map[string]interface{}),
 		StartCh: make(chan struct{}),
 	}
+}
+
+type fakeGRPCStream struct {
+	ctx context.Context
+}
+
+func (f *fakeGRPCStream) Send(event *gateways.Event) error {
+	return nil
+}
+
+func (f *fakeGRPCStream) SetHeader(metadata.MD) error {
+	return nil
+}
+
+func (f *fakeGRPCStream) SendHeader(metadata.MD) error {
+	return nil
+}
+
+func (f *fakeGRPCStream) SetTrailer(metadata.MD) {
+	return
+}
+
+func (f *fakeGRPCStream) Context() context.Context {
+	return f.ctx
+}
+
+func (f *fakeGRPCStream) SendMsg(m interface{}) error {
+	return nil
+}
+
+func (f *fakeGRPCStream) RecvMsg(m interface{}) error {
+	return nil
 }
 
 func TestWebhook(t *testing.T) {
@@ -89,6 +124,95 @@ func TestWebhook(t *testing.T) {
 					convey.So(resp.Status, convey.ShouldEqual, "400 Bad Request")
 				})
 			})
+		})
+	})
+}
+
+func TestDefaultPostActivate(t *testing.T) {
+	convey.Convey("Given a route configuration, default post activate should be a no-op", t, func() {
+		rc := getFakeRouteConfig()
+		err := DefaultPostActivate(rc)
+		convey.So(err, convey.ShouldBeNil)
+	})
+}
+
+func TestDefaultPostStop(t *testing.T) {
+	convey.Convey("Given a route configuration, default post stop should be a no-op", t, func() {
+		rc := getFakeRouteConfig()
+		err := DefaultPostStop(rc)
+		convey.So(err, convey.ShouldBeNil)
+	})
+}
+
+func TestProcessRoute(t *testing.T) {
+	convey.Convey("Given a route configuration", t, func() {
+		convey.Convey("Activate the route configuration", func() {
+			helper := NewWebhookHelper()
+			rc := getFakeRouteConfig()
+			rc.Webhook.mux = http.NewServeMux()
+
+			go func() {
+				<-helper.RouteActivateChan
+			}()
+
+			go func() {
+				rc.StartCh <- struct{}{}
+			}()
+
+			rc.activateRoute(helper)
+			convey.So(helper.ActiveEndpoints[rc.Webhook.Endpoint].Active, convey.ShouldEqual, true)
+		})
+	})
+}
+
+func TestProcessRouteChannels(t *testing.T) {
+	convey.Convey("Given a route configuration", t, func() {
+		convey.Convey("Stop server stream", func() {
+			rc := getFakeRouteConfig()
+			ctx, cancel := context.WithCancel(context.Background())
+			fgs := &fakeGRPCStream{
+				ctx: ctx,
+			}
+			helper := NewWebhookHelper()
+			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+				DataCh: make(chan []byte),
+			}
+			helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+				errChan: make(chan error),
+			}
+			errCh := make(chan error)
+			go func() {
+				<-helper.RouteDeactivateChan
+			}()
+			go func() {
+				errCh <- rc.processChannels(helper, fgs)
+			}()
+			cancel()
+			err := <-errCh
+			convey.So(err, convey.ShouldBeNil)
+		})
+		convey.Convey("Handle error", func() {
+			rc := getFakeRouteConfig()
+			fgs := &fakeGRPCStream{
+				ctx: context.Background(),
+			}
+			helper := NewWebhookHelper()
+			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+				DataCh: make(chan []byte),
+			}
+			helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+				errChan: make(chan error),
+			}
+			errCh := make(chan error)
+			err := fmt.Errorf("error")
+			go func() {
+				helper.ActiveServers[rc.Webhook.Port].errChan <- err
+			}()
+			go func() {
+				errCh <- rc.processChannels(helper, fgs)
+			}()
+			newErr := <-errCh
+			convey.So(newErr.Error(), convey.ShouldEqual, err.Error())
 		})
 	})
 }
