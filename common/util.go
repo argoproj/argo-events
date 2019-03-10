@@ -86,6 +86,12 @@ func SendErrorResponse(writer http.ResponseWriter, response string) {
 	writer.Write([]byte(response))
 }
 
+// SendInternalErrorResponse sends http internal error response
+func SendInternalErrorResponse(writer http.ResponseWriter, response string) {
+	writer.WriteHeader(http.StatusInternalServerError)
+	writer.Write([]byte(response))
+}
+
 // LoggerConf returns standard logging configuration
 func LoggerConf() zerolog.ConsoleWriter {
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}

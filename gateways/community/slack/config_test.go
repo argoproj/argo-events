@@ -15,3 +15,28 @@ limitations under the License.
 */
 
 package slack
+
+import (
+	"github.com/smartystreets/goconvey/convey"
+	"testing"
+)
+
+var es = `
+hook:
+ endpoint: "/"
+ port: "8080"
+ url: "testurl"
+token: 
+  name: fake-token
+  key: fake
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a slack event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*slackConfig)
+		convey.So(ok, convey.ShouldEqual, true)
+	})
+}
