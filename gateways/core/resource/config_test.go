@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package file
+package resource
 
 import (
 	"github.com/smartystreets/goconvey/convey"
@@ -22,17 +22,22 @@ import (
 )
 
 var es = `
-directory: "/bin/"
-type: CREATE
-path: x.txt
+namespace: "argo-events"
+group: ""
+version: "v1"
+kind: "Pod"
+filter:
+    labels:
+    workflows.argoproj.io/phase: Succeeded
+    name: "my-workflow"
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a file event source, parse it", t, func() {
+	convey.Convey("Given a resource event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*fileWatcher)
+		_, ok := ps.(*resource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

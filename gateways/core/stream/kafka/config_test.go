@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package file
+package kafka
 
 import (
 	"github.com/smartystreets/goconvey/convey"
@@ -22,17 +22,17 @@ import (
 )
 
 var es = `
-directory: "/bin/"
-type: CREATE
-path: x.txt
+url: kafka.argo-events:9092
+topic: foo
+partition: "0"
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a file event source, parse it", t, func() {
+	convey.Convey("Given a kafka event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*fileWatcher)
+		_, ok := ps.(*kafka)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
