@@ -252,13 +252,6 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, error) {
 		return nil, err
 	}
 
-	// updated spec doesn't have service defined, delete existing service.
-	if goc.gw.Spec.ServiceSpec == nil && existingSvc != nil {
-		if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
-			return nil, err
-		}
-	}
-
 	// create a new service spec
 	newSvc, err := goc.gwrctx.newGatewayService()
 	if err != nil {
@@ -269,6 +262,14 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, error) {
 
 	// check if service spec remained unchanged
 	if existingSvc != nil {
+		// updated spec doesn't have service defined, delete existing service.
+		if newSvc == nil {
+			if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
+				return nil, err
+			}
+			return nil, nil
+		}
+
 		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			goc.log.Debug().Str("gateway-name", goc.gw.Name).Str("service-name", existingSvc.Name).Msg("gateway service spec unchanged")
 			return nil, nil

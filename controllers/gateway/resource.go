@@ -72,6 +72,9 @@ func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
 // newGatewayService returns a new service that exposes gateway.
 func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
 	service := grc.gw.Spec.ServiceSpec.DeepCopy()
+	if service == nil {
+		return nil, nil
+	}
 	err := grc.SetObjectMeta(grc.gw, service)
 	return service, err
 }
