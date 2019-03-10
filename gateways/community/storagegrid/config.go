@@ -17,6 +17,7 @@ limitations under the License.
 package storagegrid
 
 import (
+	"github.com/argoproj/argo-events/gateways/common"
 	"net/http"
 	"time"
 
@@ -31,10 +32,8 @@ type StorageGridEventSourceExecutor struct {
 
 // storageGrid contains configuration for storage grid sns
 type storageGrid struct {
-	// Port to run web server on
-	Port string `json:"port"`
-	// Endpoint to listen to events on
-	Endpoint string `json:"endpoint"`
+	// Webhook
+	Hook *common.Webhook `json:"hook"`
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`

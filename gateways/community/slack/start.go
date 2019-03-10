@@ -116,10 +116,7 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 	}
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Endpoint: gwcommon.FormatWebhookEndpoint(sc.Endpoint),
-			Port:     sc.Port,
-		},
+		Webhook: sc.Hook,
 		Configs: map[string]interface{}{
 			LabelSlackToken: token,
 		},

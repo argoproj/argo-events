@@ -104,10 +104,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		Configs: map[string]interface{}{
 			LabelStorageGridConfig: sg,
 		},
-		Webhook: &gwcommon.Webhook{
-			Port:     sg.Port,
-			Endpoint: gwcommon.FormatWebhookEndpoint(sg.Endpoint),
-		},
+		Webhook:            sg.Hook,
 		Log:                ese.Log,
 		EventSource:        eventSource,
 		PostActivate:       gwcommon.DefaultPostActivate,

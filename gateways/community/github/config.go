@@ -17,6 +17,7 @@ limitations under the License.
 package github
 
 import (
+	"github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
 	"github.com/rs/zerolog"
@@ -37,18 +38,14 @@ type GithubEventSourceExecutor struct {
 
 // githubConfig contains information to setup a github project integration
 type githubConfig struct {
-	// REST API endpoint
-	Endpoint string `json:"endpoint"`
-	// Port on which HTTP server is listening for incoming events.
-	Port string `json:"port"`
+	// Webhook
+	Hook *common.Webhook `json:"hook"`
 	// GitHub owner name i.e. argoproj
 	Owner string `json:"owner"`
 	// GitHub repo name i.e. argo-events
 	Repository string `json:"repository"`
 	// Github events to subscribe to which the gateway will subscribe
 	Events []string `json:"events"`
-	// External URL for hooks
-	URL string `json:"url"`
 	// K8s secret containing github api token
 	APIToken *corev1.SecretKeySelector `json:"apiToken"`
 	// K8s secret containing WebHook Secret

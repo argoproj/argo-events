@@ -17,6 +17,7 @@ limitations under the License.
 package trello
 
 import (
+	"github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -32,16 +33,12 @@ type TrelloEventSourceExecutor struct {
 }
 
 type trello struct {
+	// Webhook
+	Hook *common.Webhook `json:"hook"`
 	// ApiKey for client
 	ApiKey *corev1.SecretKeySelector `json:"apiKey"`
 	// Token for client
 	Token *corev1.SecretKeySelector `json:"token"`
-	// Endpoint is REST API endpoint
-	Endpoint string `json:"endpoint"`
-	// Port to run the http server on
-	Port string `json:"port"`
-	// URL to register at trello
-	URL string `json:"url"`
 	// Description for webhook
 	// +optional
 	Description string `json:"description,omitempty"`

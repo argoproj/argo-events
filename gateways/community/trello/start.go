@@ -90,10 +90,12 @@ func (ese *TrelloEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 
 	client := trellolib.NewClient(apiKey, token)
 
+	formattedUrl := gwcommon.GenerateFormattedURL(tl.Hook)
+
 	if err = client.CreateWebhook(&trellolib.Webhook{
 		Active:      true,
 		Description: tl.Description,
-		CallbackURL: tl.URL,
+		CallbackURL: formattedUrl,
 	}); err != nil {
 		logger.Error().Err(err).Msg("failed to create webhook")
 		return err
@@ -118,10 +120,7 @@ func (ese *TrelloEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	tl := config.(*trello)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Endpoint: tl.Endpoint,
-			Port:     tl.Port,
-		},
+		Webhook: tl.Hook,
 		Configs: map[string]interface{}{
 			LabelTrelloConfig: tl,
 		},

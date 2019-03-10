@@ -41,5 +41,5 @@ func validateWebhook(config interface{}) error {
 		return fmt.Errorf("unknown HTTP method %s", w.Method)
 	}
 
-	return gwcommon.ValidateWebhook(w.Endpoint, w.Port)
+	return gwcommon.ValidateWebhook(w)
 }
