@@ -17,6 +17,7 @@ limitations under the License.
 package slack
 
 import (
+	"github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -36,10 +37,8 @@ type SlackEventSourceExecutor struct {
 type slackConfig struct {
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token"`
-	// Endpoint is REST API endpoint
-	Endpoint string `json:"endpoint"`
-	// Port on which server will run
-	Port string `json:"port"`
+	// Webhook
+	Hook *common.Webhook `json:"hook"`
 }
 
 func parseEventSource(es string) (interface{}, error) {

@@ -37,5 +37,5 @@ func validateSlack(config interface{}) error {
 	if sc.Token == nil {
 		return fmt.Errorf("token not provided")
 	}
-	return gwcommon.ValidateWebhook(sc.Endpoint, sc.Port)
+	return gwcommon.ValidateWebhook(sc.Hook)
 }

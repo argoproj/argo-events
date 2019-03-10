@@ -121,8 +121,10 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 		AccessKeyID:     accessKey,
 		SecretAccessKey: secretKey,
 	})
+
+	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
+
 	awsSession, err := session.NewSession(&aws.Config{
-		Endpoint:    &rc.Webhook.Endpoint,
 		Region:      &sc.Region,
 		Credentials: creds,
 		HTTPClient:  &http.Client{},
@@ -137,7 +139,7 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 
 	logger.Info().Msg("subscribing to snsConfig topic")
 	if _, err := snsSession.Subscribe(&snslib.SubscribeInput{
-		Endpoint: &rc.Webhook.Endpoint,
+		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
 		TopicArn: &sc.TopicArn,
 	}); err != nil {
@@ -173,10 +175,7 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	sc := config.(*snsConfig)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Endpoint: sc.Endpoint,
-			Port:     sc.Port,
-		},
+		Webhook: sc.Hook,
 		Configs: map[string]interface{}{
 			LabelSNSConfig: sc,
 		},

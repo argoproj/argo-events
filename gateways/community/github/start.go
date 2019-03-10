@@ -79,8 +79,9 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 		Token: c.secret,
 	}
 
+	formattedUrl := gwcommon.GenerateFormattedURL(gc.Hook)
 	hookConfig := map[string]interface{}{
-		"url": &gc.URL,
+		"url": &formattedUrl,
 	}
 
 	if gc.ContentType != "" {
@@ -148,10 +149,7 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	gc := config.(*githubConfig)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Port:     gc.Port,
-			Endpoint: gwcommon.FormatWebhookEndpoint(gc.Endpoint),
-		},
+		Webhook: gc.Hook,
 		Configs: map[string]interface{}{
 			LabelGithubConfig: gc,
 		},

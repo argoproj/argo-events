@@ -28,8 +28,10 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-endpoint: "/"
-port: "8080"
+hook:
+ endpoint: "/"
+ port: "8080"
+ url: "testurl"
 apiKey:
     key: api
     name: trello

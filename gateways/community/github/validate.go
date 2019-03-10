@@ -39,9 +39,6 @@ func validateGithub(config interface{}) error {
 	if g.APIToken == nil {
 		return fmt.Errorf("api token can't be empty")
 	}
-	if g.URL == "" {
-		return fmt.Errorf("url can't be empty")
-	}
 	if g.Events == nil || len(g.Events) < 1 {
 		return fmt.Errorf("events must be defined")
 	}
@@ -50,5 +47,5 @@ func validateGithub(config interface{}) error {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
-	return gwcommon.ValidateWebhook(g.Endpoint, g.Port)
+	return gwcommon.ValidateWebhook(g.Hook)
 }
