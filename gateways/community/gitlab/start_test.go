@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package github
+package gitlab
 
 import (
 	"bytes"
@@ -33,13 +33,13 @@ import (
 )
 
 var (
-	ese = &GithubEventSourceExecutor{
+	ese = &GitlabEventSourceExecutor{
 		Clientset: fake.NewSimpleClientset(),
 		Namespace: "fake",
 		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
 	}
 
-	secretName     = "githab-access"
+	secretName     = "gitlab-access"
 	accessKey      = "YWNjZXNz"
 	LabelAccessKey = "accesskey"
 )
@@ -60,10 +60,10 @@ func TestGetCredentials(t *testing.T) {
 
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
-		creds, err := ese.getCredentials(ps.(*githubConfig).APIToken)
+		creds, err := ese.getCredentials(ps.(*glab).AccessToken)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(creds, convey.ShouldNotBeNil)
-		convey.So(creds.secret, convey.ShouldEqual, "YWNjZXNz")
+		convey.So(creds.token, convey.ShouldEqual, "YWNjZXNz")
 	})
 }
 
@@ -78,7 +78,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			writer := &gwcommon.FakeHttpWriter{}
 			ps, err := parseEventSource(es)
 			convey.So(err, convey.ShouldBeNil)
-			pbytes, err := yaml.Marshal(ps.(*githubConfig))
+			pbytes, err := yaml.Marshal(ps.(*glab))
 			convey.So(err, convey.ShouldBeNil)
 			RouteActiveHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
@@ -103,31 +103,10 @@ func TestRouteActiveHandler(t *testing.T) {
 				data := <-dataCh
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 				convey.So(string(data), convey.ShouldEqual, string(pbytes))
-				rc.Configs[LabelGithubConfig] = ps.(*githubConfig)
+				rc.Configs[LabelGitlabConfig] = ps.(*glab)
 				err = ese.PostActivate(rc)
 				convey.So(err, convey.ShouldNotBeNil)
 			})
 		})
-	})
-}
-
-func TestValidatePayload(t *testing.T) {
-	convey.Convey("Given a secret and body, validate payload", t, func() {
-		req := http.Request{
-			Header: make(map[string][]string),
-		}
-		req.Header.Set(GithubSignatureHeader, "fake-sig")
-		req.Header.Set(GithubEventHeader, "fake-event")
-		req.Header.Set(GithubDeliveryHeader, "fake-delivery")
-		err := validatePayload([]byte("fake-secret"), req.Header, []byte("fake-body"))
-		convey.So(err, convey.ShouldNotBeNil)
-		convey.So(err.Error(), convey.ShouldEqual, "invalid signature")
-	})
-}
-
-func TestVerifySignature(t *testing.T) {
-	convey.Convey("Given a fake signature, validate payload", t, func() {
-		ok := verifySignature([]byte("fake-secret"), "fake-sig", []byte("fake-body"))
-		convey.So(ok, convey.ShouldEqual, false)
 	})
 }

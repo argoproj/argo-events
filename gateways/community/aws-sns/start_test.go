@@ -19,7 +19,6 @@ package aws_sns
 import (
 	"bytes"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
@@ -31,52 +30,13 @@ import (
 	"testing"
 )
 
-var webhook = &gwcommon.Webhook{
-	Endpoint: "/fake",
-	Port:     "12000",
-	URL:      "test-url",
-	Method:   http.MethodGet,
-}
-
-type fakeHttpWriter struct {
-	header  int
-	payload []byte
-}
-
-func (f *fakeHttpWriter) Header() http.Header {
-	return http.Header{}
-}
-
-func (f *fakeHttpWriter) Write(body []byte) (int, error) {
-	f.payload = body
-	return len(body), nil
-}
-
-func (f *fakeHttpWriter) WriteHeader(status int) {
-	f.header = status
-}
-
-func getFakeRouteConfig() *gwcommon.RouteConfig {
-	return &gwcommon.RouteConfig{
-		Webhook: webhook,
-		EventSource: &gateways.EventSource{
-			Name: "fake-event-source",
-			Data: "hello",
-			Id:   "123",
-		},
-		Log:     common.GetLoggerContext(common.LoggerConf()).Logger(),
-		Configs: make(map[string]interface{}),
-		StartCh: make(chan struct{}),
-	}
-}
-
 func TestAWSSNS(t *testing.T) {
 	convey.Convey("Given an route configuration", t, func() {
-		rc := getFakeRouteConfig()
+		rc := gwcommon.GetFakeRouteConfig()
 		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
-		writer := &fakeHttpWriter{}
+		writer := &gwcommon.FakeHttpWriter{}
 		subscriptionArn := "arn://fake"
 		awsSession, err := gwcommon.GetAWSSession(credentials.NewStaticCredentialsFromCreds(credentials.Value{
 			AccessKeyID:     "access",
@@ -91,7 +51,7 @@ func TestAWSSNS(t *testing.T) {
 
 		convey.Convey("handle the inactive route", func() {
 			RouteActiveHandler(writer, &http.Request{}, rc)
-			convey.So(writer.header, convey.ShouldEqual, http.StatusBadRequest)
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
 		ps, err := parseEventSource(es)
@@ -112,8 +72,8 @@ func TestAWSSNS(t *testing.T) {
 			RouteActiveHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			}, rc)
-			convey.So(writer.header, convey.ShouldEqual, http.StatusBadRequest)
-			convey.So(string(writer.payload), convey.ShouldEqual, "failed to confirm subscription")
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
+			convey.So(string(writer.Payload), convey.ShouldEqual, "failed to confirm subscription")
 
 			go func() {
 				<-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
@@ -125,7 +85,7 @@ func TestAWSSNS(t *testing.T) {
 			RouteActiveHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			}, rc)
-			convey.So(writer.header, convey.ShouldEqual, http.StatusOK)
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 		})
 
 		convey.Convey("Run post activate", func() {

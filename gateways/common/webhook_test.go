@@ -20,9 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/smartystreets/goconvey/convey"
-	"google.golang.org/grpc/metadata"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -30,65 +28,12 @@ import (
 	"time"
 )
 
-var webhook = &Webhook{
-	Endpoint: "/fake",
-	Port:     "12000",
-	URL:      "test-url",
-	Method:   http.MethodGet,
-}
-
-func getFakeRouteConfig() *RouteConfig {
-	return &RouteConfig{
-		Webhook: webhook,
-		EventSource: &gateways.EventSource{
-			Name: "fake-event-source",
-			Data: "hello",
-			Id:   "123",
-		},
-		Log:     common.GetLoggerContext(common.LoggerConf()).Logger(),
-		Configs: make(map[string]interface{}),
-		StartCh: make(chan struct{}),
-	}
-}
-
-type fakeGRPCStream struct {
-	ctx context.Context
-}
-
-func (f *fakeGRPCStream) Send(event *gateways.Event) error {
-	return nil
-}
-
-func (f *fakeGRPCStream) SetHeader(metadata.MD) error {
-	return nil
-}
-
-func (f *fakeGRPCStream) SendHeader(metadata.MD) error {
-	return nil
-}
-
-func (f *fakeGRPCStream) SetTrailer(metadata.MD) {
-	return
-}
-
-func (f *fakeGRPCStream) Context() context.Context {
-	return f.ctx
-}
-
-func (f *fakeGRPCStream) SendMsg(m interface{}) error {
-	return nil
-}
-
-func (f *fakeGRPCStream) RecvMsg(m interface{}) error {
-	return nil
-}
-
 func TestWebhook(t *testing.T) {
 	convey.Convey("Given a webhook helper, initialize the routes channels", t, func() {
 		webhookHelper := NewWebhookHelper()
 		go InitRouteChannels(webhookHelper)
 
-		rc := getFakeRouteConfig()
+		rc := GetFakeRouteConfig()
 
 		webhookHelper.RouteActivateChan <- rc
 
@@ -148,7 +93,7 @@ func TestWebhook(t *testing.T) {
 
 func TestDefaultPostActivate(t *testing.T) {
 	convey.Convey("Given a route configuration, default post activate should be a no-op", t, func() {
-		rc := getFakeRouteConfig()
+		rc := GetFakeRouteConfig()
 		err := DefaultPostActivate(rc)
 		convey.So(err, convey.ShouldBeNil)
 	})
@@ -156,7 +101,7 @@ func TestDefaultPostActivate(t *testing.T) {
 
 func TestDefaultPostStop(t *testing.T) {
 	convey.Convey("Given a route configuration, default post stop should be a no-op", t, func() {
-		rc := getFakeRouteConfig()
+		rc := GetFakeRouteConfig()
 		err := DefaultPostStop(rc)
 		convey.So(err, convey.ShouldBeNil)
 	})
@@ -165,7 +110,7 @@ func TestDefaultPostStop(t *testing.T) {
 func TestProcessRoute(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Activate the route configuration", func() {
-			rc := getFakeRouteConfig()
+			rc := GetFakeRouteConfig()
 			rc.Webhook.mux = http.NewServeMux()
 
 			rc.PostActivate = DefaultPostActivate
@@ -213,7 +158,7 @@ func TestProcessRoute(t *testing.T) {
 func TestProcessRouteChannels(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Stop server stream", func() {
-			rc := getFakeRouteConfig()
+			rc := GetFakeRouteConfig()
 			ctx, cancel := context.WithCancel(context.Background())
 			fgs := &fakeGRPCStream{
 				ctx: ctx,
@@ -237,7 +182,7 @@ func TestProcessRouteChannels(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 		})
 		convey.Convey("Handle error", func() {
-			rc := getFakeRouteConfig()
+			rc := GetFakeRouteConfig()
 			fgs := &fakeGRPCStream{
 				ctx: context.Background(),
 			}
@@ -270,13 +215,13 @@ func TestFormatWebhookEndpoint(t *testing.T) {
 
 func TestValidateWebhook(t *testing.T) {
 	convey.Convey("Given a webhook, validate it", t, func() {
-		convey.So(ValidateWebhook(webhook), convey.ShouldBeNil)
+		convey.So(ValidateWebhook(Hook), convey.ShouldBeNil)
 	})
 }
 
 func TestGenerateFormattedURL(t *testing.T) {
 	convey.Convey("Given a webhook, generate formatted URL", t, func() {
-		convey.So(GenerateFormattedURL(webhook), convey.ShouldEqual, "test-url/fake")
+		convey.So(GenerateFormattedURL(Hook), convey.ShouldEqual, "test-url/fake")
 	})
 }
 
