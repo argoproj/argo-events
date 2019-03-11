@@ -67,11 +67,13 @@ kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/m
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/file.yaml
 ```
 
+Make sure the sensor pod is created.
+
 **4. Trigger Workflow**
 
 Exec into the gateway pod and go to the directory specified in event source and create a file. That should generate an event causing sensor to trigger a workflow.
 
 
 ## How to listen to notifications from different directories
-Simply edit the gateway configmap and add new entry that contains the configuration required to listen to file within different directory, save
+Simply edit the gateway configmap and add new entry that contains the configuration required to listen to file within different directory and save
 the configmap. The gateway will start listening to file notifications from new directory as well.
