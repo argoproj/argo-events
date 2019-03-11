@@ -152,10 +152,9 @@ func (src *sResourceCtx) setupContainersForSensorPod(pod *corev1.Pod) {
 			Value: src.controller.Config.InstanceID,
 		},
 	}
-	containers := make([]corev1.Container, len(pod.Spec.Containers))
 	for i, container := range pod.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
-		containers[i] = container
+		pod.Spec.Containers[i] = container
 	}
 }
 

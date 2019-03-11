@@ -162,9 +162,8 @@ func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
 			Value: grc.gw.Spec.ProcessorPort,
 		},
 	}
-	containers := make([]corev1.Container, len(pod.Spec.Containers))
 	for i, container := range pod.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
-		containers[i] = container
+		pod.Spec.Containers[i] = container
 	}
 }
