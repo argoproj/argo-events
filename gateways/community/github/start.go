@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -109,6 +110,20 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	}
 
 	client := gh.NewClient(PATTransport.Client())
+	if gc.GithubBaseURL != "" {
+		baseURL, err := url.Parse(gc.GithubBaseURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github base url. err: %s", err)
+		}
+		client.BaseURL = baseURL
+	}
+	if gc.GithubUploadURL != "" {
+		uploadURL, err := url.Parse(gc.GithubUploadURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github upload url. err: %s", err)
+		}
+		client.UploadURL = uploadURL
+	}
 	rc.Configs[labelGithubClient] = client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
