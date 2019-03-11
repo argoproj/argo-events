@@ -17,8 +17,9 @@ limitations under the License.
 package sensor
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
@@ -119,21 +120,16 @@ func (soc *sOperationCtx) createSensorResources() error {
 	err := ValidateSensor(soc.s)
 	if err != nil {
 		soc.log.Error().Err(err).Msg("failed to validate sensor")
+		errors.Wrap(err, "failed to validate sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
-		return nil
+		return err
 	}
 
 	soc.initializeAllNodes()
-	newPod, err := soc.srctx.newSensorPod()
+	pod, err := soc.createSensorPod()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor pod. err: %s", err))
-		return err
-	}
-	pod, err := soc.srctx.createSensorPod(newPod)
-	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create pod for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor pod. err: %s", err))
+		errors.Wrap(err, "failed to create sensor pod")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
 	soc.markAllNodePhases()
@@ -141,16 +137,10 @@ func (soc *sOperationCtx) createSensorResources() error {
 
 	// expose sensor if service is configured
 	if soc.srctx.getServiceSpec() != nil {
-		newSvc, err := soc.srctx.newSensorService()
+		svc, err := soc.createSensorService()
 		if err != nil {
-			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
-			soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor service. err: %s", err))
-			return err
-		}
-		svc, err := soc.srctx.createSensorService(newSvc)
-		if err != nil {
-			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
-			soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor service. err: %s", err))
+			errors.Wrap(err, "failed to create sensor service")
+			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return err
 		}
 		soc.log.Info().Str("svc-name", svc.Name).Msg("sensor service is created")
@@ -162,21 +152,55 @@ func (soc *sOperationCtx) createSensorResources() error {
 	return nil
 }
 
+func (soc *sOperationCtx) createSensorPod() (*corev1.Pod, error) {
+	pod, err := soc.srctx.newSensorPod()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
+		return nil, err
+	}
+	pod, err = soc.srctx.createSensorPod(pod)
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create pod for sensor")
+		return nil, err
+	}
+	return pod, nil
+}
+func (soc *sOperationCtx) createSensorService() (*corev1.Service, error) {
+	svc, err := soc.srctx.newSensorService()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
+		return nil, err
+	}
+	svc, err = soc.srctx.createSensorService(svc)
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
+		return nil, err
+	}
+	return svc, nil
+}
+
 func (soc *sOperationCtx) updateSensorResources() error {
 	err := ValidateSensor(soc.s)
 	if err != nil {
 		soc.log.Error().Err(err).Msg("failed to validate sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
-		return nil
+		err = errors.Wrap(err, "failed to validate sensor")
+		if soc.s.Status.Phase != v1alpha1.NodePhaseError {
+			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		}
+		return err
 	}
 
 	_, podChanged, err := soc.updateSensorPod()
 	if err != nil {
+		err = errors.Wrap(err, "failed to update sensor pod")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
 
 	_, svcChanged, err := soc.updateSensorService()
 	if err != nil {
+		err = errors.Wrap(err, "failed to update sensor service")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
 
@@ -192,7 +216,6 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	existingPod, err := soc.srctx.getSensorPod()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get pod for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to get sensor pod. err: %s", err))
 		return nil, false, err
 	}
 
@@ -200,7 +223,6 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	newPod, err := soc.srctx.newSensorPod()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor pod. err: %s", err))
 		return nil, false, err
 	}
 
@@ -217,7 +239,6 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 		err := soc.srctx.deleteSensorPod(existingPod)
 		if err != nil {
 			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to delete pod for sensor")
-			soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to delete sensor pod. err: %s", err))
 			return nil, false, err
 		}
 
@@ -228,7 +249,6 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	createdPod, err := soc.srctx.createSensorPod(newPod)
 	if err != nil {
 		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor pod. err: %s", err))
 		return nil, false, err
 	}
 	soc.log.Info().Str("sensor-name", soc.s.Name).Str("pod-name", newPod.Name).Msg("sensor pod is created")
@@ -241,7 +261,6 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	existingSvc, err := soc.srctx.getSensorService()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get service for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to get sensor service. err: %s", err))
 		return nil, false, err
 	}
 
@@ -249,7 +268,6 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	newSvc, err := soc.srctx.newSensorService()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor service. err: %s", err))
 		return nil, false, err
 	}
 
@@ -283,7 +301,6 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	createdSvc, err := soc.srctx.createSensorService(newSvc)
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
-		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor service. err: %s", err))
 		return nil, false, err
 	}
 	soc.log.Info().Str("svc-name", newSvc.Name).Msg("sensor service is created")

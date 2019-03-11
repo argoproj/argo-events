@@ -17,12 +17,12 @@ limitations under the License.
 package gateway
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
+	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -124,39 +124,28 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 	err := Validate(goc.gw)
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
+		err = errors.Wrap(err, "failed to validate gateway")
+		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 	// Gateway pod has two components,
 	// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
 	// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
 	//                          compliant events and dispatch them to watchers.
-	pod, err := goc.gwrctx.newGatewayPod()
+	pod, err := goc.createGatewayPod()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize pod for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
-		return err
-	}
-	pod, err = goc.gwrctx.createGatewayPod(pod)
-	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create pod for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
+		err = errors.Wrap(err, "failed to create gateway pod")
+		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 	goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod is created")
 
 	// expose gateway if service is configured
 	if goc.gw.Spec.ServiceSpec != nil {
-		svc, err := goc.gwrctx.newGatewayService()
+		svc, err := goc.createGatewayService()
 		if err != nil {
-			goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize service for gateway")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
-			return err
-		}
-		svc, err = goc.gwrctx.createGatewayService(svc)
-		if err != nil {
-			goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create service for gateway")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway service. err: %s", err))
+			err = errors.Wrap(err, "failed to create gateway service")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
 		goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
@@ -167,23 +156,56 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 	return nil
 }
 
+func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
+	pod, err := goc.gwrctx.newGatewayPod()
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize pod for gateway")
+		return nil, err
+	}
+	pod, err = goc.gwrctx.createGatewayPod(pod)
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create pod for gateway")
+		return nil, err
+	}
+	return pod, nil
+}
+
+func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
+	svc, err := goc.gwrctx.newGatewayService()
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize service for gateway")
+		return nil, err
+	}
+	svc, err = goc.gwrctx.createGatewayService(svc)
+	if err != nil {
+		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create service for gateway")
+		return nil, err
+	}
+	return svc, nil
+}
+
 func (goc *gwOperationCtx) updateGatewayResources() error {
 	err := Validate(goc.gw)
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
+		err = errors.Wrap(err, "failed to validate gateway")
 		if goc.gw.Status.Phase != v1alpha1.NodePhaseError {
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, "validation failed")
+			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		}
 		return err
 	}
 
 	_, podChanged, err := goc.updateGatewayPod()
 	if err != nil {
+		err = errors.Wrap(err, "failed to validate gateway pod")
+		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 
 	_, svcChanged, err := goc.updateGatewayService()
 	if err != nil {
+		err = errors.Wrap(err, "failed to validate gateway service")
+		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 
@@ -199,7 +221,6 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 	existingPod, err := goc.gwrctx.getGatewayPod()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get pod for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to get gateway pod. err: %s", err))
 		return nil, false, err
 	}
 
@@ -207,7 +228,6 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 	newPod, err := goc.gwrctx.newGatewayPod()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize pod for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway pod. err: %s", err))
 		return nil, false, err
 	}
 
@@ -224,7 +244,6 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 		err := goc.gwrctx.deleteGatewayPod(existingPod)
 		if err != nil {
 			goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to delete pod for gateway")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to delete gateway pod. err: %s", err))
 			return nil, false, err
 		}
 
@@ -235,7 +254,6 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 	createdPod, err := goc.gwrctx.createGatewayPod(newPod)
 	if err != nil {
 		goc.log.Error().Err(err).Msg("failed to create pod for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway pod. err: %s", err))
 		return nil, false, err
 	}
 	goc.log.Info().Str("gateway-name", goc.gw.Name).Str("pod-name", newPod.Name).Msg("gateway pod is created")
@@ -248,7 +266,6 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 	existingSvc, err := goc.gwrctx.getGatewayService()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get service for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to get gateway service. err: %s", err))
 		return nil, false, err
 	}
 
@@ -256,7 +273,6 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 	newSvc, err := goc.gwrctx.newGatewayService()
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize service for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to initialize gateway service. err: %s", err))
 		return nil, false, err
 	}
 
@@ -290,7 +306,6 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 	createdSvc, err := goc.gwrctx.createGatewayService(newSvc)
 	if err != nil {
 		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create service for gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, fmt.Sprintf("failed to create gateway service. err: %s", err))
 		return nil, false, err
 	}
 	goc.log.Info().Str("svc-name", newSvc.Name).Msg("gateway service is created")
