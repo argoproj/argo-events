@@ -18,9 +18,8 @@ package gateways
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"hash/fnv"
-	"time"
-
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -31,26 +30,11 @@ func Hasher(value string) string {
 	return fmt.Sprintf("%v", h.Sum32())
 }
 
-// SetValidateReason set the result of event source validation
-func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
-	v.Reason = reason
-	v.IsValid = valid
-}
-
-// InitBackoff initializes backoff
-func InitBackoff(backoff *wait.Backoff) {
-	if backoff == nil {
-		backoff = &wait.Backoff{
-			Steps:    1,
-			Duration: 1,
-		}
-	}
-	backoff.Duration = backoff.Duration * time.Second
-}
-
 // General connection helper
 func Connect(backoff *wait.Backoff, conn func() error) error {
-	InitBackoff(backoff)
+	if backoff == nil {
+		backoff = &common.DefaultRetry
+	}
 	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
 		if err := conn(); err != nil {
 			return false, nil

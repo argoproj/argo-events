@@ -18,6 +18,7 @@ package gateways
 
 import (
 	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"testing"
 )
 
@@ -26,11 +27,14 @@ func TestGatewayUtil(t *testing.T) {
 		hash := Hasher("test")
 		convey.So(hash, convey.ShouldNotBeEmpty)
 	})
+}
 
-	convey.Convey("Given a event source, set the validation message", t, func() {
-		v := ValidEventSource{}
-		SetValidEventSource(&v, "event source is valid", true)
-		convey.So(v.IsValid, convey.ShouldBeTrue)
-		convey.So(v.Reason, convey.ShouldEqual, "event source is valid")
+func TestConnect(t *testing.T) {
+	convey.Convey("Given a backoff option, test connection", t, func() {
+		var backoff *wait.Backoff
+		err := Connect(backoff, func() error {
+			return nil
+		})
+		convey.So(err, convey.ShouldBeNil)
 	})
 }

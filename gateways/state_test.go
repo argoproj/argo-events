@@ -139,5 +139,13 @@ func TestGetNodeByID(t *testing.T) {
 }
 
 func TestInitializeNode(t *testing.T) {
-	convey.Convey()
+	convey.Convey("Given a node, initialize it", t, func() {
+		gc := getGatewayConfig()
+		status := gc.initializeNode("1234", "fake", "init")
+		convey.So(status, convey.ShouldNotBeNil)
+		convey.So(status.ID, convey.ShouldEqual, "1234")
+		convey.So(status.Name, convey.ShouldEqual, "fake")
+		convey.So(status.Message, convey.ShouldEqual, "init")
+		convey.So(len(gc.gw.Status.Nodes), convey.ShouldEqual, 1)
+	})
 }
