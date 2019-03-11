@@ -42,9 +42,10 @@ type Webhook struct {
 	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,4,opt,name=serverCertPath"`
 	// ServerKeyPath refers the file that contains private key
 	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,5,opt,name=serverKeyPath"`
+
 	// srv holds reference to http server
-	srv *http.Server   `json:"srv,omitempty"`
-	mux *http.ServeMux `json:"mux,omitempty"`
+	srv *http.Server
+	mux *http.ServeMux
 }
 
 // WebhookHelper is a helper struct
@@ -72,7 +73,7 @@ type activeServer struct {
 	errChan chan error
 }
 
-// RouteConfig contains configuration about a http route
+// RouteConfig contains configuration about an http route
 type RouteConfig struct {
 	Webhook            *Webhook
 	Configs            map[string]interface{}

@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"fmt"
+
 	"github.com/Knetic/govaluate"
 
 	"github.com/argoproj/argo-events/common"
@@ -215,12 +216,12 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	gvk := obj.GroupVersionKind()
 	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)
 	if err != nil {
-		return fmt.Errorf("failed to get client for given group verison and kind. err: %+v", err)
+		return fmt.Errorf("failed to get client for given group version and kind. err: %+v", err)
 	}
 
 	apiResource, err := common.ServerResourceForGroupVersionKind(sec.discoveryClient, gvk)
 	if err != nil {
-		return fmt.Errorf("failed to get server resource for given group verison and kind. err: %+v", err)
+		return fmt.Errorf("failed to get server resource for given group version and kind. err: %+v", err)
 	}
 	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
 
