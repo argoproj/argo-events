@@ -48,7 +48,8 @@ The `withdata` configuration will generate an event every 30 minutes past an hou
 and along with event time, event payload will also contain a string  "{\r\n\"hello\": \"world\"\r\n}"
 
 **What is the use of `userPayload`?**
-Many times having only the event time in not sufficient but rather have an accompanying user defined data.
+
+Only the event time is probably not sufficient as event payload. You may want to have an accompanying user defined data.
 This user defined data is `userPayload`. You can basically place any string here and gateway will put that in event payload.  
  
 ```yaml
