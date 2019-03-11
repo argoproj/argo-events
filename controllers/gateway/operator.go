@@ -197,14 +197,14 @@ func (goc *gwOperationCtx) updateGatewayResources() error {
 
 	_, podChanged, err := goc.updateGatewayPod()
 	if err != nil {
-		err = errors.Wrap(err, "failed to validate gateway pod")
+		err = errors.Wrap(err, "failed to update gateway pod")
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 
 	_, svcChanged, err := goc.updateGatewayService()
 	if err != nil {
-		err = errors.Wrap(err, "failed to validate gateway service")
+		err = errors.Wrap(err, "failed to update gateway service")
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
@@ -233,7 +233,7 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
-		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
+		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationGatewayResourceSpecHashName] == newPod.Annotations[common.AnnotationGatewayResourceSpecHashName] {
 			goc.log.Debug().Str("gateway-name", goc.gw.Name).Str("pod-name", existingPod.Name).Msg("gateway pod spec unchanged")
 			return nil, false, nil
 		}
@@ -286,7 +286,7 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 		}
 
 		// check if service spec remained unchanged
-		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
+		if existingSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] == newSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] {
 			goc.log.Debug().Str("gateway-name", goc.gw.Name).Str("service-name", existingSvc.Name).Msg("gateway service spec unchanged")
 			return nil, false, nil
 		}
@@ -325,7 +325,7 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message st
 		if goc.gw.Annotations == nil {
 			goc.gw.Annotations = make(map[string]string)
 		}
-		goc.gw.ObjectMeta.Labels[common.LabelSensorKeyPhase] = string(phase)
+		goc.gw.ObjectMeta.Labels[common.LabelGatewayKeyPhase] = string(phase)
 		// add annotations so a resource sensor can watch this gateway.
 		goc.gw.Annotations[common.LabelGatewayKeyPhase] = string(phase)
 	}

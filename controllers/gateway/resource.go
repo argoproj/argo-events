@@ -28,7 +28,7 @@ func NewGatewayResourceContext(gw *v1alpha1.Gateway, controller *GatewayControll
 			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
 			LabelOwnerName:                    common.LabelGatewayName,
 			LabelKeyOwnerControllerInstanceID: common.LabelKeyGatewayControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationSensorResourceSpecHashName,
+			AnnotationOwnerResourceHashName:   common.AnnotationGatewayResourceSpecHashName,
 			InstanceID:                        controller.Config.InstanceID,
 		},
 	}
