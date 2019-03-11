@@ -117,6 +117,6 @@ kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/ma
 Drop a file onto `input` bucket and monitor workflows
 
 ## How to listen to notifications from different bucket
-Simple edit the gateway configmap and add new entry that contains the configuration required to listen to new bucket, save
+Simply edit the gateway configmap and add new entry that contains the configuration required to listen to new bucket, save
 the configmap. The gateway will now start listening to both old and new buckets. 
 
