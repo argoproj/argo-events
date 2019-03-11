@@ -3,7 +3,7 @@
 
 ## Table of Contents
 
-- [github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto](#github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto)
+- [pkg/apis/gateway/v1alpha1/generated.proto](#pkg/apis/gateway/v1alpha1/generated.proto)
     - [Gateway](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Gateway)
     - [GatewayList](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayList)
     - [GatewayNotificationWatcher](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayNotificationWatcher)
@@ -22,10 +22,10 @@
 
 
 
-<a name="github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto"></a>
+<a name="pkg/apis/gateway/v1alpha1/generated.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto
+## pkg/apis/gateway/v1alpha1/generated.proto
 
 
 

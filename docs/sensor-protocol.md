@@ -3,7 +3,7 @@
 
 ## Table of Contents
 
-- [github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto](#github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto)
+- [pkg/apis/sensor/v1alpha1/generated.proto](#pkg/apis/sensor/v1alpha1/generated.proto)
     - [ArtifactLocation](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ArtifactLocation)
     - [ConfigmapArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ConfigmapArtifact)
     - [DataFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DataFilter)
@@ -11,6 +11,9 @@
     - [EventDependency](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependency)
     - [EventDependencyFilter](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependencyFilter)
     - [FileArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.FileArtifact)
+    - [GitArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitArtifact)
+    - [GitCreds](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitCreds)
+    - [GitRemoteConfig](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitRemoteConfig)
     - [GroupVersionKind](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GroupVersionKind)
     - [NodeStatus](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.NodeStatus)
     - [ResourceObject](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ResourceObject)
@@ -36,10 +39,10 @@
 
 
 
-<a name="github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto"></a>
+<a name="pkg/apis/sensor/v1alpha1/generated.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto
+## pkg/apis/sensor/v1alpha1/generated.proto
 
 
 
@@ -56,6 +59,7 @@ ArtifactLocation describes the source location for an external artifact
 | file | [FileArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.FileArtifact) | optional |  |
 | url | [URLArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.URLArtifact) | optional |  |
 | configmap | [ConfigmapArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.ConfigmapArtifact) | optional |  |
+| git | [GitArtifact](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitArtifact) | optional |  |
 
 
 
@@ -159,6 +163,61 @@ FileArtifact contains information about an artifact in a filesystem
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | path | [string](#string) | optional |  |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitArtifact"></a>
+
+### GitArtifact
+GitArtifact contains information about an artifact stored in git
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| url | [string](#string) | optional | Git URL |
+| cloneDirectory | [string](#string) | optional | Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers. Hence we don&#39;t use any specific git provider client. |
+| creds | [GitCreds](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitCreds) | optional | Creds contain reference to git username and password &#43;optional |
+| namespace | [string](#string) | optional | Namespace where creds are stored. &#43;optional |
+| sshKeyPath | [string](#string) | optional | SSHKeyPath is path to your ssh key path. Use this if you don&#39;t want to provide username and password. ssh key path must be mounted in sensor pod. &#43;optional |
+| filePath | [string](#string) | optional | Path to file that contains trigger resource definition |
+| branch | [string](#string) | optional | Branch to use to pull trigger resource &#43;optional |
+| tag | [string](#string) | optional | Tag to use to pull trigger resource &#43;optional |
+| remote | [GitRemoteConfig](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitRemoteConfig) | optional | Git remote to manage set of tracked repositories. Defaults to &#34;origin&#34;. Refer https://git-scm.com/docs/git-remote &#43;optional |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitCreds"></a>
+
+### GitCreds
+GitCreds contain reference to git username and password
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| username | [k8s.io.api.core.v1.SecretKeySelector](#k8s.io.api.core.v1.SecretKeySelector) | optional |  |
+| password | [k8s.io.api.core.v1.SecretKeySelector](#k8s.io.api.core.v1.SecretKeySelector) | optional |  |
+
+
+
+
+
+
+<a name="github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.GitRemoteConfig"></a>
+
+### GitRemoteConfig
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) | optional | Name of the remote to fetch from. |
+| urls | [string](#string) | repeated | URLs the URLs of a remote repository. It must be non-empty. Fetch will always use the first URL, while push will use all of them. |
 
 
 
