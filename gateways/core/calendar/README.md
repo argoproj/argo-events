@@ -9,7 +9,7 @@
 Calendar gateway can be used when you to schedule K8s resources on an interval
 or cron schedule.
 
-## How to define an entry in confimap?
+## How to define an event source in confimap?
 You can construct an entry in configmap using following fields,
 
 ```go
@@ -38,7 +38,7 @@ UserPayload string `json:"userPayload,omitempty"`
 ```
 
 ### Example
-In the following gateway configmap contains three event source configurations,
+The following gateway configmap contains three event source configurations,
 
 The `interval` configuration will basically generate an event after every 55 seconds.
 

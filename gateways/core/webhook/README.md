@@ -14,7 +14,7 @@ Endpoints are activate or deactivated at the runtime. The gateway pod
 is continuously monitros the gateway configmap. If you add a new endpoint entry in configmap, the server will register it as
 active endpoint and if you remove an endpoint entry, server will mark that endpoint as inactive.
 
-## How to define an entry in confimap?
+## How to define an event source in confimap?
 You can construct an entry in configmap using following fields,
 
 ```go
