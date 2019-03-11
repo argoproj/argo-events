@@ -198,8 +198,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.s.Spec.DeploySpec.RestartPolicy = "Never"
-					soc.s.Spec.EventProtocol.Http.Port = "1234"
+					soc.srctx.s.Spec.DeploySpec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
@@ -207,12 +207,12 @@ func TestSensorOperations(t *testing.T) {
 
 						convey.Convey("Delete pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeError, "pods \"artifact-sensor\" not found")
-							convey.So(sensorPod, convey.ShouldBeNil)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
 
 							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeError, "services \"artifact-sensor-svc\" not found")
-							convey.So(sensorSvc, convey.ShouldBeNil)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
 
 							convey.Convey("Stay in active state", func() {
 								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
@@ -287,8 +287,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.s.Spec.DeploySpec.RestartPolicy = "Never"
-					soc.s.Spec.EventProtocol.Http.Port = "1234"
+					soc.srctx.s.Spec.DeploySpec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
@@ -296,17 +296,17 @@ func TestSensorOperations(t *testing.T) {
 
 						convey.Convey("Delete pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeError, "pods \"artifact-sensor\" not found")
-							convey.So(sensorPod, convey.ShouldBeNil)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
 
 							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeError, "services \"artifact-sensor-svc\" not found")
-							convey.So(sensorSvc, convey.ShouldBeNil)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
 
-							convey.Convey("Stay in error state", func() {
+							convey.Convey("Go to active state", func() {
 								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 								convey.So(err, convey.ShouldBeNil)
-								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 							})
 						})
 					})

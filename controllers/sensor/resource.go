@@ -46,13 +46,13 @@ func (src *sResourceCtx) sensorResourceLabelSelector() (labels.Selector, error) 
 }
 
 // createSensorService creates a service
-func (src *sResourceCtx) createSensorService() (*corev1.Service, error) {
-	svc, err := src.newSensorService()
-	if err != nil {
-		return nil, err
-	}
-	svc, err = src.controller.kubeClientset.CoreV1().Services(src.s.Namespace).Create(svc)
-	return svc, err
+func (src *sResourceCtx) createSensorService(svc *corev1.Service) (*corev1.Service, error) {
+	return src.controller.kubeClientset.CoreV1().Services(src.s.Namespace).Create(svc)
+}
+
+// deleteSensorService deletes a given service
+func (src *sResourceCtx) deleteSensorService(svc *corev1.Service) error {
+	return src.controller.kubeClientset.CoreV1().Services(src.s.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
 }
 
 // getSensorService returns the service of sensor
@@ -105,16 +105,13 @@ func (src *sResourceCtx) getSensorPod() (*corev1.Pod, error) {
 }
 
 // createSensorPod creates a pod of sensor
-func (src *sResourceCtx) createSensorPod() (*corev1.Pod, error) {
-	pod, err := src.newSensorPod()
-	if err != nil {
-		return nil, err
-	}
-	pod, err = src.controller.kubeClientset.CoreV1().Pods(src.s.Namespace).Create(pod)
-	if err != nil {
-		return nil, err
-	}
-	return pod, nil
+func (src *sResourceCtx) createSensorPod(pod *corev1.Pod) (*corev1.Pod, error) {
+	return src.controller.kubeClientset.CoreV1().Pods(src.s.Namespace).Create(pod)
+}
+
+// deleteSensorPod deletes a given pod
+func (src *sResourceCtx) deleteSensorPod(pod *corev1.Pod) error {
+	return src.controller.kubeClientset.CoreV1().Pods(src.s.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
 }
 
 // newSensorPod returns a new pod of sensor
