@@ -170,30 +170,30 @@ func (soc *sOperationCtx) updateSensorResources() error {
 		return nil
 	}
 
-	createdPod, err := soc.updateSensorPod()
+	_, podChanged, err := soc.updateSensorPod()
 	if err != nil {
 		return err
 	}
 
-	createdSvc, err := soc.updateSensorService()
+	_, svcChanged, err := soc.updateSensorService()
 	if err != nil {
 		return err
 	}
 
-	if soc.s.Status.Phase != v1alpha1.NodePhaseActive && (createdPod != nil || createdSvc != nil) {
+	if soc.s.Status.Phase != v1alpha1.NodePhaseActive && (podChanged || svcChanged) {
 		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
 	}
 
 	return nil
 }
 
-func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, error) {
+func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	// Check if sensor spec has changed for pod.
 	existingPod, err := soc.srctx.getSensorPod()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get pod for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to get sensor pod. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 
 	// create a new pod spec
@@ -201,14 +201,14 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, error) {
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor pod. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
 		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("pod-name", existingPod.Name).Msg("sensor pod spec unchanged")
-			return nil, nil
+			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
@@ -218,7 +218,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, error) {
 		if err != nil {
 			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to delete pod for sensor")
 			soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to delete sensor pod. err: %s", err))
-			return nil, err
+			return nil, false, err
 		}
 
 		soc.log.Info().Str("pod-name", existingPod.Name).Msg("sensor pod is deleted")
@@ -229,20 +229,20 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, error) {
 	if err != nil {
 		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor pod. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 	soc.log.Info().Str("sensor-name", soc.s.Name).Str("pod-name", newPod.Name).Msg("sensor pod is created")
 
-	return createdPod, nil
+	return createdPod, true, nil
 }
 
-func (soc *sOperationCtx) updateSensorService() (*corev1.Service, error) {
+func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	// Check if sensor spec has changed for service.
 	existingSvc, err := soc.srctx.getSensorService()
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get service for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to get sensor service. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 
 	// create a new service spec
@@ -250,30 +250,33 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, error) {
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to initialize sensor service. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 
-	// check if service spec remained unchanged
 	if existingSvc != nil {
 		// updated spec doesn't have service defined, delete existing service.
 		if newSvc == nil {
 			if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
-				return nil, err
+				return nil, false, err
 			}
-			return nil, nil
+			return nil, true, nil
 		}
 
+		// check if service spec remained unchanged
 		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec unchanged")
-			return nil, nil
+			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
 		soc.log.Info().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec changed")
 
 		if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
-			return nil, err
+			return nil, false, err
 		}
+	} else if newSvc == nil {
+		// sensor service doesn't exist originally
+		return nil, false, nil
 	}
 
 	// change createSensorService to take a service spec
@@ -281,11 +284,11 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, error) {
 	if err != nil {
 		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, fmt.Sprintf("failed to create sensor service. err: %s", err))
-		return nil, err
+		return nil, false, err
 	}
 	soc.log.Info().Str("svc-name", newSvc.Name).Msg("sensor service is created")
 
-	return createdSvc, nil
+	return createdSvc, true, nil
 }
 
 // mark the overall sensor phase
