@@ -37,15 +37,15 @@ import (
 )
 
 const (
-	LabelGithubConfig = "config"
-	LabelGithubClient = "client"
-	LabelWebhook      = "hook"
+	labelGithubConfig = "config"
+	labelGithubClient = "client"
+	labelWebhook      = "hook"
 )
 
 const (
-	GithubSignatureHeader = "x-hub-signature"
-	GithubEventHeader     = "x-github-event"
-	GithubDeliveryHeader  = "x-github-delivery"
+	githubSignatureHeader = "x-hub-signature"
+	githubEventHeader     = "x-github-event"
+	githubDeliveryHeader  = "x-github-delivery"
 )
 
 var (
@@ -68,7 +68,7 @@ func (ese *GithubEventSourceExecutor) getCredentials(gs *corev1.SecretKeySelecto
 }
 
 func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	gc := rc.Configs[LabelGithubConfig].(*githubConfig)
+	gc := rc.Configs[labelGithubConfig].(*githubConfig)
 
 	c, err := ese.getCredentials(gc.APIToken)
 	if err != nil {
@@ -79,8 +79,9 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 		Token: c.secret,
 	}
 
+	formattedUrl := gwcommon.GenerateFormattedURL(gc.Hook)
 	hookConfig := map[string]interface{}{
-		"url": &gc.URL,
+		"url": &formattedUrl,
 	}
 
 	if gc.ContentType != "" {
@@ -108,26 +109,27 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	}
 
 	client := gh.NewClient(PATTransport.Client())
-	rc.Configs[LabelGithubClient] = client
+	rc.Configs[labelGithubClient] = client
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	hook, _, err := client.Repositories.CreateHook(ctx, gc.Owner, gc.Repository, hookSetup)
 	if err != nil {
 		return fmt.Errorf("failed to create webhook. err: %+v", err)
 	}
-	rc.Configs[LabelWebhook] = hook
+	rc.Configs[labelWebhook] = hook
 
 	ese.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
 	return nil
 }
 
 func PostStop(rc *gwcommon.RouteConfig) error {
-	gc := rc.Configs[LabelGithubConfig].(*githubConfig)
-	client := rc.Configs[LabelGithubClient].(*gh.Client)
-	hook := rc.Configs[LabelWebhook].(*gh.Hook)
+	gc := rc.Configs[labelGithubConfig].(*githubConfig)
+	client := rc.Configs[labelGithubClient].(*gh.Client)
+	hook := rc.Configs[labelWebhook].(*gh.Hook)
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	if _, err := client.Repositories.DeleteHook(ctx, gc.Owner, gc.Repository, *hook.ID); err != nil {
 		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to delete github hook")
 		return err
@@ -148,12 +150,9 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	gc := config.(*githubConfig)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Port:     gc.Port,
-			Endpoint: gwcommon.FormatWebhookEndpoint(gc.Endpoint),
-		},
+		Webhook: gc.Hook,
 		Configs: map[string]interface{}{
-			LabelGithubConfig: gc,
+			labelGithubConfig: gc,
 		},
 		Log:                ese.Log,
 		EventSource:        eventSource,
@@ -185,16 +184,16 @@ func verifySignature(secret []byte, signature string, body []byte) bool {
 }
 
 func validatePayload(secret []byte, headers http.Header, body []byte) error {
-	signature := headers.Get(GithubSignatureHeader)
+	signature := headers.Get(githubSignatureHeader)
 	if len(signature) == 0 {
 		return errors.New("no x-hub-signature header found")
 	}
 
-	if event := headers.Get(GithubEventHeader); len(event) == 0 {
+	if event := headers.Get(githubEventHeader); len(event) == 0 {
 		return errors.New("no x-github-event header found")
 	}
 
-	if id := headers.Get(GithubDeliveryHeader); len(id) == 0 {
+	if id := headers.Get(githubDeliveryHeader); len(id) == 0 {
 		return errors.New("no x-github-delivery header found")
 	}
 
@@ -227,7 +226,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	hook := rc.Configs[LabelWebhook].(*gh.Hook)
+	hook := rc.Configs[labelWebhook].(*gh.Hook)
 	if secret, ok := hook.Config["secret"]; ok {
 		if err := validatePayload([]byte(secret.(string)), request.Header, body); err != nil {
 			logger.Error().Err(err).Msg("request is not valid event notification")

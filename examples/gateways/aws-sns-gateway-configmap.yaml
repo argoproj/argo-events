@@ -6,8 +6,10 @@ metadata:
 data:
   notification_1: |-
     topicArn: "topic-arn"
-    endpoint: "/"
-    port: "9600"
+    hook:
+     endpoint: "/"
+     port: "12000"
+     url: "placeholderurl"
     accessKey:
       name: aws-secret
       key: access

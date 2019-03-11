@@ -131,7 +131,7 @@ const (
 	// AnnotationGatewayResourceSpecHashName is the annotation of a gateway resource spec hash
 	AnnotationGatewayResourceSpecHashName = gateway.FullName + "/resource-spec-hash"
 
-	// Server Connection Timeout, 5 seconds
+	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
 )
 

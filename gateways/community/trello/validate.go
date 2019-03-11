@@ -34,14 +34,11 @@ func validateTrello(config interface{}) error {
 	if tl == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if tl.URL == "" {
-		return fmt.Errorf("url is not specified")
-	}
 	if tl.Token == nil {
 		return fmt.Errorf("token can't be empty")
 	}
 	if tl.ApiKey == nil {
 		return fmt.Errorf("api key can't be empty")
 	}
-	return gwcommon.ValidateWebhook(tl.Endpoint, tl.Port)
+	return gwcommon.ValidateWebhook(tl.Hook)
 }

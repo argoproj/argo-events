@@ -17,6 +17,7 @@ limitations under the License.
 package gitlab
 
 import (
+	"github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	"k8s.io/client-go/kubernetes"
@@ -33,15 +34,10 @@ type GitlabEventSourceExecutor struct {
 
 // glab contains information to setup a gitlab project integration
 type glab struct {
-	// REST API endpoint
-	Endpoint string `json:"endpoint"`
-	// Port on which HTTP server is listening for incoming events.
-	Port string `json:"port"`
+	// Webhook
+	Hook *common.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
-	// URL of a http server which is listening for gitlab events.
-	// Refer webhook gateway for more details. https://github.com/argoproj/argo-events/blob/master/docs/tutorial.md#webhook
-	URL string `json:"url"`
 	// Event is a gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
 	Event string `json:"event"`

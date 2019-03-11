@@ -36,13 +36,16 @@ type Webhook struct {
 	Method string `json:"method" protobuf:"bytes,2,name=method"`
 	// Port on which HTTP server is listening for incoming events.
 	Port string `json:"port" protobuf:"bytes,3,name=port"`
+	// URL is the url of the server.
+	URL string `json:"url" protobuf:"bytes,4,name=url"`
 	// ServerCertPath refers the file that contains the cert.
 	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,4,opt,name=serverCertPath"`
 	// ServerKeyPath refers the file that contains private key
 	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,5,opt,name=serverKeyPath"`
+
 	// srv holds reference to http server
-	srv *http.Server   `json:"srv,omitempty"`
-	mux *http.ServeMux `json:"mux,omitempty"`
+	srv *http.Server
+	mux *http.ServeMux
 }
 
 // WebhookHelper is a helper struct
@@ -70,7 +73,7 @@ type activeServer struct {
 	errChan chan error
 }
 
-// RouteConfig contains configuration about a http route
+// RouteConfig contains configuration about an http route
 type RouteConfig struct {
 	Webhook            *Webhook
 	Configs            map[string]interface{}
@@ -236,17 +239,20 @@ func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.E
 	return nil
 }
 
-func ValidateWebhook(endpoint, port string) error {
-	if endpoint == "" {
+func ValidateWebhook(w *Webhook) error {
+	if w == nil {
+		return fmt.Errorf("")
+	}
+	if w.Endpoint == "" {
 		return fmt.Errorf("endpoint can't be empty")
 	}
-	if port == "" {
+	if w.Port == "" {
 		return fmt.Errorf("port can't be empty")
 	}
-	if port != "" {
-		_, err := strconv.Atoi(port)
+	if w.Port != "" {
+		_, err := strconv.Atoi(w.Port)
 		if err != nil {
-			return fmt.Errorf("failed to parse server port %s. err: %+v", port, err)
+			return fmt.Errorf("failed to parse server port %s. err: %+v", w.Port, err)
 		}
 	}
 	return nil
@@ -257,4 +263,8 @@ func FormatWebhookEndpoint(endpoint string) string {
 		return fmt.Sprintf("/%s", endpoint)
 	}
 	return endpoint
+}
+
+func GenerateFormattedURL(w *Webhook) string {
+	return fmt.Sprintf("%s%s", w.URL, FormatWebhookEndpoint(w.Endpoint))
 }

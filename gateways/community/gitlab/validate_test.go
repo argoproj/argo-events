@@ -27,10 +27,11 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
-endpoint: "/push"
-port: "12000"
+hook:
+ endpoint: "/push"
+ port: "12000"
+ url: "http://webhook-gateway-gateway-svc/push"
 projectId: "28"
-url: "http://webhook-gateway-gateway-svc/push"
 event: "PushEvents"
 accessToken:
     key: accesskey

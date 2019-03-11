@@ -6,7 +6,10 @@ data:
   project_1: |-
     owner: "owner-example"
     repository: "repo-example"
-    url: "http://webhook-gateway-http-svc/push"
+    hook:
+     endpoint: "/push"
+     port: "12000"
+     url: "placeholderurl"
     events:
     - "*"
     apiToken:

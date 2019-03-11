@@ -30,9 +30,9 @@ import (
 )
 
 const (
-	LabelGitlabConfig = "config"
-	LabelGitlabClient = "client"
-	LabelWebhook      = "hook"
+	labelGitlabConfig = "config"
+	labelGitlabClient = "client"
+	labelWebhook      = "hook"
 )
 
 var (
@@ -55,7 +55,7 @@ func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, e
 }
 
 func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	gl := rc.Configs[LabelGitlabConfig].(*glab)
+	gl := rc.Configs[labelGitlabConfig].(*glab)
 
 	c, err := ese.getCredentials(gl.AccessToken)
 	if err != nil {
@@ -67,10 +67,12 @@ func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 		return fmt.Errorf("failed to set gitlab base url, err: %+v", err)
 	}
 
-	rc.Configs[LabelGitlabClient] = client
+	rc.Configs[labelGitlabClient] = client
+
+	formattedUrl := gwcommon.GenerateFormattedURL(gl.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &gl.URL,
+		URL:   &formattedUrl,
 		Token: &c.token,
 		EnableSSLVerification: &gl.EnableSSLVerification,
 	}
@@ -88,16 +90,16 @@ func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	if err != nil {
 		return fmt.Errorf("failed to add project hook. err: %+v", err)
 	}
-	rc.Configs[LabelWebhook] = hook
+	rc.Configs[labelWebhook] = hook
 
 	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
 	return nil
 }
 
 func PostStop(rc *gwcommon.RouteConfig) error {
-	gl := rc.Configs[LabelGitlabConfig].(*glab)
-	client := rc.Configs[LabelGitlabClient].(*gitlab.Client)
-	hook := rc.Configs[LabelWebhook].(*gitlab.ProjectHook)
+	gl := rc.Configs[labelGitlabConfig].(*glab)
+	client := rc.Configs[labelGitlabClient].(*gitlab.Client)
+	hook := rc.Configs[labelWebhook].(*gitlab.ProjectHook)
 
 	if _, err := client.Projects.DeleteProjectHook(gl.ProjectId, hook.ID); err != nil {
 		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Interface("hook-id", hook.ID).Msg("failed to delete gitlab hook")
@@ -149,12 +151,9 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	gl := config.(*glab)
 
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: &gwcommon.Webhook{
-			Endpoint: gwcommon.FormatWebhookEndpoint(gl.Endpoint),
-			Port:     gl.Port,
-		},
+		Webhook: gl.Hook,
 		Configs: map[string]interface{}{
-			LabelGitlabConfig: gl,
+			labelGitlabConfig: gl,
 		},
 		Log:                ese.Log,
 		EventSource:        eventSource,

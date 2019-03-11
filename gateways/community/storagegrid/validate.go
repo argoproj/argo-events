@@ -32,5 +32,5 @@ func validateStorageGrid(config interface{}) error {
 	if sg == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	return gwcommon.ValidateWebhook(sg.Endpoint, sg.Port)
+	return gwcommon.ValidateWebhook(sg.Hook)
 }

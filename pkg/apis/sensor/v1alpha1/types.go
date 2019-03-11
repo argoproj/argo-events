@@ -27,20 +27,25 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// NotificationType represent a type of notifications that are handled by a sensor
 type NotificationType string
 
 const (
-	EventNotification          NotificationType = "Event"
+	// EventNotification is a notification for an event dependency (from a Gateway)
+	EventNotification NotificationType = "Event"
+	// ResourceUpdateNotification is a notification that an associated resource was updated
 	ResourceUpdateNotification NotificationType = "ResourceUpdate"
 )
 
 // NodeType is the type of a node
 type NodeType string
 
-// possible node types
 const (
+	// NodeTypeEventDependency is a node that represents a single event dependency
 	NodeTypeEventDependency NodeType = "EventDependency"
-	NodeTypeTrigger         NodeType = "Trigger"
+	// NodeTypeTrigger is a node that represents a single trigger
+	NodeTypeTrigger NodeType = "Trigger"
+	// NodeTypeDependencyGroup is a node that represents a group of event dependencies
 	NodeTypeDependencyGroup NodeType = "DependencyGroup"
 )
 
@@ -186,7 +191,7 @@ type DataFilter struct {
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type"`
 
 	// Value is the allowed string values for this key
-	// Booleans are pased using strconv.ParseBool()
+	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
 	// Strings are taken as is
 	// Nils this value is ignored
@@ -385,12 +390,13 @@ type GitArtifact struct {
 	// Tag to use to pull trigger resource
 	// +optional
 	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
-	// Git remote to manage set of tracked repositories. Defaults to "origin".
+	// Remote to manage set of tracked repositories. Defaults to "origin".
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
 	Remote *GitRemoteConfig `json:"remote" protobuf:"bytes,9,opt,name=remote"`
 }
 
+// GitRemoteConfig contains the configuration of a Git remote
 type GitRemoteConfig struct {
 	// Name of the remote to fetch from.
 	Name string `json:"name" protobuf:"bytes,1,name=name"`

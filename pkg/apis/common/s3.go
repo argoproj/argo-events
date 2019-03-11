@@ -33,7 +33,7 @@ type S3Artifact struct {
 	Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
-// Name contains information for an S3 Name
+// S3Bucket contains information to describe an S3 Bucket
 type S3Bucket struct {
 	Key  string `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
 	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
