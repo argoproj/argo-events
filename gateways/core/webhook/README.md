@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/webhook.png?raw=true" alt="Webhook"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/webhook.png?raw=true" alt="Webhook"/>
 </p>
 
 # Webhook
