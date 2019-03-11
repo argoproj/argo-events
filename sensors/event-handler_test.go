@@ -17,7 +17,10 @@ limitations under the License.
 package sensors
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -84,18 +87,22 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return &sensor, err
 }
 
-type mockHttpWriter struct{}
+type mockHttpWriter struct {
+	Status  int
+	Payload []byte
+}
 
 func (m *mockHttpWriter) Header() http.Header {
 	return http.Header{}
 }
 
-func (m *mockHttpWriter) Write([]byte) (int, error) {
+func (m *mockHttpWriter) Write(p []byte) (int, error) {
+	m.Payload = p
 	return 0, nil
 }
 
 func (m *mockHttpWriter) WriteHeader(statusCode int) {
-
+	m.Status = statusCode
 }
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
@@ -108,6 +115,7 @@ func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,
 		controllerInstanceID: "test-1",
+		queue:                make(chan *updateNotification),
 	}
 }
 
@@ -174,5 +182,87 @@ func TestEventHandler(t *testing.T) {
 			convey.So(len(sec.sensor.Status.Nodes), convey.ShouldEqual, 3)
 		})
 
+	})
+}
+
+func TestValidateEvent(t *testing.T) {
+	convey.Convey("Given an event, validate it", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		dep, valid := sec.validateEvent(&apicommon.Event{
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		})
+		convey.So(valid, convey.ShouldEqual, true)
+		convey.So(dep, convey.ShouldNotBeNil)
+	})
+}
+
+func TestParseEvent(t *testing.T) {
+	convey.Convey("Given an event payload, parse event", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		payload, err := json.Marshal(e)
+		convey.So(err, convey.ShouldBeNil)
+
+		event, err := sec.parseEvent(payload)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(string(event.Payload), convey.ShouldEqual, "hello")
+	})
+}
+
+func TestSendToInternalQueue(t *testing.T) {
+	convey.Convey("Given an event, send it on internal queue", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		go func() {
+			<-sec.queue
+		}()
+		ok := sec.sendEventToInternalQueue(e, &mockHttpWriter{})
+		convey.So(ok, convey.ShouldEqual, true)
+	})
+}
+
+func TestHandleHttpEventHandler(t *testing.T) {
+	convey.Convey("Test http handler", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		go func() {
+			<-sec.queue
+		}()
+		payload, err := json.Marshal(e)
+		convey.So(err, convey.ShouldBeNil)
+		writer := &mockHttpWriter{}
+		sec.httpEventHandler(writer, &http.Request{
+			Body: ioutil.NopCloser(bytes.NewReader(payload)),
+		})
+		convey.So(writer.Status, convey.ShouldEqual, http.StatusOK)
 	})
 }
