@@ -19,74 +19,12 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"testing"
 	"time"
-)
 
-//func TestWebhook(t *testing.T) {
-//	convey.Convey("Given a webhook helper, initialize the routes channels", t, func() {
-//		webhookHelper := NewWebhookHelper()
-//		go InitRouteChannels(webhookHelper)
-//
-//		rc := GetFakeRouteConfig()
-//
-//		webhookHelper.RouteActivateChan <- rc
-//
-//		<-rc.StartCh
-//
-//		convey.Convey("Confirm the server is running on specified port", func() {
-//			convey.So(len(webhookHelper.ActiveServers), convey.ShouldEqual, 1)
-//
-//			conn, err := net.Dial("tcp", ":12000")
-//			convey.So(err, convey.ShouldBeNil)
-//			convey.So(conn, convey.ShouldNotBeNil)
-//
-//			convey.Convey("Add route to server and validate that server serves the endpoint", func() {
-//				rc.RouteActiveHandler = func(writer http.ResponseWriter, request *http.Request, rc *RouteConfig) {
-//					if !webhookHelper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-//						common.SendErrorResponse(writer, "error")
-//						return
-//					}
-//
-//					writer.WriteHeader(http.StatusOK)
-//					writer.Write([]byte("hello there"))
-//				}
-//
-//				rc.activateRoute(webhookHelper)
-//
-//				convey.So(len(webhookHelper.ActiveEndpoints), convey.ShouldEqual, 1)
-//
-//				resp, err := http.Get("http://127.0.0.1:12000/fake")
-//				convey.So(err, convey.ShouldBeNil)
-//				convey.So(resp, convey.ShouldNotBeNil)
-//				payload, err := ioutil.ReadAll(resp.Body)
-//				convey.So(err, convey.ShouldBeNil)
-//				convey.So(string(payload), convey.ShouldEqual, "hello there")
-//				convey.So(resp.Status, convey.ShouldEqual, "200 OK")
-//
-//				convey.Convey("Deactivate an endpoint", func() {
-//					port, as := webhookHelper.ActiveServers[rc.Webhook.Port]
-//					convey.So(port, convey.ShouldNotBeEmpty)
-//					convey.So(as, convey.ShouldNotBeNil)
-//
-//					webhookHelper.RouteDeactivateChan <- rc
-//
-//					time.Sleep(time.Second * 2)
-//
-//					resp, err := http.Get("http://127.0.0.1:12000/fake")
-//					convey.So(err, convey.ShouldBeNil)
-//					convey.So(resp, convey.ShouldNotBeNil)
-//					payload, err := ioutil.ReadAll(resp.Body)
-//					convey.So(err, convey.ShouldBeNil)
-//					convey.So(string(payload), convey.ShouldEqual, "error")
-//					convey.So(resp.Status, convey.ShouldEqual, "400 Bad Request")
-//				})
-//			})
-//		})
-//	})
-//}
+	"github.com/smartystreets/goconvey/convey"
+)
 
 func TestDefaultPostActivate(t *testing.T) {
 	convey.Convey("Given a route configuration, default post activate should be a no-op", t, func() {
@@ -226,5 +164,30 @@ func TestNewWebhookHelper(t *testing.T) {
 	convey.Convey("Make sure webhook helper is not empty", t, func() {
 		helper := NewWebhookHelper()
 		convey.So(helper, convey.ShouldNotBeNil)
+	})
+}
+
+func TestInitRouteChannels(t *testing.T) {
+	convey.Convey("Test init channels for webhook helper", t, func() {
+		rc := GetFakeRouteConfig()
+		helper := NewWebhookHelper()
+		helper.ActiveServers[rc.Webhook.Port] = &activeServer{}
+		go InitRouteChannels(helper)
+
+		extraStart := make(chan bool, 1)
+		go func() {
+			<-rc.StartCh
+			extraStart <- true
+		}()
+
+		helper.RouteActivateChan <- rc
+		started := <-extraStart
+		convey.So(started, convey.ShouldEqual, true)
+
+		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{}
+
+		helper.RouteDeactivateChan <- rc
+		time.Sleep(2 * time.Second)
+		convey.So(helper.ActiveEndpoints[rc.Webhook.Endpoint].Active, convey.ShouldEqual, false)
 	})
 }
