@@ -18,8 +18,9 @@ package sensor
 
 import (
 	"fmt"
-	"github.com/Knetic/govaluate"
 	"time"
+
+	"github.com/Knetic/govaluate"
 
 	"github.com/argoproj/argo-events/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
@@ -38,7 +39,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err != nil {
 		return err
 	}
-	if len(s.Spec.DeploySpec.Containers) > 1 {
+	if len(s.Spec.DeploySpec.Spec.Containers) > 1 {
 		return fmt.Errorf("sensor pod specification can't have more than one container")
 	}
 	switch s.Spec.EventProtocol.Type {

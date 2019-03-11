@@ -84,7 +84,7 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
 	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,name=deploySpec"`
+	DeploySpec *corev1.PodTemplateSpec `json:"deploySpec" protobuf:"bytes,3,name=deploySpec"`
 
 	// EventProtocol is the protocol through which sensor receives events from gateway
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`

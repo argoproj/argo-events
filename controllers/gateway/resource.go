@@ -71,9 +71,19 @@ func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
 
 // newGatewayService returns a new service that exposes gateway.
 func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
-	service := grc.gw.Spec.ServiceSpec.DeepCopy()
-	if service == nil {
+	servicTemplateSpec := grc.gw.Spec.ServiceSpec.DeepCopy()
+	if servicTemplateSpec == nil {
 		return nil, nil
+	}
+	service := &corev1.Service{
+		ObjectMeta: servicTemplateSpec.ObjectMeta,
+		Spec:       servicTemplateSpec.Spec,
+	}
+	if service.Namespace == "" {
+		service.Namespace = grc.gw.Namespace
+	}
+	if service.Name == "" {
+		service.Name = common.DefaultServiceName(grc.gw.Name)
 	}
 	err := grc.SetObjectMeta(grc.gw, service)
 	return service, err
@@ -107,14 +117,24 @@ func (grc *gwResourceCtx) deleteGatewayPod(pod *corev1.Pod) error {
 
 // newGatewayPod returns a new pod of gateway
 func (grc *gwResourceCtx) newGatewayPod() (*corev1.Pod, error) {
-	pod := grc.gw.Spec.DeploySpec.DeepCopy()
-	pod.Spec.Containers = *grc.getContainersForGatewayPod()
+	podTemplateSpec := grc.gw.Spec.DeploySpec.DeepCopy()
+	pod := &corev1.Pod{
+		ObjectMeta: podTemplateSpec.ObjectMeta,
+		Spec:       podTemplateSpec.Spec,
+	}
+	if pod.Namespace == "" {
+		pod.Namespace = grc.gw.Namespace
+	}
+	if pod.Name == "" {
+		pod.Name = grc.gw.Name
+	}
+	grc.setupContainersForGatewayPod(pod)
 	err := grc.SetObjectMeta(grc.gw, pod)
 	return pod, err
 }
 
 // containers required for gateway deployment
-func (grc *gwResourceCtx) getContainersForGatewayPod() *[]corev1.Container {
+func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
@@ -142,10 +162,9 @@ func (grc *gwResourceCtx) getContainersForGatewayPod() *[]corev1.Container {
 			Value: grc.gw.Spec.ProcessorPort,
 		},
 	}
-	containers := make([]corev1.Container, len(grc.gw.Spec.DeploySpec.Spec.Containers))
-	for i, container := range grc.gw.Spec.DeploySpec.Spec.Containers {
+	containers := make([]corev1.Container, len(pod.Spec.Containers))
+	for i, container := range pod.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
 		containers[i] = container
 	}
-	return &containers
 }

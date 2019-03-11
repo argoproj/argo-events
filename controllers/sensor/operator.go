@@ -136,7 +136,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 	soc.log.Info().Str("pod-name", pod.Name).Msg("sensor pod is created")
 
 	// expose sensor if service is configured
-	if soc.srctx.getServiceSpec() != nil {
+	if soc.srctx.getServiceTemplateSpec() != nil {
 		svc, err := soc.createSensorService()
 		if err != nil {
 			errors.Wrap(err, "failed to create sensor service")

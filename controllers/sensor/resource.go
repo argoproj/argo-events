@@ -73,16 +73,19 @@ func (src *sResourceCtx) getSensorService() (*corev1.Service, error) {
 
 // newSensorService returns a new service that exposes sensor.
 func (src *sResourceCtx) newSensorService() (*corev1.Service, error) {
-	serviceSpec := src.getServiceSpec()
-	if serviceSpec == nil {
+	serviceTemplateSpec := src.getServiceTemplateSpec()
+	if serviceTemplateSpec == nil {
 		return nil, nil
 	}
 	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      common.DefaultServiceName(src.s.Name),
-			Namespace: src.s.Namespace,
-		},
-		Spec: *serviceSpec.DeepCopy(),
+		ObjectMeta: serviceTemplateSpec.ObjectMeta,
+		Spec:       serviceTemplateSpec.Spec,
+	}
+	if service.Namespace == "" {
+		service.Namespace = src.s.Namespace
+	}
+	if service.Name == "" {
+		service.Name = common.DefaultServiceName(src.s.Name)
 	}
 	err := src.SetObjectMeta(src.s, service)
 	return service, err
@@ -116,21 +119,24 @@ func (src *sResourceCtx) deleteSensorPod(pod *corev1.Pod) error {
 
 // newSensorPod returns a new pod of sensor
 func (src *sResourceCtx) newSensorPod() (*corev1.Pod, error) {
-	podSpec := src.s.Spec.DeploySpec.DeepCopy()
+	podTemplateSpec := src.s.Spec.DeploySpec.DeepCopy()
 	pod := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      src.s.Name,
-			Namespace: src.s.Namespace,
-		},
-		Spec: *podSpec,
+		ObjectMeta: podTemplateSpec.ObjectMeta,
+		Spec:       podTemplateSpec.Spec,
 	}
-	pod.Spec.Containers = *src.getContainersForSensorPod()
+	if pod.Namespace == "" {
+		pod.Namespace = src.s.Namespace
+	}
+	if pod.Name == "" {
+		pod.Name = src.s.Name
+	}
+	src.setupContainersForSensorPod(pod)
 	err := src.SetObjectMeta(src.s, pod)
 	return pod, err
 }
 
 // containers required for sensor deployment
-func (src *sResourceCtx) getContainersForSensorPod() *[]corev1.Container {
+func (src *sResourceCtx) setupContainersForSensorPod(pod *corev1.Pod) {
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
@@ -146,29 +152,30 @@ func (src *sResourceCtx) getContainersForSensorPod() *[]corev1.Container {
 			Value: src.controller.Config.InstanceID,
 		},
 	}
-	containers := make([]corev1.Container, len(src.s.Spec.DeploySpec.Containers))
-	for i, container := range src.s.Spec.DeploySpec.Containers {
+	containers := make([]corev1.Container, len(pod.Spec.Containers))
+	for i, container := range pod.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
 		containers[i] = container
 	}
-	return &containers
 }
 
-func (src *sResourceCtx) getServiceSpec() *corev1.ServiceSpec {
-	var serviceSpec *corev1.ServiceSpec
+func (src *sResourceCtx) getServiceTemplateSpec() *pc.ServiceTemplateSpec {
+	var serviceSpec *pc.ServiceTemplateSpec
 	// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
 	if src.s.Spec.EventProtocol.Type == pc.HTTP {
-		serviceSpec = &corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Port:       intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal,
-					TargetPort: intstr.FromInt(int(intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal)),
+		serviceSpec = &pc.ServiceTemplateSpec{
+			Spec: corev1.ServiceSpec{
+				Ports: []corev1.ServicePort{
+					{
+						Port:       intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal,
+						TargetPort: intstr.FromInt(int(intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal)),
+					},
 				},
-			},
-			Type: corev1.ServiceTypeClusterIP,
-			Selector: map[string]string{
-				common.LabelSensorName:                    src.s.Name,
-				common.LabelKeySensorControllerInstanceID: src.controller.Config.InstanceID,
+				Type: corev1.ServiceTypeClusterIP,
+				Selector: map[string]string{
+					common.LabelSensorName:                    src.s.Name,
+					common.LabelKeySensorControllerInstanceID: src.controller.Config.InstanceID,
+				},
 			},
 		}
 	}
