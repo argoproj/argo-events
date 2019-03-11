@@ -2,6 +2,8 @@
   <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/webhook.png?raw=true" alt="Webhook"/>
 </p>
 
+<br/>
+
 # Webhook
 
 The webhook gateway basically runs one or more http servers in a pod.
@@ -54,7 +56,7 @@ run multiple http servers.
 **But where is the `start` configuration to run the server?** 
 
 There is no such `start` configuration that is needed explicitly to start a server.
-If you define an entry that contains a port which is not defined in any previous entries in the configmap, the
+If you define an entry that contains a port which is not defined in any of the previous entries in the configmap, the
 gateway pod will automatically start a http server on that port.
 
 ```yaml
@@ -73,6 +75,10 @@ gateway pod will automatically start a http server on that port.
       method: "POST"
 ```
 
+## Why is there a service spec in gateway spec?
+Because you probably want to expose the gateway to the outside world as gateway pod running is http server/s. 
+If you don't to expose the gateway, just remove the `serviceSpec`. 
+
 ## Setup
 
 **1. Install Gateway Configmap**
@@ -81,16 +87,19 @@ gateway pod will automatically start a http server on that port.
  kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-gateway-configmap.yaml
 ```
 
-**2. Install gateway**
+**2. Install Gateway**
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-http.yaml
 ```
-Make sure the gateway is in active state and all the event sources are in running state.
-   
+
+Make sure the gateway pod and service is created.
+
 **3. Install Sensor**
 ```yaml
 kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-http.yaml
 ```
+
+Make sure the sensor pod is created.
 
 **4. Trigger Workflow**
 
