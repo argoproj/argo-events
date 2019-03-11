@@ -10,7 +10,7 @@
 Artifact gateway listens to bucket notifications from Minio S3 server. If you are interested in AWS S3 then 
 read [AWS SNS Gateway]() 
 
-## What types bucket notifications minio offers?
+## What types of bucket notifications minio offers?
 Read [here](https://docs.minio.io/docs/minio-bucket-notification-guide.html)
 
 ## How to define an event source in confimap?
@@ -23,7 +23,7 @@ Region    string                      `json:"region,omitempty" protobuf:"bytes,3
 Insecure  bool                        `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
 AccessKey *corev1.SecretKeySelector   `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 SecretKey *corev1.SecretKeySelector   `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
-Event     minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,7,opt,name=event"`
+Event     []string                    `json:"events,omitempty" protobuf:"bytes,7,opt,name=events"`
 Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 ```
 
@@ -113,6 +113,7 @@ kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/ma
 ```
 
 **4. Trigger workflow**
+
 Drop a file onto `input` bucket and monitor workflows
 
 ## How to listen to notifications from different bucket
