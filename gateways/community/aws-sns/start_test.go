@@ -46,8 +46,8 @@ func TestAWSSNS(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		snsSession := snslib.New(awsSession)
-		rc.Configs[LabelSNSSession] = snsSession
-		rc.Configs[LabelSubscriptionArn] = &subscriptionArn
+		rc.Configs[labelSNSSession] = snsSession
+		rc.Configs[labelSubscriptionArn] = &subscriptionArn
 
 		convey.Convey("handle the inactive route", func() {
 			RouteActiveHandler(writer, &http.Request{}, rc)
@@ -58,13 +58,13 @@ func TestAWSSNS(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-		rc.Configs[LabelSNSConfig] = ps.(*snsConfig)
+		rc.Configs[labelSNSConfig] = ps.(*snsConfig)
 
 		convey.Convey("handle the active route", func() {
 			payload := httpNotification{
 				TopicArn: "arn://fake",
 				Token:    "faketoken",
-				Type:     MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION,
+				Type:     messageTypeSubscriptionConfirmation,
 			}
 
 			payloadBytes, err := yaml.Marshal(payload)
@@ -79,7 +79,7 @@ func TestAWSSNS(t *testing.T) {
 				<-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
 			}()
 
-			payload.Type = MESSAGE_TYPE_NOTIFICATION
+			payload.Type = messageTypeNotification
 			payloadBytes, err = yaml.Marshal(payload)
 			convey.So(err, convey.ShouldBeNil)
 			RouteActiveHandler(writer, &http.Request{

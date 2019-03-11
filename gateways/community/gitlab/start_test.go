@@ -87,7 +87,7 @@ func TestRouteActiveHandler(t *testing.T) {
 
 			convey.Convey("Active route should return success", func() {
 				helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-				rc.Configs[LabelWebhook] = &github.Hook{
+				rc.Configs[labelWebhook] = &github.Hook{
 					Config: make(map[string]interface{}),
 				}
 				dataCh := make(chan []byte)
@@ -103,7 +103,7 @@ func TestRouteActiveHandler(t *testing.T) {
 				data := <-dataCh
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 				convey.So(string(data), convey.ShouldEqual, string(pbytes))
-				rc.Configs[LabelGitlabConfig] = ps.(*glab)
+				rc.Configs[labelGitlabConfig] = ps.(*glab)
 				err = ese.PostActivate(rc)
 				convey.So(err, convey.ShouldNotBeNil)
 			})

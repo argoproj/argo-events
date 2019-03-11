@@ -17,9 +17,10 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
 	"net/http"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/common"
 
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
@@ -34,15 +35,18 @@ type StorageGridEventSourceExecutor struct {
 type storageGrid struct {
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
+
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`
 	Events []string `json:"events,omitempty"`
+
 	// Filter on object key which caused the notification.
 	Filter *Filter `json:"filter,omitempty"`
+
 	// srv holds reference to http server
-	srv *http.Server   `json:"srv,omitempty"`
-	mux *http.ServeMux `json:"mux,omitempty"`
+	srv *http.Server
+	mux *http.ServeMux
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects

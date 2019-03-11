@@ -87,7 +87,7 @@ func TestRouteActiveHandler(t *testing.T) {
 
 			convey.Convey("Active route should return success", func() {
 				helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-				rc.Configs[LabelWebhook] = &github.Hook{
+				rc.Configs[labelWebhook] = &github.Hook{
 					Config: make(map[string]interface{}),
 				}
 				dataCh := make(chan []byte)
@@ -103,7 +103,7 @@ func TestRouteActiveHandler(t *testing.T) {
 				data := <-dataCh
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 				convey.So(string(data), convey.ShouldEqual, string(pbytes))
-				rc.Configs[LabelGithubConfig] = ps.(*githubConfig)
+				rc.Configs[labelGithubConfig] = ps.(*githubConfig)
 				err = ese.PostActivate(rc)
 				convey.So(err, convey.ShouldNotBeNil)
 			})
@@ -116,9 +116,9 @@ func TestValidatePayload(t *testing.T) {
 		req := http.Request{
 			Header: make(map[string][]string),
 		}
-		req.Header.Set(GithubSignatureHeader, "fake-sig")
-		req.Header.Set(GithubEventHeader, "fake-event")
-		req.Header.Set(GithubDeliveryHeader, "fake-delivery")
+		req.Header.Set(githubSignatureHeader, "fake-sig")
+		req.Header.Set(githubEventHeader, "fake-event")
+		req.Header.Set(githubDeliveryHeader, "fake-delivery")
 		err := validatePayload([]byte("fake-secret"), req.Header, []byte("fake-body"))
 		convey.So(err, convey.ShouldNotBeNil)
 		convey.So(err.Error(), convey.ShouldEqual, "invalid signature")

@@ -34,7 +34,7 @@ func TestPersistUpdates(t *testing.T) {
 				updatedGw.Labels["new"] = "new"
 
 				convey.Convey("Reapply the gateway", func() {
-					err := ReapplyUpdate(client, updatedGw)
+					err := ReapplyUpdates(client, updatedGw)
 					convey.So(err, convey.ShouldBeNil)
 					convey.So(len(updatedGw.Labels), convey.ShouldEqual, 2)
 				})

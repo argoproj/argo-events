@@ -43,7 +43,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		rc.Configs[LabelSlackToken] = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
+		rc.Configs[labelSlackToken] = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
 		helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
 
 		convey.Convey("Test url verification request", func() {
