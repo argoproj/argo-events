@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// persist the updates to the gateway resource
+// PersistUpdates of the gateway resource
 func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *zerolog.Logger) (*v1alpha1.Gateway, error) {
 	gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.ObjectMeta.Namespace)
 
@@ -23,7 +23,7 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *zerolo
 			return oldgw, err
 		}
 		log.Info().Msg("re-applying updates on latest version and retrying update")
-		err = ReapplyUpdate(client, gw)
+		err = ReapplyUpdates(client, gw)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to re-apply update")
 			return oldgw, err
@@ -33,8 +33,8 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *zerolo
 	return gw, nil
 }
 
-// reapply the updates to gateway resource
-func ReapplyUpdate(client gwclient.Interface, gw *v1alpha1.Gateway) error {
+// ReapplyUpdates to gateway resource
+func ReapplyUpdates(client gwclient.Interface, gw *v1alpha1.Gateway) error {
 	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
 		gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.Namespace)
 		g, err := gatewayClient.Update(gw)

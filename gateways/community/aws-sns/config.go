@@ -17,9 +17,10 @@ limitations under the License.
 package aws_sns
 
 import (
+	"time"
+
 	"github.com/argoproj/argo-events/gateways/common"
 	"k8s.io/client-go/kubernetes"
-	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
@@ -27,8 +28,8 @@ import (
 )
 
 const (
-	MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION = "SubscriptionConfirmation"
-	MESSAGE_TYPE_NOTIFICATION              = "Notification"
+	messageTypeSubscriptionConfirmation = "SubscriptionConfirmation"
+	messageTypeNotification             = "Notification"
 )
 
 var (

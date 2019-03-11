@@ -17,15 +17,11 @@ limitations under the License.
 package pubsub
 
 import (
-	"cloud.google.com/go/pubsub"
 	"context"
+
+	"cloud.google.com/go/pubsub"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
-)
-
-const (
-	// LabelGcpPubSubConfig is the label name of the GCP PubSub Config
-	LabelGcpPubSubConfig = "pubSubConfig"
 )
 
 // StartEventSource starts the GCP PubSub Gateway
