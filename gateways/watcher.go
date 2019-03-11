@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,7 +87,7 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
-// WatchGatewayEventSources watches change in the gateway resource
+// WatchGateway watches for changes in the gateway resource
 // This will act as replacement for old gateway-transformer-configmap. Changes to watchers, event version and event type will be reflected.
 func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, error) {
 	source := gc.newGatewayWatch(gc.Name)

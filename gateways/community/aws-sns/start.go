@@ -33,9 +33,9 @@ import (
 )
 
 const (
-	LabelSNSConfig       = "snsConfig"
-	LabelSNSSession      = "snsSession"
-	LabelSubscriptionArn = "subscriptionArn"
+	labelSNSConfig       = "snsConfig"
+	labelSNSSession      = "snsSession"
+	labelSubscriptionArn = "subscriptionArn"
 )
 
 var (
@@ -46,7 +46,7 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// routeActiveHandler handles new route
+// RouteActiveHandler handles new routes
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
 
@@ -76,11 +76,11 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	sc := rc.Configs[LabelSNSConfig].(*snsConfig)
+	sc := rc.Configs[labelSNSConfig].(*snsConfig)
 
 	switch snspayload.Type {
-	case MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION:
-		awsSession := rc.Configs[LabelSNSSession].(*snslib.SNS)
+	case messageTypeSubscriptionConfirmation:
+		awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
 		out, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
 			TopicArn: &sc.TopicArn,
 			Token:    &snspayload.Token,
@@ -89,9 +89,9 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 			logger.Error().Err(err).Msg("failed to send confirmation response to amazon")
 			return
 		}
-		rc.Configs[LabelSubscriptionArn] = out.SubscriptionArn
+		rc.Configs[labelSubscriptionArn] = out.SubscriptionArn
 
-	case MESSAGE_TYPE_NOTIFICATION:
+	case messageTypeNotification:
 		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
 	}
 
@@ -100,11 +100,12 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	common.SendSuccessResponse(writer, response)
 }
 
+// PostActivate subscribes to the sns topic
 func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
 	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
 		Str("port", rc.Webhook.Port).Logger()
 
-	sc := rc.Configs[LabelSNSConfig].(*snsConfig)
+	sc := rc.Configs[labelSNSConfig].(*snsConfig)
 	// retrieve access key id and secret access key
 	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, sc.AccessKey.Name, sc.AccessKey.Key)
 	if err != nil {
@@ -135,7 +136,7 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 	}
 
 	snsSession := snslib.New(awsSession)
-	rc.Configs[LabelSNSSession] = snsSession
+	rc.Configs[labelSNSSession] = snsSession
 
 	logger.Info().Msg("subscribing to snsConfig topic")
 	if _, err := snsSession.Subscribe(&snslib.SubscribeInput{
@@ -150,11 +151,11 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 	return nil
 }
 
-// PostStop unsubscribes the topic
+// PostStop unsubscribes from the sns topic
 func PostStop(rc *gwcommon.RouteConfig) error {
-	awsSession := rc.Configs[LabelSNSSession].(*snslib.SNS)
+	awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
 	if _, err := awsSession.Unsubscribe(&snslib.UnsubscribeInput{
-		SubscriptionArn: rc.Configs[LabelSubscriptionArn].(*string),
+		SubscriptionArn: rc.Configs[labelSubscriptionArn].(*string),
 	}); err != nil {
 		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to unsubscribe")
 		return err
@@ -162,7 +163,7 @@ func PostStop(rc *gwcommon.RouteConfig) error {
 	return nil
 }
 
-// StartConfig runs a configuration
+// StartEventSource starts an SNS event source
 func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
@@ -177,7 +178,7 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: sc.Hook,
 		Configs: map[string]interface{}{
-			LabelSNSConfig: sc,
+			labelSNSConfig: sc,
 		},
 		Log:                ese.Log,
 		EventSource:        eventSource,

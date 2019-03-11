@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	LabelSlackToken = "slackToken"
+	labelSlackToken = "slackToken"
 )
 
 var (
@@ -41,7 +41,7 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// routeActiveHandler handles new route
+// RouteActiveHandler handles new route
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
 
@@ -65,7 +65,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	}
 
 	body := buf.String()
-	token := rc.Configs[LabelSlackToken]
+	token := rc.Configs[labelSlackToken]
 	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: token.(string)}))
 	if e != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
@@ -118,7 +118,7 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
 		Webhook: sc.Hook,
 		Configs: map[string]interface{}{
-			LabelSlackToken: token,
+			labelSlackToken: token,
 		},
 		Log:                ese.Log,
 		EventSource:        eventSource,

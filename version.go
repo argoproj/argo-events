@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package argo_events
+package argoevents
 
 import (
 	"fmt"
@@ -43,6 +43,7 @@ type Version struct {
 	Platform     string
 }
 
+// String outputs the version as a string
 func (v Version) String() string {
 	return v.Version
 }
