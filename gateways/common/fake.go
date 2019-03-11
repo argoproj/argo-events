@@ -46,34 +46,36 @@ func GetFakeRouteConfig() *RouteConfig {
 	}
 }
 
-type fakeGRPCStream struct {
-	ctx context.Context
+type FakeGRPCStream struct {
+	SentData *gateways.Event
+	Ctx      context.Context
 }
 
-func (f *fakeGRPCStream) Send(event *gateways.Event) error {
+func (f *FakeGRPCStream) Send(event *gateways.Event) error {
+	f.SentData = event
 	return nil
 }
 
-func (f *fakeGRPCStream) SetHeader(metadata.MD) error {
+func (f *FakeGRPCStream) SetHeader(metadata.MD) error {
 	return nil
 }
 
-func (f *fakeGRPCStream) SendHeader(metadata.MD) error {
+func (f *FakeGRPCStream) SendHeader(metadata.MD) error {
 	return nil
 }
 
-func (f *fakeGRPCStream) SetTrailer(metadata.MD) {
+func (f *FakeGRPCStream) SetTrailer(metadata.MD) {
 	return
 }
 
-func (f *fakeGRPCStream) Context() context.Context {
-	return f.ctx
+func (f *FakeGRPCStream) Context() context.Context {
+	return f.Ctx
 }
 
-func (f *fakeGRPCStream) SendMsg(m interface{}) error {
+func (f *FakeGRPCStream) SendMsg(m interface{}) error {
 	return nil
 }
 
-func (f *fakeGRPCStream) RecvMsg(m interface{}) error {
+func (f *FakeGRPCStream) RecvMsg(m interface{}) error {
 	return nil
 }

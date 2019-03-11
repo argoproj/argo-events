@@ -17,10 +17,9 @@ limitations under the License.
 package gateways
 
 import (
-	"testing"
-
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
 func TestGatewayState(t *testing.T) {
@@ -83,4 +82,62 @@ func TestGatewayState(t *testing.T) {
 			convey.So(len(gc.gw.Status.Nodes), convey.ShouldEqual, 0)
 		})
 	})
+}
+
+func TestMarkGatewayNodePhase(t *testing.T) {
+	convey.Convey("Given a node status, mark node state", t, func() {
+		gc := getGatewayConfig()
+		nodeStatus := &EventSourceStatus{
+			Name:    "fake",
+			Id:      "1234",
+			Message: "running",
+			Phase:   v1alpha1.NodePhaseRunning,
+			Gw:      gc.gw,
+		}
+		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			"1234": v1alpha1.NodeStatus{
+				Phase:   v1alpha1.NodePhaseNew,
+				Message: "init",
+				Name:    "fake",
+				ID:      "1234",
+			},
+		}
+
+		resultStatus := gc.markGatewayNodePhase(nodeStatus)
+		convey.So(resultStatus, convey.ShouldNotBeNil)
+		convey.So(resultStatus.Name, convey.ShouldEqual, nodeStatus.Name)
+
+		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			"4567": v1alpha1.NodeStatus{
+				Phase:   v1alpha1.NodePhaseNew,
+				Message: "init",
+				Name:    "fake",
+				ID:      "1234",
+			},
+		}
+
+		resultStatus = gc.markGatewayNodePhase(nodeStatus)
+		convey.So(resultStatus, convey.ShouldBeNil)
+	})
+}
+
+func TestGetNodeByID(t *testing.T) {
+	convey.Convey("Given a node id, retrieve the node", t, func() {
+		gc := getGatewayConfig()
+		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			"1234": v1alpha1.NodeStatus{
+				Phase:   v1alpha1.NodePhaseNew,
+				Message: "init",
+				Name:    "fake",
+				ID:      "1234",
+			},
+		}
+		status := gc.getNodeByID("1234")
+		convey.So(status, convey.ShouldNotBeNil)
+		convey.So(status.ID, convey.ShouldEqual, "1234")
+	})
+}
+
+func TestInitializeNode(t *testing.T) {
+	convey.Convey()
 }

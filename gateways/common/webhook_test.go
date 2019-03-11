@@ -114,8 +114,8 @@ func TestProcessRoute(t *testing.T) {
 			rc.PostStop = DefaultPostStop
 
 			ctx, cancel := context.WithCancel(context.Background())
-			fgs := &fakeGRPCStream{
-				ctx: ctx,
+			fgs := &FakeGRPCStream{
+				Ctx: ctx,
 			}
 
 			helper := NewWebhookHelper()
@@ -157,8 +157,8 @@ func TestProcessRouteChannels(t *testing.T) {
 		convey.Convey("Stop server stream", func() {
 			rc := GetFakeRouteConfig()
 			ctx, cancel := context.WithCancel(context.Background())
-			fgs := &fakeGRPCStream{
-				ctx: ctx,
+			fgs := &FakeGRPCStream{
+				Ctx: ctx,
 			}
 			helper := NewWebhookHelper()
 			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
@@ -180,8 +180,8 @@ func TestProcessRouteChannels(t *testing.T) {
 		})
 		convey.Convey("Handle error", func() {
 			rc := GetFakeRouteConfig()
-			fgs := &fakeGRPCStream{
-				ctx: context.Background(),
+			fgs := &FakeGRPCStream{
+				Ctx: context.Background(),
 			}
 			helper := NewWebhookHelper()
 			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{

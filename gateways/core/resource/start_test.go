@@ -94,11 +94,11 @@ func TestFilter(t *testing.T) {
 				},
 			},
 		}
-		_, err = fake.NewSimpleClientset().CoreV1().Pods("fake").Create(pod)
+		pod, err = fake.NewSimpleClientset().CoreV1().Pods("fake").Create(pod)
 		convey.So(err, convey.ShouldBeNil)
 
 		outmap := make(map[string]interface{})
-		err = mapstructure.Decode(pod, outmap)
+		err = mapstructure.Decode(pod, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
 		ok := ese.passFilters("fake", &unstructured.Unstructured{

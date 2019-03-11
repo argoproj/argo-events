@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mqtt
+package nats
 
 import (
 	"github.com/smartystreets/goconvey/convey"
@@ -22,17 +22,16 @@ import (
 )
 
 var es = `
-url: tcp://mqtt.argo-events:1883
-topic: foo
-clientId: 1
+url: natsConfig://natsConfig.argo-events:4222
+subject: foo
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a mqtt event source, parse it", t, func() {
+	convey.Convey("Given a nats event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*mqtt)
+		_, ok := ps.(*natsConfig)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
