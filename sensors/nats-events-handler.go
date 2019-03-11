@@ -17,6 +17,7 @@ limitations under the License.
 package sensors
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"strconv"
 	"strings"
@@ -44,11 +45,11 @@ func (sec *sensorExecutionCtx) successNatsConnection() {
 func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
 	// escalate error
 	labels := map[string]string{
-		common.LabelEventType:  string(common.EscalationEventType),
+		common.LabelEventType:  string(common.OperationFailureEventType),
 		common.LabelSensorName: sec.sensor.Name,
 		common.LabelOperation:  "nats_connection_setup",
 	}
-	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup failed", common.EscalationEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
+	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup failed", common.OperationFailureEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup error")
 		return
 	}
@@ -91,6 +92,8 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 // trying to put a message twice on internal queue.
 func (sec *sensorExecutionCtx) NatsEventProtocol() {
 	var err error
+
+	fmt.Println("hello")
 
 	switch sec.sensor.Spec.EventProtocol.Nats.Type {
 	case pc.Standard:
