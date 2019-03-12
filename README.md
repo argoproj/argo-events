@@ -131,6 +131,7 @@ Lets deploy a webhook gateway and sensor,
 3. [Trigger](docs/trigger-guide.md)
 4. [Communication between gateway and sensor](docs/communication.md)
 5. [Controllers](docs/controllers-guide.md)
+6. [Setup Gateways & Sensors](docs/setup.md)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
