@@ -43,6 +43,11 @@ Create a K8s token that contains your slack `token` and refer that secret in gat
 
 **Note:** The gateway will not register the webhook endpoint on Slack. You need to manually do it.
 
+**How to get the URL for the service?**
+
+Depending upon the Kubernetes provider, you can create the Ingress or Route. 
+
+
 ## Setup
 
 **1. Install Gateway**
@@ -55,7 +60,7 @@ Make sure gateway pod and service is running
 **2. Install Gateway Configmap**
 
 ```bash
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/slack.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/slack-gateway-configmap.yaml
 ```
 
 **3. Install Sensor**
