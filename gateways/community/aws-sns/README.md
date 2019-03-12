@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/aws-sns.png?raw=true" alt="AWS SNS"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/sns.png?raw=true" alt="AWS SNS"/>
 </p>
 
 <br/>
