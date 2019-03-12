@@ -16,7 +16,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "gitlab-gateway:project_1"
   triggers:
     - name: gitlab-workflow-trigger
       resource:
@@ -24,19 +24,31 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        # The parameters from the workflow are overridden by the webhook's message
+        # An empty path means complete payload will be passed to trigger
+        parameters:
+          - src:
+              event: "gitlab-gateway:project_1"
+            dest: spec.arguments.parameters.0.value
         source:
           inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  - name: whalesay
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: arguments-via-webhook-event
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
+              templates:
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]
