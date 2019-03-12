@@ -67,7 +67,7 @@ message GatewayNotificationWatcher {
 message GatewaySpec {
   // DeploySpec is the pod specification for the gateway
   // Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-  optional k8s.io.api.core.v1.Pod deploySpec = 1;
+  optional k8s.io.api.core.v1.PodTemplateSpec deploySpec = 1;
 
   // ConfigMap is name of the configmap for gateway. This configmap contains event sources.
   optional string configmap = 2;
@@ -80,7 +80,7 @@ message GatewaySpec {
 
   // ServiceSpec is the specifications of the service to expose the gateway
   // Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
-  optional k8s.io.api.core.v1.Service serviceSpec = 5;
+  optional github.com.argoproj.argo_events.pkg.apis.common.ServiceTemplateSpec serviceSpec = 5;
 
   // Watchers are components which are interested listening to notifications from this gateway
   // These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.

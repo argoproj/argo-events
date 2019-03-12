@@ -846,7 +846,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
 					"eventProtocol": {
@@ -880,7 +880,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 

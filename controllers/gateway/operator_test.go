@@ -23,6 +23,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/cache"
 )
 
 var testGatewayStr = `apiVersion: argoproj.io/v1alpha1
@@ -77,7 +78,14 @@ func getGateway() (*v1alpha1.Gateway, error) {
 	return &gateway, err
 }
 
+func waitForAllInformers(done chan struct{}, controller *GatewayController) {
+	cache.WaitForCacheSync(done, controller.informer.HasSynced)
+	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
+	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+}
+
 func TestGatewayOperateLifecycle(t *testing.T) {
+	done := make(chan struct{})
 	convey.Convey("Given a gateway resource spec, parse it", t, func() {
 		fakeController := getGatewayController()
 		gateway, err := getGateway()
@@ -96,48 +104,210 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 						convey.So(goc, convey.ShouldNotBeNil)
 
 						convey.Convey("Operate on new gateway", func() {
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
+							waitForAllInformers(done, fakeController)
 
 							convey.Convey("Operation must succeed", func() {
 								convey.So(err, convey.ShouldBeNil)
 
 								convey.Convey("A gateway pod and service must be created", func() {
-									pod, err := goc.controller.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+									pod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
 									convey.So(err, convey.ShouldBeNil)
 									convey.So(pod, convey.ShouldNotBeNil)
 
-									svc, err := goc.controller.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+									svc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
 									convey.So(err, convey.ShouldBeNil)
 									convey.So(svc, convey.ShouldNotBeNil)
+
+									convey.Convey("Go to running state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+									})
 								})
 							})
 						})
 
 						convey.Convey("Operate on gateway in running state", func() {
+							// Operate it once to create pod and service
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
 							convey.So(err, convey.ShouldBeNil)
+							waitForAllInformers(done, fakeController)
+
+							goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "test")
+
+							convey.Convey("Operation must succeed", func() {
+								err := goc.operate()
+								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
+
+								convey.Convey("Untouch pod and service", func() {
+									gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewayPod, convey.ShouldNotBeNil)
+
+									gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+									convey.Convey("Stay in running state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+									})
+								})
+							})
+
+							convey.Convey("Delete pod and service", func() {
+								err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Delete("webhook-gateway", &metav1.DeleteOptions{})
+								convey.So(err, convey.ShouldBeNil)
+
+								err = fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Delete("webhook-gateway-svc", &metav1.DeleteOptions{})
+								convey.So(err, convey.ShouldBeNil)
+
+								waitForAllInformers(done, fakeController)
+
+								convey.Convey("Operation must succeed", func() {
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Create pod and service", func() {
+										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod, convey.ShouldNotBeNil)
+
+										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+										convey.Convey("Stay in running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
+
+							convey.Convey("Change pod and service spec", func() {
+								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+
+								convey.Convey("Operation must succeed", func() {
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Delete pod and service", func() {
+										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+
+										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
+
+										convey.Convey("Stay in running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
 						})
 
-						convey.Convey("Mark gateway state as error and operate", func() {
-							goc.markGatewayPhase(v1alpha1.NodePhaseError, "gateway is in error state")
+						convey.Convey("Operate on gateway in error state", func() {
+							// Operate it once to create pod and service
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
 							convey.So(err, convey.ShouldBeNil)
-							gateway, err := goc.controller.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeNil)
-							convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
-						})
+							waitForAllInformers(done, fakeController)
+							goc.markGatewayPhase(v1alpha1.NodePhaseError, "test")
 
-						convey.Convey("Delete gateway and make sure both pod and service gets deleted", func() {
-							err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Delete(gateway.Name, &metav1.DeleteOptions{})
-							convey.So(err, convey.ShouldBeNil)
+							convey.Convey("Operation must succeed", func() {
+								err := goc.operate()
+								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
 
-							gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
-							convey.So(err, convey.ShouldNotBeNil)
-							convey.So(gatewayPod, convey.ShouldBeNil)
+								convey.Convey("Untouch pod and service", func() {
+									gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewayPod, convey.ShouldNotBeNil)
 
-							gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("wenhook-gateway-svc", metav1.GetOptions{})
-							convey.So(err, convey.ShouldNotBeNil)
-							convey.So(gatewaySvc, convey.ShouldBeNil)
+									gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+									convey.Convey("Stay in error state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+									})
+								})
+							})
+
+							convey.Convey("Delete pod and service", func() {
+								err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Delete("webhook-gateway", &metav1.DeleteOptions{})
+								convey.So(err, convey.ShouldBeNil)
+
+								err = fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Delete("webhook-gateway-svc", &metav1.DeleteOptions{})
+								convey.So(err, convey.ShouldBeNil)
+
+								waitForAllInformers(done, fakeController)
+
+								convey.Convey("Operation must succeed", func() {
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Create pod and service", func() {
+										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod, convey.ShouldNotBeNil)
+
+										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+										convey.Convey("Go to running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
+
+							convey.Convey("Change pod and service spec", func() {
+								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+
+								convey.Convey("Operation must succeed", func() {
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Delete pod and service", func() {
+										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+
+										gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
+
+										convey.Convey("Go to running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
 						})
 					})
 				})

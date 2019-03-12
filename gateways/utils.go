@@ -17,19 +17,10 @@ limitations under the License.
 package gateways
 
 import (
-	"fmt"
-	"hash/fnv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/wait"
 )
-
-// Hasher hashes a string
-func Hasher(value string) string {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(value))
-	return fmt.Sprintf("%v", h.Sum32())
-}
 
 // SetValidateReason set the result of event source validation
 func SetValidEventSource(v *ValidEventSource, reason string, valid bool) {
