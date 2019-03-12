@@ -125,7 +125,11 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	defer cancel()
 	hook, _, err := client.Repositories.CreateHook(ctx, gc.Owner, gc.Repository, hookSetup)
 	if err != nil {
-		return fmt.Errorf("failed to create webhook. err: %+v", err)
+		// Continue if error is because hook already exists
+		er, ok := err.(*gh.ErrorResponse)
+		if !ok || er.Response.StatusCode != http.StatusUnprocessableEntity {
+			return fmt.Errorf("failed to create webhook. err: %+v", err)
+		}
 	}
 
 	ese.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
