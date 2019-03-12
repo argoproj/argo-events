@@ -60,6 +60,9 @@ const (
 
 	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
 	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
+
+	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
+	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
 )
 
 // SENSOR CONSTANTS
@@ -124,6 +127,9 @@ const (
 
 	// LabelGatewayEventSourceID is the label for gateway configuration ID
 	LabelGatewayEventSourceID = "event-source-id"
+
+	// AnnotationGatewayResourceSpecHashName is the annotation of a gateway resource spec hash
+	AnnotationGatewayResourceSpecHashName = gateway.FullName + "/resource-spec-hash"
 
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10

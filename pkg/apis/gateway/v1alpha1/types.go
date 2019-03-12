@@ -58,7 +58,7 @@ type GatewayList struct {
 type GatewaySpec struct {
 	// DeploySpec is the pod specification for the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	DeploySpec *corev1.Pod `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
+	DeploySpec *corev1.PodTemplateSpec `json:"deploySpec" protobuf:"bytes,1,opt,name=deploySpec"`
 
 	// ConfigMap is name of the configmap for gateway. This configmap contains event sources.
 	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
@@ -71,7 +71,7 @@ type GatewaySpec struct {
 
 	// ServiceSpec is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
-	ServiceSpec *corev1.Service `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
+	ServiceSpec *common.ServiceTemplateSpec `json:"serviceSpec,omitempty" protobuf:"bytes,5,opt,name=serviceSpec"`
 
 	// Watchers are components which are interested listening to notifications from this gateway
 	// These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.

@@ -477,7 +477,7 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 	}
 	if in.DeploySpec != nil {
 		in, out := &in.DeploySpec, &out.DeploySpec
-		*out = new(v1.PodSpec)
+		*out = new(v1.PodTemplateSpec)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.EventProtocol != nil {

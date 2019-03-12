@@ -19,15 +19,14 @@ package sensor
 import (
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/argoproj/argo-events/common"
-	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
-	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // the context of an operation on a sensor.
@@ -41,6 +40,8 @@ type sOperationCtx struct {
 	log zerolog.Logger
 	// reference to the sensor-controller
 	controller *SensorController
+	// srctx is the context to handle child resource
+	srctx sResourceCtx
 }
 
 // newSensorOperationCtx creates and initializes a new sOperationCtx object
@@ -50,6 +51,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 		updated:    false,
 		log:        common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", s.Name).Str("sensor-namespace", s.Namespace).Logger(),
 		controller: controller,
+		srctx:      NewSensorResourceContext(s, controller),
 	}
 }
 
@@ -90,128 +92,220 @@ func (soc *sOperationCtx) operate() error {
 
 	switch soc.s.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		// perform one-time sensor validation
-		// non nil err indicates failed validation
-		// we do not want to requeue a sensor in this case
-		// since validation will fail every time
-		err := ValidateSensor(soc.s)
+		err := soc.createSensorResources()
 		if err != nil {
-			soc.log.Error().Err(err).Msg("failed to validate sensor")
-			soc.markSensorPhase(v1alpha1.NodePhaseError, true, err.Error())
-			return nil
-		}
-
-		// Initialize all event dependency nodes
-		for _, dependency := range soc.s.Spec.Dependencies {
-			InitializeNode(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
-		}
-
-		// Initialize all dependency groups
-		if soc.s.Spec.DependencyGroups != nil {
-			for _, group := range soc.s.Spec.DependencyGroups {
-				InitializeNode(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, &soc.log)
-			}
-		}
-
-		// Initialize all trigger nodes
-		for _, trigger := range soc.s.Spec.Triggers {
-			InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, &soc.log)
-		}
-
-		// add default env variables
-		soc.s.Spec.DeploySpec.Containers[0].Env = append(soc.s.Spec.DeploySpec.Containers[0].Env, []corev1.EnvVar{
-			{
-				Name:  common.SensorName,
-				Value: soc.s.Name,
-			},
-			{
-				Name:  common.SensorNamespace,
-				Value: soc.s.Namespace,
-			},
-			{
-				Name:  common.EnvVarSensorControllerInstanceID,
-				Value: soc.controller.Config.InstanceID,
-			},
-		}...,
-		)
-
-		// create a sensor pod
-		// default label on sensor
-		if soc.s.ObjectMeta.Labels == nil {
-			soc.s.ObjectMeta.Labels = make(map[string]string)
-		}
-		soc.s.ObjectMeta.Labels[common.LabelSensorName] = soc.s.Name
-
-		sensorPod := &corev1.Pod{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      soc.s.Name,
-				Namespace: soc.s.Namespace,
-				Labels:    soc.s.Labels,
-				OwnerReferences: []metav1.OwnerReference{
-					*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-				},
-			},
-			Spec: *soc.s.Spec.DeploySpec,
-		}
-		_, err = soc.controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).Create(sensorPod)
-		if err != nil {
-			soc.log.Error().Err(err).Msg("failed to create sensor pod")
 			return err
 		}
-		soc.log.Info().Msg("sensor pod created")
-
-		// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
-		if _, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{}); err != nil && apierr.IsNotFound(err) && soc.s.Spec.EventProtocol.Type == pc.HTTP {
-			// Create sensor service
-			sensorSvc := &corev1.Service{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      common.DefaultServiceName(soc.s.Name),
-					Namespace: soc.s.Namespace,
-					OwnerReferences: []metav1.OwnerReference{
-						*metav1.NewControllerRef(soc.s, v1alpha1.SchemaGroupVersionKind),
-					},
-				},
-				Spec: corev1.ServiceSpec{
-					Ports: []corev1.ServicePort{
-						{
-							Port:       intstr.Parse(soc.s.Spec.EventProtocol.Http.Port).IntVal,
-							TargetPort: intstr.FromInt(int(intstr.Parse(soc.s.Spec.EventProtocol.Http.Port).IntVal)),
-						},
-					},
-					Type:     corev1.ServiceTypeClusterIP,
-					Selector: soc.s.Labels,
-				},
-			}
-			_, err = soc.controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Create(sensorSvc)
-			if err != nil {
-				soc.log.Error().Err(err).Msg("failed to create sensor service")
-				return err
-			}
-		}
-
-		// Mark all event dependency nodes as active
-		for _, dependency := range soc.s.Spec.Dependencies {
-			MarkNodePhase(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
-		}
-
-		// Mark all dependency groups as active
-		if soc.s.Spec.DependencyGroups != nil {
-			for _, group := range soc.s.Spec.DependencyGroups {
-				MarkNodePhase(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
-			}
-		}
-
-		// if we get here - we know the signals are running
-		soc.log.Info().Msg("marking sensor as active")
-		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for events")
 
 	case v1alpha1.NodePhaseActive:
-		soc.log.Info().Msg("sensor is already running")
+		soc.log.Info().Msg("sensor is running")
+
+		err := soc.updateSensorResources()
+		if err != nil {
+			return err
+		}
 
 	case v1alpha1.NodePhaseError:
 		soc.log.Info().Msg("sensor is in error state. check sensor resource status information and corresponding escalated K8 event for the error")
+
+		err := soc.updateSensorResources()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func (soc *sOperationCtx) createSensorResources() error {
+	err := ValidateSensor(soc.s)
+	if err != nil {
+		soc.log.Error().Err(err).Msg("failed to validate sensor")
+		errors.Wrap(err, "failed to validate sensor")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		return err
+	}
+
+	soc.initializeAllNodes()
+	pod, err := soc.createSensorPod()
+	if err != nil {
+		errors.Wrap(err, "failed to create sensor pod")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		return err
+	}
+	soc.markAllNodePhases()
+	soc.log.Info().Str("pod-name", pod.Name).Msg("sensor pod is created")
+
+	// expose sensor if service is configured
+	if soc.srctx.getServiceTemplateSpec() != nil {
+		svc, err := soc.createSensorService()
+		if err != nil {
+			errors.Wrap(err, "failed to create sensor service")
+			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+			return err
+		}
+		soc.log.Info().Str("svc-name", svc.Name).Msg("sensor service is created")
+	}
+
+	// if we get here - we know the signals are running
+	soc.log.Info().Msg("marking sensor as active")
+	soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "listening for events")
+	return nil
+}
+
+func (soc *sOperationCtx) createSensorPod() (*corev1.Pod, error) {
+	pod, err := soc.srctx.newSensorPod()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
+		return nil, err
+	}
+	pod, err = soc.srctx.createSensorPod(pod)
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create pod for sensor")
+		return nil, err
+	}
+	return pod, nil
+}
+func (soc *sOperationCtx) createSensorService() (*corev1.Service, error) {
+	svc, err := soc.srctx.newSensorService()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
+		return nil, err
+	}
+	svc, err = soc.srctx.createSensorService(svc)
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
+		return nil, err
+	}
+	return svc, nil
+}
+
+func (soc *sOperationCtx) updateSensorResources() error {
+	err := ValidateSensor(soc.s)
+	if err != nil {
+		soc.log.Error().Err(err).Msg("failed to validate sensor")
+		err = errors.Wrap(err, "failed to validate sensor")
+		if soc.s.Status.Phase != v1alpha1.NodePhaseError {
+			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		}
+		return err
+	}
+
+	_, podChanged, err := soc.updateSensorPod()
+	if err != nil {
+		err = errors.Wrap(err, "failed to update sensor pod")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		return err
+	}
+
+	_, svcChanged, err := soc.updateSensorService()
+	if err != nil {
+		err = errors.Wrap(err, "failed to update sensor service")
+		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		return err
+	}
+
+	if soc.s.Status.Phase != v1alpha1.NodePhaseActive && (podChanged || svcChanged) {
+		soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
+	}
+
+	return nil
+}
+
+func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
+	// Check if sensor spec has changed for pod.
+	existingPod, err := soc.srctx.getSensorPod()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get pod for sensor")
+		return nil, false, err
+	}
+
+	// create a new pod spec
+	newPod, err := soc.srctx.newSensorPod()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
+		return nil, false, err
+	}
+
+	// check if pod spec remained unchanged
+	if existingPod != nil {
+		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
+			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("pod-name", existingPod.Name).Msg("sensor pod spec unchanged")
+			return nil, false, nil
+		}
+
+		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
+		soc.log.Info().Str("pod-name", existingPod.Name).Msg("sensor pod spec changed")
+
+		err := soc.srctx.deleteSensorPod(existingPod)
+		if err != nil {
+			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to delete pod for sensor")
+			return nil, false, err
+		}
+
+		soc.log.Info().Str("pod-name", existingPod.Name).Msg("sensor pod is deleted")
+	}
+
+	// Create new pod for updated sensor spec.
+	createdPod, err := soc.srctx.createSensorPod(newPod)
+	if err != nil {
+		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
+		return nil, false, err
+	}
+	soc.log.Info().Str("sensor-name", soc.s.Name).Str("pod-name", newPod.Name).Msg("sensor pod is created")
+
+	return createdPod, true, nil
+}
+
+func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
+	// Check if sensor spec has changed for service.
+	existingSvc, err := soc.srctx.getSensorService()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get service for sensor")
+		return nil, false, err
+	}
+
+	// create a new service spec
+	newSvc, err := soc.srctx.newSensorService()
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
+		return nil, false, err
+	}
+
+	if existingSvc != nil {
+		// updated spec doesn't have service defined, delete existing service.
+		if newSvc == nil {
+			if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
+				return nil, false, err
+			}
+			return nil, true, nil
+		}
+
+		// check if service spec remained unchanged
+		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
+			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec unchanged")
+			return nil, false, nil
+		}
+
+		// service spec changed, delete existing service and create new one
+		soc.log.Info().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec changed")
+
+		if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
+			return nil, false, err
+		}
+	} else if newSvc == nil {
+		// sensor service doesn't exist originally
+		return nil, false, nil
+	}
+
+	// change createSensorService to take a service spec
+	createdSvc, err := soc.srctx.createSensorService(newSvc)
+	if err != nil {
+		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
+		return nil, false, err
+	}
+	soc.log.Info().Str("svc-name", newSvc.Name).Msg("sensor service is created")
+
+	return createdSvc, true, nil
 }
 
 // mark the overall sensor phase
@@ -251,4 +345,37 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 		}
 	}
 	soc.updated = true
+}
+
+func (soc *sOperationCtx) initializeAllNodes() {
+	// Initialize all event dependency nodes
+	for _, dependency := range soc.s.Spec.Dependencies {
+		InitializeNode(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
+	}
+
+	// Initialize all dependency groups
+	if soc.s.Spec.DependencyGroups != nil {
+		for _, group := range soc.s.Spec.DependencyGroups {
+			InitializeNode(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, &soc.log)
+		}
+	}
+
+	// Initialize all trigger nodes
+	for _, trigger := range soc.s.Spec.Triggers {
+		InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, &soc.log)
+	}
+}
+
+func (soc *sOperationCtx) markAllNodePhases() {
+	// Mark all event dependency nodes as active
+	for _, dependency := range soc.s.Spec.Dependencies {
+		MarkNodePhase(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+	}
+
+	// Mark all dependency groups as active
+	if soc.s.Spec.DependencyGroups != nil {
+		for _, group := range soc.s.Spec.DependencyGroups {
+			MarkNodePhase(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+		}
+	}
 }

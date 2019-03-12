@@ -23,7 +23,11 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/informers"
+	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -31,12 +35,16 @@ import (
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
+	ccommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
 
 const (
-	gatewayResyncPeriod = 20 * time.Minute
+	gatewayResyncPeriod         = 20 * time.Minute
+	gatewayResourceResyncPeriod = 30 * time.Minute
+	rateLimiterBaseDelay        = 5 * time.Second
+	rateLimiterMaxDelay         = 1000 * time.Second
 )
 
 // GatewayControllerConfig contain the configuration settings for the gateway-controller
@@ -65,12 +73,15 @@ type GatewayController struct {
 	gatewayClientset clientset.Interface
 
 	// gateway-controller informer and queue
-	informer cache.SharedIndexInformer
-	queue    workqueue.RateLimitingInterface
+	podInformer informersv1.PodInformer
+	svcInformer informersv1.ServiceInformer
+	informer    cache.SharedIndexInformer
+	queue       workqueue.RateLimitingInterface
 }
 
 // NewGatewayController creates a new Controller
 func NewGatewayController(rest *rest.Config, configMap, namespace string) *GatewayController {
+	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &GatewayController{
 		ConfigMap:        configMap,
 		Namespace:        namespace,
@@ -78,7 +89,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
-		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		queue:            workqueue.NewRateLimitingQueue(rateLimiter),
 	}
 }
 
@@ -115,7 +126,7 @@ func (c *GatewayController) processNextItem() bool {
 			common.LabelGatewayName: gateway.Name,
 			common.LabelEventType:   string(common.EscalationEventType),
 		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s, err: %+v", gateway.Name, err), common.StateChangeEventType,
+		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name), common.StateChangeEventType,
 			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}
@@ -166,7 +177,34 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync")
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateways")
+		return
+	}
+
+	listOptionsFunc := func(options *metav1.ListOptions) {
+		labelSelector := labels.NewSelector().Add(c.instanceIDReq())
+		options.LabelSelector = labelSelector.String()
+	}
+	factory := ccommon.ArgoEventInformerFactory{
+		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
+		OwnerInformer:         c.informer,
+		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
+		Queue: c.queue,
+	}
+
+	c.podInformer = factory.NewPodInformer()
+	go c.podInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway pods")
+		return
+	}
+
+	c.svcInformer = factory.NewServiceInformer()
+	go c.svcInformer.Informer().Run(ctx.Done())
+
+	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
+		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway services")
 		return
 	}
 

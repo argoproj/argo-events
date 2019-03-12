@@ -17,12 +17,13 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/common"
+	"testing"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
+	"k8s.io/client-go/tools/cache"
 )
 
 var sensorStr = `
@@ -78,7 +79,14 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return sensor, err
 }
 
+func waitForAllInformers(done chan struct{}, controller *SensorController) {
+	cache.WaitForCacheSync(done, controller.informer.HasSynced)
+	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
+	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+}
+
 func TestSensorOperations(t *testing.T) {
+	done := make(chan struct{})
 	convey.Convey("Given a sensor, parse it", t, func() {
 		sensor, err := getSensor()
 		convey.So(err, convey.ShouldBeNil)
@@ -94,6 +102,7 @@ func TestSensorOperations(t *testing.T) {
 			convey.So(sensor, convey.ShouldNotBeNil)
 
 			convey.Convey("Operate on a new sensor", func() {
+				soc.markSensorPhase(v1alpha1.NodePhaseNew, false, "test")
 				err := soc.operate()
 				convey.So(err, convey.ShouldBeNil)
 
@@ -116,25 +125,200 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Sensor pod and service should be created", func() {
-					sensorDeployment, err := controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+					sensorDeployment, err := controller.kubeClientset.CoreV1().Pods(soc.s.Namespace).Get("artifact-sensor", metav1.GetOptions{})
 					convey.So(err, convey.ShouldBeNil)
 					convey.So(sensorDeployment, convey.ShouldNotBeNil)
 
-					sensorSvc, err := controller.kubeClientset.CoreV1().Services(soc.s.Namespace).Get(common.DefaultServiceName(soc.s.Name), metav1.GetOptions{})
+					sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
 					convey.So(err, convey.ShouldBeNil)
 					convey.So(sensorSvc, convey.ShouldNotBeNil)
-				})
 
-				convey.Convey("Operate on a running sensor", func() {
-					convey.So(soc.s.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+					convey.Convey("Go to active state", func() {
+						sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+					})
+				})
+			})
+
+			convey.Convey("Operate on sensor in active state", func() {
+				// Operate it once to create pod and service
+				soc.markSensorPhase(v1alpha1.NodePhaseNew, false, "test")
+				err := soc.operate()
+				convey.So(err, convey.ShouldBeNil)
+				waitForAllInformers(done, controller)
+
+				soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "test")
+
+				convey.Convey("Operation must succeed", func() {
 					err := soc.operate()
 					convey.So(err, convey.ShouldBeNil)
+					waitForAllInformers(done, controller)
+
+					convey.Convey("Untouch pod and service", func() {
+						sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						convey.So(sensorPod, convey.ShouldNotBeNil)
+
+						sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						convey.So(sensorSvc, convey.ShouldNotBeNil)
+
+						convey.Convey("Stay in active state", func() {
+							sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+						})
+					})
 				})
 
-				convey.Convey("Operate on a failed sensor", func() {
-					sensor.Status.Phase = v1alpha1.NodePhaseError
+				convey.Convey("Delete pod and service", func() {
+					err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Delete("artifact-sensor", &metav1.DeleteOptions{})
+					convey.So(err, convey.ShouldBeNil)
+
+					err = controller.kubeClientset.CoreV1().Services(sensor.Namespace).Delete("artifact-sensor-svc", &metav1.DeleteOptions{})
+					convey.So(err, convey.ShouldBeNil)
+
+					waitForAllInformers(done, controller)
+
+					convey.Convey("Operation must succeed", func() {
+						err := soc.operate()
+						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
+
+						convey.Convey("Create pod and service", func() {
+							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod, convey.ShouldNotBeNil)
+
+							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc, convey.ShouldNotBeNil)
+
+							convey.Convey("Stay in active state", func() {
+								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+							})
+						})
+					})
+				})
+
+				convey.Convey("Change pod and service spec", func() {
+					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
+
+					convey.Convey("Operation must succeed", func() {
+						err := soc.operate()
+						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
+
+						convey.Convey("Delete pod and service", func() {
+							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+
+							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
+
+							convey.Convey("Stay in active state", func() {
+								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+							})
+						})
+					})
+				})
+			})
+
+			convey.Convey("Operate on sensor in error state", func() {
+				// Operate it once to create pod and service
+				soc.markSensorPhase(v1alpha1.NodePhaseNew, false, "test")
+				err := soc.operate()
+				convey.So(err, convey.ShouldBeNil)
+				waitForAllInformers(done, controller)
+				soc.markSensorPhase(v1alpha1.NodePhaseError, false, "test")
+
+				convey.Convey("Operation must succeed", func() {
 					err := soc.operate()
 					convey.So(err, convey.ShouldBeNil)
+					waitForAllInformers(done, controller)
+
+					convey.Convey("Untouch pod and service", func() {
+						sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						convey.So(sensorPod, convey.ShouldNotBeNil)
+
+						sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+						convey.So(err, convey.ShouldBeNil)
+						convey.So(sensorSvc, convey.ShouldNotBeNil)
+
+						convey.Convey("Stay in error state", func() {
+							sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+						})
+					})
+				})
+
+				convey.Convey("Delete pod and service", func() {
+					err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Delete("artifact-sensor", &metav1.DeleteOptions{})
+					convey.So(err, convey.ShouldBeNil)
+
+					err = controller.kubeClientset.CoreV1().Services(sensor.Namespace).Delete("artifact-sensor-svc", &metav1.DeleteOptions{})
+					convey.So(err, convey.ShouldBeNil)
+
+					waitForAllInformers(done, controller)
+
+					convey.Convey("Operation must succeed", func() {
+						err := soc.operate()
+						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
+
+						convey.Convey("Create pod and service", func() {
+							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod, convey.ShouldNotBeNil)
+
+							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc, convey.ShouldNotBeNil)
+
+							convey.Convey("Go to active state", func() {
+								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+							})
+						})
+					})
+				})
+
+				convey.Convey("Change pod and service spec", func() {
+					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
+
+					convey.Convey("Operation must succeed", func() {
+						err := soc.operate()
+						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
+
+						convey.Convey("Delete pod and service", func() {
+							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+
+							sensorSvc, err := controller.kubeClientset.CoreV1().Services(sensor.Namespace).Get("artifact-sensor-svc", metav1.GetOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
+
+							convey.Convey("Go to active state", func() {
+								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
+							})
+						})
+					})
 				})
 			})
 		})
