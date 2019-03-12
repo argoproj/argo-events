@@ -14,7 +14,7 @@ spec:
     http:
       port: "9300"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway-http"
       labels:
@@ -22,15 +22,15 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.8.2"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "webhook-events"
-          image: "argoproj/webhook-gateway"
+          image: "argoproj/webhook-gateway:v0.8.2"
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:

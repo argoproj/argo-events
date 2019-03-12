@@ -17,7 +17,7 @@ spec:
       clientId: "myclient"
       type: "Streaming"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway-nats-streaming"
       labels:
@@ -33,7 +33,7 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:

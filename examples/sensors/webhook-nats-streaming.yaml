@@ -5,7 +5,7 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     spec:
       containers:
         - name: "sensor"
@@ -29,8 +29,6 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        # The parameters from the workflow are overridden by the webhook's message
-        # An empty path means complete payload will be passed to trigger
         parameters:
           - src:
               event: "webhook-gateway-nats-streaming:foo"
@@ -40,7 +38,7 @@ spec:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: arguments-via-webhook-event
+              generateName: webhook-
             spec:
               entrypoint: whalesay
               arguments:

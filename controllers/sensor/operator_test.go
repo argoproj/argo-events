@@ -205,7 +205,7 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
 					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					convey.Convey("Operation must succeed", func() {
@@ -295,7 +295,7 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
 					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					convey.Convey("Operation must succeed", func() {
