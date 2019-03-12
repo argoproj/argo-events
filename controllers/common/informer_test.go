@@ -6,29 +6,32 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/client-go/kubernetes"
-
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-func getInformerFactory(clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, done chan struct{}) *ArgoEventInformerFactory {
-	informerFactory := informers.NewSharedInformerFactory(clientset, 0)
+func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedIndexInformer {
 	// NewListWatchFromClient doesn't work with fake client.
 	// ref: https://github.com/kubernetes/client-go/issues/352
-	ownerInformer := cache.NewSharedIndexInformer(&cache.ListWatch{
+	return cache.NewSharedIndexInformer(&cache.ListWatch{
 		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
 			return clientset.CoreV1().Pods("").List(options)
 		},
 		WatchFunc: clientset.CoreV1().Pods("").Watch,
 	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
+}
+
+func getInformerFactory(clientset kubernetes.Interface, queue workqueue.RateLimitingInterface, done chan struct{}) *ArgoEventInformerFactory {
+	informerFactory := informers.NewSharedInformerFactory(clientset, 0)
+	ownerInformer := getFakePodSharedIndexInformer(clientset)
 	go ownerInformer.Run(done)
 	return &ArgoEventInformerFactory{
 		OwnerGroupVersionKind: schema.GroupVersionKind{Version: "v1", Kind: "Pod"},

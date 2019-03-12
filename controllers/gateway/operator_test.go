@@ -78,6 +78,12 @@ func getGateway() (*v1alpha1.Gateway, error) {
 	return &gateway, err
 }
 
+func waitForAllInformers(done chan struct{}, controller *GatewayController) {
+	cache.WaitForCacheSync(done, controller.informer.HasSynced)
+	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
+	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+}
+
 func TestGatewayOperateLifecycle(t *testing.T) {
 	done := make(chan struct{})
 	convey.Convey("Given a gateway resource spec, parse it", t, func() {
@@ -100,6 +106,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 						convey.Convey("Operate on new gateway", func() {
 							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
+							waitForAllInformers(done, fakeController)
 
 							convey.Convey("Operation must succeed", func() {
 								convey.So(err, convey.ShouldBeNil)
@@ -127,13 +134,14 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
 							convey.So(err, convey.ShouldBeNil)
-							cache.WaitForCacheSync(done, fakeController.podInformer.Informer().HasSynced)
-							cache.WaitForCacheSync(done, fakeController.svcInformer.Informer().HasSynced)
+							waitForAllInformers(done, fakeController)
+
 							goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "test")
 
 							convey.Convey("Operation must succeed", func() {
 								err := goc.operate()
 								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
 
 								convey.Convey("Untouch pod and service", func() {
 									gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
@@ -159,12 +167,12 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 								err = fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Delete("webhook-gateway-svc", &metav1.DeleteOptions{})
 								convey.So(err, convey.ShouldBeNil)
 
-								cache.WaitForCacheSync(done, fakeController.podInformer.Informer().HasSynced)
-								cache.WaitForCacheSync(done, fakeController.svcInformer.Informer().HasSynced)
+								waitForAllInformers(done, fakeController)
 
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
 									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
 
 									convey.Convey("Create pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
@@ -191,6 +199,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
 									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
 
 									convey.Convey("Delete pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
@@ -216,13 +225,13 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
 							convey.So(err, convey.ShouldBeNil)
-							cache.WaitForCacheSync(done, fakeController.podInformer.Informer().HasSynced)
-							cache.WaitForCacheSync(done, fakeController.svcInformer.Informer().HasSynced)
+							waitForAllInformers(done, fakeController)
 							goc.markGatewayPhase(v1alpha1.NodePhaseError, "test")
 
 							convey.Convey("Operation must succeed", func() {
 								err := goc.operate()
 								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
 
 								convey.Convey("Untouch pod and service", func() {
 									gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
@@ -248,12 +257,12 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 								err = fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Delete("webhook-gateway-svc", &metav1.DeleteOptions{})
 								convey.So(err, convey.ShouldBeNil)
 
-								cache.WaitForCacheSync(done, fakeController.podInformer.Informer().HasSynced)
-								cache.WaitForCacheSync(done, fakeController.svcInformer.Informer().HasSynced)
+								waitForAllInformers(done, fakeController)
 
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
 									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
 
 									convey.Convey("Create pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})
@@ -280,6 +289,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 								convey.Convey("Operation must succeed", func() {
 									err := goc.operate()
 									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
 
 									convey.Convey("Delete pod and service", func() {
 										gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get("webhook-gateway", metav1.GetOptions{})

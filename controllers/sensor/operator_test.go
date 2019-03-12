@@ -79,6 +79,12 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return sensor, err
 }
 
+func waitForAllInformers(done chan struct{}, controller *SensorController) {
+	cache.WaitForCacheSync(done, controller.informer.HasSynced)
+	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
+	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+}
+
 func TestSensorOperations(t *testing.T) {
 	done := make(chan struct{})
 	convey.Convey("Given a sensor, parse it", t, func() {
@@ -140,13 +146,14 @@ func TestSensorOperations(t *testing.T) {
 				soc.markSensorPhase(v1alpha1.NodePhaseNew, false, "test")
 				err := soc.operate()
 				convey.So(err, convey.ShouldBeNil)
-				cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
-				cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+				waitForAllInformers(done, controller)
+
 				soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "test")
 
 				convey.Convey("Operation must succeed", func() {
 					err := soc.operate()
 					convey.So(err, convey.ShouldBeNil)
+					waitForAllInformers(done, controller)
 
 					convey.Convey("Untouch pod and service", func() {
 						sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
@@ -172,12 +179,12 @@ func TestSensorOperations(t *testing.T) {
 					err = controller.kubeClientset.CoreV1().Services(sensor.Namespace).Delete("artifact-sensor-svc", &metav1.DeleteOptions{})
 					convey.So(err, convey.ShouldBeNil)
 
-					cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
-					cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+					waitForAllInformers(done, controller)
 
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
 						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
 
 						convey.Convey("Create pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
@@ -204,6 +211,7 @@ func TestSensorOperations(t *testing.T) {
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
 						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
 
 						convey.Convey("Delete pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
@@ -229,13 +237,13 @@ func TestSensorOperations(t *testing.T) {
 				soc.markSensorPhase(v1alpha1.NodePhaseNew, false, "test")
 				err := soc.operate()
 				convey.So(err, convey.ShouldBeNil)
-				cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
-				cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+				waitForAllInformers(done, controller)
 				soc.markSensorPhase(v1alpha1.NodePhaseError, false, "test")
 
 				convey.Convey("Operation must succeed", func() {
 					err := soc.operate()
 					convey.So(err, convey.ShouldBeNil)
+					waitForAllInformers(done, controller)
 
 					convey.Convey("Untouch pod and service", func() {
 						sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
@@ -261,12 +269,12 @@ func TestSensorOperations(t *testing.T) {
 					err = controller.kubeClientset.CoreV1().Services(sensor.Namespace).Delete("artifact-sensor-svc", &metav1.DeleteOptions{})
 					convey.So(err, convey.ShouldBeNil)
 
-					cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
-					cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+					waitForAllInformers(done, controller)
 
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
 						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
 
 						convey.Convey("Create pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
@@ -293,6 +301,7 @@ func TestSensorOperations(t *testing.T) {
 					convey.Convey("Operation must succeed", func() {
 						err := soc.operate()
 						convey.So(err, convey.ShouldBeNil)
+						waitForAllInformers(done, controller)
 
 						convey.Convey("Delete pod and service", func() {
 							sensorPod, err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Get("artifact-sensor", metav1.GetOptions{})
