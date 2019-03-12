@@ -18,16 +18,10 @@ package pubsub
 
 import (
 	"context"
-	"fmt"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
-)
-
-const (
-	// LabelGcpPubSubConfig is the label name of the GCP PubSub Config
-	LabelGcpPubSubConfig = "pubSubConfig"
 )
 
 // StartEventSource starts the GCP PubSub Gateway
@@ -43,10 +37,6 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 	sc := config.(*pubSubConfig)
 
 	ctx := eventStream.Context()
-	ese.client, err = pubsub.NewClient(ctx, sc.ProjectID, option.WithCredentialsFile(sc.CredentialsFile))
-	if err != nil {
-		return fmt.Errorf("failed to create new pubsub client, err: %+v", err)
-	}
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
@@ -60,15 +50,22 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// Create a new topic with the given name.
 	logger := ese.Log.With().Str("event-source", eventSource.Name).Str("topic", sc.Topic).Logger()
+
+	client, err := pubsub.NewClient(ctx, sc.ProjectID, option.WithCredentialsFile(sc.CredentialsFile))
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
 	logger.Info().Msg("creating GCP PubSub topic")
-	topic, err := ese.client.CreateTopic(ctx, sc.Topic)
+	topic, err := client.CreateTopic(ctx, sc.Topic)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
 	logger.Info().Msg("subscribing to GCP PubSub topic")
-	sub, err := ese.client.CreateSubscription(ctx, eventSource.Id,
+	sub, err := client.CreateSubscription(ctx, eventSource.Id,
 		pubsub.SubscriptionConfig{Topic: topic})
 	if err != nil {
 		errorCh <- err
@@ -97,7 +94,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 		panic(err)
 	}
 	logger.Info().Msg("closing GCP PubSub client")
-	if err = ese.client.Close(); err != nil {
+	if err = client.Close(); err != nil {
 		panic(err)
 	}
 }

@@ -5,7 +5,10 @@ metadata:
 data:
   project_1: |-
     projectId: "1"
-    url: "YOUR_WEBHOOK_GATEWAY_EXTERNAL_URL"
+    hook:
+     endpoint: "/push"
+     port: "12000"
+     url: "placeholderurl"
     event: "PushEvents"
     accessToken:
       key: accesskey

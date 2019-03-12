@@ -27,6 +27,16 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/aws-sns-gateway"]
       serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: aws-sns-gateway-svc
+    spec:
+      selector:
+        gateway-name: "aws-sns-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
   configMap: "aws-sns-gateway-configmap"
   eventVersion: "1.0"
   type: "aws-sns"

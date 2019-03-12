@@ -19,9 +19,10 @@ package gateways
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"io"
 	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
@@ -41,10 +42,14 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 
 		// create a connection to gateway server
 		ctx, cancel := context.WithCancel(context.Background())
-		timeoutCtx, _ := context.WithTimeout(context.Background(), common.ServerConnTimeout*time.Second)
-		conn, err := grpc.DialContext(timeoutCtx, fmt.Sprintf("localhost:%s", gc.serverPort), grpc.WithBlock(), grpc.WithInsecure())
+		conn, err := grpc.Dial(
+			fmt.Sprintf("localhost:%s", gc.serverPort),
+			grpc.WithBlock(),
+			grpc.WithInsecure(),
+			grpc.WithTimeout(common.ServerConnTimeout*time.Second))
 		if err != nil {
 			gc.Log.Panic().Err(err).Str("conn-state", conn.GetState().String()).Msg("failed to connect to gateway server")
+			cancel()
 			return nil, err
 		}
 		gc.Log.Info().Str("state", conn.GetState().String()).Msg("state of the connection")

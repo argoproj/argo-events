@@ -27,6 +27,16 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/trello-gateway"]
       serviceAccountName: "argo-events-sa"
+  serviceSpec:
+    metadata:
+      name: trello-gateway-svc
+    spec:
+      selector:
+        gateway-name: "trello-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: LoadBalancer
   configMap: "trello-gateway-configmap"
   type: "trello"
   eventVersion: "1.0"

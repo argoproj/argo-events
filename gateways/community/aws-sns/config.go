@@ -17,8 +17,10 @@ limitations under the License.
 package aws_sns
 
 import (
-	"k8s.io/client-go/kubernetes"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/common"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
@@ -26,8 +28,8 @@ import (
 )
 
 const (
-	MESSAGE_TYPE_SUBSCRIPTION_CONFIRMATION = "SubscriptionConfirmation"
-	MESSAGE_TYPE_NOTIFICATION              = "Notification"
+	messageTypeSubscriptionConfirmation = "SubscriptionConfirmation"
+	messageTypeNotification             = "Notification"
 )
 
 var (
@@ -65,11 +67,9 @@ type httpNotification struct {
 
 // snsConfig contains configuration to subscribe to SNS topic
 type snsConfig struct {
-	TopicArn string `json:"topicArn"`
-	// Endpoint you wish to register
-	Endpoint string `json:"endpoint"`
-	// Port on which http server is running.
-	Port      string                    `json:"port"`
+	// Hook defines a webhook.
+	Hook      *common.Webhook           `json:"hook"`
+	TopicArn  string                    `json:"topicArn"`
 	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
 	Region    string                    `json:"region"`

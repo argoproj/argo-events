@@ -17,7 +17,6 @@ limitations under the License.
 package pubsub
 
 import (
-	"cloud.google.com/go/pubsub"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 )
@@ -25,8 +24,6 @@ import (
 // GcpPubSubEventSourceExecutor implements Eventing
 type GcpPubSubEventSourceExecutor struct {
 	Log zerolog.Logger
-	// client is the GCP PubSub Client
-	client *pubsub.Client
 }
 
 // pubSubConfig contains configuration to subscribe to GCP PubSub topic
