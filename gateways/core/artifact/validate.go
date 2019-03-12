@@ -49,8 +49,12 @@ func validateArtifact(config interface{}) error {
 	if a.Bucket != nil && a.Bucket.Name == "" {
 		return fmt.Errorf("bucket name can't be empty")
 	}
-	if a.Event != "" && minio.NotificationEventType(a.Event) == "" {
-		return fmt.Errorf("unknown event %s", a.Event)
+	if a.Events != nil {
+		for _, event := range a.Events {
+			if minio.NotificationEventType(event) == "" {
+				return fmt.Errorf("unknown event %s", event)
+			}
+		}
 	}
 	return nil
 }
