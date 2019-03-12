@@ -53,12 +53,7 @@ data:
 
 ## Setup
 
-
 **1. Install Gateway**
-
-We are installing gateway before creating configmap. Because we need to have the gateway pod running and a service backed by the pod, so 
-that we can get the URL for the service. 
-
 ```bash
 kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/aws-sqs.yaml
 ```
