@@ -128,7 +128,7 @@ required = [
 
 [[constraint]]
   name = "github.com/google/go-github"
-  version = "21.0.0"
+  revision = "50be09d24ee31a2b0868265e76c24b9545a6eb7a"
 
 [[constraint]]
   name = "k8s.io/gengo"
