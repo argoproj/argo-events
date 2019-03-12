@@ -44,7 +44,7 @@ spec:
       url: "nats://nats.argo-events:4222"
       type: "Standard"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway"
       labels:
@@ -60,7 +60,7 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:
