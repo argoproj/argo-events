@@ -22,11 +22,6 @@ import (
 )
 
 func TestGatewayUtil(t *testing.T) {
-	convey.Convey("Given a value, hash it", t, func() {
-		hash := Hasher("test")
-		convey.So(hash, convey.ShouldNotBeEmpty)
-	})
-
 	convey.Convey("Given a event source, set the validation message", t, func() {
 		v := ValidEventSource{}
 		SetValidEventSource(&v, "event source is valid", true)

@@ -19,15 +19,42 @@ package gateway
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/informers"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
+	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
+func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedIndexInformer {
+	// NewListWatchFromClient doesn't work with fake client.
+	// ref: https://github.com/kubernetes/client-go/issues/352
+	return cache.NewSharedIndexInformer(&cache.ListWatch{
+		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+			return clientset.CoreV1().Pods("").List(options)
+		},
+		WatchFunc: clientset.CoreV1().Pods("").Watch,
+	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
+}
+
 func getGatewayController() *GatewayController {
+	clientset := fake.NewSimpleClientset()
+	done := make(chan struct{})
+	informer := getFakePodSharedIndexInformer(clientset)
+	go informer.Run(done)
+	factory := informers.NewSharedInformerFactory(clientset, 0)
+	podInformer := factory.Core().V1().Pods()
+	go podInformer.Informer().Run(done)
+	svcInformer := factory.Core().V1().Services()
+	go svcInformer.Informer().Run(done)
 	return &GatewayController{
 		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
@@ -35,8 +62,11 @@ func getGatewayController() *GatewayController {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
-		kubeClientset:    fake.NewSimpleClientset(),
+		kubeClientset:    clientset,
 		gatewayClientset: fakegateway.NewSimpleClientset(),
+		podInformer:      podInformer,
+		svcInformer:      svcInformer,
+		informer:         informer,
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 	}
 }

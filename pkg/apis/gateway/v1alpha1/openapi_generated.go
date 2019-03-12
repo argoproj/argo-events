@@ -176,7 +176,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"deploySpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeploySpec is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.Pod"),
+							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
 					"configMap": {
@@ -203,7 +203,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"serviceSpec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServiceSpec is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.Service"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec"),
 						},
 					},
 					"watchers": {
@@ -230,7 +230,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 

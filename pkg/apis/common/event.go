@@ -16,7 +16,10 @@ limitations under the License.
 
 package common
 
-import "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // EventProtocolType is type of the event dispatch protocol. Used for dispatching events
 type EventProtocolType string
@@ -68,7 +71,7 @@ type EventContext struct {
 
 	// Timestamp of when the event happened. Must adhere to format specified in RFC 3339.
 
-	EventTime v1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
+	EventTime metav1.MicroTime `json:"eventTime" protobuf:"bytes,6,opt,name=eventTime"`
 
 	// A link to the schema that the data attribute adheres to.
 	// Must adhere to the format specified in RFC 3986.
@@ -144,4 +147,17 @@ type Nats struct {
 
 	// Type of the connection. either standard or streaming
 	Type NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
+}
+
+// ServiceTemplateSpec is the template spec contains metadata and service spec.
+type ServiceTemplateSpec struct {
+	// Standard object's metadata.
+	// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+	// +optional
+	metav1.ObjectMeta `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
+
+	// Specification of the desired behavior of the pod.
+	// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status
+	// +optional
+	Spec corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }

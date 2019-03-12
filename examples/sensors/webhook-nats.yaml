@@ -6,11 +6,12 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   deploySpec:
-    containers:
-      - name: "sensor"
-        image: "argoproj/sensor"
-        imagePullPolicy: Always
-    serviceAccountName: argo-events-sa
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway-nats:foo"
   eventProtocol:
