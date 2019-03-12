@@ -1553,6 +1553,7 @@
     "github.com/nats-io/go-nats",
     "github.com/nats-io/go-nats-streaming",
     "github.com/nlopes/slack/slackevents",
+    "github.com/pkg/errors",
     "github.com/robfig/cron",
     "github.com/rs/zerolog",
     "github.com/satori/go.uuid",
