@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/github.png?raw=true" alt="GitHub"/>
+  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/github-logo.png?raw=true" alt="GitHub"/>
 </p>
 
 <br/>
