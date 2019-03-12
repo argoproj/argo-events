@@ -18,14 +18,9 @@ package github
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/hex"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -107,17 +102,35 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 		Active: gh.Bool(gc.Active),
 		Config: hookConfig,
 	}
+	rc.Configs[labelWebhook] = hookSetup
 
 	client := gh.NewClient(PATTransport.Client())
+	if gc.GithubBaseURL != "" {
+		baseURL, err := url.Parse(gc.GithubBaseURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github base url. err: %s", err)
+		}
+		client.BaseURL = baseURL
+	}
+	if gc.GithubUploadURL != "" {
+		uploadURL, err := url.Parse(gc.GithubUploadURL)
+		if err != nil {
+			return fmt.Errorf("failed to parse github upload url. err: %s", err)
+		}
+		client.UploadURL = uploadURL
+	}
 	rc.Configs[labelGithubClient] = client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	hook, _, err := client.Repositories.CreateHook(ctx, gc.Owner, gc.Repository, hookSetup)
 	if err != nil {
-		return fmt.Errorf("failed to create webhook. err: %+v", err)
+		// Continue if error is because hook already exists
+		er, ok := err.(*gh.ErrorResponse)
+		if !ok || er.Response.StatusCode != http.StatusUnprocessableEntity {
+			return fmt.Errorf("failed to create webhook. err: %+v", err)
+		}
 	}
-	rc.Configs[labelWebhook] = hook
 
 	ese.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
 	return nil
@@ -163,46 +176,6 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	}, helper, eventStream)
 }
 
-func signBody(secret, body []byte) []byte {
-	computed := hmac.New(sha1.New, secret)
-	computed.Write(body)
-	return []byte(computed.Sum(nil))
-}
-
-func verifySignature(secret []byte, signature string, body []byte) bool {
-	const signaturePrefix = "sha1="
-	const signatureLength = 45
-
-	if len(signature) != signatureLength || !strings.HasPrefix(signature, signaturePrefix) {
-		return false
-	}
-
-	actual := make([]byte, 20)
-	hex.Decode(actual, []byte(signature[5:]))
-
-	return hmac.Equal(signBody(secret, body), actual)
-}
-
-func validatePayload(secret []byte, headers http.Header, body []byte) error {
-	signature := headers.Get(githubSignatureHeader)
-	if len(signature) == 0 {
-		return errors.New("no x-hub-signature header found")
-	}
-
-	if event := headers.Get(githubEventHeader); len(event) == 0 {
-		return errors.New("no x-github-event header found")
-	}
-
-	if id := headers.Get(githubDeliveryHeader); len(id) == 0 {
-		return errors.New("no x-github-delivery header found")
-	}
-
-	if !verifySignature(secret, signature, body) {
-		return errors.New("invalid signature")
-	}
-	return nil
-}
-
 // routeActiveHandler handles new route
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
@@ -219,20 +192,16 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	body, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
-		return
-	}
-
 	hook := rc.Configs[labelWebhook].(*gh.Hook)
-	if secret, ok := hook.Config["secret"]; ok {
-		if err := validatePayload([]byte(secret.(string)), request.Header, body); err != nil {
-			logger.Error().Err(err).Msg("request is not valid event notification")
-			common.SendErrorResponse(writer, fmt.Sprintf("invalid event notification"))
-			return
-		}
+	secret := ""
+	if s, ok := hook.Config["secret"]; ok {
+		secret = s.(string)
+	}
+	body, err := gh.ValidatePayload(request, []byte(secret))
+	if err != nil {
+		logger.Error().Err(err).Msg("request is not valid event notification")
+		common.SendErrorResponse(writer, fmt.Sprintf("invalid event notification"))
+		return
 	}
 
 	helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
