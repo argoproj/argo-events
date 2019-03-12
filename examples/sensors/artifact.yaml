@@ -40,7 +40,6 @@ spec:
               arguments:
                 parameters:
                 - name: message
-                  # this is the value that should be overridden
                   value: hello world
               templates:
               - name: whalesay

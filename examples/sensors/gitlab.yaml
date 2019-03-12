@@ -34,7 +34,7 @@ spec:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: calendar-workflow-
+              generateName: gitlab-workflow-
             spec:
               entrypoint: whalesay
               arguments:
