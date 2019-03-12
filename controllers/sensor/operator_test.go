@@ -35,10 +35,10 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor:v0.7"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
@@ -151,7 +151,10 @@ func TestSensorOperations(t *testing.T) {
 				soc.markSensorPhase(v1alpha1.NodePhaseActive, false, "test")
 
 				convey.Convey("Operation must succeed", func() {
-					err := soc.operate()
+					err := controller.kubeClientset.CoreV1().Pods(sensor.Namespace).Delete("artifact-sensor", &metav1.DeleteOptions{})
+					convey.So(err, convey.ShouldBeNil)
+
+					err = soc.operate()
 					convey.So(err, convey.ShouldBeNil)
 					waitForAllInformers(done, controller)
 
