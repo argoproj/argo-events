@@ -75,6 +75,7 @@ data:
 The gateway spec defined in `examples` has a `serviceSpec`. This service is used to expose the gateway server and make it reachable from GitHub.
 
 **How to get the URL for the service?**
+
 Depending upon the Kubernetes provider, you can create the Ingress or Route. 
 
 ## Setup
