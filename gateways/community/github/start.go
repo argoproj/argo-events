@@ -102,6 +102,7 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 		Active: gh.Bool(gc.Active),
 		Config: hookConfig,
 	}
+	rc.Configs[labelWebhook] = hookSetup
 
 	client := gh.NewClient(PATTransport.Client())
 	if gc.GithubBaseURL != "" {
@@ -126,7 +127,6 @@ func (ese *GithubEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) err
 	if err != nil {
 		return fmt.Errorf("failed to create webhook. err: %+v", err)
 	}
-	rc.Configs[labelWebhook] = hook
 
 	ese.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", *hook.ID).Msg("github hook created")
 	return nil
