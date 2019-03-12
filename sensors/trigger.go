@@ -178,9 +178,13 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 
 // createResourceObject creates K8s object for trigger
 func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, obj *unstructured.Unstructured) error {
-	if resource.Namespace != "" {
-		obj.SetNamespace(resource.Namespace)
+	namespace := resource.Namespace
+	// Defaults to sensor's namespace
+	if namespace == "" {
+		namespace = sec.sensor.Namespace
 	}
+	obj.SetNamespace(namespace)
+
 	if resource.Labels != nil {
 		labels := obj.GetLabels()
 		if labels != nil {
@@ -225,7 +229,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	}
 	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
 
-	reIf := client.Resource(apiResource, resource.Namespace)
+	reIf := client.Resource(apiResource, namespace)
 	liveObj, err := reIf.Create(obj)
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)

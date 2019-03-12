@@ -100,10 +100,20 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
+	fakeDiscoveryClient := kubeClientset.Discovery().(*discoveryFake.FakeDiscovery)
+	resourceList := &metav1.APIResourceList{
+		TypeMeta:     metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+		GroupVersion: metav1.GroupVersion{Group: "", Version: "v1"}.String(),
+		APIResources: []metav1.APIResource{{Kind: "Pod"}},
+	}
+	clientPool := &FakeClientPool{
+		kubeClientset.Fake,
+	}
+	fakeDiscoveryClient.Resources = append(fakeDiscoveryClient.Resources, resourceList)
 	return &sensorExecutionCtx{
 		kubeClient:           kubeClientset,
-		discoveryClient:      kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
-		clientPool:           NewFakeClientPool(),
+		discoveryClient:      fakeDiscoveryClient,
+		clientPool:           clientPool,
 		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,

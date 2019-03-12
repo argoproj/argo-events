@@ -241,3 +241,41 @@ func TestProcessTrigger(t *testing.T) {
 		convey.So(err, convey.ShouldNotBeNil)
 	})
 }
+
+func TestCreateResourceObject(t *testing.T) {
+	convey.Convey("Given a resource object", t, func() {
+		testSensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		soc := getsensorExecutionCtx(testSensor)
+
+		rObj := testTrigger.Resource.DeepCopy()
+
+		convey.Convey("Given a pod", func() {
+			namespace := "foo"
+			pod := &corev1.Pod{
+				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+				ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: "my-pod"},
+			}
+			uObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+			convey.So(err, convey.ShouldBeNil)
+			err = soc.createResourceObject(rObj, &unstructured.Unstructured{Object: uObj})
+			convey.So(err, convey.ShouldBeNil)
+			pod, err = soc.kubeClient.CoreV1().Pods(namespace).Get(pod.Name, metav1.GetOptions{})
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(pod.Namespace, convey.ShouldEqual, namespace)
+		})
+		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
+			pod := &corev1.Pod{
+				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+				ObjectMeta: metav1.ObjectMeta{Name: "my-pod"},
+			}
+			uObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+			convey.So(err, convey.ShouldBeNil)
+			err = soc.createResourceObject(rObj, &unstructured.Unstructured{Object: uObj})
+			convey.So(err, convey.ShouldBeNil)
+			pod, err = soc.kubeClient.CoreV1().Pods(testSensor.Namespace).Get(pod.Name, metav1.GetOptions{})
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(pod.Namespace, convey.ShouldEqual, testSensor.Namespace)
+		})
+	})
+}
