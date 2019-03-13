@@ -34,13 +34,13 @@ APIMACHINERY_PKGS=(
     k8s.io/apimachinery/pkg/apis/meta/v1
     k8s.io/api/core/v1
 )
-$(go run ${PROJECT_ROOT}/vendor/k8s.io/code-generator/cmd/go-to-protobuf/main.go \
+
+dist/go-to-protobuf \
     --logtostderr \
     --go-header-file=${PROJECT_ROOT}/hack/custom-boilerplate.go.txt \
     --packages=$(IFS=, ; echo "${PACKAGES[*]}") \
     --apimachinery-packages=$(IFS=, ; echo "${APIMACHINERY_PKGS[*]}") \
-    --proto-import=./vendor
-)
+    --proto-import=${PROJECT_ROOT}/vendor
 
 # generate protocol documentation
 protoc -I=${GOPATH}/src --doc_out=../docs --doc_opt=markdown,gateway-protocol.md github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto
