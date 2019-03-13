@@ -261,7 +261,7 @@ type ResourceObject struct {
 	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
 
 	// Namespace in which to create this object
-	// defaults to the service account namespace
+	// defaults to the sensor namespace
 	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
 
 	// Source of the K8 resource file(s)

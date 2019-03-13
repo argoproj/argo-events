@@ -159,7 +159,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the allowed string values for this key Booleans are pased using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -387,7 +387,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 					},
 					"remote": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Git remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
+							Description: "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig"),
 						},
 					},
@@ -430,7 +430,8 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Type: []string{"object"},
+				Description: "GitRemoteConfig contains the configuration of a Git remote",
+				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
@@ -595,7 +596,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object defaults to the service account namespace",
+							Description: "Namespace in which to create this object defaults to the sensor namespace",
 							Type:        []string{"string"},
 							Format:      "",
 						},
