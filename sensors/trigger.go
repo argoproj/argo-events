@@ -235,7 +235,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
 	sec.log.Info().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("created object")
-	if !errors.IsAlreadyExists(err) {
+	if err == nil || !errors.IsAlreadyExists(err) {
 		return err
 	}
 	liveObj, err = reIf.Get(obj.GetName(), metav1.GetOptions{})
