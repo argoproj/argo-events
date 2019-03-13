@@ -17,6 +17,9 @@ limitations under the License.
 package sensors
 
 import (
+	"encoding/json"
+	"github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/ghodss/yaml"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -197,29 +200,31 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 	}, nil
 }
 
-var testWf = `
+var testPod = `
 apiVersion: v1
 kind: Pod
 metadata:
-generateName: hello-world-
+  generateName: test-
 spec:
   containers:
-  - name: whalesay
-	image: "docker/whalesay:latest"
+  - name: test
+    image: docker/whalesay
 `
 
 var testTrigger = v1alpha1.Trigger{
-	Name: "sample",
-	Resource: &v1alpha1.ResourceObject{
-		Namespace: corev1.NamespaceDefault,
-		GroupVersionKind: v1alpha1.GroupVersionKind{
-			Version: "v1",
-			Kind:    "Pod",
+	Template: &v1alpha1.TriggerTemplate{
+		Name: "sample",
+		Resource: &v1alpha1.ResourceObject{
+			Namespace: corev1.NamespaceDefault,
+			GroupVersionKind: v1alpha1.GroupVersionKind{
+				Version: "v1",
+				Kind:    "Pod",
+			},
+			Source: v1alpha1.ArtifactLocation{
+				Inline: &testPod,
+			},
+			Labels: map[string]string{"test-label": "test-value"},
 		},
-		Source: v1alpha1.ArtifactLocation{
-			Inline: &testWf,
-		},
-		Labels: map[string]string{"test-label": "test-value"},
 	},
 }
 
@@ -236,6 +241,19 @@ func TestProcessTrigger(t *testing.T) {
 	})
 }
 
+type FakeName struct {
+	First string `json:"first"`
+	Last  string `json:"last"`
+}
+
+type fakeEvent struct {
+	Name         string `json:"name"`
+	Namespace    string `json:"namespace"`
+	Group        string `json:"group"`
+	GenerateName string `json:"generateName"`
+	Kind         string `json:"kind"`
+}
+
 func TestCreateResourceObject(t *testing.T) {
 	convey.Convey("Given a resource object", t, func() {
 		testSensor, err := getSensor()
@@ -244,34 +262,122 @@ func TestCreateResourceObject(t *testing.T) {
 		fakeclient := soc.clientPool.(*FakeClientPool).Fake
 		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
 
-		convey.Convey("Given a pod", func() {
-			rObj := testTrigger.Resource.DeepCopy()
+		convey.Convey("Given a pod spec, get a pod object", func() {
+			rObj := testTrigger.Template.Resource.DeepCopy()
 			rObj.Namespace = "foo"
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Namespace: rObj.Namespace, Name: "my-pod"},
 			}
-			uObj, err := getUnstructuredPod(pod)
+			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, uObj)
+			err = soc.createResourceObject(rObj, testTrigger.WorkflowParameters, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, rObj.Namespace)
 		})
+
+		fe := &fakeEvent{
+			Namespace:    "fake-namespace",
+			Name:         "fake",
+			Group:        "v1",
+			GenerateName: "fake-",
+			Kind:         "Deployment",
+		}
+		eventBytes, err := json.Marshal(fe)
+		convey.So(err, convey.ShouldBeNil)
+
+		node := v1alpha1.NodeStatus{
+			Event: &common.Event{
+				Payload: eventBytes,
+				Context: common.EventContext{
+					Source: &common.URI{
+						Host: "test-gateway:test",
+					},
+					ContentType: "application/json",
+				},
+			},
+			Name:  "test-gateway:test",
+			Type:  v1alpha1.NodeTypeEventDependency,
+			ID:    "1234",
+			Phase: v1alpha1.NodePhaseActive,
+		}
+
+		testTrigger.TemplateParameters = []v1alpha1.ResourceParameter{
+			{
+				Src: &v1alpha1.ResourceParameterSource{
+					Event: "test-gateway:test",
+					Path:  "name",
+				},
+				Dest: "name",
+			},
+		}
+
+		testTrigger.WorkflowParameters = []v1alpha1.ResourceParameter{
+			{
+				Src: &v1alpha1.ResourceParameterSource{
+					Event: "test-gateway:test",
+					Path:  "name",
+				},
+				Dest: "metadata.generateName",
+			},
+		}
+
+		nodeId := soc.sensor.NodeID("test-gateway:test")
+		wfNodeId := soc.sensor.NodeID("test-workflow-trigger")
+
+		wfnode := v1alpha1.NodeStatus{
+			Event: &common.Event{
+				Payload: eventBytes,
+				Context: common.EventContext{
+					Source: &common.URI{
+						Host: "test-gateway:test",
+					},
+					ContentType: "application/json",
+				},
+			},
+			Name:  "test-workflow-trigger",
+			Type:  v1alpha1.NodeTypeTrigger,
+			ID:    "1234",
+			Phase: v1alpha1.NodePhaseNew,
+		}
+
+		soc.sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			nodeId:   node,
+			wfNodeId: wfnode,
+		}
+
+		convey.Convey("Given parameters for trigger template, apply params", func() {
+			err = soc.applyParamsTrigger(&testTrigger)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(testTrigger.Template.Name, convey.ShouldEqual, fe.Name)
+
+			var tp corev1.Pod
+			err = yaml.Unmarshal([]byte(testPod), &tp)
+			convey.So(err, convey.ShouldBeNil)
+
+			rObj := tp.DeepCopy()
+			uObj, err := getUnstructured(rObj)
+			convey.So(err, convey.ShouldBeNil)
+
+			err = soc.applyParamsResource(testTrigger.WorkflowParameters, uObj)
+			convey.So(err, convey.ShouldBeNil)
+		})
+
 		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
-			rObj := testTrigger.Resource.DeepCopy()
+			rObj := testTrigger.Template.Resource.DeepCopy()
 			rObj.Namespace = ""
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
 			}
-			uObj, err := getUnstructuredPod(pod)
+			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, uObj)
+			err = soc.createResourceObject(rObj, testTrigger.WorkflowParameters, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
@@ -281,8 +387,8 @@ func TestCreateResourceObject(t *testing.T) {
 	})
 }
 
-func getUnstructuredPod(pod *corev1.Pod) (*unstructured.Unstructured, error) {
-	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+func getUnstructured(res interface{}) (*unstructured.Unstructured, error) {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
 	if err != nil {
 		return nil, err
 	}

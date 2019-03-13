@@ -55,29 +55,31 @@ spec:
   dependencies:
     - name: test-gateway:test
   triggers:
-    - name: test-workflow-trigger
-      resource:
-        namespace: argo-events
-        group: argoproj.io
-        version: v1alpha1
-        kind: Workflow
-        source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  -
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay`
+    - template:
+        name: test-workflow-trigger
+        resource:
+          namespace: argo-events
+          group: argoproj.io
+          version: v1alpha1
+          kind: Workflow
+          source:
+           inline: |
+               apiVersion: argoproj.io/v1alpha1
+               kind: Workflow
+               metadata:
+                 generateName: hello-world-
+               spec:
+                 entrypoint: whalesay
+                 templates:
+                   -
+                     container:
+                       args:
+                         - "hello world"
+                       command:
+                         - cowsay
+                       image: "docker/whalesay:latest"
+                     name: whalesay
+`
 
 var podResourceList = metav1.APIResourceList{
 	GroupVersion: metav1.GroupVersion{Group: "", Version: "v1"}.String(),

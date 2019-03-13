@@ -17,6 +17,7 @@ limitations under the License.
 package sensors
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/Knetic/govaluate"
@@ -70,19 +71,19 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 
 // canExecuteTrigger determines whether a trigger is executable based on condition set on trigger
 func (sec *sensorExecutionCtx) canExecuteTrigger(trigger v1alpha1.Trigger) bool {
-	if trigger.When == nil {
+	if trigger.Template.When == nil {
 		return true
 	}
-	if trigger.When.Any != nil {
-		for _, group := range trigger.When.Any {
+	if trigger.Template.When.Any != nil {
+		for _, group := range trigger.Template.When.Any {
 			if status := sn.GetNodeByName(sec.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
 				return true
 			}
 			return false
 		}
 	}
-	if trigger.When.All != nil {
-		for _, group := range trigger.When.All {
+	if trigger.Template.When.All != nil {
+		for _, group := range trigger.Template.When.All {
 			if status := sn.GetNodeByName(sec.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
 				return false
 			}
@@ -106,18 +107,18 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	for _, trigger := range sec.sensor.Spec.Triggers {
 		// check if a trigger condition is set
 		if canExecute := sec.canExecuteTrigger(trigger); !canExecute {
-			sec.log.Info().Str("trigger-name", trigger.Name).Msg("trigger can't be executed because trigger condition failed")
+			sec.log.Info().Str("trigger-name", trigger.Template.Name).Msg("trigger can't be executed because trigger condition failed")
 			continue
 		}
 
 		if err := sec.executeTrigger(trigger); err != nil {
-			sec.log.Error().Str("trigger-name", trigger.Name).Err(err).Msg("trigger failed to execute")
+			sec.log.Error().Str("trigger-name", trigger.Template.Name).Err(err).Msg("trigger failed to execute")
 
-			sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger. err: %+v", err))
+			sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger.Template. err: %+v", err))
 
 			// escalate using K8s event
 			labels[common.LabelEventType] = string(common.EscalationEventType)
-			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Name), common.EscalationEventType,
+			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Template.Name), common.EscalationEventType,
 				"trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 				sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
 			}
@@ -125,10 +126,10 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		}
 
 		// mark trigger as complete.
-		sn.MarkNodePhase(sec.sensor, trigger.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
+		sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
 
 		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
-		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Name), common.OperationSuccessEventType,
+		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Template.Name), common.OperationSuccessEventType,
 			"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
 		}
@@ -154,22 +155,64 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	}
 }
 
+// apply parameters for trigger
+func (sec *sensorExecutionCtx) applyParamsTrigger(trigger *v1alpha1.Trigger) error {
+	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
+		templateBytes, err := json.Marshal(trigger.Template)
+		if err != nil {
+			return err
+		}
+		tObj, err := applyParams(templateBytes, trigger.TemplateParameters, sec.extractEvents(trigger.TemplateParameters))
+		if err != nil {
+			return err
+		}
+		template := &v1alpha1.TriggerTemplate{}
+		if err = json.Unmarshal(tObj, template); err != nil {
+			return err
+		}
+		trigger.Template = template
+	}
+	return nil
+}
+
+func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.ResourceParameter, obj *unstructured.Unstructured) error {
+	if parameters != nil && len(parameters) > 0 {
+		jObj, err := obj.MarshalJSON()
+		if err != nil {
+			return fmt.Errorf("failed to marshal json. err: %+v", err)
+		}
+		events := sec.extractEvents(parameters)
+		jUpdatedObj, err := applyParams(jObj, parameters, events)
+		if err != nil {
+			return fmt.Errorf("failed to apply params. err: %+v", err)
+		}
+		err = obj.UnmarshalJSON(jUpdatedObj)
+		if err != nil {
+			return fmt.Errorf("failed to un-marshal json. err: %+v", err)
+		}
+	}
+	return nil
+}
+
 // execute the trigger
 func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
-	if trigger.Resource != nil {
-		creds, err := store.GetCredentials(sec.kubeClient, sec.sensor.Namespace, &trigger.Resource.Source)
+	if trigger.Template != nil {
+		if err := sec.applyParamsTrigger(&trigger); err != nil {
+			return err
+		}
+		creds, err := store.GetCredentials(sec.kubeClient, sec.sensor.Namespace, &trigger.Template.Resource.Source)
 		if err != nil {
 			return err
 		}
-		reader, err := store.GetArtifactReader(&trigger.Resource.Source, creds, sec.kubeClient)
+		reader, err := store.GetArtifactReader(&trigger.Template.Resource.Source, creds, sec.kubeClient)
 		if err != nil {
 			return err
 		}
-		uObj, err := store.FetchArtifact(reader, trigger.Resource.GroupVersionKind)
+		uObj, err := store.FetchArtifact(reader, trigger.Template.Resource.GroupVersionKind)
 		if err != nil {
 			return err
 		}
-		if err = sec.createResourceObject(trigger.Resource, uObj); err != nil {
+		if err = sec.createResourceObject(trigger.Template.Resource, trigger.WorkflowParameters, uObj); err != nil {
 			return err
 		}
 	}
@@ -177,7 +220,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 }
 
 // createResourceObject creates K8s object for trigger
-func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, obj *unstructured.Unstructured) error {
+func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, parameters []v1alpha1.ResourceParameter, obj *unstructured.Unstructured) error {
 	namespace := resource.Namespace
 	// Defaults to sensor's namespace
 	if namespace == "" {
@@ -201,20 +244,8 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 	// 2. extract the appropriate eventDependency events based on the resource params
 	// 3. apply the params to the JSON object
 	// 4. unmarshal the obj from the updated JSON
-	if len(resource.Parameters) > 0 {
-		jObj, err := obj.MarshalJSON()
-		if err != nil {
-			return fmt.Errorf("failed to marshal json. err: %+v", err)
-		}
-		events := sec.extractEvents(resource.Parameters)
-		jUpdatedObj, err := applyParams(jObj, resource.Parameters, events)
-		if err != nil {
-			return fmt.Errorf("failed to apply params. err: %+v", err)
-		}
-		err = obj.UnmarshalJSON(jUpdatedObj)
-		if err != nil {
-			return fmt.Errorf("failed to un-marshal json. err: %+v", err)
-		}
+	if err := sec.applyParamsResource(parameters, obj); err != nil {
+		return err
 	}
 
 	gvk := obj.GroupVersionKind()
@@ -258,7 +289,7 @@ func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter
 				continue
 			}
 			if node.Event == nil {
-				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
+				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event in event dependency does not exist, cannot apply parameter")
 				continue
 			}
 			events[param.Src.Event] = *node.Event

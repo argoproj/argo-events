@@ -200,17 +200,23 @@ type DataFilter struct {
 
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
+	// Template describes the trigger specification.
+	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,opt,name=template"`
+
+	// TemplateParameters is the list of resource parameters to pass to the template object
+	TemplateParameters []ResourceParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
+
+	// WorkflowParameters is the list of resource parameters to pass to resolved workflow object in template object
+	WorkflowParameters []ResourceParameter `json:"workflowParameters,omitempty" protobuf:"bytes,3,rep,name=workflowParameters"`
+}
+
+// TriggerTemplate is the template that describes trigger specification.
+type TriggerTemplate struct {
 	// Name is a unique name of the action to take
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// Resource describes the resource that will be created by this action
 	Resource *ResourceObject `json:"resource,omitempty" protobuf:"bytes,2,opt,name=resource"`
-
-	// Message describes a message that will be sent on a queue
-	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
-
-	// RetryStrategy is the strategy to retry a trigger if it fails
-	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=replyStrategy"`
 
 	// When is the condition to execute the trigger
 	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,5,opt,name=when"`
@@ -270,14 +276,6 @@ type ResourceObject struct {
 	// Map of string keys and values that can be used to organize and categorize
 	// (scope and select) objects. This overrides any labels in the unstructured object with the same key.
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,3,rep,name=labels"`
-
-	// Parameters is the list of resource parameters to pass in the object
-	Parameters []ResourceParameter `json:"parameters" protobuf:"bytes,4,rep,name=parameters"`
-}
-
-// RetryStrategy represents a strategy for retrying operations
-// TODO: implement me
-type RetryStrategy struct {
 }
 
 // SensorStatus contains information about the status of a sensor.

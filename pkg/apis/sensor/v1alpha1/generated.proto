@@ -70,7 +70,7 @@ message DataFilter {
   optional string type = 2;
 
   // Value is the allowed string values for this key
-  // Booleans are pased using strconv.ParseBool()
+  // Booleans are passed using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
   // Nils this value is ignored
@@ -158,7 +158,7 @@ message GitArtifact {
   // +optional
   optional string tag = 8;
 
-  // Git remote to manage set of tracked repositories. Defaults to "origin".
+  // Remote to manage set of tracked repositories. Defaults to "origin".
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
@@ -171,6 +171,7 @@ message GitCreds {
   optional k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
+// GitRemoteConfig contains the configuration of a Git remote
 message GitRemoteConfig {
   // Name of the remote to fetch from.
   optional string name = 1;
@@ -228,7 +229,7 @@ message ResourceObject {
   optional GroupVersionKind groupVersionKind = 5;
 
   // Namespace in which to create this object
-  // defaults to the service account namespace
+  // defaults to the sensor namespace
   optional string namespace = 1;
 
   // Source of the K8 resource file(s)
@@ -237,9 +238,6 @@ message ResourceObject {
   // Map of string keys and values that can be used to organize and categorize
   // (scope and select) objects. This overrides any labels in the unstructured object with the same key.
   map<string, string> labels = 3;
-
-  // Parameters is the list of resource parameters to pass in the object
-  repeated ResourceParameter parameters = 4;
 }
 
 // ResourceParameter indicates a passed parameter to a service template
@@ -269,11 +267,6 @@ message ResourceParameterSource {
   // This is only used if the path is invalid.
   // If the path is invalid and this is not defined, this param source will produce an error.
   optional string value = 3;
-}
-
-// RetryStrategy represents a strategy for retrying operations
-// TODO: implement me
-message RetryStrategy {
 }
 
 // Sensor is the definition of a sensor resource
@@ -358,20 +351,14 @@ message TimeFilter {
 
 // Trigger is an action taken, output produced, an event created, a message sent
 message Trigger {
-  // Name is a unique name of the action to take
-  optional string name = 1;
+  // Template describes the trigger specification.
+  optional TriggerTemplate template = 1;
 
-  // Resource describes the resource that will be created by this action
-  optional ResourceObject resource = 2;
+  // TemplateParameters is the list of resource parameters to pass to the template object
+  repeated ResourceParameter templateParameters = 2;
 
-  // Message describes a message that will be sent on a queue
-  optional string message = 3;
-
-  // RetryStrategy is the strategy to retry a trigger if it fails
-  optional RetryStrategy replyStrategy = 4;
-
-  // When is the condition to execute the trigger
-  optional TriggerCondition when = 5;
+  // WorkflowParameters is the list of resource parameters to pass to resolved workflow object in template object
+  repeated ResourceParameter workflowParameters = 3;
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
@@ -382,6 +369,18 @@ message TriggerCondition {
 
   // All acts as a AND operator between dependencies
   repeated string all = 2;
+}
+
+// TriggerTemplate is the template that describes trigger specification.
+message TriggerTemplate {
+  // Name is a unique name of the action to take
+  optional string name = 1;
+
+  // Resource describes the resource that will be created by this action
+  optional ResourceObject resource = 2;
+
+  // When is the condition to execute the trigger
+  optional TriggerCondition when = 5;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.

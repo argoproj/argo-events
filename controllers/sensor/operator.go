@@ -362,7 +362,7 @@ func (soc *sOperationCtx) initializeAllNodes() {
 
 	// Initialize all trigger nodes
 	for _, trigger := range soc.s.Spec.Triggers {
-		InitializeNode(soc.s, trigger.Name, v1alpha1.NodeTypeTrigger, &soc.log)
+		InitializeNode(soc.s, trigger.Template.Name, v1alpha1.NodeTypeTrigger, &soc.log)
 	}
 }
 

@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	spec "github.com/go-openapi/spec"
-	common "k8s.io/kube-openapi/pkg/common"
+	"github.com/go-openapi/spec"
+	"k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -43,7 +43,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":          schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter":       schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource": schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy":           schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                  schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
@@ -51,6 +50,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition":        schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":         schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":             schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
 }
@@ -622,25 +622,12 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 							},
 						},
 					},
-					"parameters": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Parameters is the list of resource parameters to pass in the object",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"),
-									},
-								},
-							},
-						},
-					},
 				},
-				Required: []string{"group", "version", "kind", "namespace", "source", "parameters"},
+				Required: []string{"group", "version", "kind", "namespace", "source"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"},
 	}
 }
 
@@ -703,17 +690,6 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.Referenc
 					},
 				},
 				Required: []string{"event", "path"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "RetryStrategy represents a strategy for retrying operations",
-				Type:        []string{"object"},
 			},
 		},
 	}
@@ -982,44 +958,31 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 				Description: "Trigger is an action taken, output produced, an event created, a message sent",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"name": {
+					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is a unique name of the action to take",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Template describes the trigger specification.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"),
 						},
 					},
-					"resource": {
+					"parameters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Resource describes the resource that will be created by this action",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject"),
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Message describes a message that will be sent on a queue",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"retryStrategy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "RetryStrategy is the strategy to retry a trigger if it fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"),
-						},
-					},
-					"when": {
-						SchemaProps: spec.SchemaProps{
-							Description: "When is the condition to execute the trigger",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+							Description: "Parameters is the list of resource parameters to pass in the object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"),
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"name"},
+				Required: []string{"template", "parameters"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
 	}
 }
 
@@ -1061,6 +1024,48 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref common.ReferenceCallba
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TriggerTemplate is the template that describes trigger specification.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is a unique name of the action to take",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"resource": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resource describes the resource that will be created by this action",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject"),
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Message describes a message that will be sent on a queue",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"when": {
+						SchemaProps: spec.SchemaProps{
+							Description: "When is the condition to execute the trigger",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
 	}
 }
 
