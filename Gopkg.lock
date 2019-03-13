@@ -1290,12 +1290,13 @@
 
 [[projects]]
   branch = "release-7.0"
-  digest = "1:6e37d35d68d68b1368b803617d346633830eb13b50120f68ead2c029c05eeea0"
+  digest = "1:7336dcb25cac9940ac84ea6c59c4c36d1b6b6ca4a3aba38d6d8c74bc53699a40"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
+    "dynamic/fake",
     "informers",
     "informers/admissionregistration",
     "informers/admissionregistration/v1alpha1",
@@ -1552,6 +1553,7 @@
     "github.com/nats-io/go-nats",
     "github.com/nats-io/go-nats-streaming",
     "github.com/nlopes/slack/slackevents",
+    "github.com/pkg/errors",
     "github.com/robfig/cron",
     "github.com/rs/zerolog",
     "github.com/satori/go.uuid",
@@ -1594,6 +1596,7 @@
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/dynamic",
+    "k8s.io/client-go/dynamic/fake",
     "k8s.io/client-go/informers",
     "k8s.io/client-go/informers/core/v1",
     "k8s.io/client-go/kubernetes",

@@ -596,7 +596,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object defaults to the service account namespace",
+							Description: "Namespace in which to create this object defaults to the sensor namespace",
 							Type:        []string{"string"},
 							Format:      "",
 						},
