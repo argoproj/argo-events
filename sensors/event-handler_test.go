@@ -37,6 +37,7 @@ import (
 var sensorStr = `apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
+  namespace: argo-events
   name: test-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
@@ -78,6 +79,13 @@ spec:
                       image: "docker/whalesay:latest"
                     name: whalesay`
 
+var podResourceList = metav1.APIResourceList{
+	GroupVersion: metav1.GroupVersion{Group: "", Version: "v1"}.String(),
+	APIResources: []metav1.APIResource{
+		{Kind: "Pod", Namespaced: true, Name: "pods", SingularName: "pod", Group: "", Version: "v1", Verbs: []string{"create", "get"}},
+	},
+}
+
 func getSensor() (*v1alpha1.Sensor, error) {
 	var sensor v1alpha1.Sensor
 	err := yaml.Unmarshal([]byte(sensorStr), &sensor)
@@ -100,10 +108,15 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
+	fakeDiscoveryClient := kubeClientset.Discovery().(*discoveryFake.FakeDiscovery)
+	clientPool := &FakeClientPool{
+		Fake: kubeClientset.Fake,
+	}
+	fakeDiscoveryClient.Resources = append(fakeDiscoveryClient.Resources, &podResourceList)
 	return &sensorExecutionCtx{
 		kubeClient:           kubeClientset,
-		discoveryClient:      kubeClientset.Discovery().(*discoveryFake.FakeDiscovery),
-		clientPool:           NewFakeClientPool(),
+		discoveryClient:      fakeDiscoveryClient,
+		clientPool:           clientPool,
 		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,
