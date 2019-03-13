@@ -30,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
@@ -197,20 +198,14 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 }
 
 var testWf = `
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+apiVersion: v1
+kind: Pod
 metadata:
 generateName: hello-world-
 spec:
-entrypoint: whalesay
-templates:
-- name: whalesay
-container:
-    args:
-    - "hello world"
-    command:
-    - cowsay
-    image: "docker/whalesay:latest"
+  containers:
+  - name: whalesay
+	image: "docker/whalesay:latest"
 `
 
 var testTrigger = v1alpha1.Trigger{
@@ -218,9 +213,8 @@ var testTrigger = v1alpha1.Trigger{
 	Resource: &v1alpha1.ResourceObject{
 		Namespace: corev1.NamespaceDefault,
 		GroupVersionKind: v1alpha1.GroupVersionKind{
-			Group:   "argoproj.io",
-			Version: "v1alpha1",
-			Kind:    "workflow",
+			Version: "v1",
+			Kind:    "Pod",
 		},
 		Source: v1alpha1.ArtifactLocation{
 			Inline: &testWf,
@@ -247,35 +241,50 @@ func TestCreateResourceObject(t *testing.T) {
 		testSensor, err := getSensor()
 		convey.So(err, convey.ShouldBeNil)
 		soc := getsensorExecutionCtx(testSensor)
-
-		rObj := testTrigger.Resource.DeepCopy()
+		fakeclient := soc.clientPool.(*FakeClientPool).Fake
+		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
 
 		convey.Convey("Given a pod", func() {
-			namespace := "foo"
+			rObj := testTrigger.Resource.DeepCopy()
+			rObj.Namespace = "foo"
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: namespace, Name: "my-pod"},
+				ObjectMeta: metav1.ObjectMeta{Namespace: rObj.Namespace, Name: "my-pod"},
 			}
-			uObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+			uObj, err := getUnstructuredPod(pod)
 			convey.So(err, convey.ShouldBeNil)
-			err = soc.createResourceObject(rObj, &unstructured.Unstructured{Object: uObj})
+
+			err = soc.createResourceObject(rObj, uObj)
 			convey.So(err, convey.ShouldBeNil)
-			pod, err = soc.kubeClient.CoreV1().Pods(namespace).Get(pod.Name, metav1.GetOptions{})
+
+			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(pod.Namespace, convey.ShouldEqual, namespace)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, rObj.Namespace)
 		})
 		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
+			rObj := testTrigger.Resource.DeepCopy()
+			rObj.Namespace = ""
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
-				ObjectMeta: metav1.ObjectMeta{Name: "my-pod"},
+				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
 			}
-			uObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+			uObj, err := getUnstructuredPod(pod)
 			convey.So(err, convey.ShouldBeNil)
-			err = soc.createResourceObject(rObj, &unstructured.Unstructured{Object: uObj})
+
+			err = soc.createResourceObject(rObj, uObj)
 			convey.So(err, convey.ShouldBeNil)
-			pod, err = soc.kubeClient.CoreV1().Pods(testSensor.Namespace).Get(pod.Name, metav1.GetOptions{})
+
+			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(pod.Namespace, convey.ShouldEqual, testSensor.Namespace)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
 		})
 	})
+}
+
+func getUnstructuredPod(pod *corev1.Pod) (*unstructured.Unstructured, error) {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: obj}, nil
 }
