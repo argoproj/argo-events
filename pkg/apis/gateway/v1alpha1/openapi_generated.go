@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	spec "github.com/go-openapi/spec"
-	common "k8s.io/kube-openapi/pkg/common"
+	"github.com/go-openapi/spec"
+	"k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -173,10 +173,10 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 				Description: "GatewaySpec represents gateway specifications",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"deploySpec": {
+					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeploySpec is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.Pod"),
+							Description: "Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
 					"configMap": {
@@ -200,10 +200,10 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"serviceSpec": {
+					"service": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceSpec is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.Service"),
+							Description: "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec"),
 						},
 					},
 					"watchers": {
@@ -226,11 +226,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"deploySpec", "type", "eventVersion", "processorPort", "eventProtocol"},
+				Required: []string{"template", "type", "eventVersion", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.Pod", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 

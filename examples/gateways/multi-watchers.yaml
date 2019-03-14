@@ -11,7 +11,7 @@ spec:
     type: "HTTP"
     http:
       port: "9300"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway"
       labels:
@@ -30,7 +30,7 @@ spec:
   configMap: "webhook-gateway-configmap"
   type: "webhook"
   eventVersion: "1.0"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:

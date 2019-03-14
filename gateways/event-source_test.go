@@ -151,10 +151,12 @@ testKey: testValue
 				convey.Convey("Event source should be removed", t, func() {
 					convey.So(i, convey.ShouldNotEqual, 0)
 					convey.So(event.Message, convey.ShouldEqual, "event_source_is_removed")
-					wg.Done()
 				})
+				goto end
 			}
 		}
+	end:
+		wg.Done()
 	}()
 
 	convey.Convey("Given new event sources, start consuming events", t, func() {

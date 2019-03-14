@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -43,6 +44,21 @@ func (f *fakeHttpWriter) Write(body []byte) (int, error) {
 
 func (f *fakeHttpWriter) WriteHeader(status int) {
 	f.header = status
+}
+
+func TestGetObjectHash(t *testing.T) {
+	convey.Convey("Given a value, hash it", t, func() {
+		hash, err := GetObjectHash(&corev1.Pod{})
+		convey.So(hash, convey.ShouldNotBeEmpty)
+		convey.So(err, convey.ShouldBeEmpty)
+	})
+}
+
+func TestHasher(t *testing.T) {
+	convey.Convey("Given a value, hash it", t, func() {
+		hash := Hasher("test")
+		convey.So(hash, convey.ShouldNotBeEmpty)
+	})
 }
 
 func TestDefaultConfigMapName(t *testing.T) {

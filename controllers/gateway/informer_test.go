@@ -37,7 +37,7 @@ func TestInformer(t *testing.T) {
 
 	convey.Convey("Given a gateway controller", t, func() {
 		controller := getGatewayController()
-		convey.Convey("Get a new informer and make sure its not nil", func() {
+		convey.Convey("Get a new gateway informer and make sure its not nil", func() {
 			i := controller.newGatewayInformer()
 			convey.So(i, convey.ShouldNotBeNil)
 		})

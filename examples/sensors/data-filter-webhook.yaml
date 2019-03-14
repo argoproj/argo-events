@@ -6,12 +6,13 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
-    containers:
-      - name: "sensor"
-        image: "argoproj/sensor:v0.7.1"
-        imagePullPolicy: Always
-    serviceAccountName: argo-events-sa
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor:v0.7.1"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway-http:foo"
       filters:
@@ -27,25 +28,35 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: done-workflow
+    - name: data-workflow
       resource:
         namespace: argo-events
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        parameters:
+          - src:
+              event: "webhook-gateway-http:foo"
+            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: hello-world-
+              generateName: data-workflow-
             spec:
               entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
               templates:
-                - name: whalesay
-                  container:
-                    args:
-                      - "hello world"
-                    command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]

@@ -22,7 +22,9 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/cache"
 )
 
 var testGatewayStr = `apiVersion: argoproj.io/v1alpha1
@@ -43,7 +45,7 @@ spec:
       url: "nats://nats.argo-events:4222"
       type: "Standard"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway"
       labels:
@@ -59,7 +61,7 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:
@@ -70,6 +72,11 @@ spec:
           targetPort: 12000
       type: LoadBalancer`
 
+var (
+	gatewayPodName = "webhook-gateway"
+	gatewaySvcName = "webhook-gateway-svc"
+)
+
 func getGateway() (*v1alpha1.Gateway, error) {
 	gwBytes := []byte(testGatewayStr)
 	var gateway v1alpha1.Gateway
@@ -77,7 +84,35 @@ func getGateway() (*v1alpha1.Gateway, error) {
 	return &gateway, err
 }
 
+func waitForAllInformers(done chan struct{}, controller *GatewayController) {
+	cache.WaitForCacheSync(done, controller.informer.HasSynced)
+	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
+	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
+}
+
+func getPodAndService(controller *GatewayController, namespace string) (*corev1.Pod, *corev1.Service, error) {
+	pod, err := controller.kubeClientset.CoreV1().Pods(namespace).Get(gatewayPodName, metav1.GetOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+	svc, err := controller.kubeClientset.CoreV1().Services(namespace).Get(gatewaySvcName, metav1.GetOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+	return pod, svc, err
+}
+
+func deletePodAndService(controller *GatewayController, namespace string) error {
+	err := controller.kubeClientset.CoreV1().Pods(namespace).Delete(gatewayPodName, &metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+	err = controller.kubeClientset.CoreV1().Services(namespace).Delete(gatewaySvcName, &metav1.DeleteOptions{})
+	return err
+}
+
 func TestGatewayOperateLifecycle(t *testing.T) {
+	done := make(chan struct{})
 	convey.Convey("Given a gateway resource spec, parse it", t, func() {
 		fakeController := getGatewayController()
 		gateway, err := getGateway()
@@ -96,48 +131,220 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 						convey.So(goc, convey.ShouldNotBeNil)
 
 						convey.Convey("Operate on new gateway", func() {
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 							err := goc.operate()
 
 							convey.Convey("Operation must succeed", func() {
 								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
 
 								convey.Convey("A gateway pod and service must be created", func() {
-									pod, err := goc.controller.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+									gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
 									convey.So(err, convey.ShouldBeNil)
-									convey.So(pod, convey.ShouldNotBeNil)
+									convey.So(gatewayPod, convey.ShouldNotBeNil)
+									convey.So(gatewaySvc, convey.ShouldNotBeNil)
 
-									svc, err := goc.controller.kubeClientset.CoreV1().Services(gateway.Namespace).Get("webhook-gateway-svc", metav1.GetOptions{})
-									convey.So(err, convey.ShouldBeNil)
-									convey.So(svc, convey.ShouldNotBeNil)
+									convey.Convey("Go to running state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+									})
 								})
 							})
 						})
 
 						convey.Convey("Operate on gateway in running state", func() {
-							err := goc.operate()
-							convey.So(err, convey.ShouldBeNil)
-						})
-
-						convey.Convey("Mark gateway state as error and operate", func() {
-							goc.markGatewayPhase(v1alpha1.NodePhaseError, "gateway is in error state")
-							err := goc.operate()
-							convey.So(err, convey.ShouldBeNil)
-							gateway, err := goc.controller.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
-							convey.So(err, convey.ShouldBeNil)
-							convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
-						})
-
-						convey.Convey("Delete gateway and make sure both pod and service gets deleted", func() {
 							err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Delete(gateway.Name, &metav1.DeleteOptions{})
 							convey.So(err, convey.ShouldBeNil)
+							gateway, err = fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Create(gateway)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(gateway, convey.ShouldNotBeNil)
 
-							gatewayPod, err := fakeController.kubeClientset.CoreV1().Pods(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
-							convey.So(err, convey.ShouldNotBeNil)
-							convey.So(gatewayPod, convey.ShouldBeNil)
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
 
-							gatewaySvc, err := fakeController.kubeClientset.CoreV1().Services(gateway.Namespace).Get("wenhook-gateway-svc", metav1.GetOptions{})
-							convey.So(err, convey.ShouldNotBeNil)
-							convey.So(gatewaySvc, convey.ShouldBeNil)
+							// Operate it once to create pod and service
+							waitForAllInformers(done, fakeController)
+							err = goc.operate()
+							convey.So(err, convey.ShouldBeNil)
+							waitForAllInformers(done, fakeController)
+
+							convey.Convey("Operation must succeed", func() {
+								goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "test")
+
+								waitForAllInformers(done, fakeController)
+								err := goc.operate()
+								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
+
+								convey.Convey("Untouch pod and service", func() {
+									gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewayPod, convey.ShouldNotBeNil)
+									convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+									convey.Convey("Stay in running state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+									})
+								})
+							})
+
+							convey.Convey("Delete pod and service", func() {
+								err := deletePodAndService(fakeController, gateway.Namespace)
+								convey.So(err, convey.ShouldBeNil)
+
+								convey.Convey("Operation must succeed", func() {
+									goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "test")
+
+									waitForAllInformers(done, fakeController)
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Create pod and service", func() {
+										gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod, convey.ShouldNotBeNil)
+										convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+										convey.Convey("Stay in running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
+
+							convey.Convey("Change pod and service spec", func() {
+								goc.gwrctx.gw.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
+
+								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(gatewayPod, convey.ShouldNotBeNil)
+								convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+								convey.Convey("Operation must succeed", func() {
+									goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "test")
+
+									waitForAllInformers(done, fakeController)
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Delete pod and service", func() {
+										gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
+
+										convey.Convey("Stay in running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
+						})
+
+						convey.Convey("Operate on gateway in error state", func() {
+							err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Delete(gateway.Name, &metav1.DeleteOptions{})
+							convey.So(err, convey.ShouldBeNil)
+							gateway, err = fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Create(gateway)
+							convey.So(err, convey.ShouldBeNil)
+							convey.So(gateway, convey.ShouldNotBeNil)
+
+							goc.markGatewayPhase(v1alpha1.NodePhaseNew, "test")
+
+							// Operate it once to create pod and service
+							waitForAllInformers(done, fakeController)
+							err = goc.operate()
+							convey.So(err, convey.ShouldBeNil)
+							waitForAllInformers(done, fakeController)
+
+							convey.Convey("Operation must succeed", func() {
+								goc.markGatewayPhase(v1alpha1.NodePhaseError, "test")
+
+								waitForAllInformers(done, fakeController)
+								err := goc.operate()
+								convey.So(err, convey.ShouldBeNil)
+								waitForAllInformers(done, fakeController)
+
+								convey.Convey("Untouch pod and service", func() {
+									gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+									convey.So(err, convey.ShouldBeNil)
+									convey.So(gatewayPod, convey.ShouldNotBeNil)
+									convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+									convey.Convey("Stay in error state", func() {
+										gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
+									})
+								})
+							})
+
+							convey.Convey("Delete pod and service", func() {
+								err := deletePodAndService(fakeController, gateway.Namespace)
+								convey.So(err, convey.ShouldBeNil)
+
+								convey.Convey("Operation must succeed", func() {
+									goc.markGatewayPhase(v1alpha1.NodePhaseError, "test")
+
+									waitForAllInformers(done, fakeController)
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Create pod and service", func() {
+										gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod, convey.ShouldNotBeNil)
+										convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+										convey.Convey("Go to running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
+
+							convey.Convey("Change pod and service spec", func() {
+								goc.gwrctx.gw.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
+
+								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+								convey.So(err, convey.ShouldBeNil)
+								convey.So(gatewayPod, convey.ShouldNotBeNil)
+								convey.So(gatewaySvc, convey.ShouldNotBeNil)
+
+								convey.Convey("Operation must succeed", func() {
+									goc.markGatewayPhase(v1alpha1.NodePhaseError, "test")
+
+									waitForAllInformers(done, fakeController)
+									err := goc.operate()
+									convey.So(err, convey.ShouldBeNil)
+									waitForAllInformers(done, fakeController)
+
+									convey.Convey("Delete pod and service", func() {
+										gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
+										convey.So(err, convey.ShouldBeNil)
+										convey.So(gatewayPod.Spec.RestartPolicy, convey.ShouldEqual, "Never")
+										convey.So(gatewaySvc.Spec.ClusterIP, convey.ShouldEqual, "127.0.0.1")
+
+										convey.Convey("Go to running state", func() {
+											gateway, err := fakeController.gatewayClientset.ArgoprojV1alpha1().Gateways(gateway.Namespace).Get(gateway.Name, metav1.GetOptions{})
+											convey.So(err, convey.ShouldBeNil)
+											convey.So(gateway.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+										})
+									})
+								})
+							})
 						})
 					})
 				})

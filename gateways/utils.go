@@ -17,18 +17,9 @@ limitations under the License.
 package gateways
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/common"
-	"hash/fnv"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
-
-// Hasher hashes a string
-func Hasher(value string) string {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(value))
-	return fmt.Sprintf("%v", h.Sum32())
-}
 
 // General connection helper
 func Connect(backoff *wait.Backoff, conn func() error) error {

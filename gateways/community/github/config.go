@@ -53,6 +53,10 @@ type githubConfig struct {
 	Active bool `json:"active"`
 	// ContentType json or form
 	ContentType string `json:"contentType"`
+	// GitHub base URL (for GitHub Enterprise)
+	GithubBaseURL string `json:"githubBaseURL"`
+	// GitHub upload URL (for GitHub Enterprise)
+	GithubUploadURL string `json:"githubUploadURL"`
 }
 
 // cred stores the api access token or webhook secret

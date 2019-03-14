@@ -84,8 +84,8 @@ func TestHandleEventsFromEventSource(t *testing.T) {
 			go HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, &logger)
 			dataCh <- []byte("hello")
 			time.Sleep(1 * time.Second)
-			convey.So(string(es.SentData.Payload), convey.ShouldEqual, "hello")
 			cancel()
+			convey.So(string(es.SentData.Payload), convey.ShouldEqual, "hello")
 		})
 
 		convey.Convey("handle error", func() {

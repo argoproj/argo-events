@@ -22,13 +22,6 @@ import (
 	"testing"
 )
 
-func TestGatewayUtil(t *testing.T) {
-	convey.Convey("Given a value, hash it", t, func() {
-		hash := Hasher("test")
-		convey.So(hash, convey.ShouldNotBeEmpty)
-	})
-}
-
 func TestConnect(t *testing.T) {
 	convey.Convey("Given a backoff option, test connection", t, func() {
 		var backoff *wait.Backoff

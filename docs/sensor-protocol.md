@@ -393,7 +393,7 @@ SensorSpec represents desired sensor state
 | ----- | ---- | ----- | ----------- |
 | dependencies | [EventDependency](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.EventDependency) | repeated | Dependencies is a list of the events that this sensor is dependent on. |
 | triggers | [Trigger](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.Trigger) | repeated | Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor. |
-| deploySpec | [k8s.io.api.core.v1.PodSpec](#k8s.io.api.core.v1.PodSpec) | optional | DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
+| deploySpec | [k8s.io.api.core.v1.PodSpec](#k8s.io.api.core.v1.PodSpec) | optional | Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
 | eventProtocol | [github.com.argoproj.argo_events.pkg.apis.common.EventProtocol](#github.com.argoproj.argo_events.pkg.apis.common.EventProtocol) | optional | EventProtocol is the protocol through which sensor receives events from gateway |
 | circuit | [string](#string) | optional | Circuit is a boolean expression of dependency groups |
 | dependencyGroups | [DependencyGroup](#github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1.DependencyGroup) | repeated | DependencyGroups is a list of the groups of events. |

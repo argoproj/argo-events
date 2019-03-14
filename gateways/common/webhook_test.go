@@ -166,28 +166,3 @@ func TestNewWebhookHelper(t *testing.T) {
 		convey.So(helper, convey.ShouldNotBeNil)
 	})
 }
-
-func TestInitRouteChannels(t *testing.T) {
-	convey.Convey("Test init channels for webhook helper", t, func() {
-		rc := GetFakeRouteConfig()
-		helper := NewWebhookHelper()
-		helper.ActiveServers[rc.Webhook.Port] = &activeServer{}
-		go InitRouteChannels(helper)
-
-		extraStart := make(chan bool, 1)
-		go func() {
-			<-rc.StartCh
-			extraStart <- true
-		}()
-
-		helper.RouteActivateChan <- rc
-		started := <-extraStart
-		convey.So(started, convey.ShouldEqual, true)
-
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{}
-
-		helper.RouteDeactivateChan <- rc
-		time.Sleep(2 * time.Second)
-		convey.So(helper.ActiveEndpoints[rc.Webhook.Endpoint].Active, convey.ShouldEqual, false)
-	})
-}
