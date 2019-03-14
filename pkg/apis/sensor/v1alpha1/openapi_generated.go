@@ -964,9 +964,22 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"),
 						},
 					},
-					"parameters": {
+					"templateParameters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Parameters is the list of resource parameters to pass in the object",
+							Description: "TemplateParameters is the list of resource parameters to pass to the template object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"),
+									},
+								},
+							},
+						},
+					},
+					"workflowParameters": {
+						SchemaProps: spec.SchemaProps{
+							Description: "WorkflowParameters is the list of resource parameters to pass to resolved workflow object in template object",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -978,7 +991,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						},
 					},
 				},
-				Required: []string{"template", "parameters"},
+				Required: []string{"template"},
 			},
 		},
 		Dependencies: []string{
@@ -1045,13 +1058,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource describes the resource that will be created by this action",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject"),
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Message describes a message that will be sent on a queue",
-							Type:        []string{"string"},
-							Format:      "",
 						},
 					},
 					"when": {
