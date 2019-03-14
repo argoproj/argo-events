@@ -820,9 +820,9 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
-					"deploySpec": {
+					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Description: "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
@@ -853,7 +853,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "deploySpec", "eventProtocol"},
+				Required: []string{"dependencies", "triggers", "template", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{

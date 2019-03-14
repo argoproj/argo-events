@@ -119,7 +119,7 @@ func (src *sResourceCtx) deleteSensorPod(pod *corev1.Pod) error {
 
 // newSensorPod returns a new pod of sensor
 func (src *sResourceCtx) newSensorPod() (*corev1.Pod, error) {
-	podTemplateSpec := src.s.Spec.DeploySpec.DeepCopy()
+	podTemplateSpec := src.s.Spec.Template.DeepCopy()
 	pod := &corev1.Pod{
 		ObjectMeta: podTemplateSpec.ObjectMeta,
 		Spec:       podTemplateSpec.Spec,

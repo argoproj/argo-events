@@ -39,7 +39,10 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err != nil {
 		return err
 	}
-	if len(s.Spec.DeploySpec.Spec.Containers) > 1 {
+	if s.Spec.Template == nil {
+		return fmt.Errorf("sensor pod template not defined")
+	}
+	if len(s.Spec.Template.Spec.Containers) > 1 {
 		return fmt.Errorf("sensor pod specification can't have more than one container")
 	}
 	switch s.Spec.EventProtocol.Type {

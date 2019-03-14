@@ -14,7 +14,7 @@ spec:
     http:
       port: "9300"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway-http"
       labels:
@@ -39,7 +39,7 @@ spec:
           secret:
             secretName: cert-and-key-secret
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:

@@ -1668,11 +1668,11 @@ func (m *SensorSpec) MarshalTo(dAtA []byte) (int, error) {
 			i += n
 		}
 	}
-	if m.DeploySpec != nil {
+	if m.Template != nil {
 		dAtA[i] = 0x1a
 		i++
-		i = encodeVarintGenerated(dAtA, i, uint64(m.DeploySpec.Size()))
-		n23, err := m.DeploySpec.MarshalTo(dAtA[i:])
+		i = encodeVarintGenerated(dAtA, i, uint64(m.Template.Size()))
+		n23, err := m.Template.MarshalTo(dAtA[i:])
 		if err != nil {
 			return 0, err
 		}
@@ -2339,8 +2339,8 @@ func (m *SensorSpec) Size() (n int) {
 			n += 1 + l + sovGenerated(uint64(l))
 		}
 	}
-	if m.DeploySpec != nil {
-		l = m.DeploySpec.Size()
+	if m.Template != nil {
+		l = m.Template.Size()
 		n += 1 + l + sovGenerated(uint64(l))
 	}
 	if m.EventProtocol != nil {
@@ -2720,7 +2720,7 @@ func (this *SensorSpec) String() string {
 	s := strings.Join([]string{`&SensorSpec{`,
 		`Dependencies:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.Dependencies), "EventDependency", "EventDependency", 1), `&`, ``, 1) + `,`,
 		`Triggers:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.Triggers), "Trigger", "Trigger", 1), `&`, ``, 1) + `,`,
-		`DeploySpec:` + strings.Replace(fmt.Sprintf("%v", this.DeploySpec), "PodTemplateSpec", "v1.PodTemplateSpec", 1) + `,`,
+		`Template:` + strings.Replace(fmt.Sprintf("%v", this.Template), "PodTemplateSpec", "v1.PodTemplateSpec", 1) + `,`,
 		`EventProtocol:` + strings.Replace(fmt.Sprintf("%v", this.EventProtocol), "EventProtocol", "common.EventProtocol", 1) + `,`,
 		`Circuit:` + fmt.Sprintf("%v", this.Circuit) + `,`,
 		`DependencyGroups:` + strings.Replace(strings.Replace(fmt.Sprintf("%v", this.DependencyGroups), "DependencyGroup", "DependencyGroup", 1), `&`, ``, 1) + `,`,
@@ -5939,7 +5939,7 @@ func (m *SensorSpec) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DeploySpec", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Template", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -5966,10 +5966,10 @@ func (m *SensorSpec) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.DeploySpec == nil {
-				m.DeploySpec = &v1.PodTemplateSpec{}
+			if m.Template == nil {
+				m.Template = &v1.PodTemplateSpec{}
 			}
-			if err := m.DeploySpec.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Template.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
