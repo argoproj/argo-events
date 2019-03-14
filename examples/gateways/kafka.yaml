@@ -11,7 +11,7 @@ spec:
     type: "HTTP"
     http:
       port: "9300"
-  deploySpec:
+  template:
     metadata:
       name: "kafka-gateway"
       labels:

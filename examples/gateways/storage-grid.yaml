@@ -14,7 +14,7 @@ spec:
     http:
       port: "9300"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "storage-grid-gateway"
       labels:
@@ -29,7 +29,7 @@ spec:
           image: "argoproj/storage-grid-gateway"
           imagePullPolicy: "Always"
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: storage-grid-gateway-svc
     spec:

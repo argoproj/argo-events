@@ -5,12 +5,12 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     spec:
       containers:
         - name: "sensor"
           # this is an experimental image
-          image: "argoproj/sensor:v0.7.3"
+          image: "argoproj/sensor"
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /git/argoproj

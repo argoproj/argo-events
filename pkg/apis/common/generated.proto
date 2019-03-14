@@ -143,7 +143,7 @@ message S3Artifact {
   optional S3Filter filter = 8;
 }
 
-// Name contains information for an S3 Name
+// S3Bucket contains information to describe an S3 Bucket
 message S3Bucket {
   optional string key = 1;
 

@@ -5,7 +5,7 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     spec:
       containers:
         - name: "sensor"
@@ -70,7 +70,7 @@ spec:
                 type: "HTTP"
                 http:
                   port: "9300"
-              deploySpec:
+              template:
                 metadata:
                   name: "artifact-gateway"
                   labels:

@@ -141,7 +141,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 	goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod is created")
 
 	// expose gateway if service is configured
-	if goc.gw.Spec.ServiceSpec != nil {
+	if goc.gw.Spec.Service != nil {
 		svc, err := goc.createGatewayService()
 		if err != nil {
 			err = errors.Wrap(err, "failed to create gateway service")

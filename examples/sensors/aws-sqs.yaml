@@ -5,7 +5,7 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     spec:
       containers:
         - name: "sensor"
@@ -25,20 +25,29 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        parameters:
+          - src:
+              event: "aws-sqs-gateway:notification_1"
+            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: hello-world-
+              generateName: aws-sqs-workflow-
             spec:
               entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
               templates:
-                -
-                  container:
-                    args:
-                      - "hello world"
-                    command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
-                  name: whalesay
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]

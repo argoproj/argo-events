@@ -36,10 +36,10 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     containers:
       - name: "sensor"
-        image: "argoproj/sensor:v0.7"
+        image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
@@ -238,7 +238,7 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
 					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
@@ -335,7 +335,7 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.DeploySpec.Spec.RestartPolicy = "Never"
+					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
 					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
