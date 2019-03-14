@@ -84,7 +84,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, 
 			EventType:          gc.gw.Spec.Type,
 			EventTypeVersion:   gc.gw.Spec.EventVersion,
 			Source: &apicommon.URI{
-				Host: common.DefaultGatewayConfigurationName(gc.gw.Name, gatewayEvent.Name),
+				Host: common.DefaultEventSourceName(gc.gw.Name, gatewayEvent.Name),
 			},
 		},
 		Payload: gatewayEvent.Payload,

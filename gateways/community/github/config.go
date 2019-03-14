@@ -19,7 +19,6 @@ package github
 import (
 	"github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/google/go-github/github"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -28,8 +27,6 @@ import (
 // GithubEventSourceExecutor implements ConfigExecutor
 type GithubEventSourceExecutor struct {
 	Log zerolog.Logger
-	// GitlabClient is client for gitlab api
-	GithubClient *github.Client
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

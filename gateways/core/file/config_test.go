@@ -14,23 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gateways
+package file
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/smartystreets/goconvey/convey"
+	"testing"
 )
 
-// General connection helper
-func Connect(backoff *wait.Backoff, conn func() error) error {
-	if backoff == nil {
-		backoff = &common.DefaultRetry
-	}
-	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
-		if err := conn(); err != nil {
-			return false, nil
-		}
-		return true, nil
+var es = `
+directory: "/bin/"
+type: CREATE
+path: x.txt
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a file event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*fileWatcher)
+		convey.So(ok, convey.ShouldEqual, true)
 	})
-	return err
 }

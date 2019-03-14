@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2018 KompiTech GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gateways
+package github
 
 import (
 	"github.com/smartystreets/goconvey/convey"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"testing"
 )
 
-func TestConnect(t *testing.T) {
-	convey.Convey("Given a backoff option, test connection", t, func() {
-		var backoff *wait.Backoff
-		err := Connect(backoff, func() error {
-			return nil
-		})
+var es = `
+hook:
+ endpoint: "/push"
+ port: "12000"
+ url: "http://webhook-gateway-svc"
+owner: "asd"
+repository: "dsa"
+events:
+- PushEvents
+apiToken:
+  key: accesskey
+  name: githab-access
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a github event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*githubConfig)
+		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

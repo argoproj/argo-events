@@ -14,20 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gateways
+package gitlab
 
 import (
-	"github.com/smartystreets/goconvey/convey"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 )
 
-func TestConnect(t *testing.T) {
-	convey.Convey("Given a backoff option, test connection", t, func() {
-		var backoff *wait.Backoff
-		err := Connect(backoff, func() error {
-			return nil
-		})
+var es = `
+hook:
+ endpoint: "/push"
+ port: "12000"
+ url: "http://webhook-gateway-gateway-svc/push"
+projectId: "28"
+event: "PushEvents"
+accessToken:
+    key: accesskey
+    name: gitlab-access
+enableSSLVerification: false   
+gitlabBaseUrl: "http://gitlab.com/"
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a gitlab event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*glab)
+		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
