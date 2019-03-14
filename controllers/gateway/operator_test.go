@@ -45,7 +45,7 @@ spec:
       url: "nats://nats.argo-events:4222"
       type: "Standard"
   eventVersion: "1.0"
-  deploySpec:
+  template:
     metadata:
       name: "webhook-gateway"
       labels:
@@ -61,7 +61,7 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: webhook-gateway-svc
     spec:
@@ -218,8 +218,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
-								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+								goc.gwrctx.gw.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
 
 								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
 								convey.So(err, convey.ShouldBeNil)
@@ -315,8 +315,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gwrctx.gw.Spec.DeploySpec.Spec.RestartPolicy = "Never"
-								goc.gwrctx.gw.Spec.ServiceSpec.Spec.ClusterIP = "127.0.0.1"
+								goc.gwrctx.gw.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gwrctx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
 
 								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
 								convey.So(err, convey.ShouldBeNil)

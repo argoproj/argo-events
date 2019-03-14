@@ -141,12 +141,40 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 			}
 		}
 
+		sec.deleteStaleStatusNodes()
+
 		if hasDependenciesUpdated {
 			sec.NatsEventProtocol()
 		}
 
 	default:
 		sec.log.Error().Str("notification-type", string(ew.notificationType)).Msg("unknown notification type")
+	}
+}
+
+func (sec *sensorExecutionCtx) deleteStaleStatusNodes() {
+	// delete old status nodes if any
+statusNodes:
+	for _, statusNode := range sec.sensor.Status.Nodes {
+		for _, dep := range sec.sensor.Spec.Dependencies {
+			if statusNode.Type == v1alpha1.NodeTypeEventDependency && dep.Name == statusNode.Name {
+				continue statusNodes
+			}
+		}
+		for _, depGroup := range sec.sensor.Spec.DependencyGroups {
+			if statusNode.Type == v1alpha1.NodeTypeDependencyGroup && depGroup.Name == statusNode.Name {
+				continue statusNodes
+			}
+		}
+		for _, trigger := range sec.sensor.Spec.Triggers {
+			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Name == statusNode.Name {
+				continue statusNodes
+			}
+		}
+		// corresponding node not found in spec. deleting status node
+		sec.log.Info().Str("status-node", statusNode.Name).Msg("deleting old status node")
+		nodeId := sec.sensor.NodeID(statusNode.Name)
+		delete(sec.sensor.Status.Nodes, nodeId)
 	}
 }
 

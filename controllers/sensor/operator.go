@@ -98,7 +98,7 @@ func (soc *sOperationCtx) operate() error {
 		}
 
 	case v1alpha1.NodePhaseActive:
-		soc.log.Info().Msg("sensor is running")
+		soc.log.Debug().Msg("sensor is running")
 
 		err := soc.updateSensorResources()
 		if err != nil {
@@ -120,7 +120,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 	err := ValidateSensor(soc.s)
 	if err != nil {
 		soc.log.Error().Err(err).Msg("failed to validate sensor")
-		errors.Wrap(err, "failed to validate sensor")
+		err = errors.Wrap(err, "failed to validate sensor")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
@@ -128,7 +128,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 	soc.initializeAllNodes()
 	pod, err := soc.createSensorPod()
 	if err != nil {
-		errors.Wrap(err, "failed to create sensor pod")
+		err = errors.Wrap(err, "failed to create sensor pod")
 		soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
@@ -139,7 +139,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 	if soc.srctx.getServiceTemplateSpec() != nil {
 		svc, err := soc.createSensorService()
 		if err != nil {
-			errors.Wrap(err, "failed to create sensor service")
+			err = errors.Wrap(err, "failed to create sensor service")
 			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return err
 		}

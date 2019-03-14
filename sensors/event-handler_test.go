@@ -191,3 +191,39 @@ func TestEventHandler(t *testing.T) {
 
 	})
 }
+
+func TestDeleteStaleStatusNodes(t *testing.T) {
+	convey.Convey("Given a sensor, delete the stale status nodes", t, func() {
+		sensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		sec := getsensorExecutionCtx(sensor)
+		nodeId1 := sensor.NodeID("test-gateway:test")
+		nodeId2 := sensor.NodeID("test-gateway:test2")
+		sec.sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			nodeId1: v1alpha1.NodeStatus{
+				Type:  v1alpha1.NodeTypeEventDependency,
+				Name:  "test-gateway:test",
+				Phase: v1alpha1.NodePhaseActive,
+				ID:    "1234",
+			},
+			nodeId2: v1alpha1.NodeStatus{
+				Type:  v1alpha1.NodeTypeEventDependency,
+				Name:  "test-gateway:test2",
+				Phase: v1alpha1.NodePhaseActive,
+				ID:    "2345",
+			},
+		}
+
+		_, ok := sec.sensor.Status.Nodes[nodeId1]
+		convey.So(ok, convey.ShouldEqual, true)
+		_, ok = sec.sensor.Status.Nodes[nodeId2]
+		convey.So(ok, convey.ShouldEqual, true)
+
+		sec.deleteStaleStatusNodes()
+		convey.So(len(sec.sensor.Status.Nodes), convey.ShouldEqual, 1)
+		_, ok = sec.sensor.Status.Nodes[nodeId1]
+		convey.So(ok, convey.ShouldEqual, true)
+		_, ok = sec.sensor.Status.Nodes[nodeId2]
+		convey.So(ok, convey.ShouldEqual, false)
+	})
+}

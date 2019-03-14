@@ -71,7 +71,7 @@ func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
 
 // newGatewayService returns a new service that exposes gateway.
 func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
-	servicTemplateSpec := grc.gw.Spec.ServiceSpec.DeepCopy()
+	servicTemplateSpec := grc.gw.Spec.Service.DeepCopy()
 	if servicTemplateSpec == nil {
 		return nil, nil
 	}
@@ -117,7 +117,7 @@ func (grc *gwResourceCtx) deleteGatewayPod(pod *corev1.Pod) error {
 
 // newGatewayPod returns a new pod of gateway
 func (grc *gwResourceCtx) newGatewayPod() (*corev1.Pod, error) {
-	podTemplateSpec := grc.gw.Spec.DeploySpec.DeepCopy()
+	podTemplateSpec := grc.gw.Spec.Template.DeepCopy()
 	pod := &corev1.Pod{
 		ObjectMeta: podTemplateSpec.ObjectMeta,
 		Spec:       podTemplateSpec.Spec,
