@@ -19,6 +19,7 @@ package sensors
 import (
 	"testing"
 
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -287,4 +288,34 @@ func getUnstructuredPod(pod *corev1.Pod) (*unstructured.Unstructured, error) {
 		return nil, err
 	}
 	return &unstructured.Unstructured{Object: obj}, nil
+}
+
+func TestExtractEvents(t *testing.T) {
+	convey.Convey("Given a sensor, extract events", t, func() {
+		sensor, _ := getSensor()
+		sec := getsensorExecutionCtx(sensor)
+		id := sensor.NodeID("test-gateway:test")
+		sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			id: {
+				Type: v1alpha1.NodeTypeEventDependency,
+				Event: &apicommon.Event{
+					Payload: []byte("hello"),
+					Context: apicommon.EventContext{
+						Source: &apicommon.URI{
+							Host: "test-gateway:test",
+						},
+					},
+				},
+			},
+		}
+		extractedEvents := sec.extractEvents([]v1alpha1.ResourceParameter{
+			{
+				Src: &v1alpha1.ResourceParameterSource{
+					Event: "test-gateway:test",
+				},
+				Dest: "fake-dest",
+			},
+		})
+		convey.So(len(extractedEvents), convey.ShouldEqual, 1)
+	})
 }

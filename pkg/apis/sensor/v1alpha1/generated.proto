@@ -229,7 +229,7 @@ message ResourceObject {
   optional GroupVersionKind groupVersionKind = 5;
 
   // Namespace in which to create this object
-  // defaults to the service account namespace
+  // defaults to the sensor namespace
   optional string namespace = 1;
 
   // Source of the K8 resource file(s)

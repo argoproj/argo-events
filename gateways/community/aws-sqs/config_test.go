@@ -14,23 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gateways
+package aws_sqs
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 )
 
-// General connection helper
-func Connect(backoff *wait.Backoff, conn func() error) error {
-	if backoff == nil {
-		backoff = &common.DefaultRetry
-	}
-	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
-		if err := conn(); err != nil {
-			return false, nil
-		}
-		return true, nil
+var es = `
+region: "us-east-1"
+accessKey:
+    key: accesskey
+    name: sns
+secretKey:
+    key: secretkey
+    name: sns
+queue: "test-queue"
+waitTimeSeconds: 10
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a aws-sqs event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*sqs)
+		convey.So(ok, convey.ShouldEqual, true)
 	})
-	return err
 }
