@@ -70,7 +70,7 @@ message DataFilter {
   optional string type = 2;
 
   // Value is the allowed string values for this key
-  // Booleans are pased using strconv.ParseBool()
+  // Booleans are passed using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
   // Nils this value is ignored
@@ -158,7 +158,7 @@ message GitArtifact {
   // +optional
   optional string tag = 8;
 
-  // Git remote to manage set of tracked repositories. Defaults to "origin".
+  // Remote to manage set of tracked repositories. Defaults to "origin".
   // Refer https://git-scm.com/docs/git-remote
   // +optional
   optional GitRemoteConfig remote = 9;
@@ -171,6 +171,7 @@ message GitCreds {
   optional k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
+// GitRemoteConfig contains the configuration of a Git remote
 message GitRemoteConfig {
   // Name of the remote to fetch from.
   optional string name = 1;

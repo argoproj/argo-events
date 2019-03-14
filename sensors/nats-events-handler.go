@@ -17,7 +17,6 @@ limitations under the License.
 package sensors
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"strconv"
 	"strings"
@@ -92,8 +91,6 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 // trying to put a message twice on internal queue.
 func (sec *sensorExecutionCtx) NatsEventProtocol() {
 	var err error
-
-	fmt.Println("hello")
 
 	switch sec.sensor.Spec.EventProtocol.Nats.Type {
 	case pc.Standard:
