@@ -91,7 +91,7 @@ GatewaySpec represents gateway specifications
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| deploySpec | [k8s.io.api.core.v1.Pod](#k8s.io.api.core.v1.Pod) | optional | Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
+| Template | [k8s.io.api.core.v1.Pod](#k8s.io.api.core.v1.Pod) | optional | Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
 | configmap | [string](#string) | optional | ConfigMap is name of the configmap for gateway. This configmap contains event sources. |
 | type | [string](#string) | optional | Type is the type of gateway. Used as metadata. |
 | eventVersion | [string](#string) | optional | Version is used for marking event version |
