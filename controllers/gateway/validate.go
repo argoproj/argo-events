@@ -25,8 +25,8 @@ import (
 // Validate validates the gateway resource.
 // Exporting this function so that external APIs can use this to validate gateway resource.
 func Validate(gw *v1alpha1.Gateway) error {
-	if gw.Spec.DeploySpec == nil {
-		return fmt.Errorf("gateway deploy specification is not specified")
+	if gw.Spec.Template == nil {
+		return fmt.Errorf("gateway  pod template is not specified")
 	}
 	if gw.Spec.Type == "" {
 		return fmt.Errorf("gateway type is not specified")

@@ -14,7 +14,7 @@ spec:
       clusterId: "example-stan"
       clientId: "myclient"
       type: "Streaming"
-  deploySpec:
+  template:
     metadata:
       name: "artifact-gateway-nats-streaming"
       labels:

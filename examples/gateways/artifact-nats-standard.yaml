@@ -12,7 +12,7 @@ spec:
     nats:
       url: "nats://example-nats.argo-events:4222"
       type: "Standard"
-  deploySpec:
+  template:
     metadata:
       name: "artifact-gateway-nats-standard"
       labels:
