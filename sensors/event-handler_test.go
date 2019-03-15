@@ -17,8 +17,12 @@ limitations under the License.
 package sensors
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -30,6 +34,8 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 	discoveryFake "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -37,7 +43,6 @@ import (
 var sensorStr = `apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  namespace: argo-events
   name: test-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
@@ -94,18 +99,22 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return &sensor, err
 }
 
-type mockHttpWriter struct{}
+type mockHttpWriter struct {
+	Status  int
+	Payload []byte
+}
 
 func (m *mockHttpWriter) Header() http.Header {
 	return http.Header{}
 }
 
-func (m *mockHttpWriter) Write([]byte) (int, error) {
+func (m *mockHttpWriter) Write(p []byte) (int, error) {
+	m.Payload = p
 	return 0, nil
 }
 
 func (m *mockHttpWriter) WriteHeader(statusCode int) {
-
+	m.Status = statusCode
 }
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
@@ -123,6 +132,7 @@ func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,
 		controllerInstanceID: "test-1",
+		queue:                make(chan *updateNotification),
 	}
 }
 
@@ -136,7 +146,7 @@ func getCloudEvent() *apicommon.Event {
 			EventType:          "test",
 			EventTypeVersion:   common.CloudEventsVersion,
 			Source: &apicommon.URI{
-				Host: common.DefaultGatewayConfigurationName("test-gateway", "test"),
+				Host: common.DefaultEventSourceName("test-gateway", "test"),
 			},
 		},
 		Payload: []byte(`{
@@ -225,5 +235,207 @@ func TestDeleteStaleStatusNodes(t *testing.T) {
 		convey.So(ok, convey.ShouldEqual, true)
 		_, ok = sec.sensor.Status.Nodes[nodeId2]
 		convey.So(ok, convey.ShouldEqual, false)
+	})
+}
+
+func TestValidateEvent(t *testing.T) {
+	convey.Convey("Given an event, validate it", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		dep, valid := sec.validateEvent(&apicommon.Event{
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		})
+		convey.So(valid, convey.ShouldEqual, true)
+		convey.So(dep, convey.ShouldNotBeNil)
+	})
+}
+
+func TestParseEvent(t *testing.T) {
+	convey.Convey("Given an event payload, parse event", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		payload, err := json.Marshal(e)
+		convey.So(err, convey.ShouldBeNil)
+
+		event, err := sec.parseEvent(payload)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(string(event.Payload), convey.ShouldEqual, "hello")
+	})
+}
+
+func TestSendToInternalQueue(t *testing.T) {
+	convey.Convey("Given an event, send it on internal queue", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		go func() {
+			<-sec.queue
+		}()
+		ok := sec.sendEventToInternalQueue(e, &mockHttpWriter{})
+		convey.So(ok, convey.ShouldEqual, true)
+	})
+}
+
+func TestHandleHttpEventHandler(t *testing.T) {
+	convey.Convey("Test http handler", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		go func() {
+			<-sec.queue
+		}()
+		payload, err := json.Marshal(e)
+		convey.So(err, convey.ShouldBeNil)
+		writer := &mockHttpWriter{}
+		sec.httpEventHandler(writer, &http.Request{
+			Body: ioutil.NopCloser(bytes.NewReader(payload)),
+		})
+		convey.So(writer.Status, convey.ShouldEqual, http.StatusOK)
+	})
+}
+
+func TestSuccessNatsConnection(t *testing.T) {
+	convey.Convey("Given a successful nats connection, generate K8s event", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		sec.successNatsConnection()
+		req1, err := labels.NewRequirement(common.LabelOperation, selection.Equals, []string{"nats_connection_setup"})
+		convey.So(err, convey.ShouldBeNil)
+		req2, err := labels.NewRequirement(common.LabelEventType, selection.Equals, []string{string(common.OperationSuccessEventType)})
+		convey.So(err, convey.ShouldBeNil)
+		req3, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{string(sec.sensor.Name)})
+		convey.So(err, convey.ShouldBeNil)
+
+		eventList, err := sec.kubeClient.CoreV1().Events(sec.sensor.Namespace).List(metav1.ListOptions{
+			LabelSelector: labels.NewSelector().Add([]labels.Requirement{*req1, *req2, *req3}...).String(),
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(len(eventList.Items), convey.ShouldEqual, 1)
+		event := eventList.Items[0]
+		convey.So(event.Reason, convey.ShouldEqual, "connection setup successfully")
+	})
+}
+
+func TestEscalateNatsConnectionFailure(t *testing.T) {
+	convey.Convey("Given a failed nats connection, escalate through K8s event", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		sec.escalateNatsConnectionFailure()
+		req1, err := labels.NewRequirement(common.LabelOperation, selection.Equals, []string{"nats_connection_setup"})
+		convey.So(err, convey.ShouldBeNil)
+		req2, err := labels.NewRequirement(common.LabelEventType, selection.Equals, []string{string(common.OperationFailureEventType)})
+		convey.So(err, convey.ShouldBeNil)
+		req3, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{string(sec.sensor.Name)})
+		convey.So(err, convey.ShouldBeNil)
+
+		eventList, err := sec.kubeClient.CoreV1().Events(sec.sensor.Namespace).List(metav1.ListOptions{
+			LabelSelector: labels.NewSelector().Add([]labels.Requirement{*req1, *req2, *req3}...).String(),
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(len(eventList.Items), convey.ShouldEqual, 1)
+		event := eventList.Items[0]
+		convey.So(event.Reason, convey.ShouldEqual, "connection setup failed")
+	})
+}
+
+func TestSuccessNatsSubscription(t *testing.T) {
+	convey.Convey("Given a successful nats subscription, generate K8s event", t, func() {
+		s, _ := getSensor()
+		eventSource := "fake"
+		sec := getsensorExecutionCtx(s)
+		sec.successNatsSubscription(eventSource)
+		req1, err := labels.NewRequirement(common.LabelOperation, selection.Equals, []string{"nats_subscription_success"})
+		convey.So(err, convey.ShouldBeNil)
+		req2, err := labels.NewRequirement(common.LabelEventType, selection.Equals, []string{string(common.OperationSuccessEventType)})
+		convey.So(err, convey.ShouldBeNil)
+		req3, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{string(sec.sensor.Name)})
+		convey.So(err, convey.ShouldBeNil)
+		req4, err := labels.NewRequirement(common.LabelEventSource, selection.Equals, []string{strings.Replace(eventSource, ":", "_", -1)})
+		convey.So(err, convey.ShouldBeNil)
+
+		eventList, err := sec.kubeClient.CoreV1().Events(sec.sensor.Namespace).List(metav1.ListOptions{
+			LabelSelector: labels.NewSelector().Add([]labels.Requirement{*req1, *req2, *req3, *req4}...).String(),
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(len(eventList.Items), convey.ShouldEqual, 1)
+		event := eventList.Items[0]
+		convey.So(event.Reason, convey.ShouldEqual, "nats subscription success")
+	})
+}
+
+func TestEscalateNatsSubscriptionFailure(t *testing.T) {
+	convey.Convey("Given a failed nats subscription, escalate K8s event", t, func() {
+		s, _ := getSensor()
+		eventSource := "fake"
+		sec := getsensorExecutionCtx(s)
+		sec.escalateNatsSubscriptionFailure(eventSource)
+		req1, err := labels.NewRequirement(common.LabelOperation, selection.Equals, []string{"nats_subscription_failure"})
+		convey.So(err, convey.ShouldBeNil)
+		req2, err := labels.NewRequirement(common.LabelEventType, selection.Equals, []string{string(common.OperationFailureEventType)})
+		convey.So(err, convey.ShouldBeNil)
+		req3, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{string(sec.sensor.Name)})
+		convey.So(err, convey.ShouldBeNil)
+		req4, err := labels.NewRequirement(common.LabelEventSource, selection.Equals, []string{strings.Replace(eventSource, ":", "_", -1)})
+		convey.So(err, convey.ShouldBeNil)
+
+		eventList, err := sec.kubeClient.CoreV1().Events(sec.sensor.Namespace).List(metav1.ListOptions{
+			LabelSelector: labels.NewSelector().Add([]labels.Requirement{*req1, *req2, *req3, *req4}...).String(),
+		})
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(len(eventList.Items), convey.ShouldEqual, 1)
+		event := eventList.Items[0]
+		convey.So(event.Reason, convey.ShouldEqual, "nats subscription failed")
+	})
+}
+
+func TestProcessNatsMessage(t *testing.T) {
+	convey.Convey("Given nats message, process it", t, func() {
+		s, _ := getSensor()
+		sec := getsensorExecutionCtx(s)
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		dataCh := make(chan []byte)
+		go func() {
+			data := <-sec.queue
+			dataCh <- data.event.Payload
+		}()
+		payload, err := json.Marshal(e)
+		convey.So(err, convey.ShouldBeNil)
+		sec.processNatsMessage(payload, "fake")
+		data := <-dataCh
+		convey.So(data, convey.ShouldNotBeNil)
+		convey.So(string(data), convey.ShouldEqual, "hello")
 	})
 }

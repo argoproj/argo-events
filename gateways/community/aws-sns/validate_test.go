@@ -39,7 +39,6 @@ accessKey:
 secretKey:
     key: secretkey
     name: sns
-
 `
 
 	invalidConfig = `

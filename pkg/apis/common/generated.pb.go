@@ -18,18 +18,18 @@ limitations under the License.
 package common
 
 import (
-	fmt "fmt"
+	"fmt"
 
-	io "io"
+	"io"
 
-	proto "github.com/gogo/protobuf/proto"
+	"github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_sortkeys "github.com/gogo/protobuf/sortkeys"
 	github_com_minio_minio_go "github.com/minio/minio-go"
 	v11 "k8s.io/api/core/v1"
 
-	math "math"
-	reflect "reflect"
-	strings "strings"
+	"math"
+	"reflect"
+	"strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

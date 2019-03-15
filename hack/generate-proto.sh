@@ -42,6 +42,3 @@ dist/go-to-protobuf \
     --apimachinery-packages=$(IFS=, ; echo "${APIMACHINERY_PKGS[*]}") \
     --proto-import=${PROJECT_ROOT}/vendor
 
-# generate protocol documentation
-protoc -I=${GOPATH}/src --doc_out=../docs --doc_opt=markdown,gateway-protocol.md github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto
-protoc -I=${GOPATH}/src --doc_out=../docs --doc_opt=markdown,sensor-protocol.md github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1/generated.proto
