@@ -26,7 +26,7 @@ import (
 )
 
 // apply the params to the resource json object
-func applyParams(jsonObj []byte, params []v1alpha1.ResourceParameter, events map[string]apicommon.Event) ([]byte, error) {
+func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
 		v, err := resolveParamValue(param.Src, events)

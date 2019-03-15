@@ -167,7 +167,7 @@ statusNodes:
 			}
 		}
 		for _, trigger := range sec.sensor.Spec.Triggers {
-			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Name == statusNode.Name {
+			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Template.Name == statusNode.Name {
 				continue statusNodes
 			}
 		}

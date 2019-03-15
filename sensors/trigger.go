@@ -175,7 +175,7 @@ func (sec *sensorExecutionCtx) applyParamsTrigger(trigger *v1alpha1.Trigger) err
 	return nil
 }
 
-func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.ResourceParameter, obj *unstructured.Unstructured) error {
+func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
 	if parameters != nil && len(parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
@@ -212,7 +212,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		if err = sec.createResourceObject(trigger.Template.Resource, trigger.WorkflowParameters, uObj); err != nil {
+		if err = sec.createResourceObject(trigger.Template.Resource, trigger.ResourceParameters, uObj); err != nil {
 			return err
 		}
 	}
@@ -220,7 +220,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 }
 
 // createResourceObject creates K8s object for trigger
-func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, parameters []v1alpha1.ResourceParameter, obj *unstructured.Unstructured) error {
+func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
 	namespace := resource.Namespace
 	// Defaults to sensor's namespace
 	if namespace == "" {
@@ -279,7 +279,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceO
 
 // helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.ResourceParameter) map[string]apicommon.Event {
+func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {

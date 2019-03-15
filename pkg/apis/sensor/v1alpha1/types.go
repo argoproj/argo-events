@@ -22,9 +22,8 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -66,18 +65,18 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
-	v1.TypeMeta   `json:",inline"`
-	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
+	Spec              SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
+	Status            SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
 }
 
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type SensorList struct {
-	v1.TypeMeta `json:",inline"`
-	v1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Items       []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
+	Items           []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // SensorSpec represents desired sensor state
@@ -204,10 +203,10 @@ type Trigger struct {
 	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,opt,name=template"`
 
 	// TemplateParameters is the list of resource parameters to pass to the template object
-	TemplateParameters []ResourceParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
+	TemplateParameters []TriggerParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
 
-	// WorkflowParameters is the list of resource parameters to pass to resolved workflow object in template object
-	WorkflowParameters []ResourceParameter `json:"workflowParameters,omitempty" protobuf:"bytes,3,rep,name=workflowParameters"`
+	// ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -232,8 +231,8 @@ type TriggerCondition struct {
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
 
-// ResourceParameter indicates a passed parameter to a service template
-type ResourceParameter struct {
+// TriggerParameter indicates a passed parameter to a service template
+type TriggerParameter struct {
 	// Src contains a source reference to the value of the resource parameter from a event event
 	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 
@@ -284,10 +283,10 @@ type SensorStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
-	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
+	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
-	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
+	CompletedAt metav1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
 	CompletionCount int32 `json:"completionCount,omitempty" protobuf:"varint,6,opt,name=completionCount"`
@@ -320,10 +319,10 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
+	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
-	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
+	CompletedAt metav1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`

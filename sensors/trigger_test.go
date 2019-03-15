@@ -272,7 +272,7 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.WorkflowParameters, uObj)
+			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
@@ -306,7 +306,7 @@ func TestCreateResourceObject(t *testing.T) {
 			Phase: v1alpha1.NodePhaseActive,
 		}
 
-		testTrigger.TemplateParameters = []v1alpha1.ResourceParameter{
+		testTrigger.TemplateParameters = []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.ResourceParameterSource{
 					Event: "test-gateway:test",
@@ -316,7 +316,7 @@ func TestCreateResourceObject(t *testing.T) {
 			},
 		}
 
-		testTrigger.WorkflowParameters = []v1alpha1.ResourceParameter{
+		testTrigger.ResourceParameters = []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.ResourceParameterSource{
 					Event: "test-gateway:test",
@@ -363,7 +363,7 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(rObj)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.applyParamsResource(testTrigger.WorkflowParameters, uObj)
+			err = soc.applyParamsResource(testTrigger.ResourceParameters, uObj)
 			convey.So(err, convey.ShouldBeNil)
 		})
 
@@ -377,7 +377,7 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.WorkflowParameters, uObj)
+			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
