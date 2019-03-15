@@ -4,7 +4,7 @@
 2. [Components](#components)
 2. [Specification](gateway-protocol.md)
 4. [Managing Event Sources](#managing-event-sources)
-5. [How to writer a custom gateway?](#how-to-writer-a-custom-gateway)
+5. [How to write a custom gateway?](#how-to-write-a-custom-gateway)
 6. [Examples](#examples)
 
 ## What is a gateway?
@@ -73,7 +73,7 @@ You can find gateways built by the community [here](https://github.com/argoproj/
   * You can modify K8s configmap containing event sources configurations anytime and `gateway-client` will intelligently pick new/deleted configurations and send them over to `gateway-server` to either
   start or stop the event sources.
 
-## How to writer a custom gateway?
+## How to write a custom gateway?
 To implement a custom gateway, you need to create a gRPC server and implement the service defined below.
 The framework code acts as a gRPC client consuming event stream from gateway server.
 
