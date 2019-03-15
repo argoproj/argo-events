@@ -14,23 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gateways
+package webhook
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"testing"
+
+	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/smartystreets/goconvey/convey"
 )
 
-// General connection helper
-func Connect(backoff *wait.Backoff, conn func() error) error {
-	if backoff == nil {
-		backoff = &common.DefaultRetry
-	}
-	err := wait.ExponentialBackoff(*backoff, func() (bool, error) {
-		if err := conn(); err != nil {
-			return false, nil
-		}
-		return true, nil
+var es = `
+endpoint: "/bar"
+port: "10000"
+method: "POST"
+`
+
+func TestParseConfig(t *testing.T) {
+	convey.Convey("Given a webhook event source, parse it", t, func() {
+		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*common.Webhook)
+		convey.So(ok, convey.ShouldEqual, true)
 	})
-	return err
 }

@@ -60,7 +60,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(request.Body); err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
+		common.SendInternalErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
 		return
 	}
 
@@ -68,14 +68,20 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	token := rc.Configs[labelSlackToken]
 	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: token.(string)}))
 	if e != nil {
-		writer.WriteHeader(http.StatusInternalServerError)
+		response = "failed to extract event"
+		logger.Error().Msg(response)
+		common.SendInternalErrorResponse(writer, "failed to extract event")
+		return
 	}
 
 	if eventsAPIEvent.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
-			writer.WriteHeader(http.StatusInternalServerError)
+			response = "failed to verify the challenge"
+			logger.Error().Msg(response)
+			common.SendInternalErrorResponse(writer, response)
+			return
 		}
 		writer.Header().Set("Content-Type", "text")
 		writer.Write([]byte(r.Challenge))
@@ -84,8 +90,9 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		data, err := json.Marshal(eventsAPIEvent.InnerEvent.Data)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to ")
-			common.SendErrorResponse(writer, "failed to marshal event data")
+			response = "failed to marshal event data"
+			logger.Error().Err(err).Msg(response)
+			common.SendInternalErrorResponse(writer, response)
 			return
 		}
 		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- data
@@ -93,6 +100,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 
 	response = "request successfully processed"
 	logger.Info().Msg(response)
+	common.SendSuccessResponse(writer, response)
 }
 
 // StartEventSource starts a event source
