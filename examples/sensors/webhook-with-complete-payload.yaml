@@ -20,16 +20,11 @@ spec:
   dependencies:
     - name: "webhook-gateway-nats:foo"
   triggers:
-    - name: argo-workflow
-      resource:
-        namespace: argo-events
+    - template:
+        name: argo-workflow
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "webhook-gateway-nats:foo"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
               apiVersion: argoproj.io/v1alpha1
@@ -52,3 +47,7 @@ spec:
                     image: docker/whalesay:latest
                     command: [cowsay]
                     args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "webhook-gateway-nats:foo"
+          dest: spec.arguments.parameters.0.value

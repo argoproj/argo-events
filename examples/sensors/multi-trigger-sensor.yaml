@@ -19,9 +19,8 @@ spec:
   dependencies:
     - name: "webhook-gateway-http:foo"
   triggers:
-    - name: multi-trigger-workflow-1
-      resource:
-        namespace: argo-events
+    - template:
+        name: multi-trigger-workflow-1
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -38,9 +37,8 @@ spec:
             secretKey:
               key: secretkey
               name: artifacts-minio
-    - name: multi-trigger-workflow-2
-      resource:
-        namespace: argo-events
+    - template:
+        name: multi-trigger-workflow-2
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

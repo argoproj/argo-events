@@ -215,16 +215,12 @@ spec:
 var testTrigger = v1alpha1.Trigger{
 	Template: &v1alpha1.TriggerTemplate{
 		Name: "sample",
-		Resource: &v1alpha1.ResourceObject{
-			Namespace: corev1.NamespaceDefault,
-			GroupVersionKind: v1alpha1.GroupVersionKind{
-				Version: "v1",
-				Kind:    "Pod",
-			},
-			Source: v1alpha1.ArtifactLocation{
-				Inline: &testPod,
-			},
-			Labels: map[string]string{"test-label": "test-value"},
+		GroupVersionKind: &metav1.GroupVersionKind{
+			Kind:    "Pod",
+			Version: "v1",
+		},
+		Source: &v1alpha1.ArtifactLocation{
+			Inline: &testPod,
 		},
 	},
 }
@@ -238,7 +234,7 @@ func TestProcessTrigger(t *testing.T) {
 		testSensor.Spec.Triggers = triggers
 		soc := getsensorExecutionCtx(testSensor)
 		err = soc.executeTrigger(testTrigger)
-		convey.So(err, convey.ShouldNotBeNil)
+		convey.So(err, convey.ShouldBeNil)
 	})
 }
 
@@ -264,11 +260,10 @@ func TestCreateResourceObject(t *testing.T) {
 		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
 
 		convey.Convey("Given a pod spec, get a pod object", func() {
-			rObj := testTrigger.Template.Resource.DeepCopy()
-			rObj.Namespace = "foo"
+			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: rObj.Namespace, Name: "my-pod"},
+				ObjectMeta: metav1.ObjectMeta{Namespace: "foo", Name: "my-pod"},
 			}
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
@@ -278,7 +273,7 @@ func TestCreateResourceObject(t *testing.T) {
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, rObj.Namespace)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, "foo")
 		})
 
 		fe := &fakeEvent{
@@ -309,7 +304,7 @@ func TestCreateResourceObject(t *testing.T) {
 
 		testTrigger.TemplateParameters = []v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ResourceParameterSource{
+				Src: &v1alpha1.ParameterSource{
 					Event: "test-gateway:test",
 					Path:  "name",
 				},
@@ -319,7 +314,7 @@ func TestCreateResourceObject(t *testing.T) {
 
 		testTrigger.ResourceParameters = []v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ResourceParameterSource{
+				Src: &v1alpha1.ParameterSource{
 					Event: "test-gateway:test",
 					Path:  "name",
 				},
@@ -369,8 +364,7 @@ func TestCreateResourceObject(t *testing.T) {
 		})
 
 		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
-			rObj := testTrigger.Template.Resource.DeepCopy()
-			rObj.Namespace = ""
+			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
@@ -414,9 +408,9 @@ func TestExtractEvents(t *testing.T) {
 				},
 			},
 		}
-		extractedEvents := sec.extractEvents([]v1alpha1.ResourceParameter{
+		extractedEvents := sec.extractEvents([]v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ResourceParameterSource{
+				Src: &v1alpha1.ParameterSource{
 					Event: "test-gateway:test",
 				},
 				Dest: "fake-dest",

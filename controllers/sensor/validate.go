@@ -102,8 +102,11 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 			return fmt.Errorf("trigger must define a name")
 		}
 		// each trigger must have a message or a resource
-		if trigger.Template.Resource == nil {
+		if trigger.Template.Source == nil {
 			return fmt.Errorf("trigger '%s' does not contain an absolute action", trigger.Template.Name)
+		}
+		if trigger.Template.GroupVersionKind == nil {
+			return fmt.Errorf("must provide group, version and kind for the resource")
 		}
 		if trigger.Template.When != nil && trigger.Template.When.All != nil && trigger.Template.When.Any != nil {
 			return fmt.Errorf("trigger condition can't have both any and all condition")

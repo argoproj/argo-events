@@ -127,14 +127,6 @@ type DependencyGroup struct {
 	Dependencies []string `json:"dependencies" protobuf:"bytes,2,name=dependencies"`
 }
 
-// GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
-// to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
-type GroupVersionKind struct {
-	Group   string `json:"group" protobuf:"bytes,1,name=group"`
-	Version string `json:"version" protobuf:"bytes,2,name=version"`
-	Kind    string `json:"kind" protobuf:"bytes,3,name=kind"`
-}
-
 // EventDependencyFilter defines filters and constraints for a event.
 type EventDependencyFilter struct {
 	// Name is the name of event filter
@@ -214,11 +206,14 @@ type TriggerTemplate struct {
 	// Name is a unique name of the action to take
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
-	// Resource describes the resource that will be created by this action
-	Resource *ResourceObject `json:"resource,omitempty" protobuf:"bytes,2,opt,name=resource"`
-
 	// When is the condition to execute the trigger
-	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,5,opt,name=when"`
+	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,4,opt,name=when"`
+
+	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+	*metav1.GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
+
+	// Source of the K8 resource file(s)
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
@@ -233,8 +228,8 @@ type TriggerCondition struct {
 
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
-	// Src contains a source reference to the value of the resource parameter from a event event
-	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,name=src"`
+	// Src contains a source reference to the value of the parameter from a event event
+	Src *ParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
@@ -243,8 +238,8 @@ type TriggerParameter struct {
 	Dest string `json:"dest" protobuf:"bytes,2,name=dest"`
 }
 
-// ResourceParameterSource defines the source for a resource parameter from a event event
-type ResourceParameterSource struct {
+// ParameterSource defines the source for a parameter from a event event
+type ParameterSource struct {
 	// Event is the name of the event for which to retrieve this event
 	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
 
@@ -258,23 +253,6 @@ type ResourceParameterSource struct {
 	// This is only used if the path is invalid.
 	// If the path is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
-}
-
-// ResourceObject is the resource object to create on kubernetes
-type ResourceObject struct {
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
-
-	// Namespace in which to create this object
-	// defaults to the sensor namespace
-	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-
-	// Source of the K8 resource file(s)
-	Source ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
-
-	// Map of string keys and values that can be used to organize and categorize
-	// (scope and select) objects. This overrides any labels in the unstructured object with the same key.
-	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,3,rep,name=labels"`
 }
 
 // SensorStatus contains information about the status of a sensor.

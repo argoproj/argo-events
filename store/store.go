@@ -29,6 +29,7 @@ import (
 	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NOTE: custom resources must be manually added here
@@ -50,7 +51,7 @@ type ArtifactReader interface {
 }
 
 // FetchArtifact from the location, decode it using explicit types, and unstructure it
-func FetchArtifact(reader ArtifactReader, gvk ss_v1alpha1.GroupVersionKind) (*unstructured.Unstructured, error) {
+func FetchArtifact(reader ArtifactReader, gvk *metav1.GroupVersionKind) (*unstructured.Unstructured, error) {
 	var err error
 	var obj []byte
 	obj, err = reader.Read()
@@ -78,7 +79,7 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, cl
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
-func decodeAndUnstructure(b []byte, gvk ss_v1alpha1.GroupVersionKind) (*unstructured.Unstructured, error) {
+func decodeAndUnstructure(b []byte, gvk *metav1.GroupVersionKind) (*unstructured.Unstructured, error) {
 	gvk1 := &schema.GroupVersionKind{
 		Group:   gvk.Group,
 		Version: gvk.Version,

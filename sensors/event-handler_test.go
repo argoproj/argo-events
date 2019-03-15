@@ -40,50 +40,48 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-var sensorStr = `apiVersion: argoproj.io/v1alpha1
+var sensorStr = `
+apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: test-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
+  template:
     containers:
       - name: "sensor"
         image: "argoproj/sensor"
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
+  dependencies:
+    - name: "test-gateway:test"
   eventProtocol:
     type: "HTTP"
     http:
       port: "9300"
-  dependencies:
-    - name: test-gateway:test
   triggers:
-    - template:
+    - template: 
         name: test-workflow-trigger
-        resource:
-          namespace: argo-events
-          group: argoproj.io
-          version: v1alpha1
-          kind: Workflow
-          source:
-           inline: |
-               apiVersion: argoproj.io/v1alpha1
-               kind: Workflow
-               metadata:
-                 generateName: hello-world-
-               spec:
-                 entrypoint: whalesay
-                 templates:
-                   -
-                     container:
-                       args:
-                         - "hello world"
-                       command:
-                         - cowsay
-                       image: "docker/whalesay:latest"
-                     name: whalesay
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
 `
 
 var podResourceList = metav1.APIResourceList{

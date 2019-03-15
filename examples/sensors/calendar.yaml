@@ -19,16 +19,11 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: calendar-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: calendar-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "calendar-gateway:interval"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -51,3 +46,7 @@ spec:
                   image: docker/whalesay:latest
                   command: [cowsay]
                   args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "calendar-gateway:interval"
+          dest: spec.arguments.parameters.0.value

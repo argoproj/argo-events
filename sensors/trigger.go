@@ -200,19 +200,19 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err := sec.applyParamsTrigger(&trigger); err != nil {
 			return err
 		}
-		creds, err := store.GetCredentials(sec.kubeClient, sec.sensor.Namespace, &trigger.Template.Resource.Source)
+		creds, err := store.GetCredentials(sec.kubeClient, sec.sensor.Namespace, trigger.Template.Source)
 		if err != nil {
 			return err
 		}
-		reader, err := store.GetArtifactReader(&trigger.Template.Resource.Source, creds, sec.kubeClient)
+		reader, err := store.GetArtifactReader(trigger.Template.Source, creds, sec.kubeClient)
 		if err != nil {
 			return err
 		}
-		uObj, err := store.FetchArtifact(reader, trigger.Template.Resource.GroupVersionKind)
+		uObj, err := store.FetchArtifact(reader, trigger.Template.GroupVersionKind)
 		if err != nil {
 			return err
 		}
-		if err = sec.createResourceObject(trigger.Template.Resource, trigger.ResourceParameters, uObj); err != nil {
+		if err = sec.createResourceObject(trigger.Template, trigger.ResourceParameters, uObj); err != nil {
 			return err
 		}
 	}
@@ -220,24 +220,13 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 }
 
 // createResourceObject creates K8s object for trigger
-func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.ResourceObject, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
-	namespace := resource.Namespace
+func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTemplate, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
+	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {
 		namespace = sec.sensor.Namespace
 	}
 	obj.SetNamespace(namespace)
-
-	if resource.Labels != nil {
-		labels := obj.GetLabels()
-		if labels != nil {
-			for k, v := range resource.Labels {
-				labels[k] = v
-			}
-			obj.SetLabels(labels)
-		}
-		obj.SetLabels(resource.Labels)
-	}
 
 	// passing parameters to the resource object requires 4 steps
 	// 1. marshaling the obj to JSON

@@ -20,9 +20,8 @@ spec:
       port: "9300"
   # To add other standard K8s resources, change the version and pod in triggers/resource accordingly.
   triggers:
-    - name: webhook-pod-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: webhook-pod-trigger
         group: ""
         version: v1
         kind: Pod
@@ -40,9 +39,8 @@ spec:
                   command:
                     - cowsay
                   image: "docker/whalesay:latest"
-    - name: webhook-deployment-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: webhook-deployment-trigger
         group: apps
         version: v1
         kind: Deployment

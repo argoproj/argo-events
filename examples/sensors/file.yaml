@@ -19,17 +19,11 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: file-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: file-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "file-gateway:bindir"
-              path: name
-            dest: spec.templates.0.container.args.1
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -47,3 +41,8 @@ spec:
                       - cowsay
                     image: "docker/whalesay:latest"
                   name: whalesay
+      resourceParameters:
+        - src:
+            event: "file-gateway:bindir"
+            path: name
+          dest: spec.templates.0.container.args.1

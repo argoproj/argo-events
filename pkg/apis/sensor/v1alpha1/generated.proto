@@ -181,16 +181,6 @@ message GitRemoteConfig {
   repeated string urls = 2;
 }
 
-// GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
-// to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
-message GroupVersionKind {
-  optional string group = 1;
-
-  optional string version = 2;
-
-  optional string kind = 3;
-}
-
 // NodeStatus describes the status for an individual node in the sensor's FSM.
 // A single node can represent the status for event or a trigger.
 message NodeStatus {
@@ -223,25 +213,8 @@ message NodeStatus {
   optional github.com.argoproj.argo_events.pkg.apis.common.Event event = 9;
 }
 
-// ResourceObject is the resource object to create on kubernetes
-message ResourceObject {
-  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional GroupVersionKind groupVersionKind = 5;
-
-  // Namespace in which to create this object
-  // defaults to the sensor namespace
-  optional string namespace = 1;
-
-  // Source of the K8 resource file(s)
-  optional ArtifactLocation source = 6;
-
-  // Map of string keys and values that can be used to organize and categorize
-  // (scope and select) objects. This overrides any labels in the unstructured object with the same key.
-  map<string, string> labels = 3;
-}
-
-// ResourceParameterSource defines the source for a resource parameter from a event event
-message ResourceParameterSource {
+// ParameterSource defines the source for a parameter from a event event
+message ParameterSource {
   // Event is the name of the event for which to retrieve this event
   optional string event = 1;
 
@@ -361,8 +334,8 @@ message TriggerCondition {
 
 // TriggerParameter indicates a passed parameter to a service template
 message TriggerParameter {
-  // Src contains a source reference to the value of the resource parameter from a event event
-  optional ResourceParameterSource src = 1;
+  // Src contains a source reference to the value of the parameter from a event event
+  optional ParameterSource src = 1;
 
   // Dest is the JSONPath of a resource key.
   // A path is a series of keys separated by a dot. The colon character can be escaped with '.'
@@ -376,11 +349,14 @@ message TriggerTemplate {
   // Name is a unique name of the action to take
   optional string name = 1;
 
-  // Resource describes the resource that will be created by this action
-  optional ResourceObject resource = 2;
-
   // When is the condition to execute the trigger
-  optional TriggerCondition when = 5;
+  optional TriggerCondition when = 4;
+
+  // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionKind groupVersionKind = 5;
+
+  // Source of the K8 resource file(s)
+  optional ArtifactLocation source = 6;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.
