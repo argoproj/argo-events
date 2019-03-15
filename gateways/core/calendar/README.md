@@ -68,17 +68,20 @@ data:
     timezone: "America/New_York"
 ```
 
+### Event Payload Structure
+The event payload contains `eventTime` and `userPayload` (optional)
+
 ## Setup
 **1. Install Gateway Configmap**
 
 ```yaml
-kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/calendar-gateway-configmap.yaml
+kubectl -n argo-events create -f  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar-gateway-configmap.yaml
 ```
 
 **2. Install Gateway**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/calendar.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar.yaml
 ```
 
 Make sure the gateway pod is created.
@@ -86,7 +89,7 @@ Make sure the gateway pod is created.
 **3. Install Sensor**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/calendar.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/calendar.yaml
 ```
 
 Make sure the sensor pod is created.

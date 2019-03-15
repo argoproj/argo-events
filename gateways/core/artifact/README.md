@@ -88,12 +88,15 @@ data:
       name: artifacts-minio
 ``` 
 
+### Event Payload Structure
+Refer AWS S3 Notitification - https://docs.aws.amazon.com/AmazonS3/latest/dev/notification-content-structure.html
+
 ## Setup
 
 **1. Install Gateway Configmap**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/artifact-gateway-configmap.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/artifact-gateway-configmap.yaml
 ```
 
 **2. Install Gateway**
@@ -101,7 +104,7 @@ kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/ma
 **Pre-requisite - create necessary buckets in Minio.**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/artifact-http.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/artifact-http.yaml
 ```
 
 Make sure the gateway pod is created
@@ -109,7 +112,7 @@ Make sure the gateway pod is created
 **3. Install Sensor**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/artifact.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/artifact.yaml
 ```
 
 **4. Trigger workflow**
@@ -119,4 +122,3 @@ Drop a file onto `input` bucket and monitor workflows
 ## How to listen to notifications from different bucket
 Simply edit the gateway configmap and add new entry that contains the configuration required to listen to new bucket, save
 the configmap. The gateway will now start listening to both old and new buckets. 
-

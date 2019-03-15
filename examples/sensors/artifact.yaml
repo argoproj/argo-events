@@ -5,12 +5,13 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  deploySpec:
-    containers:
-      - name: "sensor"
-        image: "argoproj/sensor"
-        imagePullPolicy: Always
-    serviceAccountName: argo-events-sa
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
   eventProtocol:
     type: "HTTP"
     http:
@@ -24,20 +25,54 @@ spec:
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
+        parameters:
+          - src:
+              event: "artifact-gateway:input"
+            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: hello-world-
+              generateName: artifact-workflow-1-
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  value: hello world
+              templates:
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]
+    - name: artifact-workflow-trigger-2
+      resource:
+        namespace: argo-events
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        # The container args from the workflow are overridden by the s3 notification key
+        parameters:
+          - src:
+              event: "artifact-gateway:input"
+              path: s3.object.key
+            dest: spec.templates.0.container.args.0
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: artifact-workflow-2-
             spec:
               entrypoint: whalesay
               templates:
-                -
+                - name: whalesay
                   container:
-                    args:
-                      - "hello world"
                     command:
                       - cowsay
                     image: "docker/whalesay:latest"
-                  name: whalesay

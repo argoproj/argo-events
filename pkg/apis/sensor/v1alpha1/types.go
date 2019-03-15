@@ -88,8 +88,8 @@ type SensorSpec struct {
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 
-	// DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	DeploySpec *corev1.PodSpec `json:"deploySpec" protobuf:"bytes,3,name=deploySpec"`
+	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
+	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
 
 	// EventProtocol is the protocol through which sensor receives events from gateway
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
@@ -261,7 +261,7 @@ type ResourceObject struct {
 	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
 
 	// Namespace in which to create this object
-	// defaults to the service account namespace
+	// defaults to the sensor namespace
 	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
 
 	// Source of the K8 resource file(s)

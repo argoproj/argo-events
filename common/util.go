@@ -17,7 +17,9 @@ limitations under the License.
 package common
 
 import (
+	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"os"
 	"time"
 
@@ -42,8 +44,8 @@ func DefaultServiceName(serviceName string) string {
 	return fmt.Sprintf("%s-svc", serviceName)
 }
 
-// DefaultGatewayConfigurationName returns a formulated name for a gateway configuration
-func DefaultGatewayConfigurationName(gatewayName string, configurationName string) string {
+// DefaultEventSourceName returns a formulated name for a gateway configuration
+func DefaultEventSourceName(gatewayName string, configurationName string) string {
 	return fmt.Sprintf("%s:%s", gatewayName, configurationName)
 }
 
@@ -86,6 +88,12 @@ func SendErrorResponse(writer http.ResponseWriter, response string) {
 	writer.Write([]byte(response))
 }
 
+// SendInternalErrorResponse sends http internal error response
+func SendInternalErrorResponse(writer http.ResponseWriter, response string) {
+	writer.WriteHeader(http.StatusInternalServerError)
+	writer.Write([]byte(response))
+}
+
 // LoggerConf returns standard logging configuration
 func LoggerConf() zerolog.ConsoleWriter {
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
@@ -107,4 +115,20 @@ func LoggerConf() zerolog.ConsoleWriter {
 // GetLoggerContext returns a logger with input options
 func GetLoggerContext(opt zerolog.ConsoleWriter) zerolog.Context {
 	return zerolog.New(opt).With().Timestamp()
+}
+
+// Hasher hashes a string
+func Hasher(value string) string {
+	h := fnv.New32a()
+	_, _ = h.Write([]byte(value))
+	return fmt.Sprintf("%v", h.Sum32())
+}
+
+// GetObjectHash returns hash of a given object
+func GetObjectHash(obj metav1.Object) (string, error) {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal resource")
+	}
+	return Hasher(string(b)), nil
 }

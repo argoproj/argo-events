@@ -113,11 +113,15 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	var actualOps fsevent.Op
 	time.Sleep(200 * time.Millisecond)
 	events = readEvents(t, watcher)
-	assert.Equal(t, []fsevent.Event{
-		{Op: fsevent.Write | fsevent.Rename | fsevent.Chmod, Name: filepath.Join(tmpdir, "foo")},
-	}, events)
+	for _, event := range events {
+		if event.Name == filepath.Join(tmpdir, "foo") {
+			actualOps |= event.Op
+		}
+	}
+	assert.Equal(t, fsevent.Write|fsevent.Rename|fsevent.Chmod, actualOps)
 
 	// Remove a file
 	err = os.Remove(filepath.Join(tmpdir, "foo"))

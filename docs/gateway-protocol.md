@@ -3,7 +3,7 @@
 
 ## Table of Contents
 
-- [github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto](#github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto)
+- [pkg/apis/gateway/v1alpha1/generated.proto](#pkg/apis/gateway/v1alpha1/generated.proto)
     - [Gateway](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.Gateway)
     - [GatewayList](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayList)
     - [GatewayNotificationWatcher](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.GatewayNotificationWatcher)
@@ -22,10 +22,10 @@
 
 
 
-<a name="github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto"></a>
+<a name="pkg/apis/gateway/v1alpha1/generated.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/generated.proto
+## pkg/apis/gateway/v1alpha1/generated.proto
 
 
 
@@ -91,11 +91,11 @@ GatewaySpec represents gateway specifications
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| deploySpec | [k8s.io.api.core.v1.Pod](#k8s.io.api.core.v1.Pod) | optional | DeploySpec is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
+| Template | [k8s.io.api.core.v1.Pod](#k8s.io.api.core.v1.Pod) | optional | Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core |
 | configmap | [string](#string) | optional | ConfigMap is name of the configmap for gateway. This configmap contains event sources. |
 | type | [string](#string) | optional | Type is the type of gateway. Used as metadata. |
 | eventVersion | [string](#string) | optional | Version is used for marking event version |
-| serviceSpec | [k8s.io.api.core.v1.Service](#k8s.io.api.core.v1.Service) | optional | ServiceSpec is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core |
+| serviceSpec | [k8s.io.api.core.v1.Service](#k8s.io.api.core.v1.Service) | optional | Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core |
 | watchers | [NotificationWatchers](#github.com.argoproj.argo_events.pkg.apis.gateway.v1alpha1.NotificationWatchers) | optional | Watchers are components which are interested listening to notifications from this gateway These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications. In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case specifying watchers would be unnecessary. |
 | processorPort | [string](#string) | optional | Port on which the gateway event source processor is running on. |
 | eventProtocol | [github.com.argoproj.argo_events.pkg.apis.common.EventProtocol](#github.com.argoproj.argo_events.pkg.apis.common.EventProtocol) | optional | EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway) |

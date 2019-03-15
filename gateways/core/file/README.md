@@ -45,12 +45,20 @@ data:
     path: x.txt # file to watch to
 ```
 
+### Event Payload Structure
+```
+{
+  "name": // Relative path to the file or directory.
+   "op": // File operation that triggered the event.
+}
+```
+
 ## Setup
 
 **1. Install Gateway**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/file.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/file.yaml
 ```
 
 Make sure the gateway pod is created.
@@ -58,13 +66,13 @@ Make sure the gateway pod is created.
 **2. Install Gateway Configmap**
 
 ```yaml
-kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/file-gateway-configmap.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/file-gateway-configmap.yaml
 ```
 
 **3. Install Sensor**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/file.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/file.yaml
 ```
 
 Make sure the sensor pod is created.

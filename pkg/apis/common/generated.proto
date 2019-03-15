@@ -157,6 +157,19 @@ message S3Filter {
   optional string suffix = 2;
 }
 
+// ServiceTemplateSpec is the template spec contains metadata and service spec.
+message ServiceTemplateSpec {
+  // Standard object's metadata.
+  // More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+
+  // Specification of the desired behavior of the pod.
+  // More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status
+  // +optional
+  optional k8s.io.api.core.v1.ServiceSpec spec = 2;
+}
+
 // URI is a Uniform Resource Identifier based on RFC 3986
 message URI {
   optional string scheme = 1;

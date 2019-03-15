@@ -155,7 +155,7 @@ func (rc *RouteConfig) startHttpServer(helper *WebhookHelper) {
 			} else {
 				err = rc.Webhook.srv.ListenAndServeTLS(rc.Webhook.ServerCertPath, rc.Webhook.ServerKeyPath)
 			}
-			rc.Log.Info().Str("event-source", rc.EventSource.Name).Str("port", rc.Webhook.Port).Msg("http server stopped")
+			rc.Log.Error().Err(err).Str("event-source", rc.EventSource.Name).Str("port", rc.Webhook.Port).Msg("http server stopped")
 			if err != nil {
 				errChan <- err
 			}

@@ -65,18 +65,21 @@ data:
     kind: "Namespace"
 ```
 
+### Event Payload Structure
+Kubernetes Object the gateway is watching.
+
 ## Setup
 
 **1. Install Gateway Configmap**
 
 ```yaml
-kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/resource-gateway-configmap.yaml
+kubectl -n argo-events create -f  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/resource-gateway-configmap.yaml
 ```
 
 **2. Install gateway**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/resource.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/resource.yaml
 ```
 
 Make sure the gateway pod is created
@@ -84,7 +87,7 @@ Make sure the gateway pod is created
 **3. Install Sensor**
 
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/resource.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
 ```
 
 Make sure the sensor pod is created.

@@ -84,19 +84,19 @@ If you don't to expose the gateway, just remove the `serviceSpec`.
 **1. Install Gateway Configmap**
 
 ```yaml
- kubectl -n argo-events create -f  https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-gateway-configmap.yaml
+ kubectl -n argo-events create -f  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml
 ```
 
 **2. Install Gateway**
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/gateways/webhook-http.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-http.yaml
 ```
 
 Make sure the gateway pod and service is created.
 
 **3. Install Sensor**
 ```yaml
-kubectl -n argo-events create -f https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-http.yaml
+kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-http.yaml
 ```
 
 Make sure the sensor pod is created.
@@ -124,5 +124,5 @@ If you want to have a secure server then you will need to mount the certifactes 
 the configmap entry, set the values for `serverCertPath` and `serverKeyPath` accordingly.
 
 Example: 
-1. Gateway: https://github.com/argoproj/argo-events/blob/master/examples/gateways/secure-webhook.yaml
-2. Configmap: https://github.com/argoproj/argo-events/blob/master/examples/gateways/secure-webhook-gateway-configmap.yaml
+1. Gateway: https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/secure-webhook.yaml
+2. Configmap: https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/secure-webhook-gateway-configmap.yaml

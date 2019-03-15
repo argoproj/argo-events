@@ -19,6 +19,7 @@ package sensors
 import (
 	"testing"
 
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -30,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/dynamic"
+	dynamicfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
@@ -197,20 +199,14 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 }
 
 var testWf = `
-apiVersion: argoproj.io/v1alpha1
-kind: Workflow
+apiVersion: v1
+kind: Pod
 metadata:
 generateName: hello-world-
 spec:
-entrypoint: whalesay
-templates:
-- name: whalesay
-container:
-    args:
-    - "hello world"
-    command:
-    - cowsay
-    image: "docker/whalesay:latest"
+  containers:
+  - name: whalesay
+	image: "docker/whalesay:latest"
 `
 
 var testTrigger = v1alpha1.Trigger{
@@ -218,9 +214,8 @@ var testTrigger = v1alpha1.Trigger{
 	Resource: &v1alpha1.ResourceObject{
 		Namespace: corev1.NamespaceDefault,
 		GroupVersionKind: v1alpha1.GroupVersionKind{
-			Group:   "argoproj.io",
-			Version: "v1alpha1",
-			Kind:    "workflow",
+			Version: "v1",
+			Kind:    "Pod",
 		},
 		Source: v1alpha1.ArtifactLocation{
 			Inline: &testWf,
@@ -239,5 +234,88 @@ func TestProcessTrigger(t *testing.T) {
 		soc := getsensorExecutionCtx(testSensor)
 		err = soc.executeTrigger(testTrigger)
 		convey.So(err, convey.ShouldNotBeNil)
+	})
+}
+
+func TestCreateResourceObject(t *testing.T) {
+	convey.Convey("Given a resource object", t, func() {
+		testSensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		soc := getsensorExecutionCtx(testSensor)
+		fakeclient := soc.clientPool.(*FakeClientPool).Fake
+		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
+
+		convey.Convey("Given a pod", func() {
+			rObj := testTrigger.Resource.DeepCopy()
+			rObj.Namespace = "foo"
+			pod := &corev1.Pod{
+				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+				ObjectMeta: metav1.ObjectMeta{Namespace: rObj.Namespace, Name: "my-pod"},
+			}
+			uObj, err := getUnstructuredPod(pod)
+			convey.So(err, convey.ShouldBeNil)
+
+			err = soc.createResourceObject(rObj, uObj)
+			convey.So(err, convey.ShouldBeNil)
+
+			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, rObj.Namespace)
+		})
+		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
+			rObj := testTrigger.Resource.DeepCopy()
+			rObj.Namespace = ""
+			pod := &corev1.Pod{
+				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
+			}
+			uObj, err := getUnstructuredPod(pod)
+			convey.So(err, convey.ShouldBeNil)
+
+			err = soc.createResourceObject(rObj, uObj)
+			convey.So(err, convey.ShouldBeNil)
+
+			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
+		})
+	})
+}
+
+func getUnstructuredPod(pod *corev1.Pod) (*unstructured.Unstructured, error) {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(pod)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: obj}, nil
+}
+
+func TestExtractEvents(t *testing.T) {
+	convey.Convey("Given a sensor, extract events", t, func() {
+		sensor, _ := getSensor()
+		sec := getsensorExecutionCtx(sensor)
+		id := sensor.NodeID("test-gateway:test")
+		sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			id: {
+				Type: v1alpha1.NodeTypeEventDependency,
+				Event: &apicommon.Event{
+					Payload: []byte("hello"),
+					Context: apicommon.EventContext{
+						Source: &apicommon.URI{
+							Host: "test-gateway:test",
+						},
+					},
+				},
+			},
+		}
+		extractedEvents := sec.extractEvents([]v1alpha1.ResourceParameter{
+			{
+				Src: &v1alpha1.ResourceParameterSource{
+					Event: "test-gateway:test",
+				},
+				Dest: "fake-dest",
+			},
+		})
+		convey.So(len(extractedEvents), convey.ShouldEqual, 1)
 	})
 }

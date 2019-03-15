@@ -18,10 +18,8 @@ package aws_sqs
 
 import (
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/store"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 )
 
@@ -48,26 +46,13 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 func (ese *SQSEventSourceExecutor) listenEvents(s *sqs, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	// retrieve access key id and secret access key
-	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, s.AccessKey.Name, s.AccessKey.Key)
-	if err != nil {
-		errorCh <- err
-		return
-	}
-	secretKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, s.SecretKey.Name, s.SecretKey.Key)
+	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, s.AccessKey, s.SecretKey)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	creds := credentials.NewStaticCredentialsFromCreds(credentials.Value{
-		AccessKeyID:     accessKey,
-		SecretAccessKey: secretKey,
-	})
-	awsSession, err := session.NewSession(&aws.Config{
-		Region:      &s.Region,
-		Credentials: creds,
-	})
+	awsSession, err := gwcommon.GetAWSSession(creds, s.Region)
 	if err != nil {
 		errorCh <- err
 		return

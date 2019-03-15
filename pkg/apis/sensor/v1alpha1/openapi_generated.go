@@ -596,7 +596,7 @@ func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object defaults to the service account namespace",
+							Description: "Namespace in which to create this object defaults to the sensor namespace",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -844,10 +844,10 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							},
 						},
 					},
-					"deploySpec": {
+					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "DeploySpec contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+							Description: "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
 					"eventProtocol": {
@@ -877,11 +877,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "deploySpec", "eventProtocol"},
+				Required: []string{"dependencies", "triggers", "template", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 
