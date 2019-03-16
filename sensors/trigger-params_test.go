@@ -59,7 +59,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(""),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "missing",
 						},
 					},
@@ -75,7 +75,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(""),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "missing",
 							Value: &defaultValue,
 						},
@@ -93,7 +93,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(""),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "missing",
 							Value: &defaultValue,
 						},
@@ -110,7 +110,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(``),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "simpleJSON",
 							Path:  "name.last",
 						},
@@ -128,7 +128,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(`{"x":"before"}`),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "simpleJSON",
 							Path:  "name.last",
 						},
@@ -146,7 +146,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(``),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "nonJSON",
 						},
 						Dest: "x",
@@ -163,7 +163,7 @@ func Test_applyParams(t *testing.T) {
 				jsonObj: []byte(``),
 				params: []v1alpha1.TriggerParameter{
 					{
-						Src: &v1alpha1.ParameterSource{
+						Src: &v1alpha1.TriggerParameterSource{
 							Event: "nonJSON",
 							Path:  "test",
 						},

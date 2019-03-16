@@ -192,7 +192,7 @@ type DataFilter struct {
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
 	// Template describes the trigger specification.
-	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,opt,name=template"`
+	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,name=template"`
 
 	// TemplateParameters is the list of resource parameters to pass to the template object
 	TemplateParameters []TriggerParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
@@ -229,7 +229,7 @@ type TriggerCondition struct {
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
 	// Src contains a source reference to the value of the parameter from a event event
-	Src *ParameterSource `json:"src" protobuf:"bytes,1,name=src"`
+	Src *TriggerParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
@@ -238,8 +238,8 @@ type TriggerParameter struct {
 	Dest string `json:"dest" protobuf:"bytes,2,name=dest"`
 }
 
-// ParameterSource defines the source for a parameter from a event event
-type ParameterSource struct {
+// TriggerParameterSource defines the source for a parameter from a event event
+type TriggerParameterSource struct {
 	// Event is the name of the event for which to retrieve this event
 	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
 

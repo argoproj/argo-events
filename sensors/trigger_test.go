@@ -304,7 +304,7 @@ func TestCreateResourceObject(t *testing.T) {
 
 		testTrigger.TemplateParameters = []v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ParameterSource{
+				Src: &v1alpha1.TriggerParameterSource{
 					Event: "test-gateway:test",
 					Path:  "name",
 				},
@@ -314,7 +314,7 @@ func TestCreateResourceObject(t *testing.T) {
 
 		testTrigger.ResourceParameters = []v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ParameterSource{
+				Src: &v1alpha1.TriggerParameterSource{
 					Event: "test-gateway:test",
 					Path:  "name",
 				},
@@ -410,7 +410,7 @@ func TestExtractEvents(t *testing.T) {
 		}
 		extractedEvents := sec.extractEvents([]v1alpha1.TriggerParameter{
 			{
-				Src: &v1alpha1.ParameterSource{
+				Src: &v1alpha1.TriggerParameterSource{
 					Event: "test-gateway:test",
 				},
 				Dest: "fake-dest",
