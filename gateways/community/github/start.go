@@ -18,6 +18,7 @@ package github
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -38,9 +39,8 @@ const (
 )
 
 const (
-	githubSignatureHeader = "x-hub-signature"
-	githubEventHeader     = "x-github-event"
-	githubDeliveryHeader  = "x-github-delivery"
+	githubEventHeader    = "X-GitHub-Event"
+	githubDeliveryHeader = "X-GitHub-Delivery"
 )
 
 var (
@@ -176,6 +176,25 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	}, helper, eventStream)
 }
 
+func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
+	body, err := gh.ValidatePayload(r, secret)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := make(map[string]interface{})
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, err
+	}
+	for _, h := range []string{
+		githubEventHeader,
+		githubDeliveryHeader,
+	} {
+		payload[h] = r.Header.Get(h)
+	}
+	return json.Marshal(payload)
+}
+
 // routeActiveHandler handles new route
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
@@ -197,7 +216,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	if s, ok := hook.Config["secret"]; ok {
 		secret = s.(string)
 	}
-	body, err := gh.ValidatePayload(request, []byte(secret))
+	body, err := parseValidateRequest(request, []byte(secret))
 	if err != nil {
 		logger.Error().Err(err).Msg("request is not valid event notification")
 		common.SendErrorResponse(writer, fmt.Sprintf("invalid event notification"))
