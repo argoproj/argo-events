@@ -18,6 +18,7 @@ package github
 
 import (
 	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -100,6 +101,31 @@ func TestRouteActiveHandler(t *testing.T) {
 				err = ese.PostActivate(rc)
 				convey.So(err, convey.ShouldNotBeNil)
 			})
+		})
+	})
+}
+
+func TestAddEventTypeBody(t *testing.T) {
+	convey.Convey("Given a request", t, func() {
+		var (
+			buf        = bytes.NewBuffer([]byte(`{ "hello": "world" }`))
+			eventType  = "PushEvent"
+			deliveryID = "131C7C9B-A571-4F60-9ACA-EA3ADA19FABE"
+		)
+		request, err := http.NewRequest("POST", "http://example.com", buf)
+		convey.So(err, convey.ShouldBeNil)
+		request.Header.Set("X-GitHub-Event", eventType)
+		request.Header.Set("X-GitHub-Delivery", deliveryID)
+		request.Header.Set("Content-Type", "application/json")
+
+		convey.Convey("Delivery headers should be written to message", func() {
+			body, err := parseValidateRequest(request, []byte{})
+			convey.So(err, convey.ShouldBeNil)
+			payload := make(map[string]interface{})
+			json.Unmarshal(body, &payload)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(payload["X-GitHub-Event"], convey.ShouldEqual, eventType)
+			convey.So(payload["X-GitHub-Delivery"], convey.ShouldEqual, deliveryID)
 		})
 	})
 }
