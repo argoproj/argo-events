@@ -19,9 +19,8 @@ spec:
   dependencies:
     - name: "artifact-gateway:input"
   triggers:
-    - name: artifact-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: artifact-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

@@ -22,9 +22,8 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -66,18 +65,18 @@ const (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 type Sensor struct {
-	v1.TypeMeta   `json:",inline"`
-	v1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Spec          SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status        SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
+	Spec              SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
+	Status            SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
 }
 
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type SensorList struct {
-	v1.TypeMeta `json:",inline"`
-	v1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Items       []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
+	Items           []Sensor `json:"items" protobuf:"bytes,2,rep,name=items"`
 }
 
 // SensorSpec represents desired sensor state
@@ -126,14 +125,6 @@ type DependencyGroup struct {
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 	// Dependencies of events
 	Dependencies []string `json:"dependencies" protobuf:"bytes,2,name=dependencies"`
-}
-
-// GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion
-// to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.
-type GroupVersionKind struct {
-	Group   string `json:"group" protobuf:"bytes,1,name=group"`
-	Version string `json:"version" protobuf:"bytes,2,name=version"`
-	Kind    string `json:"kind" protobuf:"bytes,3,name=kind"`
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -200,20 +191,29 @@ type DataFilter struct {
 
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
+	// Template describes the trigger specification.
+	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,name=template"`
+
+	// TemplateParameters is the list of resource parameters to pass to the template object
+	TemplateParameters []TriggerParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
+
+	// ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+}
+
+// TriggerTemplate is the template that describes trigger specification.
+type TriggerTemplate struct {
 	// Name is a unique name of the action to take
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
-	// Resource describes the resource that will be created by this action
-	Resource *ResourceObject `json:"resource,omitempty" protobuf:"bytes,2,opt,name=resource"`
-
-	// Message describes a message that will be sent on a queue
-	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
-
-	// RetryStrategy is the strategy to retry a trigger if it fails
-	RetryStrategy *RetryStrategy `json:"retryStrategy,omitempty" protobuf:"bytes,4,opt,name=replyStrategy"`
-
 	// When is the condition to execute the trigger
-	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,5,opt,name=when"`
+	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,4,opt,name=when"`
+
+	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+	*metav1.GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
+
+	// Source of the K8 resource file(s)
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
@@ -226,10 +226,10 @@ type TriggerCondition struct {
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
 
-// ResourceParameter indicates a passed parameter to a service template
-type ResourceParameter struct {
-	// Src contains a source reference to the value of the resource parameter from a event event
-	Src *ResourceParameterSource `json:"src" protobuf:"bytes,1,name=src"`
+// TriggerParameter indicates a passed parameter to a service template
+type TriggerParameter struct {
+	// Src contains a source reference to the value of the parameter from a event event
+	Src *TriggerParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
@@ -238,8 +238,8 @@ type ResourceParameter struct {
 	Dest string `json:"dest" protobuf:"bytes,2,name=dest"`
 }
 
-// ResourceParameterSource defines the source for a resource parameter from a event event
-type ResourceParameterSource struct {
+// TriggerParameterSource defines the source for a parameter from a event event
+type TriggerParameterSource struct {
 	// Event is the name of the event for which to retrieve this event
 	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
 
@@ -255,41 +255,16 @@ type ResourceParameterSource struct {
 	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
 }
 
-// ResourceObject is the resource object to create on kubernetes
-type ResourceObject struct {
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
-
-	// Namespace in which to create this object
-	// defaults to the sensor namespace
-	Namespace string `json:"namespace" protobuf:"bytes,1,opt,name=namespace"`
-
-	// Source of the K8 resource file(s)
-	Source ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
-
-	// Map of string keys and values that can be used to organize and categorize
-	// (scope and select) objects. This overrides any labels in the unstructured object with the same key.
-	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,3,rep,name=labels"`
-
-	// Parameters is the list of resource parameters to pass in the object
-	Parameters []ResourceParameter `json:"parameters" protobuf:"bytes,4,rep,name=parameters"`
-}
-
-// RetryStrategy represents a strategy for retrying operations
-// TODO: implement me
-type RetryStrategy struct {
-}
-
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	// Phase is the high-level summary of the sensor
 	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase"`
 
 	// StartedAt is the time at which this sensor was initiated
-	StartedAt v1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
+	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this sensor was completed
-	CompletedAt v1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
+	CompletedAt metav1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
 	// CompletionCount is the count of sensor's successful runs.
 	CompletionCount int32 `json:"completionCount,omitempty" protobuf:"varint,6,opt,name=completionCount"`
@@ -322,10 +297,10 @@ type NodeStatus struct {
 	Phase NodePhase `json:"phase" protobuf:"bytes,5,opt,name=phase"`
 
 	// StartedAt is the time at which this node started
-	StartedAt v1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
+	StartedAt metav1.MicroTime `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 
 	// CompletedAt is the time at which this node completed
-	CompletedAt v1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
+	CompletedAt metav1.MicroTime `json:"completedAt,omitempty" protobuf:"bytes,7,opt,name=completedAt"`
 
 	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`

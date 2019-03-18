@@ -23,9 +23,8 @@ spec:
           start: "22:14:05"
           stop: "23:04:05"
   triggers:
-    - name: hello-world-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: hello-world-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

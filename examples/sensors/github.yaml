@@ -19,9 +19,8 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: github-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: github-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
