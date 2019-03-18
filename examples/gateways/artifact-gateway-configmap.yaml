@@ -9,6 +9,7 @@ data:
     endpoint: minio-service.argo-events:9000
     events:
      - s3:ObjectCreated:Put
+     - s3:ObjectRemoved:Delete
     filter:
       prefix: ""
       suffix: ""

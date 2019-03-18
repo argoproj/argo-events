@@ -73,5 +73,5 @@ Make sure sensor pod is created.
 
 **4. Trigger Workflow**
 
-As soon as there a message is consumed from SQS queue, a workflow will be triggered.
+A workflow will be triggered when slack sends an event.
 

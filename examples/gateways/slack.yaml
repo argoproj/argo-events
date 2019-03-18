@@ -27,7 +27,7 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/slack-gateway"]
       serviceAccountName: "argo-events-sa"
-  serviceSpec:
+  service:
     metadata:
       name: slack-gateway-svc
     spec:
