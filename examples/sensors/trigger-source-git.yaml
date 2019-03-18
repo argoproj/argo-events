@@ -26,9 +26,8 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: workflow-trigger-1
-      resource:
-        namespace: argo-events
+    - template:
+        name: workflow-trigger-1
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -46,9 +45,8 @@ spec:
             namespace: argo-events
             filePath: "examples/hello-world.yaml"
             tag: "v2.2.1"
-    - name: workflow-trigger-2
-      resource:
-        namespace: argo-events
+    - template:
+        name: workflow-trigger-2
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

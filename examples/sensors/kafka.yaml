@@ -19,16 +19,11 @@ spec:
   dependencies:
     - name: "kafka-gateway:foo"
   triggers:
-    - name: kafka-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: kafka-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "kafka-gateway:foo"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -51,3 +46,7 @@ spec:
                   image: docker/whalesay:latest
                   command: [cowsay]
                   args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "kafka-gateway:foo"
+          dest: spec.arguments.parameters.0.value

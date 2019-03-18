@@ -19,16 +19,11 @@ spec:
   dependencies:
     - name: "gitlab-gateway:project_1"
   triggers:
-    - name: gitlab-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: gitlab-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "gitlab-gateway:project_1"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -50,4 +45,8 @@ spec:
                 container:
                   image: docker/whalesay:latest
                   command: [cowsay]
-                  args: ["{{inputs.parameters.message}}"]
+                    args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "gitlab-gateway:project_1"
+          dest: spec.arguments.parameters.0.value

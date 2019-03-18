@@ -28,6 +28,7 @@ import (
 )
 
 var sensorStr = `
+
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -49,29 +50,28 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: artifact-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template: 
+        name: artifact-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
         source:
           inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  -
-                    container:
-                      args:
-                        - "hello world"
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
-                    name: whalesay
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+                -
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
+                  name: whalesay
 `
 
 var (

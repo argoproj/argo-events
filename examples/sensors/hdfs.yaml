@@ -19,9 +19,8 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: hdfs-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: hdfs-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -46,3 +45,8 @@ spec:
                       command:
                         - cowsay
                       image: "docker/whalesay:latest"
+      resourceParameters:
+        - src:
+            event: "hdfs-gateway:tmpdir"
+            path: name
+          dest: spec.templates.0.container.args.1

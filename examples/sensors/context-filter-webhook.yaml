@@ -24,9 +24,8 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: done-workflow
-      resource:
-        namespace: argo-events
+    - template:
+        name: done-workflow
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

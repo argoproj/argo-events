@@ -19,16 +19,11 @@ spec:
   dependencies:
     - name: "resource-gateway:workflow-success"
   triggers:
-    - name: argo-workflow
-      resource:
-        namespace: argo-events
+    - template:
+        name: argo-workflow
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "resource-gateway:workflow-success"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -51,3 +46,7 @@ spec:
                   image: docker/whalesay:latest
                   command: [cowsay]
                   args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "resource-gateway:workflow-success"
+          dest: spec.arguments.parameters.0.value

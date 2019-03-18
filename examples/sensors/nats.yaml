@@ -21,16 +21,11 @@ spec:
   dependencies:
     - name: "nats-gateway:foo"
   triggers:
-    - name: nats-workflow-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: nats-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
-        parameters:
-          - src:
-              event: "nats-gateway:foo"
-            dest: spec.arguments.parameters.0.value
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -42,7 +37,6 @@ spec:
               arguments:
                 parameters:
                 - name: message
-                  # this is the value that should be overridden
                   value: hello world
               templates:
               - name: whalesay

@@ -28,30 +28,28 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":        schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":       schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":              schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":         schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":         schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":   schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":            schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":             schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":                schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":         schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GroupVersionKind":        schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":              schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject":          schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter":       schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource": schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy":           schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                  schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":              schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":              schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":            schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":              schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                 schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition":        schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":             schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":      schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":        schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":        schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":  schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":           schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":            schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":               schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":        schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":             schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition":       schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource": schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
 }
 
@@ -461,38 +459,6 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_GroupVersionKind(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "GroupVersionKind unambiguously identifies a kind.  It doesn't anonymously include GroupVersion to avoid automatic coercion.  It doesn't use a GroupVersion to avoid custom marshalling.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"group": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"version": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"group", "version", "kind"},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -566,156 +532,6 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/common.Event", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_ResourceObject(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ResourceObject is the resource object to create on kubernetes",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"group": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"version": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace in which to create this object defaults to the sensor namespace",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source of the K8 resource file(s)",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
-						},
-					},
-					"labels": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Map of string keys and values that can be used to organize and categorize (scope and select) objects. This overrides any labels in the unstructured object with the same key.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"parameters": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Parameters is the list of resource parameters to pass in the object",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"group", "version", "kind", "namespace", "source", "parameters"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameter"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_ResourceParameter(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ResourceParameter indicates a passed parameter to a service template",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"src": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Src contains a source reference to the value of the resource parameter from a event event",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource"),
-						},
-					},
-					"dest": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Dest is the JSONPath of a resource key. A path is a series of keys separated by a dot. The colon character can be escaped with '.' The -1 key can be used to append a value to an existing array. See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"src", "dest"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceParameterSource"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_ResourceParameterSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "ResourceParameterSource defines the source for a resource parameter from a event event",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"event": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Event is the name of the event for which to retrieve this event",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"path": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"value": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Value is the default literal value to use for this parameter source This is only used if the path is invalid. If the path is invalid and this is not defined, this param source will produce an error.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"event", "path"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_RetryStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "RetryStrategy represents a strategy for retrying operations",
-				Type:        []string{"object"},
-			},
-		},
 	}
 }
 
@@ -982,44 +798,44 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 				Description: "Trigger is an action taken, output produced, an event created, a message sent",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"name": {
+					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is a unique name of the action to take",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Template describes the trigger specification.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"),
 						},
 					},
-					"resource": {
+					"templateParameters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Resource describes the resource that will be created by this action",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject"),
+							Description: "TemplateParameters is the list of resource parameters to pass to the template object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
 						},
 					},
-					"message": {
+					"resourceParameters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Message describes a message that will be sent on a queue",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"retryStrategy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "RetryStrategy is the strategy to retry a trigger if it fails",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy"),
-						},
-					},
-					"when": {
-						SchemaProps: spec.SchemaProps{
-							Description: "When is the condition to execute the trigger",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+							Description: "ResourceParameters is the list of resource parameters to pass to resolved resource object in template object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"name"},
+				Required: []string{"template"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceObject", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.RetryStrategy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"},
 	}
 }
 
@@ -1061,6 +877,105 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref common.ReferenceCallba
 				},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TriggerParameter indicates a passed parameter to a service template",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"src": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Src contains a source reference to the value of the parameter from a event event",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource"),
+						},
+					},
+					"dest": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Dest is the JSONPath of a resource key. A path is a series of keys separated by a dot. The colon character can be escaped with '.' The -1 key can be used to append a value to an existing array. See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"src", "dest"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TriggerParameterSource defines the source for a parameter from a event event",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"event": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Event is the name of the event for which to retrieve this event",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"path": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Value is the default literal value to use for this parameter source This is only used if the path is invalid. If the path is invalid and this is not defined, this param source will produce an error.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"event", "path"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TriggerTemplate is the template that describes trigger specification.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name is a unique name of the action to take",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"when": {
+						SchemaProps: spec.SchemaProps{
+							Description: "When is the condition to execute the trigger",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+						},
+					},
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source of the K8 resource file(s)",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
+						},
+					},
+				},
+				Required: []string{"name", "source"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
 	}
 }
 
