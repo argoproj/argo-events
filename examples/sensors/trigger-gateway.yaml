@@ -20,9 +20,8 @@ spec:
     - name: "webhook-gateway-http:foo"
   # once sensor receives an event from webhook gateway, it will create an artifact gateway.
   triggers:
-    - name: artifact-gateway-configmap-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: artifact-gateway-configmap-trigger
         group: ""
         version: v1
         kind: Configmap
@@ -49,14 +48,13 @@ spec:
                   secretKey:
                     key: secretkey
                     name: artifacts-minio
-    - name: artifact-gateway-trigger
-      resource:
-        namespace: argo-events
+    - template:
+        name: artifact-gateway-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Gateway
         source:
-          inline: |
+          inline: |-
             apiVersion: argoproj.io/v1alpha1
             kind: Gateway
             metadata:

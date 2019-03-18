@@ -23,6 +23,7 @@ import (
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -33,7 +34,7 @@ func (f *FakeWorkflowArtifactReader) Read() ([]byte, error) {
 
 func TestFetchArtifact(t *testing.T) {
 	reader := &FakeWorkflowArtifactReader{}
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "argoproj.io",
 		Version: "v1alpha1",
 		Kind:    "Workflow",
@@ -70,7 +71,7 @@ func decodeSensor(t *testing.T) {
 	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   v1alpha1.SchemaGroupVersionKind.Group,
 		Version: v1alpha1.SchemaGroupVersionKind.Version,
 		Kind:    v1alpha1.SchemaGroupVersionKind.Kind,
@@ -81,7 +82,7 @@ func decodeSensor(t *testing.T) {
 }
 
 func decodeWorkflow(t *testing.T) {
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "argoproj.io",
 		Version: "v1alpha1",
 		Kind:    "Workflow",
@@ -106,7 +107,7 @@ spec:
 `
 
 func decodeDeploymentv1(t *testing.T) {
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "apps",
 		Version: "v1",
 		Kind:    "Deployment",
@@ -157,7 +158,7 @@ var deploymentv1 = `
 `
 
 func decodeJobv1(t *testing.T) {
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "batch",
 		Version: "v1",
 		Kind:    "Job",
@@ -187,7 +188,7 @@ spec:
 `
 
 func decodeUnsupported(t *testing.T) {
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "batch",
 		Version: "v1",
 		Kind:    "Job",
@@ -224,7 +225,7 @@ spec:
 `
 
 func decodeUnknown(t *testing.T) {
-	gvk := v1alpha1.GroupVersionKind{
+	gvk := &metav1.GroupVersionKind{
 		Group:   "unknown",
 		Version: "123",
 		Kind:    "What??",

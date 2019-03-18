@@ -34,12 +34,11 @@ spec:
     http:
       port: "9300"
   triggers:
-    - name: webhook-workflow-trigger
-      when:
-        all:
-          - "group_1"
-      resource:
-        namespace: argo-events
+    - template:
+        when:
+          all:
+            - "group_1"
+        name: webhook-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -59,12 +58,11 @@ spec:
                     command:
                       - cowsay
                     image: "docker/whalesay:latest"
-    - name: webhook-workflow-trigger-2
-      when:
-        all:
-          - "group_2"
-      resource:
-        namespace: argo-events
+    - template:
+        when:
+          all:
+            - "group_2"
+        name: webhook-workflow-trigger-2
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

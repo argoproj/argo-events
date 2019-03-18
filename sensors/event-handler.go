@@ -135,9 +135,9 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 		// initialize new triggers
 		for _, t := range sec.sensor.Spec.Triggers {
-			if node := sn.GetNodeByName(sec.sensor, t.Name); node == nil {
+			if node := sn.GetNodeByName(sec.sensor, t.Template.Name); node == nil {
 				hasDependenciesUpdated = true
-				sn.InitializeNode(sec.sensor, t.Name, v1alpha1.NodeTypeTrigger, &sec.log)
+				sn.InitializeNode(sec.sensor, t.Template.Name, v1alpha1.NodeTypeTrigger, &sec.log)
 			}
 		}
 
@@ -167,7 +167,7 @@ statusNodes:
 			}
 		}
 		for _, trigger := range sec.sensor.Spec.Triggers {
-			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Name == statusNode.Name {
+			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Template.Name == statusNode.Name {
 				continue statusNodes
 			}
 		}

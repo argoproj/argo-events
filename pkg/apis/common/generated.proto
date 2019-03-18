@@ -19,20 +19,30 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.common;
 
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/util/intstr/generated.proto";
 
 // Package-wide variables from generator "generated".
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.stable_marshaler_all) = true;
+option (gogoproto.sizer_all) = true;
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_getters_all) = false;
 option go_package = "common";
 
 // Event is a data record expressing an occurrence and its context.
 // Adheres to the CloudEvents v0.1 specification
 message Event {
-  optional EventContext context = 1;
+  optional EventContext context = 1 [(gogoproto.customname) = "Context", (gogoproto.nullable) = false];
 
-  optional bytes data = 2;
+  optional bytes data = 2 [(gogoproto.customname) = "Payload"];
 }
 
 // EventContext contains metadata that provides circumstantial information about the occurrence.
@@ -41,120 +51,120 @@ message EventContext {
   // routing, observability, policy enforcement, etc.
   // should be prefixed with a reverse-DNS name. The prefixed domain dictates
   // the organization which defines the semantics of this event type. ex: com.github.pull.create
-  optional string eventType = 1;
+  optional string eventType = 1 [(gogoproto.customname) = "EventType", (gogoproto.nullable) = false];
 
   // The version of the eventType. Enables the interpretation of data by eventual consumers,
   // requires the consumer to be knowledgeable about the producer.
-  optional string eventTypeVersion = 2;
+  optional string eventTypeVersion = 2 [(gogoproto.customname) = "EventTypeVersion", (gogoproto.nullable) = false];
 
   // The version of the CloudEvents specification which the event uses.
   // Enables the interpretation of the context.
-  optional string cloudEventsVersion = 3;
+  optional string cloudEventsVersion = 3 [(gogoproto.customname) = "CloudEventsVersion", (gogoproto.nullable) = false];
 
   // This describes the event producer.
-  optional URI source = 4;
+  optional URI source = 4 [(gogoproto.customname) = "Source"];
 
   // ID of the event. The semantics are explicitly undefined to ease the implementation of producers.
   // Enables deduplication. Must be unique within scope of producer.
-  optional string eventID = 5;
+  optional string eventID = 5 [(gogoproto.customname) = "EventID", (gogoproto.nullable) = false];
 
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime eventTime = 6 [(gogoproto.customname) = "EventTime", (gogoproto.nullable) = false];
 
   // A link to the schema that the data attribute adheres to.
   // Must adhere to the format specified in RFC 3986.
-  optional URI schemaURL = 7;
+  optional URI schemaURL = 7 [(gogoproto.customname) = "SchemaURL"];
 
   // Content type of the data attribute value. Enables the data attribute to carry any type of content,
   // whereby format and encoding might differ from that of the chosen event format.
   // For example, the data attribute may carry an XML or JSON payload and the consumer is informed
   // by this attribute being set to "application/xml" or "application/json" respectively.
-  optional string contentType = 8;
+  optional string contentType = 8 [(gogoproto.customname) = "ContentType", (gogoproto.nullable) = false];
 
   // This is for additional metadata and does not have a mandated structure.
   // Enables a place for custom fields a producer or middleware might want to include and provides a place
   // to test metadata before adding them to the CloudEvents specification.
-  map<string, string> extensions = 9;
+  map<string, string> extensions = 9 [(gogoproto.customname) = "Extensions", (gogoproto.nullable) = false];
 }
 
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
 message EventProtocol {
-  optional string type = 1;
+  optional string type = 1 [(gogoproto.casttype) = "EventProtocolType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
 
-  optional Http http = 2;
+  optional Http http = 2 [(gogoproto.customname) = "Http", (gogoproto.nullable) = false];
 
-  optional Nats nats = 3;
+  optional Nats nats = 3 [(gogoproto.customname) = "Nats", (gogoproto.nullable) = false];
 }
 
 // Http contains the information required to setup a http server and listen to incoming events
 message Http {
   // Port on which server will run
-  optional string port = 1;
+  optional string port = 1 [(gogoproto.customname) = "Port", (gogoproto.nullable) = false];
 }
 
 // Nats contains the information required to connect to nats server and get subscriptions
 message Nats {
   // URL is nats server/service URL
-  optional string url = 1;
+  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
 
   // Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
-  optional bool startWithLastReceived = 2;
+  optional bool startWithLastReceived = 2 [(gogoproto.customname) = "StartWithLastReceived", (gogoproto.nullable) = false];
 
   // Receive all stored values in order.
-  optional bool deliverAllAvailable = 3;
+  optional bool deliverAllAvailable = 3 [(gogoproto.customname) = "DeliverAllAvailable", (gogoproto.nullable) = false];
 
   // Receive messages starting at a specific sequence number
-  optional string startAtSequence = 4;
+  optional string startAtSequence = 4 [(gogoproto.customname) = "StartAtSequence", (gogoproto.nullable) = false];
 
   // Subscribe starting at a specific time
-  optional string startAtTime = 5;
+  optional string startAtTime = 5 [(gogoproto.customname) = "StartAtTime", (gogoproto.nullable) = false];
 
   // Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
-  optional string startAtTimeDelta = 6;
+  optional string startAtTimeDelta = 6 [(gogoproto.customname) = "StartAtTimeDelta", (gogoproto.nullable) = false];
 
   // Durable subscriptions allow clients to assign a durable name to a subscription when it is created
-  optional bool durable = 7;
+  optional bool durable = 7 [(gogoproto.customname) = "Durable", (gogoproto.nullable) = false];
 
   // The NATS Streaming cluster ID
-  optional string clusterId = 8;
+  optional string clusterId = 8 [(gogoproto.customname) = "ClusterId", (gogoproto.nullable) = false];
 
   // The NATS Streaming cluster ID
-  optional string clientId = 9;
+  optional string clientId = 9 [(gogoproto.customname) = "ClientId", (gogoproto.nullable) = false];
 
   // Type of the connection. either standard or streaming
-  optional string type = 10;
+  optional string type = 10 [(gogoproto.casttype) = "NatsType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
 }
 
 // S3Artifact contains information about an artifact in S3
 message S3Artifact {
-  optional string endpoint = 1;
+  optional string endpoint = 1 [(gogoproto.customname) = "Endpoint", (gogoproto.nullable) = false];
 
-  optional S3Bucket bucket = 2;
+  optional S3Bucket bucket = 2 [(gogoproto.customname) = "Bucket"];
 
-  optional string region = 3;
+  optional string region = 3 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
 
-  optional bool insecure = 4;
+  optional bool insecure = 4 [(gogoproto.customname) = "Insecure", (gogoproto.nullable) = false];
 
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5 [(gogoproto.customname) = "AccessKey"];
 
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6 [(gogoproto.customname) = "SecretKey"];
 
-  optional string event = 7;
+  optional string event = 7 [(gogoproto.casttype) = "github.com/minio/minio-go.NotificationEventType", (gogoproto.customname) = "Event", (gogoproto.nullable) = false];
 
-  optional S3Filter filter = 8;
+  optional S3Filter filter = 8 [(gogoproto.customname) = "Filter"];
 }
 
 // S3Bucket contains information to describe an S3 Bucket
 message S3Bucket {
-  optional string key = 1;
+  optional string key = 1 [(gogoproto.customname) = "Key", (gogoproto.nullable) = false];
 
-  optional string name = 2;
+  optional string name = 2 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
 }
 
 // S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
 message S3Filter {
-  optional string prefix = 1;
+  optional string prefix = 1 [(gogoproto.customname) = "Prefix", (gogoproto.nullable) = false];
 
-  optional string suffix = 2;
+  optional string suffix = 2 [(gogoproto.customname) = "Suffix", (gogoproto.nullable) = false];
 }
 
 // ServiceTemplateSpec is the template spec contains metadata and service spec.
@@ -162,30 +172,30 @@ message ServiceTemplateSpec {
   // Standard object's metadata.
   // More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata
   // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1 [(gogoproto.customname) = "ObjectMeta", (gogoproto.nullable) = false];
 
   // Specification of the desired behavior of the pod.
   // More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#spec-and-status
   // +optional
-  optional k8s.io.api.core.v1.ServiceSpec spec = 2;
+  optional k8s.io.api.core.v1.ServiceSpec spec = 2 [(gogoproto.customname) = "Spec", (gogoproto.nullable) = false];
 }
 
 // URI is a Uniform Resource Identifier based on RFC 3986
 message URI {
-  optional string scheme = 1;
+  optional string scheme = 1 [(gogoproto.customname) = "Scheme", (gogoproto.nullable) = false];
 
-  optional string user = 2;
+  optional string user = 2 [(gogoproto.customname) = "User", (gogoproto.nullable) = false];
 
-  optional string password = 3;
+  optional string password = 3 [(gogoproto.customname) = "Password", (gogoproto.nullable) = false];
 
-  optional string host = 4;
+  optional string host = 4 [(gogoproto.customname) = "Host", (gogoproto.nullable) = false];
 
-  optional int32 port = 5;
+  optional int32 port = 5 [(gogoproto.customname) = "Port", (gogoproto.nullable) = false];
 
-  optional string path = 6;
+  optional string path = 6 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
 
-  optional string query = 7;
+  optional string query = 7 [(gogoproto.customname) = "Query", (gogoproto.nullable) = false];
 
-  optional string fragment = 8;
+  optional string fragment = 8 [(gogoproto.customname) = "Fragment", (gogoproto.nullable) = false];
 }
 

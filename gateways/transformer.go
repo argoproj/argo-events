@@ -60,7 +60,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 			return err
 		}
 	default:
-		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.EventProtocol)
+		return fmt.Errorf("unknown dispatch mechanism %s", gc.gw.Spec.EventProtocol.Type)
 	}
 	return nil
 }
