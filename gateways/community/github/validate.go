@@ -26,7 +26,7 @@ func (ese *GithubEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 }
 
 func validateGithub(config interface{}) error {
-	g := config.(*githubConfig)
+	g := config.(*githubEventSource)
 	if g == nil {
 		return gwcommon.ErrNilEventSource
 	}

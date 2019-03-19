@@ -18,7 +18,9 @@ package github
 
 import (
 	"github.com/argoproj/argo-events/gateways/common"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/google/go-github/github"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -33,8 +35,17 @@ type GithubEventSourceExecutor struct {
 	Namespace string
 }
 
-// githubConfig contains information to setup a github project integration
-type githubConfig struct {
+type RouteConfig struct {
+	route     *gwcommon.Route
+	ges       *githubEventSource
+	client    *github.Client
+	hook      *github.Hook
+	clientset kubernetes.Interface
+	namespace string
+}
+
+// githubEventSource contains information to setup a github project integration
+type githubEventSource struct {
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
 	// GitHub owner name i.e. argoproj
@@ -66,7 +77,7 @@ type cred struct {
 
 // parseEventSource parses a configuration of gateway
 func parseEventSource(config string) (interface{}, error) {
-	var g *githubConfig
+	var g *githubEventSource
 	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {
 		return nil, err

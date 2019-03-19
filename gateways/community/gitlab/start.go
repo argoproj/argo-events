@@ -29,12 +29,6 @@ import (
 	"github.com/xanzy/go-gitlab"
 )
 
-const (
-	labelGitlabConfig = "config"
-	labelGitlabClient = "client"
-	labelWebhook      = "hook"
-)
-
 var (
 	helper = gwcommon.NewWebhookHelper()
 )
@@ -44,8 +38,8 @@ func init() {
 }
 
 // getCredentials for gitlab
-func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, error) {
-	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, gs.Name, gs.Key)
+func (rc *RouteConfig) getCredentials(gs *GitlabSecret) (*cred, error) {
+	token, err := store.GetSecrets(rc.clientset, rc.namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
 	}
@@ -54,72 +48,85 @@ func (ese *GitlabEventSourceExecutor) getCredentials(gs *GitlabSecret) (*cred, e
 	}, nil
 }
 
-func (ese *GitlabEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	gl := rc.Configs[labelGitlabConfig].(*glab)
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.route
+}
 
-	c, err := ese.getCredentials(gl.AccessToken)
+func (rc *RouteConfig) PostStart() error {
+	c, err := rc.getCredentials(rc.ges.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to get gitlab credentials. err: %+v", err)
 	}
 
-	client := gitlab.NewClient(nil, c.token)
-	if err = client.SetBaseURL(gl.GitlabBaseURL); err != nil {
+	rc.client = gitlab.NewClient(nil, c.token)
+	if err = rc.client.SetBaseURL(rc.ges.GitlabBaseURL); err != nil {
 		return fmt.Errorf("failed to set gitlab base url, err: %+v", err)
 	}
 
-	rc.Configs[labelGitlabClient] = client
-
-	formattedUrl := gwcommon.GenerateFormattedURL(gl.Hook)
+	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
 		URL:   &formattedUrl,
 		Token: &c.token,
-		EnableSSLVerification: &gl.EnableSSLVerification,
+		EnableSSLVerification: &rc.ges.EnableSSLVerification,
 	}
 
-	elem := reflect.ValueOf(opt).Elem().FieldByName(string(gl.Event))
+	elem := reflect.ValueOf(opt).Elem().FieldByName(string(rc.ges.Event))
 	if ok := elem.IsValid(); !ok {
-		return fmt.Errorf("unknown event %s", gl.Event)
+		return fmt.Errorf("unknown event %s", rc.ges.Event)
 	}
 
 	iev := reflect.New(elem.Type().Elem())
 	reflect.Indirect(iev).SetBool(true)
 	elem.Set(iev)
 
-	hook, _, err := client.Projects.AddProjectHook(gl.ProjectId, opt)
+	existingHooks, _, err := rc.client.Projects.ListProjectHooks(rc.ges.ProjectId, &gitlab.ListProjectHooksOptions{})
+	if err != nil {
+		return fmt.Errorf("failed to list existing webhooks. err: %+v", err)
+	}
+
+	for _, h := range existingHooks {
+		elem = reflect.ValueOf(h).Elem().FieldByName(string(rc.ges.Event))
+		if ok := elem.IsValid(); !ok {
+			return fmt.Errorf("failed to check if hook is already registered with the event %s. unknown event", rc.ges.Event)
+		}
+		if reflect.New(elem.Type().Elem()).Bool() && h.URL == formattedUrl {
+			rc.route.Logger.Info().Str("event-source", rc.route.EventSource.Name).Msg("hook is already configured")
+			return nil
+		}
+	}
+
+	hook, _, err := rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
 	if err != nil {
 		return fmt.Errorf("failed to add project hook. err: %+v", err)
 	}
-	rc.Configs[labelWebhook] = hook
+	rc.hook = hook
 
-	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook created")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("gitlab hook created")
 	return nil
 }
 
-func PostStop(rc *gwcommon.RouteConfig) error {
-	gl := rc.Configs[labelGitlabConfig].(*glab)
-	client := rc.Configs[labelGitlabClient].(*gitlab.Client)
-	hook := rc.Configs[labelWebhook].(*gitlab.ProjectHook)
-
-	if _, err := client.Projects.DeleteProjectHook(gl.ProjectId, hook.ID); err != nil {
-		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Interface("hook-id", hook.ID).Msg("failed to delete gitlab hook")
+func (rc *RouteConfig) PostStop() error {
+	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
+		rc.route.Logger.Error().Err(err).Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("failed to delete gitlab hook")
 		return err
 	}
-	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Interface("hook-id", hook.ID).Msg("gitlab hook deleted")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("gitlab hook deleted")
 	return nil
 }
 
 // routeActiveHandler handles new route
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	var response string
 
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).
+	logger := rc.route.Logger.With().Str("event-source", rc.route.EventSource.Name).Str("endpoint", rc.route.Webhook.Endpoint).
+		Str("port", rc.route.Webhook.Port).
 		Str("http-method", request.Method).Logger()
+
 	logger.Info().Msg("request received")
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
+	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
+		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.route.Webhook.Endpoint, rc.route.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
@@ -132,7 +139,7 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
+	helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- body
 	response = "request successfully processed"
 	logger.Info().Msg(response)
 	common.SendSuccessResponse(writer, response)
@@ -148,18 +155,17 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
-	gl := config.(*glab)
+	gl := config.(*gitlabEventSource)
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: gl.Hook,
-		Configs: map[string]interface{}{
-			labelGitlabConfig: gl,
+	return gwcommon.ProcessRoute(&RouteConfig{
+		route: &gwcommon.Route{
+			EventSource: eventSource,
+			Logger:      &ese.Log,
+			Webhook:     gl.Hook,
+			StartCh:     make(chan struct{}),
 		},
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       ese.PostActivate,
-		PostStop:           PostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+		namespace: ese.Namespace,
+		clientset: ese.Clientset,
+		ges:       gl,
 	}, helper, eventStream)
 }

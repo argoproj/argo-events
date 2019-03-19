@@ -18,14 +18,13 @@ package gitlab
 
 import (
 	"bytes"
+	"github.com/xanzy/go-gitlab"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/google/go-github/github"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,10 +32,10 @@ import (
 )
 
 var (
-	ese = &GitlabEventSourceExecutor{
-		Clientset: fake.NewSimpleClientset(),
-		Namespace: "fake",
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+	rc = &RouteConfig{
+		route:     gwcommon.GetFakeRoute(),
+		clientset: fake.NewSimpleClientset(),
+		namespace: "fake",
 	}
 
 	secretName     = "gitlab-access"
@@ -46,10 +45,10 @@ var (
 
 func TestGetCredentials(t *testing.T) {
 	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
-		secret, err := ese.Clientset.CoreV1().Secrets(ese.Namespace).Create(&corev1.Secret{
+		secret, err := rc.clientset.CoreV1().Secrets(rc.namespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      secretName,
-				Namespace: ese.Namespace,
+				Namespace: rc.namespace,
 			},
 			Data: map[string][]byte{
 				LabelAccessKey: []byte(accessKey),
@@ -60,7 +59,7 @@ func TestGetCredentials(t *testing.T) {
 
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
-		creds, err := ese.getCredentials(ps.(*glab).AccessToken)
+		creds, err := rc.getCredentials(ps.(*gitlabEventSource).AccessToken)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(creds, convey.ShouldNotBeNil)
 		convey.So(creds.token, convey.ShouldEqual, "YWNjZXNz")
@@ -69,8 +68,7 @@ func TestGetCredentials(t *testing.T) {
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRoute()
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
@@ -78,33 +76,34 @@ func TestRouteActiveHandler(t *testing.T) {
 			writer := &gwcommon.FakeHttpWriter{}
 			ps, err := parseEventSource(es)
 			convey.So(err, convey.ShouldBeNil)
-			pbytes, err := yaml.Marshal(ps.(*glab))
+			pbytes, err := yaml.Marshal(ps.(*gitlabEventSource))
 			convey.So(err, convey.ShouldBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
 			convey.Convey("Active route should return success", func() {
-				helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-				rc.Configs[labelWebhook] = &github.Hook{
-					Config: make(map[string]interface{}),
+				helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+				rc.hook = &gitlab.ProjectHook{
+					URL:        "fake",
+					PushEvents: true,
 				}
 				dataCh := make(chan []byte)
 				go func() {
-					resp := <-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
+					resp := <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 					dataCh <- resp
 				}()
 
-				RouteActiveHandler(writer, &http.Request{
+				rc.RouteHandler(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
-				}, rc)
+				})
 
 				data := <-dataCh
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 				convey.So(string(data), convey.ShouldEqual, string(pbytes))
-				rc.Configs[labelGitlabConfig] = ps.(*glab)
-				err = ese.PostActivate(rc)
+				rc.ges = ps.(*gitlabEventSource)
+				err = rc.PostStart()
 				convey.So(err, convey.ShouldNotBeNil)
 			})
 		})

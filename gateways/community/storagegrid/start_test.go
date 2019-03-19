@@ -27,7 +27,8 @@ import (
 	"testing"
 )
 
-var notification = `
+var (
+	notification = `
 {
   "Action": "Publish",
   "Message": {
@@ -70,11 +71,14 @@ var notification = `
   "Version": "2010-03-31"
 }
 `
+	rc = &RouteConfig{
+		route: gwcommon.GetFakeRoute(),
+	}
+)
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRoute()
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
@@ -83,29 +87,28 @@ func TestRouteActiveHandler(t *testing.T) {
 		writer := &gwcommon.FakeHttpWriter{}
 
 		convey.Convey("Inactive route should return error", func() {
-			pbytes, err := yaml.Marshal(ps.(*storageGrid))
+			pbytes, err := yaml.Marshal(ps.(*storageGridEventSource))
 			convey.So(err, convey.ShouldBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
 		convey.Convey("Active route should return success", func() {
-			helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-			rc.Configs[LabelStorageGridConfig] = ps.(*storageGrid)
+			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+			rc.sges = ps.(*storageGridEventSource)
 			dataCh := make(chan []byte)
 			go func() {
-				resp := <-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
+				resp := <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 				dataCh <- resp
 			}()
 
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(notification))),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 		})
-
 	})
 }
 
@@ -126,7 +129,7 @@ func TestFilterEvent(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(sg, convey.ShouldNotBeNil)
 
-		ok := filterEvent(sg, ps.(*storageGrid))
+		ok := filterEvent(sg, ps.(*storageGridEventSource))
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
@@ -140,7 +143,7 @@ func TestFilterName(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(sg, convey.ShouldNotBeNil)
 
-		ok := filterName(sg, ps.(*storageGrid))
+		ok := filterName(sg, ps.(*storageGridEventSource))
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

@@ -33,11 +33,11 @@ func (f *FakeHttpWriter) WriteHeader(status int) {
 }
 
 type FakeRouteConfig struct {
-	Route *Route
+	route *Route
 }
 
 func (f *FakeRouteConfig) GetRoute() *Route {
-	return f.Route
+	return f.route
 }
 
 func (f *FakeRouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {

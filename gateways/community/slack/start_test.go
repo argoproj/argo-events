@@ -19,32 +19,37 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/ghodss/yaml"
-	"github.com/nlopes/slack/slackevents"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/ghodss/yaml"
+	"github.com/nlopes/slack/slackevents"
 	"github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRoute()
+		rc := &RouteConfig{
+			route:     gwcommon.GetFakeRoute(),
+			clientset: fake.NewSimpleClientset(),
+			namespace: "fake",
+		}
 
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
 		convey.Convey("Inactive route should return 404", func() {
 			writer := &gwcommon.FakeHttpWriter{}
-			RouteActiveHandler(writer, &http.Request{}, rc)
+			rc.RouteHandler(writer, &http.Request{})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		rc.Configs[labelSlackToken] = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
+		rc.token = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
 
 		convey.Convey("Test url verification request", func() {
 			writer := &gwcommon.FakeHttpWriter{}
@@ -56,9 +61,9 @@ func TestRouteActiveHandler(t *testing.T) {
 			payload, err := yaml.Marshal(urlVer)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(payload, convey.ShouldNotBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(payload)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})
 
@@ -90,12 +95,12 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 
 			go func() {
-				<-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
+				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 			}()
 
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payload)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})
 

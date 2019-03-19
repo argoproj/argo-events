@@ -26,30 +26,15 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 )
 
-func TestDefaultPostActivate(t *testing.T) {
-	convey.Convey("Given a route configuration, default post activate should be a no-op", t, func() {
-		rc := GetFakeRoute()
-		err := DefaultPostActivate(rc)
-		convey.So(err, convey.ShouldBeNil)
-	})
-}
-
-func TestDefaultPostStop(t *testing.T) {
-	convey.Convey("Given a route configuration, default post stop should be a no-op", t, func() {
-		rc := GetFakeRoute()
-		err := DefaultPostStop(rc)
-		convey.So(err, convey.ShouldBeNil)
-	})
+var rc = &FakeRouteConfig{
+	route: GetFakeRoute(),
 }
 
 func TestProcessRoute(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Activate the route configuration", func() {
-			rc := GetFakeRoute()
-			rc.Webhook.mux = http.NewServeMux()
 
-			rc.PostActivate = DefaultPostActivate
-			rc.PostStop = DefaultPostStop
+			rc.route.Webhook.mux = http.NewServeMux()
 
 			ctx, cancel := context.WithCancel(context.Background())
 			fgs := &FakeGRPCStream{
@@ -57,10 +42,10 @@ func TestProcessRoute(t *testing.T) {
 			}
 
 			helper := NewWebhookHelper()
-			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &Endpoint{
 				DataCh: make(chan []byte),
 			}
-			helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+			helper.ActiveServers[rc.route.Webhook.Port] = &activeServer{
 				errChan: make(chan error),
 			}
 
@@ -73,7 +58,7 @@ func TestProcessRoute(t *testing.T) {
 				<-helper.RouteActivateChan
 			}()
 			go func() {
-				rc.StartCh <- struct{}{}
+				rc.route.StartCh <- struct{}{}
 			}()
 			go func() {
 				time.Sleep(3 * time.Second)
@@ -93,16 +78,15 @@ func TestProcessRoute(t *testing.T) {
 func TestProcessRouteChannels(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Stop server stream", func() {
-			rc := GetFakeRoute()
 			ctx, cancel := context.WithCancel(context.Background())
 			fgs := &FakeGRPCStream{
 				Ctx: ctx,
 			}
 			helper := NewWebhookHelper()
-			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &Endpoint{
 				DataCh: make(chan []byte),
 			}
-			helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+			helper.ActiveServers[rc.route.Webhook.Port] = &activeServer{
 				errChan: make(chan error),
 			}
 			errCh := make(chan error)
@@ -110,31 +94,30 @@ func TestProcessRouteChannels(t *testing.T) {
 				<-helper.RouteDeactivateChan
 			}()
 			go func() {
-				errCh <- rc.processChannels(helper, fgs)
+				errCh <- processChannels(rc, helper, fgs)
 			}()
 			cancel()
 			err := <-errCh
 			convey.So(err, convey.ShouldBeNil)
 		})
 		convey.Convey("Handle error", func() {
-			rc := GetFakeRoute()
 			fgs := &FakeGRPCStream{
 				Ctx: context.Background(),
 			}
 			helper := NewWebhookHelper()
-			helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &Endpoint{
 				DataCh: make(chan []byte),
 			}
-			helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+			helper.ActiveServers[rc.route.Webhook.Port] = &activeServer{
 				errChan: make(chan error),
 			}
 			errCh := make(chan error)
 			err := fmt.Errorf("error")
 			go func() {
-				helper.ActiveServers[rc.Webhook.Port].errChan <- err
+				helper.ActiveServers[rc.route.Webhook.Port].errChan <- err
 			}()
 			go func() {
-				errCh <- rc.processChannels(helper, fgs)
+				errCh <- processChannels(rc, helper, fgs)
 			}()
 			newErr := <-errCh
 			convey.So(newErr.Error(), convey.ShouldEqual, err.Error())

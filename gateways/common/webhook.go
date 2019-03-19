@@ -224,27 +224,28 @@ func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways
 	}
 }
 
-func DefaultPostActivate(rc *RouteConfig) error {
-	return nil
-}
-
-func DefaultPostStop(rc *RouteConfig) error {
-	return nil
-}
-
 func ProcessRoute(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
-	if err := validateRouteConfig(rc); err != nil {
+	r := rc.GetRoute()
+
+	if err := validateRoute(rc.GetRoute()); err != nil {
+		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred validating route")
 		return err
 	}
+
 	activateRoute(rc, helper)
+
 	if err := rc.PostStart(); err != nil {
+		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post start")
 		return err
 	}
+
 	if err := processChannels(rc, helper, eventStream); err != nil {
+		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in process channel")
 		return err
 	}
+
 	if err := rc.PostStop(); err != nil {
-		rc.GetRoute().Logger.Error().Err(err).Msg("error occurred while executing post stop logic")
+		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post stop")
 	}
 	return nil
 }
@@ -268,8 +269,7 @@ func ValidateWebhook(w *Webhook) error {
 	return nil
 }
 
-func validateRouteConfig(rc RouteConfig) error {
-	r := rc.GetRoute()
+func validateRoute(r *Route) error {
 	if r == nil {
 		return fmt.Errorf("route can't be nil")
 	}

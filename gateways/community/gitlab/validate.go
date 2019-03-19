@@ -27,7 +27,7 @@ func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 }
 
 func validateGitlab(config interface{}) error {
-	g := config.(*glab)
+	g := config.(*gitlabEventSource)
 	if g == nil {
 		return gwcommon.ErrNilEventSource
 	}
