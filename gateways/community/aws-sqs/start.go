@@ -37,13 +37,13 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(config.(*sqs), eventSource, dataCh, errorCh, doneCh)
+	go ese.listenEvents(config.(*sqsEventSource), eventSource, dataCh, errorCh, doneCh)
 
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
 // listenEvents fires an event when interval completes and item is processed from queue.
-func (ese *SQSEventSourceExecutor) listenEvents(s *sqs, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *SQSEventSourceExecutor) listenEvents(s *sqsEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, s.AccessKey, s.SecretKey)

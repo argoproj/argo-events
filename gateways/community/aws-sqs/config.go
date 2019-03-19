@@ -32,8 +32,8 @@ type SQSEventSourceExecutor struct {
 	Namespace string
 }
 
-// sqs contains information to listen to AWS SQS
-type sqs struct {
+// sqsEventSource contains information to listen to AWS SQS
+type sqsEventSource struct {
 	// AccessKey refers K8 secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey"`
 
@@ -52,7 +52,7 @@ type sqs struct {
 }
 
 func parseEventSource(es string) (interface{}, error) {
-	var n *sqs
+	var n *sqsEventSource
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err

@@ -18,6 +18,7 @@ package webhook
 
 import (
 	"github.com/argoproj/argo-events/gateways/common"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 )
@@ -25,6 +26,10 @@ import (
 // WebhookEventSourceExecutor implements Eventing
 type WebhookEventSourceExecutor struct {
 	Log zerolog.Logger
+}
+
+type RouteConfig struct {
+	Route *gwcommon.Route
 }
 
 func parseEventSource(es string) (interface{}, error) {

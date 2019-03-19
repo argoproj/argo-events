@@ -41,7 +41,7 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// RouteActiveHandler handles new route
+// RouteHandler handles new route
 func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
 	var response string
 

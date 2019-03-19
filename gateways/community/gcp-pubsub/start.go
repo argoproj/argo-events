@@ -34,7 +34,7 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
-	sc := config.(*pubSubConfig)
+	sc := config.(*pubSubEventSource)
 
 	ctx := eventStream.Context()
 
@@ -47,7 +47,7 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
 }
 
-func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// Create a new topic with the given name.
 	logger := ese.Log.With().Str("event-source", eventSource.Name).Str("topic", sc.Topic).Logger()
 

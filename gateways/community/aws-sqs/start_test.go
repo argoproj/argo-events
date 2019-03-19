@@ -47,7 +47,7 @@ func TestListenEvents(t *testing.T) {
 			errorCh2 <- err
 		}()
 
-		ese.listenEvents(ps.(*sqs), &gateways.EventSource{
+		ese.listenEvents(ps.(*sqsEventSource), &gateways.EventSource{
 			Name: "fake",
 			Data: es,
 			Id:   "1234",

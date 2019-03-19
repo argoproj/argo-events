@@ -33,7 +33,7 @@ import (
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRouteConfig()
+		rc := gwcommon.GetFakeRoute()
 		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}

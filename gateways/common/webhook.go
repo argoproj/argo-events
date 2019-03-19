@@ -57,9 +57,9 @@ type WebhookHelper struct {
 	// ActiveEndpoints keep track of endpoints that are already registered with server and their status active or inactive
 	ActiveEndpoints map[string]*Endpoint
 	// RouteActivateChan handles assigning new route to server.
-	RouteActivateChan chan *RouteConfig
+	RouteActivateChan chan RouteConfig
 	// RouteDeactivateChan handles deactivating existing route
-	RouteDeactivateChan chan *RouteConfig
+	RouteDeactivateChan chan RouteConfig
 }
 
 // HTTP Muxer
@@ -73,16 +73,20 @@ type activeServer struct {
 	errChan chan error
 }
 
-// RouteConfig contains configuration about an http route
-type RouteConfig struct {
-	Webhook            *Webhook
-	Configs            map[string]interface{}
-	EventSource        *gateways.EventSource
-	Log                zerolog.Logger
-	StartCh            chan struct{}
-	RouteActiveHandler func(writer http.ResponseWriter, request *http.Request, rc *RouteConfig)
-	PostActivate       func(rc *RouteConfig) error
-	PostStop           func(rc *RouteConfig) error
+// Route contains common information for a route
+type Route struct {
+	Webhook     *Webhook
+	Logger      *zerolog.Logger
+	StartCh     chan struct{}
+	EventSource *gateways.EventSource
+}
+
+// RouteConfig is an interface to manage  the configuration for a route
+type RouteConfig interface {
+	GetRoute() *Route
+	RouteHandler(writer http.ResponseWriter, request *http.Request)
+	PostStart() error
+	PostStop() error
 }
 
 // endpoint contains state of an http endpoint
@@ -93,14 +97,14 @@ type Endpoint struct {
 	DataCh chan []byte
 }
 
-// NewWebhookHelper returns new webhook helper
+// NewWebhookHelper returns new r.Webhook helper
 func NewWebhookHelper() *WebhookHelper {
 	return &WebhookHelper{
 		ActiveEndpoints:     make(map[string]*Endpoint),
 		ActiveServers:       make(map[string]*activeServer),
 		Mutex:               sync.Mutex{},
-		RouteActivateChan:   make(chan *RouteConfig),
-		RouteDeactivateChan: make(chan *RouteConfig),
+		RouteActivateChan:   make(chan RouteConfig),
+		RouteDeactivateChan: make(chan RouteConfig),
 	}
 }
 
@@ -110,11 +114,12 @@ func InitRouteChannels(helper *WebhookHelper) {
 		select {
 		case config := <-helper.RouteActivateChan:
 			// start server if it has not been started on this port
-			config.startHttpServer(helper)
-			config.StartCh <- struct{}{}
+			startHttpServer(config, helper)
+			startCh := config.GetRoute().StartCh
+			startCh <- struct{}{}
 
 		case config := <-helper.RouteDeactivateChan:
-			webhook := config.Webhook
+			webhook := config.GetRoute().Webhook
 			_, ok := helper.ActiveServers[webhook.Port]
 			if ok {
 				helper.ActiveEndpoints[webhook.Endpoint].Active = false
@@ -129,20 +134,21 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // starts a http server
-func (rc *RouteConfig) startHttpServer(helper *WebhookHelper) {
+func startHttpServer(rc RouteConfig, helper *WebhookHelper) {
 	// start a http server only if no other configuration previously started the server on given port
 	helper.Mutex.Lock()
-	if _, ok := helper.ActiveServers[rc.Webhook.Port]; !ok {
+	r := rc.GetRoute()
+	if _, ok := helper.ActiveServers[r.Webhook.Port]; !ok {
 		s := &server{
 			mux: http.NewServeMux(),
 		}
-		rc.Webhook.mux = s.mux
-		rc.Webhook.srv = &http.Server{
-			Addr:    ":" + fmt.Sprintf("%s", rc.Webhook.Port),
+		r.Webhook.mux = s.mux
+		r.Webhook.srv = &http.Server{
+			Addr:    ":" + fmt.Sprintf("%s", r.Webhook.Port),
 			Handler: s,
 		}
 		errChan := make(chan error, 1)
-		helper.ActiveServers[rc.Webhook.Port] = &activeServer{
+		helper.ActiveServers[r.Webhook.Port] = &activeServer{
 			srv:     s.mux,
 			errChan: errChan,
 		}
@@ -150,12 +156,12 @@ func (rc *RouteConfig) startHttpServer(helper *WebhookHelper) {
 		// start http server
 		go func() {
 			var err error
-			if rc.Webhook.ServerCertPath == "" || rc.Webhook.ServerKeyPath == "" {
-				err = rc.Webhook.srv.ListenAndServe()
+			if r.Webhook.ServerCertPath == "" || r.Webhook.ServerKeyPath == "" {
+				err = r.Webhook.srv.ListenAndServe()
 			} else {
-				err = rc.Webhook.srv.ListenAndServeTLS(rc.Webhook.ServerCertPath, rc.Webhook.ServerKeyPath)
+				err = r.Webhook.srv.ListenAndServeTLS(r.Webhook.ServerCertPath, r.Webhook.ServerKeyPath)
 			}
-			rc.Log.Error().Err(err).Str("event-source", rc.EventSource.Name).Str("port", rc.Webhook.Port).Msg("http server stopped")
+			r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Str("port", r.Webhook.Port).Msg("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -165,53 +171,54 @@ func (rc *RouteConfig) startHttpServer(helper *WebhookHelper) {
 }
 
 // activateRoute activates route
-func (rc *RouteConfig) activateRoute(helper *WebhookHelper) {
+func activateRoute(rc RouteConfig, helper *WebhookHelper) {
+	r := rc.GetRoute()
 	helper.RouteActivateChan <- rc
 
-	<-rc.StartCh
+	<-r.StartCh
 
-	if rc.Webhook.mux == nil {
+	if r.Webhook.mux == nil {
 		helper.Mutex.Lock()
-		rc.Webhook.mux = helper.ActiveServers[rc.Webhook.Port].srv
+		r.Webhook.mux = helper.ActiveServers[r.Webhook.Port].srv
 		helper.Mutex.Unlock()
 	}
 
-	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Str("port", rc.Webhook.Port).Str("endpoint", rc.Webhook.Endpoint).Msg("adding route handler")
-	if _, ok := helper.ActiveEndpoints[rc.Webhook.Endpoint]; !ok {
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &Endpoint{
+	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("adding route handler")
+	if _, ok := helper.ActiveEndpoints[r.Webhook.Endpoint]; !ok {
+		helper.ActiveEndpoints[r.Webhook.Endpoint] = &Endpoint{
 			Active: true,
 			DataCh: make(chan []byte),
 		}
-		rc.Webhook.mux.HandleFunc(rc.Webhook.Endpoint, func(writer http.ResponseWriter, request *http.Request) {
-			rc.RouteActiveHandler(writer, request, rc)
-		})
+		r.Webhook.mux.HandleFunc(r.Webhook.Endpoint, rc.RouteHandler)
 	}
-	helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
+	helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
-	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Str("port", rc.Webhook.Port).Str("endpoint", rc.Webhook.Endpoint).Msg("route handler added")
+	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("route handler added")
 }
 
-func (rc *RouteConfig) processChannels(helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
+func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
+	r := rc.GetRoute()
+
 	for {
 		select {
-		case data := <-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh:
-			rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Msg("new event received, dispatching to gateway client")
+		case data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh:
+			r.Logger.Info().Str("event-source-name", r.EventSource.Name).Msg("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
-				Name:    rc.EventSource.Name,
+				Name:    r.EventSource.Name,
 				Payload: data,
 			})
 			if err != nil {
-				rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to send event")
+				r.Logger.Error().Err(err).Str("event-source-name", r.EventSource.Name).Msg("failed to send event")
 				return err
 			}
 
 		case <-eventStream.Context().Done():
-			rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Msg("connection is closed by client")
+			r.Logger.Info().Str("event-source-name", r.EventSource.Name).Msg("connection is closed by client")
 			helper.RouteDeactivateChan <- rc
 			return nil
 
 		// this error indicates that the server has stopped running
-		case err := <-helper.ActiveServers[rc.Webhook.Port].errChan:
+		case err := <-helper.ActiveServers[r.Webhook.Port].errChan:
 			return err
 		}
 	}
@@ -225,16 +232,19 @@ func DefaultPostStop(rc *RouteConfig) error {
 	return nil
 }
 
-func ProcessRoute(rc *RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
-	rc.activateRoute(helper)
-	if err := rc.PostActivate(rc); err != nil {
+func ProcessRoute(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
+	if err := validateRouteConfig(rc); err != nil {
 		return err
 	}
-	if err := rc.processChannels(helper, eventStream); err != nil {
+	activateRoute(rc, helper)
+	if err := rc.PostStart(); err != nil {
 		return err
 	}
-	if err := rc.PostStop(rc); err != nil {
-		rc.Log.Error().Err(err).Msg("error occurred while executing post stop logic")
+	if err := processChannels(rc, helper, eventStream); err != nil {
+		return err
+	}
+	if err := rc.PostStop(); err != nil {
+		rc.GetRoute().Logger.Error().Err(err).Msg("error occurred while executing post stop logic")
 	}
 	return nil
 }
@@ -254,6 +264,26 @@ func ValidateWebhook(w *Webhook) error {
 		if err != nil {
 			return fmt.Errorf("failed to parse server port %s. err: %+v", w.Port, err)
 		}
+	}
+	return nil
+}
+
+func validateRouteConfig(rc RouteConfig) error {
+	r := rc.GetRoute()
+	if r == nil {
+		return fmt.Errorf("route can't be nil")
+	}
+	if r.Webhook == nil {
+		return fmt.Errorf("webhook can't be nil")
+	}
+	if r.StartCh == nil {
+		return fmt.Errorf("start channel can't be nil")
+	}
+	if r.EventSource == nil {
+		return fmt.Errorf("event source can't be nil")
+	}
+	if r.Logger == nil {
+		return fmt.Errorf("logger can't be nil")
 	}
 	return nil
 }

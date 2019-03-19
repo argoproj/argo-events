@@ -28,12 +28,6 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const (
-	labelSNSConfig       = "snsConfig"
-	labelSNSSession      = "snsSession"
-	labelSubscriptionArn = "subscriptionArn"
-)
-
 var (
 	helper = gwcommon.NewWebhookHelper()
 )
@@ -42,17 +36,22 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// RouteActiveHandler handles new routes
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.Route
+}
+
+// RouteHandler handles new routes
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	var response string
 
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).
+	r := rc.Route
+	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).Logger()
 	logger.Info().Msg("request received")
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
+		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
@@ -68,16 +67,16 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	var snspayload *httpNotification
 	err = yaml.Unmarshal(body, &snspayload)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to convert request payload into snsConfig payload")
+		logger.Error().Err(err).Msg("failed to convert request payload into snses payload")
 		common.SendErrorResponse(writer, "failed to marshal request")
 		return
 	}
 
-	sc := rc.Configs[labelSNSConfig].(*snsConfig)
+	sc := rc.snses
 
 	switch snspayload.Type {
 	case messageTypeSubscriptionConfirmation:
-		awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
+		awsSession := rc.session
 		out, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
 			TopicArn: &sc.TopicArn,
 			Token:    &snspayload.Token,
@@ -87,10 +86,10 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 			common.SendErrorResponse(writer, "failed to confirm subscription")
 			return
 		}
-		rc.Configs[labelSubscriptionArn] = out.SubscriptionArn
+		rc.subscriptionArn = out.SubscriptionArn
 
 	case messageTypeNotification:
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
+		helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	}
 
 	response = "request successfully processed"
@@ -98,14 +97,14 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 	common.SendSuccessResponse(writer, response)
 }
 
-// PostActivate subscribes to the sns topic
-func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).Logger()
+// PostStart subscribes to the sns topic
+func (rc *RouteConfig) PostStart() error {
+	r := rc.Route
+	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).Logger()
 
-	sc := rc.Configs[labelSNSConfig].(*snsConfig)
-
-	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, sc.AccessKey, sc.SecretKey)
+	sc := rc.snses
+	creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to get aws credentials")
 	}
@@ -117,12 +116,10 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 	}
 
 	logger.Info().Msg("subscribing to sns topic")
-
-	snsSession := snslib.New(awsSession)
-	rc.Configs[labelSNSSession] = snsSession
+	rc.session = snslib.New(awsSession)
 	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
 
-	if _, err := snsSession.Subscribe(&snslib.SubscribeInput{
+	if _, err := rc.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
 		TopicArn: &sc.TopicArn,
@@ -135,12 +132,11 @@ func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error 
 }
 
 // PostStop unsubscribes from the sns topic
-func PostStop(rc *gwcommon.RouteConfig) error {
-	awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
-	if _, err := awsSession.Unsubscribe(&snslib.UnsubscribeInput{
-		SubscriptionArn: rc.Configs[labelSubscriptionArn].(*string),
+func (rc *RouteConfig) PostStop() error {
+	if _, err := rc.session.Unsubscribe(&snslib.UnsubscribeInput{
+		SubscriptionArn: rc.subscriptionArn,
 	}); err != nil {
-		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to unsubscribe")
+		rc.Route.Logger.Error().Err(err).Str("event-source-name", rc.Route.EventSource.Name).Msg("failed to unsubscribe")
 		return err
 	}
 	return nil
@@ -156,18 +152,17 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
-	sc := config.(*snsConfig)
+	sc := config.(*snsEventSource)
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: sc.Hook,
-		Configs: map[string]interface{}{
-			labelSNSConfig: sc,
+	return gwcommon.ProcessRoute(&RouteConfig{
+		Route: &gwcommon.Route{
+			Logger:      &ese.Log,
+			EventSource: eventSource,
+			StartCh:     make(chan struct{}),
+			Webhook:     sc.Hook,
 		},
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       ese.PostActivate,
-		PostStop:           PostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+		snses:     sc,
+		namespace: ese.Namespace,
+		clientset: ese.Clientset,
 	}, helper, eventStream)
 }

@@ -28,7 +28,7 @@ import (
 
 func TestDefaultPostActivate(t *testing.T) {
 	convey.Convey("Given a route configuration, default post activate should be a no-op", t, func() {
-		rc := GetFakeRouteConfig()
+		rc := GetFakeRoute()
 		err := DefaultPostActivate(rc)
 		convey.So(err, convey.ShouldBeNil)
 	})
@@ -36,7 +36,7 @@ func TestDefaultPostActivate(t *testing.T) {
 
 func TestDefaultPostStop(t *testing.T) {
 	convey.Convey("Given a route configuration, default post stop should be a no-op", t, func() {
-		rc := GetFakeRouteConfig()
+		rc := GetFakeRoute()
 		err := DefaultPostStop(rc)
 		convey.So(err, convey.ShouldBeNil)
 	})
@@ -45,7 +45,7 @@ func TestDefaultPostStop(t *testing.T) {
 func TestProcessRoute(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Activate the route configuration", func() {
-			rc := GetFakeRouteConfig()
+			rc := GetFakeRoute()
 			rc.Webhook.mux = http.NewServeMux()
 
 			rc.PostActivate = DefaultPostActivate
@@ -93,7 +93,7 @@ func TestProcessRoute(t *testing.T) {
 func TestProcessRouteChannels(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		convey.Convey("Stop server stream", func() {
-			rc := GetFakeRouteConfig()
+			rc := GetFakeRoute()
 			ctx, cancel := context.WithCancel(context.Background())
 			fgs := &FakeGRPCStream{
 				Ctx: ctx,
@@ -117,7 +117,7 @@ func TestProcessRouteChannels(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 		})
 		convey.Convey("Handle error", func() {
-			rc := GetFakeRouteConfig()
+			rc := GetFakeRoute()
 			fgs := &FakeGRPCStream{
 				Ctx: context.Background(),
 			}

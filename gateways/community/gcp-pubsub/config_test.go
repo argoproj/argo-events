@@ -31,7 +31,7 @@ func TestParseConfig(t *testing.T) {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*pubSubConfig)
+		_, ok := ps.(*pubSubEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

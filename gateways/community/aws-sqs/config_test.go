@@ -35,11 +35,11 @@ waitTimeSeconds: 10
 `
 
 func TestParseConfig(t *testing.T) {
-	convey.Convey("Given a aws-sqs event source, parse it", t, func() {
+	convey.Convey("Given a aws-sqsEventSource event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*sqs)
+		_, ok := ps.(*sqsEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
