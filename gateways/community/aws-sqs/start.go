@@ -29,7 +29,6 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
-
 		return err
 	}
 

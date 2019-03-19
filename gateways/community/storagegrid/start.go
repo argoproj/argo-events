@@ -122,12 +122,13 @@ func (rc *RouteConfig) PostStop() error {
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	logger := rc.route.Logger.With().
 		Str("event-source-name", rc.route.EventSource.Name).
-		Str("endpoint", rc.route.Webhook.Endpoint).Str("port", rc.route.Webhook.Port).
-		Str("method", http.MethodHead).Logger()
+		Str("endpoint", rc.route.Webhook.Endpoint).
+		Str("port", rc.route.Webhook.Port).
+		Logger()
 
 	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
 		logger.Warn().Msg("inactive route")
-		common.SendErrorResponse(writer, "route is not valid")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
@@ -135,7 +136,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, "failed to parse request body")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 

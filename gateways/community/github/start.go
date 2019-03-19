@@ -132,19 +132,14 @@ func (rc *RouteConfig) PostStart() error {
 	return nil
 }
 
+// PostStop runs after event source is stopped
 func (rc *RouteConfig) PostStop() error {
-	r := rc.route
-	gc := rc.ges
-	client := rc.client
-	hook := rc.hook
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if _, err := client.Repositories.DeleteHook(ctx, gc.Owner, gc.Repository, *hook.ID); err != nil {
-		r.Logger.Error().Err(err).Str("event-source-name", r.EventSource.Name).Msg("failed to delete github hook")
-		return err
+	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.ges.Owner, rc.ges.Repository, *rc.hook.ID); err != nil {
+		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Int64("hook-id", *hook.ID).Msg("github hook deleted")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int64("hook-id", *rc.hook.ID).Msg("github hook deleted")
 	return nil
 }
 
@@ -156,6 +151,7 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		return err
 	}
 	gc := config.(*githubEventSource)
 
@@ -187,19 +183,19 @@ func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
 
 // routeActiveHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	var response string
-
 	r := rc.route
 
-	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
-		Str("http-method", request.Method).Logger()
+		Logger()
+
 	logger.Info().Msg("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
-		common.SendErrorResponse(writer, response)
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
@@ -211,12 +207,11 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	body, err := parseValidateRequest(request, []byte(secret))
 	if err != nil {
 		logger.Error().Err(err).Msg("request is not valid event notification")
-		common.SendErrorResponse(writer, fmt.Sprintf("invalid event notification"))
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
-	response = "request successfully processed"
-	logger.Info().Msg(response)
-	common.SendSuccessResponse(writer, response)
+	logger.Info().Msg("request successfully processed")
+	common.SendSuccessResponse(writer, "")
 }

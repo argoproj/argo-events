@@ -36,31 +36,33 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
+// GetRoute returns the route
 func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 	return rc.Route
 }
 
 // RouteHandler handles new routes
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	var response string
-
 	r := rc.Route
-	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
+
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).Logger()
+
 	logger.Info().Msg("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
-		common.SendErrorResponse(writer, response)
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, "failed to parse request")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
@@ -68,22 +70,20 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	err = yaml.Unmarshal(body, &snspayload)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to convert request payload into snses payload")
-		common.SendErrorResponse(writer, "failed to marshal request")
+		common.SendErrorResponse(writer, "")
 		return
 	}
-
-	sc := rc.snses
 
 	switch snspayload.Type {
 	case messageTypeSubscriptionConfirmation:
 		awsSession := rc.session
 		out, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
-			TopicArn: &sc.TopicArn,
+			TopicArn: &rc.snses.TopicArn,
 			Token:    &snspayload.Token,
 		})
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to send confirmation response to amazon")
-			common.SendErrorResponse(writer, "failed to confirm subscription")
+			common.SendErrorResponse(writer, "")
 			return
 		}
 		rc.subscriptionArn = out.SubscriptionArn
@@ -92,40 +92,40 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	}
 
-	response = "request successfully processed"
-	logger.Info().Msg(response)
-	common.SendSuccessResponse(writer, response)
+	logger.Info().Msg("request successfully processed")
 }
 
 // PostStart subscribes to the sns topic
 func (rc *RouteConfig) PostStart() error {
 	r := rc.Route
-	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
-		Str("port", r.Webhook.Port).Logger()
+
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
+		Str("topic-arn", rc.snses.TopicArn).
+		Logger()
+	logger.Info().Msg("subscribing to sns topic")
 
 	sc := rc.snses
 	creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to get aws credentials")
+		return fmt.Errorf("failed to get aws credentials. err: %+v", err)
 	}
 
 	awsSession, err := gwcommon.GetAWSSession(creds, sc.Region)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to create new session")
-		return err
+		return fmt.Errorf("failed to create aws session. err: %+v", err)
 	}
 
-	logger.Info().Msg("subscribing to sns topic")
 	rc.session = snslib.New(awsSession)
 	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
-
 	if _, err := rc.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
 		TopicArn: &sc.TopicArn,
 	}); err != nil {
-		logger.Error().Err(err).Msg("failed to send subscribe request")
-		return err
+		return fmt.Errorf("failed to send subscribe request. err: %+v", err)
 	}
 
 	return nil
@@ -136,8 +136,7 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.session.Unsubscribe(&snslib.UnsubscribeInput{
 		SubscriptionArn: rc.subscriptionArn,
 	}); err != nil {
-		rc.Route.Logger.Error().Err(err).Str("event-source-name", rc.Route.EventSource.Name).Msg("failed to unsubscribe")
-		return err
+		return fmt.Errorf("failed to unsubscribe. err: %+v", err)
 	}
 	return nil
 }

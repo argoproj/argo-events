@@ -91,7 +91,7 @@ func (rc *RouteConfig) PostStart() error {
 			return fmt.Errorf("failed to check if hook is already registered with the event %s. unknown event", rc.ges.Event)
 		}
 		if reflect.New(elem.Type().Elem()).Bool() && h.URL == formattedUrl {
-			rc.route.Logger.Info().Str("event-source", rc.route.EventSource.Name).Msg("hook is already configured")
+			rc.route.Logger.Warn().Str("event-source", rc.route.EventSource.Name).Msg("hook is already configured")
 			return nil
 		}
 	}
@@ -108,8 +108,7 @@ func (rc *RouteConfig) PostStart() error {
 
 func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
-		rc.route.Logger.Error().Err(err).Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("failed to delete gitlab hook")
-		return err
+		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
 	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("gitlab hook deleted")
 	return nil
@@ -117,32 +116,30 @@ func (rc *RouteConfig) PostStop() error {
 
 // routeActiveHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	var response string
-
-	logger := rc.route.Logger.With().Str("event-source", rc.route.EventSource.Name).Str("endpoint", rc.route.Webhook.Endpoint).
+	logger := rc.route.Logger.With().
+		Str("event-source", rc.route.EventSource.Name).
+		Str("endpoint", rc.route.Webhook.Endpoint).
 		Str("port", rc.route.Webhook.Port).
-		Str("http-method", request.Method).Logger()
+		Logger()
 
 	logger.Info().Msg("request received")
 
 	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.route.Webhook.Endpoint, rc.route.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
-		common.SendErrorResponse(writer, response)
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- body
-	response = "request successfully processed"
-	logger.Info().Msg(response)
-	common.SendSuccessResponse(writer, response)
+	logger.Info().Msg("request successfully processed")
+	common.SendSuccessResponse(writer, "")
 }
 
 // StartEventSource starts an event source

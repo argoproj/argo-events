@@ -35,6 +35,7 @@ type GithubEventSourceExecutor struct {
 	Namespace string
 }
 
+// RouteConfig contains information about the route
 type RouteConfig struct {
 	route     *gwcommon.Route
 	ges       *githubEventSource
