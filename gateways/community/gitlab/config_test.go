@@ -23,6 +23,7 @@ import (
 )
 
 var es = `
+id: 12
 hook:
  endpoint: "/push"
  port: "12000"

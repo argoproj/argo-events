@@ -30,6 +30,9 @@ func validateGithub(config interface{}) error {
 	if g == nil {
 		return gwcommon.ErrNilEventSource
 	}
+	if g.Id == 0 {
+		return fmt.Errorf("hook id must be not be zero")
+	}
 	if g.Repository == "" {
 		return fmt.Errorf("repository cannot be empty")
 	}

@@ -99,6 +99,7 @@ func (rc *RouteConfig) PostStart() error {
 		Events: gc.Events,
 		Active: gh.Bool(gc.Active),
 		Config: hookConfig,
+		ID:     &rc.ges.Id,
 	}
 
 	rc.client = gh.NewClient(PATTransport.Client())
@@ -128,7 +129,17 @@ func (rc *RouteConfig) PostStart() error {
 		}
 	}
 
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int64("hook-id", *hook.ID).Msg("github hook created")
+	if hook == nil {
+		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		hook, _, err = rc.client.Repositories.GetHook(ctx, gc.Owner, gc.Repository, rc.ges.Id)
+		if err != nil {
+			return fmt.Errorf("failed to get existing webhook with id %d. err: %+v", rc.ges.Id, err)
+		}
+	}
+
+	rc.hook = hook
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("github hook created")
 	return nil
 }
 
@@ -139,7 +150,7 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.ges.Owner, rc.ges.Repository, *rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int64("hook-id", *rc.hook.ID).Msg("github hook deleted")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("github hook deleted")
 	return nil
 }
 
@@ -156,6 +167,12 @@ func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	gc := config.(*githubEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
+		route: &gwcommon.Route{
+			Logger:      &ese.Log,
+			EventSource: eventSource,
+			Webhook:     gc.Hook,
+			StartCh:     make(chan struct{}),
+		},
 		clientset: ese.Clientset,
 		namespace: ese.Namespace,
 		ges:       gc,

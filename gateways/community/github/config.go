@@ -47,6 +47,8 @@ type RouteConfig struct {
 
 // githubEventSource contains information to setup a github project integration
 type githubEventSource struct {
+	// Webhook ID
+	Id int64 `json:"id"`
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
 	// GitHub owner name i.e. argoproj

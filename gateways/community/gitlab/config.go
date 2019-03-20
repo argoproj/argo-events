@@ -46,6 +46,8 @@ type RouteConfig struct {
 
 // gitlabEventSource contains information to setup a gitlab project integration
 type gitlabEventSource struct {
+	// Webhook Id
+	Id int `json:"id"`
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup

@@ -66,8 +66,8 @@ func (rc *RouteConfig) PostStart() error {
 	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &formattedUrl,
-		Token: &c.token,
+		URL:                   &formattedUrl,
+		Token:                 &c.token,
 		EnableSSLVerification: &rc.ges.EnableSSLVerification,
 	}
 
@@ -80,29 +80,16 @@ func (rc *RouteConfig) PostStart() error {
 	reflect.Indirect(iev).SetBool(true)
 	elem.Set(iev)
 
-	existingHooks, _, err := rc.client.Projects.ListProjectHooks(rc.ges.ProjectId, &gitlab.ListProjectHooksOptions{})
+	hook, _, err := rc.client.Projects.GetProjectHook(rc.ges.ProjectId, rc.ges.Id)
 	if err != nil {
-		return fmt.Errorf("failed to list existing webhooks. err: %+v", err)
-	}
-
-	for _, h := range existingHooks {
-		elem = reflect.ValueOf(h).Elem().FieldByName(string(rc.ges.Event))
-		if ok := elem.IsValid(); !ok {
-			return fmt.Errorf("failed to check if hook is already registered with the event %s. unknown event", rc.ges.Event)
-		}
-		if reflect.New(elem.Type().Elem()).Bool() && h.URL == formattedUrl {
-			rc.route.Logger.Warn().Str("event-source", rc.route.EventSource.Name).Msg("hook is already configured")
-			return nil
+		hook, _, err = rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
+		if err != nil {
+			return fmt.Errorf("failed to add project hook. err: %+v", err)
 		}
 	}
 
-	hook, _, err := rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
-	if err != nil {
-		return fmt.Errorf("failed to add project hook. err: %+v", err)
-	}
 	rc.hook = hook
-
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("gitlab hook created")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("gitlab hook created")
 	return nil
 }
 
@@ -110,7 +97,7 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Int("hook-id", rc.hook.ID).Msg("gitlab hook deleted")
+	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("gitlab hook deleted")
 	return nil
 }
 

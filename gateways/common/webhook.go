@@ -227,23 +227,28 @@ func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways
 func ProcessRoute(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
 	r := rc.GetRoute()
 
+	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("validating the route")
 	if err := validateRoute(rc.GetRoute()); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred validating route")
 		return err
 	}
 
+	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("activating the route")
 	activateRoute(rc, helper)
 
+	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post start")
 	if err := rc.PostStart(); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post start")
 		return err
 	}
 
+	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("processing channels")
 	if err := processChannels(rc, helper, eventStream); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in process channel")
 		return err
 	}
 
+	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post stop")
 	if err := rc.PostStop(); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post stop")
 	}
