@@ -10,7 +10,7 @@ GCP PubSub gateway listens to event streams on google cloud pub sub topics.
 
 
 ### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/community/gcp-pubsub/config.go#L31-L36),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/community/gcp-pubsub/config.go#L31-L36).
 
 Make sure to mount credentials file for authentication in gateway pod and refer the path in `credentialsFile`.
 

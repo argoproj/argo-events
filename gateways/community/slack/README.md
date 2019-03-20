@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/slack.png?raw=true" alt="Slack"/>
+  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/slack.png?raw=true" alt="Slack"/>
 </p>
 
 <br/>
@@ -9,7 +9,7 @@
 The gateway listens to events from Slack.
 
 ### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/slack.png),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/30eaa296651e80b11ffef3b20464a08a2041eb09/gateways/community/slack/config.go#L46-L49).
 
 The gateway spec defined in `examples` has a `serviceSpec`. This service is used to expose the gateway server and make it reachable from Slack.
 

@@ -10,7 +10,7 @@ Calendar gateway can be used when you to schedule K8s resources on an interval
 or cron schedule.
 
 ## How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L35-L55)
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L35-L55).
 
 The [gateway configmap](../../../examples/gateways/calendar-gateway-configmap.yaml) contains three event source configurations,
 

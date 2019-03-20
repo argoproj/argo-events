@@ -14,7 +14,7 @@ read [AWS SNS Gateway](../../community/aws-sns/README.md)
 Read about [notifications](https://docs.minio.io/docs/minio-bucket-notification-guide.html)
 
 ## How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/pkg/apis/common/s3.go#L26-L33),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/pkg/apis/common/s3.go#L26-L33).
 
 Most of the things declared are straightforward but `SecretKeySelector`. 
 

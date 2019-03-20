@@ -13,12 +13,12 @@ You consider using resource gateway as the watchdog in your cluster, basically m
 installed kubernetes resources. 
 
 ## How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/gateways/core/resource/config.go#L36-L46),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/gateways/core/resource/config.go#L36-L46).
 
 ### Example
 The [gateway configmap](../../../examples/gateways/resource-gateway-configmap.yaml) contains a couple of event sources. 
 
-The `successWorkflow` event source defines configuration to listen to notifications for newly created `Argo Workflows` and filter these
+The `workflow-success` event source defines configuration to listen to notifications for newly created `Argo Workflows` and filter these
 workflows on labels. 
 
 The `namespace` event source defines configuration to listen to any updates to namespace.

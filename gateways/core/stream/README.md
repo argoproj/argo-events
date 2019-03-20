@@ -16,7 +16,7 @@ The configuration for an event source is somewhat similar between all stream gat
 NATS gateway consumes messages by subscribing to NATS topic.
 
 ### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/39fd5b8592e27c869dcc6cf2b0e6fee1d56622f2/gateways/core/stream/nats/config.go#L33-L40).
 
 If you don't provide an explicit `Backoff`, then gateway will use a default backoff in case of connection failure.
 

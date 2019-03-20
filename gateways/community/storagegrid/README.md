@@ -9,7 +9,7 @@
 The gateway listens to bucket notifications from storage grid.
 
 ### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/community/slack/config.go#L38-L41),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/community/slack/config.go#L38-L41).
 
 Note: The gateway does not register the webhook endpoint on storage grid. You need to do it manually. 
 This is mainly because limitations of storage grid api.

@@ -13,5 +13,3 @@
 11. [HDFS](../gateways/community/hdfs)
 12. [Slack](../gateways/community/slack/README.md)
 13. [StorageGrid](../gateways/community/storagegrid/README.md)
-14. [Trello](../gateways/community/trello/README.md)
-

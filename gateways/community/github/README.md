@@ -11,7 +11,7 @@ The gateway listens to events from GitHub.
 Refer [here](https://developer.github.com/v3/activity/events/types/) for more information on type of events.
 
 ### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/30eaa296651e80b11ffef3b20464a08a2041eb09/gateways/community/github/config.go#L50-L73),
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/30eaa296651e80b11ffef3b20464a08a2041eb09/gateways/community/github/config.go#L50-L73).
 
 Refer [this](https://developer.github.com/v3/repos/hooks/#get-single-hook) to understand the structure of webhook.
 
