@@ -57,9 +57,9 @@ type WebhookHelper struct {
 	// ActiveEndpoints keep track of endpoints that are already registered with server and their status active or inactive
 	ActiveEndpoints map[string]*Endpoint
 	// RouteActivateChan handles assigning new route to server.
-	RouteActivateChan chan RouteConfig
+	RouteActivateChan chan RouteManager
 	// RouteDeactivateChan handles deactivating existing route
-	RouteDeactivateChan chan RouteConfig
+	RouteDeactivateChan chan RouteManager
 }
 
 // HTTP Muxer
@@ -81,8 +81,8 @@ type Route struct {
 	EventSource *gateways.EventSource
 }
 
-// RouteConfig is an interface to manage  the configuration for a route
-type RouteConfig interface {
+// RouteManager is an interface to manage the configuration for a route
+type RouteManager interface {
 	GetRoute() *Route
 	RouteHandler(writer http.ResponseWriter, request *http.Request)
 	PostStart() error
@@ -103,8 +103,8 @@ func NewWebhookHelper() *WebhookHelper {
 		ActiveEndpoints:     make(map[string]*Endpoint),
 		ActiveServers:       make(map[string]*activeServer),
 		Mutex:               sync.Mutex{},
-		RouteActivateChan:   make(chan RouteConfig),
-		RouteDeactivateChan: make(chan RouteConfig),
+		RouteActivateChan:   make(chan RouteManager),
+		RouteDeactivateChan: make(chan RouteManager),
 	}
 }
 
@@ -134,10 +134,10 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // starts a http server
-func startHttpServer(rc RouteConfig, helper *WebhookHelper) {
+func startHttpServer(routeManager RouteManager, helper *WebhookHelper) {
 	// start a http server only if no other configuration previously started the server on given port
 	helper.Mutex.Lock()
-	r := rc.GetRoute()
+	r := routeManager.GetRoute()
 	if _, ok := helper.ActiveServers[r.Webhook.Port]; !ok {
 		s := &server{
 			mux: http.NewServeMux(),
@@ -171,9 +171,9 @@ func startHttpServer(rc RouteConfig, helper *WebhookHelper) {
 }
 
 // activateRoute activates route
-func activateRoute(rc RouteConfig, helper *WebhookHelper) {
-	r := rc.GetRoute()
-	helper.RouteActivateChan <- rc
+func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
+	r := routeManager.GetRoute()
+	helper.RouteActivateChan <- routeManager
 
 	<-r.StartCh
 
@@ -190,15 +190,15 @@ func activateRoute(rc RouteConfig, helper *WebhookHelper) {
 			Active: true,
 			DataCh: make(chan []byte),
 		}
-		r.Webhook.mux.HandleFunc(r.Webhook.Endpoint, rc.RouteHandler)
+		r.Webhook.mux.HandleFunc(r.Webhook.Endpoint, routeManager.RouteHandler)
 	}
 	helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
 	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("route handler added")
 }
 
-func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
-	r := rc.GetRoute()
+func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
+	r := routeManager.GetRoute()
 
 	for {
 		select {
@@ -215,7 +215,7 @@ func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways
 
 		case <-eventStream.Context().Done():
 			r.Logger.Info().Str("event-source-name", r.EventSource.Name).Msg("connection is closed by client")
-			helper.RouteDeactivateChan <- rc
+			helper.RouteDeactivateChan <- routeManager
 			return nil
 
 		// this error indicates that the server has stopped running
@@ -225,32 +225,32 @@ func processChannels(rc RouteConfig, helper *WebhookHelper, eventStream gateways
 	}
 }
 
-func ProcessRoute(rc RouteConfig, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
-	r := rc.GetRoute()
+func ProcessRoute(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
+	r := routeManager.GetRoute()
 
 	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("validating the route")
-	if err := validateRoute(rc.GetRoute()); err != nil {
+	if err := validateRoute(routeManager.GetRoute()); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred validating route")
 		return err
 	}
 
 	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("activating the route")
-	activateRoute(rc, helper)
+	activateRoute(routeManager, helper)
 
 	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post start")
-	if err := rc.PostStart(); err != nil {
+	if err := routeManager.PostStart(); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post start")
 		return err
 	}
 
 	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("processing channels")
-	if err := processChannels(rc, helper, eventStream); err != nil {
+	if err := processChannels(routeManager, helper, eventStream); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in process channel")
 		return err
 	}
 
 	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post stop")
-	if err := rc.PostStop(); err != nil {
+	if err := routeManager.PostStop(); err != nil {
 		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post stop")
 	}
 	return nil
