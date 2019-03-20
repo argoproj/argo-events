@@ -79,10 +79,12 @@ func TestAWSSNS(t *testing.T) {
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-			convey.So(string(writer.Payload), convey.ShouldEqual, "failed to confirm subscription")
+
+			dataCh := make(chan []byte)
 
 			go func() {
-				<-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				dataCh <- data
 			}()
 
 			payload.Type = messageTypeNotification
@@ -91,7 +93,8 @@ func TestAWSSNS(t *testing.T) {
 			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			})
-			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
+			data := <-dataCh
+			convey.So(data, convey.ShouldNotBeNil)
 		})
 
 		convey.Convey("Run post activate", func() {
