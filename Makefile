@@ -17,7 +17,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v0.8.3
+IMAGE_TAG?=latest
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
