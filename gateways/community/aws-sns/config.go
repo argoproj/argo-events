@@ -76,7 +76,7 @@ type httpNotification struct {
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
 }
 
-// snses contains configuration to subscribe to SNS topic
+// snsEventSource contains configuration to subscribe to SNS topic
 type snsEventSource struct {
 	// Hook defines a webhook.
 	Hook      *common.Webhook           `json:"hook"`

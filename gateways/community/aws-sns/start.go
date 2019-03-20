@@ -69,7 +69,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	var snspayload *httpNotification
 	err = yaml.Unmarshal(body, &snspayload)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to convert request payload into snses payload")
+		logger.Error().Err(err).Msg("failed to convert request payload into sns event source payload")
 		common.SendErrorResponse(writer, "")
 		return
 	}

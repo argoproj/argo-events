@@ -34,7 +34,6 @@ type SlackEventSourceExecutor struct {
 	Log       zerolog.Logger
 }
 
-//
 type RouteConfig struct {
 	route     *gwcommon.Route
 	ses       *slackEventSource
@@ -43,7 +42,6 @@ type RouteConfig struct {
 	namespace string
 }
 
-// slackEventSource
 type slackEventSource struct {
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token"`

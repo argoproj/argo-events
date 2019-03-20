@@ -97,7 +97,7 @@ type Endpoint struct {
 	DataCh chan []byte
 }
 
-// NewWebhookHelper returns new r.Webhook helper
+// NewWebhookHelper returns new Webhook helper
 func NewWebhookHelper() *WebhookHelper {
 	return &WebhookHelper{
 		ActiveEndpoints:     make(map[string]*Endpoint),
@@ -184,6 +184,7 @@ func activateRoute(rc RouteConfig, helper *WebhookHelper) {
 	}
 
 	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("adding route handler")
+
 	if _, ok := helper.ActiveEndpoints[r.Webhook.Endpoint]; !ok {
 		helper.ActiveEndpoints[r.Webhook.Endpoint] = &Endpoint{
 			Active: true,
