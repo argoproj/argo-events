@@ -17,7 +17,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v0.8
+IMAGE_TAG?=v0.8.3
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
@@ -35,9 +35,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux artifact-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux trello-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux artifact-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image trello-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -262,16 +262,6 @@ sqs-linux:
 sqs-image: sqs-linux
 	docker build -t $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) -f ./gateways/community/aws-sqs/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
-
-trello:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/trello-gateway ./gateways/community/trello/cmd
-
-trello-linux:
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make trello
-
-trello-image: trello-linux
-	docker build -t $(IMAGE_PREFIX)trello-gateway:$(IMAGE_TAG) -f ./gateways/community/trello/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)trello-gateway:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
