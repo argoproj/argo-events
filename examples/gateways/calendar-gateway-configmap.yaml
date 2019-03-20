@@ -4,6 +4,6 @@ metadata:
   name: calendar-gateway-configmap
 data:
   interval: |-
-    interval: 55s
+    interval: 10s
   schedule: |-
-    schedule: 30 * * * *
+    schedule: "30 * * * *"

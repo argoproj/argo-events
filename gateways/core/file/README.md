@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/file.png?raw=true" alt="File"/>
+  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/file.png?raw=true" alt="File"/>
 </p>
 
 <br/>
@@ -13,67 +13,21 @@ The directory can be in the pod's own filesystem or you can mount a persistent v
 Make sure that the directory exists before you create the gateway configmap.
 
 ## How to define an event source in confimap?
-You can construct an entry in configmap using following fields,
-
-```go
-// Directory to watch for events
-Directory string `json:"directory"`
-
-// Path is relative path of object to watch with respect to the directory
-Path string `json:"path,omitempty"`
-
-// PathRegexp is regexp of relative path of object to watch with respect to the directory
-// +Optional
-PathRegexp string `json:"pathRegexp,omitempty"`
-
-// Type of file operations to watch
-// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
-Type string `json:"type"`
-```
-
-### Example
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: file-gateway-configmap
-data:
-  bindir: |- # event source name can be any valid string
-    directory: "/bin/"  # directory where file events are watched
-    type: CREATE # type of file event
-    path: x.txt # file to watch to
-```
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/file/config.go#L34-L38).
 
 ### Event Payload Structure
-```
-{
-  "name": // Relative path to the file or directory.
-   "op": // File operation that triggered the event.
-}
-```
+
+[Structure](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/common/fsevent/fileevent.go#L11-L14)  
+
 
 ## Setup
+**1. Install [Gateway Configmap](../../../examples/gateways/file-gateway-configmap.yaml)**
 
-**1. Install Gateway**
-
-```yaml
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/file.yaml
-```
+**2. Install [Gateway](../../../examples/gateways/file.yaml)**
 
 Make sure the gateway pod is created.
 
-**2. Install Gateway Configmap**
-
-```yaml
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/file-gateway-configmap.yaml
-```
-
-**3. Install Sensor**
-
-```yaml
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/file.yaml
-```
+**3. Install [Sensor](../../../examples/sensors/file.yaml)**
 
 Make sure the sensor pod is created.
 

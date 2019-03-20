@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/calendar.png?raw=true" alt="Calendar"/>
+  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/calendar.png?raw=true" alt="Calendar"/>
 </p>
 
 <br/>
@@ -10,35 +10,9 @@ Calendar gateway can be used when you to schedule K8s resources on an interval
 or cron schedule.
 
 ## How to define an event source in confimap?
-You can construct an entry in configmap using following fields,
+An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L35-L55)
 
-```go
-// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-Schedule string `json:"schedule"`
-
-// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-Interval string `json:"interval"`
-
-// List of RRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545.
-// RRULE is a recurrence rule which defines a repeating pattern for recurring events.
-// RDATE defines the list of DATE-TIME values for recurring events.
-// EXDATE defines the list of DATE-TIME exceptions for recurring events.
-// the combination of these rules and dates combine to form a set of date times.
-// NOTE: functionality currently only supports EXDATEs, but in the future could be expanded.
-// +Optional
-Recurrence []string `json:"recurrence,omitempty"`
-
-// Timezone in which to run the schedule
-// +optional
-Timezone string `json:"timezone,omitempty"`
-
-// UserPayload will be sent to sensor as extra data once the event is triggered
-// +optional
-UserPayload string `json:"userPayload,omitempty"`
-```
-
-### Example
-The following gateway configmap contains three event source configurations,
+The [gateway configmap](../../../examples/gateways/calendar-gateway-configmap.yaml) contains three event source configurations,
 
 The `interval` configuration will basically generate an event after every 55 seconds.
 
@@ -51,52 +25,25 @@ and along with event time, event payload will also contain a string  "{\r\n\"hel
 
 Only the event time is probably not sufficient as event payload. You may want to have an accompanying user defined data.
 This user defined data is `userPayload`. You can basically place any string here and gateway will put that in event payload.  
- 
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: calendar-gateway-configmap
-data:
-  interval: |-
-    interval: 55s
-  schedule: |-
-    schedule: 30 * * * *
-  withdata: |-
-    schedule: 30 * * * *
-    userPayload: "{\r\n\"hello\": \"world\"\r\n}"
-    timezone: "America/New_York"
-```
+
 
 ### Event Payload Structure
-The event payload contains `eventTime` and `userPayload` (optional)
+The [event payload](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L60-L64) contains `eventTime` and `userPayload` (optional)
 
 ## Setup
-**1. Install Gateway Configmap**
+**1. Install [Gateway Configmap](../../../examples/gateways/calendar-gateway-configmap.yaml)**
 
-```yaml
-kubectl -n argo-events create -f  https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar-gateway-configmap.yaml
-```
-
-**2. Install Gateway**
-
-```yaml
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar.yaml
-```
+**2. Install [Gateway](../../../examples/gateways/calendar.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install Sensor**
-
-```yaml
-kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/calendar.yaml
-```
+**3. Install [Sensor](../../../examples/sensors/calendar.yaml)**
 
 Make sure the sensor pod is created.
 
 **4. Trigger Workflow**
 
-Wait for 55 seconds to pass or if the sensor has `calendar-gateway:schedule` as event dependency, then wait for 30 min past each hour
+Wait for 10 seconds to pass or if the sensor has `calendar-gateway:schedule` as event dependency, then wait for 30 min past each hour
 for workflow to trigger.
 
 ## Add new schedule
