@@ -1,26 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: github-sensor
+  name: slack-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   template:
-    spec:
-      containers:
-        - name: "sensor"
-          image: "argoproj/sensor"
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
-  dependencies:
-    - name: "github-gateway:project_1"
+    containers:
+      - name: "sensor"
+        image: "argoproj/sensor"
+        imagePullPolicy: Always
+    serviceAccountName: argo-events-sa
   eventProtocol:
     type: "HTTP"
     http:
       port: "9300"
+  dependencies:
+    - name: "slack-gateway:notification_1"
   triggers:
     - template:
-        name: github-workflow-trigger
+        name: slack-workflow
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -29,7 +28,7 @@ spec:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
-              generateName: github-
+              generateName: slack-
             spec:
               entrypoint: whalesay
               arguments:
@@ -48,5 +47,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "github-gateway:project_1"
+            event: "slack-gateway:notification_1"
           dest: spec.arguments.parameters.0.value
