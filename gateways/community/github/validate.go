@@ -26,9 +26,12 @@ func (ese *GithubEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 }
 
 func validateGithub(config interface{}) error {
-	g := config.(*githubConfig)
+	g := config.(*githubEventSource)
 	if g == nil {
 		return gwcommon.ErrNilEventSource
+	}
+	if g.Id == 0 {
+		return fmt.Errorf("hook id must be not be zero")
 	}
 	if g.Repository == "" {
 		return fmt.Errorf("repository cannot be empty")

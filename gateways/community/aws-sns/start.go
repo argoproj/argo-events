@@ -28,12 +28,6 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const (
-	labelSNSConfig       = "snsConfig"
-	labelSNSSession      = "snsSession"
-	labelSubscriptionArn = "subscriptionArn"
-)
-
 var (
 	helper = gwcommon.NewWebhookHelper()
 )
@@ -42,106 +36,107 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// RouteActiveHandler handles new routes
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
-	var response string
+// GetRoute returns the route
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.Route
+}
 
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).
+// RouteHandler handles new routes
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+	r := rc.Route
+
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).Logger()
+
 	logger.Info().Msg("request received")
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		logger.Info().Msg("endpoint is not active")
-		common.SendErrorResponse(writer, response)
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, "failed to parse request")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	var snspayload *httpNotification
 	err = yaml.Unmarshal(body, &snspayload)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to convert request payload into snsConfig payload")
-		common.SendErrorResponse(writer, "failed to marshal request")
+		logger.Error().Err(err).Msg("failed to convert request payload into sns event source payload")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
-	sc := rc.Configs[labelSNSConfig].(*snsConfig)
-
 	switch snspayload.Type {
 	case messageTypeSubscriptionConfirmation:
-		awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
+		awsSession := rc.session
 		out, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
-			TopicArn: &sc.TopicArn,
+			TopicArn: &rc.snses.TopicArn,
 			Token:    &snspayload.Token,
 		})
 		if err != nil {
 			logger.Error().Err(err).Msg("failed to send confirmation response to amazon")
-			common.SendErrorResponse(writer, "failed to confirm subscription")
+			common.SendErrorResponse(writer, "")
 			return
 		}
-		rc.Configs[labelSubscriptionArn] = out.SubscriptionArn
+		rc.subscriptionArn = out.SubscriptionArn
 
 	case messageTypeNotification:
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
+		helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	}
 
-	response = "request successfully processed"
-	logger.Info().Msg(response)
-	common.SendSuccessResponse(writer, response)
+	logger.Info().Msg("request successfully processed")
 }
 
-// PostActivate subscribes to the sns topic
-func (ese *SNSEventSourceExecutor) PostActivate(rc *gwcommon.RouteConfig) error {
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).Logger()
+// PostStart subscribes to the sns topic
+func (rc *RouteConfig) PostStart() error {
+	r := rc.Route
 
-	sc := rc.Configs[labelSNSConfig].(*snsConfig)
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
+		Str("topic-arn", rc.snses.TopicArn).
+		Logger()
+	logger.Info().Msg("subscribing to sns topic")
 
-	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, sc.AccessKey, sc.SecretKey)
+	sc := rc.snses
+	creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to get aws credentials")
+		return fmt.Errorf("failed to get aws credentials. err: %+v", err)
 	}
 
 	awsSession, err := gwcommon.GetAWSSession(creds, sc.Region)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to create new session")
-		return err
+		return fmt.Errorf("failed to create aws session. err: %+v", err)
 	}
 
-	logger.Info().Msg("subscribing to sns topic")
-
-	snsSession := snslib.New(awsSession)
-	rc.Configs[labelSNSSession] = snsSession
+	rc.session = snslib.New(awsSession)
 	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
-
-	if _, err := snsSession.Subscribe(&snslib.SubscribeInput{
+	if _, err := rc.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
 		TopicArn: &sc.TopicArn,
 	}); err != nil {
-		logger.Error().Err(err).Msg("failed to send subscribe request")
-		return err
+		return fmt.Errorf("failed to send subscribe request. err: %+v", err)
 	}
 
 	return nil
 }
 
 // PostStop unsubscribes from the sns topic
-func PostStop(rc *gwcommon.RouteConfig) error {
-	awsSession := rc.Configs[labelSNSSession].(*snslib.SNS)
-	if _, err := awsSession.Unsubscribe(&snslib.UnsubscribeInput{
-		SubscriptionArn: rc.Configs[labelSubscriptionArn].(*string),
+func (rc *RouteConfig) PostStop() error {
+	if _, err := rc.session.Unsubscribe(&snslib.UnsubscribeInput{
+		SubscriptionArn: rc.subscriptionArn,
 	}); err != nil {
-		rc.Log.Error().Err(err).Str("event-source-name", rc.EventSource.Name).Msg("failed to unsubscribe")
-		return err
+		return fmt.Errorf("failed to unsubscribe. err: %+v", err)
 	}
 	return nil
 }
@@ -156,18 +151,17 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
-	sc := config.(*snsConfig)
+	sc := config.(*snsEventSource)
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: sc.Hook,
-		Configs: map[string]interface{}{
-			labelSNSConfig: sc,
+	return gwcommon.ProcessRoute(&RouteConfig{
+		Route: &gwcommon.Route{
+			Logger:      &ese.Log,
+			EventSource: eventSource,
+			StartCh:     make(chan struct{}),
+			Webhook:     sc.Hook,
 		},
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       ese.PostActivate,
-		PostStop:           PostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+		snses:     sc,
+		namespace: ese.Namespace,
+		clientset: ese.Clientset,
 	}, helper, eventStream)
 }

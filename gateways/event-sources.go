@@ -172,6 +172,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				Data: eventSource.Data.Config,
 			})
 			if err != nil {
+				gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("error occurred while starting event source")
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
 					Message: "failed_to_receive_event_stream",

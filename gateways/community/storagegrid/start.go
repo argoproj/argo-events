@@ -24,15 +24,10 @@ import (
 	"strings"
 
 	"github.com/argoproj/argo-events/common"
-
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/joncalhoun/qson"
 	"github.com/satori/go.uuid"
-)
-
-const (
-	LabelStorageGridConfig = "storageGridConfig"
 )
 
 var (
@@ -59,7 +54,7 @@ func generateUUID() uuid.UUID {
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *storageGrid) bool {
+func filterEvent(notification *storageGridNotification, sg *storageGridEventSource) bool {
 	if sg.Events == nil {
 		return true
 	}
@@ -72,7 +67,7 @@ func filterEvent(notification *storageGridNotification, sg *storageGrid) bool {
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *storageGrid) bool {
+func filterName(notification *storageGridNotification, sg *storageGridEventSource) bool {
 	if sg.Filter == nil {
 		return true
 	}
@@ -88,6 +83,10 @@ func filterName(notification *storageGridNotification, sg *storageGrid) bool {
 	return true
 }
 
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.route
+}
+
 // StartConfig runs a configuration
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
@@ -98,37 +97,46 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
-	sg := config.(*storageGrid)
+	sges := config.(*storageGridEventSource)
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Configs: map[string]interface{}{
-			LabelStorageGridConfig: sg,
+	return gwcommon.ProcessRoute(&RouteConfig{
+		route: &gwcommon.Route{
+			Webhook:     sges.Hook,
+			EventSource: eventSource,
+			Logger:      &ese.Log,
+			StartCh:     make(chan struct{}),
 		},
-		Webhook:            sg.Hook,
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       gwcommon.DefaultPostActivate,
-		PostStop:           gwcommon.DefaultPostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+		sges: sges,
 	}, helper, eventStream)
 }
 
-// routeActiveHandler handles new route
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
-	logger := rc.Log.With().Str("event-source-name", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).Str("port", rc.Webhook.Port).Str("method", http.MethodHead).Logger()
+func (rc *RouteConfig) PostStart() error {
+	return nil
+}
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
+func (rc *RouteConfig) PostStop() error {
+	return nil
+}
+
+// RouteHandler handles new route
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+	logger := rc.route.Logger.With().
+		Str("event-source-name", rc.route.EventSource.Name).
+		Str("endpoint", rc.route.Webhook.Endpoint).
+		Str("port", rc.route.Webhook.Port).
+		Logger()
+
+	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
 		logger.Warn().Msg("inactive route")
-		common.SendErrorResponse(writer, "route is not valid")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
-	rc.Log.Info().Str("event-source-name", rc.EventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	logger.Info().Str("event-source-name", rc.route.EventSource.Name).Str("method", http.MethodHead).Msg("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendErrorResponse(writer, "failed to parse request body")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
@@ -159,11 +167,9 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	storageGridConfig := rc.Configs[LabelStorageGridConfig].(*storageGrid)
-
-	if filterEvent(notification, storageGridConfig) && filterName(notification, storageGridConfig) {
+	if filterEvent(notification, rc.sges) && filterName(notification, rc.sges) {
 		logger.Info().Msg("new event received, dispatching to gateway client")
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- b
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- b
 		return
 	}
 

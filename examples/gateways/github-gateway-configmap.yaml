@@ -4,6 +4,7 @@ metadata:
   name: github-gateway-configmap
 data:
   project_1: |-
+    id: 1234
     owner: "owner-example"
     repository: "repo-example"
     hook:

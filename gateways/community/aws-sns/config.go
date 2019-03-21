@@ -20,11 +20,12 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/gateways/common"
-	"k8s.io/client-go/kubernetes"
-
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -43,6 +44,16 @@ type SNSEventSourceExecutor struct {
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
+}
+
+// RouteConfig contains information for a route
+type RouteConfig struct {
+	Route           *gwcommon.Route
+	snses           *snsEventSource
+	session         *snslib.SNS
+	subscriptionArn *string
+	clientset       kubernetes.Interface
+	namespace       string
 }
 
 // Json http notifications
@@ -65,8 +76,8 @@ type httpNotification struct {
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
 }
 
-// snsConfig contains configuration to subscribe to SNS topic
-type snsConfig struct {
+// snsEventSource contains configuration to subscribe to SNS topic
+type snsEventSource struct {
 	// Hook defines a webhook.
 	Hook      *common.Webhook           `json:"hook"`
 	TopicArn  string                    `json:"topicArn"`
@@ -76,10 +87,10 @@ type snsConfig struct {
 }
 
 func parseEventSource(es string) (interface{}, error) {
-	var n *snsConfig
-	err := yaml.Unmarshal([]byte(es), &n)
+	var ses *snsEventSource
+	err := yaml.Unmarshal([]byte(es), &ses)
 	if err != nil {
 		return nil, err
 	}
-	return n, nil
+	return ses, nil
 }

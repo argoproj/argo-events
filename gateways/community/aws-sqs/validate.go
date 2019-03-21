@@ -30,7 +30,7 @@ func (ese *SQSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *
 }
 
 func validateSQSConfig(config interface{}) error {
-	sc := config.(*sqs)
+	sc := config.(*sqsEventSource)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}

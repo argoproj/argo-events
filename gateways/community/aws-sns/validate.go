@@ -29,7 +29,7 @@ func (ese *SNSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *
 }
 
 func validateSNSConfig(config interface{}) error {
-	sc := config.(*snsConfig)
+	sc := config.(*snsEventSource)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}
