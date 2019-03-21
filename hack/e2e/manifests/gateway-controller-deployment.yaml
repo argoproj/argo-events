@@ -1,4 +1,3 @@
-# The gateway-controller listens for changes on the gateway CRD and creates gateway
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:

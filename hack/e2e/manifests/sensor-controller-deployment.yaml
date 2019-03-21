@@ -1,4 +1,3 @@
-# The sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
