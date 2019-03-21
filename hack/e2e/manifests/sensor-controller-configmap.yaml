@@ -1,0 +1,12 @@
+# The sensor-controller configmap includes configuration information for the sensor-controller
+# To watch sensors created in different namespace than the controller is deployed in, remove the namespace: argo-events.
+# Similarly to watch sensors created in specific namespace, change to namespace: <your_namespace>
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-controller-configmap
+  namespace: "__E2E_ID__"
+data:
+  config: |
+    instanceID: "__E2E_ID__"
+    namespace: ""
