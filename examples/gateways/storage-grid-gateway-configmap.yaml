@@ -4,7 +4,8 @@ metadata:
   name: storage-grid-gateway-configmap
 data:
   foo: |-
-    port: "8080"
-    endpoint: "/"
+    hook:
+      port: "8080"
+      endpoint: "/"
     events:
       - "ObjectCreated:Put"

@@ -148,7 +148,7 @@ message S3Artifact {
 
   optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6 [(gogoproto.customname) = "SecretKey"];
 
-  optional string event = 7 [(gogoproto.casttype) = "github.com/minio/minio-go.NotificationEventType", (gogoproto.customname) = "Event", (gogoproto.nullable) = false];
+  repeated string events = 7 [(gogoproto.customname) = "Events"];
 
   optional S3Filter filter = 8 [(gogoproto.customname) = "Filter"];
 }
