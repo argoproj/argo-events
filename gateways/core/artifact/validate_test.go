@@ -31,7 +31,8 @@ var (
 bucket:
     name: input
 endpoint: minio-service.argo-events:9000
-event: s3:ObjectCreated:Put
+events:
+ - s3:ObjectCreated:Put
 filter:
     prefix: ""
     suffix: ""
@@ -63,7 +64,8 @@ func TestValidateS3EventSource(t *testing.T) {
 s3EventConfig:
     bucket: input
     endpoint: minio-service.argo-events:9000
-    event: s3:ObjectCreated:Put
+    events:
+     - s3:ObjectCreated:Put
     filter:
         prefix: ""
         suffix: ""
