@@ -27,44 +27,47 @@ import (
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRouteConfig()
-		rc.Webhook.Method = http.MethodGet
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		rc := &RouteConfig{
+			Route: gwcommon.GetFakeRoute(),
+		}
+		r := rc.Route
+		r.Webhook.Method = http.MethodGet
+		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
 		writer := &gwcommon.FakeHttpWriter{}
 
 		convey.Convey("Inactive route should return error", func() {
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte("hello"))),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
+		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
 		convey.Convey("Active route with correct method should return success", func() {
 			dataCh := make(chan []byte)
 			go func() {
-				resp := <-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
+				resp := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
 				dataCh <- resp
 			}()
 
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodGet,
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 			data := <-dataCh
 			convey.So(string(data), convey.ShouldEqual, "fake notification")
 		})
 
 		convey.Convey("Active route with incorrect method should return failure", func() {
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodHead,
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 	})

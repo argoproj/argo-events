@@ -18,6 +18,7 @@ package slack
 
 import (
 	"github.com/argoproj/argo-events/gateways/common"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
@@ -33,8 +34,15 @@ type SlackEventSourceExecutor struct {
 	Log       zerolog.Logger
 }
 
-// slackConfig
-type slackConfig struct {
+type RouteConfig struct {
+	route     *gwcommon.Route
+	ses       *slackEventSource
+	token     string
+	clientset kubernetes.Interface
+	namespace string
+}
+
+type slackEventSource struct {
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token"`
 	// Webhook
@@ -42,7 +50,7 @@ type slackConfig struct {
 }
 
 func parseEventSource(es string) (interface{}, error) {
-	var n *slackConfig
+	var n *slackEventSource
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err

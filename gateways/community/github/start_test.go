@@ -23,7 +23,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
@@ -34,10 +33,10 @@ import (
 )
 
 var (
-	ese = &GithubEventSourceExecutor{
-		Clientset: fake.NewSimpleClientset(),
-		Namespace: "fake",
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+	rc = &RouteConfig{
+		route:     gwcommon.GetFakeRoute(),
+		clientset: fake.NewSimpleClientset(),
+		namespace: "fake",
 	}
 
 	secretName     = "githab-access"
@@ -47,10 +46,11 @@ var (
 
 func TestGetCredentials(t *testing.T) {
 	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
-		secret, err := ese.Clientset.CoreV1().Secrets(ese.Namespace).Create(&corev1.Secret{
+
+		secret, err := rc.clientset.CoreV1().Secrets(rc.namespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      secretName,
-				Namespace: ese.Namespace,
+				Namespace: rc.namespace,
 			},
 			Data: map[string][]byte{
 				LabelAccessKey: []byte(accessKey),
@@ -61,7 +61,7 @@ func TestGetCredentials(t *testing.T) {
 
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
-		creds, err := ese.getCredentials(ps.(*githubConfig).APIToken)
+		creds, err := rc.getCredentials(ps.(*githubEventSource).APIToken)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(creds, convey.ShouldNotBeNil)
 		convey.So(creds.secret, convey.ShouldEqual, "YWNjZXNz")
@@ -70,8 +70,8 @@ func TestGetCredentials(t *testing.T) {
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := gwcommon.GetFakeRouteConfig()
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		r := rc.route
+		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
@@ -79,26 +79,26 @@ func TestRouteActiveHandler(t *testing.T) {
 			writer := &gwcommon.FakeHttpWriter{}
 			ps, err := parseEventSource(es)
 			convey.So(err, convey.ShouldBeNil)
-			pbytes, err := yaml.Marshal(ps.(*githubConfig))
+			pbytes, err := yaml.Marshal(ps.(*githubEventSource))
 			convey.So(err, convey.ShouldBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
 			convey.Convey("Active route should return success", func() {
-				helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-				rc.Configs[labelWebhook] = &github.Hook{
+				helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
+				rc.hook = &github.Hook{
 					Config: make(map[string]interface{}),
 				}
 
-				RouteActiveHandler(writer, &http.Request{
+				rc.RouteHandler(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
-				}, rc)
+				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-				rc.Configs[labelGithubConfig] = ps.(*githubConfig)
-				err = ese.PostActivate(rc)
+				rc.ges = ps.(*githubEventSource)
+				err = rc.PostStart()
 				convey.So(err, convey.ShouldNotBeNil)
 			})
 		})

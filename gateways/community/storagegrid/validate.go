@@ -28,7 +28,7 @@ func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Conte
 }
 
 func validateStorageGrid(config interface{}) error {
-	sg := config.(*storageGrid)
+	sg := config.(*storageGridEventSource)
 	if sg == nil {
 		return gwcommon.ErrNilEventSource
 	}

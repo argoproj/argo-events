@@ -18,12 +18,12 @@ package gateways
 
 import (
 	"fmt"
-	"net"
-	"os"
-
 	"github.com/argoproj/argo-events/common"
 	zlog "github.com/rs/zerolog"
 	"google.golang.org/grpc"
+	"net"
+	"os"
+	"runtime/debug"
 )
 
 // StartGateway start a gateway
@@ -50,6 +50,7 @@ func StartGateway(es EventingServer) {
 func Recover(eventSource string) {
 	if r := recover(); r != nil {
 		fmt.Printf("recovered event source %s from error. recover: %v", eventSource, r)
+		debug.PrintStack()
 	}
 }
 

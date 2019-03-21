@@ -50,7 +50,7 @@ secretKey:
 )
 
 func TestSQSEventSourceExecutor_ValidateEventSource(t *testing.T) {
-	convey.Convey("Given a valid sqs event source spec, parse it and make sure no error occurs", t, func() {
+	convey.Convey("Given a valid sqsEventSource event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &SQSEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Name: configKey,
@@ -61,7 +61,7 @@ func TestSQSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 		convey.So(valid.IsValid, convey.ShouldBeTrue)
 	})
 
-	convey.Convey("Given an invalid sqs event source spec, parse it and make sure error occurs", t, func() {
+	convey.Convey("Given an invalid sqsEventSource event source spec, parse it and make sure error occurs", t, func() {
 		ese := &SQSEventSourceExecutor{}
 		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Data: invalidConfig,

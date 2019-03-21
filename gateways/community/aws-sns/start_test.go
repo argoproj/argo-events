@@ -18,22 +18,28 @@ package aws_sns
 
 import (
 	"bytes"
-	"github.com/argoproj/argo-events/common"
+	"io/ioutil"
+	"net/http"
+	"testing"
+
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-	"io/ioutil"
 	"k8s.io/client-go/kubernetes/fake"
-	"net/http"
-	"testing"
 )
 
 func TestAWSSNS(t *testing.T) {
 	convey.Convey("Given an route configuration", t, func() {
-		rc := gwcommon.GetFakeRouteConfig()
-		helper.ActiveEndpoints[rc.Webhook.Endpoint] = &gwcommon.Endpoint{
+		rc := &RouteConfig{
+			Route:     gwcommon.GetFakeRoute(),
+			namespace: "fake",
+			clientset: fake.NewSimpleClientset(),
+		}
+		r := rc.Route
+
+		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 		writer := &gwcommon.FakeHttpWriter{}
@@ -46,19 +52,19 @@ func TestAWSSNS(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		snsSession := snslib.New(awsSession)
-		rc.Configs[labelSNSSession] = snsSession
-		rc.Configs[labelSubscriptionArn] = &subscriptionArn
+		rc.session = snsSession
+		rc.subscriptionArn = &subscriptionArn
 
 		convey.Convey("handle the inactive route", func() {
-			RouteActiveHandler(writer, &http.Request{}, rc)
+			rc.RouteHandler(writer, &http.Request{})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].Active = true
-		rc.Configs[labelSNSConfig] = ps.(*snsConfig)
+		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
+		rc.snses = ps.(*snsEventSource)
 
 		convey.Convey("handle the active route", func() {
 			payload := httpNotification{
@@ -69,37 +75,35 @@ func TestAWSSNS(t *testing.T) {
 
 			payloadBytes, err := yaml.Marshal(payload)
 			convey.So(err, convey.ShouldBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
-			}, rc)
+			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-			convey.So(string(writer.Payload), convey.ShouldEqual, "failed to confirm subscription")
+
+			dataCh := make(chan []byte)
 
 			go func() {
-				<-helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh
+				data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				dataCh <- data
 			}()
 
 			payload.Type = messageTypeNotification
 			payloadBytes, err = yaml.Marshal(payload)
 			convey.So(err, convey.ShouldBeNil)
-			RouteActiveHandler(writer, &http.Request{
+			rc.RouteHandler(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
-			}, rc)
-			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
+			})
+			data := <-dataCh
+			convey.So(data, convey.ShouldNotBeNil)
 		})
 
 		convey.Convey("Run post activate", func() {
-			ese := SNSEventSourceExecutor{
-				Namespace: "fake",
-				Clientset: fake.NewSimpleClientset(),
-				Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
-			}
-			err := ese.PostActivate(rc)
+			err := rc.PostStart()
 			convey.So(err, convey.ShouldNotBeNil)
 		})
 
 		convey.Convey("Run post stop", func() {
-			err = PostStop(rc)
+			err = rc.PostStop()
 			convey.So(err, convey.ShouldNotBeNil)
 		})
 	})

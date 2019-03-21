@@ -30,7 +30,7 @@ func (ese *SlackEventSourceExecutor) ValidateEventSource(ctx context.Context, es
 }
 
 func validateSlack(config interface{}) error {
-	sc := config.(*slackConfig)
+	sc := config.(*slackEventSource)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}

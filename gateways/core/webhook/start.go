@@ -34,25 +34,31 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// routeActiveHandler handles new route
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.Route
+}
+
+// RouteHandler handles new route
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	var response string
 
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).
+	r := rc.Route
+
+	logger := r.Logger.With().Str("event-source", r.EventSource.Name).Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).Logger()
 	logger.Info().Msg("request received")
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
+		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
 		logger.Info().Msg("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
 	}
 
-	if rc.Webhook.Method != request.Method {
-		logger.Warn().Str("expected", rc.Webhook.Method).Str("actual", request.Method).Msg("method mismatch")
-		common.SendErrorResponse(writer, fmt.Sprintf("the method %s is not defined for endpoint %s", rc.Webhook.Method, rc.Webhook.Endpoint))
+	if r.Webhook.Method != request.Method {
+		logger.Warn().Str("expected", r.Webhook.Method).Str("actual", request.Method).Msg("method mismatch")
+		common.SendErrorResponse(writer, fmt.Sprintf("the method %s is not defined for endpoint %s", r.Webhook.Method, r.Webhook.Endpoint))
 		return
 	}
 
@@ -63,10 +69,18 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		return
 	}
 
-	helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- body
+	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	response = "request successfully processed"
 	logger.Info().Msg(response)
 	common.SendSuccessResponse(writer, response)
+}
+
+func (rc *RouteConfig) PostStart() error {
+	return nil
+}
+
+func (rc *RouteConfig) PostStop() error {
+	return nil
 }
 
 // StartEventSource starts a event source
@@ -82,13 +96,12 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 	h := config.(*gwcommon.Webhook)
 	h.Endpoint = gwcommon.FormatWebhookEndpoint(h.Endpoint)
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook:            h,
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       gwcommon.DefaultPostActivate,
-		PostStop:           gwcommon.DefaultPostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+	return gwcommon.ProcessRoute(&RouteConfig{
+		Route: &gwcommon.Route{
+			Logger:      &ese.Log,
+			EventSource: eventSource,
+			StartCh:     make(chan struct{}),
+			Webhook:     h,
+		},
 	}, helper, eventStream)
 }

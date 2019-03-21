@@ -14,7 +14,7 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 The [gateway configmap](../../../examples/gateways/calendar-gateway-configmap.yaml) contains three event source configurations,
 
-The `interval` configuration will basically generate an event after every 55 seconds.
+The `interval` configuration will basically generate an event after every 10 seconds.
 
 The `schedule` configuration will generate an event every 30 minutes past an hour
 

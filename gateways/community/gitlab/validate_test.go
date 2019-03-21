@@ -27,6 +27,7 @@ var (
 	configKey   = "testConfig"
 	configId    = "1234"
 	validConfig = `
+id: 1234
 hook:
  endpoint: "/push"
  port: "12000"

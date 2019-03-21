@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/gateways/common"
-
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
 )
@@ -31,8 +31,13 @@ type StorageGridEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
-// storageGrid contains configuration for storage grid sns
-type storageGrid struct {
+type RouteConfig struct {
+	route *gwcommon.Route
+	sges  *storageGridEventSource
+}
+
+// storageGridEventSource contains configuration for storage grid sns
+type storageGridEventSource struct {
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
 
@@ -98,7 +103,7 @@ type storageGridNotification struct {
 }
 
 func parseEventSource(eventSource string) (interface{}, error) {
-	var s *storageGrid
+	var s *storageGridEventSource
 	err := yaml.Unmarshal([]byte(eventSource), &s)
 	if err != nil {
 		return nil, err

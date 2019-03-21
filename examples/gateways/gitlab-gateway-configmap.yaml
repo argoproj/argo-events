@@ -4,6 +4,7 @@ metadata:
   name: gitlab-gateway-configmap
 data:
   project_1: |-
+    id: 1234
     projectId: "1"
     hook:
      endpoint: "/push"
