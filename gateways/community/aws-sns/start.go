@@ -46,7 +46,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	r := rc.Route
 
 	logger := r.Logger.With().
-		Str("event-source", r.EventSource.Name).
+		Str(common.LabelEventSource, r.EventSource.Name).
 		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).Logger()
@@ -100,7 +100,7 @@ func (rc *RouteConfig) PostStart() error {
 	r := rc.Route
 
 	logger := r.Logger.With().
-		Str("event-source", r.EventSource.Name).
+		Str(common.LabelEventSource, r.EventSource.Name).
 		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
 		Str("topic-arn", rc.snses.TopicArn).
@@ -145,10 +145,10 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 	sc := config.(*snsEventSource)

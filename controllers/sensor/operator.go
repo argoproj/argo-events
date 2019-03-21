@@ -49,7 +49,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
 		updated:    false,
-		log:        common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", s.Name).Str("sensor-namespace", s.Namespace).Logger(),
+		log:        common.GetLoggerContext(common.LoggerConf()).Str(common.LabelSensorName, s.Name).Str(common.LabelNamespace, s.Namespace).Logger(),
 		controller: controller,
 		srctx:      NewSensorResourceContext(s, controller),
 	}
@@ -80,8 +80,15 @@ func (soc *sOperationCtx) operate() error {
 			soc.s = updatedSensor
 
 			labels[common.LabelEventType] = string(eventType)
-			if err := common.GenerateK8sEvent(soc.controller.kubeClientset, "persist update", eventType, "sensor state update", soc.s.Name,
-				soc.s.Namespace, soc.controller.Config.InstanceID, sensor.Kind, labels); err != nil {
+			if err := common.GenerateK8sEvent(soc.controller.kubeClientset,
+				"persist update",
+				eventType,
+				"sensor state update",
+				soc.s.Name,
+				soc.s.Namespace,
+				soc.controller.Config.InstanceID,
+				sensor.Kind,
+				labels); err != nil {
 				soc.log.Error().Err(err).Msg("failed to create K8s event to log sensor state persist operation")
 				return
 			}
@@ -133,7 +140,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 		return err
 	}
 	soc.markAllNodePhases()
-	soc.log.Info().Str("pod-name", pod.Name).Msg("sensor pod is created")
+	soc.log.Info().Str(common.LabelPodName, pod.Name).Msg("sensor pod is created")
 
 	// expose sensor if service is configured
 	if soc.srctx.getServiceTemplateSpec() != nil {
@@ -143,7 +150,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return err
 		}
-		soc.log.Info().Str("svc-name", svc.Name).Msg("sensor service is created")
+		soc.log.Info().Str(common.LabelServiceName, svc.Name).Msg("sensor service is created")
 	}
 
 	// if we get here - we know the signals are running
@@ -155,25 +162,26 @@ func (soc *sOperationCtx) createSensorResources() error {
 func (soc *sOperationCtx) createSensorPod() (*corev1.Pod, error) {
 	pod, err := soc.srctx.newSensorPod()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
+		soc.log.Error().Err(err).Msg("failed to initialize pod for sensor")
 		return nil, err
 	}
 	pod, err = soc.srctx.createSensorPod(pod)
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create pod for sensor")
+		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
 		return nil, err
 	}
 	return pod, nil
 }
+
 func (soc *sOperationCtx) createSensorService() (*corev1.Service, error) {
 	svc, err := soc.srctx.newSensorService()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
+		soc.log.Error().Err(err).Msg("failed to initialize service for sensor")
 		return nil, err
 	}
 	svc, err = soc.srctx.createSensorService(svc)
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
+		soc.log.Error().Err(err).Msg("failed to create service for sensor")
 		return nil, err
 	}
 	return svc, nil
@@ -215,34 +223,34 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	// Check if sensor spec has changed for pod.
 	existingPod, err := soc.srctx.getSensorPod()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get pod for sensor")
+		soc.log.Error().Err(err).Msg("failed to get pod for sensor")
 		return nil, false, err
 	}
 
 	// create a new pod spec
 	newPod, err := soc.srctx.newSensorPod()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize pod for sensor")
+		soc.log.Error().Err(err).Msg("failed to initialize pod for sensor")
 		return nil, false, err
 	}
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
 		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("pod-name", existingPod.Name).Msg("sensor pod spec unchanged")
+			soc.log.Debug().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod spec unchanged")
 			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
-		soc.log.Info().Str("pod-name", existingPod.Name).Msg("sensor pod spec changed")
+		soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod spec changed")
 
 		err := soc.srctx.deleteSensorPod(existingPod)
 		if err != nil {
-			soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to delete pod for sensor")
+			soc.log.Error().Err(err).Msg("failed to delete pod for sensor")
 			return nil, false, err
 		}
 
-		soc.log.Info().Str("pod-name", existingPod.Name).Msg("sensor pod is deleted")
+		soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod is deleted")
 	}
 
 	// Create new pod for updated sensor spec.
@@ -251,7 +259,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
 		return nil, false, err
 	}
-	soc.log.Info().Str("sensor-name", soc.s.Name).Str("pod-name", newPod.Name).Msg("sensor pod is created")
+	soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod is created")
 
 	return createdPod, true, nil
 }
@@ -260,14 +268,14 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	// Check if sensor spec has changed for service.
 	existingSvc, err := soc.srctx.getSensorService()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to get service for sensor")
+		soc.log.Error().Err(err).Msg("failed to get service for sensor")
 		return nil, false, err
 	}
 
 	// create a new service spec
 	newSvc, err := soc.srctx.newSensorService()
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to initialize service for sensor")
+		soc.log.Error().Err(err).Msg("failed to initialize service for sensor")
 		return nil, false, err
 	}
 
@@ -282,12 +290,12 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 
 		// check if service spec remained unchanged
 		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.Debug().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec unchanged")
+			soc.log.Debug().Str(common.LabelServiceName, existingSvc.Name).Msg("sensor service spec unchanged")
 			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
-		soc.log.Info().Str("sensor-name", soc.s.Name).Str("service-name", existingSvc.Name).Msg("sensor service spec changed")
+		soc.log.Info().Str(common.LabelServiceName, existingSvc.Name).Msg("sensor service spec changed")
 
 		if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
 			return nil, false, err
@@ -300,10 +308,10 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	// change createSensorService to take a service spec
 	createdSvc, err := soc.srctx.createSensorService(newSvc)
 	if err != nil {
-		soc.log.Error().Err(err).Str("sensor-name", soc.s.Name).Msg("failed to create service for sensor")
+		soc.log.Error().Err(err).Str(common.LabelServiceName, newSvc.Name).Msg("failed to create service for sensor")
 		return nil, false, err
 	}
-	soc.log.Info().Str("svc-name", newSvc.Name).Msg("sensor service is created")
+	soc.log.Info().Str(common.LabelServiceName, newSvc.Name).Msg("sensor service is created")
 
 	return createdSvc, true, nil
 }

@@ -45,7 +45,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	r := rc.route
 
 	logger := r.Logger.With().
-		Str("event-source", r.EventSource.Name).
+		Str(common.LabelEventSource, r.EventSource.Name).
 		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
 		Str("http-method", request.Method).
@@ -115,7 +115,7 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	logger := ese.Log.With().Str("event-source-name", eventSource.Name).Logger()
+	logger := ese.Log.With().Str(common.LabelEventSource, eventSource.Name).Logger()
 	logger.Info().Msg("operating on event source")
 
 	config, err := parseEventSource(eventSource.Data)

@@ -37,7 +37,7 @@ func (w *WatchableHDFS) GetFileID(fi os.FileInfo) interface{} {
 func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -109,12 +109,12 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 			return
 		}
 	}
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to HDFS notifications")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to watch to HDFS notifications")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ese.Log.Info().Str("event-source", eventSource.Name).Msg("HDFS watcher has stopped")
+				ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("HDFS watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("HDFS watcher stopped")
 				return

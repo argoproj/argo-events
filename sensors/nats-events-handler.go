@@ -66,7 +66,7 @@ func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription success")
 		return
 	}
-	sec.log.Info().Str("event-source", eventSource).Msg("created event for nats subscription success ")
+	sec.log.Info().Str(common.LabelEventSource, eventSource).Msg("created event for nats subscription success ")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource string) {
@@ -81,7 +81,7 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription error")
 		return
 	}
-	sec.log.Warn().Str("event-source", eventSource).Msg("created event for nats subscription failure")
+	sec.log.Warn().Str(common.LabelEventSource, eventSource).Msg("created event for nats subscription failure")
 }
 
 // NatsEventProtocol handles events sent over NATS
@@ -111,7 +111,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
 				// escalate failure
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.Error().Err(err).Str(common.LabelEventSource, dependency.Name).Msg("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -134,7 +134,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			}
 			if _, err := sec.getNatsStreamingSubscription(dependency.Name); err != nil {
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.Error().Err(err).Str("event-source-name", dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.Error().Err(err).Str(common.LabelEventSource, dependency.Name).Msg("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -202,13 +202,13 @@ func (sec *sensorExecutionCtx) getNatsStreamingOption(eventSource string) (snats
 func (sec *sensorExecutionCtx) processNatsMessage(msg []byte, eventSource string) {
 	event, err := sec.parseEvent(msg)
 	if err != nil {
-		sec.log.Error().Err(err).Str("event-source-name", eventSource).Msg("failed to parse message into event")
+		sec.log.Error().Err(err).Str(common.LabelEventSource, eventSource).Msg("failed to parse message into event")
 		return
 	}
 	// validate whether the event is from gateway that this sensor is watching and send event over internal queue if valid
 	if sec.sendEventToInternalQueue(event, nil) {
-		sec.log.Info().Str("event-source-name", eventSource).Msg("event successfully sent over internal queue")
+		sec.log.Info().Str(common.LabelEventSource, eventSource).Msg("event successfully sent over internal queue")
 		return
 	}
-	sec.log.Warn().Str("event-source-name", eventSource).Msg("event is from unknown source")
+	sec.log.Warn().Str(common.LabelEventSource, eventSource).Msg("event is from unknown source")
 }

@@ -50,7 +50,7 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 	return &gwOperationCtx{
 		gw:         gw,
 		updated:    false,
-		log:        common.GetLoggerContext(common.LoggerConf()).Str("name", gw.Name).Str("namespace", gw.Namespace).Logger(),
+		log:        common.GetLoggerContext(common.LoggerConf()).Str(common.LabelGatewayName, gw.Name).Str(common.LabelNamespace, gw.Namespace).Logger(),
 		controller: controller,
 		gwrctx:     NewGatewayResourceContext(gw, controller),
 	}
@@ -76,8 +76,16 @@ func (goc *gwOperationCtx) operate() error {
 			}
 
 			labels[common.LabelEventType] = string(eventType)
-			if err := common.GenerateK8sEvent(goc.controller.kubeClientset, "persist update", eventType, "gateway state update", goc.gw.Name, goc.gw.Namespace,
-				goc.controller.Config.InstanceID, gateway.Kind, labels); err != nil {
+			if err := common.GenerateK8sEvent(goc.controller.kubeClientset,
+				"persist update",
+				eventType,
+				"gateway state update",
+				goc.gw.Name,
+				goc.gw.Namespace,
+				goc.controller.Config.InstanceID,
+				gateway.Kind,
+				labels,
+			); err != nil {
 				goc.log.Error().Err(err).Msg("failed to create K8s event to log gateway state persist operation")
 				return
 			}
@@ -86,7 +94,7 @@ func (goc *gwOperationCtx) operate() error {
 		goc.updated = false
 	}()
 
-	goc.log.Info().Str("phase", string(goc.gw.Status.Phase)).Msg("operating on the gateway")
+	goc.log.Info().Str(common.LabelPhase, string(goc.gw.Status.Phase)).Msg("operating on the gateway")
 
 	// check the state of a gateway and take actions accordingly
 	switch goc.gw.Status.Phase {
@@ -98,7 +106,7 @@ func (goc *gwOperationCtx) operate() error {
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		goc.log.Error().Str("gateway-name", goc.gw.Name).Msg("gateway is in error state. please check escalated K8 event for the error")
+		goc.log.Error().Msg("gateway is in error state. please check escalated K8 event for the error")
 
 		err := goc.updateGatewayResources()
 		if err != nil {
@@ -107,7 +115,7 @@ func (goc *gwOperationCtx) operate() error {
 
 	// Gateway is already running, do nothing
 	case v1alpha1.NodePhaseRunning:
-		goc.log.Info().Str("gateway-name", goc.gw.Name).Msg("gateway is running")
+		goc.log.Info().Msg("gateway is running")
 
 		err := goc.updateGatewayResources()
 		if err != nil {
@@ -115,7 +123,7 @@ func (goc *gwOperationCtx) operate() error {
 		}
 
 	default:
-		goc.log.Panic().Str("gateway-name", goc.gw.Name).Str("phase", string(goc.gw.Status.Phase)).Msg("unknown gateway phase.")
+		goc.log.Panic().Str("phase", string(goc.gw.Status.Phase)).Msg("unknown gateway phase.")
 	}
 	return nil
 }
@@ -123,7 +131,7 @@ func (goc *gwOperationCtx) operate() error {
 func (goc *gwOperationCtx) createGatewayResources() error {
 	err := Validate(goc.gw)
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
+		goc.log.Error().Err(err).Msg("gateway validation failed")
 		err = errors.Wrap(err, "failed to validate gateway")
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
@@ -138,7 +146,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
-	goc.log.Info().Str("pod-name", pod.Name).Msg("gateway pod is created")
+	goc.log.Info().Str(common.LabelPodName, pod.Name).Msg("gateway pod is created")
 
 	// expose gateway if service is configured
 	if goc.gw.Spec.Service != nil {
@@ -151,7 +159,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 		goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
 	}
 
-	goc.log.Info().Str("gateway-name", goc.gw.Name).Msg("marking gateway as active")
+	goc.log.Info().Msg("marking gateway as active")
 	goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 	return nil
 }
@@ -159,12 +167,12 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
 	pod, err := goc.gwrctx.newGatewayPod()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize pod for gateway")
+		goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
 		return nil, err
 	}
 	pod, err = goc.gwrctx.createGatewayPod(pod)
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create pod for gateway")
+		goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 		return nil, err
 	}
 	return pod, nil
@@ -173,12 +181,12 @@ func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
 func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 	svc, err := goc.gwrctx.newGatewayService()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize service for gateway")
+		goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
 		return nil, err
 	}
 	svc, err = goc.gwrctx.createGatewayService(svc)
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create service for gateway")
+		goc.log.Error().Err(err).Msg("failed to create service for gateway")
 		return nil, err
 	}
 	return svc, nil
@@ -187,7 +195,7 @@ func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
 func (goc *gwOperationCtx) updateGatewayResources() error {
 	err := Validate(goc.gw)
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("gateway validation failed")
+		goc.log.Error().Err(err).Msg("gateway validation failed")
 		err = errors.Wrap(err, "failed to validate gateway")
 		if goc.gw.Status.Phase != v1alpha1.NodePhaseError {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
@@ -220,34 +228,34 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 	// Check if gateway spec has changed for pod.
 	existingPod, err := goc.gwrctx.getGatewayPod()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get pod for gateway")
+		goc.log.Error().Err(err).Msg("failed to get pod for gateway")
 		return nil, false, err
 	}
 
 	// create a new pod spec
 	newPod, err := goc.gwrctx.newGatewayPod()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize pod for gateway")
+		goc.log.Error().Err(err).Msg("failed to initialize pod for gateway")
 		return nil, false, err
 	}
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
 		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationGatewayResourceSpecHashName] == newPod.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.Debug().Str("gateway-name", goc.gw.Name).Str("pod-name", existingPod.Name).Msg("gateway pod spec unchanged")
+			goc.log.Debug().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod spec unchanged")
 			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng gateway pod.
-		goc.log.Info().Str("pod-name", existingPod.Name).Msg("gateway pod spec changed")
+		goc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod spec changed")
 
 		err := goc.gwrctx.deleteGatewayPod(existingPod)
 		if err != nil {
-			goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to delete pod for gateway")
+			goc.log.Error().Err(err).Msg("failed to delete pod for gateway")
 			return nil, false, err
 		}
 
-		goc.log.Info().Str("pod-name", existingPod.Name).Msg("gateway pod is deleted")
+		goc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod is deleted")
 	}
 
 	// Create new pod for updated gateway spec.
@@ -256,7 +264,7 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 		goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 		return nil, false, err
 	}
-	goc.log.Info().Str("gateway-name", goc.gw.Name).Str("pod-name", newPod.Name).Msg("gateway pod is created")
+	goc.log.Info().Str(common.LabelPodName, newPod.Name).Msg("gateway pod is created")
 
 	return createdPod, true, nil
 }
@@ -265,14 +273,14 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 	// Check if gateway spec has changed for service.
 	existingSvc, err := goc.gwrctx.getGatewayService()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to get service for gateway")
+		goc.log.Error().Err(err).Msg("failed to get service for gateway")
 		return nil, false, err
 	}
 
 	// create a new service spec
 	newSvc, err := goc.gwrctx.newGatewayService()
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to initialize service for gateway")
+		goc.log.Error().Err(err).Msg("failed to initialize service for gateway")
 		return nil, false, err
 	}
 
@@ -287,12 +295,12 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 
 		// check if service spec remained unchanged
 		if existingSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] == newSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.Debug().Str("gateway-name", goc.gw.Name).Str("service-name", existingSvc.Name).Msg("gateway service spec unchanged")
+			goc.log.Debug().Str(common.LabelServiceName, existingSvc.Name).Msg("gateway service spec unchanged")
 			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
-		goc.log.Info().Str("gateway-name", goc.gw.Name).Str("service-name", existingSvc.Name).Msg("gateway service spec changed")
+		goc.log.Info().Str(common.LabelServiceName, existingSvc.Name).Msg("gateway service spec changed")
 
 		if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
 			return nil, false, err
@@ -305,10 +313,10 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 	// change createGatewayService to take a service spec
 	createdSvc, err := goc.gwrctx.createGatewayService(newSvc)
 	if err != nil {
-		goc.log.Error().Err(err).Str("gateway-name", goc.gw.Name).Msg("failed to create service for gateway")
+		goc.log.Error().Err(err).Msg("failed to create service for gateway")
 		return nil, false, err
 	}
-	goc.log.Info().Str("svc-name", newSvc.Name).Msg("gateway service is created")
+	goc.log.Info().Str(common.LabelServiceName, newSvc.Name).Msg("gateway service is created")
 
 	return createdSvc, true, nil
 }

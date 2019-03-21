@@ -66,8 +66,8 @@ func (rc *RouteConfig) PostStart() error {
 	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:                   &formattedUrl,
-		Token:                 &c.token,
+		URL:   &formattedUrl,
+		Token: &c.token,
 		EnableSSLVerification: &rc.ges.EnableSSLVerification,
 	}
 
@@ -89,7 +89,7 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.hook = hook
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("gitlab hook created")
+	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("gitlab hook created")
 	return nil
 }
 
@@ -97,14 +97,14 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("gitlab hook deleted")
+	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("gitlab hook deleted")
 	return nil
 }
 
 // routeActiveHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	logger := rc.route.Logger.With().
-		Str("event-source", rc.route.EventSource.Name).
+		Str(common.LabelEventSource, rc.route.EventSource.Name).
 		Str("endpoint", rc.route.Webhook.Endpoint).
 		Str("port", rc.route.Webhook.Port).
 		Logger()
@@ -133,10 +133,10 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 	gl := config.(*gitlabEventSource)

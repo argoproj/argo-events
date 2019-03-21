@@ -25,10 +25,10 @@ import (
 
 // StartEventSource starts an event source
 func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -79,7 +79,7 @@ func (ese *SQSEventSourceExecutor) listenEvents(s *sqsEventSource, eventSource *
 				WaitTimeSeconds:     aws.Int64(s.WaitTimeSeconds),
 			})
 			if err != nil {
-				ese.Log.Warn().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to process item from queue, waiting for next timeout")
+				ese.Log.Warn().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to process item from queue, waiting for next timeout")
 				continue
 			}
 

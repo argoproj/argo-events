@@ -71,12 +71,12 @@ func (sec *sensorExecutionCtx) httpEventHandler(w http.ResponseWriter, r *http.R
 	// validate whether the event is from gateway that this sensor is watching and send event over internal queue if valid
 	if sec.sendEventToInternalQueue(event, w) {
 		response = "message successfully sent over internal queue"
-		sec.log.Info().Str("event-source-name", event.Context.Source.Host).Msg(response)
+		sec.log.Info().Str(common.LabelEventSource, event.Context.Source.Host).Msg(response)
 		common.SendSuccessResponse(w, response)
 		return
 	}
 
 	response = "event is from unknown source"
-	sec.log.Warn().Str("event-source-name", event.Context.Source.Host).Msg(response)
+	sec.log.Warn().Str(common.LabelEventSource, event.Context.Source.Host).Msg(response)
 	common.SendErrorResponse(w, response)
 }

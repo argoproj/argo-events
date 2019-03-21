@@ -42,8 +42,8 @@ const (
 
 // SENSOR CONTROLLER CONSTANTS
 const (
-	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor-controller
-	DefaultSensorControllerDeploymentName = "sensor-controller"
+	// LabelSensorControllerName is the default deployment name of the sensor-controller
+	LabelSensorControllerName = "sensor-controller"
 
 	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
 	// Content encoding is expected to be YAML.
@@ -83,7 +83,7 @@ const (
 	LabelOperation = "operation"
 
 	// LabelEventSource is label for event name
-	LabelEventSource = "event-name"
+	LabelEventSource = "event-source"
 
 	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
@@ -91,8 +91,8 @@ const (
 
 // GATEWAY CONSTANTS
 const (
-	// DefaultGatewayControllerDeploymentName is the default deployment name of the gateway-controller-controller
-	DefaultGatewayControllerDeploymentName = "gateway-controller"
+	// LabelGatewayControllerName is the default deployment name of the gateway-controller-controller
+	LabelGatewayControllerName = "gateway-controller"
 
 	// EnvVarGatewayControllerConfigMap contains name of the configmap to retrieve gateway-controller configuration from
 	EnvVarGatewayControllerConfigMap = "GATEWAY_CONTROLLER_CONFIG_MAP"
@@ -151,4 +151,39 @@ const (
 	// CloudEventsVersion is the version of the CloudEvents spec targeted+
 	// by this library.
 	CloudEventsVersion = "0.1"
+)
+
+// Logger constants
+const (
+	// LabelNamespace is the label for the namespace
+	LabelNamespace = "namespace"
+
+	// LabelPhase is the label for the phase
+	LabelPhase = "phase"
+
+	// LabelInstanceId is the label for the instance id
+	LabelInstanceId = "instance-id"
+
+	// LabelPodName is the label for the pod name
+	LabelPodName = "pod-name"
+
+	// 	LabelServiceName is the label for the service name
+	LabelServiceName = "svc-name"
+
+	// LabelEndpoint is the label for the endpoint
+	LabelEndpoint = "endpoint"
+
+	// LabelPort is the label for the port
+	LabelPort = "port"
+
+	// LabelURL is the label for the url
+	LabelURL = "url"
+
+	LabelNodeName = "node-name"
+
+	LabelNodeType = "node-type"
+
+	LabelHttpMethod = "http-method"
+
+	LabelClientId = "client-id"
 )

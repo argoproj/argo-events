@@ -18,6 +18,7 @@ package kafka
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"strconv"
 
 	"github.com/Shopify/sarama"
@@ -35,10 +36,10 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // StartEventSource starts an event source
 func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -62,7 +63,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Str("url", k.URL).Msg("failed to connect")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, k.URL).Msg("failed to connect")
 		errorCh <- err
 		return
 	}
@@ -90,7 +91,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -103,7 +104,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		case <-doneCh:
 			err = partitionConsumer.Close()
 			if err != nil {
-				ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to close consumer")
+				ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to close consumer")
 			}
 			return
 		}

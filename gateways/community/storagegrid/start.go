@@ -91,10 +91,10 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 	sges := config.(*storageGridEventSource)
@@ -121,7 +121,7 @@ func (rc *RouteConfig) PostStop() error {
 // RouteHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	logger := rc.route.Logger.With().
-		Str("event-source-name", rc.route.EventSource.Name).
+		Str(common.LabelEventSource, rc.route.EventSource.Name).
 		Str("endpoint", rc.route.Webhook.Endpoint).
 		Str("port", rc.route.Webhook.Port).
 		Logger()
@@ -132,7 +132,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	logger.Info().Str("event-source-name", rc.route.EventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Str("method", http.MethodHead).Msg("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")

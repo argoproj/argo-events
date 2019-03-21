@@ -28,10 +28,10 @@ import (
 func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 	sc := config.(*pubSubEventSource)
@@ -49,7 +49,7 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 
 func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// Create a new topic with the given name.
-	logger := ese.Log.With().Str("event-source", eventSource.Name).Str("topic", sc.Topic).Logger()
+	logger := ese.Log.With().Str(common.LabelEventSource, eventSource.Name).Str("topic", sc.Topic).Logger()
 
 	client, err := pubsub.NewClient(ctx, sc.ProjectID, option.WithCredentialsFile(sc.CredentialsFile))
 	if err != nil {

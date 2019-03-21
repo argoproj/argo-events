@@ -17,16 +17,17 @@ limitations under the License.
 package mqtt
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 )
 
 // StartEventSource starts an event source
 func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -54,14 +55,14 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Err(err).Str("url", m.URL).Str("client-id", m.ClientId).Msg("failed to connect")
+		ese.Log.Error().Err(err).Str(common.LabelURL, m.URL).Str(common.LabelClientId, m.ClientId).Msg("failed to connect")
 		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("subscribing to topic")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("subscribing to topic")
 	if token := m.client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		ese.Log.Error().Err(token.Error()).Str("url", m.URL).Str("client-id", m.ClientId).Msg("failed to subscribe")
+		ese.Log.Error().Err(token.Error()).Str(common.LabelURL, m.URL).Str(common.LabelClientId, m.ClientId).Msg("failed to subscribe")
 		errorCh <- token.Error()
 		return
 	}
@@ -69,6 +70,6 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	<-doneCh
 	token := m.client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
-		ese.Log.Error().Err(token.Error()).Str("event-source-name", eventSource.Name).Msg("failed to unsubscribe client")
+		ese.Log.Error().Err(token.Error()).Str(common.LabelEventSource, eventSource.Name).Msg("failed to unsubscribe client")
 	}
 }

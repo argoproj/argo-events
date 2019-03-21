@@ -108,7 +108,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
-		gc.Log.Info().Str("event-source-name", status.Name).Msg("event source is removed")
+		gc.Log.Info().Str(common.LabelEventSource, status.Name).Msg("event source is removed")
 		gc.updated = true
 	}
 
@@ -133,7 +133,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 		// generate a K8s event for persist event source state change
 		if err := common.GenerateK8sEvent(gc.Clientset, status.Message, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
-			gc.Log.Error().Err(err).Str("event-source-name", status.Name).Msg("failed to create K8s event to log event source state change")
+			gc.Log.Error().Err(err).Str(common.LabelEventSource, status.Name).Msg("failed to create K8s event to log event source state change")
 		}
 	}
 	gc.updated = false

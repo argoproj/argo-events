@@ -139,7 +139,7 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.hook = hook
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("github hook created")
+	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("github hook created")
 	return nil
 }
 
@@ -150,7 +150,7 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.ges.Owner, rc.ges.Repository, *rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str("event-source-name", rc.route.EventSource.Name).Msg("github hook deleted")
+	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("github hook deleted")
 	return nil
 }
 
@@ -158,10 +158,10 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 	gc := config.(*githubEventSource)
@@ -203,7 +203,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	r := rc.route
 
 	logger := r.Logger.With().
-		Str("event-source", r.EventSource.Name).
+		Str(common.LabelEventSource, r.EventSource.Name).
 		Str("endpoint", r.Webhook.Endpoint).
 		Str("port", r.Webhook.Port).
 		Logger()

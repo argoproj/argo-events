@@ -22,6 +22,11 @@ import (
 	"fmt"
 	"time"
 
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	ccommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -32,12 +37,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	ccommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
 
 const (
@@ -86,7 +85,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
+		log:              common.GetLoggerContext(common.LoggerConf()).Str(common.LabelNamespace, namespace).Logger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(rateLimiter),
@@ -103,7 +102,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.Warn().Str("gateway-controller", key.(string)).Err(err).Msg("failed to get gateway-controller '%s' from informer index")
+		c.log.Warn().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("failed to get gateway '%s' from informer index")
 		return true
 	}
 
@@ -114,7 +113,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	gateway, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.log.Warn().Str("gateway-controller", key.(string)).Err(err).Msg("key in index is not a gateway-controller")
+		c.log.Warn().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("key in index is not a gateway")
 		return true
 	}
 
@@ -126,8 +125,16 @@ func (c *GatewayController) processNextItem() bool {
 			common.LabelGatewayName: gateway.Name,
 			common.LabelEventType:   string(common.EscalationEventType),
 		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name), common.StateChangeEventType,
-			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
+		if err := common.GenerateK8sEvent(c.kubeClientset,
+			fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name),
+			common.StateChangeEventType,
+			"controller operation failed",
+			gateway.Name,
+			gateway.Namespace,
+			c.Config.InstanceID,
+			gateway.Kind,
+			labels,
+		); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}
 	}
@@ -135,7 +142,7 @@ func (c *GatewayController) processNextItem() bool {
 	err = c.handleErr(err, key)
 	// create k8 event to escalate the error
 	if err != nil {
-		ctx.log.Error().Interface("error", err).Msg("gateway controller failed to handle error")
+		ctx.log.Error().Err(err).Msg("gateway controller failed to handle error")
 	}
 	return true
 }
@@ -154,7 +161,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.log.Error().Str("gateway-controller", key.(string)).Err(err).Msg("error syncing gateway-controller")
+		c.log.Error().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("error syncing gateway")
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -166,7 +173,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 // Run executes the gateway-controller
 func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
-	c.log.Info().Str("version", base.GetVersion().Version).Str("instance-id", c.Config.InstanceID).Msg("starting gateway-controller")
+	c.log.Info().Str(common.LabelInstanceId, c.Config.InstanceID).Str("version", base.GetVersion().Version).Msg("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
 		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller config map")

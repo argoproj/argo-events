@@ -18,6 +18,7 @@ package artifact
 
 import (
 	"encoding/json"
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -27,10 +28,10 @@ import (
 
 // StartEventSource activates an event source and streams back events
 func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -47,9 +48,9 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("event-source", eventSource).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Interface("event-source", eventSource).Msg("retrieving access and secret key")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("retrieving access and secret key")
 	// retrieve access key id and secret access key
 	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.AccessKey.Key)
 	if err != nil {
@@ -68,7 +69,7 @@ func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSou
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to listen to bucket notifications")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to listen to bucket notifications")
 	for notification := range minioClient.ListenBucketNotification(a.Bucket.Name, a.Filter.Prefix, a.Filter.Suffix, a.Events, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err

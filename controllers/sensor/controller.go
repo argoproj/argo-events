@@ -20,7 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"github.com/rs/zerolog"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,6 +65,8 @@ type SensorController struct {
 	Namespace string
 	// Config is the sensor-controller's configuration
 	Config SensorControllerConfig
+	// log is the logger for a gateway
+	log zerolog.Logger
 
 	// kubernetes config and apis
 	kubeConfig      *rest.Config
@@ -88,6 +90,7 @@ func NewSensorController(rest *rest.Config, configMap, namespace string) *Sensor
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: clientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(rateLimiter),
+		log:             common.GetLoggerContext(common.LoggerConf()).Str(common.LabelNamespace, namespace).Logger(),
 	}
 }
 
@@ -101,7 +104,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		fmt.Printf("failed to get sensor '%s' from informer index: %+v", key, err)
+		c.log.Warn().Str(common.LabelSensorName, key.(string)).Err(err).Msg("failed to get sensor from informer index")
 		return true
 	}
 
@@ -112,7 +115,7 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		fmt.Printf("key '%s' in index is not a sensor", key)
+		c.log.Warn().Str(common.LabelSensorName, key.(string)).Err(err).Msg("key in index is not a sensor")
 		return true
 	}
 
@@ -125,8 +128,16 @@ func (c *SensorController) processNextItem() bool {
 			common.LabelEventType:  string(common.EscalationEventType),
 			common.LabelOperation:  "controller_operation",
 		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("failed to operate on sensor %s", sensor.Name), common.EscalationEventType,
-			"sensor operation failed", sensor.Name, sensor.Namespace, c.Config.InstanceID, sensor.Kind, labels); err != nil {
+		if err := common.GenerateK8sEvent(c.kubeClientset,
+			fmt.Sprintf("failed to operate on sensor %s", sensor.Name),
+			common.EscalationEventType,
+			"sensor operation failed",
+			sensor.Name,
+			sensor.Namespace,
+			c.Config.InstanceID,
+			sensor.Kind,
+			labels,
+		); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate sensor operation failure")
 		}
 	}
@@ -163,10 +174,10 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 
-	fmt.Printf("sensor-controller (version: %s) (instance: %s) starting", base.GetVersion(), c.Config.InstanceID)
+	c.log.Info().Str(common.LabelInstanceId, c.Config.InstanceID).Str("version", base.GetVersion().Version).Msg("starting sensor controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		fmt.Printf("failed to register watch for sensor-controller config map: %v", err)
+		c.log.Error().Err(err).Msg("failed to register watch for sensor controller config map")
 		return
 	}
 
@@ -174,7 +185,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		log.Panicf("timed out waiting for the caches to sync")
+		c.log.Panic().Msg("timed out waiting for the caches to sync for sensors")
 		return
 	}
 
@@ -193,7 +204,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.podInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
-		log.Panic("timed out waiting for the caches to sync for sensor pods")
+		c.log.Panic().Msg("timed out waiting for the caches to sync for sensor pods")
 		return
 	}
 
@@ -201,7 +212,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.svcInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
-		log.Panic("timed out waiting for the caches to sync for sensor services")
+		c.log.Panic().Msg("timed out waiting for the caches to sync for sensor services")
 		return
 	}
 

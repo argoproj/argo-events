@@ -18,6 +18,7 @@ package amqp
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/argoproj/argo-events/gateways"
 	amqplib "github.com/streadway/amqp"
@@ -28,7 +29,7 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	ese.Log.Info().Str("event-stream-name", eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -91,7 +92,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-delivery:

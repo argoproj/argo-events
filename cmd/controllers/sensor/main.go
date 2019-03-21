@@ -35,7 +35,7 @@ func main() {
 	// sensor-controller configuration
 	configMap, ok := os.LookupEnv(common.EnvVarSensorControllerConfigMap)
 	if !ok {
-		configMap = common.DefaultConfigMapName(common.DefaultSensorControllerDeploymentName)
+		configMap = common.DefaultConfigMapName(common.LabelSensorControllerName)
 	}
 
 	namespace, ok := os.LookupEnv(common.SensorNamespace)

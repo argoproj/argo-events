@@ -17,16 +17,17 @@ limitations under the License.
 package nats
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	natslib "github.com/nats-io/go-nats"
 )
 
 // StartEventSource starts an event source
 func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
 		return err
 	}
 
@@ -49,17 +50,17 @@ func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gat
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Str("event-source-name", eventSource.Name).Str("url", n.URL).Err(err).Msg("connection failed")
+		ese.Log.Error().Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, n.URL).Err(err).Msg("connection failed")
 		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("subscribing to messages")
+	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("subscribing to messages")
 	_, err := n.conn.Subscribe(n.Subject, func(msg *natslib.Msg) {
 		dataCh <- msg.Data
 	})
 	if err != nil {
-		ese.Log.Error().Str("event-source-name", eventSource.Name).Str("url", n.URL).Str("subject", n.Subject).Err(err).Msg("failed to subscribe")
+		ese.Log.Error().Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, n.URL).Str("subject", n.Subject).Err(err).Msg("failed to subscribe")
 		errorCh <- err
 		return
 	}

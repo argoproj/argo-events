@@ -86,7 +86,7 @@ func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controlle
 			return oldsensor, err
 		}
 	}
-	log.Info().Str("phase", string(sensor.Status.Phase)).Msg("sensor state updated successfully")
+	log.Info().Str(common.LabelPodName, string(sensor.Status.Phase)).Msg("sensor state updated successfully")
 	return sensor, nil
 }
 
@@ -110,7 +110,7 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *zerolog.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
-		log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Str("phase", string(node.Phase))
+		log.Info().Str(common.LabelNodeType, string(node.Type)).Str(common.LabelNodeName, node.Name).Str(common.LabelPhase, string(node.Phase))
 		node.Phase = phase
 	}
 
@@ -124,7 +124,7 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 
 	if node.Phase == v1alpha1.NodePhaseComplete {
 		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
-		log.Info().Str("type", string(node.Type)).Str("node-name", node.Name).Msg("completed")
+		log.Info().Str(common.LabelNodeType, string(node.Type)).Str(common.LabelNodeName, node.Name).Msg("completed")
 	}
 
 	sensor.Status.Nodes[node.ID] = *node
