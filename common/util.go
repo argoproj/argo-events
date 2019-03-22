@@ -125,7 +125,7 @@ func Hasher(value string) string {
 }
 
 // GetObjectHash returns hash of a given object
-func GetObjectHash(obj metav1.Object) (string, error) {
+func GetObjectHash(obj interface{}) (string, error) {
 	b, err := json.Marshal(obj)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal resource")

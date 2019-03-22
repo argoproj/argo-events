@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"github.com/ghodss/yaml"
 	"io"
 	"reflect"
 	"time"
@@ -37,11 +38,17 @@ import (
 // Creating a hash of event source makes it easy to check equality of two event sources.
 func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) (map[string]*EventSourceContext, error) {
 	esElem := reflect.ValueOf(es).Elem()
+	esValue := esElem.FieldByName(string(es.Spec.Type))
 
 	configs := make(map[string]*EventSourceContext)
-	for configKey, configValue := range cm.Data {
-		hashKey := common.Hasher(configKey + configValue)
-		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source")
+
+	for _, configKey := range esValue.MapKeys() {
+		configValue := esValue.MapIndex(configKey).Interface()
+		hashKey, err := common.GetObjectHash(configValue)
+		if err != nil {
+			return nil, err
+		}
+		gc.Log.Info().Str("config-key", configKey.String()).Str("hash", string(hashKey)).Msg("event source")
 
 		// create a connection to gateway server
 		ctx, cancel := context.WithCancel(context.Background())
@@ -60,7 +67,7 @@ func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) 
 		configs[hashKey] = &EventSourceContext{
 			Data: &EventSourceData{
 				ID:     hashKey,
-				Src:    configKey,
+				Src:    configKey.String(),
 				Config: configValue,
 			},
 			Cancel: cancel,
@@ -141,9 +148,15 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				return
 			}
 
+			data, err := yaml.Marshal(eventSource.Data.Config)
+			if err != nil {
+				// log the error and return
+				return
+			}
+
 			// validate event source
 			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
-				Data: eventSource.Data.Config,
+				Data: data,
 				Name: eventSource.Data.Src,
 			}); !valid.IsValid {
 				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Str("validation-failure", valid.Reason).Msg("event source is not valid")
@@ -172,7 +185,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			// listen to events from gateway server
 			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, &EventSource{
 				Name: eventSource.Data.Src,
-				Data: eventSource.Data.Config,
+				Data: data,
 			})
 			if err != nil {
 				gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("error occurred while starting event source")

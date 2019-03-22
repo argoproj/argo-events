@@ -25,7 +25,7 @@ message EventSource {
     // The event source name.
     string name = 2;
     // The event source configuration value.
-    string data = 3;
+    bytes data = 3;
 }
 
 /**

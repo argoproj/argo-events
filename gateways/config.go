@@ -95,7 +95,7 @@ type EventSourceData struct {
 	// Src contains name of the event source
 	Src string `json:"src"`
 	// Config contains the event source
-	Config string `json:"config"`
+	Config interface{} `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.
