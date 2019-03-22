@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,29 +30,29 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// WatchGatewayEventSources watches change in configuration for the gateway
-func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
-	source := gc.newConfigMapWatch(gc.configName)
+// WatchEventSources watches change in event sources for the gateway
+func (gc *GatewayConfig) WatchEventSources(ctx context.Context) (cache.Controller, error) {
+	source := gc.newEventSourceWatch(gc.eventSourceResourceName)
 	_, controller := cache.NewInformer(
 		source,
 		&corev1.ConfigMap{},
 		0,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				if newCm, ok := obj.(*corev1.ConfigMap); ok {
-					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
-					err := gc.manageEventSources(newCm)
+				if es, ok := obj.(*esv1alpha1.EventSource); ok {
+					gc.Log.Info().Str("event-source-resource", gc.eventSourceResourceName).Msg("detected event source addition")
+					err := gc.manageEventSources(es)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("add config failed")
+						gc.Log.Error().Err(err).Msg("add event source failed")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
-				if cm, ok := new.(*corev1.ConfigMap); ok {
-					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
-					err := gc.manageEventSources(cm)
+				if es, ok := new.(*esv1alpha1.EventSource); ok {
+					gc.Log.Info().Msg("detected event source update")
+					err := gc.manageEventSources(es)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update config failed")
+						gc.Log.Error().Err(err).Msg("update event source failed")
 					}
 				}
 			},
@@ -61,10 +62,10 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 	return controller, nil
 }
 
-// newConfigMapWatch creates a new configmap watcher
-func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
-	x := gc.Clientset.CoreV1().RESTClient()
-	resource := "configmaps"
+// newEventSourceWatch creates a new event source watcher
+func (gc *GatewayConfig) newEventSourceWatch(name string) *cache.ListWatch {
+	x := gc.escs.ArgoprojV1alpha1().RESTClient()
+	resource := "eventsources"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
@@ -88,7 +89,6 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 }
 
 // WatchGateway watches for changes in the gateway resource
-// This will act as replacement for old gateway-transformer-configmap. Changes to watchers, event version and event type will be reflected.
 func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, error) {
 	source := gc.newGatewayWatch(gc.Name)
 	_, controller := cache.NewInformer(
@@ -98,7 +98,7 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
-					gc.Log.Info().Msg("detected gateway update. updating gateway watchers")
+					gc.Log.Info().Msg("detected gateway update")
 					gc.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseResourceUpdate,
 						Gw:      g,

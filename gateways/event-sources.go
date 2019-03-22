@@ -20,21 +20,24 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"reflect"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 
 	"github.com/argoproj/argo-events/common"
+	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
-	corev1 "k8s.io/api/core/v1"
 )
 
 // createInternalEventSources creates an internal representation of event source declared in the gateway configmap.
 // returned event sources are map of hash of event source and event source itself.
 // Creating a hash of event source makes it easy to check equality of two event sources.
-func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[string]*EventSourceContext, error) {
+func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) (map[string]*EventSourceContext, error) {
+	esElem := reflect.ValueOf(es).Elem()
+
 	configs := make(map[string]*EventSourceContext)
 	for configKey, configValue := range cm.Data {
 		hashKey := common.Hasher(configKey + configValue)
@@ -246,8 +249,8 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 }
 
 // manageEventSources syncs registered event sources and updated gateway configmap
-func (gc *GatewayConfig) manageEventSources(cm *corev1.ConfigMap) error {
-	eventSources, err := gc.createInternalEventSources(cm)
+func (gc *GatewayConfig) manageEventSources(es *esv1alpha1.EventSource) error {
+	eventSources, err := gc.createInternalEventSources(es)
 	if err != nil {
 		return err
 	}

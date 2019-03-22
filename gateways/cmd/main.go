@@ -65,7 +65,7 @@ func main() {
 		panic(err)
 	}
 	// watch for event source updates
-	if _, err := gc.WatchGatewayEventSources(context.Background()); err != nil {
+	if _, err := gc.WatchEventSources(context.Background()); err != nil {
 		panic(err)
 	}
 	select {}

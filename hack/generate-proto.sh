@@ -25,6 +25,7 @@ PACKAGES=(
     github.com/argoproj/argo-events/pkg/apis/common
     github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1
     github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1
+    github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1
 )
 APIMACHINERY_PKGS=(
     +k8s.io/apimachinery/pkg/util/intstr

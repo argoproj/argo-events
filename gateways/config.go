@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	esclientset "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
@@ -51,14 +52,16 @@ type GatewayConfig struct {
 	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
 	gwcs gwclientset.Interface
+	// escs is the eventsource clientset
+	escs esclientset.Interface
 	// updated indicates whether gateway resource is updated
 	updated bool
 	// serverPort is gateway server port to listen events from
 	serverPort string
 	// registeredConfigs stores information about current event sources that are running in the gateway
 	registeredConfigs map[string]*EventSourceContext
-	// configName is name of configmap that contains run event source/s for the gateway
-	configName string
+	// eventSourceResourceName is name of event source custom resource that contains event source/s for the gateway
+	eventSourceResourceName string
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
 	// StatusCh is used to communicate the status of an event source
@@ -139,14 +142,15 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	gc := &GatewayConfig{
-		Log:                  common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
-		Clientset:            clientset,
-		Namespace:            namespace,
-		Name:                 name,
-		KubeConfig:           restConfig,
-		registeredConfigs:    make(map[string]*EventSourceContext),
-		configName:           configName,
+		Log:                     common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
+		Clientset:               clientset,
+		Namespace:               namespace,
+		Name:                    name,
+		KubeConfig:              restConfig,
+		registeredConfigs:       make(map[string]*EventSourceContext),
+		eventSourceResourceName: configName,
 		gwcs:                 gwcs,
+		escs:                 esclientset.NewForConfigOrDie(restConfig),
 		gw:                   gw,
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,
