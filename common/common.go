@@ -186,4 +186,6 @@ const (
 	LabelHttpMethod = "http-method"
 
 	LabelClientId = "client-id"
+
+	LabelVersion = "version"
 )

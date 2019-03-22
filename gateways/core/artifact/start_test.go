@@ -32,7 +32,7 @@ func TestListeEvents(t *testing.T) {
 	convey.Convey("Given an event source, listen to events", t, func() {
 		ese := &S3EventSourceExecutor{
 			Clientset: fake.NewSimpleClientset(),
-			Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+			Log:       common.NewArgoEventsLogger(),
 			Namespace: "fake",
 		}
 		secret, err := ese.Clientset.CoreV1().Secrets(ese.Namespace).Create(&corev1.Secret{

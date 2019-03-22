@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/rs/zerolog"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,7 +65,7 @@ type SensorController struct {
 	// Config is the sensor-controller's configuration
 	Config SensorControllerConfig
 	// log is the logger for a gateway
-	log zerolog.Logger
+	log *common.ArgoEventsLogger
 
 	// kubernetes config and apis
 	kubeConfig      *rest.Config
@@ -90,7 +89,7 @@ func NewSensorController(rest *rest.Config, configMap, namespace string) *Sensor
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: clientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(rateLimiter),
-		log:             common.GetLoggerContext(common.LoggerConf()).Str(common.LabelNamespace, namespace).Logger(),
+		log:             common.NewArgoEventsLogger().WithNamespace(namespace),
 	}
 }
 
@@ -104,7 +103,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.Warn().Str(common.LabelSensorName, key.(string)).Err(err).Msg("failed to get sensor from informer index")
+		c.log.WithSensorName(key.(string)).Warn().Err(err).Msg("failed to get sensor from informer index")
 		return true
 	}
 
@@ -115,7 +114,7 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		c.log.Warn().Str(common.LabelSensorName, key.(string)).Err(err).Msg("key in index is not a sensor")
+		c.log.WithSensorName(key.(string)).Warn().Err(err).Msg("key in index is not a sensor")
 		return true
 	}
 
@@ -123,11 +122,6 @@ func (c *SensorController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		labels := map[string]string{
-			common.LabelSensorName: sensor.Name,
-			common.LabelEventType:  string(common.EscalationEventType),
-			common.LabelOperation:  "controller_operation",
-		}
 		if err := common.GenerateK8sEvent(c.kubeClientset,
 			fmt.Sprintf("failed to operate on sensor %s", sensor.Name),
 			common.EscalationEventType,
@@ -136,7 +130,11 @@ func (c *SensorController) processNextItem() bool {
 			sensor.Namespace,
 			c.Config.InstanceID,
 			sensor.Kind,
-			labels,
+			map[string]string{
+				common.LabelSensorName: sensor.Name,
+				common.LabelEventType:  string(common.EscalationEventType),
+				common.LabelOperation:  "controller_operation",
+			},
 		); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate sensor operation failure")
 		}
@@ -174,7 +172,7 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 
-	c.log.Info().Str(common.LabelInstanceId, c.Config.InstanceID).Str("version", base.GetVersion().Version).Msg("starting sensor controller")
+	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info().Msg("starting sensor controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
 		c.log.Error().Err(err).Msg("failed to register watch for sensor controller config map")

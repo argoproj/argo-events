@@ -24,7 +24,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -37,7 +36,7 @@ type sOperationCtx struct {
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
 	// log is the logrus logging context to correlate logs with a sensor
-	log zerolog.Logger
+	log *common.ArgoEventsLogger
 	// reference to the sensor-controller
 	controller *SensorController
 	// srctx is the context to handle child resource
@@ -49,7 +48,7 @@ func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sO
 	return &sOperationCtx{
 		s:          s.DeepCopy(),
 		updated:    false,
-		log:        common.GetLoggerContext(common.LoggerConf()).Str(common.LabelSensorName, s.Name).Str(common.LabelNamespace, s.Namespace).Logger(),
+		log:        common.NewArgoEventsLogger().WithSensorName(s.Name).WithNamespace(s.Namespace),
 		controller: controller,
 		srctx:      NewSensorResourceContext(s, controller),
 	}
@@ -68,7 +67,7 @@ func (soc *sOperationCtx) operate() error {
 			}
 			eventType := common.StateChangeEventType
 
-			updatedSensor, err := PersistUpdates(soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, &soc.log)
+			updatedSensor, err := PersistUpdates(soc.controller.sensorClientset, soc.s, soc.controller.Config.InstanceID, soc.log)
 			if err != nil {
 				soc.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
 
@@ -237,12 +236,12 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 	// check if pod spec remained unchanged
 	if existingPod != nil {
 		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.Debug().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod spec unchanged")
+			soc.log.WithPodName(existingPod.Name).Debug().Msg("sensor pod spec unchanged")
 			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
-		soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod spec changed")
+		soc.log.WithPodName(existingPod.Name).Info().Msg("sensor pod spec changed")
 
 		err := soc.srctx.deleteSensorPod(existingPod)
 		if err != nil {
@@ -250,7 +249,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 			return nil, false, err
 		}
 
-		soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod is deleted")
+		soc.log.WithPodName(existingPod.Name).Info().Msg("sensor pod is deleted")
 	}
 
 	// Create new pod for updated sensor spec.
@@ -259,7 +258,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 		soc.log.Error().Err(err).Msg("failed to create pod for sensor")
 		return nil, false, err
 	}
-	soc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("sensor pod is created")
+	soc.log.WithPodName(existingPod.Name).Info().Msg("sensor pod is created")
 
 	return createdPod, true, nil
 }
@@ -290,12 +289,12 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 
 		// check if service spec remained unchanged
 		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.Debug().Str(common.LabelServiceName, existingSvc.Name).Msg("sensor service spec unchanged")
+			soc.log.WithServiceName(existingSvc.Name).Debug().Msg("sensor service spec unchanged")
 			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
-		soc.log.Info().Str(common.LabelServiceName, existingSvc.Name).Msg("sensor service spec changed")
+		soc.log.WithServiceName(existingSvc.Name).Info().Msg("sensor service spec changed")
 
 		if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
 			return nil, false, err
@@ -308,10 +307,10 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	// change createSensorService to take a service spec
 	createdSvc, err := soc.srctx.createSensorService(newSvc)
 	if err != nil {
-		soc.log.Error().Err(err).Str(common.LabelServiceName, newSvc.Name).Msg("failed to create service for sensor")
+		soc.log.WithServiceName(newSvc.Name).Error().Err(err).Msg("failed to create service for sensor")
 		return nil, false, err
 	}
-	soc.log.Info().Str(common.LabelServiceName, newSvc.Name).Msg("sensor service is created")
+	soc.log.WithServiceName(newSvc.Name).Info().Msg("sensor service is created")
 
 	return createdSvc, true, nil
 }
@@ -358,32 +357,32 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 func (soc *sOperationCtx) initializeAllNodes() {
 	// Initialize all event dependency nodes
 	for _, dependency := range soc.s.Spec.Dependencies {
-		InitializeNode(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, &soc.log)
+		InitializeNode(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, soc.log)
 	}
 
 	// Initialize all dependency groups
 	if soc.s.Spec.DependencyGroups != nil {
 		for _, group := range soc.s.Spec.DependencyGroups {
-			InitializeNode(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, &soc.log)
+			InitializeNode(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, soc.log)
 		}
 	}
 
 	// Initialize all trigger nodes
 	for _, trigger := range soc.s.Spec.Triggers {
-		InitializeNode(soc.s, trigger.Template.Name, v1alpha1.NodeTypeTrigger, &soc.log)
+		InitializeNode(soc.s, trigger.Template.Name, v1alpha1.NodeTypeTrigger, soc.log)
 	}
 }
 
 func (soc *sOperationCtx) markAllNodePhases() {
 	// Mark all event dependency nodes as active
 	for _, dependency := range soc.s.Spec.Dependencies {
-		MarkNodePhase(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+		MarkNodePhase(soc.s, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, soc.log, "node is active")
 	}
 
 	// Mark all dependency groups as active
 	if soc.s.Spec.DependencyGroups != nil {
 		for _, group := range soc.s.Spec.DependencyGroups {
-			MarkNodePhase(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &soc.log, "node is active")
+			MarkNodePhase(soc.s, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, soc.log, "node is active")
 		}
 	}
 }

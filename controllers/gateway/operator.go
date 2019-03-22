@@ -24,7 +24,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	zlog "github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -37,7 +36,7 @@ type gwOperationCtx struct {
 	// updated indicates whether the gateway-controller object was updated and needs to be persisted back to k8
 	updated bool
 	// log is the logger for a gateway
-	log zlog.Logger
+	log *common.ArgoEventsLogger
 	// reference to the gateway-controller-controller
 	controller *GatewayController
 	// gwrctx is the context to handle child resource
@@ -50,7 +49,7 @@ func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController)
 	return &gwOperationCtx{
 		gw:         gw,
 		updated:    false,
-		log:        common.GetLoggerContext(common.LoggerConf()).Str(common.LabelGatewayName, gw.Name).Str(common.LabelNamespace, gw.Namespace).Logger(),
+		log:        common.NewArgoEventsLogger().WithGatewayName(gw.Name).WithNamespace(gw.Namespace),
 		controller: controller,
 		gwrctx:     NewGatewayResourceContext(gw, controller),
 	}
@@ -68,7 +67,7 @@ func (goc *gwOperationCtx) operate() error {
 				common.LabelKeyGatewayControllerInstanceID: goc.controller.Config.InstanceID,
 				common.LabelOperation:                      "persist_gateway_state",
 			}
-			goc.gw, err = PersistUpdates(goc.controller.gatewayClientset, goc.gw, &goc.log)
+			goc.gw, err = PersistUpdates(goc.controller.gatewayClientset, goc.gw, goc.log)
 			if err != nil {
 				goc.log.Error().Err(err).Msg("failed to persist gateway update, escalating...")
 				// escalate
@@ -94,7 +93,7 @@ func (goc *gwOperationCtx) operate() error {
 		goc.updated = false
 	}()
 
-	goc.log.Info().Str(common.LabelPhase, string(goc.gw.Status.Phase)).Msg("operating on the gateway")
+	goc.log.WithPhase(string(goc.gw.Status.Phase)).Info().Msg("operating on the gateway")
 
 	// check the state of a gateway and take actions accordingly
 	switch goc.gw.Status.Phase {
@@ -123,7 +122,7 @@ func (goc *gwOperationCtx) operate() error {
 		}
 
 	default:
-		goc.log.Panic().Str("phase", string(goc.gw.Status.Phase)).Msg("unknown gateway phase.")
+		goc.log.WithPhase(string(goc.gw.Status.Phase)).Panic().Msg("unknown gateway phase.")
 	}
 	return nil
 }
@@ -146,7 +145,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
-	goc.log.Info().Str(common.LabelPodName, pod.Name).Msg("gateway pod is created")
+	goc.log.WithPodName(pod.Name).Info().Msg("gateway pod is created")
 
 	// expose gateway if service is configured
 	if goc.gw.Spec.Service != nil {
@@ -156,7 +155,7 @@ func (goc *gwOperationCtx) createGatewayResources() error {
 			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
-		goc.log.Info().Str("svc-name", svc.Name).Msg("gateway service is created")
+		goc.log.WithServiceName(svc.Name).Info().Msg("gateway service is created")
 	}
 
 	goc.log.Info().Msg("marking gateway as active")
@@ -242,12 +241,12 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 	// check if pod spec remained unchanged
 	if existingPod != nil {
 		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationGatewayResourceSpecHashName] == newPod.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.Debug().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod spec unchanged")
+			goc.log.WithPodName(existingPod.Name).Debug().Msg("gateway pod spec unchanged")
 			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng gateway pod.
-		goc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod spec changed")
+		goc.log.WithPodName(existingPod.Name).Info().Msg("gateway pod spec changed")
 
 		err := goc.gwrctx.deleteGatewayPod(existingPod)
 		if err != nil {
@@ -255,7 +254,7 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 			return nil, false, err
 		}
 
-		goc.log.Info().Str(common.LabelPodName, existingPod.Name).Msg("gateway pod is deleted")
+		goc.log.WithPodName(existingPod.Name).Info().Msg("gateway pod is deleted")
 	}
 
 	// Create new pod for updated gateway spec.
@@ -264,7 +263,7 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 		goc.log.Error().Err(err).Msg("failed to create pod for gateway")
 		return nil, false, err
 	}
-	goc.log.Info().Str(common.LabelPodName, newPod.Name).Msg("gateway pod is created")
+	goc.log.WithPodName(newPod.Name).Info().Msg("gateway pod is created")
 
 	return createdPod, true, nil
 }
@@ -295,12 +294,12 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 
 		// check if service spec remained unchanged
 		if existingSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] == newSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.Debug().Str(common.LabelServiceName, existingSvc.Name).Msg("gateway service spec unchanged")
+			goc.log.WithServiceName(existingSvc.Name).Debug().Msg("gateway service spec unchanged")
 			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
-		goc.log.Info().Str(common.LabelServiceName, existingSvc.Name).Msg("gateway service spec changed")
+		goc.log.WithServiceName(existingSvc.Name).Info().Msg("gateway service spec changed")
 
 		if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
 			return nil, false, err
@@ -316,7 +315,7 @@ func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error)
 		goc.log.Error().Err(err).Msg("failed to create service for gateway")
 		return nil, false, err
 	}
-	goc.log.Info().Str(common.LabelServiceName, newSvc.Name).Msg("gateway service is created")
+	goc.log.WithServiceName(createdSvc.Name).Info().Msg("gateway service is created")
 
 	return createdSvc, true, nil
 }

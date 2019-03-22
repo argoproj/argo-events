@@ -44,11 +44,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	r := rc.Route
 
-	logger := r.Logger.With().
-		Str(common.LabelEventSource, r.EventSource.Name).
-		Str(common.LabelEndpoint, r.Webhook.Endpoint).
-		Str(common.LabelPort, r.Webhook.Port).
-		Str(common.LabelHttpMethod, request.Method).Logger()
+	logger := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHttpMethod(request.Method)
 
 	logger.Info().Msg("request received")
 
@@ -90,10 +86,10 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	ese.Log.WithEventSource(eventSource.Name).Info().Msg("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		ese.Log.WithEventSource(eventSource.Name).Info().Msg("failed to parse event source")
 		return err
 	}
 	h := config.(*gwcommon.Webhook)
@@ -101,7 +97,7 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		Route: &gwcommon.Route{
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			EventSource: eventSource,
 			StartCh:     make(chan struct{}),
 			Webhook:     h,

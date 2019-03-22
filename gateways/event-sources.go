@@ -86,7 +86,7 @@ func (gc *GatewayConfig) diffEventSources(newConfigs map[string]*EventSourceCont
 	}
 
 	gc.Log.Info().Interface("current-event-sources-keys", currentConfigKeys).Msg("event sources hashes")
-	gc.Log.Info().Interface("updated-event-sources--keys", updatedConfigKeys).Msg("event sources hashes")
+	gc.Log.Info().Interface("updated-event-sources-keys", updatedConfigKeys).Msg("event sources hashes")
 
 	swapped := false
 	// iterates over current event sources and updated event sources
@@ -123,7 +123,10 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 		eventSource := eventSources[key]
 		// register the event source
 		gc.registeredConfigs[key] = eventSource
-		gc.Log.Info().Str(common.LabelEventSource, eventSource.Data.Src).Msg("activating new event source")
+
+		log := gc.Log.With().Str(common.LabelEventSource, eventSource.Data.Src).Logger()
+
+		log.Info().Msg("activating new event source")
 
 		go func() {
 			// conn should be in READY state

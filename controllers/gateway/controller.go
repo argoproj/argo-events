@@ -27,7 +27,6 @@ import (
 	ccommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -64,7 +63,7 @@ type GatewayController struct {
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
-	log zerolog.Logger
+	log *common.ArgoEventsLogger
 
 	// kubernetes config and apis
 	kubeConfig       *rest.Config
@@ -85,7 +84,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              common.GetLoggerContext(common.LoggerConf()).Str(common.LabelNamespace, namespace).Logger(),
+		log:              common.NewArgoEventsLogger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(rateLimiter),
@@ -102,7 +101,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.Warn().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("failed to get gateway '%s' from informer index")
+		c.log.WithGatewayName(key.(string)).Warn().Err(err).Msg("failed to get gateway '%s' from informer index")
 		return true
 	}
 
@@ -113,7 +112,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	gateway, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.log.Warn().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("key in index is not a gateway")
+		c.log.WithGatewayName(key.(string)).Warn().Err(err).Err(err).Msg("key in index is not a gateway")
 		return true
 	}
 
@@ -121,10 +120,6 @@ func (c *GatewayController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		labels := map[string]string{
-			common.LabelGatewayName: gateway.Name,
-			common.LabelEventType:   string(common.EscalationEventType),
-		}
 		if err := common.GenerateK8sEvent(c.kubeClientset,
 			fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name),
 			common.StateChangeEventType,
@@ -133,7 +128,10 @@ func (c *GatewayController) processNextItem() bool {
 			gateway.Namespace,
 			c.Config.InstanceID,
 			gateway.Kind,
-			labels,
+			map[string]string{
+				common.LabelGatewayName: gateway.Name,
+				common.LabelEventType:   string(common.EscalationEventType),
+			},
 		); err != nil {
 			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
 		}
@@ -161,7 +159,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.log.Error().Str(common.LabelGatewayName, key.(string)).Err(err).Msg("error syncing gateway")
+		c.log.WithGatewayName(key.(string)).Error().Err(err).Msg("error syncing gateway")
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -173,7 +171,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 // Run executes the gateway-controller
 func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
-	c.log.Info().Str(common.LabelInstanceId, c.Config.InstanceID).Str("version", base.GetVersion().Version).Msg("starting gateway-controller")
+	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info().Msg("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
 		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller config map")

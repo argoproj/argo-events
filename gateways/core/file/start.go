@@ -19,7 +19,6 @@ package file
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"regexp"
 	"strings"
 
@@ -30,10 +29,12 @@ import (
 
 // StartEventSource starts an event source
 func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("activating event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info().Msg("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.Error().Err(err).Msg("failed to parse event source")
 		return err
 	}
 
@@ -48,6 +49,8 @@ func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 
 func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name)
 
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
@@ -72,12 +75,13 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 			return
 		}
 	}
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to watch to file notifications")
+
+	log.Info().Msg("starting to watch to file notifications")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("fs watcher has stopped")
+				log.Info().Msg("fs watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("fs watcher stopped")
 				return
@@ -91,7 +95,7 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 				matched = true
 			}
 			if matched && fwc.Type == event.Op.String() {
-				ese.Log.Debug().Str(common.LabelEventSource, eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
+				log.Debug().Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("fs event")
 				// Assume fsnotify event has the same Op spec of our file event
 				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String())}
 				payload, err := json.Marshal(fileEvent)

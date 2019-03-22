@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	sclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -41,7 +40,7 @@ func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatu
 }
 
 // create a new node
-func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *zerolog.Logger, messages ...string) *v1alpha1.NodeStatus {
+func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *common.ArgoEventsLogger, messages ...string) *v1alpha1.NodeStatus {
 	if sensor.Status.Nodes == nil {
 		sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
@@ -68,7 +67,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 }
 
 // PersistUpdates persists the updates to the Sensor resource
-func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controllerInstanceId string, log *zerolog.Logger) (*v1alpha1.Sensor, error) {
+func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controllerInstanceId string, log *common.ArgoEventsLogger) (*v1alpha1.Sensor, error) {
 	sensorClient := client.ArgoprojV1alpha1().Sensors(sensor.ObjectMeta.Namespace)
 	// in case persist update fails
 	oldsensor := sensor.DeepCopy()
@@ -86,7 +85,7 @@ func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controlle
 			return oldsensor, err
 		}
 	}
-	log.Info().Str(common.LabelPodName, string(sensor.Status.Phase)).Msg("sensor state updated successfully")
+	log.WithPhase(string(sensor.Status.Phase)).Info().Msg("sensor state updated successfully")
 	return sensor, nil
 }
 
@@ -107,7 +106,7 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *zerolog.Logger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *common.ArgoEventsLogger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
 		log.Info().Str(common.LabelNodeType, string(node.Type)).Str(common.LabelNodeName, node.Name).Str(common.LabelPhase, string(node.Phase))

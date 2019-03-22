@@ -160,14 +160,14 @@ func NewGatewayConfiguration() *GatewayConfig {
 		if gc.natsConn, err = nats.Connect(gw.Spec.EventProtocol.Nats.URL); err != nil {
 			panic(fmt.Errorf("failed to obtain NATS standard connection. err: %+v", err))
 		}
-		gc.Log.Info().Str("nats-url", gw.Spec.EventProtocol.Nats.URL).Msg("connected to nats service")
+		gc.Log.Info().Str(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Msg("connected to nats service")
 
 		if gc.gw.Spec.EventProtocol.Nats.Type == pc.Streaming {
 			gc.natsStreamingConn, err = snats.Connect(gc.gw.Spec.EventProtocol.Nats.ClusterId, gc.gw.Spec.EventProtocol.Nats.ClientId, snats.NatsConn(gc.natsConn))
 			if err != nil {
 				panic(fmt.Errorf("failed to obtain NATS streaming connection. err: %+v", err))
 			}
-			gc.Log.Info().Str("nats-url", gw.Spec.EventProtocol.Nats.URL).Msg("nats streaming connection successful")
+			gc.Log.Info().Str(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Msg("nats streaming connection successful")
 		}
 	}
 	return gc
