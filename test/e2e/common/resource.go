@@ -20,6 +20,10 @@ func GetE2EID() string {
 	return e2eID
 }
 
+func KeepNamespace() bool {
+	return os.Getenv("KEEP_NAMESPACE") != ""
+}
+
 func ReadResource(path string) (*unstructured.Unstructured, error) {
 	bytes, err := ioutil.ReadFile(path)
 	if err != nil {

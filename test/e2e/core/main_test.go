@@ -40,7 +40,13 @@ func setup() error {
 }
 
 func teardown() error {
-	return client.DeleteNamespaces()
+	if !e2ecommon.KeepNamespace() {
+		err := client.DeleteNamespaces()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func TestMain(m *testing.M) {
