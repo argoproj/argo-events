@@ -9,6 +9,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -16,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -38,15 +38,6 @@ func init() {
 	if err := gwv1.AddToScheme(scheme.Scheme); err != nil {
 		panic(err)
 	}
-}
-
-func NewClient() (kubernetes.Interface, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
-	return kubernetes.NewForConfig(config)
 }
 
 type E2EClient struct {
@@ -96,7 +87,37 @@ func (clpl *E2EClient) CreateTmpNamespace() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ns.GetName(), nil
+
+	nsName := ns.GetName()
+	binding := &rbacv1.RoleBinding{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "RoleBinding",
+			APIVersion: "rbac.authorization.k8s.io/v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      nsName,
+			Namespace: nsName,
+		},
+		Subjects: []rbacv1.Subject{
+			{
+				Kind:      "ServiceAccount",
+				Name:      "default",
+				Namespace: nsName,
+			},
+		},
+		RoleRef: rbacv1.RoleRef{
+			APIGroup: "rbac.authorization.k8s.io",
+			Kind:     "ClusterRole",
+			Name:     "edit",
+		},
+	}
+
+	_, err = clpl.Create(nsName, binding)
+	if err != nil {
+		return "", err
+	}
+
+	return nsName, nil
 }
 
 func (clpl *E2EClient) DeleteNamespaces() error {
