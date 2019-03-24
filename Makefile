@@ -299,5 +299,5 @@ openapi-gen:
 codegen: clientgen openapigen protogen
 
 .PHONY: e2e
-e2e: all-images
+e2e:
 	./hack/e2e/run-e2e.sh
