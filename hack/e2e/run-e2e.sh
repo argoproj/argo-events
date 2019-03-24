@@ -4,10 +4,9 @@ set -e
 
 PROJECT_ROOT=$(cd $(dirname ${BASH_SOURCE})/../..; pwd)
 
-if [[ -z "$E2E_ID" ]]; then
-  E2E_ID="argo-events-e2e-$(date +%s)"
-fi
-export E2E_ID
+export E2E_ID=${E2E_ID:-argo-events-e2e-$(date +%s)}
+
+$PROJECT_ROOT/hack/e2e/setup-e2e.sh
 
 function cleanup {
   if [[ -z "$KEEP_NAMESPACE" ]]; then
@@ -18,8 +17,6 @@ function cleanup {
   fi
 }
 trap cleanup EXIT
-
-$PROJECT_ROOT/hack/e2e/setup-e2e.sh
 
 echo "* Run e2e tests."
 go test -v ./test/e2e/...
