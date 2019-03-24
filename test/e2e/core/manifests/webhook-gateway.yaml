@@ -28,16 +28,18 @@ spec:
           image: "argoproj/webhook-gateway"
           imagePullPolicy: "IfNotPresent"
           command: ["/bin/webhook-gateway"]
+          # ports:
+          # - containerPort: 12000
   service:
     metadata:
-      name: webhook-gateway-svc
+      name: "webhook-gateway-svc"
     spec:
       selector:
         gateway-name: "webhook-gateway"
       ports:
         - port: 12000
           targetPort: 12000
-      type: LoadBalancer
+      type: ClusterIP
   watchers:
     sensors:
       - name: "webhook-sensor"

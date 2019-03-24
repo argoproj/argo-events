@@ -27,13 +27,14 @@ spec:
             apiVersion: v1
             kind: Pod
             metadata:
-              generateName: webhook-
+              name: webhook-sensor-triggered-pod
             spec:
               containers:
               - name: whalesay
                 image: docker/whalesay:latest
                 command: [cowsay]
                 args: ["TO_BE_PASSED"]
+              restartPolicy: "Never"
       resourceParameters:
         - src:
             event: "webhook-gateway:foo"
