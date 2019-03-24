@@ -33,7 +33,7 @@ done
 echo "* Wait for controllers startup..."
 sleep 3
 MAX_WAIT=60
-for i in {1..$MAX_WAIT}; do
+for i in {1 .. $MAX_WAIT}; do
   pods_cnt=$(kubectl get pod -n "$E2E_ID" --no-headers --field-selector "status.phase=Running" 2> /dev/null | wc -l | xargs)
   if [[ $pods_cnt -eq 2 ]]; then
     break
