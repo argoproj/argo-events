@@ -69,7 +69,7 @@ func TestGeneralUseCase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	manifestsDir := filepath.Join(dir, "manifests")
+	manifestsDir := filepath.Join(dir, "manifests", "general-use-case")
 
 	convey.Convey("Test the general use case", t, func() {
 		convey.Convey("Create a gateway.", func() {
