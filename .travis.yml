@@ -2,8 +2,12 @@ language: go
 go:
   - 1.x
 
+services:
+  - docker
+
 before_install:
   - go get github.com/mattn/goveralls
+  - go get sigs.k8s.io/kind
 
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -14,6 +18,8 @@ script:
   - make all
   - make test coverage
   - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
+  - make build-e2e-images
+  - make kind-e2e
 
 deploy:
   provider: releases

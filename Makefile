@@ -301,3 +301,10 @@ codegen: clientgen openapigen protogen
 .PHONY: e2e
 e2e:
 	./hack/e2e/run-e2e.sh
+
+.PHONY: kind-e2e
+kind-e2e:
+	./hack/e2e/kind-run-e2e.sh
+
+.PHONY: build-e2e-images
+build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image webhook-image
