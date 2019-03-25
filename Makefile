@@ -274,7 +274,7 @@ trello-image: trello-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)trello-gateway:$(IMAGE_TAG) ; fi
 
 test:
-	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
+	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
 coverage:
 	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
