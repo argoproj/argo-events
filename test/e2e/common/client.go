@@ -34,17 +34,7 @@ import (
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-var (
-	kubeconfig = filepath.Join(os.Getenv("HOME"), ".kube/config")
-)
-
 func init() {
-	rand.Seed(time.Now().UnixNano())
-
-	if os.Getenv("KUBECONFIG") != "" {
-		kubeconfig = os.Getenv("KUBECONFIG")
-	}
-
 	// Add custom schemes
 	if err := sv1.AddToScheme(scheme.Scheme); err != nil {
 		panic(err)
@@ -63,6 +53,12 @@ type E2EClient struct {
 }
 
 func NewE2EClient(e2eID string) (*E2EClient, error) {
+	var kubeconfig string
+	if os.Getenv("KUBECONFIG") != "" {
+		kubeconfig = os.Getenv("KUBECONFIG")
+	} else {
+		kubeconfig = filepath.Join(os.Getenv("HOME"), ".kube/config")
+	}
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		return nil, err
@@ -74,7 +70,8 @@ func NewE2EClient(e2eID string) (*E2EClient, error) {
 		return nil, err
 	}
 
-	clientID := strconv.FormatUint(rand.Uint64(), 16)
+	myrand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	clientID := strconv.FormatUint(myrand.Uint64(), 16)
 
 	return &E2EClient{
 		Config:          config,
