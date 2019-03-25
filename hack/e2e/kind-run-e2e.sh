@@ -9,7 +9,7 @@ IMAGE_PREFIX=${IMAGE_PREFIX:-argoproj/}
 IMAGE_TAG=${IMAGE_TAG:-latest}
 
 kind create cluster --name $CLUSTER_NAME --image $KUBERNETES_VERSION
-export KUBECONFIG="$(kind get kubeconfig-path)"
+export KUBECONFIG="$(kind get kubeconfig-path --name=$CLUSTER_NAME)"
 kubectl cluster-info
 
 function cleanup {
@@ -25,6 +25,6 @@ trap cleanup EXIT
 kind load docker-image --name $CLUSTER_NAME ${IMAGE_PREFIX}sensor-controller:${IMAGE_TAG} ${IMAGE_PREFIX}gateway-controller:${IMAGE_TAG} ${IMAGE_PREFIX}webhook-gateway:${IMAGE_TAG} ${IMAGE_PREFIX}gateway-client:${IMAGE_TAG}
 
 # Avoid too early access
-sleep 10
+sleep 1
 
 $PROJECT_ROOT/hack/e2e/run-e2e.sh
