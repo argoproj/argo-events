@@ -11,6 +11,8 @@ cache:
 
 env:
   global:
+    - DOCKER_PUSH=false
+    - IMAGE_TAG=latest
     - PATH=$HOME/bin:$PATH
 
 before_install:
