@@ -8,6 +8,7 @@ services:
 cache:
   directories:
     - $HOME/bin
+    - $HOME/docker
 
 env:
   global:
@@ -16,6 +17,8 @@ env:
     - PATH=$HOME/bin:$PATH
 
 before_install:
+  # Load cached docker images
+  - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - go get github.com/mattn/goveralls
   - go get sigs.k8s.io/kind
   - if [ ! -d $HOME/bin/kubectl ]; then
@@ -23,6 +26,12 @@ before_install:
       curl -o $HOME/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/v1.13.4/bin/linux/amd64/kubectl;
       chmod +x $HOME/bin/kubectl;
     fi
+
+before_cache:
+  # Save tagged docker images
+  - >
+    mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
+    | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
