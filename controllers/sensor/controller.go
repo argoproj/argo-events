@@ -103,7 +103,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.WithSensorName(key.(string)).Warn().Err(err).Msg("failed to get sensor from informer index")
+		c.log.WithSensorName(key.(string)).WithError(err).Warn("failed to get sensor from informer index")
 		return true
 	}
 
@@ -114,7 +114,7 @@ func (c *SensorController) processNextItem() bool {
 
 	sensor, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		c.log.WithSensorName(key.(string)).Warn().Err(err).Msg("key in index is not a sensor")
+		c.log.WithSensorName(key.(string)).WithError(err).Warn("key in index is not a sensor")
 		return true
 	}
 
@@ -136,13 +136,13 @@ func (c *SensorController) processNextItem() bool {
 				common.LabelOperation:  "controller_operation",
 			},
 		); err != nil {
-			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate sensor operation failure")
+			ctx.log.WithError(err).Error("failed to create K8s event to escalate sensor operation failure")
 		}
 	}
 
 	err = c.handleErr(err, key)
 	if err != nil {
-		ctx.log.Error().Err(err).Msg("sensor controller is unable to handle the error")
+		ctx.log.WithError(err).Error("sensor controller is unable to handle the error")
 	}
 	return true
 }
@@ -172,10 +172,10 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 
-	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info().Msg("starting sensor controller")
+	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info("starting sensor controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.Error().Err(err).Msg("failed to register watch for sensor controller config map")
+		c.log.WithError(err).Error("failed to register watch for sensor controller config map")
 		return
 	}
 
@@ -183,7 +183,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for sensors")
+		c.log.Panic("timed out waiting for the caches to sync for sensors")
 		return
 	}
 
@@ -202,7 +202,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.podInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for sensor pods")
+		c.log.Panic("timed out waiting for the caches to sync for sensor pods")
 		return
 	}
 
@@ -210,7 +210,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 	go c.svcInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for sensor services")
+		c.log.Panic("timed out waiting for the caches to sync for sensor services")
 		return
 	}
 

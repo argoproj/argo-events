@@ -43,14 +43,22 @@ type EventSourceStatus struct {
 
 // markGatewayNodePhase marks the node with a phase, returns the node
 func (gc *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
-	gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("phase", string(nodeStatus.Phase)).Msg("marking node phase")
+	log := gc.Log.WithFields(
+		map[string]interface{}{
+			common.LabelNodeName: nodeStatus.Name,
+			common.LabelPhase:    string(nodeStatus.Phase),
+		},
+	)
+
+	log.Info("marking node phase")
+
 	node := gc.getNodeByID(nodeStatus.Id)
 	if node == nil {
-		gc.Log.Warn().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Msg("node is not initialized")
+		log.Warn("node is not initialized")
 		return nil
 	}
 	if node.Phase != nodeStatus.Phase {
-		gc.Log.Info().Str("node-name", nodeStatus.Name).Str("node-id", nodeStatus.Id).Str("old-phase", string(node.Phase)).Str("new-phase", string(nodeStatus.Phase)).Msg("phase marked")
+		log.WithField("new-phase", string(nodeStatus.Phase)).Info("phase updated")
 		node.Phase = nodeStatus.Phase
 	}
 	node.Message = nodeStatus.Message
@@ -73,7 +81,7 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 	if gc.gw.Status.Nodes == nil {
 		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
-	gc.Log.Info().Str("node-id", nodeID).Str("node-name", nodeName).Msg("node")
+	gc.Log.WithField(common.LabelNodeName, nodeName).Info("node")
 	node, ok := gc.gw.Status.Nodes[nodeID]
 	if !ok {
 		node = v1alpha1.NodeStatus{
@@ -86,14 +94,21 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
 	gc.gw.Status.Nodes[nodeID] = node
-	gc.Log.Info().Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is running")
+	gc.Log.WithFields(
+		map[string]interface{}{
+			common.LabelNodeName: nodeName,
+			"node-message":       node.Message,
+		},
+	).Info("node is running")
 	gc.updated = true
 	return node
 }
 
 // UpdateGatewayResourceState updates gateway resource nodes state
 func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
-	gc.Log.Info().Msg("received a gateway state update notification")
+	log := gc.Log.WithEventSource(status.Name)
+
+	log.Info("received a gateway state update notification")
 
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
@@ -108,7 +123,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 	case v1alpha1.NodePhaseRemove:
 		delete(gc.gw.Status.Nodes, status.Id)
-		gc.Log.Info().Str(common.LabelEventSource, status.Name).Msg("event source is removed")
+		log.Info("event source is removed")
 		gc.updated = true
 	}
 
@@ -121,9 +136,9 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 			common.LabelGatewayEventSourceID:   status.Id,
 			common.LabelOperation:              "persist_event_source_state",
 		}
-		updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, &gc.Log)
+		updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, gc.Log)
 		if err != nil {
-			gc.Log.Error().Err(err).Msg("failed to persist gateway resource updates, reverting to old state")
+			log.WithError(err).Error("failed to persist gateway resource updates, reverting to old state")
 			eventType = common.EscalationEventType
 		}
 
@@ -133,7 +148,7 @@ func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
 
 		// generate a K8s event for persist event source state change
 		if err := common.GenerateK8sEvent(gc.Clientset, status.Message, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
-			gc.Log.Error().Err(err).Str(common.LabelEventSource, status.Name).Msg("failed to create K8s event to log event source state change")
+			log.WithError(err).Error("failed to create K8s event to log event source state change")
 		}
 	}
 	gc.updated = false

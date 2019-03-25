@@ -101,7 +101,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.WithGatewayName(key.(string)).Warn().Err(err).Msg("failed to get gateway '%s' from informer index")
+		c.log.WithGatewayName(key.(string)).WithError(err).Warn("failed to get gateway '%s' from informer index")
 		return true
 	}
 
@@ -112,7 +112,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	gateway, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.log.WithGatewayName(key.(string)).Warn().Err(err).Err(err).Msg("key in index is not a gateway")
+		c.log.WithGatewayName(key.(string)).WithError(err).Warn("key in index is not a gateway")
 		return true
 	}
 
@@ -133,14 +133,14 @@ func (c *GatewayController) processNextItem() bool {
 				common.LabelEventType:   string(common.EscalationEventType),
 			},
 		); err != nil {
-			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
+			ctx.log.WithError(err).Error("failed to create K8s event to escalate controller operation failure")
 		}
 	}
 
 	err = c.handleErr(err, key)
 	// create k8 event to escalate the error
 	if err != nil {
-		ctx.log.Error().Err(err).Msg("gateway controller failed to handle error")
+		ctx.log.WithError(err).Error("gateway controller failed to handle error")
 	}
 	return true
 }
@@ -159,7 +159,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.log.WithGatewayName(key.(string)).Error().Err(err).Msg("error syncing gateway")
+		c.log.WithGatewayName(key.(string)).WithError(err).Error("error syncing gateway")
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -171,10 +171,10 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 // Run executes the gateway-controller
 func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
-	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info().Msg("starting gateway-controller")
+	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Infof("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller config map")
+		c.log.WithError(err).Error("failed to register watch for gateway-controller config map")
 		return
 	}
 
@@ -182,7 +182,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateways")
+		c.log.Panicf("timed out waiting for the caches to sync for gateways")
 		return
 	}
 
@@ -201,7 +201,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.podInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway pods")
+		c.log.Panic("timed out waiting for the caches to sync for gateway pods")
 		return
 	}
 
@@ -209,7 +209,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.svcInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway services")
+		c.log.Panic("timed out waiting for the caches to sync for gateway services")
 		return
 	}
 

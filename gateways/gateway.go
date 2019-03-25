@@ -58,7 +58,7 @@ func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSou
 	for {
 		select {
 		case data := <-dataCh:
-			log.WithEventSource(name).Info().Msg("new event received, dispatching to gateway client")
+			log.WithEventSource(name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&Event{
 				Name:    name,
 				Payload: data,
@@ -68,11 +68,11 @@ func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSou
 			}
 
 		case err := <-errorCh:
-			log.WithEventSource(name).Error().Err(err).Msg("error occurred while getting event from event source")
+			log.WithEventSource(name).WithError(err).Error("error occurred while getting event from event source")
 			return err
 
 		case <-eventStream.Context().Done():
-			log.WithEventSource(name).Info().Msg("connection is closed by client")
+			log.WithEventSource(name).Info("connection is closed by client")
 			doneCh <- struct{}{}
 			return nil
 		}

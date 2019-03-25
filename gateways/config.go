@@ -28,7 +28,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
-	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -38,7 +37,7 @@ import (
 // GatewayConfig provides a generic event source for a gateway
 type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is client for kubernetes API
 	Clientset kubernetes.Interface
 	// Name is gateway name
@@ -139,7 +138,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	gc := &GatewayConfig{
-		Log:                  common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
+		Log:                  common.NewArgoEventsLogger().WithGatewayName(name).WithNamespace(namespace),
 		Clientset:            clientset,
 		Namespace:            namespace,
 		Name:                 name,
@@ -160,14 +159,14 @@ func NewGatewayConfiguration() *GatewayConfig {
 		if gc.natsConn, err = nats.Connect(gw.Spec.EventProtocol.Nats.URL); err != nil {
 			panic(fmt.Errorf("failed to obtain NATS standard connection. err: %+v", err))
 		}
-		gc.Log.Info().Str(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Msg("connected to nats service")
+		gc.Log.WithField(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Info("connected to nats service")
 
 		if gc.gw.Spec.EventProtocol.Nats.Type == pc.Streaming {
 			gc.natsStreamingConn, err = snats.Connect(gc.gw.Spec.EventProtocol.Nats.ClusterId, gc.gw.Spec.EventProtocol.Nats.ClientId, snats.NatsConn(gc.natsConn))
 			if err != nil {
 				panic(fmt.Errorf("failed to obtain NATS streaming connection. err: %+v", err))
 			}
-			gc.Log.Info().Str(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Msg("nats streaming connection successful")
+			gc.Log.WithField(common.LabelURL, gw.Spec.EventProtocol.Nats.URL).Info("nats streaming connection successful")
 		}
 	}
 	return gc

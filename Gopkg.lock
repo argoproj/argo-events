@@ -46,12 +46,6 @@
   version = "v1.21.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/adlio/trello"
-  packages = ["."]
-  revision = "b0faddb69566d3b80c1b70aa6daf2677b3f7a551"
-
-[[projects]]
   name = "github.com/argoproj/argo"
   packages = [
     "pkg/apis/workflow",
@@ -247,6 +241,7 @@
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+  branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -262,8 +257,7 @@
     "ptypes/empty",
     "ptypes/timestamp"
   ]
-  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
-  version = "v1.3.1"
+  revision = "d3c38a4eb4970272b87a425ae00ccc4548e2f9bb"
 
 [[projects]]
   name = "github.com/golang/snappy"
@@ -451,13 +445,13 @@
   version = "v1.7.2"
 
 [[projects]]
+  branch = "master"
   name = "github.com/nats-io/go-nats-streaming"
   packages = [
     ".",
     "pb"
   ]
-  revision = "4366d43a0648b4997ed32080f937e8702ab86c48"
-  version = "v0.4.2"
+  revision = "6a8470f970a0f01992927611aed618e6c3f2cc57"
 
 [[projects]]
   name = "github.com/nats-io/nkeys"
@@ -1321,6 +1315,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c293ab2c7a55af4a7da20b9f2d4944243d7405988de952dc92bed3596dc25205"
+  inputs-digest = "40b0eb4f808bd8aa888402da3b737efdf68fd4478b5f6b2922ac3f853312cca0"
   solver-name = "gps-cdcl"
   solver-version = 1

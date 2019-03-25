@@ -47,7 +47,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 	nodeID := sensor.NodeID(nodeName)
 	oldNode, ok := sensor.Status.Nodes[nodeID]
 	if ok {
-		log.Info().Str("node-name", nodeName).Msg("node already initialized")
+		log.WithField(common.LabelNodeName, nodeName).Info("node already initialized")
 		return &oldNode
 	}
 	node := v1alpha1.NodeStatus{
@@ -62,7 +62,13 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 		node.Message = messages[0]
 	}
 	sensor.Status.Nodes[nodeID] = node
-	log.Info().Str("node-type", string(node.Type)).Str("node-name", node.DisplayName).Str("node-message", node.Message).Msg("node is initialized")
+	log.WithFields(
+		map[string]interface{}{
+			common.LabelNodeType: string(node.Type),
+			common.LabelNodeName: node.DisplayName,
+			"node-message":       node.Message,
+		},
+	).Info("node is initialized")
 	return &node
 }
 
@@ -74,18 +80,19 @@ func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controlle
 
 	sensor, err := sensorClient.Update(sensor)
 	if err != nil {
-		log.Warn().Err(err).Msg("error updating sensor")
 		if errors.IsConflict(err) {
+			log.WithError(err).Error("error updating sensor")
 			return oldsensor, err
 		}
-		log.Info().Msg("re-applying updates on latest version and retrying update")
+
+		log.Info("re-applying updates on latest version and retrying update")
 		err = ReapplyUpdate(client, sensor)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to re-apply update")
+			log.WithError(err).Error("failed to re-apply update")
 			return oldsensor, err
 		}
 	}
-	log.WithPhase(string(sensor.Status.Phase)).Info().Msg("sensor state updated successfully")
+	log.WithPhase(string(sensor.Status.Phase)).Info("sensor state updated successfully")
 	return sensor, nil
 }
 
@@ -109,7 +116,13 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *common.ArgoEventsLogger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
-		log.Info().Str(common.LabelNodeType, string(node.Type)).Str(common.LabelNodeName, node.Name).Str(common.LabelPhase, string(node.Phase))
+		log.WithFields(
+			map[string]interface{}{
+				common.LabelNodeType: string(node.Type),
+				common.LabelNodeName: node.Name,
+				common.LabelPhase:    string(node.Phase),
+			},
+		).Info("marking node phase")
 		node.Phase = phase
 	}
 
@@ -123,7 +136,12 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 
 	if node.Phase == v1alpha1.NodePhaseComplete {
 		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
-		log.Info().Str(common.LabelNodeType, string(node.Type)).Str(common.LabelNodeName, node.Name).Msg("completed")
+		log.WithFields(
+			map[string]interface{}{
+				common.LabelNodeType: string(node.Type),
+				common.LabelNodeName: node.Name,
+			},
+		).Info("phase marked as completed")
 	}
 
 	sensor.Status.Nodes[node.ID] = *node

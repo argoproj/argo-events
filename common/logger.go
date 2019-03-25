@@ -1,89 +1,116 @@
 package common
 
-import "github.com/rs/zerolog"
+import (
+	"os"
+
+	"github.com/sirupsen/logrus"
+)
+
+// Logger constants
+const (
+	LabelNamespace   = "namespace"
+	LabelPhase       = "phase"
+	LabelInstanceId  = "instance-id"
+	LabelPodName     = "pod-name"
+	LabelServiceName = "svc-name"
+	LabelEndpoint    = "endpoint"
+	LabelPort        = "port"
+	LabelURL         = "url"
+	LabelNodeName    = "node-name"
+	LabelNodeType    = "node-type"
+	LabelHttpMethod  = "http-method"
+	LabelClientId    = "client-id"
+	LabelVersion     = "version"
+	LabelError       = "error"
+)
 
 type ArgoEventsLogger struct {
-	*zerolog.Logger
+	*logrus.Logger
 }
 
 func NewArgoEventsLogger() *ArgoEventsLogger {
-	logger := GetLoggerContext(LoggerConf()).Logger()
+	logrus.SetOutput(os.Stdout)
 	return &ArgoEventsLogger{
-		&logger,
+		logrus.New(),
 	}
 }
 
 func (a *ArgoEventsLogger) WithNamespace(namespace string) *ArgoEventsLogger {
-	a.With().Str(LabelNamespace, namespace)
+	a.WithField(LabelNamespace, namespace)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithGatewayControllerName(name string) *ArgoEventsLogger {
-	a.With().Str(LabelGatewayControllerName, name)
+	a.WithField(LabelGatewayControllerName, name)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithGatewayName(name string) *ArgoEventsLogger {
-	a.With().Str(LabelGatewayName, name)
+	a.WithField(LabelGatewayName, name)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithSensorControllerName(name string) *ArgoEventsLogger {
-	a.With().Str(LabelSensorControllerName, name)
+	a.WithField(LabelSensorControllerName, name)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithSensorName(name string) *ArgoEventsLogger {
-	a.With().Str(LabelSensorName, name)
+	a.WithField(LabelSensorName, name)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithPhase(phase string) *ArgoEventsLogger {
-	a.With().Str(LabelPhase, phase)
+	a.WithField(LabelPhase, phase)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithInstanceId(instanceId string) *ArgoEventsLogger {
-	a.With().Str(LabelInstanceId, instanceId)
+	a.WithField(LabelInstanceId, instanceId)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithPodName(podName string) *ArgoEventsLogger {
-	a.With().Str(LabelPodName, podName)
+	a.WithField(LabelPodName, podName)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithServiceName(svcName string) *ArgoEventsLogger {
-	a.With().Str(LabelServiceName, svcName)
+	a.WithField(LabelServiceName, svcName)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithEventSource(name string) *ArgoEventsLogger {
-	a.With().Str(LabelEventSource, name)
+	a.WithField(LabelEventSource, name)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithEndpoint(endpoint string) *ArgoEventsLogger {
-	a.With().Str(LabelEndpoint, endpoint)
+	a.WithField(LabelEndpoint, endpoint)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithPort(port string) *ArgoEventsLogger {
-	a.With().Str(LabelPort, port)
+	a.WithField(LabelPort, port)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithURL(url string) *ArgoEventsLogger {
-	a.With().Str(LabelURL, url)
+	a.WithField(LabelURL, url)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithVersion(version string) *ArgoEventsLogger {
-	a.With().Str(LabelVersion, version)
+	a.WithField(LabelVersion, version)
 	return a
 }
 
 func (a *ArgoEventsLogger) WithHttpMethod(method string) *ArgoEventsLogger {
-	a.With().Str(LabelHttpMethod, method)
+	a.WithField(LabelHttpMethod, method)
+	return a
+}
+
+func (a *ArgoEventsLogger) WithError(err error) *ArgoEventsLogger {
+	a.WithField(LabelError, err)
 	return a
 }

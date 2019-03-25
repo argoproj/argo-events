@@ -17,18 +17,18 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *common
 
 	gw, err := gatewayClient.Update(gw)
 	if err != nil {
-		log.Warn().Err(err).Msg("error updating gateway")
+		log.WithError(err).Warn("error updating gateway")
 		if errors.IsConflict(err) {
 			return oldgw, err
 		}
-		log.Info().Msg("re-applying updates on latest version and retrying update")
+		log.Info("re-applying updates on latest version and retrying update")
 		err = ReapplyUpdates(client, gw)
 		if err != nil {
-			log.Error().Err(err).Msg("failed to re-apply update")
+			log.WithError(err).Error("failed to re-apply update")
 			return oldgw, err
 		}
 	}
-	log.WithPhase(string(gw.Status.Phase)).Info().Msg("gateway state updated successfully")
+	log.WithError(err).WithPhase(string(gw.Status.Phase)).Info("gateway state updated successfully")
 	return gw, nil
 }
 
