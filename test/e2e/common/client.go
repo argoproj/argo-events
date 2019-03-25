@@ -41,6 +41,10 @@ var (
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
+	if os.Getenv("KUBECONFIG") != "" {
+		kubeconfig = os.Getenv("KUBECONFIG")
+	}
+
 	// Add custom schemes
 	if err := sv1.AddToScheme(scheme.Scheme); err != nil {
 		panic(err)
