@@ -24,6 +24,6 @@ trap cleanup EXIT
 kind load docker-image --name $CLUSTER_NAME ${IMAGE_PREFIX}sensor-controller:${IMAGE_TAG} ${IMAGE_PREFIX}gateway-controller:${IMAGE_TAG} ${IMAGE_PREFIX}webhook-gateway:${IMAGE_TAG} ${IMAGE_PREFIX}gateway-client:${IMAGE_TAG}
 
 # Avoid too early access
-sleep 1
+sleep 10
 
 $PROJECT_ROOT/hack/e2e/run-e2e.sh
