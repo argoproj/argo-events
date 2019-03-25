@@ -277,7 +277,7 @@ test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
 coverage:
-	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
+	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov
 
 clean:
