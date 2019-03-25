@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.9
++ Support applying parameters for complete trigger spec #230
++ Increased test coverage #220
++ Gateway and Sensor pods are managed by the framework in the event of deletion #194
++ Add URL to webhook like gateways #216
++ Improved file gateway with path regex support #213
++ TLS support for webhook #206
++ Bug fix for Github gateway #243
+
 ## v0.8
 + Support for arbitrary boolean logic to resolve event dependencies #12
 + Ability to add timezone and extra user payload to calendar gateway #164
