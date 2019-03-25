@@ -21,9 +21,8 @@ import (
 )
 
 var (
-	client       *e2ecommon.E2EClient
-	e2eID        string
-	tmpNamespace string
+	client *e2ecommon.E2EClient
+	e2eID  string
 )
 
 func setup() error {
@@ -33,11 +32,6 @@ func setup() error {
 		return err
 	}
 	client = cli
-	namespace, err := client.CreateTmpNamespace()
-	if err != nil {
-		return err
-	}
-	tmpNamespace = namespace
 	return nil
 }
 
@@ -64,6 +58,11 @@ func TestMain(m *testing.M) {
 }
 
 func TestGeneralUseCase(t *testing.T) {
+	tmpNamespace, err := client.CreateTmpNamespace()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	_, filename, _, _ := runtime.Caller(0)
 	dir, err := filepath.Abs(filepath.Dir(filename))
 	if err != nil {
