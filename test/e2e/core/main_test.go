@@ -148,7 +148,7 @@ func TestGeneralUseCase(t *testing.T) {
 
 		convey.Convey("Make a request to the gateway.", func() {
 			// Avoid too early access
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 
 			// Use available port
 			l, _ := net.Listen("tcp", ":0")
