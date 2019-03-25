@@ -27,9 +27,12 @@ func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, e
 }
 
 func validateGitlab(config interface{}) error {
-	g := config.(*glab)
+	g := config.(*gitlabEventSource)
 	if g == nil {
 		return gwcommon.ErrNilEventSource
+	}
+	if g.Id == 0 {
+		return fmt.Errorf("hook id must be not be zero")
 	}
 	if g.ProjectId == "" {
 		return fmt.Errorf("project id can't be empty")

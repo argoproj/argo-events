@@ -26,8 +26,8 @@ type GcpPubSubEventSourceExecutor struct {
 	Log zerolog.Logger
 }
 
-// pubSubConfig contains configuration to subscribe to GCP PubSub topic
-type pubSubConfig struct {
+// pubSubEventSource contains configuration to subscribe to GCP PubSub topic
+type pubSubEventSource struct {
 	// ProjectID is the unique identifier for your project on GCP
 	ProjectID string `json:"projectID"`
 	// Topic on which a subscription will be created
@@ -37,7 +37,7 @@ type pubSubConfig struct {
 }
 
 func parseEventSource(es string) (interface{}, error) {
-	var n *pubSubConfig
+	var n *pubSubEventSource
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err

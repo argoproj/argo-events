@@ -19,7 +19,6 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/argoproj/argo-events/common"
@@ -27,10 +26,6 @@ import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/argoproj/argo-events/store"
 	"github.com/nlopes/slack/slackevents"
-)
-
-const (
-	labelSlackToken = "slackToken"
 )
 
 var (
@@ -41,36 +36,41 @@ func init() {
 	go gwcommon.InitRouteChannels(helper)
 }
 
-// RouteActiveHandler handles new route
-func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *gwcommon.RouteConfig) {
-	var response string
+func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+	return rc.route
+}
 
-	logger := rc.Log.With().Str("event-source", rc.EventSource.Name).Str("endpoint", rc.Webhook.Endpoint).
-		Str("port", rc.Webhook.Port).
-		Str("http-method", request.Method).Logger()
+// RouteHandler handles new route
+func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+	r := rc.route
+
+	logger := r.Logger.With().
+		Str("event-source", r.EventSource.Name).
+		Str("endpoint", r.Webhook.Endpoint).
+		Str("port", r.Webhook.Port).
+		Str("http-method", request.Method).
+		Logger()
+
 	logger.Info().Msg("request received")
 
-	if !helper.ActiveEndpoints[rc.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", rc.Webhook.Endpoint, rc.Webhook.Method)
-		logger.Info().Msg("endpoint is not active")
-		common.SendErrorResponse(writer, response)
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
+		logger.Warn().Msg("endpoint is not active")
+		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(request.Body); err != nil {
 		logger.Error().Err(err).Msg("failed to parse request body")
-		common.SendInternalErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
+		common.SendInternalErrorResponse(writer, "")
 		return
 	}
 
 	body := buf.String()
-	token := rc.Configs[labelSlackToken]
-	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: token.(string)}))
+	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: rc.token}))
 	if e != nil {
-		response = "failed to extract event"
-		logger.Error().Msg(response)
-		common.SendInternalErrorResponse(writer, "failed to extract event")
+		logger.Error().Msg("failed to extract event")
+		common.SendInternalErrorResponse(writer, "")
 		return
 	}
 
@@ -78,29 +78,37 @@ func RouteActiveHandler(writer http.ResponseWriter, request *http.Request, rc *g
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
-			response = "failed to verify the challenge"
-			logger.Error().Msg(response)
-			common.SendInternalErrorResponse(writer, response)
+			logger.Error().Msg("failed to verify the challenge")
+			common.SendInternalErrorResponse(writer, "")
 			return
 		}
 		writer.Header().Set("Content-Type", "text")
-		writer.Write([]byte(r.Challenge))
+		if _, err := writer.Write([]byte(r.Challenge)); err != nil {
+			logger.Error().Err(err).Msg("failed to write the response for url verification")
+			// don't return, we want to keep this running to give user chance to retry
+		}
 	}
 
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		data, err := json.Marshal(eventsAPIEvent.InnerEvent.Data)
 		if err != nil {
-			response = "failed to marshal event data"
-			logger.Error().Err(err).Msg(response)
-			common.SendInternalErrorResponse(writer, response)
+			logger.Error().Err(err).Msg("failed to marshal event data")
+			common.SendInternalErrorResponse(writer, "")
 			return
 		}
-		helper.ActiveEndpoints[rc.Webhook.Endpoint].DataCh <- data
+		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- data
 	}
 
-	response = "request successfully processed"
-	logger.Info().Msg(response)
-	common.SendSuccessResponse(writer, response)
+	logger.Info().Msg("request successfully processed")
+	common.SendSuccessResponse(writer, "")
+}
+
+func (rc *RouteConfig) PostStart() error {
+	return nil
+}
+
+func (rc *RouteConfig) PostStop() error {
+	return nil
 }
 
 // StartEventSource starts a event source
@@ -115,24 +123,25 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 		logger.Error().Err(err).Msg("failed to parse event source")
 		return err
 	}
-	sc := config.(*slackConfig)
 
-	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, sc.Token.Name, sc.Token.Key)
+	ses := config.(*slackEventSource)
+
+	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, ses.Token.Name, ses.Token.Key)
 	if err != nil {
 		logger.Error().Err(err).Msg("failed to retrieve token")
 		return err
 	}
 
-	return gwcommon.ProcessRoute(&gwcommon.RouteConfig{
-		Webhook: sc.Hook,
-		Configs: map[string]interface{}{
-			labelSlackToken: token,
+	return gwcommon.ProcessRoute(&RouteConfig{
+		route: &gwcommon.Route{
+			Logger:      &ese.Log,
+			StartCh:     make(chan struct{}),
+			Webhook:     ses.Hook,
+			EventSource: eventSource,
 		},
-		Log:                ese.Log,
-		EventSource:        eventSource,
-		PostActivate:       gwcommon.DefaultPostActivate,
-		PostStop:           gwcommon.DefaultPostStop,
-		RouteActiveHandler: RouteActiveHandler,
-		StartCh:            make(chan struct{}),
+		token:     token,
+		clientset: ese.Clientset,
+		namespace: ese.Namespace,
+		ses:       ses,
 	}, helper, eventStream)
 }

@@ -69,9 +69,7 @@ func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSou
 	}
 
 	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to listen to bucket notifications")
-	for notification := range minioClient.ListenBucketNotification(a.Bucket.Name, a.Filter.Prefix, a.Filter.Suffix, []string{
-		string(a.Event),
-	}, doneCh) {
+	for notification := range minioClient.ListenBucketNotification(a.Bucket.Name, a.Filter.Prefix, a.Filter.Suffix, a.Events, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err
 			return

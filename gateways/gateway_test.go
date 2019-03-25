@@ -61,13 +61,6 @@ func (f *FakeGRPCStream) RecvMsg(m interface{}) error {
 	return nil
 }
 
-func TestRecover(t *testing.T) {
-	convey.Convey("Recover from panic", t, func() {
-		defer Recover("fake")
-		panic("fake panic")
-	})
-}
-
 func TestHandleEventsFromEventSource(t *testing.T) {
 	convey.Convey("Given a gateway server, handle events from an event source", t, func() {
 		dataCh := make(chan []byte)

@@ -17,20 +17,19 @@ limitations under the License.
 package common
 
 import (
-	"github.com/minio/minio-go"
 	corev1 "k8s.io/api/core/v1"
 )
 
 // S3Artifact contains information about an artifact in S3
 type S3Artifact struct {
-	Endpoint  string                      `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket    *S3Bucket                   `json:"bucket" protobuf:"bytes,2,opt,name=bucket"`
-	Region    string                      `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Insecure  bool                        `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
-	AccessKey *corev1.SecretKeySelector   `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
-	SecretKey *corev1.SecretKeySelector   `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
-	Event     minio.NotificationEventType `json:"event,omitempty" protobuf:"bytes,7,opt,name=event"`
-	Filter    *S3Filter                   `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+	Endpoint  string                    `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+	Bucket    *S3Bucket                 `json:"bucket" protobuf:"bytes,2,opt,name=bucket"`
+	Region    string                    `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
+	Insecure  bool                      `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
+	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
+	Events    []string                  `json:"events,omitempty" protobuf:"bytes,7,opt,name=events"`
+	Filter    *S3Filter                 `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
 }
 
 // S3Bucket contains information to describe an S3 Bucket

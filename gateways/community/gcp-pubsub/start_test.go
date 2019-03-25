@@ -29,7 +29,7 @@ func TestListenEvents(t *testing.T) {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		psc := ps.(*pubSubConfig)
+		psc := ps.(*pubSubEventSource)
 
 		ese := &GcpPubSubEventSourceExecutor{
 			Log: common.GetLoggerContext(common.LoggerConf()).Logger(),

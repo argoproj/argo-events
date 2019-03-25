@@ -31,7 +31,7 @@ func (ese *GcpPubSubEventSourceExecutor) ValidateEventSource(ctx context.Context
 }
 
 func validatePubSubConfig(config interface{}) error {
-	sc := config.(*pubSubConfig)
+	sc := config.(*pubSubEventSource)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}

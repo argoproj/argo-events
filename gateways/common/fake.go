@@ -32,16 +32,35 @@ func (f *FakeHttpWriter) WriteHeader(status int) {
 	f.HeaderStatus = status
 }
 
-func GetFakeRouteConfig() *RouteConfig {
-	return &RouteConfig{
+type FakeRouteConfig struct {
+	route *Route
+}
+
+func (f *FakeRouteConfig) GetRoute() *Route {
+	return f.route
+}
+
+func (f *FakeRouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+}
+
+func (f *FakeRouteConfig) PostStart() error {
+	return nil
+}
+
+func (f *FakeRouteConfig) PostStop() error {
+	return nil
+}
+
+func GetFakeRoute() *Route {
+	logger := common.GetLoggerContext(common.LoggerConf()).Logger()
+	return &Route{
 		Webhook: Hook,
 		EventSource: &gateways.EventSource{
 			Name: "fake-event-source",
 			Data: "hello",
 			Id:   "123",
 		},
-		Log:     common.GetLoggerContext(common.LoggerConf()).Logger(),
-		Configs: make(map[string]interface{}),
+		Logger:  &logger,
 		StartCh: make(chan struct{}),
 	}
 }

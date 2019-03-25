@@ -22,6 +22,7 @@ import (
 )
 
 var es = `
+id: 1234
 hook:
  endpoint: "/push"
  port: "12000"
@@ -40,7 +41,7 @@ func TestParseConfig(t *testing.T) {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*githubConfig)
+		_, ok := ps.(*githubEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

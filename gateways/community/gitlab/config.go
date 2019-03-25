@@ -18,8 +18,10 @@ package gitlab
 
 import (
 	"github.com/argoproj/argo-events/gateways/common"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/rs/zerolog"
+	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -32,8 +34,20 @@ type GitlabEventSourceExecutor struct {
 	Namespace string
 }
 
-// glab contains information to setup a gitlab project integration
-type glab struct {
+// RouteConfig contains the configuration information for a route
+type RouteConfig struct {
+	route     *gwcommon.Route
+	clientset kubernetes.Interface
+	client    *gitlab.Client
+	hook      *gitlab.ProjectHook
+	namespace string
+	ges       *gitlabEventSource
+}
+
+// gitlabEventSource contains information to setup a gitlab project integration
+type gitlabEventSource struct {
+	// Webhook Id
+	Id int `json:"id"`
 	// Webhook
 	Hook *common.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup
@@ -65,7 +79,7 @@ type cred struct {
 
 // parseEventSource parses an event sources of gateway
 func parseEventSource(config string) (interface{}, error) {
-	var g *glab
+	var g *gitlabEventSource
 	err := yaml.Unmarshal([]byte(config), &g)
 	if err != nil {
 		return nil, err
