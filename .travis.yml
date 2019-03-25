@@ -5,9 +5,22 @@ go:
 services:
   - docker
 
+cache:
+  directories:
+    - $HOME/bin
+
+env:
+  global:
+    - PATH=$HOME/bin:$PATH
+
 before_install:
   - go get github.com/mattn/goveralls
   - go get sigs.k8s.io/kind
+  - if [ ! -d $HOME/bin/kubectl ]; then
+      mkdir -p $HOME/bin;
+      curl -o $HOME/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/v1.13.4/bin/linux/amd64/kubectl;
+      chmod +x $HOME/bin/kubectl;
+    fi
 
 install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
