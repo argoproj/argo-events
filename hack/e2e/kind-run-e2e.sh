@@ -10,6 +10,7 @@ IMAGE_TAG=${IMAGE_TAG:-latest}
 
 kind create cluster --name $CLUSTER_NAME --image $KUBERNETES_VERSION
 export KUBECONFIG="$(kind get kubeconfig-path)"
+kubectl cluster-info
 
 function cleanup {
   if [[ -z "$KEEP_CLUSTER" ]]; then
