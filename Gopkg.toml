@@ -15,12 +15,12 @@ required = [
 ]
 
 [[constraint]]
-  name = "github.com/adlio/trello"
-  branch = "master"
-
-[[constraint]]
   name = "k8s.io/code-generator"
   branch = "release-1.10"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/nats-io/go-nats-streaming"

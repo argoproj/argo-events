@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: "TBA"
+  labels:
+    argo-events-e2e: "TBA"
+    argo-events-e2e-client-id: "TBA"
