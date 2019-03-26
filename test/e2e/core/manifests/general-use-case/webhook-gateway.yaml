@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: webhook-gateway
+  labels:
+    gateways.argoproj.io/gateway-controller-instanceid: "__E2E_ID__"
+spec:
+  configMap: "webhook-gateway-configmap"
+  type: "webhook"
+  processorPort: "9330"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  eventVersion: "1.0"
+  template:
+    metadata:
+      name: "webhook-gateway"
+      labels:
+        gateway-name: "webhook-gateway"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client"
+          imagePullPolicy: "IfNotPresent"
+          command: ["/bin/gateway-client"]
+        - name: "webhook-events"
+          image: "argoproj/webhook-gateway"
+          imagePullPolicy: "IfNotPresent"
+          command: ["/bin/webhook-gateway"]
+          # ports:
+          # - containerPort: 12000
+  service:
+    metadata:
+      name: "webhook-gateway-svc"
+    spec:
+      selector:
+        gateway-name: "webhook-gateway"
+      ports:
+        - port: 12000
+          targetPort: 12000
+      type: ClusterIP
+  watchers:
+    sensors:
+      - name: "webhook-sensor"
