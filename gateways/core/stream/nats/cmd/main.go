@@ -24,6 +24,6 @@ import (
 
 func main() {
 	gateways.StartGateway(&nats.NatsEventSourceExecutor{
-		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log: common.NewArgoEventsLogger(),
 	})
 }

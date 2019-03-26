@@ -91,10 +91,12 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 	sges := config.(*storageGridEventSource)
@@ -103,7 +105,7 @@ func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateway
 		route: &gwcommon.Route{
 			Webhook:     sges.Hook,
 			EventSource: eventSource,
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			StartCh:     make(chan struct{}),
 		},
 		sges: sges,
@@ -120,22 +122,22 @@ func (rc *RouteConfig) PostStop() error {
 
 // RouteHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	logger := rc.route.Logger.With().
-		Str(common.LabelEventSource, rc.route.EventSource.Name).
-		Str("endpoint", rc.route.Webhook.Endpoint).
-		Str("port", rc.route.Webhook.Port).
-		Logger()
+	log := rc.route.Logger.
+		WithEventSource(rc.route.EventSource.Name).
+		WithEndpoint(rc.route.Webhook.Endpoint).
+		WithPort(rc.route.Webhook.Port).
+		WithHttpMethod(request.Method)
 
 	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
-		logger.Warn().Msg("inactive route")
+		log.Warn("inactive route")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
-	logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Str("method", http.MethodHead).Msg("received a request")
+	log.Info("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
+		log.WithError(err).Error("failed to parse request body")
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -151,28 +153,27 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to unescape request body url")
+		log.WithError(err).Error("failed to unescape request body url")
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to convert request body in JSON format")
+		log.WithError(err).Error("failed to convert request body in JSON format")
 		return
 	}
 
 	var notification *storageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to unmarshal request body")
+		log.WithError(err).Error("failed to unmarshal request body")
 		return
 	}
 
 	if filterEvent(notification, rc.sges) && filterName(notification, rc.sges) {
-		logger.Info().Msg("new event received, dispatching to gateway client")
+		log.WithError(err).Error("new event received, dispatching to gateway client")
 		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- b
 		return
 	}
 
-	logger.Warn().Interface("notification", notification).
-		Msg("discarding notification since it did not pass all filters")
+	log.Warn("discarding notification since it did not pass all filters")
 }

@@ -19,7 +19,6 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
@@ -35,10 +34,11 @@ import (
 
 // StartEventSource starts an event source
 func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -60,7 +60,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	ese.Log.WithEventSource(eventSource.Name).Info().Msg("starting to watch to resource notifications")
+	ese.Log.WithEventSource(eventSource.Name).Info("starting to watch to resource notifications")
 
 	resourceList, err := ese.discoverResources(res)
 	if err != nil {
@@ -133,13 +133,18 @@ func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interfa
 		select {
 		case item := <-watcher.ResultChan():
 			if item.Object == nil {
-				log.Info().Msg("watch ended, creating a new watch")
+				log.Info("watch ended, creating a new watch")
 				watchCh <- struct{}{}
 				return
 			}
 
 			if res.Type != "" && item.Type != res.Type {
-				log.Warn().Str("actual-event-type", string(item.Type)).Str("expected-event-type", string(res.Type)).Msg("event type mismatched. won't consume the event")
+				log.WithFields(
+					map[string]interface{}{
+						"actual-event-type":   string(item.Type),
+						"expected-event-type": string(res.Type),
+					},
+				).Warn("event type mismatched. won't consume the event")
 				continue
 			}
 
@@ -164,7 +169,7 @@ func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interfa
 
 			if obj, ok := resourceObjects[resourceKey]; ok {
 				if string(watchedObj) == obj {
-					log.Info().Msg("update is already watched")
+					log.Info("update is already watched")
 					continue
 				}
 			}
@@ -192,13 +197,11 @@ func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (*metav
 func (ese *ResourceEventSourceExecutor) serverResourceForGVK(resourceInterfaces *metav1.APIResourceList, kind string) (*metav1.APIResource, error) {
 	for i := range resourceInterfaces.APIResources {
 		apiResource := resourceInterfaces.APIResources[i]
-		gvk := schema.FromAPIVersionAndKind(resourceInterfaces.GroupVersion, apiResource.Kind)
-		ese.Log.Info().Str("api-resource", gvk.String())
 		if apiResource.Kind == kind {
 			return &apiResource, nil
 		}
 	}
-	ese.Log.Warn().Str("kind", kind).Msg("no resource found")
+	ese.Log.WithField("kind", kind).Error("no resource found")
 	return nil, fmt.Errorf("no resource found")
 }
 
@@ -227,23 +230,43 @@ func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstruct
 	}
 	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		log.Info().Str("resource-name", obj.GetName()).Str("prefix", filter.Prefix).Msg("FILTERED: resource name does not match prefix")
+		log.WithFields(
+			map[string]interface{}{
+				"resource-name": obj.GetName(),
+				"prefix":        filter.Prefix,
+			},
+		).Info("resource name does not match prefix")
 		return false
 	}
 	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Info().Str("creation-timestamp", created.UTC().String()).Str("createdBy", filter.CreatedBy.UTC().String()).Msg("FILTERED: resource creation timestamp is after createdBy")
+		log.WithFields(
+			map[string]interface{}{
+				"creation-timestamp": created.UTC().String(),
+				"createdBy":          filter.CreatedBy.UTC().String(),
+			},
+		).Info("resource creation timestamp is after createdBy")
 		return false
 	}
 	// check labels
 	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		log.Info().Interface("resource-labels", obj.GetLabels()).Interface("filter-labels", filter.Labels).Msg("FILTERED: labels mismatch")
+		log.WithFields(
+			map[string]interface{}{
+				"resource-labels": obj.GetLabels(),
+				"filter-labels":   filter.Labels,
+			},
+		).Info("labels mismatch")
 		return false
 	}
 	// check annotations
 	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		log.Info().Interface("resource-annotations", obj.GetAnnotations()).Interface("filter-annotations", filter.Annotations).Msg("FILTERED: annotations mismatch")
+		log.WithFields(
+			map[string]interface{}{
+				"resource-annotations": obj.GetAnnotations(),
+				"filter-annotations":   filter.Annotations,
+			},
+		).Info("annotations mismatch")
 		return false
 	}
 	return true

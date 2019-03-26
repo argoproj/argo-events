@@ -22,6 +22,7 @@ const (
 	LabelClientId    = "client-id"
 	LabelVersion     = "version"
 	LabelError       = "error"
+	LabelTime        = "time"
 )
 
 type ArgoEventsLogger struct {
@@ -112,5 +113,10 @@ func (a *ArgoEventsLogger) WithHttpMethod(method string) *ArgoEventsLogger {
 
 func (a *ArgoEventsLogger) WithError(err error) *ArgoEventsLogger {
 	a.WithField(LabelError, err)
+	return a
+}
+
+func (a *ArgoEventsLogger) WithTime(time string) *ArgoEventsLogger {
+	a.WithField(LabelTime, time)
 	return a
 }

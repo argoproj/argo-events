@@ -35,10 +35,10 @@ func (sec *sensorExecutionCtx) successNatsConnection() {
 		common.LabelOperation:  "nats_connection_setup",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup successfully", common.OperationSuccessEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup success")
+		sec.log.WithError(err).Error("failed to create K8s event to log nats connection setup success")
 		return
 	}
-	sec.log.Info().Msg("created event for nats connection setup success")
+	sec.log.Info("created event for nats connection setup success")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
@@ -49,10 +49,10 @@ func (sec *sensorExecutionCtx) escalateNatsConnectionFailure() {
 		common.LabelOperation:  "nats_connection_setup",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "connection setup failed", common.OperationFailureEventType, "connection setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats connection setup error")
+		sec.log.WithError(err).Error("failed to create K8s event to log nats connection setup error")
 		return
 	}
-	sec.log.Warn().Msg("created event for nats connection failure")
+	sec.log.Warn("created event for nats connection failure")
 }
 
 func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
@@ -63,10 +63,10 @@ func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
 		common.LabelOperation:   "nats_subscription_success",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription success", common.OperationSuccessEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription success")
+		sec.log.WithEventSource(eventSource).WithError(err).Error("failed to create K8s event to log nats subscription success")
 		return
 	}
-	sec.log.Info().Str(common.LabelEventSource, eventSource).Msg("created event for nats subscription success ")
+	sec.log.WithEventSource(eventSource).Info("created event for nats subscription success ")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource string) {
@@ -78,10 +78,10 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 		common.LabelOperation:   "nats_subscription_failure",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription failed", common.OperationFailureEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.Error().Err(err).Msg("failed to create K8s event to log nats subscription error")
+		sec.log.WithEventSource(eventSource).Error("failed to create K8s event to log nats subscription error")
 		return
 	}
-	sec.log.Warn().Str(common.LabelEventSource, eventSource).Msg("created event for nats subscription failure")
+	sec.log.WithEventSource(eventSource).Warn("created event for nats subscription failure")
 }
 
 // NatsEventProtocol handles events sent over NATS
@@ -99,7 +99,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			if err != nil {
 				// escalate failure
 				sec.escalateNatsConnectionFailure()
-				sec.log.Panic().Err(err).Msg("failed to connect to nats server")
+				sec.log.WithError(err).Panic("failed to connect to nats server")
 			}
 			// log success
 			sec.successNatsConnection()
@@ -111,7 +111,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
 				// escalate failure
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.Error().Err(err).Str(common.LabelEventSource, dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.WithEventSource(dependency.Name).Error("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -124,7 +124,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			sec.nconn.stream, err = snats.Connect(sec.sensor.Spec.EventProtocol.Nats.ClusterId, sec.sensor.Spec.EventProtocol.Nats.ClientId, snats.NatsURL(sec.sensor.Spec.EventProtocol.Nats.URL))
 			if err != nil {
 				sec.escalateNatsConnectionFailure()
-				sec.log.Panic().Err(err).Msg("failed to connect to nats streaming server")
+				sec.log.WithError(err).Panic("failed to connect to nats streaming server")
 			}
 			sec.successNatsConnection()
 		}
@@ -134,7 +134,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			}
 			if _, err := sec.getNatsStreamingSubscription(dependency.Name); err != nil {
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.Error().Err(err).Str(common.LabelEventSource, dependency.Name).Msg("failed to get the nats subscription")
+				sec.log.WithEventSource(dependency.Name).WithError(err).Error("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -200,15 +200,16 @@ func (sec *sensorExecutionCtx) getNatsStreamingOption(eventSource string) (snats
 
 // processNatsMessage handles a nats message payload
 func (sec *sensorExecutionCtx) processNatsMessage(msg []byte, eventSource string) {
+	log := sec.log.WithEventSource(eventSource)
 	event, err := sec.parseEvent(msg)
 	if err != nil {
-		sec.log.Error().Err(err).Str(common.LabelEventSource, eventSource).Msg("failed to parse message into event")
+		log.WithError(err).Error("failed to parse message into event")
 		return
 	}
 	// validate whether the event is from gateway that this sensor is watching and send event over internal queue if valid
 	if sec.sendEventToInternalQueue(event, nil) {
-		sec.log.Info().Str(common.LabelEventSource, eventSource).Msg("event successfully sent over internal queue")
+		sec.log.Info("event successfully sent over internal queue")
 		return
 	}
-	sec.log.Warn().Str(common.LabelEventSource, eventSource).Msg("event is from unknown source")
+	sec.log.Warn("event is from unknown source")
 }

@@ -36,7 +36,7 @@ func main() {
 		panic("namespace is not provided")
 	}
 	gateways.StartGateway(&github.GithubEventSourceExecutor{
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log:       common.NewArgoEventsLogger(),
 		Namespace: namespace,
 		Clientset: clientset,
 	})

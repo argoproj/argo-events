@@ -24,10 +24,12 @@ import (
 
 // StartEventSource starts an event source
 func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -37,11 +39,18 @@ func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 
 	go ese.listenEvents(config.(*mqtt), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name).WithFields(
+		map[string]interface{}{
+			common.LabelURL:      m.URL,
+			common.LabelClientId: m.ClientId,
+		},
+	)
 
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
 		dataCh <- msg.Payload()
@@ -55,14 +64,14 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelURL, m.URL).Str(common.LabelClientId, m.ClientId).Msg("failed to connect")
+		log.Info("failed to connect")
 		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("subscribing to topic")
+	log.Info("subscribing to topic")
 	if token := m.client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		ese.Log.Error().Err(token.Error()).Str(common.LabelURL, m.URL).Str(common.LabelClientId, m.ClientId).Msg("failed to subscribe")
+		log.WithError(token.Error()).Error("failed to subscribe")
 		errorCh <- token.Error()
 		return
 	}
@@ -70,6 +79,6 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	<-doneCh
 	token := m.client.Unsubscribe(m.Topic)
 	if token.Error() != nil {
-		ese.Log.Error().Err(token.Error()).Str(common.LabelEventSource, eventSource.Name).Msg("failed to unsubscribe client")
+		log.WithError(token.Error()).Error("failed to unsubscribe client")
 	}
 }

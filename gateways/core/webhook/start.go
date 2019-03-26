@@ -44,33 +44,39 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	r := rc.Route
 
-	logger := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHttpMethod(request.Method)
+	log := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHttpMethod(request.Method)
 
-	logger.Info().Msg("request received")
+	log.Info("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
-		logger.Info().Msg("endpoint is not active")
+		log.Info("endpoint is not active")
 		common.SendErrorResponse(writer, response)
 		return
 	}
 
 	if r.Webhook.Method != request.Method {
-		logger.Warn().Str("expected", r.Webhook.Method).Str("actual", request.Method).Msg("method mismatch")
+		log.WithFields(
+			map[string]interface{}{
+				"expected": r.Webhook.Method,
+				"actual":   request.Method,
+			},
+		).Warn("method mismatch")
+
 		common.SendErrorResponse(writer, fmt.Sprintf("the method %s is not defined for endpoint %s", r.Webhook.Method, r.Webhook.Endpoint))
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
+		log.WithError(err).Error("failed to parse request body")
 		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
 		return
 	}
 
 	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	response = "request successfully processed"
-	logger.Info().Msg(response)
+	log.Info(response)
 	common.SendSuccessResponse(writer, response)
 }
 
@@ -86,10 +92,12 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.WithEventSource(eventSource.Name).Info().Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.WithEventSource(eventSource.Name).Info().Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 	h := config.(*gwcommon.Webhook)

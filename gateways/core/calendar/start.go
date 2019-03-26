@@ -32,11 +32,11 @@ type Next func(time.Time) time.Time
 // StartEventSource starts an event source
 func (ese *CalendarEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	log := ese.Log.WithEventSource(eventSource.Name)
-	log.Info().Msg("activating event source")
+	log.Info("activating event source")
 
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -46,7 +46,7 @@ func (ese *CalendarEventSourceExecutor) StartEventSource(eventSource *gateways.E
 
 	go ese.listenEvents(config.(*calSchedule), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func resolveSchedule(cal *calSchedule) (cronlib.Schedule, error) {
@@ -114,7 +114,7 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ese.Log.WithEventSource(eventSource.Name).Info().Str("time", t.UTC().String()).Msg("expected next calendar event")
+		ese.Log.WithEventSource(eventSource.Name).WithTime(t.UTC().String()).Info("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx

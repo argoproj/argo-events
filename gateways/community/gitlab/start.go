@@ -80,16 +80,13 @@ func (rc *RouteConfig) PostStart() error {
 	reflect.Indirect(iev).SetBool(true)
 	elem.Set(iev)
 
-	hook, _, err := rc.client.Projects.GetProjectHook(rc.ges.ProjectId, rc.ges.Id)
+	hook, _, err := rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
 	if err != nil {
-		hook, _, err = rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
-		if err != nil {
-			return fmt.Errorf("failed to add project hook. err: %+v", err)
-		}
+		return fmt.Errorf("failed to add project hook. err: %+v", err)
 	}
 
 	rc.hook = hook
-	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("gitlab hook created")
+	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("gitlab hook created")
 	return nil
 }
 
@@ -97,35 +94,34 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("gitlab hook deleted")
+	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("gitlab hook deleted")
 	return nil
 }
 
 // routeActiveHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	logger := rc.route.Logger.With().
-		Str(common.LabelEventSource, rc.route.EventSource.Name).
-		Str("endpoint", rc.route.Webhook.Endpoint).
-		Str("port", rc.route.Webhook.Port).
-		Logger()
+	log := rc.route.Logger.
+		WithEventSource(rc.route.EventSource.Name).
+		WithEndpoint(rc.route.Webhook.Endpoint).
+		WithPort(rc.route.Webhook.Port)
 
-	logger.Info().Msg("request received")
+	log.Info("request received")
 
 	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
-		logger.Info().Msg("endpoint is not active")
+		log.Info("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
+		log.WithError(err).Error("failed to parse request body")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- body
-	logger.Info().Msg("request successfully processed")
+	log.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "")
 }
 
@@ -133,10 +129,12 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 	gl := config.(*gitlabEventSource)
@@ -144,7 +142,7 @@ func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.Eve
 	return gwcommon.ProcessRoute(&RouteConfig{
 		route: &gwcommon.Route{
 			EventSource: eventSource,
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			Webhook:     gl.Hook,
 			StartCh:     make(chan struct{}),
 		},

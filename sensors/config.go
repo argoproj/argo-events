@@ -26,7 +26,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
-	"github.com/rs/zerolog"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -47,7 +46,7 @@ type sensorExecutionCtx struct {
 	// http server which exposes the sensor to gateway/s
 	server *http.Server
 	// logger for the sensor
-	log zerolog.Logger
+	log *common.ArgoEventsLogger
 	// queue is internal queue to manage incoming events
 	queue chan *updateNotification
 	// controllerInstanceID is the instance ID of sensor controller processing this sensor
@@ -84,7 +83,7 @@ func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 		clientPool:           clientPool,
 		discoveryClient:      discoveryClient,
 		sensor:               sensor,
-		log:                  common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", sensor.Name).Logger(),
+		log:                  common.NewArgoEventsLogger().WithSensorName(sensor.Name),
 		queue:                make(chan *updateNotification),
 		controllerInstanceID: controllerInstanceID,
 	}

@@ -20,15 +20,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 )
 
 // StorageGridEventSourceExecutor implements Eventing
 type StorageGridEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 type RouteConfig struct {
@@ -39,7 +38,7 @@ type RouteConfig struct {
 // storageGridEventSource contains configuration for storage grid sns
 type storageGridEventSource struct {
 	// Webhook
-	Hook *common.Webhook `json:"hook"`
+	Hook *gwcommon.Webhook `json:"hook"`
 
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations

@@ -45,23 +45,23 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	r := rc.Route
 
-	logger := r.Logger.With().
-		Str(common.LabelEventSource, r.EventSource.Name).
-		Str("endpoint", r.Webhook.Endpoint).
-		Str("port", r.Webhook.Port).
-		Str("http-method", request.Method).Logger()
+	logger := r.Logger.
+		WithEventSource(r.EventSource.Name).
+		WithEndpoint(r.Webhook.Endpoint).
+		WithPort(r.Webhook.Port).
+		WithHttpMethod(request.Method)
 
-	logger.Info().Msg("request received")
+	logger.Info("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		logger.Info().Msg("endpoint is not active")
+		logger.Info("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
+		logger.WithError(err).Error("failed to parse request body")
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -69,7 +69,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	var snspayload *httpNotification
 	err = yaml.Unmarshal(body, &snspayload)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to convert request payload into sns event source payload")
+		logger.WithError(err).Error("failed to convert request payload into sns event source payload")
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -82,7 +82,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 			Token:    &snspayload.Token,
 		})
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to send confirmation response to amazon")
+			logger.WithError(err).Error("failed to send confirmation response to amazon")
 			common.SendErrorResponse(writer, "")
 			return
 		}
@@ -92,20 +92,20 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	}
 
-	logger.Info().Msg("request successfully processed")
+	logger.Info("request successfully processed")
 }
 
 // PostStart subscribes to the sns topic
 func (rc *RouteConfig) PostStart() error {
 	r := rc.Route
 
-	logger := r.Logger.With().
-		Str(common.LabelEventSource, r.EventSource.Name).
-		Str("endpoint", r.Webhook.Endpoint).
-		Str("port", r.Webhook.Port).
-		Str("topic-arn", rc.snses.TopicArn).
-		Logger()
-	logger.Info().Msg("subscribing to sns topic")
+	logger := r.Logger.
+		WithEventSource(r.EventSource.Name).
+		WithEndpoint(r.Webhook.Endpoint).
+		WithPort(r.Webhook.Port).
+		WithField("topic-arn", rc.snses.TopicArn)
+
+	logger.Info("subscribing to sns topic")
 
 	sc := rc.snses
 	creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
@@ -145,17 +145,19 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 	sc := config.(*snsEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		Route: &gwcommon.Route{
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			EventSource: eventSource,
 			StartCh:     make(chan struct{}),
 			Webhook:     sc.Hook,

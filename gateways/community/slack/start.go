@@ -44,32 +44,31 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
-	logger := r.Logger.With().
-		Str(common.LabelEventSource, r.EventSource.Name).
-		Str("endpoint", r.Webhook.Endpoint).
-		Str("port", r.Webhook.Port).
-		Str("http-method", request.Method).
-		Logger()
+	log := r.Logger.
+		WithEventSource(r.EventSource.Name).
+		WithEndpoint(r.Webhook.Endpoint).
+		WithPort(r.Webhook.Port).
+		WithHttpMethod(request.Method)
 
-	logger.Info().Msg("request received")
+	log.Info("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		logger.Warn().Msg("endpoint is not active")
+		log.Warn("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	var buf bytes.Buffer
 	if _, err := buf.ReadFrom(request.Body); err != nil {
-		logger.Error().Err(err).Msg("failed to parse request body")
+		log.WithError(err).Error("failed to parse request body")
 		common.SendInternalErrorResponse(writer, "")
 		return
 	}
 
 	body := buf.String()
-	eventsAPIEvent, e := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: rc.token}))
-	if e != nil {
-		logger.Error().Msg("failed to extract event")
+	eventsAPIEvent, err := slackevents.ParseEvent(json.RawMessage(body), slackevents.OptionVerifyToken(&slackevents.TokenComparator{VerificationToken: rc.token}))
+	if err != nil {
+		log.WithError(err).Error("failed to extract event")
 		common.SendInternalErrorResponse(writer, "")
 		return
 	}
@@ -78,13 +77,13 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		var r *slackevents.ChallengeResponse
 		err := json.Unmarshal([]byte(body), &r)
 		if err != nil {
-			logger.Error().Msg("failed to verify the challenge")
+			log.WithError(err).Error("failed to verify the challenge")
 			common.SendInternalErrorResponse(writer, "")
 			return
 		}
 		writer.Header().Set("Content-Type", "text")
 		if _, err := writer.Write([]byte(r.Challenge)); err != nil {
-			logger.Error().Err(err).Msg("failed to write the response for url verification")
+			log.WithError(err).Error("failed to write the response for url verification")
 			// don't return, we want to keep this running to give user chance to retry
 		}
 	}
@@ -92,14 +91,14 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
 		data, err := json.Marshal(eventsAPIEvent.InnerEvent.Data)
 		if err != nil {
-			logger.Error().Err(err).Msg("failed to marshal event data")
+			log.WithError(err).Error("failed to marshal event data")
 			common.SendInternalErrorResponse(writer, "")
 			return
 		}
 		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- data
 	}
 
-	logger.Info().Msg("request successfully processed")
+	log.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "")
 }
 
@@ -115,12 +114,12 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	logger := ese.Log.With().Str(common.LabelEventSource, eventSource.Name).Logger()
-	logger.Info().Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+	log.Info("operating on event source")
 
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -128,7 +127,7 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 
 	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, ses.Token.Name, ses.Token.Key)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to retrieve token")
+		log.WithError(err).Error("failed to retrieve token")
 		return err
 	}
 

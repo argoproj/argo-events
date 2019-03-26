@@ -17,17 +17,16 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
 // GitlabEventSourceExecutor implements ConfigExecutor
 type GitlabEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

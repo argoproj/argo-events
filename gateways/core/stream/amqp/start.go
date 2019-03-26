@@ -18,18 +18,18 @@ package amqp
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-
 	"github.com/argoproj/argo-events/gateways"
 	amqplib "github.com/streadway/amqp"
 )
 
 // StartEventSource starts an event source
 func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-stream-name", eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -39,7 +39,7 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 
 	go ese.listenEvents(config.(*amqp), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
@@ -92,7 +92,9 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		return
 	}
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to subscribe to messages")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-delivery:
@@ -100,7 +102,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		case <-doneCh:
 			err = a.conn.Close()
 			if err != nil {
-				ese.Log.Error().Err(err).Str("event-stream-name", eventSource.Name).Msg("failed to close connection")
+				log.WithError(err).Info("failed to close connection")
 			}
 			return
 		}

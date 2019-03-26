@@ -161,7 +161,7 @@ func startHttpServer(routeManager RouteManager, helper *WebhookHelper) {
 			} else {
 				err = r.Webhook.srv.ListenAndServeTLS(r.Webhook.ServerCertPath, r.Webhook.ServerKeyPath)
 			}
-			r.Logger.Error().Err(err).Str(common.LabelEventSource, r.EventSource.Name).Str("port", r.Webhook.Port).Msg("http server stopped")
+			r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -185,7 +185,7 @@ func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
 
 	log := r.Logger.WithEventSource(r.EventSource.Name).WithPort(r.Webhook.Port).WithEndpoint(r.Webhook.Endpoint)
 
-	log.Info().Msg("adding route handler")
+	log.Info("adding route handler")
 	if _, ok := helper.ActiveEndpoints[r.Webhook.Endpoint]; !ok {
 		helper.ActiveEndpoints[r.Webhook.Endpoint] = &Endpoint{
 			Active: true,
@@ -195,7 +195,7 @@ func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
 	}
 	helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
-	r.Logger.Info().Msg("route handler added")
+	log.Info("route handler added")
 }
 
 func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -204,18 +204,18 @@ func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStre
 	for {
 		select {
 		case data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh:
-			r.Logger.WithEventSource(r.EventSource.Name).Info().Msg("new event received, dispatching to gateway client")
+			r.Logger.WithEventSource(r.EventSource.Name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    r.EventSource.Name,
 				Payload: data,
 			})
 			if err != nil {
-				r.Logger.WithEventSource(r.EventSource.Name).Error().Err(err).Msg("failed to send event")
+				r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("failed to send event")
 				return err
 			}
 
 		case <-eventStream.Context().Done():
-			r.Logger.WithEventSource(r.EventSource.Name).Info().Msg("connection is closed by client")
+			r.Logger.WithEventSource(r.EventSource.Name).Info("connection is closed by client")
 			helper.RouteDeactivateChan <- routeManager
 			return nil
 
@@ -230,30 +230,30 @@ func ProcessRoute(routeManager RouteManager, helper *WebhookHelper, eventStream 
 	r := routeManager.GetRoute()
 	log := r.Logger.WithEventSource(r.EventSource.Name)
 
-	log.Info().Msg("validating the route")
+	log.Info("validating the route")
 	if err := validateRoute(routeManager.GetRoute()); err != nil {
-		log.Error().Err(err).Msg("error occurred validating route")
+		log.WithError(err).Error("error occurred validating route")
 		return err
 	}
 
-	log.Info().Msg("activating the route")
+	log.Info("activating the route")
 	activateRoute(routeManager, helper)
 
-	log.Info().Msg("running post start")
+	log.Info("running post start")
 	if err := routeManager.PostStart(); err != nil {
-		log.Error().Err(err).Msg("error occurred in post start")
+		log.WithError(err).Error("error occurred in post start")
 		return err
 	}
 
-	log.Info().Msg("processing channels")
+	log.Info("processing channels")
 	if err := processChannels(routeManager, helper, eventStream); err != nil {
-		log.Error().Err(err).Msg("error occurred in process channel")
+		log.WithError(err).Error("error occurred in process channel")
 		return err
 	}
 
-	log.Info().Msg("running post stop")
+	log.Info("running post stop")
 	if err := routeManager.PostStop(); err != nil {
-		log.Error().Err(err).Msg("error occurred in post stop")
+		log.WithError(err).Error("error occurred in post stop")
 	}
 	return nil
 }

@@ -29,10 +29,10 @@ import (
 func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	log := ese.Log.WithEventSource(eventSource.Name)
 
-	log.Info().Msg("activating event source")
+	log.Info("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -42,17 +42,17 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 
 	go ese.listenEvents(config.(*apicommon.S3Artifact), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 // listenEvents listens to minio bucket notifications
 func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
-
 	log := ese.Log.WithEventSource(eventSource.Name)
-	log.Info().Msg("operating on event source")
 
-	log.Info().Msg("retrieving access and secret key")
+	log.Info("operating on event source")
+
+	log.Info("retrieving access and secret key")
 	// retrieve access key id and secret access key
 	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.AccessKey.Key)
 	if err != nil {
@@ -71,7 +71,7 @@ func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSou
 		return
 	}
 
-	log.Info().Msg("starting to listen to bucket notifications")
+	log.Info("starting to listen to bucket notifications")
 	for notification := range minioClient.ListenBucketNotification(a.Bucket.Name, a.Filter.Prefix, a.Filter.Suffix, a.Events, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err

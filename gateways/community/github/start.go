@@ -139,7 +139,7 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.hook = hook
-	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("github hook created")
+	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("github hook created")
 	return nil
 }
 
@@ -150,7 +150,7 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.ges.Owner, rc.ges.Repository, *rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.Info().Str(common.LabelEventSource, rc.route.EventSource.Name).Msg("github hook deleted")
+	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("github hook deleted")
 	return nil
 }
 
@@ -158,17 +158,19 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 	gc := config.(*githubEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		route: &gwcommon.Route{
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			EventSource: eventSource,
 			Webhook:     gc.Hook,
 			StartCh:     make(chan struct{}),
@@ -202,16 +204,15 @@ func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
-	logger := r.Logger.With().
-		Str(common.LabelEventSource, r.EventSource.Name).
-		Str("endpoint", r.Webhook.Endpoint).
-		Str("port", r.Webhook.Port).
-		Logger()
+	logger := r.Logger.
+		WithEventSource(r.EventSource.Name).
+		WithEndpoint(r.Webhook.Endpoint).
+		WithPort(r.Webhook.Port)
 
-	logger.Info().Msg("request received")
+	logger.Info("request received")
 
 	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		logger.Info().Msg("endpoint is not active")
+		logger.Info("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -223,12 +224,12 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	}
 	body, err := parseValidateRequest(request, []byte(secret))
 	if err != nil {
-		logger.Error().Err(err).Msg("request is not valid event notification")
+		logger.WithError(err).Error("request is not valid event notification")
 		common.SendErrorResponse(writer, "")
 		return
 	}
 
 	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
-	logger.Info().Msg("request successfully processed")
+	logger.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "")
 }

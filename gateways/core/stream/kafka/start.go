@@ -18,6 +18,7 @@ package kafka
 
 import (
 	"fmt"
+	"github.com/apex/log"
 	"github.com/argoproj/argo-events/common"
 	"strconv"
 
@@ -36,10 +37,12 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // StartEventSource starts an event source
 func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -63,7 +66,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, k.URL).Msg("failed to connect")
+		log.WithError(err).WithField(common.LabelURL, k.URL).Error("failed to connect")
 		errorCh <- err
 		return
 	}
@@ -91,7 +94,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		return
 	}
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("starting to subscribe to messages")
+	log.Info("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -104,7 +107,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		case <-doneCh:
 			err = partitionConsumer.Close()
 			if err != nil {
-				ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to close consumer")
+				log.WithError(err).Error("failed to close consumer")
 			}
 			return
 		}

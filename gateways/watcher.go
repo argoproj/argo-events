@@ -39,19 +39,19 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if newCm, ok := obj.(*corev1.ConfigMap); ok {
-					gc.Log.Info().Str("config-map", gc.configName).Msg("detected ConfigMap addition. Updating the controller run config.")
+					gc.Log.WithField("name", newCm.Name).Info("detected configmap addition")
 					err := gc.manageEventSources(newCm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("add config failed")
+						gc.Log.WithError(err).Error("add config failed")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if cm, ok := new.(*corev1.ConfigMap); ok {
-					gc.Log.Info().Msg("detected ConfigMap update. Updating the controller run config.")
+					gc.Log.Info("detected ConfigMap update. Updating the controller run config.")
 					err := gc.manageEventSources(cm)
 					if err != nil {
-						gc.Log.Error().Err(err).Msg("update config failed")
+						gc.Log.WithError(err).Error("update config failed")
 					}
 				}
 			},
@@ -98,7 +98,7 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
-					gc.Log.Info().Msg("detected gateway update. updating gateway watchers")
+					gc.Log.Info("detected gateway update. updating gateway watchers")
 					gc.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseResourceUpdate,
 						Gw:      g,

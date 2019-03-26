@@ -17,15 +17,15 @@ limitations under the License.
 package aws_sqs
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 // SQSEventSourceExecutor implements Eventing
 type SQSEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

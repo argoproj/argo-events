@@ -24,10 +24,12 @@ import (
 
 // StartEventSource starts an event source
 func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str(common.LabelEventSource, eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -37,11 +39,18 @@ func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 
 	go ese.listenEvents(config.(*natsConfig), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name).WithFields(
+		map[string]interface{}{
+			common.LabelURL: n.URL,
+			"subject":       n.Subject,
+		},
+	)
 
 	if err := gateways.Connect(n.Backoff, func() error {
 		var err error
@@ -50,17 +59,17 @@ func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gat
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, n.URL).Err(err).Msg("connection failed")
+		log.WithError(err).Error("connection failed")
 		errorCh <- err
 		return
 	}
 
-	ese.Log.Info().Str(common.LabelEventSource, eventSource.Name).Msg("subscribing to messages")
+	log.Info("subscribing to messages")
 	_, err := n.conn.Subscribe(n.Subject, func(msg *natslib.Msg) {
 		dataCh <- msg.Data
 	})
 	if err != nil {
-		ese.Log.Error().Str(common.LabelEventSource, eventSource.Name).Str(common.LabelURL, n.URL).Str("subject", n.Subject).Err(err).Msg("failed to subscribe")
+		log.WithError(err).Error("failed to subscribe")
 		errorCh <- err
 		return
 	}
