@@ -1,0 +1,26 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sensor-controller
+  namespace: "__E2E_ID__"
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: "__E2E_ID__"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      serviceAccountName: argo-events-sa
+      containers:
+      - name: sensor-controller
+        image: argoproj/sensor-controller
+        imagePullPolicy: Always
+        env:
+          - name: SENSOR_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: SENSOR_CONFIG_MAP
+            value: sensor-controller-configmap

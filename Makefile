@@ -274,10 +274,10 @@ slack-image: slack-linux
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) ; fi
 
 test:
-	go test $(shell go list ./... | grep -v /vendor/) -race -short -v
+	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
 
 coverage:
-	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/)
+	go test -covermode=count -coverprofile=profile.cov $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/)
 	go tool cover -func=profile.cov
 
 clean:
@@ -297,3 +297,14 @@ openapi-gen:
 
 .PHONY: codegen
 codegen: clientgen openapigen protogen
+
+.PHONY: e2e
+e2e:
+	./hack/e2e/run-e2e.sh
+
+.PHONY: kind-e2e
+kind-e2e:
+	./hack/e2e/kind-run-e2e.sh
+
+.PHONY: build-e2e-images
+build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image webhook-image

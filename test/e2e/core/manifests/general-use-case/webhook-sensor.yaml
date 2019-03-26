@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: "__E2E_ID__"
+spec:
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: "IfNotPresent"
+  dependencies:
+    - name: "webhook-gateway:foo"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  triggers:
+    - template:
+        name: webhook-pod-trigger
+        version: v1
+        kind: Pod
+        source:
+          inline: |
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: webhook-sensor-triggered-pod
+            spec:
+              containers:
+              - name: whalesay
+                image: docker/whalesay:latest
+                command: [cowsay]
+                args: ["TO_BE_PASSED"]
+              restartPolicy: "Never"
+      resourceParameters:
+        - src:
+            event: "webhook-gateway:foo"
+          dest: spec.containers.0.args.0
