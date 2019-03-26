@@ -30,7 +30,7 @@ type SlackEventSourceExecutor struct {
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
-	Log       common.ArgoEventsLogger
+	Log       *common.ArgoEventsLogger
 }
 
 type RouteConfig struct {

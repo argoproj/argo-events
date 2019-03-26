@@ -48,7 +48,7 @@ type gitlabEventSource struct {
 	// Webhook Id
 	Id int `json:"id"`
 	// Webhook
-	Hook *common.Webhook `json:"hook"`
+	Hook *gwcommon.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
 	// Event is a gitlab event to listen to.

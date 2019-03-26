@@ -224,6 +224,7 @@ func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) strin
 // helper method to return a flag indicating if the object passed the client side filters
 func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstructured.Unstructured, filter *ResourceFilter) bool {
 	log := ese.Log.WithEventSource(esName)
+
 	// no filters are applied.
 	if filter == nil {
 		return true

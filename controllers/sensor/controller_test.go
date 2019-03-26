@@ -73,6 +73,7 @@ func getSensorController() *SensorController {
 		svcInformer:     svcInformer,
 		informer:        informer,
 		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		log:             common.NewArgoEventsLogger(),
 	}
 }
 

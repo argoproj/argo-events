@@ -133,7 +133,7 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		route: &gwcommon.Route{
-			Logger:      &ese.Log,
+			Logger:      ese.Log,
 			StartCh:     make(chan struct{}),
 			Webhook:     ses.Hook,
 			EventSource: eventSource,

@@ -258,7 +258,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 		soc.log.WithError(err).Error("failed to create pod for sensor")
 		return nil, false, err
 	}
-	soc.log.WithPodName(existingPod.Name).Info("sensor pod is created")
+	soc.log.WithPodName(newPod.Name).Info("sensor pod is created")
 
 	return createdPod, true, nil
 }
