@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
+	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -57,6 +58,15 @@ const (
 	NodePhaseActive   NodePhase = "Active"   // the node is active and waiting on dependencies to resolve
 	NodePhaseError    NodePhase = "Error"    // the node has encountered an error in processing
 	NodePhaseNew      NodePhase = ""         // the node is new
+)
+
+// TriggerCycleState is the label for the state of the trigger cycle
+type TriggerCycleState string
+
+// possible values of trigger cycle states
+const (
+	TriggerCycleSuccess TriggerCycleState = "Success" // all triggers are successfully executed
+	TriggerCycleFailure TriggerCycleState = "Failure" // one or more triggers failed
 )
 
 // Sensor is the definition of a sensor resource
@@ -98,6 +108,9 @@ type SensorSpec struct {
 
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
+
+	// ErrorOnFailedRound transitions sensor into `error` state if the trigger round fails.
+	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
 }
 
 // EventDependency describes a dependency
@@ -199,6 +212,9 @@ type Trigger struct {
 
 	// ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
 	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+
+	// Policy to configure backoff and execution of trigger
+	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,4,opt,name=policy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -207,13 +223,13 @@ type TriggerTemplate struct {
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// When is the condition to execute the trigger
-	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,4,opt,name=when"`
+	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,2,opt,name=when"`
 
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	*metav1.GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
+	*metav1.GroupVersionKind `json:",inline" protobuf:"bytes,3,opt,name=groupVersionKind"`
 
 	// Source of the K8 resource file(s)
-	Source *ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
@@ -255,6 +271,35 @@ type TriggerParameterSource struct {
 	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
 }
 
+// TriggerPolicy dictates the policy for the trigger retries
+type TriggerPolicy struct {
+	// Backoff before checking resource state
+	Backoff Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
+
+	// Criteria to check resource state
+	Criteria *TriggerPolicyCriteria `json:"criteria" protobuf:"bytes,2,opt,name=criteria"`
+
+	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
+	// It takes precedence over `ErrorOnFailedRound`.
+	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,opt,name=errorOnBackoffTimeout"`
+}
+
+type Backoff struct {
+	Duration time.Duration `json:"duration"` // the base duration
+	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
+	Jitter   float64       `json:"jitter"`   // The amount of jitter applied each iteration
+	Steps    int           `json:"steps"`    // Exit with error after this many steps
+}
+
+// TriggerPolicyCriteria defines the criteria to decide if a resource is in success or failure state.
+type TriggerPolicyCriteria struct {
+	// Success criteria
+	Success map[string]string `json:"success" protobuf:"bytes,1,opt,name=success"`
+
+	// Failure criteria
+	Failure map[string]string `json:"failure" protobuf:"bytes,2,opt,name=failure"`
+}
+
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	// Phase is the high-level summary of the sensor
@@ -266,15 +311,18 @@ type SensorStatus struct {
 	// CompletedAt is the time at which this sensor was completed
 	CompletedAt metav1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
 
-	// CompletionCount is the count of sensor's successful runs.
-	CompletionCount int32 `json:"completionCount,omitempty" protobuf:"varint,6,opt,name=completionCount"`
-
 	// Message is a human readable string indicating details about a sensor in its phase
 	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
 
 	// Nodes is a mapping between a node ID and the node's status
 	// it records the states for the FSM of this sensor.
 	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
+
+	// TriggerCycleCount is the count of sensor's trigger cycle runs.
+	TriggerCycleCount int32 `json:"triggerCycleCount,omitempty" protobuf:"varint,6,opt,name=triggerCycleCount"`
+
+	// TriggerCycleState is the status from last cycle of triggers execution.
+	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,7,opt,name=triggerCycleStatus"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.

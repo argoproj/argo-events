@@ -21,20 +21,24 @@ import (
 	"fmt"
 
 	"github.com/Knetic/govaluate"
-
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/dynamic"
 )
 
 // canProcessTriggers evaluates whether triggers can be processed and executed
 func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
+	if sec.sensor.Spec.ErrorOnFailedRound && sec.sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure {
+		return false, fmt.Errorf("last trigger cycle was a failure and sensor policy is set to ErrorOnFailedRound, so won't process the triggers")
+	}
+
 	if sec.sensor.Spec.DependencyGroups != nil {
 		groups := make(map[string]interface{}, len(sec.sensor.Spec.DependencyGroups))
 	group:
@@ -104,6 +108,8 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		common.LabelOperation:  "process_triggers",
 	}
 
+	successTriggerCycle := true
+
 	for _, trigger := range sec.sensor.Spec.Triggers {
 		// check if a trigger condition is set
 		if canExecute := sec.canExecuteTrigger(trigger); !canExecute {
@@ -114,7 +120,10 @@ func (sec *sensorExecutionCtx) processTriggers() {
 		if err := sec.executeTrigger(trigger); err != nil {
 			sec.log.Error().Str("trigger-name", trigger.Template.Name).Err(err).Msg("trigger failed to execute")
 
+			// mark trigger status as error
 			sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger.Template. err: %+v", err))
+
+			successTriggerCycle = false
 
 			// escalate using K8s event
 			labels[common.LabelEventType] = string(common.EscalationEventType)
@@ -136,11 +145,17 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	}
 
 	// increment completion counter
-	sec.sensor.Status.CompletionCount = sec.sensor.Status.CompletionCount + 1
+	sec.sensor.Status.TriggerCycleCount = sec.sensor.Status.TriggerCycleCount + 1
+
+	if successTriggerCycle {
+		sec.sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleSuccess
+	} else {
+		sec.sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+	}
 
 	// create K8s event to mark the trigger round completion
 	labels[common.LabelEventType] = string(common.OperationSuccessEventType)
-	if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.CompletionCount), common.OperationSuccessEventType,
+	if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.TriggerCycleCount), common.OperationSuccessEventType,
 		"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
 		sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
 	}
@@ -212,15 +227,85 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		if err = sec.createResourceObject(trigger.Template, trigger.ResourceParameters, uObj); err != nil {
+		if err = sec.createResourceObject(&trigger, uObj); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
+// applyTriggerPolicy applies backoff and evaluates success/failure for a trigger
+func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, resourceInterface dynamic.ResourceInterface, name, namespace string) error {
+	sec.log.Info().Interface("backoff", trigger.Policy.Backoff).Msg("backoff")
+
+	err := wait.ExponentialBackoff(wait.Backoff{
+		Duration: trigger.Policy.Backoff.Duration,
+		Steps:    trigger.Policy.Backoff.Steps,
+		Factor:   trigger.Policy.Backoff.Factor,
+		Jitter:   trigger.Policy.Backoff.Jitter,
+	}, func() (bool, error) {
+		sec.log.Info().Msg("getting resource")
+
+		obj, err := resourceInterface.Get(name, metav1.GetOptions{})
+		if err != nil {
+			sec.log.Warn().Err(err).Str("resource-name", obj.GetName()).Msg("failed to get triggered resource")
+			return false, nil
+		}
+
+		fmt.Println(obj)
+
+		fmt.Println(obj.GetLabels())
+
+		labels := obj.GetLabels()
+		if labels == nil {
+			sec.log.Warn().Msg("triggered object does not have labels, won't apply the trigger policy")
+			return false, nil
+		}
+
+		// check if success criteria is set
+		if trigger.Policy.Criteria.Success != nil {
+			success := true
+			for successKey, successValue := range trigger.Policy.Criteria.Success {
+				if value, ok := labels[successKey]; ok {
+					if successValue != value {
+						success = false
+						break
+					}
+					continue
+				}
+				success = false
+			}
+			if success {
+				return true, nil
+			}
+		}
+
+		// check if failure criteria is set
+		if trigger.Policy.Criteria.Failure != nil {
+			failure := true
+			for failureKey, failureValue := range trigger.Policy.Criteria.Failure {
+				if value, ok := labels[failureKey]; ok {
+					if failureValue != value {
+						failure = false
+						break
+					}
+					continue
+				}
+				failure = false
+			}
+			if failure {
+				return false, fmt.Errorf("trigger failure")
+			}
+		}
+
+		return false, nil
+	})
+
+	return err
+}
+
 // createResourceObject creates K8s object for trigger
-func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTemplate, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
+func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, obj *unstructured.Unstructured) error {
 	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {
@@ -233,7 +318,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTe
 	// 2. extract the appropriate eventDependency events based on the resource params
 	// 3. apply the params to the JSON object
 	// 4. unmarshal the obj from the updated JSON
-	if err := sec.applyParamsResource(parameters, obj); err != nil {
+	if err := sec.applyParamsResource(trigger.ResourceParameters, obj); err != nil {
 		return err
 	}
 
@@ -255,14 +340,22 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTe
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
 	sec.log.Info().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("created object")
-	if err == nil || !errors.IsAlreadyExists(err) {
-		return err
+
+	// apply trigger policy if set
+	if trigger.Policy != nil {
+		sec.log.Info().Msg("applying trigger policy")
+
+		if err := sec.applyTriggerPolicy(trigger, reIf, liveObj.GetName(), namespace); err != nil {
+			if err == wait.ErrWaitTimeout {
+				if trigger.Policy.ErrorOnBackoffTimeout {
+					return fmt.Errorf("failed to determine status of the triggered resource")
+				}
+				return nil
+			}
+			return err
+		}
 	}
-	liveObj, err = reIf.Get(obj.GetName(), metav1.GetOptions{})
-	if err != nil {
-		return err
-	}
-	sec.log.Warn().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("object already exist")
+
 	return nil
 }
 
@@ -285,4 +378,12 @@ func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.TriggerParameter)
 		}
 	}
 	return events
+}
+
+func getLabelKeys(labels map[string]string) []string {
+	keys := make([]string, 0, len(labels))
+	for k := range labels {
+		keys = append(keys, k)
+	}
+	return keys
 }
