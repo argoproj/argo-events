@@ -68,22 +68,6 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
-	//
-	//cmd := exec.Command("bash", "-c", `eval "$(ssh-agent)"`)
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stdout
-	//err = cmd.Run()
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to eval ssh-agent. err: %+v", err)
-	//}
-	//cmd = exec.Command("bash", "-c", "ssh-add", sshKeyFile)
-	//cmd.Stdout = os.Stdout
-	//cmd.Stderr = os.Stdout
-	//err = cmd.Run()
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to add ssh key to ssh-agent. err: %+v", err)
-	//}
-
 	signer, err := ssh.ParsePrivateKey([]byte(sshKey))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
