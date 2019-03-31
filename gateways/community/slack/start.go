@@ -48,7 +48,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		WithEventSource(r.EventSource.Name).
 		WithEndpoint(r.Webhook.Endpoint).
 		WithPort(r.Webhook.Port).
-		WithHttpMethod(request.Method)
+		WithHTTPMethod(request.Method)
 
 	log.Info("request received")
 

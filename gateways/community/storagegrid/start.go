@@ -126,7 +126,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		WithEventSource(rc.route.EventSource.Name).
 		WithEndpoint(rc.route.Webhook.Endpoint).
 		WithPort(rc.route.Webhook.Port).
-		WithHttpMethod(request.Method)
+		WithHTTPMethod(request.Method)
 
 	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
 		log.Warn("inactive route")

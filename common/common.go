@@ -38,6 +38,9 @@ const (
 
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
+
+	// EnvVarDebugLog is the env var to turn on the debug mode for logging
+	EnvVarDebugLog = "DEBUG_LOG"
 )
 
 // SENSOR CONTROLLER CONSTANTS

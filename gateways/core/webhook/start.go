@@ -44,7 +44,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	r := rc.Route
 
-	log := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHttpMethod(request.Method)
+	log := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHTTPMethod(request.Method)
 
 	log.Info("request received")
 

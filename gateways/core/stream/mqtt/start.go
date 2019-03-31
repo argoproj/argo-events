@@ -48,7 +48,7 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	log := ese.Log.WithEventSource(eventSource.Name).WithFields(
 		map[string]interface{}{
 			common.LabelURL:      m.URL,
-			common.LabelClientId: m.ClientId,
+			common.LabelClientID: m.ClientId,
 		},
 	)
 

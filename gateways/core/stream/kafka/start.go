@@ -18,9 +18,9 @@ package kafka
 
 import (
 	"fmt"
-	"github.com/apex/log"
-	"github.com/argoproj/argo-events/common"
 	"strconv"
+
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/gateways"
@@ -57,6 +57,8 @@ func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 
 func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name)
 
 	if err := gateways.Connect(k.Backoff, func() error {
 		var err error
