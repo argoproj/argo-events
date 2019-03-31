@@ -18,16 +18,15 @@ package store
 
 import (
 	"fmt"
-	"gopkg.in/src-d/go-git.v4/config"
-	"io/ioutil"
-
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
+	"gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
+	"io/ioutil"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -63,9 +62,9 @@ func (g *GitArtifactReader) getRemote() string {
 	return DefaultRemote
 }
 
-func getSSHKeyAuth(privateSshKeyFile string) (transport.AuthMethod, error) {
+func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 	var auth transport.AuthMethod
-	sshKey, err := ioutil.ReadFile(privateSshKeyFile)
+	sshKey, err := ioutil.ReadFile(sshKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
@@ -131,10 +130,15 @@ func (g *GitArtifactReader) readFromRepository(r *git.Repository) ([]byte, error
 		return nil, fmt.Errorf("failed to get working tree. err: %+v", err)
 	}
 
-	if err := r.Fetch(&git.FetchOptions{
+	fetchOptions := &git.FetchOptions{
 		RemoteName: g.getRemote(),
 		RefSpecs:   fetchRefSpec,
-	}); err != nil && err != git.NoErrAlreadyUpToDate {
+	}
+	if auth != nil {
+		fetchOptions.Auth = auth
+	}
+
+	if err := r.Fetch(fetchOptions); err != nil && err != git.NoErrAlreadyUpToDate {
 		return nil, fmt.Errorf("failed to fetch. err: %v", err)
 	}
 
