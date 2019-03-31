@@ -43,9 +43,9 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		}
 		eventType := common.StateChangeEventType
 
-		updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log)
+		updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, sec.log)
 		if err != nil {
-			sec.log.Error().Err(err).Msg("failed to persist sensor update, escalating...")
+			sec.log.WithError(err).Error("failed to persist sensor update, escalating...")
 			// escalate failure
 			eventType = common.EscalationEventType
 		}
@@ -56,19 +56,22 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		labels[common.LabelEventType] = string(eventType)
 		if err := common.GenerateK8sEvent(sec.kubeClient, "persist update", eventType, "sensor resource update", sec.sensor.Name,
 			sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log sensor resource persist operation")
+			sec.log.WithError(err).Error("failed to create K8s event to log sensor resource persist operation")
 			return
 		}
-		sec.log.Info().Msg("successfully persisted sensor resource update and created K8s event")
+
+		sec.log.Info("successfully persisted sensor resource update and created K8s event")
 	}()
 
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
-		sec.log.Info().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("received event notification")
+		log := sec.log.WithEventSource(ew.event.Context.Source.Host)
+		log.Info("received event notification")
+
 		// apply filters if any.
 		ok, err := sec.filterEvent(ew.eventDependency.Filters, ew.event)
 		if err != nil {
-			sec.log.Error().Err(err).Str("event-dependency-name", ew.event.Context.Source.Host).Err(err).Msg("failed to apply filter")
+			log.WithError(err).Error("failed to apply filter")
 
 			// escalate error
 			labels := map[string]string{
@@ -78,40 +81,40 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 				common.LabelOperation:   "filter_event",
 			}
 			if err := common.GenerateK8sEvent(sec.kubeClient, "apply filter failed", common.OperationFailureEventType, "filtering event", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-				sec.log.Error().Err(err).Msg("failed to create K8s event to log filtering error")
+				log.WithError(err).Error("failed to create K8s event to log filtering error")
 			}
 
 			// change node state to error
-			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
+			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
 			return
 		}
 
 		// event is not valid
 		if !ok {
-			sec.log.Error().Str("event-dependency-name", ew.event.Context.Source.Host).Msg("event did not pass filters")
+			log.Error("event did not pass filters")
 
 			// change node state to error
-			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, &sec.log, "event did not pass filters")
+			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, "event did not pass filters")
 			return
 		}
 
-		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, &sec.log, "event is received")
+		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, sec.log, "event is received")
 
 		// check if triggers can be processed and executed
 		canProcess, err := sec.canProcessTriggers()
 		if err != nil {
-			sec.log.Error().Err(err).Msg("error occurred while determining triggers can be processed")
+			sec.log.WithError(err).Error("error occurred while determining triggers can be processed")
 			return
 		}
 
 		if !canProcess {
-			sec.log.Info().Msg("triggers can't be processed at this time, won't fire triggers")
+			sec.log.Warn("triggers can't be processed at this time, won't fire triggers")
 			return
 		}
 		sec.processTriggers()
 
 	case v1alpha1.ResourceUpdateNotification:
-		sec.log.Info().Msg("sensor resource update")
+		sec.log.Info("sensor resource update")
 		// update sensor resource
 		sec.sensor = ew.sensor
 
@@ -120,16 +123,16 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		// initialize new dependencies
 		for _, dependency := range sec.sensor.Spec.Dependencies {
 			if node := sn.GetNodeByName(sec.sensor, dependency.Name); node == nil {
-				sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, &sec.log)
-				sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is active")
+				sn.InitializeNode(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, sec.log)
+				sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sec.log, "dependency is active")
 			}
 		}
 
 		// initialize new dependency groups
 		for _, group := range sec.sensor.Spec.DependencyGroups {
 			if node := sn.GetNodeByName(sec.sensor, group.Name); node == nil {
-				sn.InitializeNode(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, &sec.log)
-				sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is active")
+				sn.InitializeNode(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, sec.log)
+				sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sec.log, "dependency group is active")
 			}
 		}
 
@@ -137,7 +140,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		for _, t := range sec.sensor.Spec.Triggers {
 			if node := sn.GetNodeByName(sec.sensor, t.Template.Name); node == nil {
 				hasDependenciesUpdated = true
-				sn.InitializeNode(sec.sensor, t.Template.Name, v1alpha1.NodeTypeTrigger, &sec.log)
+				sn.InitializeNode(sec.sensor, t.Template.Name, v1alpha1.NodeTypeTrigger, sec.log)
 			}
 		}
 
@@ -148,7 +151,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 		}
 
 	default:
-		sec.log.Error().Str("notification-type", string(ew.notificationType)).Msg("unknown notification type")
+		sec.log.WithField("notification-type", string(ew.notificationType)).Error("unknown notification type")
 	}
 }
 
@@ -172,7 +175,7 @@ statusNodes:
 			}
 		}
 		// corresponding node not found in spec. deleting status node
-		sec.log.Info().Str("status-node", statusNode.Name).Msg("deleting old status node")
+		sec.log.WithField("status-node", statusNode.Name).Info("deleting old status node")
 		nodeId := sec.sensor.NodeID(statusNode.Name)
 		delete(sec.sensor.Status.Nodes, nodeId)
 	}
@@ -196,15 +199,15 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 	case pc.NATS:
 		sec.NatsEventProtocol()
 		var err error
-		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, &sec.log); err != nil {
-			sec.log.Error().Err(err).Msg("failed to persist sensor update")
+		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, sec.log); err != nil {
+			sec.log.WithError(err).Error("failed to persist sensor update")
 			labels := map[string]string{
 				common.LabelEventType:  string(common.OperationFailureEventType),
 				common.LabelSensorName: sec.sensor.Name,
 				common.LabelOperation:  "persist_after_nats_conn_update_failure",
 			}
 			if err := common.GenerateK8sEvent(sec.kubeClient, "persist updates nats connection update failed", common.OperationFailureEventType, "persist updates nats connection update", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-				sec.log.Error().Err(err).Msg("failed to create K8s event to log persist updates nats connection update failure")
+				sec.log.WithError(err).Error("failed to create K8s event to log persist updates nats connection update failure")
 			}
 		}
 		select {}
@@ -225,7 +228,7 @@ func (sec *sensorExecutionCtx) parseEvent(payload []byte) (*apicommon.Event, err
 	var event *apicommon.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
 		response := "failed to parse event received from gateway"
-		sec.log.Error().Err(err).Msg(response)
+		sec.log.WithError(err).Error(response)
 		return nil, err
 	}
 	return event, nil

@@ -38,12 +38,15 @@ const (
 
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
+
+	// EnvVarDebugLog is the env var to turn on the debug mode for logging
+	EnvVarDebugLog = "DEBUG_LOG"
 )
 
 // SENSOR CONTROLLER CONSTANTS
 const (
-	// DefaultSensorControllerDeploymentName is the default deployment name of the sensor-controller
-	DefaultSensorControllerDeploymentName = "sensor-controller"
+	// LabelSensorControllerName is the default deployment name of the sensor-controller
+	LabelSensorControllerName = "sensor-controller"
 
 	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
 	// Content encoding is expected to be YAML.
@@ -83,7 +86,7 @@ const (
 	LabelOperation = "operation"
 
 	// LabelEventSource is label for event name
-	LabelEventSource = "event-name"
+	LabelEventSource = "event-source"
 
 	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
@@ -91,8 +94,8 @@ const (
 
 // GATEWAY CONSTANTS
 const (
-	// DefaultGatewayControllerDeploymentName is the default deployment name of the gateway-controller-controller
-	DefaultGatewayControllerDeploymentName = "gateway-controller"
+	// LabelGatewayControllerName is the default deployment name of the gateway-controller-controller
+	LabelGatewayControllerName = "gateway-controller"
 
 	// EnvVarGatewayControllerConfigMap contains name of the configmap to retrieve gateway-controller configuration from
 	EnvVarGatewayControllerConfigMap = "GATEWAY_CONTROLLER_CONFIG_MAP"

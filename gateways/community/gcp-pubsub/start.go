@@ -17,9 +17,8 @@ limitations under the License.
 package pubsub
 
 import (
-	"context"
-
 	"cloud.google.com/go/pubsub"
+	"context"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
 )
@@ -28,10 +27,12 @@ import (
 func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	ese.Log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Info("failed to parse event source")
 		return err
 	}
 	sc := config.(*pubSubEventSource)
@@ -44,12 +45,12 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 
 	go ese.listenEvents(ctx, sc, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// Create a new topic with the given name.
-	logger := ese.Log.With().Str("event-source", eventSource.Name).Str("topic", sc.Topic).Logger()
+	logger := ese.Log.WithEventSource(eventSource.Name).WithField("topic", sc.Topic)
 
 	client, err := pubsub.NewClient(ctx, sc.ProjectID, option.WithCredentialsFile(sc.CredentialsFile))
 	if err != nil {
@@ -57,14 +58,14 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 		return
 	}
 
-	logger.Info().Msg("creating GCP PubSub topic")
+	logger.Info("creating GCP PubSub topic")
 	topic, err := client.CreateTopic(ctx, sc.Topic)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	logger.Info().Msg("subscribing to GCP PubSub topic")
+	logger.Info("subscribing to GCP PubSub topic")
 	sub, err := client.CreateSubscription(ctx, eventSource.Id,
 		pubsub.SubscriptionConfig{Topic: topic})
 	if err != nil {
@@ -73,7 +74,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 	}
 
 	err = sub.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
-		logger.Info().Msg("received GCP PubSub Message from topic")
+		logger.Info("received GCP PubSub Message from topic")
 		dataCh <- m.Data
 		m.Ack()
 	})
@@ -85,15 +86,15 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 	<-doneCh
 
 	// after this point, panic on errors
-	logger.Info().Msg("deleting GCP PubSub subscription")
+	logger.Info("deleting GCP PubSub subscription")
 	if err = sub.Delete(context.Background()); err != nil {
 		panic(err)
 	}
-	logger.Info().Msg("deleting GCP PubSub topic")
+	logger.Info("deleting GCP PubSub topic")
 	if err = topic.Delete(context.Background()); err != nil {
 		panic(err)
 	}
-	logger.Info().Msg("closing GCP PubSub client")
+	logger.Info("closing GCP PubSub client")
 	if err = client.Close(); err != nil {
 		panic(err)
 	}

@@ -31,7 +31,7 @@ func main() {
 		panic(err)
 	}
 	gateways.StartGateway(&resource.ResourceEventSourceExecutor{
-		Log:          common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log:          common.NewArgoEventsLogger(),
 		K8RestConfig: rest,
 	})
 }

@@ -24,6 +24,6 @@ import (
 
 func main() {
 	gateways.StartGateway(&calendar.CalendarEventSourceExecutor{
-		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log: common.NewArgoEventsLogger(),
 	})
 }

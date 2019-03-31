@@ -34,7 +34,7 @@ func TestListenEvents(t *testing.T) {
 		ese := &SQSEventSourceExecutor{
 			Clientset: fake.NewSimpleClientset(),
 			Namespace: "fake",
-			Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+			Log:       common.NewArgoEventsLogger(),
 		}
 
 		dataCh := make(chan []byte)

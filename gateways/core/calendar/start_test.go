@@ -43,7 +43,7 @@ func TestListenEvents(t *testing.T) {
 		convey.So(ps, convey.ShouldNotBeNil)
 
 		ese := &CalendarEventSourceExecutor{
-			Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+			Log: common.NewArgoEventsLogger(),
 		}
 		dataCh := make(chan []byte)
 		errorCh := make(chan error)

@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/argoproj/argo-events/common"
+
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/gateways"
 )
@@ -35,10 +37,12 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // StartEventSource starts an event source
 func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("operating on event source")
+	log := ese.Log.WithEventSource(eventSource.Name)
+
+	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to parse event source")
+		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
 
@@ -48,11 +52,13 @@ func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 
 	go ese.listenEvents(config.(*kafka), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name)
 
 	if err := gateways.Connect(k.Backoff, func() error {
 		var err error
@@ -62,7 +68,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		}
 		return nil
 	}); err != nil {
-		ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Str("url", k.URL).Msg("failed to connect")
+		log.WithError(err).WithField(common.LabelURL, k.URL).Error("failed to connect")
 		errorCh <- err
 		return
 	}
@@ -90,7 +96,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		return
 	}
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to subscribe to messages")
+	log.Info("starting to subscribe to messages")
 	for {
 		select {
 		case msg := <-partitionConsumer.Messages():
@@ -103,7 +109,7 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 		case <-doneCh:
 			err = partitionConsumer.Close()
 			if err != nil {
-				ese.Log.Error().Err(err).Str("event-source-name", eventSource.Name).Msg("failed to close consumer")
+				log.WithError(err).Error("failed to close consumer")
 			}
 			return
 		}

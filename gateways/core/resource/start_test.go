@@ -17,6 +17,7 @@ limitations under the License.
 package resource
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/mitchellh/mapstructure"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -27,7 +28,9 @@ import (
 )
 
 var (
-	ese          = &ResourceEventSourceExecutor{}
+	ese = &ResourceEventSourceExecutor{
+		Log: common.NewArgoEventsLogger(),
+	}
 	resourceList = metav1.APIResourceList{
 		GroupVersion: "v1",
 		APIResources: []metav1.APIResource{
@@ -90,7 +93,7 @@ func TestFilter(t *testing.T) {
 				Namespace: "fake",
 				Labels: map[string]string{
 					"workflows.argoproj.io/phase": "Succeeded",
-					"name": "my-workflow",
+					"name":                        "my-workflow",
 				},
 			},
 		}

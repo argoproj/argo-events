@@ -18,8 +18,7 @@
 + AWS SNS Gateway #169
 + GCP PubSub Gateway #176
 + Support for git as trigger source #171
-+ Enhance Gitlan & Github gateway with in-build http server #172
-
++ Enhance Gitlab & Github gateway with in-build http server #172
 
 ## v0.7
 + Refactor gateways #147

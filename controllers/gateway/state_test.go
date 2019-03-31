@@ -1,9 +1,9 @@
 package gateway
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -12,7 +12,7 @@ func TestPersistUpdates(t *testing.T) {
 	convey.Convey("Given a gateway resource", t, func() {
 		namespace := "argo-events"
 		client := fake.NewSimpleClientset()
-		logger := common.GetLoggerContext(common.LoggerConf()).Logger()
+		logger := common.NewArgoEventsLogger()
 		gw, err := getGateway()
 		convey.So(err, convey.ShouldBeNil)
 
@@ -26,7 +26,7 @@ func TestPersistUpdates(t *testing.T) {
 			}
 
 			convey.Convey("Update the gateway", func() {
-				updatedGw, err := PersistUpdates(client, gw, &logger)
+				updatedGw, err := PersistUpdates(client, gw, logger)
 				convey.So(err, convey.ShouldBeNil)
 				convey.So(updatedGw, convey.ShouldNotEqual, gw)
 				convey.So(updatedGw.Labels, convey.ShouldResemble, gw.Labels)

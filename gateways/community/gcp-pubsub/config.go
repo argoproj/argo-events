@@ -17,13 +17,13 @@ limitations under the License.
 package pubsub
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 )
 
 // GcpPubSubEventSourceExecutor implements Eventing
 type GcpPubSubEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // pubSubEventSource contains configuration to subscribe to GCP PubSub topic

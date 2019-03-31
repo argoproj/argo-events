@@ -37,7 +37,7 @@ func main() {
 		panic("namespace is not provided")
 	}
 	gateways.StartGateway(&aws_sqs.SQSEventSourceExecutor{
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log:       common.NewArgoEventsLogger(),
 		Clientset: clientset,
 		Namespace: namespace,
 	})
