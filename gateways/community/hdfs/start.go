@@ -37,7 +37,7 @@ func (w *WatchableHDFS) GetFileID(fi os.FileInfo) interface{} {
 func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("activating event source")
+	ese.Log.WithEventSource(eventSource.Name).Info("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -50,11 +50,13 @@ func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSour
 
 	go ese.listenEvents(gwc, eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, &ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
 func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithEventSource(eventSource.Name)
 
 	hdfsConfig, err := createHDFSConfig(ese.Clientset, ese.Namespace, &config.GatewayClientConfig)
 	if err != nil {
@@ -109,12 +111,12 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 			return
 		}
 	}
-	ese.Log.Info().Str("event-source-name", eventSource.Name).Msg("starting to watch to HDFS notifications")
+	log.Info("starting to watch to HDFS notifications")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				ese.Log.Info().Str("event-source", eventSource.Name).Msg("HDFS watcher has stopped")
+				log.Info("HDFS watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("HDFS watcher stopped")
 				return
@@ -127,7 +129,13 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 				matched = true
 			}
 			if matched && (op&event.Op != 0) {
-				ese.Log.Debug().Str("config-key", eventSource.Name).Str("event-type", event.Op.String()).Str("descriptor-name", event.Name).Msg("HDFS event")
+				log.WithFields(
+					map[string]interface{}{
+						"event-type":      event.Op.String(),
+						"descriptor-name": event.Name,
+					},
+				).Debug("HDFS event")
+
 				payload, err := json.Marshal(event)
 				if err != nil {
 					errorCh <- err

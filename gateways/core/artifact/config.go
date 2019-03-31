@@ -17,15 +17,15 @@ limitations under the License.
 package artifact
 
 import (
+	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"k8s.io/client-go/kubernetes"
 )
 
 // S3EventSourceExecutor implements Eventing
 type S3EventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

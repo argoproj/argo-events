@@ -35,7 +35,7 @@ import (
 
 func getGatewayConfig() *GatewayConfig {
 	return &GatewayConfig{
-		Log:        common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log:        common.NewArgoEventsLogger(),
 		serverPort: "1234",
 		StatusCh:   make(chan EventSourceStatus),
 		gw: &v1alpha1.Gateway{

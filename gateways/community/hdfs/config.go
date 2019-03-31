@@ -2,18 +2,17 @@ package hdfs
 
 import (
 	"errors"
+	"github.com/argoproj/argo-events/common"
 
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/argoproj/argo-events/gateways/common"
 )
 
 // EventSourceExecutor implements Eventing
 type EventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
@@ -22,7 +21,7 @@ type EventSourceExecutor struct {
 
 // GatewayConfig contains information to setup a HDFS integration
 type GatewayConfig struct {
-	common.WatchPathConfig `json:",inline"`
+	gwcommon.WatchPathConfig `json:",inline"`
 
 	// Type of file operations to watch
 	Type string `json:"type"`

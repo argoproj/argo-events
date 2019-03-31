@@ -17,21 +17,20 @@ limitations under the License.
 package file
 
 import (
+	"github.com/argoproj/argo-events/common"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
-
-	"github.com/argoproj/argo-events/gateways/common"
 )
 
 // FileEventSourceExecutor implements Eventing
 type FileEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // fileWatcher contains configuration information for this gateway
 // +k8s:openapi-gen=true
 type fileWatcher struct {
-	common.WatchPathConfig `json:",inline"`
+	gwcommon.WatchPathConfig `json:",inline"`
 
 	// Type of file operations to watch
 	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information

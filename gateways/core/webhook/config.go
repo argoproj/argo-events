@@ -17,15 +17,14 @@ limitations under the License.
 package webhook
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 )
 
 // WebhookEventSourceExecutor implements Eventing
 type WebhookEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 type RouteConfig struct {
@@ -33,7 +32,7 @@ type RouteConfig struct {
 }
 
 func parseEventSource(es string) (interface{}, error) {
-	var n *common.Webhook
+	var n *gwcommon.Webhook
 	err := yaml.Unmarshal([]byte(es), &n)
 	if err != nil {
 		return nil, err

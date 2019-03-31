@@ -32,7 +32,7 @@ func TestListenEvents(t *testing.T) {
 		psc := ps.(*pubSubEventSource)
 
 		ese := &GcpPubSubEventSourceExecutor{
-			Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+			Log: common.NewArgoEventsLogger(),
 		}
 
 		dataCh := make(chan []byte)

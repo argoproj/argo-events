@@ -19,10 +19,9 @@ package gateways
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog"
+	"github.com/argoproj/argo-events/common"
 	"github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc/metadata"
-	"os"
 	"testing"
 	"time"
 )
@@ -66,7 +65,7 @@ func TestHandleEventsFromEventSource(t *testing.T) {
 		dataCh := make(chan []byte)
 		errorCh := make(chan error)
 		doneCh := make(chan struct{})
-		logger := zerolog.New(os.Stdout)
+		logger := common.NewArgoEventsLogger()
 
 		ctx, cancel := context.WithCancel(context.Background())
 
@@ -74,7 +73,7 @@ func TestHandleEventsFromEventSource(t *testing.T) {
 			es := &FakeGRPCStream{
 				Ctx: ctx,
 			}
-			go HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, &logger)
+			go HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, logger)
 			dataCh <- []byte("hello")
 			time.Sleep(1 * time.Second)
 			cancel()
@@ -87,7 +86,7 @@ func TestHandleEventsFromEventSource(t *testing.T) {
 			}
 			errorCh2 := make(chan error)
 			go func() {
-				err := HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, &logger)
+				err := HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, logger)
 				errorCh2 <- err
 			}()
 			errorCh <- fmt.Errorf("fake error")

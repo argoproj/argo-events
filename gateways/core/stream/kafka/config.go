@@ -18,14 +18,14 @@ package kafka
 
 import (
 	"github.com/Shopify/sarama"
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // KafkaEventSourceExecutor implements Eventing
 type KafkaEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // kafka defines configuration required to connect to kafka cluster

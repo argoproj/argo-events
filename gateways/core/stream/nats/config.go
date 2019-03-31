@@ -17,15 +17,15 @@ limitations under the License.
 package nats
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
-	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NatsEventSourceExecutor implements Eventing
 type NatsEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // Nats contains configuration to connect to NATS cluster

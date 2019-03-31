@@ -126,7 +126,7 @@ func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 		kubeClient:           kubeClientset,
 		discoveryClient:      fakeDiscoveryClient,
 		clientPool:           clientPool,
-		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
+		log:                  common.NewArgoEventsLogger(),
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,
 		controllerInstanceID: "test-1",
@@ -166,10 +166,10 @@ func TestEventHandler(t *testing.T) {
 		sec.sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 		fmt.Println(sensor.NodeID("test-gateway:test"))
 
-		sensor2.InitializeNode(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, &sec.log, "node is init")
-		sensor2.MarkNodePhase(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "node is active")
+		sensor2.InitializeNode(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, sec.log, "node is init")
+		sensor2.MarkNodePhase(sec.sensor, "test-gateway:test", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sec.log, "node is active")
 
-		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, &sec.log, "trigger is init")
+		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, sec.log, "trigger is init")
 
 		sec.processUpdateNotification(&updateNotification{
 			event:            getCloudEvent(),

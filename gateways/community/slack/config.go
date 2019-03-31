@@ -17,10 +17,9 @@ limitations under the License.
 package slack
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -31,7 +30,7 @@ type SlackEventSourceExecutor struct {
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
-	Log       zerolog.Logger
+	Log       *common.ArgoEventsLogger
 }
 
 type RouteConfig struct {
@@ -46,7 +45,7 @@ type slackEventSource struct {
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token"`
 	// Webhook
-	Hook *common.Webhook `json:"hook"`
+	Hook *gwcommon.Webhook `json:"hook"`
 }
 
 func parseEventSource(es string) (interface{}, error) {

@@ -68,6 +68,7 @@ func getGatewayController() *GatewayController {
 		svcInformer:      svcInformer,
 		informer:         informer,
 		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		log:              common.NewArgoEventsLogger(),
 	}
 }
 

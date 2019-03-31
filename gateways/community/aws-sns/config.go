@@ -19,11 +19,10 @@ package aws_sns
 import (
 	"time"
 
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -39,7 +38,7 @@ var (
 
 // SNSEventSourceExecutor implements Eventing
 type SNSEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
@@ -79,7 +78,7 @@ type httpNotification struct {
 // snsEventSource contains configuration to subscribe to SNS topic
 type snsEventSource struct {
 	// Hook defines a webhook.
-	Hook      *common.Webhook           `json:"hook"`
+	Hook      *gwcommon.Webhook         `json:"hook"`
 	TopicArn  string                    `json:"topicArn"`
 	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
 	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`

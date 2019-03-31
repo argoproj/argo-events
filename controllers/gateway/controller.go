@@ -22,7 +22,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/rs/zerolog"
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	ccommon "github.com/argoproj/argo-events/controllers/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -32,12 +36,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	ccommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 )
 
 const (
@@ -65,7 +63,7 @@ type GatewayController struct {
 	// Config is the gateway-controller gateway-controller-controller's configuration
 	Config GatewayControllerConfig
 	// log is the logger for a gateway
-	log zerolog.Logger
+	log *common.ArgoEventsLogger
 
 	// kubernetes config and apis
 	kubeConfig       *rest.Config
@@ -86,7 +84,7 @@ func NewGatewayController(rest *rest.Config, configMap, namespace string) *Gatew
 		ConfigMap:        configMap,
 		Namespace:        namespace,
 		kubeConfig:       rest,
-		log:              common.GetLoggerContext(common.LoggerConf()).Str("controller-namespace", namespace).Logger(),
+		log:              common.NewArgoEventsLogger(),
 		kubeClientset:    kubernetes.NewForConfigOrDie(rest),
 		gatewayClientset: clientset.NewForConfigOrDie(rest),
 		queue:            workqueue.NewRateLimitingQueue(rateLimiter),
@@ -103,7 +101,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.Warn().Str("gateway-controller", key.(string)).Err(err).Msg("failed to get gateway-controller '%s' from informer index")
+		c.log.WithGatewayName(key.(string)).WithError(err).Warn("failed to get gateway '%s' from informer index")
 		return true
 	}
 
@@ -114,7 +112,7 @@ func (c *GatewayController) processNextItem() bool {
 
 	gateway, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.log.Warn().Str("gateway-controller", key.(string)).Err(err).Msg("key in index is not a gateway-controller")
+		c.log.WithGatewayName(key.(string)).WithError(err).Warn("key in index is not a gateway")
 		return true
 	}
 
@@ -122,20 +120,27 @@ func (c *GatewayController) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		labels := map[string]string{
-			common.LabelGatewayName: gateway.Name,
-			common.LabelEventType:   string(common.EscalationEventType),
-		}
-		if err := common.GenerateK8sEvent(c.kubeClientset, fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name), common.StateChangeEventType,
-			"controller operation failed", gateway.Name, gateway.Namespace, c.Config.InstanceID, gateway.Kind, labels); err != nil {
-			ctx.log.Error().Err(err).Msg("failed to create K8s event to escalate controller operation failure")
+		if err := common.GenerateK8sEvent(c.kubeClientset,
+			fmt.Sprintf("controller failed to operate on gateway %s", gateway.Name),
+			common.StateChangeEventType,
+			"controller operation failed",
+			gateway.Name,
+			gateway.Namespace,
+			c.Config.InstanceID,
+			gateway.Kind,
+			map[string]string{
+				common.LabelGatewayName: gateway.Name,
+				common.LabelEventType:   string(common.EscalationEventType),
+			},
+		); err != nil {
+			ctx.log.WithError(err).Error("failed to create K8s event to escalate controller operation failure")
 		}
 	}
 
 	err = c.handleErr(err, key)
 	// create k8 event to escalate the error
 	if err != nil {
-		ctx.log.Error().Interface("error", err).Msg("gateway controller failed to handle error")
+		ctx.log.WithError(err).Error("gateway controller failed to handle error")
 	}
 	return true
 }
@@ -154,7 +159,7 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.log.Error().Str("gateway-controller", key.(string)).Err(err).Msg("error syncing gateway-controller")
+		c.log.WithGatewayName(key.(string)).WithError(err).Error("error syncing gateway")
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)
@@ -166,10 +171,10 @@ func (c *GatewayController) handleErr(err error, key interface{}) error {
 // Run executes the gateway-controller
 func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int) {
 	defer c.queue.ShutDown()
-	c.log.Info().Str("version", base.GetVersion().Version).Str("instance-id", c.Config.InstanceID).Msg("starting gateway-controller")
+	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Infof("starting gateway-controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.Error().Err(err).Msg("failed to register watch for gateway-controller config map")
+		c.log.WithError(err).Error("failed to register watch for gateway-controller config map")
 		return
 	}
 
@@ -177,7 +182,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateways")
+		c.log.Panicf("timed out waiting for the caches to sync for gateways")
 		return
 	}
 
@@ -189,14 +194,14 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
 		OwnerInformer:         c.informer,
 		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
-		Queue: c.queue,
+		Queue:                 c.queue,
 	}
 
 	c.podInformer = factory.NewPodInformer()
 	go c.podInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway pods")
+		c.log.Panic("timed out waiting for the caches to sync for gateway pods")
 		return
 	}
 
@@ -204,7 +209,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 	go c.svcInformer.Informer().Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
-		c.log.Panic().Msg("timed out waiting for the caches to sync for gateway services")
+		c.log.Panic("timed out waiting for the caches to sync for gateway services")
 		return
 	}
 

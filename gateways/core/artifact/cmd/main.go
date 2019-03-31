@@ -37,7 +37,7 @@ func main() {
 		panic("namespace is not provided")
 	}
 	gateways.StartGateway(&artifact.S3EventSourceExecutor{
-		Log:       common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log:       common.NewArgoEventsLogger(),
 		Clientset: clientset,
 		Namespace: namespace,
 	})
