@@ -103,11 +103,12 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 			sec.log.Error().Err(err).Msg("error occurred while determining triggers can be processed")
 			return
 		}
-
 		if !canProcess {
 			sec.log.Info().Msg("triggers can't be processed at this time, won't fire triggers")
 			return
 		}
+
+		// triggers are ready to process
 		sec.processTriggers()
 
 	case v1alpha1.ResourceUpdateNotification:

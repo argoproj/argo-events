@@ -109,7 +109,8 @@ type SensorSpec struct {
 	// DependencyGroups is a list of the groups of events.
 	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
 
-	// ErrorOnFailedRound transitions sensor into `error` state if the trigger round fails.
+	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
+	// Once sensor state is set to `error`, no further triggers will be processed.
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
 }
 
@@ -118,18 +119,11 @@ type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
-	// Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated.
-	// Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
-	// This trumps the recurrence patterns of calendar events and allows any event to have a strict defined life.
-	// After the deadline is reached and this event has not in a Resolved state, this event is marked as Failed
-	// and proper escalations should proceed.
-	Deadline int64 `json:"deadline,omitempty" protobuf:"bytes,2,opt,name=deadline"`
-
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,3,opt,name=filters"`
+	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,2,opt,name=filters"`
 
 	// Connected tells if subscription is already setup in case of nats protocol.
-	Connected bool `json:"connected,omitempty" protobuf:"bytes,4,opt,name=connected"`
+	Connected bool `json:"connected,omitempty" protobuf:"bytes,3,opt,name=connected"`
 }
 
 // DependencyGroup is the group of dependencies
@@ -213,7 +207,7 @@ type Trigger struct {
 	// ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
 	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
 
-	// Policy to configure backoff and execution of trigger
+	// Policy to configure backoff and execution criteria for the trigger
 	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,4,opt,name=policy"`
 }
 
@@ -280,23 +274,30 @@ type TriggerPolicy struct {
 	Criteria *TriggerPolicyCriteria `json:"criteria" protobuf:"bytes,2,opt,name=criteria"`
 
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
-	// It takes precedence over `ErrorOnFailedRound`.
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,opt,name=errorOnBackoffTimeout"`
 }
 
+// Backoff for an operation
 type Backoff struct {
-	Duration time.Duration `json:"duration"` // the base duration
-	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
-	Jitter   float64       `json:"jitter"`   // The amount of jitter applied each iteration
-	Steps    int           `json:"steps"`    // Exit with error after this many steps
+	// Duration is the duration in nanoseconds
+	Duration time.Duration `json:"duration" protobuf:"bytes,1,opt,name=duration"`
+
+	// Duration is multiplied by factor each iteration
+	Factor float64 `json:"factor" protobuf:"bytes,2,opt,name=factor"`
+
+	// The amount of jitter applied each iteration
+	Jitter float64 `json:"jitter" protobuf:"bytes,3,opt,name=jitter"`
+
+	// Exit with error after this many steps
+	Steps int `json:"steps" protobuf:"bytes,4,opt,name=steps"`
 }
 
 // TriggerPolicyCriteria defines the criteria to decide if a resource is in success or failure state.
 type TriggerPolicyCriteria struct {
-	// Success criteria
+	// Success defines labels required to identify a resource in success state
 	Success map[string]string `json:"success" protobuf:"bytes,1,opt,name=success"`
 
-	// Failure criteria
+	// Failure defines labels required to identify a resource in failed state
 	Failure map[string]string `json:"failure" protobuf:"bytes,2,opt,name=failure"`
 }
 
@@ -359,20 +360,33 @@ type NodeStatus struct {
 
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
-	S3        *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
-	Inline    *string               `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
-	File      *FileArtifact         `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
-	URL       *URLArtifact          `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
-	Configmap *ConfigmapArtifact    `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
-	Git       *GitArtifact          `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
+	// S3 compliant artifact
+	S3 *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+
+	// Inline artifact is embedded in sensor spec as a string
+	Inline *string `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
+
+	// File artifact is artifact stored in a file
+	File *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
+
+	// URL to fetch the artifact from
+	URL *URLArtifact `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+
+	// Configmap that stores the artifact
+	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+
+	// Git repository hosting the artifact
+	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
 type ConfigmapArtifact struct {
 	// Name of the configmap
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
+
 	// Namespace where configmap is deployed
 	Namespace string `json:"namespace" protobuf:"bytes,2,name=namespace"`
+
 	// Key within configmap data which contains trigger resource definition
 	Key string `json:"key" protobuf:"bytes,3,name=key"`
 }
@@ -384,35 +398,46 @@ type FileArtifact struct {
 
 // URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
-	Path       string `json:"path" protobuf:"bytes,1,name=path"`
-	VerifyCert bool   `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
+	// Path is the complete URL
+	Path string `json:"path" protobuf:"bytes,1,name=path"`
+
+	// VerifyCert decides whether the connection is secure or not
+	VerifyCert bool `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
 }
 
 // GitArtifact contains information about an artifact stored in git
 type GitArtifact struct {
 	// Git URL
 	URL string `json:"url" protobuf:"bytes,1,name=url"`
+
 	// Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers.
 	// Hence we don't use any specific git provider client.
 	CloneDirectory string `json:"cloneDirectory" protobuf:"bytes,2,name=cloneDirectory"`
+
 	// Creds contain reference to git username and password
 	// +optional
 	Creds *GitCreds `json:"creds,omitempty" protobuf:"bytes,3,opt,name=creds"`
+
 	// Namespace where creds are stored.
 	// +optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+
 	// SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
 	// ssh key path must be mounted in sensor pod.
 	// +optional
 	SSHKeyPath string `json:"sshKeyPath,omitempty" protobuf:"bytes,5,opt,name=sshKeyPath"`
+
 	// Path to file that contains trigger resource definition
 	FilePath string `json:"filePath" protobuf:"bytes,6,name=filePath"`
+
 	// Branch to use to pull trigger resource
 	// +optional
 	Branch string `json:"branch,omitempty" protobuf:"bytes,7,opt,name=branch"`
+
 	// Tag to use to pull trigger resource
 	// +optional
 	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
+
 	// Remote to manage set of tracked repositories. Defaults to "origin".
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
@@ -423,6 +448,7 @@ type GitArtifact struct {
 type GitRemoteConfig struct {
 	// Name of the remote to fetch from.
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
+
 	// URLs the URLs of a remote repository. It must be non-empty. Fetch will
 	// always use the first URL, while push will use all of them.
 	URLS []string `json:"urls" protobuf:"bytes,2,rep,name=urls"`

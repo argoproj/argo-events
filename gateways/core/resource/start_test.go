@@ -90,7 +90,7 @@ func TestFilter(t *testing.T) {
 				Namespace: "fake",
 				Labels: map[string]string{
 					"workflows.argoproj.io/phase": "Succeeded",
-					"name": "my-workflow",
+					"name":                        "my-workflow",
 				},
 			},
 		}

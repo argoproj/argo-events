@@ -1,0 +1,111 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: trigger-backoff
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: "webhook-gateway-http:foo"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  # If set to true, marks sensor state as `error` if the previous trigger round fails.
+  # Once sensor state is set to `error`, no further triggers will be processed.
+  errorOnFailedRound: true
+  triggers:
+    - template:
+        name: trigger-1
+        # Policy to configure backoff and execution criteria for the trigger
+        # Because the sensor is able to trigger any K8s resource, it determines the resource state by looking at the resource's labels.
+        policy:
+          # Backoff before checking the resource labels
+          backoff:
+            # Duration is the duration in nanoseconds
+            duration: 1000000000 # 1 second
+            # Duration is multiplied by factor each iteration
+            factor: 2
+            # The amount of jitter applied each iteration
+            jitter: 0.1
+            # Exit with error after this many steps
+            steps: 5
+          # the criteria to decide if a resource is in success or failure state.
+          # labels set on the resource decide if resource is in success or failed state.
+          criteria:
+            # Note: Set either success or failure labels. If you set both, only success labels will be considered.
+
+            # Success defines labels required to identify a resource in success state
+            success:
+              workflows.argoproj.io/phase: Succeeded
+            # Failure defines labels required to identify a resource in failed state
+            failure:
+              workflows.argoproj.io/phase: Failed
+          # Determines whether trigger should be marked as failed if the backoff times out and sensor is still unable to decide the state of the trigger.
+          # defaults to false
+          errorOnBackoffTimeout: true
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: webhook-
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
+              templates:
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "webhook-gateway-http:foo"
+          dest: spec.arguments.parameters.0.value
+    - template:
+        name: trigger-2
+          policy:
+            backoff:
+              duration: 1000000000 # 1 second
+              factor: 2
+              jitter: 0.1
+              steps: 5
+            criteria:
+              failure:
+                workflows.argoproj.io/phase: Failed
+            errorOnBackoffTimeout: false
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+              - name: whalesay
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["hello world"]

@@ -170,7 +170,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	}
 }
 
-// apply parameters for trigger
+// applyParamsTrigger applies parameters to trigger
 func (sec *sensorExecutionCtx) applyParamsTrigger(trigger *v1alpha1.Trigger) error {
 	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
 		templateBytes, err := json.Marshal(trigger.Template)
@@ -190,6 +190,7 @@ func (sec *sensorExecutionCtx) applyParamsTrigger(trigger *v1alpha1.Trigger) err
 	return nil
 }
 
+// applyParamsResource applies parameters to resource within trigger
 func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
 	if parameters != nil && len(parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
@@ -209,7 +210,7 @@ func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.Trigger
 	return nil
 }
 
-// execute the trigger
+// executeTrigger executes the trigger
 func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 	if trigger.Template != nil {
 		if err := sec.applyParamsTrigger(&trigger); err != nil {
@@ -236,33 +237,26 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 
 // applyTriggerPolicy applies backoff and evaluates success/failure for a trigger
 func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, resourceInterface dynamic.ResourceInterface, name, namespace string) error {
-	sec.log.Info().Interface("backoff", trigger.Policy.Backoff).Msg("backoff")
-
 	err := wait.ExponentialBackoff(wait.Backoff{
 		Duration: trigger.Policy.Backoff.Duration,
 		Steps:    trigger.Policy.Backoff.Steps,
 		Factor:   trigger.Policy.Backoff.Factor,
 		Jitter:   trigger.Policy.Backoff.Jitter,
 	}, func() (bool, error) {
-		sec.log.Info().Msg("getting resource")
-
 		obj, err := resourceInterface.Get(name, metav1.GetOptions{})
 		if err != nil {
 			sec.log.Warn().Err(err).Str("resource-name", obj.GetName()).Msg("failed to get triggered resource")
 			return false, nil
 		}
 
-		fmt.Println(obj)
-
-		fmt.Println(obj.GetLabels())
-
 		labels := obj.GetLabels()
 		if labels == nil {
 			sec.log.Warn().Msg("triggered object does not have labels, won't apply the trigger policy")
 			return false, nil
 		}
+		sec.log.Debug().Interface("labels", labels).Msg("object labels")
 
-		// check if success criteria is set
+		// check if success labels match with labels on object
 		if trigger.Policy.Criteria.Success != nil {
 			success := true
 			for successKey, successValue := range trigger.Policy.Criteria.Success {
@@ -280,7 +274,7 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 			}
 		}
 
-		// check if failure criteria is set
+		// check if failure labels match with labels on object
 		if trigger.Policy.Criteria.Failure != nil {
 			failure := true
 			for failureKey, failureValue := range trigger.Policy.Criteria.Failure {
@@ -294,7 +288,7 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 				failure = false
 			}
 			if failure {
-				return false, fmt.Errorf("trigger failure")
+				return false, fmt.Errorf("trigger is in failed state")
 			}
 		}
 
@@ -343,12 +337,12 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 
 	// apply trigger policy if set
 	if trigger.Policy != nil {
-		sec.log.Info().Msg("applying trigger policy")
+		sec.log.Info().Msg("applying trigger policy...")
 
 		if err := sec.applyTriggerPolicy(trigger, reIf, liveObj.GetName(), namespace); err != nil {
 			if err == wait.ErrWaitTimeout {
 				if trigger.Policy.ErrorOnBackoffTimeout {
-					return fmt.Errorf("failed to determine status of the triggered resource")
+					return fmt.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 				}
 				return nil
 			}
