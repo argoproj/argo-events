@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
@@ -377,6 +378,9 @@ type ArtifactLocation struct {
 
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
+
+	// Resource is generic template for K8s resource
+	Resource *unstructured.Unstructured `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
