@@ -52,7 +52,7 @@ func (f *FakeRouteConfig) PostStop() error {
 }
 
 func GetFakeRoute() *Route {
-	logger := common.GetLoggerContext(common.LoggerConf()).Logger()
+	logger := common.NewArgoEventsLogger()
 	return &Route{
 		Webhook: Hook,
 		EventSource: &gateways.EventSource{
@@ -60,7 +60,7 @@ func GetFakeRoute() *Route {
 			Data: "hello",
 			Id:   "123",
 		},
-		Logger:  &logger,
+		Logger:  logger,
 		StartCh: make(chan struct{}),
 	}
 }

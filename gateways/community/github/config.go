@@ -17,18 +17,17 @@ limitations under the License.
 package github
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
-	"github.com/rs/zerolog"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
 // GithubEventSourceExecutor implements ConfigExecutor
 type GithubEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
@@ -50,7 +49,7 @@ type githubEventSource struct {
 	// Webhook ID
 	Id int64 `json:"id"`
 	// Webhook
-	Hook *common.Webhook `json:"hook"`
+	Hook *gwcommon.Webhook `json:"hook"`
 	// GitHub owner name i.e. argoproj
 	Owner string `json:"owner"`
 	// GitHub repo name i.e. argo-events

@@ -49,7 +49,7 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 					continue group
 				}
 			}
-			sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseComplete, nil, &sec.log, "dependency group is complete")
+			sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseComplete, nil, sec.log, "dependency group is complete")
 			groups[group.Name] = true
 		}
 
@@ -100,7 +100,7 @@ func (sec *sensorExecutionCtx) canExecuteTrigger(trigger v1alpha1.Trigger) bool 
 // processTriggers checks if all event dependencies are complete and then starts executing triggers
 func (sec *sensorExecutionCtx) processTriggers() {
 	// to trigger the sensor action/s we need to check if all event dependencies are completed and sensor is active
-	sec.log.Info().Msg("all event dependencies are marked completed, processing triggers")
+	sec.log.Info("all event dependencies are marked completed, processing triggers")
 
 	// labels for K8s event
 	labels := map[string]string{
@@ -111,17 +111,19 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	successTriggerCycle := true
 
 	for _, trigger := range sec.sensor.Spec.Triggers {
+		log := sec.log.WithTrigger(trigger.Template.Name)
+
 		// check if a trigger condition is set
 		if canExecute := sec.canExecuteTrigger(trigger); !canExecute {
-			sec.log.Info().Str("trigger-name", trigger.Template.Name).Msg("trigger can't be executed because trigger condition failed")
+			log.Info("trigger can't be executed because trigger condition failed")
 			continue
 		}
 
 		if err := sec.executeTrigger(trigger); err != nil {
-			sec.log.Error().Str("trigger-name", trigger.Template.Name).Err(err).Msg("trigger failed to execute")
+			log.WithError(err).Error("trigger failed to execute")
 
 			// mark trigger status as error
-			sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, &sec.log, fmt.Sprintf("failed to execute trigger.Template. err: %+v", err))
+			sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseError, nil, sec.log, fmt.Sprintf("failed to execute trigger.Template. err: %+v", err))
 
 			successTriggerCycle = false
 
@@ -129,18 +131,18 @@ func (sec *sensorExecutionCtx) processTriggers() {
 			labels[common.LabelEventType] = string(common.EscalationEventType)
 			if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("failed to execute trigger %s", trigger.Template.Name), common.EscalationEventType,
 				"trigger failure", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-				sec.log.Error().Err(err).Msg("failed to create K8s event to escalate trigger failure")
+				log.WithError(err).Error("failed to create K8s event to escalate trigger failure")
 			}
 			continue
 		}
 
 		// mark trigger as complete.
-		sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, &sec.log, "successfully executed trigger")
+		sn.MarkNodePhase(sec.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, v1alpha1.NodePhaseComplete, nil, sec.log, "successfully executed trigger")
 
 		labels[common.LabelEventType] = string(common.OperationSuccessEventType)
 		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("trigger %s executed successfully", trigger.Template.Name), common.OperationSuccessEventType,
 			"trigger executed", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution")
+			log.WithError(err).Error("failed to create K8s event to log trigger execution")
 		}
 	}
 
@@ -157,16 +159,16 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	labels[common.LabelEventType] = string(common.OperationSuccessEventType)
 	if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("completion count:%d", sec.sensor.Status.TriggerCycleCount), common.OperationSuccessEventType,
 		"triggers execution round completion", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.Error().Err(err).Msg("failed to create K8s event to log trigger execution round completion")
+		sec.log.WithError(err).Error("failed to create K8s event to log trigger execution round completion")
 	}
 
 	// Mark all dependency nodes as active
 	for _, dependency := range sec.sensor.Spec.Dependencies {
-		sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency is re-activated")
+		sn.MarkNodePhase(sec.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sec.log, "dependency is re-activated")
 	}
 	// Mark all dependency groups as active
 	for _, group := range sec.sensor.Spec.DependencyGroups {
-		sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, &sec.log, "dependency group is re-activated")
+		sn.MarkNodePhase(sec.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sec.log, "dependency group is re-activated")
 	}
 }
 
@@ -245,16 +247,16 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 	}, func() (bool, error) {
 		obj, err := resourceInterface.Get(name, metav1.GetOptions{})
 		if err != nil {
-			sec.log.Warn().Err(err).Str("resource-name", obj.GetName()).Msg("failed to get triggered resource")
+			sec.log.WithError(err).WithField("resource-name", obj.GetName()).Error("failed to get triggered resource")
 			return false, nil
 		}
 
 		labels := obj.GetLabels()
 		if labels == nil {
-			sec.log.Warn().Msg("triggered object does not have labels, won't apply the trigger policy")
+			sec.log.Warn("triggered object does not have labels, won't apply the trigger policy")
 			return false, nil
 		}
-		sec.log.Debug().Interface("labels", labels).Msg("object labels")
+		sec.log.WithField("labels", labels).Debug("object labels")
 
 		// check if success labels match with labels on object
 		if trigger.Policy.Criteria.Success != nil {
@@ -326,18 +328,28 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 	if err != nil {
 		return fmt.Errorf("failed to get server resource for given group version and kind. err: %+v", err)
 	}
-	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
+
+	sec.log.WithFields(
+		map[string]interface{}{
+			"api":           apiResource.Name,
+			"group-version": gvk.Version,
+		}).Info("created api resource")
 
 	reIf := client.Resource(apiResource, namespace)
 	liveObj, err := reIf.Create(obj)
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
-	sec.log.Info().Str("kind", liveObj.GetKind()).Str("name", liveObj.GetName()).Msg("created object")
+
+	sec.log.WithFields(
+		map[string]interface{}{
+			"kind": liveObj.GetKind(),
+			"name": liveObj.GetName(),
+		}).Info("created object")
 
 	// apply trigger policy if set
 	if trigger.Policy != nil {
-		sec.log.Info().Msg("applying trigger policy...")
+		sec.log.Info("applying trigger policy...")
 
 		if err := sec.applyTriggerPolicy(trigger, reIf, liveObj.GetName(), namespace); err != nil {
 			if err == wait.ErrWaitTimeout {
@@ -359,25 +371,22 @@ func (sec *sensorExecutionCtx) extractEvents(params []v1alpha1.TriggerParameter)
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
+			log := sec.log.WithFields(
+				map[string]interface{}{
+					"param-src":  param.Src.Event,
+					"param-dest": param.Dest,
+				})
 			node := sn.GetNodeByName(sec.sensor, param.Src.Event)
 			if node == nil {
-				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event dependency node does not exist, cannot apply parameter")
+				log.Warn("event dependency node does not exist, cannot apply parameter")
 				continue
 			}
 			if node.Event == nil {
-				sec.log.Warn().Str("param-src", param.Src.Event).Str("param-dest", param.Dest).Msg("WARNING: event in event dependency does not exist, cannot apply parameter")
+				log.Warn("event in event dependency does not exist, cannot apply parameter")
 				continue
 			}
 			events[param.Src.Event] = *node.Event
 		}
 	}
 	return events
-}
-
-func getLabelKeys(labels map[string]string) []string {
-	keys := make([]string, 0, len(labels))
-	for k := range labels {
-		keys = append(keys, k)
-	}
-	return keys
 }

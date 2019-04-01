@@ -30,7 +30,7 @@ import (
 
 // resyncs the sensor object for status updates
 func (se *sensorExecutionCtx) syncSensor(ctx context.Context) cache.Controller {
-	se.log.Info().Msg("watching sensor updates")
+	se.log.Info("watching sensor updates")
 	source := se.newSensorWatch()
 	_, controller := cache.NewInformer(
 		source,

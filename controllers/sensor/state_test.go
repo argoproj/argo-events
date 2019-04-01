@@ -13,7 +13,7 @@ import (
 
 func TestSensorState(t *testing.T) {
 	fakeSensorClient := fakesensor.NewSimpleClientset()
-	logger := common.GetLoggerContext(common.LoggerConf()).Logger()
+	logger := common.NewArgoEventsLogger()
 	sn := &v1alpha1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-sensor",
@@ -29,12 +29,12 @@ func TestSensorState(t *testing.T) {
 		})
 
 		convey.Convey("Initialize a new node", func() {
-			status := InitializeNode(sn, "first_node", v1alpha1.NodeTypeEventDependency, &logger)
+			status := InitializeNode(sn, "first_node", v1alpha1.NodeTypeEventDependency, logger)
 			convey.So(status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseNew)
 		})
 
 		convey.Convey("Persist updates to sn", func() {
-			sensor, err := PersistUpdates(fakeSensorClient, sn, "1", &logger)
+			sensor, err := PersistUpdates(fakeSensorClient, sn, "1", logger)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(len(sensor.Status.Nodes), convey.ShouldEqual, 1)
 		})
@@ -42,7 +42,7 @@ func TestSensorState(t *testing.T) {
 		convey.Convey("Mark sn node state to active", func() {
 			status := MarkNodePhase(sn, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
 				Payload: []byte("test payload"),
-			}, &logger)
+			}, logger)
 			convey.So(status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 		})
 

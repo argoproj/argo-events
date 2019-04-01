@@ -155,7 +155,7 @@ func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
 		},
 		{
 			Name:  common.EnvVarGatewayControllerName,
-			Value: common.DefaultGatewayControllerDeploymentName,
+			Value: common.LabelGatewayControllerName,
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,

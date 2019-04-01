@@ -18,13 +18,13 @@ package common
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/rs/zerolog"
 )
 
 // Webhook is a general purpose REST API
@@ -76,7 +76,7 @@ type activeServer struct {
 // Route contains common information for a route
 type Route struct {
 	Webhook     *Webhook
-	Logger      *zerolog.Logger
+	Logger      *common.ArgoEventsLogger
 	StartCh     chan struct{}
 	EventSource *gateways.EventSource
 }
@@ -161,7 +161,7 @@ func startHttpServer(routeManager RouteManager, helper *WebhookHelper) {
 			} else {
 				err = r.Webhook.srv.ListenAndServeTLS(r.Webhook.ServerCertPath, r.Webhook.ServerKeyPath)
 			}
-			r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Str("port", r.Webhook.Port).Msg("http server stopped")
+			r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -183,8 +183,9 @@ func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
 		helper.Mutex.Unlock()
 	}
 
-	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("adding route handler")
+	log := r.Logger.WithEventSource(r.EventSource.Name).WithPort(r.Webhook.Port).WithEndpoint(r.Webhook.Endpoint)
 
+	log.Info("adding route handler")
 	if _, ok := helper.ActiveEndpoints[r.Webhook.Endpoint]; !ok {
 		helper.ActiveEndpoints[r.Webhook.Endpoint] = &Endpoint{
 			Active: true,
@@ -194,7 +195,7 @@ func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
 	}
 	helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
-	r.Logger.Info().Str("event-source-name", r.EventSource.Name).Str("port", r.Webhook.Port).Str("endpoint", r.Webhook.Endpoint).Msg("route handler added")
+	log.Info("route handler added")
 }
 
 func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -203,18 +204,18 @@ func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStre
 	for {
 		select {
 		case data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh:
-			r.Logger.Info().Str("event-source-name", r.EventSource.Name).Msg("new event received, dispatching to gateway client")
+			r.Logger.WithEventSource(r.EventSource.Name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    r.EventSource.Name,
 				Payload: data,
 			})
 			if err != nil {
-				r.Logger.Error().Err(err).Str("event-source-name", r.EventSource.Name).Msg("failed to send event")
+				r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("failed to send event")
 				return err
 			}
 
 		case <-eventStream.Context().Done():
-			r.Logger.Info().Str("event-source-name", r.EventSource.Name).Msg("connection is closed by client")
+			r.Logger.WithEventSource(r.EventSource.Name).Info("connection is closed by client")
 			helper.RouteDeactivateChan <- routeManager
 			return nil
 
@@ -227,31 +228,32 @@ func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStre
 
 func ProcessRoute(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
 	r := routeManager.GetRoute()
+	log := r.Logger.WithEventSource(r.EventSource.Name)
 
-	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("validating the route")
+	log.Info("validating the route")
 	if err := validateRoute(routeManager.GetRoute()); err != nil {
-		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred validating route")
+		log.WithError(err).Error("error occurred validating route")
 		return err
 	}
 
-	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("activating the route")
+	log.Info("activating the route")
 	activateRoute(routeManager, helper)
 
-	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post start")
+	log.Info("running post start")
 	if err := routeManager.PostStart(); err != nil {
-		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post start")
+		log.WithError(err).Error("error occurred in post start")
 		return err
 	}
 
-	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("processing channels")
+	log.Info("processing channels")
 	if err := processChannels(routeManager, helper, eventStream); err != nil {
-		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in process channel")
+		log.WithError(err).Error("error occurred in process channel")
 		return err
 	}
 
-	r.Logger.Info().Str("event-source", r.EventSource.Name).Msg("running post stop")
+	log.Info("running post stop")
 	if err := routeManager.PostStop(); err != nil {
-		r.Logger.Error().Err(err).Str("event-source", r.EventSource.Name).Msg("error occurred in post stop")
+		log.WithError(err).Error("error occurred in post stop")
 	}
 	return nil
 }

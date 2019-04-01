@@ -19,7 +19,6 @@ package gateways
 import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
-	zlog "github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -55,11 +54,11 @@ func Recover(eventSource string) {
 }
 
 // HandleEventsFromEventSource handles events from the event source.
-func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *zlog.Logger) error {
+func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *common.ArgoEventsLogger) error {
 	for {
 		select {
 		case data := <-dataCh:
-			log.Info().Str("event-source-name", name).Msg("new event received, dispatching to gateway client")
+			log.WithEventSource(name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&Event{
 				Name:    name,
 				Payload: data,
@@ -69,11 +68,11 @@ func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSou
 			}
 
 		case err := <-errorCh:
-			log.Info().Str("event-source-name", name).Err(err).Msg("error occurred while getting event from event source")
+			log.WithEventSource(name).WithError(err).Error("error occurred while getting event from event source")
 			return err
 
 		case <-eventStream.Context().Done():
-			log.Info().Str("event-source-name", name).Msg("connection is closed by client")
+			log.WithEventSource(name).Info("connection is closed by client")
 			doneCh <- struct{}{}
 			return nil
 		}

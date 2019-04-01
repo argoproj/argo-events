@@ -33,9 +33,9 @@ func (sec *sensorExecutionCtx) HttpEventProtocol() {
 	// add a handler to handle incoming events
 	http.HandleFunc("/", sec.httpEventHandler)
 
-	sec.log.Info().Str("port", sec.sensor.Spec.EventProtocol.Http.Port).Msg("sensor started listening")
+	sec.log.WithPort(sec.sensor.Spec.EventProtocol.Http.Port).Info("sensor started listening")
 	if err := sec.server.ListenAndServe(); err != nil {
-		sec.log.Error().Err(err).Msg("sensor server stopped")
+		sec.log.WithError(err).Error("sensor server stopped")
 		// escalate error
 		labels := map[string]string{
 			common.LabelEventType:  string(common.EscalationEventType),
@@ -44,7 +44,7 @@ func (sec *sensorExecutionCtx) HttpEventProtocol() {
 		}
 		if err := common.GenerateK8sEvent(sec.kubeClient, fmt.Sprintf("sensor server stopped"), common.EscalationEventType,
 			"server shutdown", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sec.log.Error().Err(err).Msg("failed to create K8s event to log server shutdown error")
+			sec.log.WithError(err).Error("failed to create K8s event to log server shutdown error")
 		}
 	}
 }
@@ -53,30 +53,30 @@ func (sec *sensorExecutionCtx) HttpEventProtocol() {
 func (sec *sensorExecutionCtx) httpEventHandler(w http.ResponseWriter, r *http.Request) {
 	var response string
 
-	sec.log.Info().Msg("received an event from gateway")
+	sec.log.Info("received an event from gateway")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		response = "failed to read request body"
-		sec.log.Error().Err(err).Msg(response)
+		sec.log.WithError(err).Error(response)
 		common.SendErrorResponse(w, response)
 	}
 
 	event, err := sec.parseEvent(body)
 	if err != nil {
 		response = "failed to parse request into event"
-		sec.log.Error().Err(err).Msg(response)
+		sec.log.WithError(err).Error(response)
 		common.SendErrorResponse(w, response)
 	}
 
 	// validate whether the event is from gateway that this sensor is watching and send event over internal queue if valid
 	if sec.sendEventToInternalQueue(event, w) {
 		response = "message successfully sent over internal queue"
-		sec.log.Info().Str("event-source-name", event.Context.Source.Host).Msg(response)
+		sec.log.WithEventSource(event.Context.Source.Host).Info(response)
 		common.SendSuccessResponse(w, response)
 		return
 	}
 
 	response = "event is from unknown source"
-	sec.log.Warn().Str("event-source-name", event.Context.Source.Host).Msg(response)
+	sec.log.WithEventSource(event.Context.Source.Host).Warn(response)
 	common.SendErrorResponse(w, response)
 }

@@ -17,15 +17,15 @@ limitations under the License.
 package mqtt
 
 import (
+	"github.com/argoproj/argo-events/common"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // MqttEventSourceExecutor implements Eventing
 type MqttEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // mqtt contains information to connect to MQTT broker

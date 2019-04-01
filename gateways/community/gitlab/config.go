@@ -17,17 +17,16 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
 // GitlabEventSourceExecutor implements ConfigExecutor
 type GitlabEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
@@ -49,7 +48,7 @@ type gitlabEventSource struct {
 	// Webhook Id
 	Id int `json:"id"`
 	// Webhook
-	Hook *common.Webhook `json:"hook"`
+	Hook *gwcommon.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId"`
 	// Event is a gitlab event to listen to.

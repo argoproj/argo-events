@@ -17,15 +17,15 @@ limitations under the License.
 package calendar
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 )
 
 // CalendarEventSourceExecutor implements Eventing
 type CalendarEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 }
 
 // calSchedule describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.

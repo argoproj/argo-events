@@ -19,11 +19,11 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	pubsub "github.com/argoproj/argo-events/gateways/community/gcp-pubsub"
+	"github.com/argoproj/argo-events/gateways/community/gcp-pubsub"
 )
 
 func main() {
 	gateways.StartGateway(&pubsub.GcpPubSubEventSourceExecutor{
-		Log: common.GetLoggerContext(common.LoggerConf()).Logger(),
+		Log: common.NewArgoEventsLogger(),
 	})
 }

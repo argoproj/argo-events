@@ -17,8 +17,8 @@ limitations under the License.
 package resource
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"github.com/rs/zerolog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
@@ -26,7 +26,7 @@ import (
 
 // ResourceEventSourceExecutor implements Eventing
 type ResourceEventSourceExecutor struct {
-	Log zerolog.Logger
+	Log *common.ArgoEventsLogger
 	// K8RestConfig is kubernetes cluster config
 	K8RestConfig *rest.Config
 }
