@@ -270,8 +270,8 @@ type TriggerPolicy struct {
 	// Backoff before checking resource state
 	Backoff Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
 
-	// Criteria to check resource state
-	Criteria *TriggerPolicyCriteria `json:"criteria" protobuf:"bytes,2,opt,name=criteria"`
+	// State refers to labels used to check the resource state
+	State *TriggerStateLabels `json:"state" protobuf:"bytes,2,opt,name=state"`
 
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,opt,name=errorOnBackoffTimeout"`
@@ -292,8 +292,8 @@ type Backoff struct {
 	Steps int `json:"steps" protobuf:"bytes,4,opt,name=steps"`
 }
 
-// TriggerPolicyCriteria defines the criteria to decide if a resource is in success or failure state.
-type TriggerPolicyCriteria struct {
+// TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.
+type TriggerStateLabels struct {
 	// Success defines labels required to identify a resource in success state
 	Success map[string]string `json:"success" protobuf:"bytes,1,opt,name=success"`
 
@@ -324,6 +324,9 @@ type SensorStatus struct {
 
 	// TriggerCycleState is the status from last cycle of triggers execution.
 	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,7,opt,name=triggerCycleStatus"`
+
+	// LastCycleTime is the time when last trigger cycle completed
+	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,8,opt,name=lastCycleTime"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.

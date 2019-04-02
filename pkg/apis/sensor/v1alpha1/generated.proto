@@ -306,6 +306,9 @@ message SensorStatus {
 
   // TriggerCycleState is the status from last cycle of triggers execution.
   optional string triggerCycleStatus = 7 [(gogoproto.casttype) = "TriggerCycleState", (gogoproto.customname) = "TriggerCycleStatus", (gogoproto.nullable) = false];
+
+  // LastCycleTime is the time when last trigger cycle completed
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastCycleTime = 8 [(gogoproto.customname) = "LastCycleTime", (gogoproto.nullable) = false];
 }
 
 // TimeFilter describes a window in time.
@@ -383,15 +386,15 @@ message TriggerPolicy {
   // Backoff before checking resource state
   optional Backoff backoff = 1 [(gogoproto.customname) = "Backoff", (gogoproto.nullable) = false];
 
-  // Criteria to check resource state
-  optional TriggerPolicyCriteria criteria = 2 [(gogoproto.customname) = "Criteria"];
+  // State refers to labels used to check the resource state
+  optional TriggerStateLabels state = 2 [(gogoproto.customname) = "State"];
 
   // ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
   optional bool errorOnBackoffTimeout = 3 [(gogoproto.customname) = "ErrorOnBackoffTimeout", (gogoproto.nullable) = false];
 }
 
-// TriggerPolicyCriteria defines the criteria to decide if a resource is in success or failure state.
-message TriggerPolicyCriteria {
+// TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.
+message TriggerStateLabels {
   // Success defines labels required to identify a resource in success state
   map<string, string> success = 1 [(gogoproto.customname) = "Success", (gogoproto.nullable) = false];
 

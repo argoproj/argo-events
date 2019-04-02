@@ -148,6 +148,8 @@ func (sec *sensorExecutionCtx) processTriggers() {
 
 	// increment completion counter
 	sec.sensor.Status.TriggerCycleCount = sec.sensor.Status.TriggerCycleCount + 1
+	// set completion time
+	sec.sensor.Status.LastCycleTime = metav1.Now()
 
 	if successTriggerCycle {
 		sec.sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleSuccess
@@ -259,9 +261,9 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 		sec.log.WithField("labels", labels).Debug("object labels")
 
 		// check if success labels match with labels on object
-		if trigger.Policy.Criteria.Success != nil {
+		if trigger.Policy.State.Success != nil {
 			success := true
-			for successKey, successValue := range trigger.Policy.Criteria.Success {
+			for successKey, successValue := range trigger.Policy.State.Success {
 				if value, ok := labels[successKey]; ok {
 					if successValue != value {
 						success = false
@@ -277,9 +279,9 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 		}
 
 		// check if failure labels match with labels on object
-		if trigger.Policy.Criteria.Failure != nil {
+		if trigger.Policy.State.Failure != nil {
 			failure := true
-			for failureKey, failureValue := range trigger.Policy.Criteria.Failure {
+			for failureKey, failureValue := range trigger.Policy.State.Failure {
 				if value, ok := labels[failureKey]; ok {
 					if failureValue != value {
 						failure = false

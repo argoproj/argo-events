@@ -46,12 +46,6 @@
   version = "v1.21.0"
 
 [[projects]]
-  name = "github.com/apex/log"
-  packages = ["."]
-  revision = "941dea75d3ebfbdd905a5d8b7b232965c5e5c684"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/argoproj/argo"
   packages = [
     "pkg/apis/workflow",
@@ -544,8 +538,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
-  version = "v1.4.0"
+  revision = "8bdbc7bcc01dcbb8ec23dc8a28e332258d25251f"
+  version = "v1.4.1"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -1324,6 +1318,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "587077f053f9f8c09ff70711127b09ef0e10950873369b956baa0e1d77e0ec62"
+  inputs-digest = "cfff04f465fd9c945e39622ff33eb96b846b2966adc7b29fc27321e647b52d15"
   solver-name = "gps-cdcl"
   solver-version = 1

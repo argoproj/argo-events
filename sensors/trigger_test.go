@@ -18,13 +18,9 @@ package sensors
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/common"
-	"github.com/ghodss/yaml"
-	"testing"
-	"time"
-
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,6 +35,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
+	"testing"
 )
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
@@ -207,6 +204,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: test1
+  labels:
+    "success-label": "fake"
 spec:
   containers:
   - name: test
@@ -379,19 +378,6 @@ func TestCreateResourceObject(t *testing.T) {
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
 		})
 
-		gvk := schema.GroupVersionKind{
-			Kind:    "Pod",
-			Version: "v1",
-		}
-
-		client, err := soc.clientPool.ClientForGroupVersionKind(gvk)
-		convey.So(err, convey.ShouldBeNil)
-
-		apiResource, err := common.ServerResourceForGroupVersionKind(soc.discoveryClient, gvk)
-		convey.So(err, convey.ShouldBeNil)
-
-		reIf := client.Resource(apiResource, soc.sensor.Namespace)
-
 		convey.Convey("Given policies for trigger, apply it", func() {
 			testTrigger.Template.Source.Inline = &testPod
 			testTrigger.Policy = &v1alpha1.TriggerPolicy{
@@ -400,7 +386,7 @@ func TestCreateResourceObject(t *testing.T) {
 					Factor:   2,
 					Steps:    10,
 				},
-				Criteria: &v1alpha1.TriggerPolicyCriteria{
+				State: &v1alpha1.TriggerStateLabels{
 					Success: map[string]string{
 						"success-label": "fake",
 					},
@@ -413,6 +399,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: test2
+  labels:
+    "failure-label": "fake"
 spec:
   containers:
   - name: test
@@ -437,7 +425,7 @@ spec:
 						Factor:   2,
 						Steps:    10,
 					},
-					Criteria: &v1alpha1.TriggerPolicyCriteria{
+					State: &v1alpha1.TriggerStateLabels{
 						Failure: map[string]string{
 							"failure-label": "fake",
 						},
@@ -446,25 +434,11 @@ spec:
 			}
 
 			convey.Convey("Execute the first trigger  and make sure the trigger execution results in success", func() {
-				// add label for success after 1 second
-				go func() {
-					time.Sleep(2 * time.Second)
-					pod, _ := reIf.Get("test1", metav1.GetOptions{})
-					pod.SetLabels(testTrigger.Policy.Criteria.Success)
-					_, err = reIf.Update(pod)
-				}()
 				err = soc.executeTrigger(testTrigger)
 				convey.So(err, convey.ShouldBeNil)
 			})
 
 			convey.Convey("Execute the second trigger and make sure the trigger execution results in failure", func() {
-				// add label for failure after 1 second
-				go func() {
-					time.Sleep(2 * time.Second)
-					pod, _ := reIf.Get("test2", metav1.GetOptions{})
-					pod.SetLabels(testTrigger2.Policy.Criteria.Failure)
-					_, err = reIf.Update(pod)
-				}()
 				err = soc.executeTrigger(testTrigger2)
 				convey.So(err, convey.ShouldNotBeNil)
 			})
@@ -477,6 +451,7 @@ spec:
 			}
 
 			convey.Convey("If trigger times out and error on timeout is set, trigger execution must fail", func() {
+				testTrigger.Policy.State.Success = nil
 				testTrigger.Policy.ErrorOnBackoffTimeout = true
 				err = soc.executeTrigger(testTrigger)
 				convey.So(err, convey.ShouldNotBeNil)
