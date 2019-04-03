@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Webhook
+metadata:
+  name: webhook-event-source
+spec:
+  foo:
+    port: "12000"
+    endpoint: "/foo"
+    method: "POST"
+  bar:
+    port: "12000"
+    endpoint: "/bar"
+    method: "POST"

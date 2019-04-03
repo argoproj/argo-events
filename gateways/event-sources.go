@@ -18,17 +18,15 @@ package gateways
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/ghodss/yaml"
 	"io"
-	"reflect"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
-
 	"github.com/argoproj/argo-events/common"
-	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 )
@@ -36,19 +34,33 @@ import (
 // createInternalEventSources creates an internal representation of event source declared in the gateway configmap.
 // returned event sources are map of hash of event source and event source itself.
 // Creating a hash of event source makes it easy to check equality of two event sources.
-func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) (map[string]*EventSourceContext, error) {
-	esElem := reflect.ValueOf(es).Elem()
-	esValue := esElem.FieldByName(string(es.Spec.Type))
-
+func (gc *GatewayConfig) createInternalEventSources(es interface{}) (map[string]*EventSourceContext, error) {
 	configs := make(map[string]*EventSourceContext)
 
-	for _, configKey := range esValue.MapKeys() {
-		configValue := esValue.MapIndex(configKey).Interface()
-		hashKey, err := common.GetObjectHash(configValue)
-		if err != nil {
-			return nil, err
-		}
-		gc.Log.Info().Str("config-key", configKey.String()).Str("hash", string(hashKey)).Msg("event source")
+	esBytes, err := json.Marshal(es)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal event source. err: %+v", err)
+	}
+
+	gc.Log.Info().Str("es", string(esBytes)).Msg("event source")
+
+	gc.Log.Info().Interface("gateway", gc.gw).Msg("gateway in create internal")
+
+	esSpec := gjson.GetBytes(esBytes, gc.gw.Spec.EventSource.SpecKey)
+
+	if !esSpec.Exists() {
+		return nil, fmt.Errorf("gateway event source resource doesn't contain %s", gc.gw.Spec.EventSource.SpecKey)
+	}
+
+	if esSpec.Type != gjson.JSON || esSpec.IsArray() {
+		return nil, fmt.Errorf("%s must be a map of event sources", gc.gw.Spec.EventSource.SpecKey)
+	}
+
+	for configKey, value := range esSpec.Map() {
+		configValue := value.String()
+		hashKey := common.Hasher(configKey + configValue)
+
+		gc.Log.Info().Str("config-key", configKey).Str("config-value", configValue).Str("hash", string(hashKey)).Msg("event source")
 
 		// create a connection to gateway server
 		ctx, cancel := context.WithCancel(context.Background())
@@ -58,16 +70,17 @@ func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) 
 			grpc.WithInsecure(),
 			grpc.WithTimeout(common.ServerConnTimeout*time.Second))
 		if err != nil {
-			gc.Log.Panic().Err(err).Str("conn-state", conn.GetState().String()).Msg("failed to connect to gateway server")
+			gc.Log.Panic().Err(err).Msg("failed to connect to gateway server")
 			cancel()
 			return nil, err
 		}
+
 		gc.Log.Info().Str("state", conn.GetState().String()).Msg("state of the connection")
 
 		configs[hashKey] = &EventSourceContext{
 			Data: &EventSourceData{
 				ID:     hashKey,
-				Src:    configKey.String(),
+				Src:    configKey,
 				Config: configValue,
 			},
 			Cancel: cancel,
@@ -76,6 +89,7 @@ func (gc *GatewayConfig) createInternalEventSources(es *esv1alpha1.EventSource) 
 			Conn:   conn,
 		}
 	}
+
 	return configs, nil
 }
 
@@ -96,7 +110,7 @@ func (gc *GatewayConfig) diffEventSources(newConfigs map[string]*EventSourceCont
 	}
 
 	gc.Log.Info().Interface("current-event-sources-keys", currentConfigKeys).Msg("event sources hashes")
-	gc.Log.Info().Interface("updated-event-sources--keys", updatedConfigKeys).Msg("event sources hashes")
+	gc.Log.Info().Interface("updated-event-sources-keys", updatedConfigKeys).Msg("event sources hashes")
 
 	swapped := false
 	// iterates over current event sources and updated event sources
@@ -148,15 +162,9 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				return
 			}
 
-			data, err := yaml.Marshal(eventSource.Data.Config)
-			if err != nil {
-				// log the error and return
-				return
-			}
-
 			// validate event source
 			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
-				Data: data,
+				Data: eventSource.Data.Config,
 				Name: eventSource.Data.Src,
 			}); !valid.IsValid {
 				gc.Log.Error().Str("event-source-name", eventSource.Data.Src).Str("validation-failure", valid.Reason).Msg("event source is not valid")
@@ -185,7 +193,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			// listen to events from gateway server
 			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, &EventSource{
 				Name: eventSource.Data.Src,
-				Data: data,
+				Data: eventSource.Data.Config,
 			})
 			if err != nil {
 				gc.Log.Error().Err(err).Str("event-source-name", eventSource.Data.Src).Msg("error occurred while starting event source")
@@ -262,7 +270,7 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 }
 
 // manageEventSources syncs registered event sources and updated gateway configmap
-func (gc *GatewayConfig) manageEventSources(es *esv1alpha1.EventSource) error {
+func (gc *GatewayConfig) manageEventSources(es interface{}) error {
 	eventSources, err := gc.createInternalEventSources(es)
 	if err != nil {
 		return err

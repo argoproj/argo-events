@@ -103,15 +103,15 @@ required = [
   version = "5.3.0"
 
 [[override]]
-  branch = "release-1.10"
+  branch = "release-1.14"
   name = "k8s.io/api"
 
 [[override]]
-  branch = "release-1.10"
+  branch = "release-1.14"
   name = "k8s.io/apimachinery"
 
 [[override]]
-  branch = "release-7.0"
+  branch = "release-11.0"
   name = "k8s.io/client-go"
 
 [prune]

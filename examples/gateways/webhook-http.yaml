@@ -6,14 +6,18 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
     gateway-name: "webhook-gateway-http"
 spec:
-  configMap: "webhook-gateway-configmap"
-  type: "webhook"
+  eventSource:
+    name: "webhook-event-source"
+    group: "argoproj.io"
+    version: "v1alpha1"
+    resource: "webhooks"
+    specKey: "spec"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
     http:
       port: "9300"
-  eventVersion: "1.0"
+  cloudEventsVersion: "1.0"
   template:
     metadata:
       name: "webhook-gateway-http"
@@ -22,7 +26,7 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.9.2-test"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "webhook-events"

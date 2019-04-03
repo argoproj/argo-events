@@ -1,0 +1,14 @@
+# Define a "webhook" custom resource definition
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: webhooks.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Webhook
+    listKind: WebhookList
+    plural: webhooks
+    singular: webhook
+  scope: Namespaced
+  version: v1alpha1

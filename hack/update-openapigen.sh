@@ -21,10 +21,3 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
     --input-dirs github.com/argoproj/argo-events/pkg/apis/gateway/${VERSION} \
     --output-package github.com/argoproj/argo-events/pkg/apis/gateway/${VERSION} \
     $@
-
-# EventSource
-go run ${CODEGEN_PKG}/cmd/openapi-gen/main.go \
-    --go-header-file ${PROJECT_ROOT}/hack/custom-boilerplate.go.txt \
-    --input-dirs github.com/argoproj/argo-events/pkg/apis/eventsource/${VERSION} \
-    --output-package github.com/argoproj/argo-events/pkg/apis/eventsource/${VERSION} \
-    $@

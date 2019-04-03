@@ -33,9 +33,4 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
 					  "gateway:v1alpha1" \
 						  --go-header-file $SCRIPT_ROOT/hack/custom-boilerplate.go.txt
 
-bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-				  github.com/argoproj/argo-events/pkg/client/eventsource github.com/argoproj/argo-events/pkg/apis \
-					  "eventsource:v1alpha1" \
-						  --go-header-file $SCRIPT_ROOT/hack/custom-boilerplate.go.txt
-
 go run $SCRIPT_ROOT/vendor/k8s.io/gengo/examples/deepcopy-gen/main.go -i github.com/argoproj/argo-events/pkg/apis/common -p github.com/argoproj/argo-events/pkg/apis/common --go-header-file $SCRIPT_ROOT/vendor/k8s.io/gengo/boilerplate/boilerplate.go.txt

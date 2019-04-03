@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"os"
@@ -61,12 +60,18 @@ func main() {
 	}()
 
 	// watch updates to gateway resource
-	if _, err := gc.WatchGateway(context.Background()); err != nil {
-		panic(err)
-	}
+	go func() {
+		if err := gc.WatchGateway(); err != nil {
+			panic(err)
+		}
+	}()
+
 	// watch for event source updates
-	if _, err := gc.WatchEventSources(context.Background()); err != nil {
-		panic(err)
-	}
+	go func() {
+		if err := gc.WatchGatewayEventSource(); err != nil {
+			panic(err)
+		}
+	}()
+
 	select {}
 }

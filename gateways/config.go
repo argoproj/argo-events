@@ -26,7 +26,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	esclientset "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
@@ -52,8 +51,6 @@ type GatewayConfig struct {
 	gw *v1alpha1.Gateway
 	// gwClientset is gateway clientset
 	gwcs gwclientset.Interface
-	// escs is the eventsource clientset
-	escs esclientset.Interface
 	// updated indicates whether gateway resource is updated
 	updated bool
 	// serverPort is gateway server port to listen events from
@@ -95,7 +92,7 @@ type EventSourceData struct {
 	// Src contains name of the event source
 	Src string `json:"src"`
 	// Config contains the event source
-	Config interface{} `json:"config"`
+	Config string `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.
@@ -121,10 +118,6 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if !ok {
 		panic("no namespace provided")
 	}
-	configName, ok := os.LookupEnv(common.EnvVarGatewayEventSourceConfigMap)
-	if !ok {
-		panic("gateway processor configmap is not provided")
-	}
 	controllerInstanceID, ok := os.LookupEnv(common.EnvVarGatewayControllerInstanceID)
 	if !ok {
 		panic("gateway controller instance ID is not provided")
@@ -142,15 +135,13 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	gc := &GatewayConfig{
-		Log:                     common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
-		Clientset:               clientset,
-		Namespace:               namespace,
-		Name:                    name,
-		KubeConfig:              restConfig,
-		registeredConfigs:       make(map[string]*EventSourceContext),
-		eventSourceResourceName: configName,
+		Log:                  common.GetLoggerContext(common.LoggerConf()).Str("gateway-name", name).Str("gateway-namespace", namespace).Logger(),
+		Clientset:            clientset,
+		Namespace:            namespace,
+		Name:                 name,
+		KubeConfig:           restConfig,
+		registeredConfigs:    make(map[string]*EventSourceContext),
 		gwcs:                 gwcs,
-		escs:                 esclientset.NewForConfigOrDie(restConfig),
 		gw:                   gw,
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,

@@ -61,13 +61,10 @@ type GatewaySpec struct {
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,1,opt,name=template"`
 
 	// ConfigMap is name of the configmap for gateway. This configmap contains event sources.
-	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
-
-	// Type is the type of gateway. Used as metadata.
-	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
+	EventSource *EventSource `json:"eventSource,omitempty" protobuf:"bytes,2,opt,name=eventSource"`
 
 	// Version is used for marking event version
-	EventVersion string `json:"eventVersion" protobuf:"bytes,4,opt,name=eventVersion"`
+	CloudEventsVersion string `json:"cloudEventsVersion" protobuf:"bytes,4,opt,name=cloudEventsVersion"`
 
 	// Service is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
@@ -84,6 +81,25 @@ type GatewaySpec struct {
 
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
 	EventProtocol *common.EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
+}
+
+// EventSource contains information about gateway specific custom resource that contains event source configurations
+type EventSource struct {
+	// Name of the gateway specific custom resource
+	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+
+	// GroupVersionResource contains group, version and resource of the gateway specific custom resource for event sources
+	GroupVersionResource `json:",inline" protobuf:"bytes,2,opt,name=groupVersionResource"`
+
+	// SpecKey within gateway specific custom resource contains map of event source.
+	SpecKey string `json:"specKey" protobuf:"bytes,3,opt,name=specKey"`
+}
+
+// GroupVersionResource contains group, version and resource of the gateway specific custom resource for event sources
+type GroupVersionResource struct {
+	Group    string `json:"group" protobuf:"bytes,1,opt,name=group"`
+	Version  string `json:"version" protobuf:"byets,2,opt,name=version"`
+	Resource string `json:"resource" protobuf:"bytes,3,opt,name=resource"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

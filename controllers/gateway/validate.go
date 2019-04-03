@@ -28,10 +28,10 @@ func Validate(gw *v1alpha1.Gateway) error {
 	if gw.Spec.Template == nil {
 		return fmt.Errorf("gateway  pod template is not specified")
 	}
-	if gw.Spec.Type == "" {
-		return fmt.Errorf("gateway type is not specified")
+	if gw.Spec.EventSource == nil {
+		return fmt.Errorf("gateway event source is not specified")
 	}
-	if gw.Spec.EventVersion == "" {
+	if gw.Spec.CloudEventsVersion == "" {
 		return fmt.Errorf("gateway version is not specified")
 	}
 	switch gw.Spec.EventProtocol.Type {

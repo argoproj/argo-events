@@ -28,14 +28,62 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSource":                schema_pkg_apis_gateway_v1alpha1_EventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":                schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":              schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GroupVersionResource":       schema_pkg_apis_gateway_v1alpha1_GroupVersionResource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers":       schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher":  schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref),
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_EventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventSource contains information about gateway specific custom resource that contains event source configurations",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the gateway specific custom resource",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"group": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"resource": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"specKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SpecKey within gateway specific custom resource contains map of event source.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name", "group", "version", "resource", "specKey"},
+			},
+		},
 	}
 }
 
@@ -179,21 +227,13 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"configMap": {
+					"eventSource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConfigMap is name of the configmap for gateway. This configmap contains event sources.",
-							Type:        []string{"string"},
-							Format:      "",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSource"),
 						},
 					},
-					"type": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Type is the type of gateway. Used as metadata.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"eventVersion": {
+					"cloudEventsVersion": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Version is used for marking event version",
 							Type:        []string{"string"},
@@ -226,11 +266,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"template", "type", "eventVersion", "processorPort", "eventProtocol"},
+				Required: []string{"template", "cloudEventsVersion", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSource", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 
@@ -281,6 +321,38 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_GroupVersionResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GroupVersionResource contains group, version and resource of the gateway specific custom resource for event sources",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"group": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"resource": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"group", "version", "resource"},
+			},
+		},
 	}
 }
 

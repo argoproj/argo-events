@@ -28,7 +28,10 @@ import (
 	"net/http"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -131,4 +134,39 @@ func GetObjectHash(obj interface{}) (string, error) {
 		return "", fmt.Errorf("failed to marshal resource")
 	}
 	return Hasher(string(b)), nil
+}
+
+// LabelReq returns label requirements
+func LabelReq(key, value string) (*labels.Requirement, error) {
+	req, err := labels.NewRequirement(key, selection.Equals, []string{value})
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
+}
+
+// LabelSelector returns label selector for resource filtering
+func LabelSelector(resourceLabels map[string]string) (labels.Selector, error) {
+	var labelRequirements []labels.Requirement
+	for key, value := range resourceLabels {
+		req, err := LabelReq(key, value)
+		if err != nil {
+			return nil, err
+		}
+		labelRequirements = append(labelRequirements, *req)
+	}
+	return labels.NewSelector().Add(labelRequirements...), nil
+}
+
+// FieldSelector returns field selector for resource filtering
+func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
+	var selectors []fields.Selector
+	for key, value := range fieldSelectors {
+		selector, err := fields.ParseSelector(fmt.Sprintf("%s=%s", key, value))
+		if err != nil {
+			return nil, err
+		}
+		selectors = append(selectors, selector)
+	}
+	return fields.AndSelectors(selectors...), nil
 }
