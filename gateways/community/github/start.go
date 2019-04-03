@@ -138,6 +138,11 @@ func (rc *RouteConfig) PostStart() error {
 		}
 	}
 
+	if gc.WebHookSecret != nil {
+		// As secret in hook config is masked with asterisk (*), replace it with unmasked secret.
+		hook.Config["secret"] = hookConfig["secret"]
+	}
+
 	rc.hook = hook
 	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("github hook created")
 	return nil
