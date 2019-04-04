@@ -28,178 +28,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/dynamic"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
-	"k8s.io/client-go/kubernetes/fake"
-	kTesting "k8s.io/client-go/testing"
-	"k8s.io/client-go/util/flowcontrol"
 )
-
-// Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
-
-// FakeClient is a fake implementation of dynamic.Interface.
-type FakeClient struct {
-	GroupVersion schema.GroupVersion
-
-	*kTesting.Fake
-}
-
-// GetRateLimiter returns the rate limiter for this client.
-func (c *FakeClient) GetRateLimiter() flowcontrol.RateLimiter {
-	return nil
-}
-
-// Resource returns an API interface to the specified resource for this client's
-// group and version.  If resource is not a namespaced resource, then namespace
-// is ignored.  The ResourceClient inherits the parameter codec of this client
-func (c *FakeClient) Resource(resource *metav1.APIResource, namespace string) dynamic.ResourceInterface {
-	return &FakeResourceClient{
-		Resource:  c.GroupVersion.WithResource(resource.Name),
-		Kind:      c.GroupVersion.WithKind(resource.Kind),
-		Namespace: namespace,
-
-		Fake: c.Fake,
-	}
-}
-
-// ParameterCodec returns a client with the provided parameter codec.
-func (c *FakeClient) ParameterCodec(parameterCodec runtime.ParameterCodec) dynamic.Interface {
-	return &FakeClient{
-		Fake: c.Fake,
-	}
-}
-
-// FakeResourceClient is a fake implementation of dynamic.ResourceInterface
-type FakeResourceClient struct {
-	Resource  schema.GroupVersionResource
-	Kind      schema.GroupVersionKind
-	Namespace string
-
-	*kTesting.Fake
-}
-
-// List returns a list of objects for this resource.
-func (c *FakeResourceClient) List(opts metav1.ListOptions) (runtime.Object, error) {
-	obj, err := c.Fake.
-		Invokes(kTesting.NewListAction(c.Resource, c.Kind, c.Namespace, opts), &unstructured.UnstructuredList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := kTesting.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &unstructured.UnstructuredList{}
-	for _, item := range obj.(*unstructured.UnstructuredList).Items {
-		if label.Matches(labels.Set(item.GetLabels())) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Get gets the resource with the specified name.
-func (c *FakeResourceClient) Get(name string, opts metav1.GetOptions) (*unstructured.Unstructured, error) {
-	obj, err := c.Fake.
-		Invokes(kTesting.NewGetAction(c.Resource, c.Namespace, name), &unstructured.Unstructured{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	return obj.(*unstructured.Unstructured), err
-}
-
-// Delete deletes the resource with the specified name.
-func (c *FakeResourceClient) Delete(name string, opts *metav1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(kTesting.NewDeleteAction(c.Resource, c.Namespace, name), &unstructured.Unstructured{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeResourceClient) DeleteCollection(deleteOptions *metav1.DeleteOptions, listOptions metav1.ListOptions) error {
-	_, err := c.Fake.
-		Invokes(kTesting.NewDeleteCollectionAction(c.Resource, c.Namespace, listOptions), &unstructured.Unstructured{})
-
-	return err
-}
-
-// Create creates the provided resource.
-func (c *FakeResourceClient) Create(inObj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	obj, err := c.Fake.
-		Invokes(kTesting.NewCreateAction(c.Resource, c.Namespace, inObj), &unstructured.Unstructured{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*unstructured.Unstructured), err
-}
-
-// Update updates the provided resource.
-func (c *FakeResourceClient) Update(inObj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	obj, err := c.Fake.
-		Invokes(kTesting.NewUpdateAction(c.Resource, c.Namespace, inObj), &unstructured.Unstructured{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*unstructured.Unstructured), err
-}
-
-// Watch returns a watch.Interface that watches the resource.
-func (c *FakeResourceClient) Watch(opts metav1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(kTesting.NewWatchAction(c.Resource, c.Namespace, opts))
-}
-
-// Patch patches the provided resource.
-func (c *FakeResourceClient) Patch(name string, pt types.PatchType, data []byte) (*unstructured.Unstructured, error) {
-	obj, err := c.Fake.
-		Invokes(kTesting.NewPatchAction(c.Resource, c.Namespace, name, data), &unstructured.Unstructured{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*unstructured.Unstructured), err
-}
-
-// FakeClientPool provides a fake implementation of dynamic.ClientPool.
-// It assumes resource GroupVersions are the same as their corresponding kind GroupVersions.
-type FakeClientPool struct {
-	kTesting.Fake
-}
-
-// ClientForGroupVersionKind returns a client configured for the specified groupVersionResource.
-// Resource may be empty.
-func (p *FakeClientPool) ClientForGroupVersionResource(resource schema.GroupVersionResource) (dynamic.Interface, error) {
-	return p.ClientForGroupVersionKind(resource.GroupVersion().WithKind(""))
-}
-
-func NewFakeClientPool(objects ...runtime.Object) *FakeClientPool {
-	fakeClientset := fake.NewSimpleClientset(objects...)
-	return &FakeClientPool{
-		fakeClientset.Fake,
-	}
-}
-
-// ClientForGroupVersionKind returns a client configured for the specified groupVersionKind.
-// Kind may be empty.
-func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind) (dynamic.Interface, error) {
-	// we can just create a new client every time for testing purposes
-	return &FakeClient{
-		GroupVersion: kind.GroupVersion(),
-		Fake:         &p.Fake,
-	}, nil
-}
 
 var testPod = `
 apiVersion: v1
@@ -256,11 +88,9 @@ func TestCreateResourceObject(t *testing.T) {
 		testSensor, err := getSensor()
 		convey.So(err, convey.ShouldBeNil)
 		soc := getsensorExecutionCtx(testSensor)
-		fakeclient := soc.clientPool.(*FakeClientPool).Fake
-		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
+		fakeclient := dynamicfake.NewSimpleDynamicClient(runtime.NewScheme())
 
 		convey.Convey("Given a pod spec, get a pod object", func() {
-			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Namespace: "foo", Name: "my-pod"},
@@ -268,10 +98,14 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
+			err = soc.createResourceObject(&testTrigger, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
-			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
+			unstructuredPod, err := fakeclient.Resource(schema.GroupVersionResource{
+				Group:    "",
+				Version:  "v1",
+				Resource: "pods",
+			}).Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, "foo")
 		})
@@ -364,7 +198,6 @@ func TestCreateResourceObject(t *testing.T) {
 		})
 
 		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
-			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
@@ -372,10 +205,14 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
+			err = soc.createResourceObject(&testTrigger, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
-			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
+			unstructuredPod, err := fakeclient.Resource(schema.GroupVersionResource{
+				Group:    "",
+				Version:  "v1",
+				Resource: "pods",
+			}).Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
 		})

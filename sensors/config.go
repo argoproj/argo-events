@@ -17,6 +17,7 @@ limitations under the License.
 package sensors
 
 import (
+	"k8s.io/client-go/dynamic"
 	"net/http"
 
 	"github.com/nats-io/go-nats"
@@ -27,8 +28,6 @@ import (
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/rs/zerolog"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -38,10 +37,8 @@ type sensorExecutionCtx struct {
 	sensorClient clientset.Interface
 	// kubeClient is the kubernetes client
 	kubeClient kubernetes.Interface
-	// ClientPool manages a pool of dynamic clients.
-	clientPool dynamic.ClientPool
-	// DiscoveryClient implements the functions that discover server-supported API groups, versions and resources.
-	discoveryClient discovery.DiscoveryInterface
+	// dynamicClient is kubernetes client for namespaceable resource
+	dynamicClient dynamic.NamespaceableResourceInterface
 	// sensor object
 	sensor *v1alpha1.Sensor
 	// http server which exposes the sensor to gateway/s
@@ -76,13 +73,10 @@ type updateNotification struct {
 
 // NewSensorExecutionCtx returns a new sensor execution context.
 func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface,
-	clientPool dynamic.ClientPool, discoveryClient discovery.DiscoveryInterface,
 	sensor *v1alpha1.Sensor, controllerInstanceID string) *sensorExecutionCtx {
 	return &sensorExecutionCtx{
 		sensorClient:         sensorClient,
 		kubeClient:           kubeClient,
-		clientPool:           clientPool,
-		discoveryClient:      discoveryClient,
 		sensor:               sensor,
 		log:                  common.GetLoggerContext(common.LoggerConf()).Str("sensor-name", sensor.Name).Logger(),
 		queue:                make(chan *updateNotification),

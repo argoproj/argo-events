@@ -36,7 +36,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	discoveryFake "k8s.io/client-go/discovery/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -117,15 +116,9 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
-	fakeDiscoveryClient := kubeClientset.Discovery().(*discoveryFake.FakeDiscovery)
-	clientPool := &FakeClientPool{
-		Fake: kubeClientset.Fake,
-	}
-	fakeDiscoveryClient.Resources = append(fakeDiscoveryClient.Resources, &podResourceList)
+
 	return &sensorExecutionCtx{
 		kubeClient:           kubeClientset,
-		discoveryClient:      fakeDiscoveryClient,
-		clientPool:           clientPool,
 		log:                  common.GetLoggerContext(common.LoggerConf()).Logger(),
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,

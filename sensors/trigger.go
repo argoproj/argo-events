@@ -19,8 +19,8 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/Knetic/govaluate"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
@@ -212,7 +212,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		if err = sec.createResourceObject(trigger.Template, trigger.ResourceParameters, uObj); err != nil {
+		if err = sec.createResourceObject(&trigger, uObj); err != nil {
 			return err
 		}
 	}
@@ -220,7 +220,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 }
 
 // createResourceObject creates K8s object for trigger
-func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTemplate, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
+func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, obj *unstructured.Unstructured) error {
 	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {
@@ -233,24 +233,21 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTe
 	// 2. extract the appropriate eventDependency events based on the resource params
 	// 3. apply the params to the JSON object
 	// 4. unmarshal the obj from the updated JSON
-	if err := sec.applyParamsResource(parameters, obj); err != nil {
+	if err := sec.applyParamsResource(trigger.ResourceParameters, obj); err != nil {
 		return err
 	}
 
-	gvk := obj.GroupVersionKind()
-	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)
+	nrc, err := common.GetNamespaceableResourceClient(sec.kubeConfig, schema.GroupVersionResource{
+		Group:    trigger.Template.Group,
+		Version:  trigger.Template.Version,
+		Resource: trigger.Template.Resource,
+	}, namespace)
+
 	if err != nil {
-		return fmt.Errorf("failed to get client for given group version and kind. err: %+v", err)
+		return err
 	}
 
-	apiResource, err := common.ServerResourceForGroupVersionKind(sec.discoveryClient, gvk)
-	if err != nil {
-		return fmt.Errorf("failed to get server resource for given group version and kind. err: %+v", err)
-	}
-	sec.log.Info().Str("api", apiResource.Name).Str("group-version", gvk.Version).Msg("created api resource")
-
-	reIf := client.Resource(apiResource, namespace)
-	liveObj, err := reIf.Create(obj)
+	liveObj, err := nrc.Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
@@ -258,7 +255,7 @@ func (sec *sensorExecutionCtx) createResourceObject(resource *v1alpha1.TriggerTe
 	if err == nil || !errors.IsAlreadyExists(err) {
 		return err
 	}
-	liveObj, err = reIf.Get(obj.GetName(), metav1.GetOptions{})
+	liveObj, err = nrc.Get(obj.GetName(), metav1.GetOptions{})
 	if err != nil {
 		return err
 	}

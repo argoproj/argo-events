@@ -212,8 +212,10 @@ type TriggerTemplate struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	*metav1.GroupVersionKind `json:",inline" protobuf:"bytes,5,opt,name=groupVersionKind"`
 
+	Resource string `json:"resource" protobuf:"bytes,6,opt,name=resource"`
+
 	// Source of the K8 resource file(s)
-	Source *ArtifactLocation `json:"source" protobuf:"bytes,6,opt,name=source"`
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,7,opt,name=source"`
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
