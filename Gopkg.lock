@@ -13,7 +13,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "16bf007f472b38edd9456aae993a7d55a45cd614"
+  revision = "a4ed3b9f8c7419c692a60bbf780ab0f1c4af5ce4"
 
 [[projects]]
   name = "github.com/DataDog/zstd"
@@ -44,12 +44,6 @@
   packages = ["."]
   revision = "4602b5a8c6e826f9e0737865818dd43b2339a092"
   version = "v1.21.0"
-
-[[projects]]
-  name = "github.com/apex/log"
-  packages = ["."]
-  revision = "941dea75d3ebfbdd905a5d8b7b232965c5e5c684"
-  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/argoproj/argo"
@@ -96,7 +90,7 @@
     "service/sqs",
     "service/sts"
   ]
-  revision = "bc1d9853e6163363c4a708276ead180a8672fc26"
+  revision = "3ef79e6ee13bcdb585ec75e207e349cde24ae8bc"
 
 [[projects]]
   name = "github.com/colinmarc/hdfs"
@@ -162,8 +156,8 @@
     ".",
     "log"
   ]
-  revision = "e64cccdfee8896c036b8a88d560c5e3ae15d904d"
-  version = "v2.9.1"
+  revision = "b9bbc5664f49b6deec52393bd68f39830687a347"
+  version = "v2.9.3"
 
 [[projects]]
   name = "github.com/emirpasic/gods"
@@ -317,7 +311,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "847fc94819f9d5a4e7154e2203b36f6dbace6f48"
+  revision = "bb2674552d8fc183605e16acbf9e8f0a0b031dee"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -365,7 +359,7 @@
     "encoding/asn1",
     "x/crypto/pbkdf2"
   ]
-  revision = "2aebee971930cd0dd525873330952ab7df5ac95c"
+  revision = "dc7c13fece037a4a36e2b3c69db4991498d30692"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -410,7 +404,7 @@
     "jlexer",
     "jwriter"
   ]
-  revision = "1de009706dbeb9d05f18586f0735fcdb7c524481"
+  revision = "1ea4449da9834f4d333f1cc461c374aea217d249"
 
 [[projects]]
   name = "github.com/minio/minio-go"
@@ -422,8 +416,8 @@
     "pkg/s3utils",
     "pkg/set"
   ]
-  revision = "5df22878d3cdee48fbb086449268b1a465147c7d"
-  version = "v6.0.20"
+  revision = "a937bac96010803c5460f117490b21f96151c796"
+  version = "v6.0.21"
 
 [[projects]]
   name = "github.com/mitchellh/go-homedir"
@@ -466,7 +460,7 @@
     ".",
     "pb"
   ]
-  revision = "6a8470f970a0f01992927611aed618e6c3f2cc57"
+  revision = "512d9079d04064a6b2788d47e9800269d6e32ba8"
 
 [[projects]]
   name = "github.com/nats-io/nkeys"
@@ -485,10 +479,12 @@
   name = "github.com/nlopes/slack"
   packages = [
     ".",
+    "internal/errorsx",
+    "internal/timex",
     "slackevents",
     "slackutilsx"
   ]
-  revision = "73f226d818228bd6ca98b123e0319bf745d9afc6"
+  revision = "490f287f4b4412bf56d2d176d640cb916d008371"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -502,8 +498,8 @@
     ".",
     "internal/xxh32"
   ]
-  revision = "062282ea0dcff40c9fb8525789eef9644b1fbd6e"
-  version = "v2.1.0"
+  revision = "315a67e90e415bcdaff33057da191569bf4d8479"
+  version = "v2.1.1"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -542,20 +538,21 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
-  version = "v1.4.0"
+  revision = "9b3cdde74fbe9443d704467498a7dcb61a79de9b"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
+    "internal/go-diff/diffmatchpatch",
     "internal/go-render/render",
     "internal/oglematchers"
   ]
-  revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
-  version = "1.8.3"
+  revision = "f487f9de1cd36ebab28235b9373028812fb47cbd"
+  version = "1.10.1"
 
 [[projects]]
   name = "github.com/smartystreets/goconvey"
@@ -588,7 +585,7 @@
   branch = "master"
   name = "github.com/streadway/amqp"
   packages = ["."]
-  revision = "14f78b41ce6da3d698c2ef2cc8c0ea7ce9e26688"
+  revision = "75d898a42a940fbc854dfd1a4199eabdc00cf024"
 
 [[projects]]
   name = "github.com/stretchr/objx"
@@ -645,12 +642,14 @@
   name = "go.opencensus.io"
   packages = [
     ".",
-    "exemplar",
     "internal",
     "internal/tagencoding",
+    "metric/metricdata",
+    "metric/metricproducer",
     "plugin/ocgrpc",
     "plugin/ochttp",
     "plugin/ochttp/propagation/b3",
+    "resource",
     "stats",
     "stats/internal",
     "stats/view",
@@ -660,8 +659,8 @@
     "trace/propagation",
     "trace/tracestate"
   ]
-  revision = "3b8e2721f2c3c01fa1bf4a2e455874e7b8319cd7"
-  version = "v0.19.2"
+  revision = "46618d076d80f4eab85adbcb3be9a370be1dc4e0"
+  version = "v0.20.0"
 
 [[projects]]
   branch = "master"
@@ -689,7 +688,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
+  revision = "38d8ce5564a5b71b2e3a00553993f1b9a7ae852f"
 
 [[projects]]
   branch = "master"
@@ -708,7 +707,7 @@
     "trace",
     "websocket"
   ]
-  revision = "15845e8f865bdabdefb6e7da65b4d9e8de5e94ef"
+  revision = "eb5bcb51f2a31c7d5141d810b70815c05d9c9146"
 
 [[projects]]
   branch = "master"
@@ -720,7 +719,7 @@
     "jws",
     "jwt"
   ]
-  revision = "c85d3e98c914e3a33234ad863dcbff5dbc425bb8"
+  revision = "9f3314589c9a9136388751d9adae6b0ed400978a"
 
 [[projects]]
   branch = "master"
@@ -739,7 +738,7 @@
     "unix",
     "windows"
   ]
-  revision = "f49334f85ddcf0f08d7fb6dd7363e9e6d6b777eb"
+  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -785,7 +784,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "0268d3dd0724eb8b65d4e71a1285076f6efd643d"
+  revision = "d996c1aa53b10c3c47e1764d087a569bb6c32ed1"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -832,7 +831,7 @@
     "googleapis/rpc/status",
     "protobuf/field_mask"
   ]
-  revision = "e79c0c59cdb5e117ef82a6f885294df3d74065d5"
+  revision = "64821d5d210748c883cd2b809589555ae4654203"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -1319,11 +1318,11 @@
     "pkg/generators/rules",
     "pkg/util/sets"
   ]
-  revision = "5e45bb682580c9be5ffa4d27d367f0eeba125c7b"
+  revision = "94e1e7b7574c44c4c0f2007de6fe617e259191f3"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "587077f053f9f8c09ff70711127b09ef0e10950873369b956baa0e1d77e0ec62"
+  inputs-digest = "cfff04f465fd9c945e39622ff33eb96b846b2966adc7b29fc27321e647b52d15"
   solver-name = "gps-cdcl"
   solver-version = 1

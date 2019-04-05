@@ -8,8 +8,8 @@ data:
       name: aws-secret
       key: access
     secretKey:
-      name aws-secret
+      name: aws-secret
       key: secret
     region: "us-east-1"
     queue: "<queue-name>"
-    waitTimeSeconds: 50
+    waitTimeSeconds: 20

@@ -39,7 +39,7 @@ spec:
             steps: 5
           # the criteria to decide if a resource is in success or failure state.
           # labels set on the resource decide if resource is in success or failed state.
-          criteria:
+          state:
             # Note: Set either success or failure labels. If you set both, only success labels will be considered.
 
             # Success defines labels required to identify a resource in success state
@@ -82,16 +82,16 @@ spec:
           dest: spec.arguments.parameters.0.value
     - template:
         name: trigger-2
-          policy:
-            backoff:
-              duration: 1000000000 # 1 second
-              factor: 2
-              jitter: 0.1
-              steps: 5
-            criteria:
-              failure:
-                workflows.argoproj.io/phase: Failed
-            errorOnBackoffTimeout: false
+        policy:
+          backoff:
+            duration: 1000000000 # 1 second
+            factor: 2
+            jitter: 0.1
+            steps: 5
+          state:
+            failure:
+              workflows.argoproj.io/phase: Failed
+          errorOnBackoffTimeout: false
         group: argoproj.io
         version: v1alpha1
         kind: Workflow

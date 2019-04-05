@@ -50,7 +50,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource": schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy":          schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicyCriteria":  schema_pkg_apis_sensor_v1alpha1_TriggerPolicyCriteria(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels":     schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
@@ -103,23 +103,14 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource is generic template for K8s resource",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"object"},
-										Format: "",
-									},
-								},
-							},
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
 	}
 }
 
@@ -828,8 +819,14 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
+					"lastCycleTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LastCycleTime is the time when last trigger cycle completed",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
 				},
-				Required: []string{"phase", "triggerCycleStatus"},
+				Required: []string{"phase", "triggerCycleStatus", "lastCycleTime"},
 			},
 		},
 		Dependencies: []string{
@@ -1036,10 +1033,10 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"),
 						},
 					},
-					"criteria": {
+					"state": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Criteria to check resource state",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicyCriteria"),
+							Description: "State refers to labels used to check the resource state",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels"),
 						},
 					},
 					"errorOnBackoffTimeout": {
@@ -1050,19 +1047,19 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 						},
 					},
 				},
-				Required: []string{"backoff", "criteria", "errorOnBackoffTimeout"},
+				Required: []string{"backoff", "state", "errorOnBackoffTimeout"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicyCriteria"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_TriggerPolicyCriteria(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TriggerPolicyCriteria defines the criteria to decide if a resource is in success or failure state.",
+				Description: "TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"success": {
