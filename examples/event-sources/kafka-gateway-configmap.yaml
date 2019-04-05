@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kafka-gateway-configmap
+  name: kafka-gateway-event-source
 data:
   foo: |-
     url: kafka.argo-events:9092

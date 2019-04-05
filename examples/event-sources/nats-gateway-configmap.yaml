@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nats-gateway-configmap
+  name: nats-gateway-event-source
 data:
   foo: |-
     url: nats://nats.argo-events:4222

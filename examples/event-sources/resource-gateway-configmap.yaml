@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: resource-gateway-configmap
+  name: resource-gateway-event-source
 data:
   workflow-success: |-
     namespace: argo-events

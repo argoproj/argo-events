@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trello-gateway-configmap
+  name: trello-gateway-event-source
 data:
   notification_1: |-
     hook:

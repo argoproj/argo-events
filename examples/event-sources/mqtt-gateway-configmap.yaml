@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mqtt-gateway-configmap
+  name: mqtt-gateway-event-source
 data:
   foo: |-
     url: tcp://mqtt.argo-events:1883

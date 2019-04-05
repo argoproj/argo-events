@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: webhook-gateway-configmap
+  name: webhook-gateway-event-source
 data:
   foo: |-
     port: "12000"

@@ -5,12 +5,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: aws-sns-gateway-configmap
+  name: aws-sns-gateway-event-source
   labels:
     # do not remove
     argo-events-gateway-version: v0.10
 data:
-  example-1: |-
+  example: |-
     # topic arn
     topicArn: "topic-arn"
     # hook contains configuration for the HTTP server running in the gateway.
@@ -20,10 +20,10 @@ data:
      endpoint: "/"
      # port to run HTTP server on
      port: "12000"
-     # Server url that the gateway will use to register at AWS.
+     # url the gateway will use to register at AWS.
      # This url must be reachable from outside the cluster.
      # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
-     url: "url"
+     url: "http://myfakeurl.fake"
     # accessKey contains information about K8s secret that stores the access key
     accessKey:
       # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
@@ -39,12 +39,17 @@ data:
     # aws region
     region: "us-east-1"
 
-  example-2: |-
+  example-with-secure-connection: |-
     topicArn: "topic-arn"
     hook:
      endpoint: "/"
-     port: "12000"
-     url: "placeholderurl"
+     # gateway can run multiple HTTP servers, just define a unique port.
+     port: "13000"
+     url: "http://mysecondfakeurl.fake"
+     # path to file that is mounted in gateway pod which contains certs
+     serverCertPath: "some path in pod"
+     # path to file that is mounted in gateway pod which contains private key
+     serverKeyPath: "some path in pod"
     accessKey:
       name: aws-secret
       key: access

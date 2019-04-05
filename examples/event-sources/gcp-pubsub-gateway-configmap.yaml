@@ -1,9 +1,19 @@
+# This configmap contains the event sources configurations for GCP PubSub gateway
+# Refer: https://github.com/argoproj/argo-events/blob/master/gateways/community/gcp-pubsub/config.go
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gcp-pubsub-gateway-configmap
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
 data:
-  notification_1: |-
-    projectId: "your-project-id"
-    topic: "your-topic"
+  example-1: |-
+    # id of your project
+    projectId: "my-fake-project-id"
+    # topic name
+    topic: "my-fake-topic"
+    # Refers to the credential file that is mounted in the gateway pod.
     credentialsFile: "path to credential files"

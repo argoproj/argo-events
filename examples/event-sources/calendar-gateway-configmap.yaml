@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: calendar-gateway-configmap
+  name: calendar-gateway-event-source
 data:
   example-with-interval: |-
     # creates an event every 10 seconds

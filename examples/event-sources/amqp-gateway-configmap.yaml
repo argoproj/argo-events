@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: amqp-gateway-configmap
+  name: amqp-gateway-event-source
   labels:
     # do not remove
     argo-events-gateway-version: v0.10

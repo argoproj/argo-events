@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: slack-gateway-configmap
+  name: slack-gateway-event-source
 data:
   notification_1: |-
     hook:

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: storage-grid-gateway-configmap
+  name: storage-grid-gateway-event-source
 data:
   foo: |-
     hook:

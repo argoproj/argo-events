@@ -5,7 +5,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: artifact-gateway-configmap
+  name: artifact-gateway-event-source
   labels:
     # do not remove
     argo-events-gateway-version: v0.10
@@ -30,7 +30,7 @@ data:
       suffix: ".txt"
     # type of the connection
     insecure: true
-    # accessKey contains information about K8s secret that stores the access key
+    # accessKey refers to K8s secret that stores the access key
     accessKey:
       # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
       key: accesskey
