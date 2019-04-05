@@ -39,6 +39,7 @@ const (
 	LabelVersion     = "version"
 	LabelError       = "error"
 	LabelTime        = "time"
+	LabelTriggerName = "trigger-name"
 )
 
 // ArgoEventsLogger is the logger for the framework
@@ -49,14 +50,15 @@ type ArgoEventsLogger struct {
 // NewArgoEventsLogger returns a new ArgoEventsLogger
 func NewArgoEventsLogger() *ArgoEventsLogger {
 	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.InfoLevel)
 
 	debugMode, ok := os.LookupEnv(EnvVarDebugLog)
 	if ok && debugMode == "true" {
-		logrus.Debug()
+		logrus.SetLevel(logrus.DebugLevel)
 	}
 
 	return &ArgoEventsLogger{
-		logrus.New(),
+		logrus.StandardLogger(),
 	}
 }
 
@@ -159,5 +161,11 @@ func (a *ArgoEventsLogger) WithError(err error) *ArgoEventsLogger {
 // WithTime returns the logger with time set
 func (a *ArgoEventsLogger) WithTime(time string) *ArgoEventsLogger {
 	a.WithField(LabelTime, time)
+	return a
+}
+
+// WithTrigger returns the logger with trigger name set
+func (a *ArgoEventsLogger) WithTrigger(name string) *ArgoEventsLogger {
+	a.WithField(LabelTriggerName, name)
 	return a
 }

@@ -18,12 +18,9 @@ package sensors
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/ghodss/yaml"
-	"testing"
-
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,6 +35,7 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
+	"testing"
 )
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
@@ -205,7 +203,9 @@ var testPod = `
 apiVersion: v1
 kind: Pod
 metadata:
-  generateName: test-
+  name: test1
+  labels:
+    "success-label": "fake"
 spec:
   containers:
   - name: test
@@ -260,7 +260,6 @@ func TestCreateResourceObject(t *testing.T) {
 		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
 
 		convey.Convey("Given a pod spec, get a pod object", func() {
-			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Namespace: "foo", Name: "my-pod"},
@@ -268,7 +267,7 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
+			err = soc.createResourceObject(&testTrigger, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
@@ -287,10 +286,10 @@ func TestCreateResourceObject(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		node := v1alpha1.NodeStatus{
-			Event: &common.Event{
+			Event: &apicommon.Event{
 				Payload: eventBytes,
-				Context: common.EventContext{
-					Source: &common.URI{
+				Context: apicommon.EventContext{
+					Source: &apicommon.URI{
 						Host: "test-gateway:test",
 					},
 					ContentType: "application/json",
@@ -326,10 +325,10 @@ func TestCreateResourceObject(t *testing.T) {
 		wfNodeId := soc.sensor.NodeID("test-workflow-trigger")
 
 		wfnode := v1alpha1.NodeStatus{
-			Event: &common.Event{
+			Event: &apicommon.Event{
 				Payload: eventBytes,
-				Context: common.EventContext{
-					Source: &common.URI{
+				Context: apicommon.EventContext{
+					Source: &apicommon.URI{
 						Host: "test-gateway:test",
 					},
 					ContentType: "application/json",
@@ -364,7 +363,6 @@ func TestCreateResourceObject(t *testing.T) {
 		})
 
 		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
-			rObj := testTrigger.Template.DeepCopy()
 			pod := &corev1.Pod{
 				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
 				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
@@ -372,12 +370,98 @@ func TestCreateResourceObject(t *testing.T) {
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(rObj, testTrigger.ResourceParameters, uObj)
+			err = soc.createResourceObject(&testTrigger, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
+		})
+
+		convey.Convey("Given policies for trigger, apply it", func() {
+			testTrigger.Template.Source.Inline = &testPod
+			testTrigger.Policy = &v1alpha1.TriggerPolicy{
+				Backoff: v1alpha1.Backoff{
+					Duration: 1000000000,
+					Factor:   2,
+					Steps:    10,
+				},
+				State: &v1alpha1.TriggerStateLabels{
+					Success: map[string]string{
+						"success-label": "fake",
+					},
+				},
+				ErrorOnBackoffTimeout: false,
+			}
+
+			triggerPod2 := `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test2
+  labels:
+    "failure-label": "fake"
+spec:
+  containers:
+  - name: test
+    image: docker/whalesay
+`
+
+			testTrigger2 := v1alpha1.Trigger{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "trigger2",
+					Source: &v1alpha1.ArtifactLocation{
+						Inline: &triggerPod2,
+					},
+					GroupVersionKind: &metav1.GroupVersionKind{
+						Kind:    "Pod",
+						Version: "v1",
+					},
+				},
+				Policy: &v1alpha1.TriggerPolicy{
+					ErrorOnBackoffTimeout: true,
+					Backoff: v1alpha1.Backoff{
+						Duration: 1000000000,
+						Factor:   2,
+						Steps:    10,
+					},
+					State: &v1alpha1.TriggerStateLabels{
+						Failure: map[string]string{
+							"failure-label": "fake",
+						},
+					},
+				},
+			}
+
+			convey.Convey("Execute the first trigger  and make sure the trigger execution results in success", func() {
+				err = soc.executeTrigger(testTrigger)
+				convey.So(err, convey.ShouldBeNil)
+			})
+
+			convey.Convey("Execute the second trigger and make sure the trigger execution results in failure", func() {
+				err = soc.executeTrigger(testTrigger2)
+				convey.So(err, convey.ShouldNotBeNil)
+			})
+
+			// modify backoff so that applyPolicy doesnt wait too much
+			testTrigger.Policy.Backoff = v1alpha1.Backoff{
+				Steps:    2,
+				Duration: 1000000000,
+				Factor:   1,
+			}
+
+			convey.Convey("If trigger times out and error on timeout is set, trigger execution must fail", func() {
+				testTrigger.Policy.State.Success = nil
+				testTrigger.Policy.ErrorOnBackoffTimeout = true
+				err = soc.executeTrigger(testTrigger)
+				convey.So(err, convey.ShouldNotBeNil)
+			})
+
+			convey.Convey("If trigger times out and error on timeout is not set, trigger execution must succeed", func() {
+				testTrigger.Policy.ErrorOnBackoffTimeout = false
+				err = soc.executeTrigger(testTrigger)
+				convey.So(err, convey.ShouldBeNil)
+			})
 		})
 	})
 }
@@ -417,5 +501,83 @@ func TestExtractEvents(t *testing.T) {
 			},
 		})
 		convey.So(len(extractedEvents), convey.ShouldEqual, 1)
+	})
+}
+
+func TestCanProcessTriggers(t *testing.T) {
+	convey.Convey("Given a sensor, test if triggers can be processed", t, func() {
+		sensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+
+		sensor.Status.Nodes = map[string]v1alpha1.NodeStatus{
+			sensor.NodeID(sensor.Spec.Dependencies[0].Name): {
+				Name:  sensor.Spec.Dependencies[0].Name,
+				Phase: v1alpha1.NodePhaseComplete,
+				Type:  v1alpha1.NodeTypeEventDependency,
+			},
+		}
+
+		for _, dep := range []v1alpha1.EventDependency{
+			{
+				Name: "test-gateway:test2",
+			},
+			{
+				Name: "test-gateway:test3",
+			},
+		} {
+			sensor.Spec.Dependencies = append(sensor.Spec.Dependencies, dep)
+			sensor.Status.Nodes[sensor.NodeID(dep.Name)] = v1alpha1.NodeStatus{
+				Name:  dep.Name,
+				Phase: v1alpha1.NodePhaseComplete,
+				Type:  v1alpha1.NodeTypeEventDependency,
+			}
+		}
+
+		soc := getsensorExecutionCtx(sensor)
+		ok, err := soc.canProcessTriggers()
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ok, convey.ShouldEqual, true)
+
+		node := sensor.Status.Nodes[sensor.NodeID("test-gateway:test2")]
+		node.Phase = v1alpha1.NodePhaseNew
+		sensor.Status.Nodes[sensor.NodeID("test-gateway:test2")] = node
+
+		ok, err = soc.canProcessTriggers()
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ok, convey.ShouldEqual, false)
+
+		convey.Convey("Add dependency groups and evaluate the circuit", func() {
+			for _, depGroup := range []v1alpha1.DependencyGroup{
+				{
+					Name:         "depg1",
+					Dependencies: []string{sensor.Spec.Dependencies[1].Name, sensor.Spec.Dependencies[2].Name},
+				},
+				{
+					Name:         "depg2",
+					Dependencies: []string{sensor.Spec.Dependencies[0].Name},
+				},
+			} {
+				sensor.Spec.DependencyGroups = append(sensor.Spec.DependencyGroups, depGroup)
+				sensor.Status.Nodes[sensor.NodeID(depGroup.Name)] = v1alpha1.NodeStatus{
+					Name:  depGroup.Name,
+					Phase: v1alpha1.NodePhaseNew,
+				}
+			}
+
+			sensor.Spec.Circuit = "depg1 || depg2"
+
+			ok, err = soc.canProcessTriggers()
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(ok, convey.ShouldEqual, true)
+		})
+
+		convey.Convey("If the previous round of triggers failed and error on previous round policy is set, then don't execute the triggers", func() {
+			sensor.Spec.ErrorOnFailedRound = true
+			sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+
+			ok, err = soc.canProcessTriggers()
+			convey.So(err, convey.ShouldNotBeNil)
+			convey.So(ok, convey.ShouldEqual, false)
+		})
 	})
 }

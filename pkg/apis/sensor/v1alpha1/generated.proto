@@ -41,17 +41,38 @@ option go_package = "v1alpha1";
 
 // ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
+  // S3 compliant artifact
   optional github.com.argoproj.argo_events.pkg.apis.common.S3Artifact s3 = 1 [(gogoproto.customname) = "S3"];
 
+  // Inline artifact is embedded in sensor spec as a string
   optional string inline = 2 [(gogoproto.customname) = "Inline"];
 
+  // File artifact is artifact stored in a file
   optional FileArtifact file = 3 [(gogoproto.customname) = "File"];
 
+  // URL to fetch the artifact from
   optional URLArtifact url = 4 [(gogoproto.customname) = "URL"];
 
+  // Configmap that stores the artifact
   optional ConfigmapArtifact configmap = 5 [(gogoproto.customname) = "Configmap"];
 
+  // Git repository hosting the artifact
   optional GitArtifact git = 6 [(gogoproto.customname) = "Git"];
+}
+
+// Backoff for an operation
+message Backoff {
+  // Duration is the duration in nanoseconds
+  optional int64 duration = 1 [(gogoproto.casttype) = "time.Duration", (gogoproto.customname) = "Duration", (gogoproto.nullable) = false];
+
+  // Duration is multiplied by factor each iteration
+  optional double factor = 2 [(gogoproto.customname) = "Factor", (gogoproto.nullable) = false];
+
+  // The amount of jitter applied each iteration
+  optional double jitter = 3 [(gogoproto.customname) = "Jitter", (gogoproto.nullable) = false];
+
+  // Exit with error after this many steps
+  optional int64 steps = 4 [(gogoproto.customname) = "Steps", (gogoproto.nullable) = false];
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
@@ -101,18 +122,11 @@ message EventDependency {
   // Name is a unique name of this dependency
   optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
 
-  // Deadline is the duration in seconds after the StartedAt time of the sensor after which this event is terminated.
-  // Note: this functionality is not yet respected, but it's theoretical behavior is as follows:
-  // This trumps the recurrence patterns of calendar events and allows any event to have a strict defined life.
-  // After the deadline is reached and this event has not in a Resolved state, this event is marked as Failed
-  // and proper escalations should proceed.
-  optional int64 deadline = 2 [(gogoproto.customname) = "Deadline", (gogoproto.nullable) = false];
-
   // Filters and rules governing tolerations of success and constraints on the context and data of an event
-  optional EventDependencyFilter filters = 3 [(gogoproto.customname) = "Filters", (gogoproto.nullable) = false];
+  optional EventDependencyFilter filters = 2 [(gogoproto.customname) = "Filters", (gogoproto.nullable) = false];
 
   // Connected tells if subscription is already setup in case of nats protocol.
-  optional bool connected = 4 [(gogoproto.customname) = "Connected", (gogoproto.nullable) = false];
+  optional bool connected = 3 [(gogoproto.customname) = "Connected", (gogoproto.nullable) = false];
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
@@ -263,6 +277,10 @@ message SensorSpec {
 
   // DependencyGroups is a list of the groups of events.
   repeated DependencyGroup dependencyGroups = 6 [(gogoproto.customname) = "DependencyGroups", (gogoproto.nullable) = false];
+
+  // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
+  // Once sensor state is set to `error`, no further triggers will be processed.
+  optional bool errorOnFailedRound = 7 [(gogoproto.customname) = "ErrorOnFailedRound", (gogoproto.nullable) = false];
 }
 
 // SensorStatus contains information about the status of a sensor.
@@ -276,15 +294,21 @@ message SensorStatus {
   // CompletedAt is the time at which this sensor was completed
   optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3 [(gogoproto.customname) = "CompletedAt", (gogoproto.nullable) = false];
 
-  // CompletionCount is the count of sensor's successful runs.
-  optional int32 completionCount = 6 [(gogoproto.customname) = "CompletionCount", (gogoproto.nullable) = false];
-
   // Message is a human readable string indicating details about a sensor in its phase
   optional string message = 4 [(gogoproto.customname) = "Message", (gogoproto.nullable) = false];
 
   // Nodes is a mapping between a node ID and the node's status
   // it records the states for the FSM of this sensor.
   map<string, NodeStatus> nodes = 5 [(gogoproto.customname) = "Nodes", (gogoproto.nullable) = false];
+
+  // TriggerCycleCount is the count of sensor's trigger cycle runs.
+  optional int32 triggerCycleCount = 6 [(gogoproto.customname) = "TriggerCycleCount", (gogoproto.nullable) = false];
+
+  // TriggerCycleState is the status from last cycle of triggers execution.
+  optional string triggerCycleStatus = 7 [(gogoproto.casttype) = "TriggerCycleState", (gogoproto.customname) = "TriggerCycleStatus", (gogoproto.nullable) = false];
+
+  // LastCycleTime is the time when last trigger cycle completed
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastCycleTime = 8 [(gogoproto.customname) = "LastCycleTime", (gogoproto.nullable) = false];
 }
 
 // TimeFilter describes a window in time.
@@ -313,6 +337,9 @@ message Trigger {
 
   // ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
   repeated TriggerParameter resourceParameters = 3 [(gogoproto.customname) = "ResourceParameters", (gogoproto.nullable) = false];
+
+  // Policy to configure backoff and execution criteria for the trigger
+  optional TriggerPolicy policy = 4 [(gogoproto.customname) = "Policy"];
 }
 
 // TriggerCondition describes condition which must be satisfied in order to execute a trigger.
@@ -354,25 +381,48 @@ message TriggerParameterSource {
   optional string value = 3 [(gogoproto.customname) = "Value"];
 }
 
+// TriggerPolicy dictates the policy for the trigger retries
+message TriggerPolicy {
+  // Backoff before checking resource state
+  optional Backoff backoff = 1 [(gogoproto.customname) = "Backoff", (gogoproto.nullable) = false];
+
+  // State refers to labels used to check the resource state
+  optional TriggerStateLabels state = 2 [(gogoproto.customname) = "State"];
+
+  // ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
+  optional bool errorOnBackoffTimeout = 3 [(gogoproto.customname) = "ErrorOnBackoffTimeout", (gogoproto.nullable) = false];
+}
+
+// TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.
+message TriggerStateLabels {
+  // Success defines labels required to identify a resource in success state
+  map<string, string> success = 1 [(gogoproto.customname) = "Success", (gogoproto.nullable) = false];
+
+  // Failure defines labels required to identify a resource in failed state
+  map<string, string> failure = 2 [(gogoproto.customname) = "Failure", (gogoproto.nullable) = false];
+}
+
 // TriggerTemplate is the template that describes trigger specification.
 message TriggerTemplate {
   // Name is a unique name of the action to take
   optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
 
   // When is the condition to execute the trigger
-  optional TriggerCondition when = 4 [(gogoproto.customname) = "When"];
+  optional TriggerCondition when = 2 [(gogoproto.customname) = "When"];
 
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionKind groupVersionKind = 5 [(gogoproto.customname) = "GroupVersionKind"];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionKind groupVersionKind = 3 [(gogoproto.customname) = "GroupVersionKind"];
 
   // Source of the K8 resource file(s)
-  optional ArtifactLocation source = 6 [(gogoproto.customname) = "Source"];
+  optional ArtifactLocation source = 4 [(gogoproto.customname) = "Source"];
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.
 message URLArtifact {
+  // Path is the complete URL
   optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
 
+  // VerifyCert decides whether the connection is secure or not
   optional bool verifyCert = 2 [(gogoproto.customname) = "VerifyCert", (gogoproto.nullable) = false];
 }
 
