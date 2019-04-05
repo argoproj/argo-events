@@ -20,7 +20,9 @@ data:
      endpoint: "/"
      # port to run HTTP server on
      port: "12000"
-     # for the server that can be reached from outside the cluster
+     # Server url that the gateway will use to register at AWS.
+     # This url must be reachable from outside the cluster.
+     # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
      url: "url"
     # accessKey contains information about K8s secret that stores the access key
     accessKey:

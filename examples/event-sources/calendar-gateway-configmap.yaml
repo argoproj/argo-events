@@ -7,8 +7,6 @@ kind: ConfigMap
 metadata:
   name: calendar-gateway-configmap
 data:
-  # you can either define an interval or a schedule
-
   example-with-interval: |-
     # creates an event every 10 seconds
     interval: 10s
