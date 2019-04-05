@@ -1,0 +1,25 @@
+# This configmap contains the event sources configurations for Calendar gateway
+# Refer: https://github.com/argoproj/argo-events/blob/2a5f965ff704bab535e6a753d999232b9b00b9e5/gateways/core/calendar/config.go#L34
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: calendar-gateway-configmap
+data:
+  # you can either define an interval or a schedule
+
+  example-with-interval: |-
+    # creates an event every 10 seconds
+    interval: 10s
+
+  example-with-schedule: |-
+    # schedules an event at 30 minutes past each hour
+    schedule: "30 * * * *"
+
+  example-with-static-user-payload: |-
+    # creates an event every 20 seconds
+    interval: 20s
+    # userPayload is a static string that will be send to the the sensor with each event payload
+    # whatever you put here is blindly delivered to sensor.
+    userPayload: "{\"hello\": \"world\"}"

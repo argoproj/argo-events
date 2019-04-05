@@ -1,0 +1,52 @@
+# This configmap contains the event sources configurations for AWS SNS gateway
+# Refer: https://github.com/argoproj/argo-events/blob/e0242e7b00f7edc7e0cff314abd3a728ddf3c62b/gateways/community/aws-sns/config.go#L68
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-sns-gateway-configmap
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
+data:
+  example-1: |-
+    # topic arn
+    topicArn: "topic-arn"
+    # hook contains configuration for the HTTP server running in the gateway.
+    # AWS will send events to following port and endpoint
+    hook:
+     # endpoint to expose to AWS
+     endpoint: "/"
+     # port to run HTTP server on
+     port: "12000"
+     # for the server that can be reached from outside the cluster
+     url: "url"
+    # accessKey contains information about K8s secret that stores the access key
+    accessKey:
+      # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
+      key: accesskey
+      # Name of the K8s secret that contains the access key
+      name: aws-secret
+    # secretKey contains information about K8s secret that stores the secret key
+    secretKey:
+      # Key within the K8s secret whose corresponding value (must be base64 encoded) is secret key
+      key: secretkey
+      # Name of the K8s secret that contains the secret key
+      name: aws-secret
+    # aws region
+    region: "us-east-1"
+
+  example-2: |-
+    topicArn: "topic-arn"
+    hook:
+     endpoint: "/"
+     port: "12000"
+     url: "placeholderurl"
+    accessKey:
+      name: aws-secret
+      key: access
+    secretKey:
+      name aws-secret
+      key: secret
+    region: "us-east-1"

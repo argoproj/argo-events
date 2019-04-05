@@ -21,7 +21,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"io/ioutil"
-	"strings"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
@@ -33,9 +32,6 @@ func TestValidate(t *testing.T) {
 		files, err := ioutil.ReadDir(dir)
 		convey.So(err, convey.ShouldBeNil)
 		for _, file := range files {
-			if strings.HasSuffix(file.Name(), "configmap.yaml") {
-				continue
-			}
 			fmt.Println("filename: ", file.Name())
 			content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 			convey.So(err, convey.ShouldBeNil)

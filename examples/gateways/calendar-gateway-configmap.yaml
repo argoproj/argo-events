@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: calendar-gateway-configmap
-data:
-  interval: |-
-    interval: 10s
-  schedule: |-
-    schedule: "30 * * * *"

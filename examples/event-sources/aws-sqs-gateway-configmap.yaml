@@ -1,0 +1,43 @@
+# This configmap contains the event sources configurations for AWS SQS gateway
+# Refer: https://github.com/argoproj/argo-events/blob/2a5f965ff704bab535e6a753d999232b9b00b9e5/gateways/community/aws-sqs/config.go#L36
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-sqs-gateway-configmap
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
+data:
+  example-1: |-
+    # accessKey contains information about K8s secret that stores the access key
+    accessKey:
+      # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
+      key: accesskey
+      # Name of the K8s secret that contains the access key
+      name: aws-secret
+    # secretKey contains information about K8s secret that stores the secret key
+    secretKey:
+      # Key within the K8s secret whose corresponding value (must be base64 encoded) is secret key
+      key: secretkey
+      # Name of the K8s secret that contains the secret key
+      name: aws-secret
+    # aws region
+    region: "us-east-1"
+    # name of the queue. The gateway resolves the url of the queue from the queue name.
+    queue: "my-fake-queue-1"
+    # The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.
+    # MUST BE > 0 AND <= 20
+    waitTimeSeconds: 20
+
+  example-2: |-
+    accessKey:
+      key: accesskey
+      name: aws-secret
+    secretKey:
+      key: secretkey
+      name: aws-secret
+    region: "us-east-1"
+    queue: "my-fake-queue-2"
+    waitTimeSeconds: 20
