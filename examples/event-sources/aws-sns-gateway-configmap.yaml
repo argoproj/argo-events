@@ -1,5 +1,4 @@
 # This configmap contains the event sources configurations for AWS SNS gateway
-# Refer: https://github.com/argoproj/argo-events/blob/e0242e7b00f7edc7e0cff314abd3a728ddf3c62b/gateways/community/aws-sns/config.go#L68
 
 ---
 apiVersion: v1

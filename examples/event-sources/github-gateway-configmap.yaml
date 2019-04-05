@@ -1,5 +1,4 @@
 # This configmap contains the event sources configurations for Github gateway
-# Refer: https://github.com/argoproj/argo-events/blob/2a5f965ff704bab535e6a753d999232b9b00b9e5/gateways/community/github/config.go#L48
 # More info: https://developer.github.com/v3/repos/hooks/#create-a-hook
 
 ---

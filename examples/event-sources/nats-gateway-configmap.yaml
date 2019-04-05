@@ -2,7 +2,28 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nats-gateway-event-source
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
 data:
-  foo: |-
+  # no retries if connection to kafka service is not successful
+  example-without-retry: |-
+    # url of the nats service
     url: nats://nats.argo-events:4222
+    # subject name
     subject: foo
+
+  # retry after each backoff to setup successful connection
+  example-with-retry: |-
+    # url of the nats service
+    url: nats://nats.argo-events:4222
+    # subject name
+    subject: foo
+    backoff:
+      # duration in nanoseconds. following value is 10 seconds
+      duration: 10000000000
+      # how many backoffs
+      steps: 5
+      # factor to increase on each step.
+      # setting factor > 1 makes backoff exponential.
+      factor: 2

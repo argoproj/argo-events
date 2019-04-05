@@ -1,5 +1,4 @@
 # This configmap contains the event sources configurations for AMQP gateway
-# Refer: https://github.com/argoproj/argo-events/blob/2a5f965ff704bab535e6a753d999232b9b00b9e5/gateways/core/stream/amqp/config.go#L32
 
 ---
 apiVersion: v1
@@ -10,7 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 data:
-  example-1: |-
+  # no retries if connection to amqp service is not successful
+  example-without-retry: |-
     # url of the service
     url: amqp://amqp.argo-events:5672
     # name of the exchange
@@ -20,8 +20,17 @@ data:
     # routing key for the exchange
     routingKey: "routing key"
 
-  example-2: |-
+  # retry after each backoff to setup successful connection
+  example-with-retry: |-
     url: amqp://amqp.argo-events:5672
     exchangeName: "name of the exchange"
     exchangeType: fanout
     routingKey: "routing key"
+    backoff:
+      # duration in nanoseconds. following value is 10 seconds
+      duration: 10000000000
+      # how many backoffs
+      steps: 5
+      # factor to increase on each step.
+      # setting factor > 1 makes backoff exponential.
+      factor: 2

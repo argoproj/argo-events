@@ -3,19 +3,33 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: resource-gateway-event-source
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
 data:
-  workflow-success: |-
+  # watch workflows that are in successful state
+  example-with-added-type-and-labels-filter: |-
     namespace: argo-events
     group: "argoproj.io"
     version: "v1alpha1"
     kind: "Workflow"
+    # type of event
+    # possible values are ADDED, DELETED, MODIFIED, ERROR
+    # if not provided, listen to all events
+    # Optional
     type: ADDED
+    # Filters to apply on watched object
+    # Optional
     filter:
       labels:
         workflows.argoproj.io/phase: Succeeded
         name: "my-workflow"
-  namespace: |-
+
+  # watch all namespace related events because no type is provided
+  example-with-all-types-and-no-filter: |-
     namespace: argo-events
     group: "k8s.io"
     version: "v1"
     kind: "Namespace"
+
+

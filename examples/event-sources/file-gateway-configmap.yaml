@@ -1,5 +1,4 @@
 # This configmap contains the event sources configurations for File gateway
-# Refer: https://github.com/argoproj/argo-events/blob/master/gateways/core/file/config.go
 
 ---
 apiVersion: v1

@@ -1,13 +1,33 @@
+# This configmap contains the event sources configurations for Kafka gateway
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: kafka-gateway-event-source
+  labels:
+    # do not remove
+    argo-events-gateway-version: v0.10
 data:
-  foo: |-
+  # no retries if connection to kafka service is not successful
+  example-without-retry: |-
+    # url of the service
     url: kafka.argo-events:9092
-    topic: foo
+    # name of the topic
+    topic: "topic-1"
+    # partition number
     partition: "0"
-  bar: |-
+
+  # retry after each backoff to setup successful connection
+  example-with-retry: |-
     url: kafka.argo-events:9092
-    topic: bar
+    topic: "topic-2"
     partition: "1"
+    backoff:
+      # duration in nanoseconds. following value is 10 seconds
+      duration: 10000000000
+      # how many backoffs
+      steps: 5
+      # factor to increase on each step.
+      # setting factor > 1 makes backoff exponential.
+      factor: 2

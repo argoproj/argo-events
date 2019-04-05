@@ -1,5 +1,4 @@
 # This configmap contains the event sources configurations for GCP PubSub gateway
-# Refer: https://github.com/argoproj/argo-events/blob/master/gateways/community/gcp-pubsub/config.go
 
 ---
 apiVersion: v1
