@@ -4,22 +4,25 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: mqtt-gateway-event-source
+  name: kafka-event-source
   labels:
     # do not remove
-    argo-events-gateway-version: v0.10
+    argo-events-event-source-version: v0.10
 data:
   # no retries if connection to kafka service is not successful
   example-without-retry: |-
-    # url of your mqtt service
-    url: tcp://mqtt.argo-events:1883
-    # topic name
-    topic: foo
+    # url of the service
+    url: kafka.argo-events:9092
+    # name of the topic
+    topic: "topic-1"
+    # partition number
+    partition: "0"
 
-  # retry after each backoff to setup successful connection
+  # retry after each backoff to set up a successful connection
   example-with-retry: |-
-    url: tcp://mqtt.argo-events:1883
-    topic: bar
+    url: kafka.argo-events:9092
+    topic: "topic-2"
+    partition: "1"
     backoff:
       # duration in nanoseconds. following value is 10 seconds
       duration: 10000000000

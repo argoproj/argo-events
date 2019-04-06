@@ -18,7 +18,11 @@ kind: Sensor
 metadata:
   name: complete-trigger-parameterization-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:

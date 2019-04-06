@@ -30,7 +30,7 @@ Refer AWS S3 Notitification - https://docs.aws.amazon.com/AmazonS3/latest/dev/no
 
 **1. Install [Gateway Configmap](../../../examples/gateways/artifact-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/artifact-http.yaml)**
+**2. Install [Gateway](../../../examples/gateways/artifact.yaml)**
 
 Make sure the gateway pod is created
    

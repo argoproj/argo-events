@@ -1,10 +1,13 @@
-# this is a non-repeatable sensor. To make it repeatable, set `repeat` as true in `spec`
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-with-data-filter-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:

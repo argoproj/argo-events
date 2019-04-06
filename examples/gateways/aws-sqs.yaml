@@ -3,8 +3,11 @@ kind: Gateway
 metadata:
   name: aws-sqs-gateway
   labels:
+    # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "aws-sqs-gateway"
+    # gateway controller will use this label to match with it's own version
+    # do not remove
+    argo-events-gateway-version: v0.10
 spec:
   processorPort: "9330"
   eventProtocol:

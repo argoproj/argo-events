@@ -1,19 +1,22 @@
+# This configmap contains the event sources configurations for NATS gateway
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nats-gateway-event-source
+  name: nats-event-source
   labels:
     # do not remove
-    argo-events-gateway-version: v0.10
+    argo-events-event-source-version: v0.10
 data:
-  # no retries if connection to kafka service is not successful
+  # no retries if connection to nats service is not successful
   example-without-retry: |-
     # url of the nats service
     url: nats://nats.argo-events:4222
     # subject name
     subject: foo
 
-  # retry after each backoff to setup successful connection
+  # retry after each backoff to set up a successful connection
   example-with-retry: |-
     # url of the nats service
     url: nats://nats.argo-events:4222

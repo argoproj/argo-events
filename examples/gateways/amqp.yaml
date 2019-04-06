@@ -1,16 +1,27 @@
+# AMQP gateway spec
+
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
   name: amqp-gateway
   labels:
+    # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "amqp-gateway"
+    # gateway controller will use this label to match with it's own version
+    # do not remove
+    argo-events-gateway-version: v0.10
 spec:
+  # port of the gateway server to send event source configuration to.
+  # you can configure it to any open port
   processorPort: "9330"
+  # protocol used to send event from gateway to sensor. HTTP in this case
   eventProtocol:
     type: "HTTP"
+    # port on which sensor is listening to events
     http:
       port: "9300"
+  # template is K8s PodSpec
   template:
     metadata:
       name: "amqp-gateway"
@@ -27,9 +38,13 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/amqp-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "amqp-gateway-configmap"
+  # event source configmap name
+  eventSource: "amqp-event-source"
+  # type of the gateway
   type: "amqp"
-  eventVersion: "1.0"
+  # once gateway receives event from external entity, it converts it into cloud events
+  cloudEventsVersion: "1.0"
+  # sensors to send events to
   watchers:
     sensors:
     - name: "amqp-sensor"

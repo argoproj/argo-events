@@ -4,10 +4,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: gcp-pubsub-gateway-configmap
+  name: gcp-pubsub-configmap
   labels:
     # do not remove
-    argo-events-gateway-version: v0.10
+    argo-events-event-source-version: v0.10
 data:
   example-1: |-
     # id of your project

@@ -4,7 +4,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: calendar-gateway-event-source
+  name: calendar-event-source
+  labels:
+    # do not remove
+    argo-events-event-source-version: v0.10
 data:
   example-with-interval: |-
     # creates an event every 10 seconds

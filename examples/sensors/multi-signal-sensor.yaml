@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: multi-signal-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -36,8 +40,11 @@ spec:
               entrypoint: whalesay
               arguments:
                 parameters:
-                - name: message
-                  # this is the value that should be overridden
+                - name: message1
+                  # this is the value that should be overridden by event payload from webhook-gateway-http:foo
+                  value: hello world
+                - name: message2
+                  # this is the value that should be overridden by event payload from calendar-gateway:interval
                   value: hello world
               templates:
               - name: whalesay
@@ -47,8 +54,13 @@ spec:
                 container:
                   image: docker/whalesay:latest
                   command: [cowsay]
-                  args: ["{{inputs.parameters.message}}"]
+                  args:
+                    - "{{inputs.parameters.message1}}"
+                    - "{{inputs.parameters.message2}}"
       resourceParameters:
         - src:
             event: "webhook-gateway-http:foo"
           dest: spec.arguments.parameters.0.value
+        - src:
+            event: "calendar-gateway:interval"
+          dest: spec.arguments.parameters.1.value

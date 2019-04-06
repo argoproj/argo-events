@@ -4,10 +4,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: amqp-gateway-event-source
+  name: amqp-event-source
   labels:
     # do not remove
-    argo-events-gateway-version: v0.10
+    argo-events-event-source-version: v0.10
 data:
   # no retries if connection to amqp service is not successful
   example-without-retry: |-
@@ -20,7 +20,7 @@ data:
     # routing key for the exchange
     routingKey: "routing key"
 
-  # retry after each backoff to setup successful connection
+  # retry after each backoff to set up a successful connection
   example-with-retry: |-
     url: amqp://amqp.argo-events:5672
     exchangeName: "name of the exchange"
