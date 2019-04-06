@@ -18,15 +18,10 @@ package common
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 const (
-	// EnvVarKubeConfig is the path to the Kubernetes configuration
-	EnvVarKubeConfig = "KUBE_CONFIG"
 
-	// SuccessResponse for http request
-	SuccessResponse = "Success"
 	// ErrorResponse for http request
 	ErrorResponse = "Error"
 
@@ -38,34 +33,24 @@ const (
 
 	// DefaultControllerNamespace is the default namespace where the sensor and gateways controllers are installed
 	DefaultControllerNamespace = "argo-events"
+)
+
+// ENV VARS
+const (
+	// EnvVarKubeConfig is the path to the Kubernetes configuration
+	EnvVarKubeConfig = "KUBE_CONFIG"
 
 	// EnvVarDebugLog is the env var to turn on the debug mode for logging
 	EnvVarDebugLog = "DEBUG_LOG"
 )
 
-// SENSOR CONTROLLER CONSTANTS
+// LABELS
 const (
-	// LabelSensorControllerName is the default deployment name of the sensor-controller
-	LabelSensorControllerName = "sensor-controller"
+	// LabelOperation is a label for an operation in framework
+	LabelOperation = "operation"
 
-	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
-	// Content encoding is expected to be YAML.
-	SensorControllerConfigMapKey = "config"
-
-	//LabelKeySensorControllerInstanceID is the label which allows to separate application among multiple running sensor controllers.
-	LabelKeySensorControllerInstanceID = sensor.FullName + "/sensor-controller-instanceid"
-
-	// LabelSensorKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
-	LabelSensorKeyPhase = sensor.FullName + "/phase"
-
-	// LabelSensorKeyComplete is the label to mark sensors as complete
-	LabelSensorKeyComplete = sensor.FullName + "/complete"
-
-	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
-	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
-
-	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
-	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
+	// LabelEventSource is label for event name
+	LabelEventSource = "event-source"
 )
 
 // SENSOR CONSTANTS
@@ -81,12 +66,6 @@ const (
 
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
-
-	// LabelOperation is a label for an operation in framework
-	LabelOperation = "operation"
-
-	// LabelEventSource is label for event name
-	LabelEventSource = "event-source"
 
 	// EnvVarSensorControllerInstanceID is used to get sensor controller instance id
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
@@ -136,6 +115,8 @@ const (
 
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
+
+	LabelArgoEventsGatewayVersion = "argo-events-gateway-version"
 )
 
 // Gateway client constants

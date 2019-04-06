@@ -24,6 +24,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // GitlabEventSourceExecutor implements ConfigExecutor
 type GitlabEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

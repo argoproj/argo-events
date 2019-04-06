@@ -48,7 +48,7 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if cm, ok := new.(*corev1.ConfigMap); ok {
-					gc.Log.Info("detected ConfigMap update. Updating the controller run config.")
+					gc.Log.Info("detected EventSource update. Updating the controller run config.")
 					err := gc.manageEventSources(cm)
 					if err != nil {
 						gc.Log.WithError(err).Error("update config failed")

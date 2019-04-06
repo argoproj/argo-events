@@ -18,6 +18,7 @@ package gateway
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )
@@ -25,15 +26,27 @@ import (
 // Validate validates the gateway resource.
 // Exporting this function so that external APIs can use this to validate gateway resource.
 func Validate(gw *v1alpha1.Gateway) error {
+	if gw.Labels == nil {
+		return fmt.Errorf("gateway labels can't be empty. %s label must be set", common.LabelArgoEventsGatewayVersion)
+	}
+	version, ok := gw.Labels[common.LabelArgoEventsGatewayVersion]
+	if !ok || version != v1alpha1.ArgoEventsGatewayVersion {
+		return fmt.Errorf("gateway label %s must be set and must equal %s", common.LabelArgoEventsGatewayVersion, v1alpha1.ArgoEventsGatewayVersion)
+	}
+
 	if gw.Spec.Template == nil {
 		return fmt.Errorf("gateway  pod template is not specified")
 	}
 	if gw.Spec.Type == "" {
 		return fmt.Errorf("gateway type is not specified")
 	}
-	if gw.Spec.EventVersion == "" {
-		return fmt.Errorf("gateway version is not specified")
+	if gw.Spec.EventSource == "" {
+		return fmt.Errorf("event source for the gateway is not specified")
 	}
+	if gw.Spec.ProcessorPort == "" {
+		return fmt.Errorf("gateway processor port is not specified")
+	}
+
 	switch gw.Spec.EventProtocol.Type {
 	case apicommon.HTTP:
 		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {

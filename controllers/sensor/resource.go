@@ -29,8 +29,8 @@ func NewSensorResourceContext(s *v1alpha1.Sensor, controller *SensorController) 
 		ChildResourceContext: controllerscommon.ChildResourceContext{
 			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
 			LabelOwnerName:                    common.LabelSensorName,
-			LabelKeyOwnerControllerInstanceID: common.LabelKeySensorControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationSensorResourceSpecHashName,
+			LabelKeyOwnerControllerInstanceID: LabelKeySensorControllerInstanceID,
+			AnnotationOwnerResourceHashName:   AnnotationSensorResourceSpecHashName,
 			InstanceID:                        controller.Config.InstanceID,
 		},
 	}
@@ -172,8 +172,8 @@ func (src *sResourceCtx) getServiceTemplateSpec() *pc.ServiceTemplateSpec {
 				},
 				Type: corev1.ServiceTypeClusterIP,
 				Selector: map[string]string{
-					common.LabelSensorName:                    src.s.Name,
-					common.LabelKeySensorControllerInstanceID: src.controller.Config.InstanceID,
+					common.LabelSensorName:             src.s.Name,
+					LabelKeySensorControllerInstanceID: src.controller.Config.InstanceID,
 				},
 			},
 		}

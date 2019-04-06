@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // NatsEventSourceExecutor implements Eventing
 type NatsEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

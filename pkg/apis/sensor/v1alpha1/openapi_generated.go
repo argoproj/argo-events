@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/go-openapi/spec"
-	"k8s.io/kube-openapi/pkg/common"
+	spec "github.com/go-openapi/spec"
+	common "k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {

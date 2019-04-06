@@ -1,10 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/update-docs/docs/assets/stream.png?raw=true" alt="Stream"/>
-</p>
-
-<br/>
-
-
 # Streams
 
 A Stream Gateway basically listens to messages on a message queue.

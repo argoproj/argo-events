@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/webhook.png?raw=true" alt="Webhook"/>
-</p>
-
-<br/>
-
 # Webhook
 
 The webhook gateway basically runs one or more http servers in a pod.

@@ -26,7 +26,7 @@ import (
 
 // ValidateEventSource validates webhook event source
 func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateWebhook)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateWebhook)
 }
 
 func validateWebhook(config interface{}) error {

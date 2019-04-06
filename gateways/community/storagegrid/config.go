@@ -25,6 +25,8 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // StorageGridEventSourceExecutor implements Eventing
 type StorageGridEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

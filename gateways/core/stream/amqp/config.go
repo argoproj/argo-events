@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // AMQPEventSourceExecutor implements Eventing
 type AMQPEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

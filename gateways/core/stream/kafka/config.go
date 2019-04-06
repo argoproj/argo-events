@@ -23,6 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // KafkaEventSourceExecutor implements Eventing
 type KafkaEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

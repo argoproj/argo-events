@@ -22,6 +22,8 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // WebhookEventSourceExecutor implements Eventing
 type WebhookEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

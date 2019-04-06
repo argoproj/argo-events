@@ -24,6 +24,8 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // ResourceEventSourceExecutor implements Eventing
 type ResourceEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

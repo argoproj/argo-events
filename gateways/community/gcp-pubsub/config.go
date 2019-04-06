@@ -21,6 +21,8 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // GcpPubSubEventSourceExecutor implements Eventing
 type GcpPubSubEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

@@ -22,6 +22,8 @@ import (
 	"github.com/ghodss/yaml"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // FileEventSourceExecutor implements Eventing
 type FileEventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

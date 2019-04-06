@@ -10,6 +10,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // EventSourceExecutor implements Eventing
 type EventSourceExecutor struct {
 	Log *common.ArgoEventsLogger

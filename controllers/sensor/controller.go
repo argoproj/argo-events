@@ -20,6 +20,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,11 +41,45 @@ import (
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
+// informer constants
 const (
 	sensorResyncPeriod         = 20 * time.Minute
 	sensorResourceResyncPeriod = 30 * time.Minute
 	rateLimiterBaseDelay       = 5 * time.Second
 	rateLimiterMaxDelay        = 1000 * time.Second
+)
+
+// env variables constants
+const (
+	//LabelKeySensorControllerInstanceID is the label which allows to separate application among multiple running sensor controllers.
+	LabelKeySensorControllerInstanceID = sensor.FullName + "/sensor-controller-instanceid"
+
+	// LabelSensorKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
+	LabelSensorKeyPhase = sensor.FullName + "/phase"
+
+	// LabelSensorKeyComplete is the label to mark sensors as complete
+	LabelSensorKeyComplete = sensor.FullName + "/complete"
+
+	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
+	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
+)
+
+// labels constants
+const (
+	// LabelSensorControllerName is the default deployment name of the sensor-controller
+	LabelSensorControllerName = "sensor-controller"
+
+	LabelArgoEventsSensorVersion = "argo-events-sensor-version"
+)
+
+// miscellaneous constants
+const (
+	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
+	// Content encoding is expected to be YAML.
+	SensorControllerConfigMapKey = "config"
+
+	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
+	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
 )
 
 // SensorControllerConfig contain the configuration settings for the sensor-controller
@@ -58,14 +94,14 @@ type SensorControllerConfig struct {
 
 // SensorController listens for new sensors and hands off handling of each sensor on the queue to the operator
 type SensorController struct {
-	// ConfigMap is the name of the config map in which to derive configuration of the contoller
+	// EventSource is the name of the config map in which to derive configuration of the contoller
 	ConfigMap string
 	// Namespace for sensor controller
 	Namespace string
 	// Config is the sensor-controller's configuration
 	Config SensorControllerConfig
 	// log is the logger for a gateway
-	log *common.ArgoEventsLogger
+	log *logrus.Logger
 
 	// kubernetes config and apis
 	kubeConfig      *rest.Config
@@ -89,7 +125,7 @@ func NewSensorController(rest *rest.Config, configMap, namespace string) *Sensor
 		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
 		sensorClientset: clientset.NewForConfigOrDie(rest),
 		queue:           workqueue.NewRateLimitingQueue(rateLimiter),
-		log:             common.NewArgoEventsLogger().WithNamespace(namespace),
+		log:             common.NewArgoEventsLogger(),
 	}
 }
 
@@ -103,7 +139,7 @@ func (c *SensorController) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.WithSensorName(key.(string)).WithError(err).Warn("failed to get sensor from informer index")
+		c.log.WithField(common.LabelSensorName, key.(string)).WithError(err).Warn("failed to get sensor from informer index")
 		return true
 	}
 
@@ -112,26 +148,26 @@ func (c *SensorController) processNextItem() bool {
 		return true
 	}
 
-	sensor, ok := obj.(*v1alpha1.Sensor)
+	s, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		c.log.WithSensorName(key.(string)).WithError(err).Warn("key in index is not a sensor")
+		c.log.WithField(common.LabelSensorName, key.(string)).WithError(err).Warn("key in index is not a sensor")
 		return true
 	}
 
-	ctx := newSensorOperationCtx(sensor, c)
+	ctx := newSensorOperationCtx(s, c)
 
 	err = ctx.operate()
 	if err != nil {
 		if err := common.GenerateK8sEvent(c.kubeClientset,
-			fmt.Sprintf("failed to operate on sensor %s", sensor.Name),
+			fmt.Sprintf("failed to operate on sensor %s", s.Name),
 			common.EscalationEventType,
 			"sensor operation failed",
-			sensor.Name,
-			sensor.Namespace,
+			s.Name,
+			s.Namespace,
 			c.Config.InstanceID,
 			sensor.Kind,
 			map[string]string{
-				common.LabelSensorName: sensor.Name,
+				common.LabelSensorName: s.Name,
 				common.LabelEventType:  string(common.EscalationEventType),
 				common.LabelOperation:  "controller_operation",
 			},
@@ -172,7 +208,11 @@ func (c *SensorController) handleErr(err error, key interface{}) error {
 func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
 	defer c.queue.ShutDown()
 
-	c.log.WithInstanceId(c.Config.InstanceID).WithVersion(base.GetVersion().Version).Info("starting sensor controller")
+	c.log.WithFields(
+		map[string]interface{}{
+			common.LabelInstanceID: c.Config.InstanceID,
+			common.LabelVersion:    base.GetVersion().Version,
+		}).Info("starting sensor controller")
 	_, err := c.watchControllerConfigMap(ctx)
 	if err != nil {
 		c.log.WithError(err).Error("failed to register watch for sensor controller config map")

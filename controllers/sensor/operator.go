@@ -17,6 +17,7 @@ limitations under the License.
 package sensor
 
 import (
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/pkg/errors"
@@ -36,7 +37,7 @@ type sOperationCtx struct {
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
 	updated bool
 	// log is the logrus logging context to correlate logs with a sensor
-	log *common.ArgoEventsLogger
+	log *logrus.Logger
 	// reference to the sensor-controller
 	controller *SensorController
 	// srctx is the context to handle child resource
@@ -46,9 +47,13 @@ type sOperationCtx struct {
 // newSensorOperationCtx creates and initializes a new sOperationCtx object
 func newSensorOperationCtx(s *v1alpha1.Sensor, controller *SensorController) *sOperationCtx {
 	return &sOperationCtx{
-		s:          s.DeepCopy(),
-		updated:    false,
-		log:        common.NewArgoEventsLogger().WithSensorName(s.Name).WithNamespace(s.Namespace),
+		s:       s.DeepCopy(),
+		updated: false,
+		log: common.NewArgoEventsLogger().WithFields(
+			map[string]interface{}{
+				common.LabelSensorName: s.Name,
+				common.LabelNamespace:  s.Namespace,
+			}).Logger,
 		controller: controller,
 		srctx:      NewSensorResourceContext(s, controller),
 	}
@@ -60,10 +65,10 @@ func (soc *sOperationCtx) operate() error {
 		if soc.updated {
 			// persist updates to sensor resource
 			labels := map[string]string{
-				common.LabelSensorName:                    soc.s.Name,
-				common.LabelSensorKeyPhase:                string(soc.s.Status.Phase),
-				common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
-				common.LabelOperation:                     "persist_state_update",
+				common.LabelSensorName:             soc.s.Name,
+				LabelSensorKeyPhase:                string(soc.s.Status.Phase),
+				LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
+				common.LabelOperation:              "persist_state_update",
 			}
 			eventType := common.StateChangeEventType
 
@@ -139,7 +144,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 		return err
 	}
 	soc.markAllNodePhases()
-	soc.log.WithPodName(pod.Name).Info("sensor pod is created")
+	soc.log.WithField(common.LabelPodName, pod.Name).Info("sensor pod is created")
 
 	// expose sensor if service is configured
 	if soc.srctx.getServiceTemplateSpec() != nil {
@@ -149,7 +154,7 @@ func (soc *sOperationCtx) createSensorResources() error {
 			soc.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return err
 		}
-		soc.log.WithServiceName(svc.Name).Info("sensor service is created")
+		soc.log.WithField(common.LabelServiceName, svc.Name).Info("sensor service is created")
 	}
 
 	// if we get here - we know the signals are running
@@ -235,13 +240,13 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
-		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.WithPodName(existingPod.Name).Debug("sensor pod spec unchanged")
+		if existingPod.Annotations != nil && existingPod.Annotations[AnnotationSensorResourceSpecHashName] == newPod.Annotations[AnnotationSensorResourceSpecHashName] {
+			soc.log.WithField(common.LabelPodName, existingPod.Name).Debug("sensor pod spec unchanged")
 			return nil, false, nil
 		}
 
 		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
-		soc.log.WithPodName(existingPod.Name).Info("sensor pod spec changed")
+		soc.log.WithField(common.LabelPodName, existingPod.Name).Info("sensor pod spec changed")
 
 		err := soc.srctx.deleteSensorPod(existingPod)
 		if err != nil {
@@ -249,7 +254,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 			return nil, false, err
 		}
 
-		soc.log.WithPodName(existingPod.Name).Info("sensor pod is deleted")
+		soc.log.WithField(common.LabelPodName, existingPod.Name).Info("sensor pod is deleted")
 	}
 
 	// Create new pod for updated sensor spec.
@@ -258,7 +263,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 		soc.log.WithError(err).Error("failed to create pod for sensor")
 		return nil, false, err
 	}
-	soc.log.WithPodName(newPod.Name).Info("sensor pod is created")
+	soc.log.WithField(common.LabelPodName, newPod.Name).Info("sensor pod is created")
 
 	return createdPod, true, nil
 }
@@ -288,13 +293,13 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 		}
 
 		// check if service spec remained unchanged
-		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
-			soc.log.WithServiceName(existingSvc.Name).Debug("sensor service spec unchanged")
+		if existingSvc.Annotations[AnnotationSensorResourceSpecHashName] == newSvc.Annotations[AnnotationSensorResourceSpecHashName] {
+			soc.log.WithField(common.LabelServiceName, existingSvc.Name).Debug("sensor service spec unchanged")
 			return nil, false, nil
 		}
 
 		// service spec changed, delete existing service and create new one
-		soc.log.WithServiceName(existingSvc.Name).Info("sensor service spec changed")
+		soc.log.WithField(common.LabelServiceName, existingSvc.Name).Info("sensor service spec changed")
 
 		if err := soc.srctx.deleteSensorService(existingSvc); err != nil {
 			return nil, false, err
@@ -307,10 +312,10 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 	// change createSensorService to take a service spec
 	createdSvc, err := soc.srctx.createSensorService(newSvc)
 	if err != nil {
-		soc.log.WithServiceName(newSvc.Name).WithError(err).Error("failed to create service for sensor")
+		soc.log.WithField(common.LabelServiceName, newSvc.Name).WithError(err).Error("failed to create service for sensor")
 		return nil, false, err
 	}
-	soc.log.WithServiceName(newSvc.Name).Info("sensor service is created")
+	soc.log.WithField(common.LabelServiceName, newSvc.Name).Info("sensor service is created")
 
 	return createdSvc, true, nil
 }
@@ -333,9 +338,9 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 		if soc.s.ObjectMeta.Annotations == nil {
 			soc.s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		soc.s.ObjectMeta.Labels[common.LabelSensorKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Labels[LabelSensorKeyPhase] = string(phase)
 		// add annotations so a resource sensor can watch this sensor.
-		soc.s.ObjectMeta.Annotations[common.LabelSensorKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Annotations[LabelSensorKeyPhase] = string(phase)
 	}
 	if soc.s.Status.StartedAt.IsZero() {
 		soc.s.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
@@ -358,8 +363,8 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			if soc.s.ObjectMeta.Labels == nil {
 				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
-			soc.s.ObjectMeta.Labels[common.LabelSensorKeyComplete] = "true"
-			soc.s.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
+			soc.s.ObjectMeta.Labels[LabelSensorKeyComplete] = "true"
+			soc.s.ObjectMeta.Annotations[LabelSensorKeyComplete] = string(phase)
 		}
 	}
 	soc.updated = true
