@@ -21,7 +21,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "mqtt-gateway:foo"
+    - name: "mqtt-gateway:example-with-retry"
   triggers:
     - template:
         name: mqtt-workflow-trigger
@@ -52,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "mqtt-gateway:foo"
+            event: "mqtt-gateway:example-with-retry"
           dest: spec.arguments.parameters.0.value

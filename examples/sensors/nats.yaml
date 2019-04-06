@@ -6,6 +6,9 @@ metadata:
   name: nats-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -19,7 +22,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "nats-gateway:foo"
+    - name: "nats-gateway:example-with-retry"
   triggers:
     - template:
         name: nats-workflow-trigger
@@ -47,3 +50,7 @@ spec:
                   image: docker/whalesay:latest
                   command: [cowsay]
                   args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "nats-gateway:example-with-retry"
+          dest: spec.arguments.parameters.0.value

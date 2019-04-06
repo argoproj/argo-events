@@ -4,6 +4,9 @@ metadata:
   name: resource-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -17,7 +20,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "resource-gateway:workflow-success"
+    - name: "resource-gateway:example"
   triggers:
     - template:
         name: argo-workflow
@@ -48,5 +51,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "resource-gateway:workflow-success"
+            event: "resource-gateway:example"
           dest: spec.arguments.parameters.0.value

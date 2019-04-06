@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "artifact"
+  eventSource: "artifact-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "NATS"
@@ -33,6 +35,3 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/artifact-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "artifact-gateway-configmap"
-  eventVersion: "1.0"
-  type: "artifact"

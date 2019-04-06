@@ -43,11 +43,11 @@ If you don't to expose the gateway, just remove the `serviceSpec`.
 
 **1. Install  [Gateway Configmap](../../../examples/gateways/webhook-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/webhook-http.yaml)**
+**2. Install [Gateway](../../../examples/gateways/webhook.yaml)**
 
 Make sure the gateway pod and service is created.
 
-**3. Install [Sensor](../../../examples/sensors/webhook-http.yaml)**
+**3. Install [Sensor](../../../examples/sensors/webhook.yaml)**
 
 Make sure the sensor pod is created.
 

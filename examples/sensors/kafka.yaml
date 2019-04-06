@@ -21,7 +21,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "kafka-gateway:foo"
+    - name: "kafka-gateway:example-with-retry"
   triggers:
     - template:
         name: kafka-workflow-trigger
@@ -52,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "kafka-gateway:foo"
+            event: "kafka-gateway:example-with-retry"
           dest: spec.arguments.parameters.0.value

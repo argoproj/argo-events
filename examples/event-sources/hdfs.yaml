@@ -1,9 +1,12 @@
+# This configmap contains the event sources configurations for HDFS gateway
+
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: hdfs-gateway-configmap
 data:
-  tmpdir: |-
+  example-1: |-
     directory: "/tmp/"
     type: "CREATE"
     path: x.txt

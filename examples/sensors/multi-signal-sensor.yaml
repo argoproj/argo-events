@@ -22,8 +22,8 @@ spec:
       port: "9300"
   # wait for both "webhook-gateway-http:foo" and "calendar-gateway:interval" to happen
   dependencies:
-    - name: "webhook-gateway-http:foo"
-    - name: "calendar-gateway:interval"
+    - name: "webhook-gateway-http:example"
+    - name: "calendar-gateway:example-with-interval"
   triggers:
     - template:
         name: multi-signal-workflow-trigger
@@ -59,8 +59,8 @@ spec:
                     - "{{inputs.parameters.message2}}"
       resourceParameters:
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
           dest: spec.arguments.parameters.0.value
         - src:
-            event: "calendar-gateway:interval"
+            event: "calendar-gateway:example-with-interval"
           dest: spec.arguments.parameters.1.value

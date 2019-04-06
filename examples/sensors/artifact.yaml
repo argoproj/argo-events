@@ -21,10 +21,10 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "artifact-gateway:input"
+    - name: "artifact-gateway:example-1"
   triggers:
     - template:
-        name: artifact-workflow-trigger-2
+        name: artifact-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -47,6 +47,6 @@ spec:
       # The container args from the workflow are overridden by the s3 notification key
       resourceParameters:
         - src:
-            event: "artifact-gateway:input"
+            event: "artifact-gateway:example-1"
             path: s3.object.key
           dest: spec.templates.0.container.args.0

@@ -17,7 +17,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "file-gateway:bindir"
+    - name: "file-gateway:example-with-path"
   eventProtocol:
     type: "HTTP"
     http:
@@ -47,6 +47,6 @@ spec:
                   name: whalesay
       resourceParameters:
         - src:
-            event: "file-gateway:bindir"
+            event: "file-gateway:example-with-path"
             path: name
           dest: spec.templates.0.container.args.1

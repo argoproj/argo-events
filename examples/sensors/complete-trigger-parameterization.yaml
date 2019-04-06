@@ -1,4 +1,4 @@
-# The event payload for this example =
+# Consider an event payload,
 #
 #  {
 #   "name": "trigger-wf-1",
@@ -32,7 +32,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -59,24 +59,24 @@ spec:
       # Apply parameter at template
       templateParameters:
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
             path: name
           dest: name
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
             path: namespace
           dest: namespace
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
             path: bucket
           dest: source.s3.bucket.name
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
             path: key
           dest: source.s3.bucket.key
       # Apply parameter for workflow
       resourceParameters:
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
             path: image
           dest: spec.templates.0.container.image

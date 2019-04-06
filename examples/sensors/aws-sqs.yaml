@@ -21,7 +21,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "aws-sqs-gateway:notification_1"
+    - name: "aws-sqs-gateway:example-1"
   triggers:
     - template:
         name: sqs-workflow
@@ -52,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "aws-sqs-gateway:notification_1"
+            event: "aws-sqs-gateway:example-1"
           dest: spec.arguments.parameters.0.value

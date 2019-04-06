@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "aws-sns"
+  eventSource: "aws-sns-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -40,9 +42,6 @@ spec:
         - port: 12000
           targetPort: 12000
       type: LoadBalancer
-  configMap: "aws-sns-gateway-configmap"
-  eventVersion: "1.0"
-  type: "aws-sns"
   watchers:
     sensors:
       - name: "aws-sns-sensor"

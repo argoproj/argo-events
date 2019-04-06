@@ -1,6 +1,3 @@
-# AMQP gateway spec
-
----
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
@@ -12,6 +9,10 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  # type of the gateway
+  type: "amqp"
+  # event source configmap name
+  eventSource: "amqp-event-source"
   # port of the gateway server to send event source configuration to.
   # you can configure it to any open port
   processorPort: "9330"
@@ -38,12 +39,6 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/amqp-gateway"]
       serviceAccountName: "argo-events-sa"
-  # event source configmap name
-  eventSource: "amqp-event-source"
-  # type of the gateway
-  type: "amqp"
-  # once gateway receives event from external entity, it converts it into cloud events
-  cloudEventsVersion: "1.0"
   # sensors to send events to
   watchers:
     sensors:

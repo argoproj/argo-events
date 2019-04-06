@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "github"
+  eventSource: "github-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -40,9 +42,6 @@ spec:
         - port: 12000
           targetPort: 12000
       type: LoadBalancer
-  configMap: "github-gateway-configmap"
-  type: "github"
-  eventVersion: "1.0"
   watchers:
     sensors:
       - name: "github-sensor"

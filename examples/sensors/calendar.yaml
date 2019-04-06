@@ -17,7 +17,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "calendar-gateway:interval"
+    - name: "calendar-gateway:example-with-interval"
   eventProtocol:
     type: "HTTP"
     http:
@@ -52,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "calendar-gateway:interval"
+            event: "calendar-gateway:example-with-interval"
           dest: spec.arguments.parameters.0.value

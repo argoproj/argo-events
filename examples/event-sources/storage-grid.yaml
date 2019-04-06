@@ -9,7 +9,7 @@ metadata:
     # do not remove
     argo-events-event-source-version: v0.10
 data:
-  example-non-secure: |-
+  example: |-
     # hook contains configuration for the HTTP server running in the gateway.
     # StorageGrid will send events to following port and endpoint
     hook:

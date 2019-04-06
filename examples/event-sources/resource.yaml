@@ -10,7 +10,7 @@ metadata:
     argo-events-event-source-version: v0.10
 data:
   # watch workflows that are in successful state
-  example-with-add-type-and-labels-filter: |-
+  example: |-
     # namespace to listen events within
     namespace: argo-events
     # resource group

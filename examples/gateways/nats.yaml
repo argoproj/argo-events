@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "nats"
+  eventSource: "nats-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -30,9 +32,6 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/nats-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "nats-gateway-configmap"
-  type: "nats"
-  eventVersion: "1.0"
   watchers:
     sensors:
       - name: "nats-sensor"

@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "gcp-pubsub"
+  eventSource: "gcp-pubsub-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -37,9 +39,6 @@ spec:
           secret:
             secretName: gcp-pubsub
       serviceAccountName: "argo-events-sa"
-  configMap: "gcp-pubsub-gateway-configmap"
-  eventVersion: "1.0"
-  type: "gcp-pubsub"
   watchers:
     sensors:
       - name: "gcp-pubsub-sensor"

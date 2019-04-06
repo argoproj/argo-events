@@ -9,6 +9,8 @@ metadata:
     # do not remove
     argo-events-gateway-version: v0.10
 spec:
+  type: "webhook"
+  eventSource: "webhook-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -30,9 +32,6 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       serviceAccountName: "argo-events-sa"
-  configMap: "webhook-gateway-configmap"
-  type: "webhook"
-  eventVersion: "1.0"
   service:
     metadata:
       name: webhook-gateway-svc

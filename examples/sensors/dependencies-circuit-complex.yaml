@@ -1,12 +1,12 @@
-# The dependency grouping and selective workflow trigger execution is not supported in latest release
-# This feature will be released in next release v0.8.
-# You can try this example with sensor and sensor controller image v0.7.1
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-sensor-http
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:

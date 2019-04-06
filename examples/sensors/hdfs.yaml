@@ -17,7 +17,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "hdfs-gateway:tmpdir"
+    - name: "hdfs-gateway:example-1"
   eventProtocol:
     type: "HTTP"
     http:
@@ -46,6 +46,6 @@ spec:
                       image: "docker/whalesay:latest"
       resourceParameters:
         - src:
-            event: "hdfs-gateway:tmpdir"
+            event: "hdfs-gateway:example-1"
             path: name
           dest: spec.templates.0.container.args.1
