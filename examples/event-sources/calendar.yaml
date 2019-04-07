@@ -23,3 +23,11 @@ data:
     # userPayload is a static string that will be send to the the sensor with each event payload
     # whatever you put here is blindly delivered to sensor.
     userPayload: "{\"hello\": \"world\"}"
+
+  example-with-timezone: |-
+    # creates an event every 20 seconds
+    interval: 20s
+    # userPayload is a static string that will be send to the the sensor with each event payload
+    # whatever you put here is blindly delivered to sensor.
+    userPayload: "{\"hello\": \"world\"}"
+

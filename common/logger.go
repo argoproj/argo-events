@@ -17,11 +17,8 @@ limitations under the License.
 package common
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"os"
-	"runtime"
-	"strings"
 )
 
 // Logger constants
@@ -45,22 +42,20 @@ const (
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
 func NewArgoEventsLogger() *logrus.Logger {
-	log := logrus.New()
-
-	log.SetOutput(os.Stdout)
-	log.SetLevel(logrus.InfoLevel)
+	log := &logrus.Logger{
+		Out:   os.Stdout,
+		Level: logrus.InfoLevel,
+		Formatter: &logrus.TextFormatter{
+			TimestampFormat:  "2006-01-02 15:04:05",
+			FullTimestamp:    true,
+			ForceColors:      true,
+			QuoteEmptyFields: true,
+		},
+	}
 
 	debugMode, ok := os.LookupEnv(EnvVarDebugLog)
 	if ok && debugMode == "true" {
 		log.SetLevel(logrus.DebugLevel)
-	}
-
-	log.SetReportCaller(true)
-	log.Formatter = &logrus.TextFormatter{
-		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
-			filename := strings.Split(f.File, "github.com/argoproj/argo-events")
-			return fmt.Sprintf("%s()", f.Function), fmt.Sprintf("%s:%d", filename[1], f.Line)
-		},
 	}
 
 	return log

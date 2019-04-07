@@ -24,9 +24,9 @@ data:
     endpoint: "/secure"
     method: "POST"
     # path to file that is mounted in gateway pod which contains certs
-    serverCertPath: "some path in pod"
+    serverCertPath: "/bin/webhook-secure/crt"
     # path to file that is mounted in gateway pod which contains private key
-    serverKeyPath: "some path in pod"
+    serverKeyPath: "/bin/webhook-secure/key"
 
   # example 3 and 4 shows how you can add multiple endpoints on same HTTP server
 
