@@ -18,6 +18,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -31,7 +32,8 @@ var (
 func ValidateGatewayEventSource(eventSource *gateways.EventSource, version string, parseEventSource func(string) (interface{}, error), validateEventSource func(interface{}) error) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
 	if eventSource.Version != version {
-		return v, fmt.Errorf("event source version mismatch. gateway expects %s version, and provided version is %s", version, eventSource.Version)
+		v.Reason = fmt.Sprintf("event source version mismatch. gateway expects %s version, and provided version is %s", version, eventSource.Version)
+		return v, nil
 	}
 	es, err := parseEventSource(eventSource.Data)
 	if err != nil {
@@ -48,10 +50,10 @@ func ValidateGatewayEventSource(eventSource *gateways.EventSource, version strin
 
 func CheckEventSourceVersion(cm *corev1.ConfigMap) error {
 	if cm.Labels == nil {
-		return fmt.Errorf("labels can't be empty. event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
+		return fmt.Errorf("labels can't be empty. event source must be specified in as %s label", common.LabelArgoEventsEventSourceVersion)
 	}
-	if _, ok := cm.Labels[LabelArgoEventsEventSourceVersion]; !ok {
-		return fmt.Errorf("event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
+	if _, ok := cm.Labels[common.LabelArgoEventsEventSourceVersion]; !ok {
+		return fmt.Errorf("event source must be specified in as %s label", common.LabelArgoEventsEventSourceVersion)
 	}
 	return nil
 }

@@ -45,11 +45,13 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
 	r := rc.Route
 
-	logger := r.Logger.
-		WithEventSource(r.EventSource.Name).
-		WithEndpoint(r.Webhook.Endpoint).
-		WithPort(r.Webhook.Port).
-		WithHTTPMethod(request.Method)
+	logger := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+			common.LabelPort:        r.Webhook.Port,
+			common.LabelHTTPMethod:  r.Webhook.Method,
+		})
 
 	logger.Info("request received")
 
@@ -99,11 +101,14 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 func (rc *RouteConfig) PostStart() error {
 	r := rc.Route
 
-	logger := r.Logger.
-		WithEventSource(r.EventSource.Name).
-		WithEndpoint(r.Webhook.Endpoint).
-		WithPort(r.Webhook.Port).
-		WithField("topic-arn", rc.snses.TopicArn)
+	logger := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+			common.LabelPort:        r.Webhook.Port,
+			common.LabelHTTPMethod:  r.Webhook.Method,
+			"topic-arn":             rc.snses.TopicArn,
+		})
 
 	logger.Info("subscribing to sns topic")
 
@@ -145,9 +150,9 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
-
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("operating on event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")

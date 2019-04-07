@@ -31,7 +31,7 @@ type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
 func (ese *CalendarEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("activating event source")
 
 	config, err := parseEventSource(eventSource.Data)
@@ -114,7 +114,11 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		ese.Log.WithEventSource(eventSource.Name).WithTime(t.UTC().String()).Info("expected next calendar event")
+		ese.Log.WithFields(
+			map[string]interface{}{
+				common.LabelEventSource: eventSource.Name,
+				common.LabelTime:        t.UTC().String(),
+			}).Info("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx

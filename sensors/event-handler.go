@@ -65,7 +65,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
-		log := sec.log.WithEventSource(ew.event.Context.Source.Host)
+		log := sec.log.WithField(common.LabelEventSource, ew.event.Context.Source.Host)
 		log.Info("received event notification")
 
 		// apply filters if any.

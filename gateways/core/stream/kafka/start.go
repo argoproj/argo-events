@@ -37,7 +37,7 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 
 // StartEventSource starts an event source
 func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
@@ -58,7 +58,7 @@ func (ese *KafkaEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	if err := gateways.Connect(k.Backoff, func() error {
 		var err error

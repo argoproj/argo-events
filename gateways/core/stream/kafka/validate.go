@@ -26,7 +26,7 @@ import (
 
 // ValidateEventSource validates the gateway event source
 func (ese *KafkaEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateKafka)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateKafka)
 }
 
 func validateKafka(config interface{}) error {

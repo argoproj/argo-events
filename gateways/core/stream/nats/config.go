@@ -17,9 +17,9 @@ limitations under the License.
 package nats
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -27,7 +27,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 
 // NatsEventSourceExecutor implements Eventing
 type NatsEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // Nats contains configuration to connect to NATS cluster

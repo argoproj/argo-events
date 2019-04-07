@@ -24,7 +24,7 @@ import (
 
 // StartEventSource starts an event source
 func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
@@ -45,10 +45,11 @@ func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name).WithFields(
+	log := ese.Log.WithFields(
 		map[string]interface{}{
-			common.LabelURL:      m.URL,
-			common.LabelClientID: m.ClientId,
+			common.LabelEventSource: eventSource.Name,
+			common.LabelURL:         m.URL,
+			common.LabelClientID:    m.ClientId,
 		},
 	)
 

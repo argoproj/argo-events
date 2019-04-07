@@ -18,6 +18,7 @@ package artifact
 
 import (
 	"encoding/json"
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -27,9 +28,9 @@ import (
 
 // StartEventSource activates an event source and streams back events
 func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
-
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("activating event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")
@@ -48,7 +49,7 @@ func (ese *S3EventSourceExecutor) StartEventSource(eventSource *gateways.EventSo
 // listenEvents listens to minio bucket notifications
 func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 

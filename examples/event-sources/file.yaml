@@ -22,4 +22,4 @@ data:
     directory: "/bin/"
     type: CREATE
     # the gateway will watch events for path that matches following regex
-    pathRegexp: "*.txt"
+    pathRegexp: "([a-z]+).txt"

@@ -17,8 +17,8 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
@@ -28,7 +28,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 
 // ResourceEventSourceExecutor implements Eventing
 type ResourceEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 	// K8RestConfig is kubernetes cluster config
 	K8RestConfig *rest.Config
 }

@@ -20,7 +20,7 @@ data:
     # token contains information about K8s secret that stores the token
     token:
       # Name of the K8s secret that contains the token
-      name slack-secret
+      name: slack-secret
       # Key within the K8s secret whose corresponding value (must be base64 encoded) is token
       key: tokenkey
 
@@ -29,7 +29,7 @@ data:
       endpoint: "/"
       port: "13000"
     token:
-      name slack-secret-2
+      name: slack-secret-2
       key: tokenkey
 
   # with secure connection
@@ -42,5 +42,5 @@ data:
       # path to file that is mounted in gateway pod which contains private key
       serverKeyPath: "some path in pod"
     token:
-      name slack-secret-3
+      name: slack-secret-3
       key: tokenkey

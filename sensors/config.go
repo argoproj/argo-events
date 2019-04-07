@@ -17,6 +17,7 @@ limitations under the License.
 package sensors
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/nats-io/go-nats"
@@ -46,7 +47,7 @@ type sensorExecutionCtx struct {
 	// http server which exposes the sensor to gateway/s
 	server *http.Server
 	// logger for the sensor
-	log *common.ArgoEventsLogger
+	log *logrus.Logger
 	// queue is internal queue to manage incoming events
 	queue chan *updateNotification
 	// controllerInstanceID is the instance ID of sensor controller processing this sensor
@@ -83,7 +84,7 @@ func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernet
 		clientPool:           clientPool,
 		discoveryClient:      discoveryClient,
 		sensor:               sensor,
-		log:                  common.NewArgoEventsLogger().WithSensorName(sensor.Name),
+		log:                  common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		queue:                make(chan *updateNotification),
 		controllerInstanceID: controllerInstanceID,
 	}

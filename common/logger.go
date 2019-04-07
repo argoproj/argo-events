@@ -17,7 +17,10 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"os"
+	"path"
+	"runtime"
 
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +40,6 @@ const (
 	LabelHTTPMethod  = "http-method"
 	LabelClientID    = "client-id"
 	LabelVersion     = "version"
-	LabelError       = "error"
 	LabelTime        = "time"
 	LabelTriggerName = "trigger-name"
 )
@@ -52,5 +54,21 @@ func NewArgoEventsLogger() *logrus.Logger {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
+	logrus.AddHook(&ContextHook{})
+
 	return logrus.StandardLogger()
+}
+
+type ContextHook struct{}
+
+func (hook ContextHook) Levels() []logrus.Level {
+	return logrus.AllLevels
+}
+
+func (hook ContextHook) Fire(entry *logrus.Entry) error {
+	if pc, file, line, ok := runtime.Caller(10); ok {
+		funcName := runtime.FuncForPC(pc).Name()
+		entry.Data["source"] = fmt.Sprintf("%s:%v:%s", path.Base(file), line, path.Base(funcName))
+	}
+	return nil
 }

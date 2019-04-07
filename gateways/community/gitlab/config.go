@@ -17,7 +17,6 @@ limitations under the License.
 package gitlab
 
 import (
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
@@ -48,8 +47,6 @@ type RouteConfig struct {
 
 // gitlabEventSource contains information to setup a gitlab project integration
 type gitlabEventSource struct {
-	// Webhook Id
-	Id int `json:"id"`
 	// Webhook
 	Hook *gwcommon.Webhook `json:"hook"`
 	// ProjectId is the id of project for which integration needs to setup

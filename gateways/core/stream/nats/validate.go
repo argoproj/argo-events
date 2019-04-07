@@ -25,7 +25,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateNATS)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateNATS)
 }
 
 func validateNATS(config interface{}) error {

@@ -19,6 +19,7 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"strings"
 
 	"github.com/argoproj/argo-events/gateways"
@@ -34,8 +35,9 @@ import (
 
 // StartEventSource starts an event source
 func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("operating on event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")
@@ -60,7 +62,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
 	}
 
-	ese.Log.WithEventSource(eventSource.Name).Info("starting to watch to resource notifications")
+	ese.Log.WithField(common.LabelEventSource, eventSource.Name).Info("starting to watch to resource notifications")
 
 	resourceList, err := ese.discoverResources(res)
 	if err != nil {
@@ -128,7 +130,7 @@ func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource 
 }
 
 func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interface, res *resource, eventSource *gateways.EventSource, resourceObjects map[string]string, dataCh chan []byte, errorCh chan error, watchCh chan struct{}, doneCh chan struct{}) {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	for {
 		select {
 		case item := <-watcher.ResultChan():
@@ -223,7 +225,7 @@ func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) strin
 
 // helper method to return a flag indicating if the object passed the client side filters
 func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstructured.Unstructured, filter *ResourceFilter) bool {
-	log := ese.Log.WithEventSource(esName)
+	log := ese.Log.WithField(common.LabelEventSource, esName)
 
 	// no filters are applied.
 	if filter == nil {

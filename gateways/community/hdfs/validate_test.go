@@ -33,7 +33,7 @@ func TestValidateEventSource(t *testing.T) {
 				Name:    key,
 				Id:      common.Hasher(key),
 				Data:    value,
-				Version: cm.Labels[gwcommon.LabelArgoEventsEventSourceVersion],
+				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)

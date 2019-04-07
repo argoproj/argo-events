@@ -15,4 +15,5 @@ data:
     # topic name
     topic: "my-fake-topic"
     # Refers to the credential file that is mounted in the gateway pod.
-    credentialsFile: "path to credential files"
+    # ./validate.go is just a placeholder to make tests pass. Please place the path to actual credentials file :)
+    credentialsFile: "./validate.go"

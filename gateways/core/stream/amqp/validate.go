@@ -25,7 +25,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *AMQPEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateAMQP)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateAMQP)
 }
 
 func validateAMQP(config interface{}) error {

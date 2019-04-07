@@ -17,8 +17,8 @@ limitations under the License.
 package amqp
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -27,7 +27,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 
 // AMQPEventSourceExecutor implements Eventing
 type AMQPEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // amqp contains configuration required to connect to rabbitmq service and process messages

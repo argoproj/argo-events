@@ -24,9 +24,9 @@ import (
 
 // StartEventSource starts an event source
 func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
-
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("operating on event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")
@@ -45,10 +45,11 @@ func (ese *NatsEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name).WithFields(
+	log := ese.Log.WithFields(
 		map[string]interface{}{
-			common.LabelURL: n.URL,
-			"subject":       n.Subject,
+			common.LabelEventSource: eventSource.Name,
+			common.LabelURL:         n.URL,
+			"subject":               n.Subject,
 		},
 	)
 

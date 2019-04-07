@@ -102,11 +102,9 @@ const (
 	EnvVarSensorControllerInstanceID = "SENSOR_CONTROLLER_INSTANCE_ID"
 )
 
-// GATEWAY CONSTANTS
+// GATEWAY CONTROLLER CONSTANTS
 const (
-	// LabelGatewayControllerName is the default deployment name of the gateway-controller-controller
-	LabelGatewayControllerName = "gateway-controller"
-
+	// env variables
 	// EnvVarGatewayControllerConfigMap contains name of the configmap to retrieve gateway-controller configuration from
 	EnvVarGatewayControllerConfigMap = "GATEWAY_CONTROLLER_CONFIG_MAP"
 
@@ -116,15 +114,15 @@ const (
 	// EnvVarGatewayControllerName is used to get name of gateway controller
 	EnvVarGatewayControllerName = "GATEWAY_CONTROLLER_NAME"
 
-	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
-	// Content encoding is expected to be YAML.
-	GatewayControllerConfigMapKey = "config"
-
 	// EnvVarGatewayName refers env var for name of gateway
 	EnvVarGatewayName = "GATEWAY_NAME"
 
 	// EnvVarGatewayNamespace is namespace where gateway controller is deployed
 	EnvVarGatewayNamespace = "GATEWAY_NAMESPACE"
+
+	// labels
+	// LabelGatewayControllerName is the default deployment name of the gateway-controller-controller
+	LabelGatewayControllerName = "gateway-controller"
 
 	//LabelKeyGatewayControllerInstanceID is the label which allows to separate application among multiple running gateway-controller controllers.
 	LabelKeyGatewayControllerInstanceID = gateway.FullName + "/gateway-controller-instanceid"
@@ -135,32 +133,35 @@ const (
 	// LabelGatewayName is the label for gateway name
 	LabelGatewayName = "gateway-name"
 
-	// LabelGatewayEventSourceName is the label for a event source in gateway
-	LabelGatewayEventSourceName = "config-name"
-
-	// LabelGatewayEventSourceID is the label for gateway configuration ID
-	LabelGatewayEventSourceID = "event-source-id"
+	// LabelArgoEventsGatewayVersion is the label for the gateway version
+	LabelArgoEventsGatewayVersion = "argo-events-gateway-version"
 
 	// AnnotationGatewayResourceSpecHashName is the annotation of a gateway resource spec hash
 	AnnotationGatewayResourceSpecHashName = gateway.FullName + "/resource-spec-hash"
 
-	// Server Connection Timeout, 10 seconds
-	ServerConnTimeout = 10
-
-	LabelArgoEventsGatewayVersion = "argo-events-gateway-version"
-
-	LabelArgoEventsEventSourceVersion = "argo-events-event-source-version"
+	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
+	// Content encoding is expected to be YAML.
+	GatewayControllerConfigMapKey = "config"
 )
 
-// Gateway client constants
+// GATEWAY CONSTANTS
 const (
+	// LabelGatewayEventSourceName is the label for a event source in gateway
+	LabelGatewayEventSourceName = "event-source-name"
+
+	// LabelGatewayEventSourceID is the label for gateway configuration ID
+	LabelGatewayEventSourceID = "event-source-id"
+
+	// LabelArgoEventsEventSourceVersion is the label for event source version
+	LabelArgoEventsEventSourceVersion = "argo-events-event-source-version"
+
 	// EnvVarGatewayEventSourceConfigMap is used to get map containing event sources to run in a gateway
 	EnvVarGatewayEventSourceConfigMap = "GATEWAY_EVENT_SOURCE_CONFIG_MAP"
-)
 
-// Gateway server constants
-const (
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
+
+	// Server Connection Timeout, 10 seconds
+	ServerConnTimeout = 10
 )
 
 // CloudEvents constants

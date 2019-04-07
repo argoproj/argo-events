@@ -15,11 +15,15 @@ data:
     url: tcp://mqtt.argo-events:1883
     # topic name
     topic: foo
+    # client id
+    clientId: 1234
 
   # retry after each backoff to set up a successful connection
   example-with-retry: |-
     url: tcp://mqtt.argo-events:1883
     topic: bar
+    # client id
+    clientId: 2345
     backoff:
       # duration in nanoseconds. following value is 10 seconds
       duration: 10000000000

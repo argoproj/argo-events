@@ -18,8 +18,8 @@ package kafka
 
 import (
 	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -27,7 +27,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 
 // KafkaEventSourceExecutor implements Eventing
 type KafkaEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // kafka defines configuration required to connect to kafka cluster

@@ -46,7 +46,7 @@ data:
       # path to file that is mounted in gateway pod which contains certs
       serverCertPath: "some path in pod"
       # path to file that is mounted in gateway pod which contains private key
-      serverKeyPath: "some path
+      serverKeyPath: "some path in pod"
     event: "PushEvents"
     accessToken:
       key: accesskey
