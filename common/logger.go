@@ -18,11 +18,10 @@ package common
 
 import (
 	"fmt"
-	"os"
-	"path"
-	"runtime"
-
 	"github.com/sirupsen/logrus"
+	"os"
+	"runtime"
+	"strings"
 )
 
 // Logger constants
@@ -46,29 +45,23 @@ const (
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger
 func NewArgoEventsLogger() *logrus.Logger {
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.InfoLevel)
+	log := logrus.New()
+
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logrus.InfoLevel)
 
 	debugMode, ok := os.LookupEnv(EnvVarDebugLog)
 	if ok && debugMode == "true" {
-		logrus.SetLevel(logrus.DebugLevel)
+		log.SetLevel(logrus.DebugLevel)
 	}
 
-	logrus.AddHook(&ContextHook{})
-
-	return logrus.StandardLogger()
-}
-
-type ContextHook struct{}
-
-func (hook ContextHook) Levels() []logrus.Level {
-	return logrus.AllLevels
-}
-
-func (hook ContextHook) Fire(entry *logrus.Entry) error {
-	if pc, file, line, ok := runtime.Caller(10); ok {
-		funcName := runtime.FuncForPC(pc).Name()
-		entry.Data["source"] = fmt.Sprintf("%s:%v:%s", path.Base(file), line, path.Base(funcName))
+	log.SetReportCaller(true)
+	log.Formatter = &logrus.TextFormatter{
+		CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			filename := strings.Split(f.File, "github.com/argoproj/argo-events")
+			return fmt.Sprintf("%s()", f.Function), fmt.Sprintf("%s:%d", filename[1], f.Line)
+		},
 	}
-	return nil
+
+	return log
 }

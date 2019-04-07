@@ -32,7 +32,9 @@ import (
 
 func TestValidateEventSource(t *testing.T) {
 	convey.Convey("Given a valid webhook event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &WebhookEventSourceExecutor{}
+		ese := &WebhookEventSourceExecutor{
+			Log: common.NewArgoEventsLogger(),
+		}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "webhook.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
@@ -41,7 +43,7 @@ func TestValidateEventSource(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(cm, convey.ShouldNotBeNil)
 
-		err = gwcommon.CheckEventSourceVersion(cm)
+		err = common.CheckEventSourceVersion(cm)
 		convey.So(err, convey.ShouldBeNil)
 
 		for key, value := range cm.Data {

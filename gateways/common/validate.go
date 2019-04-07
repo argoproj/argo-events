@@ -18,9 +18,7 @@ package common
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	corev1 "k8s.io/api/core/v1"
 )
 
 const EventSourceDir = "../../../examples/event-sources"
@@ -46,14 +44,4 @@ func ValidateGatewayEventSource(eventSource *gateways.EventSource, version strin
 	}
 	v.IsValid = true
 	return v, nil
-}
-
-func CheckEventSourceVersion(cm *corev1.ConfigMap) error {
-	if cm.Labels == nil {
-		return fmt.Errorf("labels can't be empty. event source must be specified in as %s label", common.LabelArgoEventsEventSourceVersion)
-	}
-	if _, ok := cm.Labels[common.LabelArgoEventsEventSourceVersion]; !ok {
-		return fmt.Errorf("event source must be specified in as %s label", common.LabelArgoEventsEventSourceVersion)
-	}
-	return nil
 }

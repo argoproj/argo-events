@@ -73,8 +73,8 @@ type GatewayConfig struct {
 
 // EventSourceContext contains information of a event source for gateway to run.
 type EventSourceContext struct {
-	// Data holds the actual event source
-	Data *EventSourceData
+	// Source holds the actual event source
+	Source *EventSource
 	// Ctx contains context for the connection
 	Ctx context.Context
 	// Cancel upon invocation cancels the connection context
@@ -83,16 +83,6 @@ type EventSourceContext struct {
 	Client EventingClient
 	// Conn is grpc connection
 	Conn *grpc.ClientConn
-}
-
-// EventSourceData holds the actual event source
-type EventSourceData struct {
-	// Unique ID for event source
-	ID string `json:"id"`
-	// Src contains name of the event source
-	Src string `json:"src"`
-	// Config contains the event source
-	Config string `json:"config"`
 }
 
 // GatewayEvent is the internal representation of an event.

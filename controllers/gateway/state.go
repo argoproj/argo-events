@@ -29,7 +29,7 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus
 			return oldgw, err
 		}
 	}
-	log.WithError(err).WithField(common.LabelPhase, string(gw.Status.Phase)).Info("gateway state updated successfully")
+	log.WithField(common.LabelPhase, string(gw.Status.Phase)).Info("gateway state updated successfully")
 	return gw, nil
 }
 
