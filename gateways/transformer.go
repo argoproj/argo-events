@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"net/http"
 	"time"
 
@@ -71,7 +72,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, 
 	// Generate an event id
 	eventId := suuid.NewV1()
 
-	gc.Log.WithEventSource(gatewayEvent.Name).Info("converting gateway event into cloudevents specification compliant event")
+	gc.Log.WithField(common.LabelEventSource, gatewayEvent.Name).Info("converting gateway event into cloudevents specification compliant event")
 
 	// Create an CloudEvent
 	ce := &apicommon.Event{
@@ -81,7 +82,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, 
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          gc.gw.Spec.Type,
-			EventTypeVersion:   gc.gw.Spec.EventVersion,
+			EventTypeVersion:   v1alpha1.ArgoEventsGatewayVersion,
 			Source: &apicommon.URI{
 				Host: common.DefaultEventSourceName(gc.gw.Name, gatewayEvent.Name),
 			},
@@ -89,25 +90,25 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, 
 		Payload: gatewayEvent.Payload,
 	}
 
-	gc.Log.WithEventSource(gatewayEvent.Name).Info("event has been transformed into cloud event")
+	gc.Log.WithField(common.LabelGatewayName, gatewayEvent.Name).Info("event has been transformed into cloud event")
 	return ce, nil
 }
 
 // dispatchEventOverHttp dispatches event to watchers over http.
 func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byte) error {
-	gc.Log.WithEventSource(source).Info("dispatching event to watchers")
+	gc.Log.WithField(common.LabelEventSource, source).Info("dispatching event to watchers")
 
 	completeSuccess := true
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
 		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
-			gc.Log.WithEventSource(source).WithSensorName(sensor.Name).Warn("failed to dispatch event to sensor watcher over http. communication error")
+			gc.Log.WithField(common.LabelSensorName, sensor.Name).Warn("failed to dispatch event to sensor watcher over http. communication error")
 			completeSuccess = false
 		}
 	}
 	for _, gateway := range gc.gw.Spec.Watchers.Gateways {
 		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(gateway.Name), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
-			gc.Log.WithEventSource(source).WithGatewayName(gateway.Name).WithError(err).Warn("failed to dispatch event to gateway watcher over http. communication error")
+			gc.Log.WithField(common.LabelGatewayName, gateway.Name).WithError(err).Warn("failed to dispatch event to gateway watcher over http. communication error")
 			completeSuccess = false
 		}
 	}
@@ -133,11 +134,11 @@ func (gc *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byt
 	}
 
 	if err != nil {
-		gc.Log.WithEventSource(source).WithError(err).Error("failed to publish event")
+		gc.Log.WithField(common.LabelEventSource, source).WithError(err).Error("failed to publish event")
 		return err
 	}
 
-	gc.Log.WithEventSource(source).Info("event published successfully")
+	gc.Log.WithField(common.LabelEventSource, source).Info("event published successfully")
 	return nil
 }
 

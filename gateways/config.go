@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
 
 	"github.com/nats-io/go-nats"
@@ -37,7 +38,7 @@ import (
 // GatewayConfig provides a generic event source for a gateway
 type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 	// Clientset is client for kubernetes API
 	Clientset kubernetes.Interface
 	// Name is gateway name
@@ -138,7 +139,11 @@ func NewGatewayConfiguration() *GatewayConfig {
 	}
 
 	gc := &GatewayConfig{
-		Log:                  common.NewArgoEventsLogger().WithGatewayName(name).WithNamespace(namespace),
+		Log: common.NewArgoEventsLogger().WithFields(
+			map[string]interface{}{
+				common.LabelGatewayName: gw.Name,
+				common.LabelNamespace:   gw.Namespace,
+			}).Logger,
 		Clientset:            clientset,
 		Namespace:            namespace,
 		Name:                 name,

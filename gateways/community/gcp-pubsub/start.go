@@ -19,6 +19,7 @@ package pubsub
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
 )
@@ -27,9 +28,9 @@ import (
 func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
-
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	ese.Log.Info("operating on event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Info("failed to parse event source")
@@ -50,7 +51,7 @@ func (ese *GcpPubSubEventSourceExecutor) StartEventSource(eventSource *gateways.
 
 func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *pubSubEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// Create a new topic with the given name.
-	logger := ese.Log.WithEventSource(eventSource.Name).WithField("topic", sc.Topic)
+	logger := ese.Log.WithField(common.LabelEventSource, eventSource.Name).WithField("topic", sc.Topic)
 
 	client, err := pubsub.NewClient(ctx, sc.ProjectID, option.WithCredentialsFile(sc.CredentialsFile))
 	if err != nil {

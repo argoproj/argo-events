@@ -43,7 +43,7 @@ func TestSensorControllerConfigWatch(t *testing.T) {
 					Name:      sc.ConfigMap,
 				},
 				Data: map[string]string{
-					SensorControllerConfigMapKey: `instanceID: fake-instance-id`,
+					common.SensorControllerConfigMapKey: `instanceID: fake-instance-id`,
 				},
 			}
 			cm, err := sc.kubeClientset.CoreV1().ConfigMaps(sc.Namespace).Create(cmObj)

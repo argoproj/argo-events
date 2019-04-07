@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/github-logo.png?raw=true" alt="GitHub"/>
-</p>
-
-<br/>
-
 # Github
 
 The gateway listens to events from GitHub. 

@@ -65,10 +65,10 @@ func (soc *sOperationCtx) operate() error {
 		if soc.updated {
 			// persist updates to sensor resource
 			labels := map[string]string{
-				common.LabelSensorName:             soc.s.Name,
-				LabelSensorKeyPhase:                string(soc.s.Status.Phase),
-				LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
-				common.LabelOperation:              "persist_state_update",
+				common.LabelSensorName:                    soc.s.Name,
+				common.LabelSensorKeyPhase:                string(soc.s.Status.Phase),
+				common.LabelKeySensorControllerInstanceID: soc.controller.Config.InstanceID,
+				common.LabelOperation:                     "persist_state_update",
 			}
 			eventType := common.StateChangeEventType
 
@@ -240,7 +240,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 
 	// check if pod spec remained unchanged
 	if existingPod != nil {
-		if existingPod.Annotations != nil && existingPod.Annotations[AnnotationSensorResourceSpecHashName] == newPod.Annotations[AnnotationSensorResourceSpecHashName] {
+		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationSensorResourceSpecHashName] == newPod.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			soc.log.WithField(common.LabelPodName, existingPod.Name).Debug("sensor pod spec unchanged")
 			return nil, false, nil
 		}
@@ -293,7 +293,7 @@ func (soc *sOperationCtx) updateSensorService() (*corev1.Service, bool, error) {
 		}
 
 		// check if service spec remained unchanged
-		if existingSvc.Annotations[AnnotationSensorResourceSpecHashName] == newSvc.Annotations[AnnotationSensorResourceSpecHashName] {
+		if existingSvc.Annotations[common.AnnotationSensorResourceSpecHashName] == newSvc.Annotations[common.AnnotationSensorResourceSpecHashName] {
 			soc.log.WithField(common.LabelServiceName, existingSvc.Name).Debug("sensor service spec unchanged")
 			return nil, false, nil
 		}
@@ -338,9 +338,9 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 		if soc.s.ObjectMeta.Annotations == nil {
 			soc.s.ObjectMeta.Annotations = make(map[string]string)
 		}
-		soc.s.ObjectMeta.Labels[LabelSensorKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Labels[common.LabelSensorKeyPhase] = string(phase)
 		// add annotations so a resource sensor can watch this sensor.
-		soc.s.ObjectMeta.Annotations[LabelSensorKeyPhase] = string(phase)
+		soc.s.ObjectMeta.Annotations[common.LabelSensorKeyPhase] = string(phase)
 	}
 	if soc.s.Status.StartedAt.IsZero() {
 		soc.s.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
@@ -363,8 +363,8 @@ func (soc *sOperationCtx) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 			if soc.s.ObjectMeta.Labels == nil {
 				soc.s.ObjectMeta.Labels = make(map[string]string)
 			}
-			soc.s.ObjectMeta.Labels[LabelSensorKeyComplete] = "true"
-			soc.s.ObjectMeta.Annotations[LabelSensorKeyComplete] = string(phase)
+			soc.s.ObjectMeta.Labels[common.LabelSensorKeyComplete] = "true"
+			soc.s.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
 		}
 	}
 	soc.updated = true

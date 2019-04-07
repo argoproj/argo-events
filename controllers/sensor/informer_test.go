@@ -17,6 +17,7 @@ limitations under the License.
 package sensor
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
@@ -28,7 +29,7 @@ func TestInformer(t *testing.T) {
 		controller := getSensorController()
 		convey.Convey("Instance ID required key must match", func() {
 			req := controller.instanceIDReq()
-			convey.So(req.Key(), convey.ShouldEqual, LabelKeySensorControllerInstanceID)
+			convey.So(req.Key(), convey.ShouldEqual, common.LabelKeySensorControllerInstanceID)
 			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
 			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
 		})

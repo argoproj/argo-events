@@ -19,6 +19,7 @@ package sensor
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
@@ -101,9 +102,9 @@ func (c *SensorController) ResyncConfig(namespace string) error {
 }
 
 func (c *SensorController) updateConfig(cm *corev1.ConfigMap) error {
-	configStr, ok := cm.Data[SensorControllerConfigMapKey]
+	configStr, ok := cm.Data[common.SensorControllerConfigMapKey]
 	if !ok {
-		return fmt.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, SensorControllerConfigMapKey)
+		return fmt.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.SensorControllerConfigMapKey)
 	}
 	var config SensorControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)

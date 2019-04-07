@@ -246,7 +246,7 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
 		delete(gc.registeredConfigs, configKey)
-		gc.Log.WithEventSource(eventSource.Data.Src).Info("removing the event source")
+		gc.Log.WithField(common.LabelEventSource, eventSource.Data.Src).Info("removing the event source")
 		gc.StatusCh <- EventSourceStatus{
 			Phase:   v1alpha1.NodePhaseRemove,
 			Id:      eventSource.Data.ID,
@@ -255,7 +255,7 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 		}
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {
-			gc.Log.WithEventSource(eventSource.Data.Src).WithError(err).Error("failed to close client connection")
+			gc.Log.WithField(common.LabelEventSource, eventSource.Data.Src).WithError(err).Error("failed to close client connection")
 		}
 	}
 }

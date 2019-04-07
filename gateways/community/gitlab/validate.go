@@ -23,7 +23,7 @@ import (
 
 // ValidateEventSource validates gitlab gateway event source
 func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateGitlab)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateGitlab)
 }
 
 func validateGitlab(config interface{}) error {

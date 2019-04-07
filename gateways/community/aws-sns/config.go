@@ -17,9 +17,9 @@ limitations under the License.
 package aws_sns
 
 import (
+	"github.com/sirupsen/logrus"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
@@ -40,7 +40,7 @@ var (
 
 // SNSEventSourceExecutor implements Eventing
 type SNSEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

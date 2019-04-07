@@ -18,6 +18,7 @@ package common
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 )
 
 const (
@@ -51,6 +52,36 @@ const (
 
 	// LabelEventSource is label for event name
 	LabelEventSource = "event-source"
+)
+
+// SENSOR CONTROLLER CONSTANTS
+const (
+	// env variables constants
+	//LabelKeySensorControllerInstanceID is the label which allows to separate application among multiple running sensor controllers.
+	LabelKeySensorControllerInstanceID = sensor.FullName + "/sensor-controller-instanceid"
+
+	// LabelSensorKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
+	LabelSensorKeyPhase = sensor.FullName + "/phase"
+
+	// LabelSensorKeyComplete is the label to mark sensors as complete
+	LabelSensorKeyComplete = sensor.FullName + "/complete"
+
+	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
+	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
+
+	// labels constants
+	// LabelSensorControllerName is the default deployment name of the sensor-controller
+	LabelSensorControllerName = "sensor-controller"
+
+	LabelArgoEventsSensorVersion = "argo-events-sensor-version"
+
+	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
+	// Content encoding is expected to be YAML.
+	SensorControllerConfigMapKey = "config"
+
+	// miscellaneous constants
+	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
+	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
 )
 
 // SENSOR CONSTANTS
@@ -117,6 +148,8 @@ const (
 	ServerConnTimeout = 10
 
 	LabelArgoEventsGatewayVersion = "argo-events-gateway-version"
+
+	LabelArgoEventsEventSourceVersion = "argo-events-event-source-version"
 )
 
 // Gateway client constants

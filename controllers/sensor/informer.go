@@ -17,6 +17,8 @@ limitations under the License.
 package sensor
 
 import (
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
@@ -32,11 +34,19 @@ func (c *SensorController) instanceIDReq() labels.Requirement {
 	if c.Config.InstanceID == "" {
 		panic("controller instance id must be specified")
 	}
-	instanceIDReq, err = labels.NewRequirement(LabelKeySensorControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+	instanceIDReq, err = labels.NewRequirement(common.LabelKeySensorControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}
 	return *instanceIDReq
+}
+
+func (c *SensorController) versionReq() labels.Requirement {
+	versionReq, err := labels.NewRequirement(common.LabelArgoEventsSensorVersion, selection.Equals, []string{v1alpha1.ArgoEventsSensorVersion})
+	if err != nil {
+		panic(err)
+	}
+	return *versionReq
 }
 
 // The sensor informer adds new Sensors to the sensor-controller's queue based on Add, Update, and Delete Event Handlers for the Sensor Resources
@@ -47,7 +57,7 @@ func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
 		c.Config.Namespace,
 		func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-			labelSelector := labels.NewSelector().Add(c.instanceIDReq())
+			labelSelector := labels.NewSelector().Add(c.instanceIDReq(), c.versionReq())
 			options.LabelSelector = labelSelector.String()
 		},
 	)

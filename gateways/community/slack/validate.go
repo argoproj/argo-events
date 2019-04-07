@@ -26,7 +26,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *SlackEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSlack)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSlack)
 }
 
 func validateSlack(config interface{}) error {

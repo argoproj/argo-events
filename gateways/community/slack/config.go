@@ -17,9 +17,9 @@ limitations under the License.
 package slack
 
 import (
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -32,7 +32,7 @@ type SlackEventSourceExecutor struct {
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
-	Log       *common.ArgoEventsLogger
+	Log       *logrus.Logger
 }
 
 type RouteConfig struct {

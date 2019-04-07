@@ -33,14 +33,6 @@ import (
 // the error is ignored by the operation context as subsequent re-queues would produce the same error.
 // Exporting this function so that external APIs can use this to validate sensor resource.
 func ValidateSensor(s *v1alpha1.Sensor) error {
-	if s.Labels == nil {
-		return fmt.Errorf("sensor labels can't be empty. %s label must be set", LabelArgoEventsSensorVersion)
-	}
-	version, ok := s.Labels[LabelArgoEventsSensorVersion]
-	if !ok || version != v1alpha1.ArgoEventsSensorVersion {
-		return fmt.Errorf("sensor label %s must be set and must equal %s", LabelArgoEventsSensorVersion, v1alpha1.ArgoEventsSensorVersion)
-	}
-
 	if err := validateDependencies(s.Spec.Dependencies); err != nil {
 		return err
 	}

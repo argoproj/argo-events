@@ -29,7 +29,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *EventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateGatewayConfig)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateGatewayConfig)
 }
 
 func validateGatewayConfig(config interface{}) error {

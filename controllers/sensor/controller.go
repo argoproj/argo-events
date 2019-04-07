@@ -49,39 +49,6 @@ const (
 	rateLimiterMaxDelay        = 1000 * time.Second
 )
 
-// env variables constants
-const (
-	//LabelKeySensorControllerInstanceID is the label which allows to separate application among multiple running sensor controllers.
-	LabelKeySensorControllerInstanceID = sensor.FullName + "/sensor-controller-instanceid"
-
-	// LabelSensorKeyPhase is a label applied to sensors to indicate the current phase of the sensor (for filtering purposes)
-	LabelSensorKeyPhase = sensor.FullName + "/phase"
-
-	// LabelSensorKeyComplete is the label to mark sensors as complete
-	LabelSensorKeyComplete = sensor.FullName + "/complete"
-
-	// EnvVarSensorControllerConfigMap is the name of the configmap to use for the sensor-controller
-	EnvVarSensorControllerConfigMap = "SENSOR_CONFIG_MAP"
-)
-
-// labels constants
-const (
-	// LabelSensorControllerName is the default deployment name of the sensor-controller
-	LabelSensorControllerName = "sensor-controller"
-
-	LabelArgoEventsSensorVersion = "argo-events-sensor-version"
-)
-
-// miscellaneous constants
-const (
-	// SensorControllerConfigMapKey is the key in the configmap to retrieve sensor configuration from.
-	// Content encoding is expected to be YAML.
-	SensorControllerConfigMapKey = "config"
-
-	// AnnotationSensorResourceSpecHashName is the annotation of a sensor resource spec hash
-	AnnotationSensorResourceSpecHashName = sensor.FullName + "/resource-spec-hash"
-)
-
 // SensorControllerConfig contain the configuration settings for the sensor-controller
 type SensorControllerConfig struct {
 	// InstanceID is a label selector to limit the sensor-controller's watch of sensor jobs to a specific instance.

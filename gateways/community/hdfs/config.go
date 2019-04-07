@@ -2,7 +2,7 @@ package hdfs
 
 import (
 	"errors"
-	"github.com/argoproj/argo-events/common"
+	"github.com/sirupsen/logrus"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
@@ -14,7 +14,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 
 // EventSourceExecutor implements Eventing
 type EventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 	// Clientset is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed

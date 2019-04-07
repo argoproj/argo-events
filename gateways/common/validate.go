@@ -22,7 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-const EventSourceDir = "../../examples/event-sources"
+const EventSourceDir = "../../../examples/event-sources"
 
 var (
 	ErrNilEventSource = fmt.Errorf("event source can't be nil")

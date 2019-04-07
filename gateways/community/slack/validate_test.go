@@ -18,51 +18,41 @@ package slack
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-)
-
-var (
-	configKey   = "testConfig"
-	configId    = "1234"
-	validConfig = `
-hook:
- endpoint: "/"
- port: "8080"
- url: "testurl"
-token: 
-  name: fake-token
-  key: fake
-`
-
-	invalidConfig = `
-endpoint: "/"
-`
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestValidateStorageGridEventSource(t *testing.T) {
-	convey.Convey("Given a valid slack event source spec, parse it and make sure no error occurs", t, func() {
+	convey.Convey("Given a slack event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &SlackEventSourceExecutor{}
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Name: configKey,
-			Id:   configId,
-			Data: validConfig,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeTrue)
-	})
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "slack.yaml"))
+		convey.So(err, convey.ShouldBeNil)
 
-	convey.Convey("Given an invalid slack event source spec, parse it and make sure error occurs", t, func() {
-		ese := &SlackEventSourceExecutor{}
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Data: invalidConfig,
-			Id:   configId,
-			Name: configKey,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeFalse)
-		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+		var cm *corev1.ConfigMap
+		err = yaml.Unmarshal(content, &cm)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cm, convey.ShouldNotBeNil)
+
+		err = gwcommon.CheckEventSourceVersion(cm)
+		convey.So(err, convey.ShouldBeNil)
+
+		for key, value := range cm.Data {
+			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+				Name:    key,
+				Id:      common.Hasher(key),
+				Data:    value,
+				Version: cm.Labels[gwcommon.LabelArgoEventsEventSourceVersion],
+			})
+			convey.So(valid, convey.ShouldNotBeNil)
+			convey.So(valid.IsValid, convey.ShouldBeTrue)
+		}
 	})
 }

@@ -106,7 +106,7 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 
 // UpdateGatewayResourceState updates gateway resource nodes state
 func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
-	log := gc.Log.WithEventSource(status.Name)
+	log := gc.Log.WithField(common.LabelEventSource, status.Name)
 
 	log.Info("received a gateway state update notification")
 
