@@ -100,11 +100,17 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact"),
 						},
 					},
+					"resource": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resource is generic template for K8s resource",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
 	}
 }
 

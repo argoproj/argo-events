@@ -37,7 +37,7 @@ func getInformerFactory(clientset kubernetes.Interface, queue workqueue.RateLimi
 		OwnerGroupVersionKind: schema.GroupVersionKind{Version: "v1", Kind: "Pod"},
 		OwnerInformer:         ownerInformer,
 		SharedInformerFactory: informerFactory,
-		Queue:                 queue,
+		Queue: queue,
 	}
 }
 

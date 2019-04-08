@@ -59,6 +59,10 @@ func (in *ArtifactLocation) DeepCopyInto(out *ArtifactLocation) {
 		*out = new(GitArtifact)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Resource != nil {
+		in, out := &in.Resource, &out.Resource
+		*out = (*in).DeepCopy()
+	}
 	return
 }
 
@@ -428,6 +432,7 @@ func (in *SensorStatus) DeepCopyInto(out *SensorStatus) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
+	in.LastCycleTime.DeepCopyInto(&out.LastCycleTime)
 	return
 }
 
