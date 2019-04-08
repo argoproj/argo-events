@@ -18,9 +18,9 @@ package kafka
 
 import (
 	"github.com/Shopify/sarama"
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"
@@ -39,7 +39,7 @@ type kafka struct {
 	// Topic name
 	Topic string `json:"topic"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// Consumer manages PartitionConsumers which process Kafka messages from brokers.
 	consumer sarama.Consumer
 }

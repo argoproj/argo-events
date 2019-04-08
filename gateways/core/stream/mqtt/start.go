@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // StartEventSource starts an event source
@@ -58,7 +59,12 @@ func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.
 	}
 	opts := mqttlib.NewClientOptions().AddBroker(m.URL).SetClientID(m.ClientId)
 
-	if err := gateways.Connect(m.Backoff, func() error {
+	if err := gateways.Connect(&wait.Backoff{
+		Factor:   m.Backoff.Factor,
+		Duration: m.Backoff.Duration,
+		Jitter:   m.Backoff.Jitter,
+		Steps:    m.Backoff.Steps,
+	}, func() error {
 		client := mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()

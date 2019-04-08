@@ -41,7 +41,7 @@ func TestValidateMqttEventSource(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(cm, convey.ShouldNotBeNil)
 
-		err = gwcommon.CheckEventSourceVersion(cm)
+		err = common.CheckEventSourceVersion(cm)
 		convey.So(err, convey.ShouldBeNil)
 
 		for key, value := range cm.Data {
@@ -52,7 +52,6 @@ func TestValidateMqttEventSource(t *testing.T) {
 				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
-			convey.Println(valid.Reason)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)
 		}
 	})

@@ -17,10 +17,10 @@ limitations under the License.
 package nats
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"
@@ -37,7 +37,7 @@ type natsConfig struct {
 	// Subject name
 	Subject string `json:"subject"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// conn represents a bare connection to a nats-server.
 	conn *natslib.Conn
 }

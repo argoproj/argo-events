@@ -23,7 +23,7 @@ data:
      - s3:ObjectRemoved:Delete
     # Filters to apply on the key
     # Optional
-    # e.g. filter for key starts with "hello-" and ends with ".txt"
+    # e.g. filter for key that starts with "hello-" and ends with ".txt"
     filter:
       prefix: "hello-"
       suffix: ".txt"

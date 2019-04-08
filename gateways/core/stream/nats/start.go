@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	natslib "github.com/nats-io/go-nats"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // StartEventSource starts an event source
@@ -53,7 +54,12 @@ func (ese *NatsEventSourceExecutor) listenEvents(n *natsConfig, eventSource *gat
 		},
 	)
 
-	if err := gateways.Connect(n.Backoff, func() error {
+	if err := gateways.Connect(&wait.Backoff{
+		Steps:    n.Backoff.Steps,
+		Jitter:   n.Backoff.Jitter,
+		Duration: n.Backoff.Duration,
+		Factor:   n.Backoff.Factor,
+	}, func() error {
 		var err error
 		if n.conn, err = natslib.Connect(n.URL); err != nil {
 			return err

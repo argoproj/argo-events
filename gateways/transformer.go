@@ -102,7 +102,7 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
 		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
-			gc.Log.WithField(common.LabelSensorName, sensor.Name).Warn("failed to dispatch event to sensor watcher over http. communication error")
+			gc.Log.WithField(common.LabelSensorName, sensor.Name).WithError(err).Warn("failed to dispatch event to sensor watcher over http. communication error")
 			completeSuccess = false
 		}
 	}

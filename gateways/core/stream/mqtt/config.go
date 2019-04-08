@@ -17,10 +17,10 @@ limitations under the License.
 package mqtt
 
 import (
+	"github.com/argoproj/argo-events/common"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"
@@ -39,7 +39,7 @@ type mqtt struct {
 	// Client ID
 	ClientId string `json:"clientId"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// It is an MQTT client for communicating with an MQTT server
 	client mqttlib.Client
 }

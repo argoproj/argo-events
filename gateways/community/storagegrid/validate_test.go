@@ -41,7 +41,7 @@ func TestValidateStorageGridEventSource(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(cm, convey.ShouldNotBeNil)
 
-		err = gwcommon.CheckEventSourceVersion(cm)
+		err = common.CheckEventSourceVersion(cm)
 		convey.So(err, convey.ShouldBeNil)
 
 		for key, value := range cm.Data {

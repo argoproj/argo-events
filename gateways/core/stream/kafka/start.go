@@ -18,6 +18,7 @@ package kafka
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"strconv"
 
 	"github.com/argoproj/argo-events/common"
@@ -60,7 +61,12 @@ func (ese *KafkaEventSourceExecutor) listenEvents(k *kafka, eventSource *gateway
 
 	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
-	if err := gateways.Connect(k.Backoff, func() error {
+	if err := gateways.Connect(&wait.Backoff{
+		Steps:    k.Backoff.Steps,
+		Jitter:   k.Backoff.Jitter,
+		Duration: k.Backoff.Duration,
+		Factor:   k.Backoff.Factor,
+	}, func() error {
 		var err error
 		k.consumer, err = sarama.NewConsumer([]string{k.URL}, nil)
 		if err != nil {
