@@ -18,9 +18,10 @@ package sensors
 
 import (
 	"encoding/json"
+	"testing"
+
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,7 +36,6 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	kTesting "k8s.io/client-go/testing"
 	"k8s.io/client-go/util/flowcontrol"
-	"testing"
 )
 
 // Below code refers to PR https://github.com/kubernetes/kubernetes/issues/60390
@@ -199,41 +199,58 @@ func (p *FakeClientPool) ClientForGroupVersionKind(kind schema.GroupVersionKind)
 	}, nil
 }
 
-var testPod = `
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test1
-  labels:
-    "success-label": "fake"
-spec:
-  containers:
-  - name: test
-    image: docker/whalesay
-`
+var successLabels = map[string]string{
+	"success-label": "fake",
+}
 
-var testTrigger = v1alpha1.Trigger{
-	Template: &v1alpha1.TriggerTemplate{
-		Name: "sample",
-		GroupVersionKind: &metav1.GroupVersionKind{
-			Kind:    "Pod",
-			Version: "v1",
-		},
-		Source: &v1alpha1.ArtifactLocation{
-			Inline: &testPod,
+var failureLabels = map[string]string{
+	"failure-label": "fake",
+}
+
+var podTemplate = &corev1.Pod{
+	TypeMeta: metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
+	Spec: corev1.PodSpec{
+		Containers: []corev1.Container{
+			{
+				Name:  "test1",
+				Image: "docker/whalesay",
+			},
 		},
 	},
 }
 
+var triggerTemplate = v1alpha1.Trigger{
+	Template: &v1alpha1.TriggerTemplate{
+		GroupVersionKind: &metav1.GroupVersionKind{
+			Kind:    "Pod",
+			Version: "v1",
+		},
+	},
+}
+
+func getUnstructured(res interface{}) (*unstructured.Unstructured, error) {
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
+	if err != nil {
+		return nil, err
+	}
+	return &unstructured.Unstructured{Object: obj}, nil
+}
+
 func TestProcessTrigger(t *testing.T) {
 	convey.Convey("Given a sensor", t, func() {
-		triggers := make([]v1alpha1.Trigger, 1)
-		triggers[0] = testTrigger
+		trigger := *triggerTemplate.DeepCopy()
+		trigger.Template.Name = "testTrigger"
+		pod := podTemplate.DeepCopy()
+		pod.Name = "testTrigger"
+		uObj, err := getUnstructured(pod)
+		convey.So(err, convey.ShouldBeNil)
+		trigger.Template.Source = &v1alpha1.ArtifactLocation{
+			Resource: uObj,
+		}
 		testSensor, err := getSensor()
 		convey.So(err, convey.ShouldBeNil)
-		testSensor.Spec.Triggers = triggers
 		soc := getsensorExecutionCtx(testSensor)
-		err = soc.executeTrigger(testTrigger)
+		err = soc.executeTrigger(trigger)
 		convey.So(err, convey.ShouldBeNil)
 	})
 }
@@ -251,29 +268,13 @@ type fakeEvent struct {
 	Kind         string `json:"kind"`
 }
 
-func TestCreateResourceObject(t *testing.T) {
-	convey.Convey("Given a resource object", t, func() {
+func TestTriggerParameterization(t *testing.T) {
+	convey.Convey("Given an event, parameterize the trigger", t, func() {
 		testSensor, err := getSensor()
 		convey.So(err, convey.ShouldBeNil)
 		soc := getsensorExecutionCtx(testSensor)
-		fakeclient := soc.clientPool.(*FakeClientPool).Fake
-		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
-
-		convey.Convey("Given a pod spec, get a pod object", func() {
-			pod := &corev1.Pod{
-				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
-				ObjectMeta: metav1.ObjectMeta{Namespace: "foo", Name: "my-pod"},
-			}
-			uObj, err := getUnstructured(pod)
-			convey.So(err, convey.ShouldBeNil)
-
-			err = soc.createResourceObject(&testTrigger, uObj)
-			convey.So(err, convey.ShouldBeNil)
-
-			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, "foo")
-		})
+		triggerName := "test-workflow-trigger"
+		dependency := "test-gateway:test"
 
 		fe := &fakeEvent{
 			Namespace:    "fake-namespace",
@@ -290,51 +291,54 @@ func TestCreateResourceObject(t *testing.T) {
 				Payload: eventBytes,
 				Context: apicommon.EventContext{
 					Source: &apicommon.URI{
-						Host: "test-gateway:test",
+						Host: dependency,
 					},
 					ContentType: "application/json",
 				},
 			},
-			Name:  "test-gateway:test",
+			Name:  dependency,
 			Type:  v1alpha1.NodeTypeEventDependency,
 			ID:    "1234",
 			Phase: v1alpha1.NodePhaseActive,
 		}
 
-		testTrigger.TemplateParameters = []v1alpha1.TriggerParameter{
+		trigger := triggerTemplate.DeepCopy()
+		trigger.Template.Name = triggerName
+
+		trigger.TemplateParameters = []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.TriggerParameterSource{
-					Event: "test-gateway:test",
+					Event: dependency,
 					Path:  "name",
 				},
 				Dest: "name",
 			},
 		}
 
-		testTrigger.ResourceParameters = []v1alpha1.TriggerParameter{
+		trigger.ResourceParameters = []v1alpha1.TriggerParameter{
 			{
 				Src: &v1alpha1.TriggerParameterSource{
-					Event: "test-gateway:test",
+					Event: dependency,
 					Path:  "name",
 				},
 				Dest: "metadata.generateName",
 			},
 		}
 
-		nodeId := soc.sensor.NodeID("test-gateway:test")
-		wfNodeId := soc.sensor.NodeID("test-workflow-trigger")
+		nodeId := soc.sensor.NodeID(dependency)
+		wfNodeId := soc.sensor.NodeID(triggerName)
 
 		wfnode := v1alpha1.NodeStatus{
 			Event: &apicommon.Event{
 				Payload: eventBytes,
 				Context: apicommon.EventContext{
 					Source: &apicommon.URI{
-						Host: "test-gateway:test",
+						Host: dependency,
 					},
 					ContentType: "application/json",
 				},
 			},
-			Name:  "test-workflow-trigger",
+			Name:  triggerName,
 			Type:  v1alpha1.NodeTypeTrigger,
 			ID:    "1234",
 			Phase: v1alpha1.NodePhaseNew,
@@ -345,133 +349,163 @@ func TestCreateResourceObject(t *testing.T) {
 			wfNodeId: wfnode,
 		}
 
-		convey.Convey("Given parameters for trigger template, apply params", func() {
-			err = soc.applyParamsTrigger(&testTrigger)
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(testTrigger.Template.Name, convey.ShouldEqual, fe.Name)
+		err = soc.applyParamsTrigger(trigger)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(trigger.Template.Name, convey.ShouldEqual, fe.Name)
 
-			var tp corev1.Pod
-			err = yaml.Unmarshal([]byte(testPod), &tp)
-			convey.So(err, convey.ShouldBeNil)
+		rObj := podTemplate.DeepCopy()
+		rObj.Name = "testTrigger"
+		uObj, err := getUnstructured(rObj)
+		convey.So(err, convey.ShouldBeNil)
 
-			rObj := tp.DeepCopy()
-			uObj, err := getUnstructured(rObj)
-			convey.So(err, convey.ShouldBeNil)
+		err = soc.applyParamsResource(trigger.ResourceParameters, uObj)
+		convey.So(err, convey.ShouldBeNil)
 
-			err = soc.applyParamsResource(testTrigger.ResourceParameters, uObj)
+	})
+}
+
+func TestTriggerPolicy(t *testing.T) {
+	convey.Convey("Given a trigger, apply policy", t, func() {
+		testSensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		soc := getsensorExecutionCtx(testSensor)
+
+		trigger1 := triggerTemplate.DeepCopy()
+		trigger2 := triggerTemplate.DeepCopy()
+
+		trigger1.Template.Name = "testTrigger1"
+		trigger2.Template.Name = "testTrigger2"
+
+		triggerPod1 := podTemplate.DeepCopy()
+		triggerPod2 := podTemplate.DeepCopy()
+
+		triggerPod1.Name = "testPod1"
+		triggerPod2.Name = "testPod2"
+
+		triggerPod1.Labels = successLabels
+		triggerPod2.Labels = failureLabels
+
+		uObj1, err := getUnstructured(triggerPod1)
+		convey.So(err, convey.ShouldBeNil)
+
+		uObj2, err := getUnstructured(triggerPod2)
+		convey.So(err, convey.ShouldBeNil)
+
+		backoff := v1alpha1.Backoff{
+			Duration: 1000000000,
+			Factor:   2,
+			Steps:    10,
+		}
+
+		trigger1.Template.Source = &v1alpha1.ArtifactLocation{
+			Resource: uObj1,
+		}
+		trigger1.Policy = &v1alpha1.TriggerPolicy{
+			Backoff: backoff,
+			State: &v1alpha1.TriggerStateLabels{
+				Success: successLabels,
+			},
+		}
+
+		trigger2.Template.Source = &v1alpha1.ArtifactLocation{
+			Resource: uObj2,
+		}
+		trigger2.Policy = &v1alpha1.TriggerPolicy{
+			Backoff: backoff,
+			State: &v1alpha1.TriggerStateLabels{
+				Failure: failureLabels,
+			},
+		}
+
+		convey.Convey("Execute the first trigger  and make sure the trigger execution results in success", func() {
+			err = soc.executeTrigger(*trigger1)
 			convey.So(err, convey.ShouldBeNil)
 		})
 
-		convey.Convey("Given a pod without namespace, use sensor namespace", func() {
-			pod := &corev1.Pod{
-				TypeMeta:   metav1.TypeMeta{Kind: "Pod", APIVersion: "v1"},
-				ObjectMeta: metav1.ObjectMeta{Name: "my-pod-without-namespace"},
-			}
+		convey.Convey("Execute the second trigger and make sure the trigger execution results in failure", func() {
+			err = soc.executeTrigger(*trigger2)
+			convey.So(err, convey.ShouldNotBeNil)
+		})
+
+		// modify backoff so that applyPolicy doesnt wait too much
+		trigger1.Policy.Backoff = v1alpha1.Backoff{
+			Steps:    2,
+			Duration: 1000000000,
+			Factor:   1,
+		}
+
+		triggerPod1.Labels = nil
+		uObj1, err = getUnstructured(triggerPod1)
+		convey.So(err, convey.ShouldBeNil)
+		trigger1.Template.Source.Resource = uObj1
+
+		convey.Convey("If trigger times out and error on timeout is set, trigger execution must fail", func() {
+			trigger1.Policy.ErrorOnBackoffTimeout = true
+			err = soc.executeTrigger(*trigger1)
+			convey.So(err, convey.ShouldNotBeNil)
+		})
+
+		convey.Convey("If trigger times out and error on timeout is not set, trigger execution must succeed", func() {
+			trigger1.Policy.ErrorOnBackoffTimeout = false
+			err = soc.executeTrigger(*trigger1)
+			convey.So(err, convey.ShouldBeNil)
+		})
+	})
+}
+
+func TestCreateResourceObject(t *testing.T) {
+	convey.Convey("Given a trigger", t, func() {
+		testSensor, err := getSensor()
+		convey.So(err, convey.ShouldBeNil)
+		soc := getsensorExecutionCtx(testSensor)
+		fakeclient := soc.clientPool.(*FakeClientPool).Fake
+		dynamicClient := dynamicfake.FakeResourceClient{Resource: schema.GroupVersionResource{Version: "v1", Resource: "pods"}, Fake: &fakeclient}
+
+		convey.Convey("Given a pod spec, create a pod trigger", func() {
+			pod := podTemplate.DeepCopy()
+			pod.Name = "testTrigger"
+			pod.Namespace = "foo"
 			uObj, err := getUnstructured(pod)
 			convey.So(err, convey.ShouldBeNil)
 
-			err = soc.createResourceObject(&testTrigger, uObj)
+			trigger := triggerTemplate.DeepCopy()
+			trigger.Template.Name = "trigger"
+
+			trigger.Template.Source = &v1alpha1.ArtifactLocation{
+				Resource: uObj,
+			}
+
+			convey.Println(trigger.Template.Source)
+
+			err = soc.createResourceObject(trigger, uObj)
+			convey.So(err, convey.ShouldBeNil)
+
+			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, "foo")
+		})
+
+		convey.Convey("Given a pod without namespace,create a pod trigger", func() {
+			pod := podTemplate.DeepCopy()
+			pod.Name = "testTrigger"
+			uObj, err := getUnstructured(pod)
+			convey.So(err, convey.ShouldBeNil)
+
+			trigger := triggerTemplate.DeepCopy()
+			trigger.Template.Name = "trigger"
+
+			trigger.Template.Source = &v1alpha1.ArtifactLocation{
+				Resource: uObj,
+			}
+
+			err = soc.createResourceObject(trigger, uObj)
 			convey.So(err, convey.ShouldBeNil)
 
 			unstructuredPod, err := dynamicClient.Get(pod.Name, metav1.GetOptions{})
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(unstructuredPod.GetNamespace(), convey.ShouldEqual, testSensor.Namespace)
 		})
-
-		convey.Convey("Given policies for trigger, apply it", func() {
-			testTrigger.Template.Source.Inline = &testPod
-			testTrigger.Policy = &v1alpha1.TriggerPolicy{
-				Backoff: v1alpha1.Backoff{
-					Duration: 1000000000,
-					Factor:   2,
-					Steps:    10,
-				},
-				State: &v1alpha1.TriggerStateLabels{
-					Success: map[string]string{
-						"success-label": "fake",
-					},
-				},
-				ErrorOnBackoffTimeout: false,
-			}
-
-			triggerPod2 := `
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test2
-  labels:
-    "failure-label": "fake"
-spec:
-  containers:
-  - name: test
-    image: docker/whalesay
-`
-
-			testTrigger2 := v1alpha1.Trigger{
-				Template: &v1alpha1.TriggerTemplate{
-					Name: "trigger2",
-					Source: &v1alpha1.ArtifactLocation{
-						Inline: &triggerPod2,
-					},
-					GroupVersionKind: &metav1.GroupVersionKind{
-						Kind:    "Pod",
-						Version: "v1",
-					},
-				},
-				Policy: &v1alpha1.TriggerPolicy{
-					ErrorOnBackoffTimeout: true,
-					Backoff: v1alpha1.Backoff{
-						Duration: 1000000000,
-						Factor:   2,
-						Steps:    10,
-					},
-					State: &v1alpha1.TriggerStateLabels{
-						Failure: map[string]string{
-							"failure-label": "fake",
-						},
-					},
-				},
-			}
-
-			convey.Convey("Execute the first trigger  and make sure the trigger execution results in success", func() {
-				err = soc.executeTrigger(testTrigger)
-				convey.So(err, convey.ShouldBeNil)
-			})
-
-			convey.Convey("Execute the second trigger and make sure the trigger execution results in failure", func() {
-				err = soc.executeTrigger(testTrigger2)
-				convey.So(err, convey.ShouldNotBeNil)
-			})
-
-			// modify backoff so that applyPolicy doesnt wait too much
-			testTrigger.Policy.Backoff = v1alpha1.Backoff{
-				Steps:    2,
-				Duration: 1000000000,
-				Factor:   1,
-			}
-
-			convey.Convey("If trigger times out and error on timeout is set, trigger execution must fail", func() {
-				testTrigger.Policy.State.Success = nil
-				testTrigger.Policy.ErrorOnBackoffTimeout = true
-				err = soc.executeTrigger(testTrigger)
-				convey.So(err, convey.ShouldNotBeNil)
-			})
-
-			convey.Convey("If trigger times out and error on timeout is not set, trigger execution must succeed", func() {
-				testTrigger.Policy.ErrorOnBackoffTimeout = false
-				err = soc.executeTrigger(testTrigger)
-				convey.So(err, convey.ShouldBeNil)
-			})
-		})
 	})
-}
-
-func getUnstructured(res interface{}) (*unstructured.Unstructured, error) {
-	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(res)
-	if err != nil {
-		return nil, err
-	}
-	return &unstructured.Unstructured{Object: obj}, nil
 }
 
 func TestExtractEvents(t *testing.T) {

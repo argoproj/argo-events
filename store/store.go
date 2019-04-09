@@ -65,16 +65,24 @@ func FetchArtifact(reader ArtifactReader, gvk *metav1.GroupVersionKind) (*unstru
 func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, clientset kubernetes.Interface) (ArtifactReader, error) {
 	if loc.S3 != nil {
 		return NewS3Reader(loc.S3, creds)
-	} else if loc.Inline != nil {
+	}
+	if loc.Inline != nil {
 		return NewInlineReader(loc.Inline)
-	} else if loc.File != nil {
+	}
+	if loc.File != nil {
 		return NewFileReader(loc.File)
-	} else if loc.URL != nil {
+	}
+	if loc.URL != nil {
 		return NewURLReader(loc.URL)
-	} else if loc.Git != nil {
+	}
+	if loc.Git != nil {
 		return NewGitReader(clientset, loc.Git)
-	} else if loc.Configmap != nil {
+	}
+	if loc.Configmap != nil {
 		return NewConfigMapReader(clientset, loc.Configmap)
+	}
+	if loc.Resource != nil {
+		return NewResourceReader(loc.Resource)
 	}
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
