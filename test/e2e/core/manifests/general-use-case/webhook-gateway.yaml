@@ -4,8 +4,9 @@ metadata:
   name: webhook-gateway
   labels:
     gateways.argoproj.io/gateway-controller-instanceid: "__E2E_ID__"
+    argo-events-gateway-version: v0.10
 spec:
-  configMap: "webhook-gateway-configmap"
+  eventSource: "webhook-gateway-event-source"
   type: "webhook"
   processorPort: "9330"
   eventProtocol:

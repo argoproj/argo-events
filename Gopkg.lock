@@ -13,13 +13,13 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "a4ed3b9f8c7419c692a60bbf780ab0f1c4af5ce4"
+  revision = "e65d5a7bb2799d5dbfd6ca17030c94951454b08c"
 
 [[projects]]
   name = "github.com/DataDog/zstd"
   packages = ["."]
-  revision = "c7161f8c63c045cbc7ca051dcc969dd0e4054de2"
-  version = "v1.3.5"
+  revision = "69c5189b6513b1503c9c5332fb2e96362e51d547"
+  version = "v1.3.8"
 
 [[projects]]
   branch = "master"
@@ -42,8 +42,8 @@
 [[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
-  revision = "4602b5a8c6e826f9e0737865818dd43b2339a092"
-  version = "v1.21.0"
+  revision = "5d2af84cf5e2dd36f2daecaaafa13c4e286f20fd"
+  version = "v1.22.0"
 
 [[projects]]
   name = "github.com/argoproj/argo"
@@ -90,7 +90,7 @@
     "service/sqs",
     "service/sts"
   ]
-  revision = "3ef79e6ee13bcdb585ec75e207e349cde24ae8bc"
+  revision = "a59596beb512ad4327d1e109267224f01653d877"
 
 [[projects]]
   name = "github.com/colinmarc/hdfs"
@@ -266,7 +266,7 @@
     "ptypes/empty",
     "ptypes/timestamp"
   ]
-  revision = "d3c38a4eb4970272b87a425ae00ccc4548e2f9bb"
+  revision = "e91709a02e0e8ff8b86b7aa913fdc9ae9498e825"
 
 [[projects]]
   name = "github.com/golang/snappy"
@@ -286,10 +286,10 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/google/gofuzz"
   packages = ["."]
-  revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
+  revision = "f140a6486e521aad38f5917de355cbf147cc0496"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/googleapis/gax-go"
@@ -311,7 +311,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "bb2674552d8fc183605e16acbf9e8f0a0b031dee"
+  revision = "8a4e74d23f07f7bff3bc6a7378c7849807f278f6"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -471,8 +471,8 @@
 [[projects]]
   name = "github.com/nats-io/nuid"
   packages = ["."]
-  revision = "289cccf02c178dc782430d534e3c1f5b72af807f"
-  version = "v1.0.0"
+  revision = "4b96681fa6d28dd0ab5fe79bac63b3a493d9ee94"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -484,7 +484,7 @@
     "slackevents",
     "slackutilsx"
   ]
-  revision = "490f287f4b4412bf56d2d176d640cb916d008371"
+  revision = "c33a46b52751322265b0e3f6243aaa462c738684"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -659,8 +659,8 @@
     "trace/propagation",
     "trace/tracestate"
   ]
-  revision = "46618d076d80f4eab85adbcb3be9a370be1dc4e0"
-  version = "v0.20.0"
+  revision = "75c0cca22312e51bfd4fafdbe9197ae399e18b38"
+  version = "v0.20.2"
 
 [[projects]]
   branch = "master"
@@ -738,7 +738,7 @@
     "unix",
     "windows"
   ]
-  revision = "4b34438f7a67ee5f45cc6132e2bad873a20324e9"
+  revision = "cc4d4f50624c67f0af3a3fa307f4be9ab9030144"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -784,7 +784,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "d996c1aa53b10c3c47e1764d087a569bb6c32ed1"
+  revision = "7e5bf9270d7061560865b8847c378236480f47e3"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -799,8 +799,8 @@
     "transport/http",
     "transport/http/internal/propagation"
   ]
-  revision = "bce707a4d0ea3488942724b3bcc1c8338f38f991"
-  version = "v0.3.0"
+  revision = "0cbcb99a9ea0c8023c794b2693cbe1def82ed4d7"
+  version = "v0.3.2"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -851,6 +851,7 @@
     "grpclog",
     "internal",
     "internal/backoff",
+    "internal/balancerload",
     "internal/binarylog",
     "internal/channelz",
     "internal/envconfig",
@@ -869,8 +870,8 @@
     "status",
     "tap"
   ]
-  revision = "3507fb8e1a5ad030303c106fef3a47c9fdad16ad"
-  version = "v1.19.1"
+  revision = "236199dd5f8031d698fb64091194aecd1c3895b2"
+  version = "v1.20.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
