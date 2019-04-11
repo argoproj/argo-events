@@ -3,7 +3,7 @@ kind: Gateway
 metadata:
   name: webhook-gateway
   labels:
-    gateways.argoproj.io/gateway-controller-instanceid: "__E2E_ID__"
+    gateways.argoproj.io/gateway-controller-instanceid: "E2E_ID"
     argo-events-gateway-version: v0.10
 spec:
   eventSource: "webhook-gateway-event-source"

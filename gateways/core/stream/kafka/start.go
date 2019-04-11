@@ -18,13 +18,11 @@ package kafka
 
 import (
 	"fmt"
+	"github.com/Shopify/sarama"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"strconv"
-
-	"github.com/argoproj/argo-events/common"
-
-	"github.com/Shopify/sarama"
-	"github.com/argoproj/argo-events/gateways"
 )
 
 func verifyPartitionAvailable(part int32, partitions []int32) bool {

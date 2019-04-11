@@ -2,4 +2,4 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argo-events-sa
-  namespace: "__E2E_ID__"
+  namespace: "E2E_ID"

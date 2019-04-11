@@ -23,10 +23,10 @@ metadata:
     argo-events-e2e: "$E2E_ID"
 EOS
 
-# ls $PROJECT_ROOT/hack/e2e/manifests/* | xargs -I {} sed -e "s|__E2E_ID__|$E2E_ID|g" {} | kubectl apply -f -
+# ls $PROJECT_ROOT/hack/e2e/manifests/* | xargs -I {} sed -e "s|E2E_ID|$E2E_ID|g" {} | kubectl apply -f -
 manifests=$(ls $PROJECT_ROOT/hack/e2e/manifests/*)
 for m in $manifests; do
-  sed -e "s|__E2E_ID__|$E2E_ID|g" $m | kubectl apply -f -
+  sed -e "s|E2E_ID|$E2E_ID|g" $m | kubectl apply -f -
 done
 
 # wait for controllers up

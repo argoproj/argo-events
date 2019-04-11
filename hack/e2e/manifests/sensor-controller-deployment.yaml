@@ -2,9 +2,7 @@ apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: sensor-controller
-  namespace: "__E2E_ID__"
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: "__E2E_ID__"
+  namespace: "E2E_ID"
 spec:
   replicas: 1
   template:

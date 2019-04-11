@@ -784,7 +784,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "7e5bf9270d7061560865b8847c378236480f47e3"
+  revision = "2538eef75904eff384a2551359968e40c207d9d2"
 
 [[projects]]
   name = "google.golang.org/api"
