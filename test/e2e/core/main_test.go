@@ -79,10 +79,6 @@ func TestGeneralUseCase(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			_, err = client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-gateway.yaml"), nil)
-			if err != nil {
-				t.Fatal(err)
-			}
 		})
 
 		convey.Convey("Create a sensor.", func() {
