@@ -33,6 +33,9 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * CloudEvents compliant.
 * Ability to manage event sources at runtime.
 
+## Documentation
+To learn more about Argo Events, [go to complete documentation](docs/)
+
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
 
