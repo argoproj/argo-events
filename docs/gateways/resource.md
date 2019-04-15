@@ -1,10 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/k8s.png?raw=true" alt="K8s"/>
-</p>
-
-<br/>
-
-
 # Resource
 
 Resource gateway listens to updates on **any** Kubernetes resource.

@@ -1,10 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/s3.png?raw=true" alt="Minio S3"/>
-</p>
-
-<br/>
-
-
 # Minio S3
 
 Artifact gateway listens to bucket notifications from Minio S3 server. If you are interested in AWS S3 then 

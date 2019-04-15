@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/sns.png?raw=true" alt="AWS SNS"/>
-</p>
-
-<br/>
-
 # AWS SNS
 
 AWS SNS gateway listens to notifications from SNS.

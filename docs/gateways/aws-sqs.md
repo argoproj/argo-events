@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/sqs.png?raw=true" alt="AWS SQS"/>
-</p>
-
-<br/>
-
 # AWS SQS
 
 AWS SNS gateway consumes messages from SQS queue.

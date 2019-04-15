@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/file.png?raw=true" alt="File"/>
-</p>
-
-<br/>
-
 # File
 
 File gateway watches changes to the file within specified directory.

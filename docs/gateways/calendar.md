@@ -1,9 +1,3 @@
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/ebdbdd4a2a8ce47a0fc6e9a6a63531be2c26148a/docs/assets/calendar.png?raw=true" alt="Calendar"/>
-</p>
-
-<br/>
-
 # Calendar
 
 Calendar gateway can be used when you to schedule K8s resources on an interval
