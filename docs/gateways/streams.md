@@ -18,7 +18,7 @@ in case of the connection failure.
 
 ### Setup
 
-**1. Install [Gateway Configmap](../../examples/event-sources/nats.yaml)**
+**1. Install [Event Source](../../examples/event-sources/nats.yaml)**
 
 **2. Install [Gateway](../../examples/gateways/nats.yaml)**
 

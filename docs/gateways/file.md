@@ -15,7 +15,7 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 
 ## Setup
-**1. Install [Gateway Configmap](../../examples/event-sources/file.yaml)**
+**1. Install [Event Source](../../examples/event-sources/file.yaml)**
 
 **2. Install [Gateway](../../examples/gateways/file.yaml)**
 

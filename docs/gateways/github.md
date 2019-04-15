@@ -21,12 +21,12 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 **1. Install [Gateway](../../examples/gateways/github.yaml)**
 
-We are installing gateway before creating configmap. Because we need to have the gateway pod running and a service backed by the pod, so 
+We are installing gateway before creating event sources. Because we need to have the gateway pod running and a service backed by the pod, so 
 that we can get the URL for the service. 
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../examples/event-sources/github.yaml)**
+**2. Install [Event Source](../../examples/event-sources/github.yaml)**
 
 **3. Install [Sensor](../../examples/sensors/github.yaml)**
 

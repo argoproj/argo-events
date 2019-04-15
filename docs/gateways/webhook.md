@@ -35,7 +35,7 @@ If you don't to expose the gateway, just remove the `serviceSpec`.
 
 ## Setup
 
-**1. Install  [Gateway Configmap](../../examples/event-sources/webhook.yaml)**
+**1. Install  [Event Source](../../examples/event-sources/webhook.yaml)**
 
 **2. Install [Gateway](../../examples/gateways/webhook.yaml)**
 

@@ -20,7 +20,7 @@ The `namespace` event source defines configuration to listen to any updates to n
 Kubernetes Object the gateway is watching.
 
 ## Setup
-**1. Install [Gateway Configmap](../../examples/event-sources/resource.yaml)**
+**1. Install [Event Source](../../examples/event-sources/resource.yaml)**
 
 **2. Install [Gateway](../../examples/gateways/resource.yaml)**
 

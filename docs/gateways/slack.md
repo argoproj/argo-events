@@ -22,7 +22,7 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../examples/event-sources/slack.yaml)**
+**2. Install [Event Source](../../examples/event-sources/slack.yaml)**
 
 **3. Install [Sensor](../../examples/sensors/slack.yaml)**
 
