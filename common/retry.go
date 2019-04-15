@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// Backoff defines an operational backoff
 type Backoff struct {
 	Duration time.Duration `json:"duration"` // the base duration
 	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
