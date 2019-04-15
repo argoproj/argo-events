@@ -9,13 +9,13 @@ Because SQS works on polling, you need to provide a `waitTimeSeconds`.
 
 ## Setup
 
-**1. Install [Gateway](../../../examples/gateways/aws-sqs.yaml)**
+**1. Install [Gateway](../../examples/gateways/aws-sqs.yaml)**
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../../examples/gateways/aws-sqs-gateway-configmap.yaml)**
+**2. Install [Gateway Configmap](../../examples/gateways/aws-sqs-gateway-configmap.yaml)**
 
-**3. Install [Sensor](../../../examples/sensors/aws-sqs.yaml)**
+**3. Install [Sensor](../../examples/sensors/aws-sqs.yaml)**
 
 Make sure sensor pod is created.
 

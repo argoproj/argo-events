@@ -20,13 +20,13 @@ The `namespace` event source defines configuration to listen to any updates to n
 Kubernetes Object the gateway is watching.
 
 ## Setup
-**1. Install [Gateway Configmap](../../../examples/gateways/resource-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/gateways/resource-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/resource.yaml)**
+**2. Install [Gateway](../../examples/gateways/resource.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../../examples/sensors/resource.yaml)**
+**3. Install [Sensor](../../examples/sensors/resource.yaml)**
 
 Make sure the sensor pod is created.
 

@@ -12,7 +12,7 @@ active endpoint and if you remove an endpoint entry, server will mark that endpo
 An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/common/webhook.go#L32-L44)
 
 ### Example
-The [configmap](../../../examples/gateways/secure-webhook-gateway-configmap.yaml) contains two event source configurations.
+The [configmap](../../examples/gateways/secure-webhook-gateway-configmap.yaml) contains two event source configurations.
 
 The first entry `bar` defines the endpoint `/bar`, the HTTP method that will be allowed for the endpoint and
 the server port to register the endpoint on. 
@@ -35,13 +35,13 @@ If you don't to expose the gateway, just remove the `serviceSpec`.
 
 ## Setup
 
-**1. Install  [Gateway Configmap](../../../examples/gateways/webhook-gateway-configmap.yaml)**
+**1. Install  [Gateway Configmap](../../examples/gateways/webhook-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/webhook.yaml)**
+**2. Install [Gateway](../../examples/gateways/webhook.yaml)**
 
 Make sure the gateway pod and service is created.
 
-**3. Install [Sensor](../../../examples/sensors/webhook.yaml)**
+**3. Install [Sensor](../../examples/sensors/webhook.yaml)**
 
 Make sure the sensor pod is created.
 
@@ -68,5 +68,5 @@ If you want to have a secure server then you will need to mount the certifactes 
 the configmap entry, set the values for `serverCertPath` and `serverKeyPath` accordingly.
 
 Example: 
-1. [Gateway](../../../examples/gateways/secure-webhook.yaml)
-2. [Configmap](../../../examples/gateways/secure-webhook-gateway-configmap.yaml)
+1. [Gateway](../../examples/gateways/secure-webhook.yaml)
+2. [Configmap](../../examples/gateways/secure-webhook-gateway-configmap.yaml)

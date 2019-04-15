@@ -15,13 +15,13 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 
 ## Setup
-**1. Install [Gateway Configmap](../../../examples/gateways/file-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/gateways/file-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/file.yaml)**
+**2. Install [Gateway](../../examples/gateways/file.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../../examples/sensors/file.yaml)**
+**3. Install [Sensor](../../examples/sensors/file.yaml)**
 
 Make sure the sensor pod is created.
 

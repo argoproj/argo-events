@@ -13,18 +13,18 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 If you don't provide an explicit `Backoff`, then gateway will use a default backoff in case of connection failure.
 
-The [event source](../../../examples/gateways/nats-gateway-configmap.yaml) contains information to subscribe to topic `foo`, it also contains an explicit backoff option
+The [event source](../../examples/gateways/nats-gateway-configmap.yaml) contains information to subscribe to topic `foo`, it also contains an explicit backoff option
 in case of the connection failure.
 
 ### Setup
 
-**1. Install [Gateway Configmap](../../../examples/gateways/nats-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/gateways/nats-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/nats.yaml)**
+**2. Install [Gateway](../../examples/gateways/nats.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../../examples/sensors/nats.yaml)**
+**3. Install [Sensor](../../examples/sensors/nats.yaml)**
 
 Make sure the sensor pod is created
 
@@ -32,6 +32,3 @@ Make sure the sensor pod is created
 
 Publish message to subject `foo`. 
 You might find this useful https://github.com/nats-io/go-nats/tree/master/examples/nats-pub
-
-## Setting up other stream gateways
-You can follow examples [here](../../../examples/gateways) to setup other stream gateways.

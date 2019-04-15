@@ -25,13 +25,13 @@ This user defined data is `userPayload`. You can basically place any string here
 The [event payload](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L60-L64) contains `eventTime` and `userPayload` (optional)
 
 ## Setup
-**1. Install [Gateway Configmap](../../../examples/gateways/calendar-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/gateways/calendar-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/calendar.yaml)**
+**2. Install [Gateway](../../examples/gateways/calendar.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../../examples/sensors/calendar.yaml)**
+**3. Install [Sensor](../../examples/sensors/calendar.yaml)**
 
 Make sure the sensor pod is created.
 

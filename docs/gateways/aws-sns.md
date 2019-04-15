@@ -17,16 +17,16 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 ## Setup
 
-**1. Install [Gateway](../../../examples/gateways/aws-sns.yaml)**
+**1. Install [Gateway](../../examples/gateways/aws-sns.yaml)**
 
 We are installing gateway before creating configmap. Because we need to have the gateway pod running and a service backed by the pod, so 
 that we can get the URL for the service. 
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../../examples/gateways/aws-sns-gateway-configmap.yaml)**
+**2. Install [Gateway Configmap](../../examples/gateways/aws-sns-gateway-configmap.yaml)**
 
-**3. Install [Sensor](../../../examples/sensors/aws-sns.yaml)**
+**3. Install [Sensor](../../examples/sensors/aws-sns.yaml)**
 
 Make sure sensor pod is created.
 

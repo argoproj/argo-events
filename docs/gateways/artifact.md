@@ -21,13 +21,13 @@ Refer AWS S3 Notitification - https://docs.aws.amazon.com/AmazonS3/latest/dev/no
 
 **Pre-requisite** - Create necessary bucket/s in Minio.
 
-**1. Install [Gateway Configmap](../../../examples/gateways/artifact-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/gateways/artifact-gateway-configmap.yaml)**
 
-**2. Install [Gateway](../../../examples/gateways/artifact.yaml)**
+**2. Install [Gateway](../../examples/gateways/artifact.yaml)**
 
 Make sure the gateway pod is created
    
-**3. Install [Sensor](../../../examples/sensors/artifact.yaml)**
+**3. Install [Sensor](../../examples/sensors/artifact.yaml)**
 
 **4. Trigger workflow**
 

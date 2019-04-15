@@ -17,13 +17,13 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 ## Setup
 
-**1. Install [Gateway](../../../examples/gateways/storage-grid.yaml)**
+**1. Install [Gateway](../../examples/gateways/storage-grid.yaml)**
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../../examples/gateways/storage-grid-gateway-configmap.yaml)**
+**2. Install [Gateway Configmap](../../examples/gateways/storage-grid-gateway-configmap.yaml)**
 
-**3. Install [Sensor](../../../examples/sensors/storage-grid.yaml)**
+**3. Install [Sensor](../../examples/sensors/storage-grid.yaml)**
 
 Make sure sensor pod is created.
 
