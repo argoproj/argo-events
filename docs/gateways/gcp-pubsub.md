@@ -9,7 +9,7 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 Make sure to mount credentials file for authentication in gateway pod and refer the path in `credentialsFile`.
 
 ## Setup
-**1. Install [Gateway Configmap](../../examples/gateways/gcp-pubsub-gateway-configmap.yaml)**
+**1. Install [Gateway Configmap](../../examples/event-sources/gcp-pubsub-gateway-configmap.yaml)**
 
 **2. Install [Gateway](../../examples/gateways/gcp-pubsub.yaml)**
 

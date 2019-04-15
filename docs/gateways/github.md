@@ -26,7 +26,7 @@ that we can get the URL for the service.
 
 Make sure gateway pod and service is running
 
-**2. Install [Gateway Configmap](../../examples/gateways/github-gateway-configmap.yaml)**
+**2. Install [Gateway Configmap](../../examples/event-sources/github-gateway-configmap.yaml)**
 
 **3. Install [Sensor](../../examples/sensors/github.yaml)**
 
