@@ -1,17 +1,18 @@
 # Gateway
 
-1. [What is a gateway](#what-is-a-gateway)
-2. [Components](#components)
-2. [Specification](gateway-protocol.md)
-4. [Managing Event Sources](#managing-event-sources)
-5. [How to write a custom gateway?](#how-to-write-a-custom-gateway)
-6. [Examples](#examples)
+- [Gateway](#gateway)
+  - [What is a gateway?](#what-is-a-gateway)
+    - [Components](#components)
+    - [Core gateways](#core-gateways)
+    - [Community gateways](#community-gateways)
+  - [Managing Event Sources](#managing-event-sources)
+  - [How to write a custom gateway?](#how-to-write-a-custom-gateway)
+  - [Examples](#examples)
 
 ## What is a gateway?
 A gateway consumes events from event sources, transforms them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatches them to sensors.
 
 <br/>
-</br>
 
 <p align="center">
   <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/gateways.png?raw=true" alt="Gateway"/>
@@ -108,14 +109,14 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 
   * ### Available Environment Variables to Server
  
-     |  Field               |  Description |
-     |----------------------|--------------|
-     |  GATEWAY_NAMESPACE                           | K8s namespace of the gateway |
-     |  GATEWAY_EVENT_SOURCE_CONFIG_MAP            | K8s configmap containing event source|
-     |  GATEWAY_NAME                               | name of the gateway |
-     |  GATEWAY_CONTROLLER_INSTANCE_ID             | gateway controller instance id |
-     | GATEWAY_CONTROLLER_NAME                     | gateway controller name
-     | GATEWAY_SERVER_PORT                         | Port on which the gateway gRPC server should run 
+     | Field                           | Description                                      |
+     | ------------------------------- | ------------------------------------------------ |
+     | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
+     | GATEWAY_EVENT_SOURCE_CONFIG_MAP | K8s configmap containing event source            |
+     | GATEWAY_NAME                    | name of the gateway                              |
+     | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
+     | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
+     | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
  
   * ### Implementation
     You can follow existing implementations [here](../gateways)

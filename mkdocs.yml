@@ -1,0 +1,42 @@
+site_name: Argo Events - The Event-Based Dependency Manager for Kubernetes
+repo_url: https://github.com/argoproj/argo-events
+strict: true
+theme:
+  name: material
+  palette:
+    primary: teal
+  font:
+    text: 'Work Sans'
+  logo: 'assets/logo.png'
+google_analytics:
+- 'UA-105170809-2'
+- 'auto'
+markdown_extensions:
+- codehilite
+- admonition
+- toc:
+    permalink: true
+nav:
+  - Overview: index.md
+  - gateway.md
+  - sensor.md
+  - trigger.md
+  - communication.md
+  - controllers.md
+  - Setup:
+    - gateways/artifact.md
+    - gateways/aws-sns.md
+    - gateways/aws-sqs.md
+    - gateways/calendar.md
+    - gateways/file.md
+    - gateways/gcp-pubsub.md
+    - gateways/github.md
+    - gateways/gitlab.md
+    - gateways/resource.md
+    - gateways/slack.md
+    - gateways/storage-grid.md
+    - gateways/streams.md
+    - gateways/webhook.md
+  - Releases ⧉: https://github.com/argoproj/argo-events/releases
+  - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
+  - Blog ⧉: https://blog.argoproj.io/
