@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor"
+          image: "argoproj/sensor:v0.10-test"
           imagePullPolicy: "IfNotPresent"
   dependencies:
     - name: "webhook-gateway:foo"

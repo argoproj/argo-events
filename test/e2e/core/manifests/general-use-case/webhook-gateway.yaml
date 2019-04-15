@@ -22,11 +22,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.10-test"
           imagePullPolicy: "IfNotPresent"
           command: ["/bin/gateway-client"]
         - name: "webhook-events"
-          image: "argoproj/webhook-gateway"
+          image: "argoproj/webhook-gateway:v0.10-test"
           imagePullPolicy: "IfNotPresent"
           command: ["/bin/webhook-gateway"]
           # ports:
