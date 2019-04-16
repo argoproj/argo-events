@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd $(dirname ${BASH_SOURCE})/../..; pwd)
 KUBERNETES_VERSION=${KUBERNETES_VERSION:-kindest/node:v1.13.4}
 CLUSTER_NAME=${CLUSTER_NAME:-kind-argo-events}
 IMAGE_PREFIX=${IMAGE_PREFIX:-argoproj/}
-IMAGE_TAG=${IMAGE_TAG:-v0.10-test}
+IMAGE_TAG=v0.10-test
 
 kind create cluster --name $CLUSTER_NAME --image $KUBERNETES_VERSION
 export KUBECONFIG="$(kind get kubeconfig-path --name=$CLUSTER_NAME)"
