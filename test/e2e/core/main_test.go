@@ -71,6 +71,16 @@ func TestGeneralUseCase(t *testing.T) {
 	manifestsDir := filepath.Join(dir, "manifests", "general-use-case")
 
 	convey.Convey("Test the general use case", t, func() {
+
+		convey.Convey("Create event source", func() {
+			_, err := client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-gateway-event-source.yaml"), func(obj *unstructured.Unstructured) error {
+				return nil
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+		})
+
 		convey.Convey("Create a gateway.", func() {
 			_, err := client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-gateway.yaml"), func(obj *unstructured.Unstructured) error {
 				e2ecommon.SetLabel(obj, common.LabelKeyGatewayControllerInstanceID, e2eID)
