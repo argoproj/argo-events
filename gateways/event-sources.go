@@ -153,6 +153,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
 				Data: eventSource.Data.Config,
 				Name: eventSource.Data.Src,
+				Id:   eventSource.Data.ID,
 			}); !valid.IsValid {
 				gc.Log.WithFields(
 					map[string]interface{}{
@@ -185,6 +186,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, &EventSource{
 				Name: eventSource.Data.Src,
 				Data: eventSource.Data.Config,
+				Id:   eventSource.Data.ID,
 			})
 			if err != nil {
 				gc.Log.WithError(err).Error("error occurred while starting event source")
