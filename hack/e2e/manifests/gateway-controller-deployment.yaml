@@ -1,10 +1,13 @@
-apiVersion: apps/v1beta1
+# The gateway-controller listens for changes on the gateway CRD and creates gateway
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-controller
-  namespace: "E2E_ID"
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-controller
   template:
     metadata:
       labels:
@@ -13,7 +16,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
       - name: gateway-controller
-        image: argoproj/gateway-controller
+        image: argoproj/gateway-controller:v0.10-test
         imagePullPolicy: Always
         env:
           - name: GATEWAY_NAMESPACE
