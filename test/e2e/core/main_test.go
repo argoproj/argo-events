@@ -24,9 +24,6 @@ import (
 const NAMESPACE = "argo-events"
 
 func TestGeneralUseCase(t *testing.T) {
-
-	fmt.Println("In general use case")
-
 	client, err := e2ecommon.NewE2EClient()
 	if err != nil {
 		t.Fatal(err)
@@ -42,9 +39,6 @@ func TestGeneralUseCase(t *testing.T) {
 	convey.Convey("Test the general use case", t, func() {
 
 		convey.Convey("Create event source", func() {
-
-			convey.Println("creating event source")
-
 			esBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-gateway-event-source.yaml"))
 			if err != nil {
 				convey.ShouldPanic(err)
@@ -59,8 +53,6 @@ func TestGeneralUseCase(t *testing.T) {
 		})
 
 		convey.Convey("Create a gateway.", func() {
-			convey.Println("creating gateway")
-
 			gwBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-gateway.yaml"))
 			if err != nil {
 				convey.ShouldPanic(err)
@@ -75,8 +67,6 @@ func TestGeneralUseCase(t *testing.T) {
 		})
 
 		convey.Convey("Create a sensor.", func() {
-			convey.Println("creating sensor")
-
 			swBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-sensor.yaml"))
 			if err != nil {
 				convey.ShouldPanic(err)
@@ -95,46 +85,35 @@ func TestGeneralUseCase(t *testing.T) {
 			defer ticker.Stop()
 			var gwpod, spod *corev1.Pod
 			var gwsvc *corev1.Service
-
-			convey.Println("waiting for resource")
-
 			for {
-				convey.Println("get gateway pod")
 				if gwpod == nil {
 					pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-gateway", metav1.GetOptions{})
 					if err != nil && !apierr.IsNotFound(err) {
 						t.Fatal(err)
 					}
-					bytee, _ := yaml.Marshal(pod)
-					convey.Println(string(bytee))
+					_, _ = yaml.Marshal(pod)
 					if pod != nil && pod.Status.Phase == corev1.PodRunning {
 						gwpod = pod
-						convey.Println("gateway pod is running")
 					}
 				}
 
-				convey.Println("get gateway service")
 				if gwsvc == nil {
 					svc, err := client.KubeClient.CoreV1().Services(NAMESPACE).Get("webhook-gateway-svc", metav1.GetOptions{})
 					if err != nil && !apierr.IsNotFound(err) {
 						t.Fatal(err)
 					}
 					gwsvc = svc
-					convey.Println("gateway service running")
 				}
 				if spod == nil {
-					convey.Println("sensor pod is running")
 					pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-sensor", metav1.GetOptions{})
 					if err != nil && !apierr.IsNotFound(err) {
 						t.Fatal(err)
 					}
 					if pod != nil && pod.Status.Phase == corev1.PodRunning {
 						spod = pod
-						convey.Println("sensor pod is running")
 					}
 				}
 				if gwpod != nil && gwsvc != nil && spod != nil {
-					convey.Println("BREAK THIS")
 					break
 				}
 			}
@@ -149,8 +128,6 @@ func TestGeneralUseCase(t *testing.T) {
 			port := l.Addr().(*net.TCPAddr).Port
 			l.Close()
 
-			convey.Println("port forwarding")
-
 			// Use port forwarding to access pods in minikube
 			stopChan, err := client.ForwardServicePort(NAMESPACE, "webhook-gateway", port, 12000)
 			if err != nil {
@@ -158,7 +135,6 @@ func TestGeneralUseCase(t *testing.T) {
 			}
 			defer close(stopChan)
 
-			convey.Println("making request")
 			url := fmt.Sprintf("http://localhost:%d/foo", port)
 			req, err := http.NewRequest("POST", url, strings.NewReader("e2e"))
 			if err != nil {
@@ -171,33 +147,18 @@ func TestGeneralUseCase(t *testing.T) {
 			}
 			defer resp.Body.Close()
 
-			convey.Println("request made")
-
 			if t.Failed() {
 				t.FailNow()
 			}
 		})
 
 		convey.Convey("Check if the sensor trigggered a pod.", func() {
-			ticker2 := time.NewTicker(time.Second)
-			defer ticker2.Stop()
-		L:
-			for {
-				select {
-				case _ = <-ticker2.C:
-					pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-sensor-triggered-pod", metav1.GetOptions{})
-					if err != nil && !apierr.IsNotFound(err) {
-						t.Error(err)
-						break L
-					}
-					if pod != nil && pod.Status.Phase == corev1.PodSucceeded {
-						convey.So(pod.Spec.Containers[0].Args[0], convey.ShouldEqual, "e2e")
-						break L
-					}
-				case <-time.After(10 * time.Second):
-					t.Error("timed out gateway and sensor startup")
-					break L
-				}
+			pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-sensor-triggered-pod", metav1.GetOptions{})
+			if err != nil && !apierr.IsNotFound(err) {
+				t.Error(err)
+			}
+			if pod != nil && pod.Status.Phase == corev1.PodSucceeded {
+				convey.So(pod.Spec.Containers[0].Args[0], convey.ShouldEqual, "e2e")
 			}
 		})
 	})
