@@ -24,7 +24,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateStorageGrid)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateStorageGrid)
 }
 
 func validateStorageGrid(config interface{}) error {

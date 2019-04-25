@@ -20,12 +20,14 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // KafkaEventSourceExecutor implements Eventing
 type KafkaEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // kafka defines configuration required to connect to kafka cluster
@@ -37,7 +39,7 @@ type kafka struct {
 	// Topic name
 	Topic string `json:"topic"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// Consumer manages PartitionConsumers which process Kafka messages from brokers.
 	consumer sarama.Consumer
 }

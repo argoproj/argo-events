@@ -31,9 +31,13 @@ func Validate(gw *v1alpha1.Gateway) error {
 	if gw.Spec.Type == "" {
 		return fmt.Errorf("gateway type is not specified")
 	}
-	if gw.Spec.EventVersion == "" {
-		return fmt.Errorf("gateway version is not specified")
+	if gw.Spec.EventSource == "" {
+		return fmt.Errorf("event source for the gateway is not specified")
 	}
+	if gw.Spec.ProcessorPort == "" {
+		return fmt.Errorf("gateway processor port is not specified")
+	}
+
 	switch gw.Spec.EventProtocol.Type {
 	case apicommon.HTTP:
 		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {

@@ -17,17 +17,19 @@ limitations under the License.
 package storagegrid
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
 )
 
+const ArgoEventsEventSourceVersion = "v0.10"
+
 // StorageGridEventSourceExecutor implements Eventing
 type StorageGridEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 type RouteConfig struct {

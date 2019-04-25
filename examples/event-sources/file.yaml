@@ -1,0 +1,25 @@
+# This configmap contains the event sources configurations for File gateway
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: file-configmap
+  labels:
+    # do not remove
+    argo-events-event-source-version: v0.10
+data:
+  example-with-path: |-
+    # directory to watch
+    directory: "/bin/"
+    # type of the event
+    # supported types are: CREATE, WRITE, REMOVE, RENAME, CHMOD
+    type: CREATE
+    # path to watch
+    path: x.txt
+
+  example-with-path-regex: |-
+    directory: "/bin/"
+    type: CREATE
+    # the gateway will watch events for path that matches following regex
+    pathRegexp: "([a-z]+).txt"

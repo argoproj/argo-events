@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: aws-sns-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -17,7 +21,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "aws-sns-gateway:notification_1"
+    - name: "aws-sns-gateway:example"
   triggers:
     - template:
         name: sns-workflow
@@ -48,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "aws-sns-gateway:notification_1"
+            event: "aws-sns-gateway:example"
           dest: spec.arguments.parameters.0.value

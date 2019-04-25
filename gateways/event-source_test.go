@@ -97,6 +97,9 @@ func TestEventSources(t *testing.T) {
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "gateway-configmap",
 				Namespace: "test-namespace",
+				Labels: map[string]string{
+					common.LabelArgoEventsEventSourceVersion: "v0.10",
+				},
 			},
 			Data: map[string]string{
 				"event-source-1": `
@@ -113,9 +116,10 @@ testKey: testValue
 		convey.So(eventSrcCtxMap, convey.ShouldNotBeNil)
 		convey.So(len(eventSrcCtxMap), convey.ShouldEqual, 1)
 		for _, data := range eventSrcCtxMap {
-			convey.So(data.Data.Config, convey.ShouldEqual, `
+			convey.So(data.Source.Data, convey.ShouldEqual, `
 testKey: testValue
 `)
+			convey.So(data.Source.Version, convey.ShouldEqual, "v0.10")
 		}
 	})
 

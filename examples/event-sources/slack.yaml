@@ -1,0 +1,46 @@
+# This configmap contains the event sources configurations for Slack gateway
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slack-event-source
+  labels:
+    # do not remove
+    argo-events-event-source-version: v0.10
+data:
+  example-1: |-
+    # hook contains configuration for the HTTP server running in the gateway.
+    # Slack will send events to following port and endpoint
+    hook:
+      # endpoint to listen events on
+      endpoint: "/"
+      # port to run HTTP server on
+      port: "12000"
+    # token contains information about K8s secret that stores the token
+    token:
+      # Name of the K8s secret that contains the token
+      name: slack-secret
+      # Key within the K8s secret whose corresponding value (must be base64 encoded) is token
+      key: tokenkey
+
+  example-2: |-
+    hook:
+      endpoint: "/"
+      port: "13000"
+    token:
+      name: slack-secret-2
+      key: tokenkey
+
+  # with secure connection
+  example-3: |-
+    hook:
+      endpoint: "/"
+      port: "14000"
+      # path to file that is mounted in gateway pod which contains certs
+      serverCertPath: "some path in pod"
+      # path to file that is mounted in gateway pod which contains private key
+      serverKeyPath: "some path in pod"
+    token:
+      name: slack-secret-3
+      key: tokenkey

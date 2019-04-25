@@ -33,7 +33,7 @@ func (sec *sensorExecutionCtx) HttpEventProtocol() {
 	// add a handler to handle incoming events
 	http.HandleFunc("/", sec.httpEventHandler)
 
-	sec.log.WithPort(sec.sensor.Spec.EventProtocol.Http.Port).Info("sensor started listening")
+	sec.log.WithField(common.LabelPort, sec.sensor.Spec.EventProtocol.Http.Port).Info("sensor started listening")
 	if err := sec.server.ListenAndServe(); err != nil {
 		sec.log.WithError(err).Error("sensor server stopped")
 		// escalate error
@@ -71,12 +71,12 @@ func (sec *sensorExecutionCtx) httpEventHandler(w http.ResponseWriter, r *http.R
 	// validate whether the event is from gateway that this sensor is watching and send event over internal queue if valid
 	if sec.sendEventToInternalQueue(event, w) {
 		response = "message successfully sent over internal queue"
-		sec.log.WithEventSource(event.Context.Source.Host).Info(response)
+		sec.log.WithField(common.LabelEventSource, event.Context.Source.Host).Info(response)
 		common.SendSuccessResponse(w, response)
 		return
 	}
 
 	response = "event is from unknown source"
-	sec.log.WithEventSource(event.Context.Source.Host).Warn(response)
+	sec.log.WithField(common.LabelEventSource, event.Context.Source.Host).Warn(response)
 	common.SendErrorResponse(w, response)
 }

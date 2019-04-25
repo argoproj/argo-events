@@ -4,6 +4,9 @@ metadata:
   name: storage-grid-watcher-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -13,7 +16,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "storage-grid-gateway:my_bucket"
+    - name: "storage-grid-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -49,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "storage-grid-gateway:my_bucket"
+            event: "storage-grid-gateway:example"
           dest: spec.arguments.parameters.0.value

@@ -1,7 +1,4 @@
-FROM alpine:3.9 as alpine
-RUN apk add -U --no-cache ca-certificates
-
-FROM scratch
+FROM centos:7
+RUN yum -y install ca-certificates
 COPY dist/gcp-pubsub-gateway /bin/
-COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 ENTRYPOINT [ "/bin/gcp-pubsub-gateway" ]

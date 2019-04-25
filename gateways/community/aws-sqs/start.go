@@ -17,6 +17,7 @@ limitations under the License.
 package aws_sqs
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/aws/aws-sdk-go/aws"
@@ -25,8 +26,11 @@ import (
 
 // StartEventSource starts an event source
 func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	defer gateways.Recover(eventSource.Name)
+
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("activating event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")
@@ -44,8 +48,6 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 
 // listenEvents fires an event when interval completes and item is processed from queue.
 func (ese *SQSEventSourceExecutor) listenEvents(s *sqsEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer gateways.Recover(eventSource.Name)
-
 	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, s.AccessKey, s.SecretKey)
 	if err != nil {
 		errorCh <- err
@@ -80,7 +82,7 @@ func (ese *SQSEventSourceExecutor) listenEvents(s *sqsEventSource, eventSource *
 				WaitTimeSeconds:     aws.Int64(s.WaitTimeSeconds),
 			})
 			if err != nil {
-				ese.Log.WithEventSource(eventSource.Name).WithError(err).Error("failed to process item from queue, waiting for next timeout")
+				ese.Log.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Error("failed to process item from queue, waiting for next timeout")
 				continue
 			}
 

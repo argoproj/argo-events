@@ -1,0 +1,148 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor-http
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
+spec:
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: "webhook-gateway-http:endpoint1"
+      filters:
+        name: "context-filter"
+        context:
+          source:
+            host: xyz.com
+          contentType: application/json
+    - name: "webhook-gateway-http:endpoint2"
+    - name: "webhook-gateway-http:endpoint3"
+    - name: "webhook-gateway-http:endpoint4"
+      filters:
+        name: "data-filter"
+        data:
+          - path: bucket
+            type: string
+            value:
+              - "argo-workflow-input"
+              - "argo-workflow-input1"
+    - name: "webhook-gateway-http:endpoint5"
+    - name: "webhook-gateway-http:endpoint6"
+    - name: "webhook-gateway-http:endpoint7"
+    - name: "webhook-gateway-http:endpoint8"
+    - name: "webhook-gateway-http:endpoint9"
+  dependencyGroups:
+    - name: "group_1"
+      dependencies:
+        - "webhook-gateway-http:endpoint1"
+        - "webhook-gateway-http:endpoint2"
+    - name: "group_2"
+      dependencies:
+        - "webhook-gateway-http:endpoint3"
+    - name: "group_3"
+      dependencies:
+        - "webhook-gateway-http:endpoint4"
+        - "webhook-gateway-http:endpoint5"
+    - name: "group_4"
+      dependencies:
+        - "webhook-gateway-http:endpoint6"
+        - "webhook-gateway-http:endpoint7"
+        - "webhook-gateway-http:endpoint8"
+    - name: "group_5"
+      dependencies:
+        - "webhook-gateway-http:endpoint9"
+  circuit: "group_1 || group_2 || ((group_3 || group_4) && group_5)"
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  triggers:
+    - template:
+        when:
+          any:
+            - "group_1"
+            - "group_2"
+        name: webhook-workflow-trigger
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-1-
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
+              templates:
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "webhook-gateway-http:endpoint1"
+          dest: spec.arguments.parameters.0.value
+    - template:
+        name: webhook-workflow-trigger-2
+        when:
+          all:
+            - "group_5"
+            - "group_4"
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-2-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
+    - template:
+        name: webhook-workflow-trigger-common
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          inline: |
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-common-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"

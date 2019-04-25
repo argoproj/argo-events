@@ -111,7 +111,7 @@ func (sec *sensorExecutionCtx) processTriggers() {
 	successTriggerCycle := true
 
 	for _, trigger := range sec.sensor.Spec.Triggers {
-		log := sec.log.WithTrigger(trigger.Template.Name)
+		log := sec.log.WithField(common.LabelTriggerName, trigger.Template.Name)
 
 		// check if a trigger condition is set
 		if canExecute := sec.canExecuteTrigger(trigger); !canExecute {

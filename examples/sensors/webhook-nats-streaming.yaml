@@ -4,6 +4,9 @@ metadata:
   name: webhook-nats-streaming
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -21,7 +24,7 @@ spec:
       clientId: "myclient1"
       deliverAllAvailable: true
   dependencies:
-    - name: "webhook-gateway-nats-streaming:foo"
+    - name: "webhook-gateway-streaming-nats:example"
   triggers:
     - template:
         name: argo-workflow
@@ -52,5 +55,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "webhook-gateway-nats-streaming:foo"
+            event: "webhook-gateway-streaming-nats:example"
           dest: spec.arguments.parameters.0.value

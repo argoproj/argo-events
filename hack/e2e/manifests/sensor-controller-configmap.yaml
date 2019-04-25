@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: sensor-controller-configmap
-  namespace: "__E2E_ID__"
-data:
-  config: |
-    instanceID: "__E2E_ID__"
-    namespace: ""

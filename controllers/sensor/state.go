@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -40,7 +41,7 @@ func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatu
 }
 
 // create a new node
-func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *common.ArgoEventsLogger, messages ...string) *v1alpha1.NodeStatus {
+func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *logrus.Logger, messages ...string) *v1alpha1.NodeStatus {
 	if sensor.Status.Nodes == nil {
 		sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
@@ -73,7 +74,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 }
 
 // PersistUpdates persists the updates to the Sensor resource
-func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controllerInstanceId string, log *common.ArgoEventsLogger) (*v1alpha1.Sensor, error) {
+func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controllerInstanceId string, log *logrus.Logger) (*v1alpha1.Sensor, error) {
 	sensorClient := client.ArgoprojV1alpha1().Sensors(sensor.ObjectMeta.Namespace)
 	// in case persist update fails
 	oldsensor := sensor.DeepCopy()
@@ -92,7 +93,7 @@ func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controlle
 			return oldsensor, err
 		}
 	}
-	log.WithPhase(string(sensor.Status.Phase)).Info("sensor state updated successfully")
+	log.WithField(common.LabelPhase, string(sensor.Status.Phase)).Info("sensor state updated successfully")
 	return sensor, nil
 }
 
@@ -113,7 +114,7 @@ func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) erro
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *common.ArgoEventsLogger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
 		log.WithFields(

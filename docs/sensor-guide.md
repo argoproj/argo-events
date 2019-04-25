@@ -108,4 +108,3 @@ The `parameters` define list of
 
 ## Examples
 You can find sensor examples [here](https://github.com/argoproj/argo-events/tree/master/examples/sensors)
-

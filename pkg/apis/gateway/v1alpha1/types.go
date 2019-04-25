@@ -22,6 +22,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Gateway version
+const ArgoEventsGatewayVersion = "v0.10"
+
 // NodePhase is the label for the condition of a node.
 type NodePhase string
 
@@ -60,30 +63,27 @@ type GatewaySpec struct {
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,1,opt,name=template"`
 
-	// ConfigMap is name of the configmap for gateway. This configmap contains event sources.
-	ConfigMap string `json:"configMap,omitempty" protobuf:"bytes,2,opt,name=configmap"`
+	// EventSource is name of the configmap that stores event source configurations for the gateway
+	EventSource string `json:"eventSource,omitempty" protobuf:"bytes,2,opt,name=eventSource"`
 
 	// Type is the type of gateway. Used as metadata.
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 
-	// Version is used for marking event version
-	EventVersion string `json:"eventVersion" protobuf:"bytes,4,opt,name=eventVersion"`
-
 	// Service is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
-	Service *common.ServiceTemplateSpec `json:"service,omitempty" protobuf:"bytes,5,opt,name=service"`
+	Service *common.ServiceTemplateSpec `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
 
 	// Watchers are components which are interested listening to notifications from this gateway
 	// These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
 	// In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
 	// specifying watchers would be unnecessary.
-	Watchers *NotificationWatchers `json:"watchers,omitempty" protobuf:"bytes,6,opt,name=watchers"`
+	Watchers *NotificationWatchers `json:"watchers,omitempty" protobuf:"bytes,5,opt,name=watchers"`
 
 	// Port on which the gateway event source processor is running on.
-	ProcessorPort string `json:"processorPort" protobuf:"bytes,7,opt,name=processorPort"`
+	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
-	EventProtocol *common.EventProtocol `json:"eventProtocol" protobuf:"bytes,8,opt,name=eventProtocol"`
+	EventProtocol *common.EventProtocol `json:"eventProtocol" protobuf:"bytes,7,opt,name=eventProtocol"`
 }
 
 // GatewayStatus contains information about the status of a gateway.

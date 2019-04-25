@@ -17,14 +17,16 @@ limitations under the License.
 package webhook
 
 import (
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // WebhookEventSourceExecutor implements Eventing
 type WebhookEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 type RouteConfig struct {

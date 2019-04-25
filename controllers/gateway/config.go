@@ -41,7 +41,7 @@ func (c *GatewayController) watchControllerConfigMap(ctx context.Context) (cache
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected ConfigMap update. updating the gateway-controller config.")
+					c.log.Info("detected EventSource update. updating the gateway-controller config.")
 					err := c.updateConfig(cm)
 					if err != nil {
 						c.log.Error("update of config failed", "err", err)
@@ -50,10 +50,10 @@ func (c *GatewayController) watchControllerConfigMap(ctx context.Context) (cache
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected ConfigMap update. updating the gateway-controller config.")
+					c.log.Info("detected EventSource update. updating the gateway-controller config.")
 					err := c.updateConfig(newCm)
 					if err != nil {
-						c.log.Errorf("update of config failed", "err", err)
+						c.log.WithError(err).Error("update of config failed")
 					}
 				}
 			},

@@ -3,9 +3,14 @@ kind: Gateway
 metadata:
   name: slack-gateway
   labels:
+    # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    gateway-name: "slack-gateway"
+    # gateway controller will use this label to match with it's own version
+    # do not remove
+    argo-events-gateway-version: v0.10
 spec:
+  type: "slack"
+  eventSource: "slack-event-source"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -37,9 +42,6 @@ spec:
         - port: 12000
           targetPort: 12000
       type: LoadBalancer
-  configMap: "slack-gateway-configmap"
-  type: "slack"
-  eventVersion: "1.0"
   watchers:
     sensors:
       - name: "slack-sensor"

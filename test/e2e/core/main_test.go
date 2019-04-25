@@ -2,63 +2,29 @@ package core
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/smartystreets/goconvey/convey"
-
-	"github.com/argoproj/argo-events/common"
+	gwalpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	snv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	e2ecommon "github.com/argoproj/argo-events/test/e2e/common"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var (
-	client *e2ecommon.E2EClient
-	e2eID  string
-)
-
-func setup() error {
-	e2eID = e2ecommon.GetE2EID()
-	cli, err := e2ecommon.NewE2EClient(e2eID)
-	if err != nil {
-		return err
-	}
-	client = cli
-	return nil
-}
-
-func teardown() {
-	if !e2ecommon.KeepNamespace() {
-		if client != nil {
-			err := client.DeleteNamespaces()
-			if err != nil {
-				fmt.Printf("%+v\n", err)
-			}
-		}
-	}
-}
-
-func TestMain(m *testing.M) {
-	err := setup()
-	if err != nil {
-		teardown()
-		panic(err)
-	}
-	ret := m.Run()
-	teardown()
-	os.Exit(ret)
-}
+const NAMESPACE = "argo-events"
 
 func TestGeneralUseCase(t *testing.T) {
-	tmpNamespace, err := client.CreateTmpNamespace()
+	client, err := e2ecommon.NewE2EClient()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,27 +37,46 @@ func TestGeneralUseCase(t *testing.T) {
 	manifestsDir := filepath.Join(dir, "manifests", "general-use-case")
 
 	convey.Convey("Test the general use case", t, func() {
-		convey.Convey("Create a gateway.", func() {
-			_, err := client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-gateway.yaml"), func(obj *unstructured.Unstructured) error {
-				e2ecommon.SetLabel(obj, common.LabelKeyGatewayControllerInstanceID, e2eID)
-				return nil
-			})
+
+		convey.Convey("Create event source", func() {
+			esBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-gateway-event-source.yaml"))
 			if err != nil {
-				t.Fatal(err)
+				convey.ShouldPanic(err)
 			}
-			_, err = client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-gateway-configmap.yaml"), nil)
+			var cm *corev1.ConfigMap
+			if err := yaml.Unmarshal(esBytes, &cm); err != nil {
+				convey.ShouldPanic(err)
+			}
+			if _, err = client.KubeClient.CoreV1().ConfigMaps(NAMESPACE).Create(cm); err != nil {
+				convey.ShouldPanic(err)
+			}
+		})
+
+		convey.Convey("Create a gateway.", func() {
+			gwBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-gateway.yaml"))
 			if err != nil {
-				t.Fatal(err)
+				convey.ShouldPanic(err)
+			}
+			var gw *gwalpha1.Gateway
+			if err := yaml.Unmarshal(gwBytes, &gw); err != nil {
+				convey.ShouldPanic(err)
+			}
+			if _, err = client.GwClient.ArgoprojV1alpha1().Gateways(NAMESPACE).Create(gw); err != nil {
+				convey.ShouldPanic(err)
 			}
 		})
 
 		convey.Convey("Create a sensor.", func() {
-			_, err := client.CreateResourceFromYaml(tmpNamespace, filepath.Join(manifestsDir, "webhook-sensor.yaml"), func(obj *unstructured.Unstructured) error {
-				e2ecommon.SetLabel(obj, common.LabelKeySensorControllerInstanceID, e2eID)
-				return nil
-			})
+			swBytes, err := ioutil.ReadFile(filepath.Join(manifestsDir, "webhook-sensor.yaml"))
 			if err != nil {
-				t.Fatal(err)
+				convey.ShouldPanic(err)
+			}
+			var sn *snv1alpha1.Sensor
+			if err := yaml.Unmarshal(swBytes, &sn); err != nil {
+				convey.ShouldPanic(err)
+			}
+			if _, err = client.SnClient.ArgoprojV1alpha1().Sensors(NAMESPACE).Create(sn); err != nil {
+				convey.ShouldPanic(err)
 			}
 		})
 
@@ -100,48 +85,37 @@ func TestGeneralUseCase(t *testing.T) {
 			defer ticker.Stop()
 			var gwpod, spod *corev1.Pod
 			var gwsvc *corev1.Service
-		L:
 			for {
-				select {
-				case _ = <-ticker.C:
-					if gwpod == nil {
-						pod, err := client.GetPod(tmpNamespace, "webhook-gateway")
-						if err != nil && !apierr.IsNotFound(err) {
-							t.Error(err)
-							break L
-						}
-						if pod != nil && pod.Status.Phase == corev1.PodRunning {
-							gwpod = pod
-						}
+				if gwpod == nil {
+					pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-gateway", metav1.GetOptions{})
+					if err != nil && !apierr.IsNotFound(err) {
+						t.Fatal(err)
 					}
-					if gwsvc == nil {
-						svc, err := client.GetService(tmpNamespace, "webhook-gateway-svc")
-						if err != nil && !apierr.IsNotFound(err) {
-							t.Error(err)
-							break L
-						}
-						gwsvc = svc
+					_, _ = yaml.Marshal(pod)
+					if pod != nil && pod.Status.Phase == corev1.PodRunning {
+						gwpod = pod
 					}
-					if spod == nil {
-						pod, err := client.GetPod(tmpNamespace, "webhook-sensor")
-						if err != nil && !apierr.IsNotFound(err) {
-							t.Error(err)
-							break L
-						}
-						if pod != nil && pod.Status.Phase == corev1.PodRunning {
-							spod = pod
-						}
-					}
-					if gwpod != nil && gwsvc != nil && spod != nil {
-						break L
-					}
-				case <-time.After(10 * time.Second):
-					t.Error("timed out gateway and sensor startup")
-					break L
 				}
-			}
-			if t.Failed() {
-				t.FailNow()
+
+				if gwsvc == nil {
+					svc, err := client.KubeClient.CoreV1().Services(NAMESPACE).Get("webhook-gateway-svc", metav1.GetOptions{})
+					if err != nil && !apierr.IsNotFound(err) {
+						t.Fatal(err)
+					}
+					gwsvc = svc
+				}
+				if spod == nil {
+					pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-sensor", metav1.GetOptions{})
+					if err != nil && !apierr.IsNotFound(err) {
+						t.Fatal(err)
+					}
+					if pod != nil && pod.Status.Phase == corev1.PodRunning {
+						spod = pod
+					}
+				}
+				if gwpod != nil && gwsvc != nil && spod != nil {
+					break
+				}
 			}
 		})
 
@@ -155,7 +129,7 @@ func TestGeneralUseCase(t *testing.T) {
 			l.Close()
 
 			// Use port forwarding to access pods in minikube
-			stopChan, err := client.ForwardServicePort(tmpNamespace, "webhook-gateway", port, 12000)
+			stopChan, err := client.ForwardServicePort(NAMESPACE, "webhook-gateway", port, 12000)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -179,25 +153,12 @@ func TestGeneralUseCase(t *testing.T) {
 		})
 
 		convey.Convey("Check if the sensor trigggered a pod.", func() {
-			ticker2 := time.NewTicker(time.Second)
-			defer ticker2.Stop()
-		L:
-			for {
-				select {
-				case _ = <-ticker2.C:
-					pod, err := client.GetPod(tmpNamespace, "webhook-sensor-triggered-pod")
-					if err != nil && !apierr.IsNotFound(err) {
-						t.Error(err)
-						break L
-					}
-					if pod != nil && pod.Status.Phase == corev1.PodSucceeded {
-						convey.So(pod.Spec.Containers[0].Args[0], convey.ShouldEqual, "e2e")
-						break L
-					}
-				case <-time.After(10 * time.Second):
-					t.Error("timed out gateway and sensor startup")
-					break L
-				}
+			pod, err := client.KubeClient.CoreV1().Pods(NAMESPACE).Get("webhook-sensor-triggered-pod", metav1.GetOptions{})
+			if err != nil && !apierr.IsNotFound(err) {
+				t.Error(err)
+			}
+			if pod != nil && pod.Status.Phase == corev1.PodSucceeded {
+				convey.So(pod.Spec.Containers[0].Args[0], convey.ShouldEqual, "e2e")
 			}
 		})
 	})

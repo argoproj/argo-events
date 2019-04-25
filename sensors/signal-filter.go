@@ -62,17 +62,17 @@ func (sec *sensorExecutionCtx) filterEvent(f v1alpha1.EventDependencyFilter, eve
 // returns true if 1 and 2 are true and false otherwise
 func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, eventTime *metav1.MicroTime) (bool, error) {
 	if timeFilter != nil {
-		sec.log.WithTime(eventTime.String()).Info("event time")
+		sec.log.WithField(common.LabelTime, eventTime.String()).Info("event time")
 		utc := time.Now().UTC()
 		currentTime := time.Date(utc.Year(), utc.Month(), utc.Day(), 0, 0, 0, 0, time.UTC).Format(common.StandardYYYYMMDDFormat)
-		sec.log.WithTime(currentTime).Info("current time")
+		sec.log.WithField(common.LabelTime, currentTime).Info("current time")
 
 		if timeFilter.Start != "" && timeFilter.Stop != "" {
 			startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Start))
 			if err != nil {
 				return false, err
 			}
-			sec.log.WithTime(startTime.String()).Info("start time")
+			sec.log.WithField(common.LabelTime, startTime.String()).Info("start time")
 			startTime = startTime.UTC()
 
 			stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%s %s", currentTime, timeFilter.Stop))
@@ -80,7 +80,7 @@ func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, event
 				return false, err
 			}
 
-			sec.log.WithTime(stopTime.String()).Info("stop time")
+			sec.log.WithField(common.LabelTime, stopTime.String()).Info("stop time")
 			stopTime = stopTime.UTC()
 
 			return (startTime.Before(eventTime.Time) || stopTime.Equal(eventTime.Time)) && eventTime.Time.Before(stopTime), nil
@@ -93,7 +93,7 @@ func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, event
 				return false, err
 			}
 
-			sec.log.WithTime(startTime.String()).Info("start time")
+			sec.log.WithField(common.LabelTime, startTime.String()).Info("start time")
 			startTime = startTime.UTC()
 			return startTime.Before(eventTime.Time) || startTime.Equal(eventTime.Time), nil
 		}
@@ -104,7 +104,7 @@ func (sec *sensorExecutionCtx) filterTime(timeFilter *v1alpha1.TimeFilter, event
 				return false, err
 			}
 
-			sec.log.WithTime(stopTime.String()).Info("stop time")
+			sec.log.WithField(common.LabelTime, stopTime.String()).Info("stop time")
 			stopTime = stopTime.UTC()
 			return eventTime.Time.Before(stopTime), nil
 		}

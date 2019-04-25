@@ -17,11 +17,11 @@ limitations under the License.
 package common
 
 import (
-	"k8s.io/client-go/kubernetes"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 // K8sEventType is the type of event generated to indicate change in state of resource

@@ -22,6 +22,7 @@ import (
 	"hash/fnv"
 	"net/http"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
@@ -103,4 +104,14 @@ func GetObjectHash(obj metav1.Object) (string, error) {
 		return "", fmt.Errorf("failed to marshal resource")
 	}
 	return Hasher(string(b)), nil
+}
+
+func CheckEventSourceVersion(cm *corev1.ConfigMap) error {
+	if cm.Labels == nil {
+		return fmt.Errorf("labels can't be empty. event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
+	}
+	if _, ok := cm.Labels[LabelArgoEventsEventSourceVersion]; !ok {
+		return fmt.Errorf("event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
+	}
+	return nil
 }

@@ -1,20 +1,23 @@
-# this is a non-repeatable sensor. To make it repeatable, set `repeat` as true in `spec`
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: webhook-with-data-filter-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor:v0.7.1"
+          image: "argoproj/sensor"
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
       filters:
         name: "data-filter"
         data:
@@ -57,5 +60,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
           dest: spec.arguments.parameters.0.value

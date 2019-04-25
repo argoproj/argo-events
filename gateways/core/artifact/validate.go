@@ -28,7 +28,7 @@ import (
 
 // ValidateEventSource validates a s3 event source
 func (ese *S3EventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(eventSource.Data, parseEventSource, validateArtifact)
+	return gwcommon.ValidateGatewayEventSource(eventSource, ArgoEventsEventSourceVersion, parseEventSource, validateArtifact)
 }
 
 // validates an artifact

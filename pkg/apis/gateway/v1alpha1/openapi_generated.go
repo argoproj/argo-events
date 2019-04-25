@@ -179,9 +179,9 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"configMap": {
+					"eventSource": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ConfigMap is name of the configmap for gateway. This configmap contains event sources.",
+							Description: "EventSource is name of the configmap that stores event source configurations for the gateway",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -189,13 +189,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type is the type of gateway. Used as metadata.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"eventVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Version is used for marking event version",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -226,7 +219,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"template", "type", "eventVersion", "processorPort", "eventProtocol"},
+				Required: []string{"template", "type", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{

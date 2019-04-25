@@ -26,7 +26,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *CalendarEventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(eventSource.Data, parseEventSource, validateSchedule)
+	return gwcommon.ValidateGatewayEventSource(eventSource, ArgoEventsEventSourceVersion, parseEventSource, validateSchedule)
 }
 
 func validateSchedule(config interface{}) error {

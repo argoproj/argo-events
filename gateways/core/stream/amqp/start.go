@@ -18,13 +18,15 @@ package amqp
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	amqplib "github.com/streadway/amqp"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // StartEventSource starts an event source
 func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
@@ -68,7 +70,12 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	if err := gateways.Connect(a.Backoff, func() error {
+	if err := gateways.Connect(&wait.Backoff{
+		Steps:    a.Backoff.Steps,
+		Factor:   a.Backoff.Factor,
+		Duration: a.Backoff.Duration,
+		Jitter:   a.Backoff.Jitter,
+	}, func() error {
 		var err error
 		a.conn, err = amqplib.Dial(a.URL)
 		if err != nil {
@@ -92,7 +99,7 @@ func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.
 		return
 	}
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("starting to subscribe to messages")
 	for {

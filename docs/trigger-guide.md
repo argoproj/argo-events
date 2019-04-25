@@ -25,7 +25,7 @@ The framework provides support to fetch trigger resources from different sources
    * ### File
         Artifacts are defined in a file that is mounted via a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `sensor-controller` pod.
    
-        [Example](../examples/sensors/file-sensor.yaml)
+        [Example](../examples/sensors/trigger-source-file.yaml)
    
    * ### URL
         Artifacts are accessed from web via RESTful API.

@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: file-gateway-configmap
-data:
-  bindir: |-
-    directory: "/bin/"
-    type: CREATE
-    path: x.txt
