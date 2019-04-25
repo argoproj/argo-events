@@ -1,12 +1,13 @@
-apiVersion: apps/v1beta1
+# The sensor-controller listens for changes on the sensor CRD and creates sensor executor jobs
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sensor-controller
-  namespace: "__E2E_ID__"
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: "__E2E_ID__"
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-controller
   template:
     metadata:
       labels:
@@ -15,7 +16,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
       - name: sensor-controller
-        image: argoproj/sensor-controller
+        image: argoproj/sensor-controller:v0.10-test
         imagePullPolicy: Always
         env:
           - name: SENSOR_NAMESPACE

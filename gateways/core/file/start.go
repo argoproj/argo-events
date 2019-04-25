@@ -19,6 +19,7 @@ package file
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"regexp"
 	"strings"
 
@@ -29,9 +30,9 @@ import (
 
 // StartEventSource starts an event source
 func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithEventSource(eventSource.Name)
-
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("activating event source")
+
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		log.WithError(err).Error("failed to parse event source")
@@ -50,7 +51,7 @@ func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()

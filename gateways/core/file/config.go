@@ -17,14 +17,16 @@ limitations under the License.
 package file
 
 import (
-	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // FileEventSourceExecutor implements Eventing
 type FileEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // fileWatcher contains configuration information for this gateway

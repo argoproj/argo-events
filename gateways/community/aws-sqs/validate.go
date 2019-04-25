@@ -26,7 +26,7 @@ import (
 
 // ValidateEventSource validates gateway event source
 func (ese *SQSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateSQSConfig)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSQSConfig)
 }
 
 func validateSQSConfig(config interface{}) error {

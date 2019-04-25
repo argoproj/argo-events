@@ -18,42 +18,41 @@ package calendar
 
 import (
 	"context"
-	"github.com/smartystreets/goconvey/convey"
+	"fmt"
+	"io/ioutil"
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-)
-
-var (
-	configKey   = "testConfig"
-	configId    = "1234"
-	configValue = `
-schedule: 30 * * * *
-`
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestValidateCalendarEventSource(t *testing.T) {
-	convey.Convey("Given a valid calendar spec, parse it and make sure no error occurs", t, func() {
+	convey.Convey("Given a calendar spec, parse it and make sure no error occurs", t, func() {
 		ese := &CalendarEventSourceExecutor{}
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Data: configValue,
-			Id:   configId,
-			Name: configKey,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeTrue)
-	})
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "calendar.yaml"))
+		convey.So(err, convey.ShouldBeNil)
 
-	convey.Convey("Given an invalid calendar spec, parse it and make sure error occurs", t, func() {
-		ese := &CalendarEventSourceExecutor{}
-		invalidConfig := ""
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Data: invalidConfig,
-			Id:   configId,
-			Name: configKey,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeFalse)
-		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+		var cm *corev1.ConfigMap
+		err = yaml.Unmarshal(content, &cm)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cm, convey.ShouldNotBeNil)
+
+		err = common.CheckEventSourceVersion(cm)
+		convey.So(err, convey.ShouldBeNil)
+
+		for key, value := range cm.Data {
+			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+				Name:    key,
+				Id:      common.Hasher(key),
+				Data:    value,
+				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
+			})
+			convey.So(valid, convey.ShouldNotBeNil)
+			convey.So(valid.IsValid, convey.ShouldBeTrue)
+		}
 	})
 }

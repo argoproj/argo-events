@@ -1,0 +1,84 @@
+# This configmap contains the event sources configurations for Resource gateway
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: resource-event-source
+  labels:
+    # do not remove
+    argo-events-event-source-version: v0.10
+data:
+  # watch workflows that are in successful state
+  example: |-
+    # namespace to listen events within
+    namespace: argo-events
+    # resource group
+    group: "argoproj.io"
+    # resource version
+    version: "v1alpha1"
+    # resource kind
+    kind: "Workflow"
+    # type of event
+    # possible values are ADDED, DELETED, MODIFIED, ERROR
+    # if not provided, listen to all events
+    # Optional
+    type: ADDED
+    # Filters to apply on watched object
+    # Optional
+    filter:
+      labels:
+        workflows.argoproj.io/phase: Succeeded
+        name: "my-workflow"
+
+  # watch all namespace related events
+  example-with-all-types-and-no-filter: |-
+    namespace: argo-events
+    group: "k8s.io"
+    version: "v1"
+    kind: "Namespace"
+
+  # create event if workflow with prefix "my-workflow" gets modified
+  example-with-prefix-filter: |-
+    namespace: argo-events
+    group: argoproj.io
+    version: v1alpha1
+    kind: Workflow
+    type: MODIFIED
+    filter:
+      prefix: "my-workflow"
+
+  # create event if pod with specified annotation gets deleted
+  example-with-annotations-filter: |-
+    namespace: argo-events
+    group: "k8s.io"
+    version: v1
+    kind: Pod
+    type: DELETED
+    filter:
+      annotations:
+        gateways.argoproj.io/resource-spec-hash: "2978318157"
+
+  # create event when a pod is created before 2019-03-27T010:52:32Z
+  example-with-created-by-filter: |-
+    namespace: argo-events
+    group: argoproj.io
+    version: v1alpha1
+    kind: Workflow
+    type: ADDED
+    filter:
+      createdBy: "2019-04-06T12:52:11Z"
+
+  example-with-multi-filters: |-
+    namespace: argo-events
+    group: "k8s.io"
+    version: v1
+    kind: Pod
+    type: ADDED
+    filter:
+      createdBy: "2019-04-06T12:52:11Z"
+      annotations:
+        workflows.argoproj.io/node-name: hello-world-6j292
+      labels:
+        workflows.argoproj.io/completed: "true"
+      prefix: "hello"

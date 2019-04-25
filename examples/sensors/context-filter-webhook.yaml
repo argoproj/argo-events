@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: webhook-with-context-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -13,7 +17,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:foo"
+    - name: "webhook-gateway:example"
       filters:
         context:
           source:

@@ -4,12 +4,13 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // PersistUpdates of the gateway resource
-func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *common.ArgoEventsLogger) (*v1alpha1.Gateway, error) {
+func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus.Logger) (*v1alpha1.Gateway, error) {
 	gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.ObjectMeta.Namespace)
 
 	// in case persist update fails
@@ -28,7 +29,7 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *common
 			return oldgw, err
 		}
 	}
-	log.WithError(err).WithPhase(string(gw.Status.Phase)).Info("gateway state updated successfully")
+	log.WithField(common.LabelPhase, string(gw.Status.Phase)).Info("gateway state updated successfully")
 	return gw, nil
 }
 

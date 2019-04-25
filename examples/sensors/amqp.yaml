@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: amqp-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -17,7 +21,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "amqp-gateway:foo"
+    - name: "amqp-gateway:example-with-retry"
   triggers:
     - template:
         name: amqp-workflow-trigger
@@ -48,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "amqp-gateway:foo"
+            event: "amqp-gateway:example-with-retry"
           dest: spec.arguments.parameters.0.value

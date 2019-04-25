@@ -86,7 +86,7 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.hook = hook
-	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("gitlab hook created")
+	rc.route.Logger.WithField(common.LabelEventSource, rc.route.EventSource.Name).Info("gitlab hook created")
 	return nil
 }
 
@@ -94,20 +94,24 @@ func (rc *RouteConfig) PostStop() error {
 	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
-	rc.route.Logger.WithEventSource(rc.route.EventSource.Name).Info("gitlab hook deleted")
+	rc.route.Logger.WithField(common.LabelEventSource, rc.route.EventSource.Name).Info("gitlab hook deleted")
 	return nil
 }
 
 // routeActiveHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	log := rc.route.Logger.
-		WithEventSource(rc.route.EventSource.Name).
-		WithEndpoint(rc.route.Webhook.Endpoint).
-		WithPort(rc.route.Webhook.Port)
+	r := rc.route
+
+	log := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+			common.LabelPort:        r.Webhook.Port,
+		})
 
 	log.Info("request received")
 
-	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		log.Info("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
@@ -120,7 +124,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- body
+	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	log.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "")
 }
@@ -129,7 +133,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)

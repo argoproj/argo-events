@@ -23,6 +23,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// Backoff defines an operational backoff
+type Backoff struct {
+	Duration time.Duration `json:"duration"` // the base duration
+	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
+	Jitter   float64       `json:"jitter"`   // The amount of jitter applied each iteration
+	Steps    int           `json:"steps"`    // Exit with error after this many steps
+}
+
 // DefaultRetry is a default retry backoff settings when retrying API calls
 var DefaultRetry = wait.Backoff{
 	Steps:    5,

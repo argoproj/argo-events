@@ -19,6 +19,7 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"net/http"
@@ -26,7 +27,12 @@ import (
 
 // ValidateEventSource validates webhook event source
 func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateWebhook)
+	ese.Log.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: es.Name,
+			common.LabelVersion:     es.Version,
+		}).Info("validating event source")
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateWebhook)
 }
 
 func validateWebhook(config interface{}) error {

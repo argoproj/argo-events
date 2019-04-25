@@ -20,12 +20,14 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // NatsEventSourceExecutor implements Eventing
 type NatsEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // Nats contains configuration to connect to NATS cluster
@@ -35,7 +37,7 @@ type natsConfig struct {
 	// Subject name
 	Subject string `json:"subject"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// conn represents a bare connection to a nats-server.
 	conn *natslib.Conn
 }

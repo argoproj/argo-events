@@ -63,10 +63,10 @@ func (sec *sensorExecutionCtx) successNatsSubscription(eventSource string) {
 		common.LabelOperation:   "nats_subscription_success",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription success", common.OperationSuccessEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.WithEventSource(eventSource).WithError(err).Error("failed to create K8s event to log nats subscription success")
+		sec.log.WithField(common.LabelEventSource, eventSource).WithError(err).Error("failed to create K8s event to log nats subscription success")
 		return
 	}
-	sec.log.WithEventSource(eventSource).Info("created event for nats subscription success ")
+	sec.log.WithField(common.LabelEventSource, eventSource).Info("created event for nats subscription success ")
 }
 
 func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource string) {
@@ -78,10 +78,10 @@ func (sec *sensorExecutionCtx) escalateNatsSubscriptionFailure(eventSource strin
 		common.LabelOperation:   "nats_subscription_failure",
 	}
 	if err := common.GenerateK8sEvent(sec.kubeClient, "nats subscription failed", common.OperationFailureEventType, "subscription setup", sec.sensor.Name, sec.sensor.Namespace, sec.controllerInstanceID, sensor.Kind, labels); err != nil {
-		sec.log.WithEventSource(eventSource).Error("failed to create K8s event to log nats subscription error")
+		sec.log.WithField(common.LabelEventSource, eventSource).Error("failed to create K8s event to log nats subscription error")
 		return
 	}
-	sec.log.WithEventSource(eventSource).Warn("created event for nats subscription failure")
+	sec.log.WithField(common.LabelEventSource, eventSource).Warn("created event for nats subscription failure")
 }
 
 // NatsEventProtocol handles events sent over NATS
@@ -111,7 +111,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			if _, err := sec.getNatsStandardSubscription(dependency.Name); err != nil {
 				// escalate failure
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.WithEventSource(dependency.Name).Error("failed to get the nats subscription")
+				sec.log.WithField(common.LabelEventSource, dependency.Name).Error("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -134,7 +134,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 			}
 			if _, err := sec.getNatsStreamingSubscription(dependency.Name); err != nil {
 				sec.escalateNatsSubscriptionFailure(dependency.Name)
-				sec.log.WithEventSource(dependency.Name).WithError(err).Error("failed to get the nats subscription")
+				sec.log.WithField(common.LabelEventSource, dependency.Name).WithError(err).Error("failed to get the nats subscription")
 				continue
 			}
 			dependency.Connected = true
@@ -200,7 +200,7 @@ func (sec *sensorExecutionCtx) getNatsStreamingOption(eventSource string) (snats
 
 // processNatsMessage handles a nats message payload
 func (sec *sensorExecutionCtx) processNatsMessage(msg []byte, eventSource string) {
-	log := sec.log.WithEventSource(eventSource)
+	log := sec.log.WithField(common.LabelEventSource, eventSource)
 	event, err := sec.parseEvent(msg)
 	if err != nil {
 		log.WithError(err).Error("failed to parse message into event")

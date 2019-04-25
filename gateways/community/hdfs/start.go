@@ -3,6 +3,7 @@ package hdfs
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -37,7 +38,7 @@ func (w *WatchableHDFS) GetFileID(fi os.FileInfo) interface{} {
 func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.WithEventSource(eventSource.Name).Info("activating event source")
+	ese.Log.WithField(common.LabelEventSource, eventSource.Name).Info("activating event source")
 	config, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		return err
@@ -56,7 +57,7 @@ func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSour
 func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	hdfsConfig, err := createHDFSConfig(ese.Clientset, ese.Namespace, &config.GatewayClientConfig)
 	if err != nil {

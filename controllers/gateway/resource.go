@@ -143,7 +143,7 @@ func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
 		},
 		{
 			Name:  common.EnvVarGatewayEventSourceConfigMap,
-			Value: grc.gw.Spec.ConfigMap,
+			Value: grc.gw.Spec.EventSource,
 		},
 		{
 			Name:  common.EnvVarGatewayName,

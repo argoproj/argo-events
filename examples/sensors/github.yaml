@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: github-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -13,7 +17,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "github-gateway:project_1"
+    - name: "github-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -48,5 +52,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "github-gateway:project_1"
+            event: "github-gateway:example"
           dest: spec.arguments.parameters.0.value

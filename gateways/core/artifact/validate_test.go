@@ -18,66 +18,41 @@ package artifact
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-)
-
-var (
-	configKey   = "testConfig"
-	configId    = "1234"
-	configValue = `
-bucket:
-    name: input
-endpoint: minio-service.argo-events:9000
-events:
- - s3:ObjectCreated:Put
-filter:
-    prefix: ""
-    suffix: ""
-insecure: true
-accessKey:
-    key: accesskey
-    name: artifacts-minio
-secretKey:
-    key: secretkey
-    name: artifacts-minio
-`
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestValidateS3EventSource(t *testing.T) {
-	convey.Convey("Given a valid S3 artifact spec, parse the spec and make sure no error occurs", t, func() {
+	convey.Convey("Given a S3 artifact spec, parse the spec and make sure no error occurs", t, func() {
 		ese := &S3EventSourceExecutor{}
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Name: configKey,
-			Data: configValue,
-			Id:   configId,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeTrue)
-	})
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "artifact.yaml"))
+		convey.So(err, convey.ShouldBeNil)
 
-	convey.Convey("Given an invalid S3 artifact spec, parse it and error should occur", t, func() {
-		ese := &S3EventSourceExecutor{}
-		invalidS3Artifact := `
-s3EventConfig:
-    bucket: input
-    endpoint: minio-service.argo-events:9000
-    events:
-     - s3:ObjectCreated:Put
-    filter:
-        prefix: ""
-        suffix: ""
-insecure: true
-`
-		valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-			Id:   configId,
-			Name: configKey,
-			Data: invalidS3Artifact,
-		})
-		convey.So(valid, convey.ShouldNotBeNil)
-		convey.So(valid.IsValid, convey.ShouldBeFalse)
-		convey.So(valid.Reason, convey.ShouldNotBeEmpty)
+		var cm *corev1.ConfigMap
+		err = yaml.Unmarshal(content, &cm)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(cm, convey.ShouldNotBeNil)
+
+		err = common.CheckEventSourceVersion(cm)
+		convey.So(err, convey.ShouldBeNil)
+
+		for key, value := range cm.Data {
+			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
+				Name:    key,
+				Id:      common.Hasher(key),
+				Data:    value,
+				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
+			})
+			convey.So(valid, convey.ShouldNotBeNil)
+			convey.So(valid.IsValid, convey.ShouldBeTrue)
+		}
 	})
 }

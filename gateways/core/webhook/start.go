@@ -44,7 +44,13 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	r := rc.Route
 
-	log := r.Logger.WithEventSource(r.EventSource.Name).WithEndpoint(r.Webhook.Endpoint).WithPort(r.Webhook.Port).WithHTTPMethod(request.Method)
+	log := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+			common.LabelPort:        r.Webhook.Port,
+			common.LabelHTTPMethod:  r.Webhook.Method,
+		})
 
 	log.Info("request received")
 
@@ -92,7 +98,7 @@ func (rc *RouteConfig) PostStop() error {
 func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)

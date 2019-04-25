@@ -3,14 +3,18 @@ kind: Sensor
 metadata:
   name: webhook-sensor
   labels:
-    sensors.argoproj.io/sensor-controller-instanceid: "__E2E_ID__"
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor"
+          image: "argoproj/sensor:v0.10-test"
           imagePullPolicy: "IfNotPresent"
+      serviceAccountName: argo-events-sa
   dependencies:
     - name: "webhook-gateway:foo"
   eventProtocol:

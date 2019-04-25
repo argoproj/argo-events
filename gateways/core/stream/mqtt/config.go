@@ -20,12 +20,14 @@ import (
 	"github.com/argoproj/argo-events/common"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // MqttEventSourceExecutor implements Eventing
 type MqttEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // mqtt contains information to connect to MQTT broker
@@ -37,7 +39,7 @@ type mqtt struct {
 	// Client ID
 	ClientId string `json:"clientId"`
 	// Backoff holds parameters applied to connection.
-	Backoff *wait.Backoff `json:"backoff,omitempty"`
+	Backoff *common.Backoff `json:"backoff,omitempty"`
 	// It is an MQTT client for communicating with an MQTT server
 	client mqttlib.Client
 }

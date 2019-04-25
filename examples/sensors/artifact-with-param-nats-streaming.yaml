@@ -3,7 +3,11 @@ kind: Sensor
 metadata:
   name: artifact-with-param-nats-streaming-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -20,7 +24,7 @@ spec:
       clusterId: "example-stan"
       clientId: "myclient1"
   dependencies:
-    - name: "artifact-gateway-nats-streaming:input"
+    - name: "artifact-gateway-nats-streaming:example-1"
   triggers:
     - template:
         name: argo-workflow
@@ -44,6 +48,6 @@ spec:
       # The container args from the workflow are overridden by the s3 notification key
       resourceParameters:
         - src:
-            event: "artifact-gateway-nats-streaming:input"
+            event: "artifact-gateway-nats-streaming:example-1"
             path: s3.object.key
           dest: spec.templates.0.container.args.0

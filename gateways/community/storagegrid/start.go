@@ -91,7 +91,7 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithEventSource(eventSource.Name)
+	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
 	config, err := parseEventSource(eventSource.Data)
@@ -122,13 +122,17 @@ func (rc *RouteConfig) PostStop() error {
 
 // RouteHandler handles new route
 func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
-	log := rc.route.Logger.
-		WithEventSource(rc.route.EventSource.Name).
-		WithEndpoint(rc.route.Webhook.Endpoint).
-		WithPort(rc.route.Webhook.Port).
-		WithHTTPMethod(request.Method)
+	r := rc.route
 
-	if !helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active {
+	log := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+			common.LabelPort:        r.Webhook.Port,
+			common.LabelHTTPMethod:  r.Webhook.Method,
+		})
+
+	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		log.Warn("inactive route")
 		common.SendErrorResponse(writer, "")
 		return

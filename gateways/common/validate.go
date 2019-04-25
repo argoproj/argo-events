@@ -21,13 +21,19 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 )
 
+const EventSourceDir = "../../../examples/event-sources"
+
 var (
 	ErrNilEventSource = fmt.Errorf("event source can't be nil")
 )
 
-func ValidateGatewayEventSource(eventSource string, parseEventSource func(string) (interface{}, error), validateEventSource func(interface{}) error) (*gateways.ValidEventSource, error) {
+func ValidateGatewayEventSource(eventSource *gateways.EventSource, version string, parseEventSource func(string) (interface{}, error), validateEventSource func(interface{}) error) (*gateways.ValidEventSource, error) {
 	v := &gateways.ValidEventSource{}
-	es, err := parseEventSource(eventSource)
+	if eventSource.Version != version {
+		v.Reason = fmt.Sprintf("event source version mismatch. gateway expects %s version, and provided version is %s", version, eventSource.Version)
+		return v, nil
+	}
+	es, err := parseEventSource(eventSource.Data)
 	if err != nil {
 		v.Reason = fmt.Sprintf("failed to parse event source. err: %+v", err)
 		return v, nil

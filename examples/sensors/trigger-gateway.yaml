@@ -4,6 +4,9 @@ metadata:
   name: trigger-gateway-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
+    # sensor controller will use this label to match with it's own version
+    # do not remove
+    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
@@ -17,11 +20,11 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
   # once sensor receives an event from webhook gateway, it will create an artifact gateway.
   triggers:
     - template:
-        name: artifact-gateway-configmap-trigger
+        name: artifact-event-source-trigger
         group: ""
         version: v1
         kind: Configmap
@@ -30,10 +33,12 @@ spec:
             apiVersion: v1
             kind: Configmap
             metadata:
-              name: artifact-gateway-configmap
+              name: artifact-event-source
+              labels:
+                argo-events-event-source-version: v0.10
             spec:
               data:
-                input: |-
+                example: |-
                   bucket:
                     name: input
                   endpoint: minio-service.argo-events:9000
@@ -61,8 +66,10 @@ spec:
               name: artifact-gateway
               labels:
                 gateways.argoproj.io/gateway-controller-instanceid: argo-events
-                gateway-name: "artifact-gateway"
+                argo-events-gateway-version: v0.10
             spec:
+              type: "artifact"
+              eventSource: "artifact-event-source"
               processorPort: "9330"
               eventProtocol:
                 type: "HTTP"
@@ -84,10 +91,6 @@ spec:
                       imagePullPolicy: "Always"
                       command: ["/bin/artifact-gateway"]
                   serviceAccountName: "argo-events-sa"
-              configMap: "artifact-gateway-configmap"
-              eventVersion: "1.0"
-              type: "artifact"
               watchers:
                 sensors:
                   - name: "artifact-sensor"
-                  - name: "artifact-with-param-sensor"

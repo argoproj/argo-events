@@ -17,9 +17,9 @@ limitations under the License.
 package sensor
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/selection"
 )

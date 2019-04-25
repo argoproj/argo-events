@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -39,19 +40,27 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if newCm, ok := obj.(*corev1.ConfigMap); ok {
-					gc.Log.WithField("name", newCm.Name).Info("detected configmap addition")
-					err := gc.manageEventSources(newCm)
-					if err != nil {
-						gc.Log.WithError(err).Error("add config failed")
+					if err := common.CheckEventSourceVersion(newCm); err != nil {
+						gc.Log.WithField("name", newCm.Name).Error(err)
+					} else {
+						gc.Log.WithField("name", newCm.Name).Info("detected configmap addition")
+						err := gc.manageEventSources(newCm)
+						if err != nil {
+							gc.Log.WithError(err).Error("add config failed")
+						}
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if cm, ok := new.(*corev1.ConfigMap); ok {
-					gc.Log.Info("detected ConfigMap update. Updating the controller run config.")
-					err := gc.manageEventSources(cm)
-					if err != nil {
-						gc.Log.WithError(err).Error("update config failed")
+					if err := common.CheckEventSourceVersion(cm); err != nil {
+						gc.Log.WithField("name", cm.Name).Error(err)
+					} else {
+						gc.Log.Info("detected EventSource update. Updating the controller run config.")
+						err := gc.manageEventSources(cm)
+						if err != nil {
+							gc.Log.WithError(err).Error("update config failed")
+						}
 					}
 				}
 			},

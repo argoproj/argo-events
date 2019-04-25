@@ -23,16 +23,13 @@ import (
 
 // ValidateEventSource validates gitlab gateway event source
 func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es.Data, parseEventSource, validateGitlab)
+	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateGitlab)
 }
 
 func validateGitlab(config interface{}) error {
 	g := config.(*gitlabEventSource)
 	if g == nil {
 		return gwcommon.ErrNilEventSource
-	}
-	if g.Id == 0 {
-		return fmt.Errorf("hook id must be not be zero")
 	}
 	if g.ProjectId == "" {
 		return fmt.Errorf("project id can't be empty")

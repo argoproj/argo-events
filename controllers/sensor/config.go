@@ -19,8 +19,8 @@ package sensor
 import (
 	"context"
 	"fmt"
-
 	"github.com/argoproj/argo-events/common"
+
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
@@ -42,7 +42,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
-					log.Info("detected ConfigMap update. updating the sensor-controller config.")
+					log.Info("detected EventSource update. updating the sensor-controller config.")
 					err := c.updateConfig(cm)
 					if err != nil {
 						log.Errorf("update of config failed due to: %v", err)
@@ -51,7 +51,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
-					log.Info("detected ConfigMap update. updating the sensor-controller config.")
+					log.Info("detected EventSource update. updating the sensor-controller config.")
 					err := c.updateConfig(newCm)
 					if err != nil {
 						log.Errorf("update of config failed due to: %v", err)

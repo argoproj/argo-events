@@ -19,6 +19,7 @@ package common
 import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
@@ -76,7 +77,7 @@ type activeServer struct {
 // Route contains common information for a route
 type Route struct {
 	Webhook     *Webhook
-	Logger      *common.ArgoEventsLogger
+	Logger      *logrus.Logger
 	StartCh     chan struct{}
 	EventSource *gateways.EventSource
 }
@@ -161,7 +162,7 @@ func startHttpServer(routeManager RouteManager, helper *WebhookHelper) {
 			} else {
 				err = r.Webhook.srv.ListenAndServeTLS(r.Webhook.ServerCertPath, r.Webhook.ServerKeyPath)
 			}
-			r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("http server stopped")
+			r.Logger.WithField(common.LabelEventSource, r.EventSource.Name).WithError(err).Error("http server stopped")
 			if err != nil {
 				errChan <- err
 			}
@@ -183,7 +184,12 @@ func activateRoute(routeManager RouteManager, helper *WebhookHelper) {
 		helper.Mutex.Unlock()
 	}
 
-	log := r.Logger.WithEventSource(r.EventSource.Name).WithPort(r.Webhook.Port).WithEndpoint(r.Webhook.Endpoint)
+	log := r.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: r.EventSource.Name,
+			common.LabelPort:        r.Webhook.Port,
+			common.LabelEndpoint:    r.Webhook.Endpoint,
+		})
 
 	log.Info("adding route handler")
 	if _, ok := helper.ActiveEndpoints[r.Webhook.Endpoint]; !ok {
@@ -204,18 +210,18 @@ func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStre
 	for {
 		select {
 		case data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh:
-			r.Logger.WithEventSource(r.EventSource.Name).Info("new event received, dispatching to gateway client")
+			r.Logger.WithField(common.LabelEventSource, r.EventSource.Name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    r.EventSource.Name,
 				Payload: data,
 			})
 			if err != nil {
-				r.Logger.WithEventSource(r.EventSource.Name).WithError(err).Error("failed to send event")
+				r.Logger.WithField(common.LabelEventSource, r.EventSource.Name).WithError(err).Error("failed to send event")
 				return err
 			}
 
 		case <-eventStream.Context().Done():
-			r.Logger.WithEventSource(r.EventSource.Name).Info("connection is closed by client")
+			r.Logger.WithField(common.LabelEventSource, r.EventSource.Name).Info("connection is closed by client")
 			helper.RouteDeactivateChan <- routeManager
 			return nil
 
@@ -228,7 +234,7 @@ func processChannels(routeManager RouteManager, helper *WebhookHelper, eventStre
 
 func ProcessRoute(routeManager RouteManager, helper *WebhookHelper, eventStream gateways.Eventing_StartEventSourceServer) error {
 	r := routeManager.GetRoute()
-	log := r.Logger.WithEventSource(r.EventSource.Name)
+	log := r.Logger.WithField(common.LabelEventSource, r.EventSource.Name)
 
 	log.Info("validating the route")
 	if err := validateRoute(routeManager.GetRoute()); err != nil {

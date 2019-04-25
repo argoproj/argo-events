@@ -17,13 +17,15 @@ limitations under the License.
 package pubsub
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
+
+const ArgoEventsEventSourceVersion = "v0.10"
 
 // GcpPubSubEventSourceExecutor implements Eventing
 type GcpPubSubEventSourceExecutor struct {
-	Log *common.ArgoEventsLogger
+	Log *logrus.Logger
 }
 
 // pubSubEventSource contains configuration to subscribe to GCP PubSub topic

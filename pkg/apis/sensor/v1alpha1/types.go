@@ -28,6 +28,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const ArgoEventsSensorVersion = "v0.10"
+
 // NotificationType represent a type of notifications that are handled by a sensor
 type NotificationType string
 
