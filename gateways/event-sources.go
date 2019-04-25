@@ -54,7 +54,8 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 			grpc.WithInsecure(),
 			grpc.WithTimeout(common.ServerConnTimeout*time.Second))
 		if err != nil {
-			gc.Log.WithError(err).Panic("failed to connect to gateway server")
+			gc.Log.WithError(err).
+				WithField("conn-state", conn.GetState().String()).Panic("failed to connect to gateway server")
 			cancel()
 			return nil, err
 		}
@@ -62,11 +63,10 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 		gc.Log.WithField("state", conn.GetState().String()).Info("state of the connection")
 
 		configs[hashKey] = &EventSourceContext{
-			Source: &EventSource{
-				Id:      hashKey,
-				Name:    configKey,
-				Data:    configValue,
-				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
+			Data: &EventSourceData{
+				ID:     hashKey,
+				Src:    configKey,
+				Config: configValue,
 			},
 			Cancel: cancel,
 			Ctx:    ctx,
@@ -132,7 +132,7 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 		// register the event source
 		gc.registeredConfigs[key] = eventSource
 
-		log := gc.Log.WithField(common.LabelEventSource, eventSource.Source.Name)
+		log := gc.Log.WithField(common.LabelEventSource, eventSource.Data.Src)
 
 		log.Info("activating new event source")
 
@@ -142,15 +142,18 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				gc.Log.Error("connection is not in ready state.")
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
-					Id:      eventSource.Source.Id,
+					Id:      eventSource.Data.ID,
 					Message: "connection_is_not_in_ready_state",
-					Name:    eventSource.Source.Name,
+					Name:    eventSource.Data.Src,
 				}
 				return
 			}
 
 			// validate event source
-			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, eventSource.Source); !valid.IsValid {
+			if valid, _ := eventSource.Client.ValidateEventSource(eventSource.Ctx, &EventSource{
+				Data: eventSource.Data.Config,
+				Name: eventSource.Data.Src,
+			}); !valid.IsValid {
 				gc.Log.WithFields(
 					map[string]interface{}{
 						"validation-failure": valid.Reason,
@@ -161,9 +164,9 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 				}
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
-					Id:      eventSource.Source.Id,
+					Id:      eventSource.Data.ID,
 					Message: "event_source_is_not_valid",
-					Name:    eventSource.Source.Name,
+					Name:    eventSource.Data.Src,
 				}
 				return
 			}
@@ -174,19 +177,22 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 			gc.StatusCh <- EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseRunning,
 				Message: "event_source_is_running",
-				Id:      eventSource.Source.Id,
-				Name:    eventSource.Source.Name,
+				Id:      eventSource.Data.ID,
+				Name:    eventSource.Data.Src,
 			}
 
 			// listen to events from gateway server
-			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, eventSource.Source)
+			eventStream, err := eventSource.Client.StartEventSource(eventSource.Ctx, &EventSource{
+				Name: eventSource.Data.Src,
+				Data: eventSource.Data.Config,
+			})
 			if err != nil {
 				gc.Log.WithError(err).Error("error occurred while starting event source")
 				gc.StatusCh <- EventSourceStatus{
 					Phase:   v1alpha1.NodePhaseError,
 					Message: "failed_to_receive_event_stream",
-					Name:    eventSource.Source.Name,
-					Id:      eventSource.Source.Id,
+					Name:    eventSource.Data.Src,
+					Id:      eventSource.Data.ID,
 				}
 				return
 			}
@@ -200,8 +206,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 						gc.StatusCh <- EventSourceStatus{
 							Phase:   v1alpha1.NodePhaseCompleted,
 							Message: "event_source_has_been_stopped",
-							Name:    eventSource.Source.Name,
-							Id:      eventSource.Source.Id,
+							Name:    eventSource.Data.Src,
+							Id:      eventSource.Data.ID,
 						}
 						return
 					}
@@ -210,8 +216,8 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					gc.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseError,
 						Message: "failed_to_receive_event_from_event_source_stream",
-						Name:    eventSource.Source.Name,
-						Id:      eventSource.Source.Id,
+						Name:    eventSource.Data.Src,
+						Id:      eventSource.Data.ID,
 					}
 					return
 				}
@@ -220,9 +226,9 @@ func (gc *GatewayConfig) startEventSources(eventSources map[string]*EventSourceC
 					// escalate error through a K8s event
 					labels := map[string]string{
 						common.LabelEventType:              string(common.EscalationEventType),
-						common.LabelGatewayEventSourceName: eventSource.Source.Name,
+						common.LabelGatewayEventSourceName: eventSource.Data.Src,
 						common.LabelGatewayName:            gc.Name,
-						common.LabelGatewayEventSourceID:   eventSource.Source.Id,
+						common.LabelGatewayEventSourceID:   eventSource.Data.ID,
 						common.LabelOperation:              "dispatch_event_to_watchers",
 					}
 					if err := common.GenerateK8sEvent(gc.Clientset, fmt.Sprintf("failed to dispatch event to watchers"), common.EscalationEventType, "event dispatch failed", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
@@ -240,16 +246,16 @@ func (gc *GatewayConfig) stopEventSources(configs []string) {
 	for _, configKey := range configs {
 		eventSource := gc.registeredConfigs[configKey]
 		delete(gc.registeredConfigs, configKey)
-		gc.Log.WithField(common.LabelEventSource, eventSource.Source.Name).Info("removing the event source")
+		gc.Log.WithEventSource(eventSource.Data.Src).Info("removing the event source")
 		gc.StatusCh <- EventSourceStatus{
 			Phase:   v1alpha1.NodePhaseRemove,
-			Id:      eventSource.Source.Id,
+			Id:      eventSource.Data.ID,
 			Message: "event_source_is_removed",
-			Name:    eventSource.Source.Name,
+			Name:    eventSource.Data.Src,
 		}
 		eventSource.Cancel()
 		if err := eventSource.Conn.Close(); err != nil {
-			gc.Log.WithField(common.LabelEventSource, eventSource.Source.Name).WithError(err).Error("failed to close client connection")
+			gc.Log.WithEventSource(eventSource.Data.Src).WithError(err).Error("failed to close client connection")
 		}
 	}
 }

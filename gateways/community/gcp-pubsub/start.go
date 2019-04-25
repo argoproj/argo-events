@@ -19,7 +19,6 @@ package pubsub
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
 )
@@ -67,7 +66,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 	}
 
 	logger.Info("subscribing to GCP PubSub topic")
-	sub, err := client.CreateSubscription(ctx, eventSource.Id,
+	sub, err := client.CreateSubscription(ctx, fmt.Sprintf("%v-%v", eventSource.Name, eventSource.Id),
 		pubsub.SubscriptionConfig{Topic: topic})
 	if err != nil {
 		errorCh <- err
