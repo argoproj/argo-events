@@ -17,12 +17,13 @@ markdown_extensions:
 - toc:
     permalink: true
 nav:
-  - Overview: index.md
-  - gateway.md
-  - sensor.md
-  - trigger.md
-  - communication.md
-  - controllers.md
+  - Overview: 'index.md'
+  - 'installation.md'
+  - 'gateway.md'
+  - 'sensor.md'
+  - 'trigger.md'
+  - 'communication.md'
+  - 'controllers.md'
   - Setup:
     - gateways/artifact.md
     - gateways/aws-sns.md

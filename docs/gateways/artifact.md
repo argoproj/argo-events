@@ -1,7 +1,7 @@
 # Minio S3
 
 Artifact gateway listens to bucket notifications from Minio S3 server. If you are interested in AWS S3 then 
-read [AWS SNS Gateway](../../community/aws-sns/README.md) 
+read [AWS SNS Gateway](aws-sns.md) 
 
 ## What types of bucket notifications minio offers?
 Read about [notifications](https://docs.minio.io/docs/minio-bucket-notification-guide.html)
@@ -21,13 +21,13 @@ Refer AWS S3 Notitification - https://docs.aws.amazon.com/AmazonS3/latest/dev/no
 
 **Pre-requisite** - Create necessary bucket/s in Minio.
 
-**1. Install [Event Source](../../examples/event-sources/artifact.yaml)**
+**1. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/artifact.yaml)**
 
-**2. Install [Gateway](../../examples/gateways/artifact.yaml)**
+**2. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/artifact.yaml)**
 
 Make sure the gateway pod is created
    
-**3. Install [Sensor](../../examples/sensors/artifact.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/artifact.yaml)**
 
 **4. Trigger workflow**
 

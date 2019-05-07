@@ -15,50 +15,50 @@ The framework provides support to fetch trigger resources from different sources
    * ### Inline
         Inlined artifacts are included directly within the sensor resource and decoded as a string.
    
-        [Example](../examples/sensors/artifact.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/artifact.yaml)
    
    * ### S3      
         Argo Events uses the [minio-go](https://github.com/minio/minio-go) client for access to any Amazon S3 compatible object store.
    
-        [Example](../examples/sensors/context-filter-webhook.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/context-filter-webhook.yaml)
     
    * ### File
         Artifacts are defined in a file that is mounted via a [PersistentVolume](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) within the `sensor-controller` pod.
    
-        [Example](../examples/sensors/trigger-source-file.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-source-file.yaml)
    
    * ### URL
         Artifacts are accessed from web via RESTful API.
    
-        [Example](../examples/sensors/url-sensor.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/url-sensor.yaml)
    
    * ### Configmap
         Artifact stored in Kubernetes configmap are accessed using the key.
    
-        [Example](../examples/sensors/trigger-source-configmap.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-source-configmap.yaml)
    
    * ### Git
         Artifact stored in either public or private Git repository
    
-        [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
+        [Example](https://github.com/argoproj/argo-events/tree/master//github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
 
 ## What resource types are supported out of box?
 - [Argo Workflow](https://github.com/argoproj/argo)
 - [Standard K8s resources](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/)
-- [Gateway](gateway-protocol.md)
-- [Sensor](sensor-protocol.md)
+- [Gateway](gateway.md)
+- [Sensor](sensor.md)
 
   * ### Trigger Standard Kubernetes Resource
     There could be a case where you may want to trigger a standard Kubernetes resource like Pod, Deployment etc. instead of an Argo Workflow.
     The sensor allows you to trigger any K8s resource in the same way you would trigger an Argo Workflow.
 
-    * The [example](../examples/sensors/trigger-standard-k8s-resource.yaml) showcases how you can trigger different standard K8s resources.
+    * The [example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-standard-k8s-resource.yaml) showcases how you can trigger different standard K8s resources.
       You can find K8s API reference [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/).
 
     * To trigger other standard K8s resources, change the group and version in `triggers/resource` accordingly.
 
   * ### Trigger Gateway
-    Follow the [example](../examples/sensors/trigger-gateway.yaml) to trigger a gateway. 
+    Follow the [example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-gateway.yaml) to trigger a gateway. 
 
     In the example, the sensor creates a configmap and gateway resource for artifact gateway.
  
@@ -66,7 +66,7 @@ The framework provides support to fetch trigger resources from different sources
     and the second trigger is actual gateway.
 
   * ### How to pass the event payload to triggers other than Argo Workflow?
-    Same way you would pass an event payload to an Argo Workflow trigger. Refer [here](sensor-guide.md#how-to-pass-an-event-payload-to-a-trigger)
+    Same way you would pass an event payload to an Argo Workflow trigger. Refer [here](sensor.md#how-to-pass-an-event-payload-to-a-trigger)
 
 ## How can I add my custom resource as trigger?
 The set of currently supported resources are implemented in the `store` package. 

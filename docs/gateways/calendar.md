@@ -6,7 +6,7 @@ or cron schedule.
 ## How to define an event source in confimap?
 An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L35-L55).
 
-The [gateway configmap](../../../examples/gateways/calendar-gateway-configmap.yaml) contains three event source configurations,
+The [gateway configmap](https://github.com/argoproj/argo-events/tree/master/examples/gateways/calendar-gateway-configmap.yaml) contains three event source configurations,
 
 The `interval` configuration will basically generate an event after every 10 seconds.
 
@@ -25,13 +25,13 @@ This user defined data is `userPayload`. You can basically place any string here
 The [event payload](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/core/calendar/config.go#L60-L64) contains `eventTime` and `userPayload` (optional)
 
 ## Setup
-**1. Install [Event Source](../../examples/event-sources/calendar.yaml)**
+**1. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/calendar.yaml)**
 
-**2. Install [Gateway](../../examples/gateways/calendar.yaml)**
+**2. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/calendar.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../examples/sensors/calendar.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/calendar.yaml)**
 
 Make sure the sensor pod is created.
 

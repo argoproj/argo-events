@@ -13,18 +13,18 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 If you don't provide an explicit `Backoff`, then gateway will use a default backoff in case of connection failure.
 
-The [event source](../../examples/gateways/nats-gateway-configmap.yaml) contains information to subscribe to topic `foo`, it also contains an explicit backoff option
+The [event source](https://github.com/argoproj/argo-events/tree/master/examples/gateways/nats-gateway-configmap.yaml) contains information to subscribe to topic `foo`, it also contains an explicit backoff option
 in case of the connection failure.
 
 ### Setup
 
-**1. Install [Event Source](../../examples/event-sources/nats.yaml)**
+**1. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/nats.yaml)**
 
-**2. Install [Gateway](../../examples/gateways/nats.yaml)**
+**2. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/nats.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../examples/sensors/nats.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/nats.yaml)**
 
 Make sure the sensor pod is created
 

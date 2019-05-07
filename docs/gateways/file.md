@@ -15,13 +15,13 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 
 
 ## Setup
-**1. Install [Event Source](../../examples/event-sources/file.yaml)**
+**1. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/file.yaml)**
 
-**2. Install [Gateway](../../examples/gateways/file.yaml)**
+**2. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/file.yaml)**
 
 Make sure the gateway pod is created.
 
-**3. Install [Sensor](../../examples/sensors/file.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/file.yaml)**
 
 Make sure the sensor pod is created.
 

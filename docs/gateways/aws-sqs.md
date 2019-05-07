@@ -9,13 +9,13 @@ Because SQS works on polling, you need to provide a `waitTimeSeconds`.
 
 ## Setup
 
-**1. Install [Gateway](../../examples/gateways/aws-sqs.yaml)**
+**1. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/aws-sqs.yaml)**
 
 Make sure gateway pod and service is running
 
-**2. Install [Event Source](../../examples/event-sources/aws-sqs.yaml)**
+**2. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/aws-sqs.yaml)**
 
-**3. Install [Sensor](../../examples/sensors/aws-sqs.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/aws-sqs.yaml)**
 
 Make sure sensor pod is created.
 

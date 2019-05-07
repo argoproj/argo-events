@@ -9,13 +9,13 @@ An entry in the gateway configmap corresponds to [this](https://github.com/argop
 Make sure to mount credentials file for authentication in gateway pod and refer the path in `credentialsFile`.
 
 ## Setup
-**1. Install [Event Source](../../examples/event-sources/gcp-pubsub.yaml)**
+**1. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/gcp-pubsub.yaml)**
 
-**2. Install [Gateway](../../examples/gateways/gcp-pubsub.yaml)**
+**2. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/gcp-pubsub.yaml)**
 
 Make sure gateway pod and service is running
 
-**3. Install [Sensor](../../examples/sensors/gcp-pubsub.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/gcp-pubsub.yaml)**
 
 Make sure sensor pod is created.
 

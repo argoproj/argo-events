@@ -17,13 +17,13 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 ## Setup
 
-**1. Install [Gateway](../../examples/gateways/storage-grid.yaml)**
+**1. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/storage-grid.yaml)**
 
 Make sure gateway pod and service is running
 
-**2. Install [Event Source](../../examples/event-sources/storage-grid.yaml)**
+**2. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/storage-grid.yaml)**
 
-**3. Install [Sensor](../../examples/sensors/storage-grid.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/storage-grid.yaml)**
 
 Make sure sensor pod is created.
 

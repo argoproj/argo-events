@@ -1,11 +1,10 @@
 # Sensor
 Sensors define a set of event dependencies (inputs) and triggers (outputs). 
 
-1. [Specifications](sensor-protocol.md)
-2. [Terminology](#terminology)
-3. [How it works?](#how-it-works)
-4. [How to pass an event payload to a trigger?](#how-to-pass-an-event-payload-to-a-trigger)
-5. [Examples](#examples)
+1. [Terminology](#terminology)
+2. [How it works?](#how-it-works)
+3. [How to pass an event payload to a trigger?](#how-to-pass-an-event-payload-to-a-trigger)
+4. [Examples](#examples)
 
 <br/>
 
@@ -27,7 +26,7 @@ Sensors define a set of event dependencies (inputs) and triggers (outputs).
     Circuit is any arbitrary boolean logic that can be applied on dependency groups.
 
   * ### What is a trigger?
-    Refer [Triggers](trigger-guide.md).
+    Refer [Triggers](trigger.md).
 
 ## How it works?
   1. Once the sensor receives an event from gateway either over HTTP or through NATS, it validates

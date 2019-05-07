@@ -1,65 +1,53 @@
 # Argo Events
 
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-logo.png?raw=true" alt="Logo"/>
+</p>
+
+## What is Argo Events?
+**Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
+and trigger Kubernetes objects after successful event dependencies resolution.
+
+<br/>
+<br/>
+
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-top-level.png?raw=true" alt="High Level Overview"/>
+</p>
+
+<br/>
+
+## Features 
+* Manage dependencies from a variety of event sources.
+* Ability to customize business-level constraint logic for event dependencies resolution.
+* Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
+* Ability to extends framework to add your own event source listener.
+* Define arbitrary boolean logic to resolve event dependencies.
+* CloudEvents compliant.
+* Ability to manage event sources at runtime.
+
 ## Core Concepts
 The framework is made up of two components: 
 
- 1. **`Gateway`** which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
+ 1. **Gateway** which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
 
- 2. **`Sensor`** which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
+ 2. **Sensor** which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
 
-## Install
-
-* ### Requirements
-  * Kubernetes cluster >v1.9
-  * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
-
-* ### Helm Chart
-
-    Make sure you have helm client installed and Tiller server is running. To install helm, follow https://docs.helm.sh/using_helm/
-
-    1. Add `argoproj` repository
-
-    ```bash
-    helm repo add argo https://argoproj.github.io/argo-helm
-    ```
-
-    2. Install `argo-events` chart
-    
-    ```bash
-    helm install argo/argo-events
-    ```   
-
-* ### Using kubectl
-  * Deploy Argo Events SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
-  
-    ```
-    kubectl create namespace argo-events
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-crd.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-configmap.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-deployment.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
-    ```
-
-**Note**: If you have already deployed the argo workflow controller in another namespace
-and the controller is namespace scoped, make sure to deploy a new controller in `argo-events` namespace.  
-
+ 3. **Event Source** is a configmap that contains configurations which is interpreted by gateway as source for events producing entity. 
+ 
 ## Get Started
 Lets deploy a webhook gateway and sensor,
 
  * First, we need to setup event sources for gateway to listen. The event sources for any gateway are managed using K8s configmap.
    
    ```bash
-   kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml 
+   kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml 
    ```
    
  * Create webhook gateway, 
  
    ```bash
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-http.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
    ```
     
    After running above command, gateway controller will create corresponding gateway pod and a LoadBalancing service.
@@ -67,7 +55,7 @@ Lets deploy a webhook gateway and sensor,
  * Create webhook sensor,
     
     ```bash
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-http.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
     ```
     
    Once sensor resource is created, sensor controller will create corresponding sensor pod and a ClusterIP service. 
@@ -89,13 +77,3 @@ Lets deploy a webhook gateway and sensor,
    ```
    argo list -n argo-events
    ```
-
- * More examples can be found at [examples](../examples)
-
-## Further Reading
-1. [Gateway](gateway-guide.md)
-2. [Sensor](sensor-guide.md)
-3. [Trigger](trigger-guide.md)
-4. [Communication between gateway and sensor](communication.md)
-5. [Controllers](controllers-guide.md)
-6. [Setup Gateways](gateways)

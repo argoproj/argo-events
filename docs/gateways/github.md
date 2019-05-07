@@ -19,16 +19,16 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 ## Setup
 
-**1. Install [Gateway](../../examples/gateways/github.yaml)**
+**1. Install [Gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/github.yaml)**
 
 We are installing gateway before creating event sources. Because we need to have the gateway pod running and a service backed by the pod, so 
 that we can get the URL for the service. 
 
 Make sure gateway pod and service is running
 
-**2. Install [Event Source](../../examples/event-sources/github.yaml)**
+**2. Install [Event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/github.yaml)**
 
-**3. Install [Sensor](../../examples/sensors/github.yaml)**
+**3. Install [Sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/github.yaml)**
 
 Make sure sensor pod is created.
 
