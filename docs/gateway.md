@@ -1,14 +1,5 @@
 # Gateway
 
-- [Gateway](#gateway)
-  - [What is a gateway?](#what-is-a-gateway)
-    - [Components](#components)
-    - [Core gateways](#core-gateways)
-    - [Community gateways](#community-gateways)
-  - [Managing Event Sources](#managing-event-sources)
-  - [How to write a custom gateway?](#how-to-write-a-custom-gateway)
-  - [Examples](#examples)
-
 ## What is a gateway?
 A gateway consumes events from event sources, transforms them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatches them to sensors.
 

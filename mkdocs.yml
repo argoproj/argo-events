@@ -20,26 +20,29 @@ nav:
   - Overview: 'index.md'
   - 'installation.md'
   - 'getting_started.md'
+  - Setup:
+      - gateways/artifact.md
+      - gateways/aws-sns.md
+      - gateways/aws-sqs.md
+      - gateways/calendar.md
+      - gateways/file.md
+      - gateways/gcp-pubsub.md
+      - gateways/github.md
+      - gateways/gitlab.md
+      - gateways/resource.md
+      - gateways/slack.md
+      - gateways/storage-grid.md
+      - gateways/streams.md
+      - gateways/webhook.md
   - 'gateway.md'
   - 'sensor.md'
   - 'trigger.md'
   - 'parameterization.md'
   - 'communication.md'
   - 'controllers.md'
-  - Setup:
-    - gateways/artifact.md
-    - gateways/aws-sns.md
-    - gateways/aws-sqs.md
-    - gateways/calendar.md
-    - gateways/file.md
-    - gateways/gcp-pubsub.md
-    - gateways/github.md
-    - gateways/gitlab.md
-    - gateways/resource.md
-    - gateways/slack.md
-    - gateways/storage-grid.md
-    - gateways/streams.md
-    - gateways/webhook.md
+  - Use-Cases:
+      - use-cases/ci-pipeline.md
+      - use-cases/resource-quota-monitor.md
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
   - Blog ⧉: https://blog.argoproj.io/

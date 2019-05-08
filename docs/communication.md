@@ -1,4 +1,4 @@
-# Internal Communication
+# Persisting Events
 
 1. [How gateway forwards events to sensor](#how-gateway-forwards-events-to-sensor)
 2. [HTTP](#http)
