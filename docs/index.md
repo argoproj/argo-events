@@ -53,13 +53,13 @@ Lets deploy a webhook gateway and sensor,
  * First, we need to setup event sources for gateway to listen. The event sources for any gateway are managed using K8s configmap.
    
    ```bash
-   kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-gateway-configmap.yaml 
+   kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml 
    ```
    
  * Create webhook gateway, 
  
    ```bash
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook-http.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
    ```
     
    After running above command, gateway controller will create corresponding gateway pod and a LoadBalancing service.
@@ -67,7 +67,7 @@ Lets deploy a webhook gateway and sensor,
  * Create webhook sensor,
     
     ```bash
-    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook-http.yaml
+    kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
     ```
     
    Once sensor resource is created, sensor controller will create corresponding sensor pod and a ClusterIP service. 
