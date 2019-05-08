@@ -24,7 +24,6 @@ A gateway consumes events from event sources, transforms them into the [cloudeve
 A gateway has two components:
 
  1. <b>gateway-client</b>: It creates one or more gRPC clients depending on event sources configurations, consumes events from server, transforms these events into cloudevents and dispatches them to sensors.
-     Refer <b>https://github.com/cloudevents/spec </b> for more info on cloudevents specifications.
      
  2. <b>gateway-server</b>: It is a gRPC server that consumes events from event sources and streams them to gateway client.
  
@@ -56,10 +55,10 @@ A gateway has two components:
 
     4. **AMQP**:
     [AMQP](https://www.amqp.org/) is a open standard messaging protocol (ISO/IEC 19464). There are a variety of broker implementations including, but not limited to the following:
-      - [Apache ActiveMQ](http://activemq.apache.org/)
-      - [Apache Qpid](https://qpid.apache.org/)
-      - [StormMQ](http://stormmq.com/)
-      - [RabbitMQ](https://www.rabbitmq.com/)
+        - [Apache ActiveMQ](http://activemq.apache.org/)
+        - [Apache Qpid](https://qpid.apache.org/)
+        - [StormMQ](http://stormmq.com/)
+        - [RabbitMQ](https://www.rabbitmq.com/)
 
  You can find core gateways [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)
 
@@ -87,39 +86,36 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 
 <br/>
 
-  * ### Proto Definition
-    1. The proto file is located at https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto 
+### Proto Definition
+1. The proto file is located [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto) 
 
-    2. If you choose to implement the gateway in `go`, then you can find generated client stubs at https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go
+2. If you choose to implement the gateway in `Go`, then you can find generated client stubs [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go)
 
-    3. To create stubs in other languages, head over to gRPC website https://grpc.io/
+3. To create stubs in other languages, head over to [gRPC website](https://grpc.io/)
+
+4. Service,
+
+        /**
+        * Service for handling event sources.
+        */
+        service Eventing {
+            // StartEventSource starts an event source and returns stream of events.
+            rpc StartEventSource(EventSource) returns (stream Event);
+            // ValidateEventSource validates an event source.
+            rpc ValidateEventSource(EventSource) returns (ValidEventSource);
+        }
+
+
+### Available Environment Variables to Server
  
-    4. Service
-    ```proto
-    /**
-    * Service for handling event sources.
-    */
-    service Eventing {
-        // StartEventSource starts an event source and returns stream of events.
-        rpc StartEventSource(EventSource) returns (stream Event);
-        // ValidateEventSource validates an event source.
-        rpc ValidateEventSource(EventSource) returns (ValidEventSource);
-    }
-    ```
-
-  * ### Available Environment Variables to Server
+ | Field                           | Description                                      |
+ | ------------------------------- | ------------------------------------------------ |
+ | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
+ | GATEWAY_EVENT_SOURCE_CONFIG_MAP | K8s configmap containing event source            |
+ | GATEWAY_NAME                    | name of the gateway                              |
+ | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
+ | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
+ | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
  
-     | Field                           | Description                                      |
-     | ------------------------------- | ------------------------------------------------ |
-     | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
-     | GATEWAY_EVENT_SOURCE_CONFIG_MAP | K8s configmap containing event source            |
-     | GATEWAY_NAME                    | name of the gateway                              |
-     | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
-     | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
-     | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
- 
-  * ### Implementation
-    You can follow existing implementations [here](../gateways)
-
-## Examples
-You can find gateway examples [here](https://github.com/argoproj/argo-events/tree/master/examples/gateways)
+### Implementation
+ You can follow existing implementations [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)

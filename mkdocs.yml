@@ -19,9 +19,11 @@ markdown_extensions:
 nav:
   - Overview: 'index.md'
   - 'installation.md'
+  - 'getting_started.md'
   - 'gateway.md'
   - 'sensor.md'
   - 'trigger.md'
+  - 'parameterization.md'
   - 'communication.md'
   - 'controllers.md'
   - Setup:
