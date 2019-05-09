@@ -11,14 +11,14 @@ A gateway consumes events from event sources, transforms them into the [cloudeve
 
 <br/>
 
-### Components
+## Components
 A gateway has two components:
 
  1. <b>gateway-client</b>: It creates one or more gRPC clients depending on event sources configurations, consumes events from server, transforms these events into cloudevents and dispatches them to sensors.
      
  2. <b>gateway-server</b>: It is a gRPC server that consumes events from event sources and streams them to gateway client.
  
-### Core gateways
+## Core gateways
 
  1. **Calendar**:
     Events produced are based on either a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar gateway supports a `recurrence` field in which to specify special exclusion dates for which this gateway will not produce an event.
@@ -53,8 +53,75 @@ A gateway has two components:
 
  You can find core gateways [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)
 
-### Community gateways
+## Community gateways
 You can find gateways built by the community [here](https://github.com/argoproj/argo-events/tree/master/gateways/community). New gateway contributions are always welcome.
+
+## Example
+
+    apiVersion: argoproj.io/v1alpha1
+    kind: Gateway
+    metadata:
+      name: webhook-gateway
+      labels:
+        # gateway controller with instanceId "argo-events" will process this gateway
+        gateways.argoproj.io/gateway-controller-instanceid: argo-events
+        # gateway controller will use this label to match with it's own version
+        # do not remove
+        argo-events-gateway-version: v0.10
+    spec:
+      type: "webhook"
+      eventSource: "webhook-event-source"
+      processorPort: "9330"
+      eventProtocol:
+        type: "HTTP"
+        http:
+          port: "9300"
+      template:
+        metadata:
+          name: "webhook-gateway-http"
+          labels:
+            gateway-name: "webhook-gateway"
+        spec:
+          containers:
+            - name: "gateway-client"
+              image: "argoproj/gateway-client"
+              imagePullPolicy: "Always"
+              command: ["/bin/gateway-client"]
+            - name: "webhook-events"
+              image: "argoproj/webhook-gateway"
+              imagePullPolicy: "Always"
+              command: ["/bin/webhook-gateway"]
+          serviceAccountName: "argo-events-sa"
+      service:
+        metadata:
+          name: webhook-gateway-svc
+        spec:
+          selector:
+            gateway-name: "webhook-gateway"
+          ports:
+            - port: 12000
+              targetPort: 12000
+          type: LoadBalancer
+      watchers:
+        sensors:
+          - name: "webhook-sensor"
+
+
+The gateway `spec` has following fields:
+
+1. `type`: Type of the gateway. This is defined by the user.
+
+2. `eventSource`: Refers to K8s configmap that holds the list of event sources.
+
+3. `processorPort`: This is a gateway server port. You can leave this to `9330` unless you really have to change it to a different port.
+
+4. `eventProtocol`: Communication protocol between sensor and gateway. For more information, head over to [communication](./communication.md)
+
+5. `template`: Defines the specification for gateway pod.
+
+6. `service`: Specification of a K8s service to expose the gateway pod.
+
+7. `watchers`: List of sensors to which events must be dispatched.
 
 ## Managing Event Sources
   * The event sources configurations are managed using K8s configmap. Once the gateway resource is created with the configmap reference in it's spec, it starts watching the configmap.

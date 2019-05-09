@@ -32,25 +32,14 @@ Artifacts defined as generic K8s resource template. This is specially useful if 
 - [Gateway](gateway.md)
 - [Sensor](sensor.md)
 
-### Trigger Standard Kubernetes Resource
+## How to trigger standard Kubernetes Resource instead of Argo Workflow?
 There could be a case where you may want to trigger a standard Kubernetes resource like Pod, Deployment etc. instead of an Argo Workflow.
-The sensor allows you to trigger any K8s resource in the same way you would trigger an Argo Workflow.
+The sensor allows you to trigger any K8s resource the same way you would trigger an Argo Workflow.
 
 * The [example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-standard-k8s-resource.yaml) showcases how you can trigger different standard K8s resources.
   You can find K8s API reference [here](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/).
 
 * To trigger other standard K8s resources, change the group and version in `triggers/resource` accordingly.
-
-### Trigger Gateway
-Follow the [example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-gateway.yaml) to trigger a gateway. 
-
-In the example, the sensor creates a configmap and gateway resource for artifact gateway.
-
-Because a gateway depends on `gateway-configmap` which stores the event source configurations, the first trigger in sensor is a configmap
-and the second trigger is actual gateway.
-
-### How to pass the event payload to triggers other than Argo Workflow?
-Same way you would pass an event payload to an Argo Workflow trigger. Refer [here](sensor.md#how-to-pass-an-event-payload-to-a-trigger)
 
 ## How can I add my custom resource as trigger?
 The set of currently supported resources are implemented in the `store` package. 

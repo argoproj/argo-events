@@ -1,14 +1,24 @@
-# Parameterize triggers
+# Trigger Parameterization
 
-## How to pass an event payload to a trigger?
-Payload of an event can be passed to any trigger. The way it works is you define `parameters` on trigger resource in sensor spec. 
-The `parameters` define list of
+Payload of an event can be passed to any trigger. Argo Events offers parameterization at two levels,
+
+1) Template
+
+2) Resource
+
+## Template
+You can parameterize the template that refers the Argo Worflow / K8s artifact. 
+
+## Resource
+Allows to parameterize the Argo workflow/K8s resource definition.
+
+You can find an example [here.](https://github.com/argoproj/argo-events/blob/master/examples/sensors/complete-trigger-parameterization.yaml)
+
+## Parameter Structure
+A `parameter` contains:
 
    1. `src`:
        1. `event`: the name of the event dependency
-       2. `path`: which is basically a key within event payload to look for
-       3. `value`: which is a default value if sensor can't find `path` in event payload.   
-   2. `dest`: destination key within trigger spec whose corresponding value needs to be replaced with value from event payload
-  
-* Pass complete event payload to trigger [example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-with-complete-payload.yaml)
-* Extract particular value from event payload and pass to trigger [example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/webhook-with-resource-param.yaml) 
+       2. `path`: a key within event payload to look for
+       3. `value`: default value if sensor can't find `path` in event payload.   
+   2. `dest`: destination key within resource definition whose corresponding value needs to be replaced with value from event payload

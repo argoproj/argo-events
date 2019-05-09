@@ -34,3 +34,7 @@ The framework is made up of two components:
  2. **Sensor** which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
 
  3. **Event Source** is a configmap that contains configurations which is interpreted by gateway as source for events producing entity. 
+
+## In Nutshell
+Gateway monitors event sources and starts routines in parallel that consume events from entities like S3, Github, SNS, SQS,
+PubSub etc. and dispatch these events to sensor. Sensor upon receiving the events, evaluates the dependencies and triggers Argo workflows or other K8s resources.
