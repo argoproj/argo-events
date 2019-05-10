@@ -8,6 +8,8 @@ import (
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -20,7 +22,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 //*
 // Represents an event source
@@ -293,6 +295,17 @@ type EventingServer interface {
 	StartEventSource(*EventSource, Eventing_StartEventSourceServer) error
 	// ValidateEventSource validates an event source.
 	ValidateEventSource(context.Context, *EventSource) (*ValidEventSource, error)
+}
+
+// UnimplementedEventingServer can be embedded to have forward compatible implementations.
+type UnimplementedEventingServer struct {
+}
+
+func (*UnimplementedEventingServer) StartEventSource(req *EventSource, srv Eventing_StartEventSourceServer) error {
+	return status.Errorf(codes.Unimplemented, "method StartEventSource not implemented")
+}
+func (*UnimplementedEventingServer) ValidateEventSource(ctx context.Context, req *EventSource) (*ValidEventSource, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateEventSource not implemented")
 }
 
 func RegisterEventingServer(s *grpc.Server, srv EventingServer) {
