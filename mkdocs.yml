@@ -40,9 +40,6 @@ nav:
   - 'parameterization.md'
   - 'communication.md'
   - 'controllers.md'
-  - Use-Cases:
-      - use-cases/ci-pipeline.md
-      - use-cases/resource-quota-monitor.md
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
   - Blog ⧉: https://blog.argoproj.io/

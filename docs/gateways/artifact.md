@@ -1,6 +1,6 @@
 # Minio S3
 
-Artifact gateway listens to bucket notifications from Minio S3 server. If you are interested in AWS S3 then 
+The gateway listens to bucket notifications from Minio S3 server. If you are interested in AWS S3 then 
 read [AWS SNS Gateway](aws-sns.md) 
 
 ## Install Minio

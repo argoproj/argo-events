@@ -12,6 +12,7 @@ You can parameterize the template that refers the Argo Worflow / K8s artifact.
 ## Resource
 Allows to parameterize the Argo workflow/K8s resource definition.
 
+
 You can find an example [here.](https://github.com/argoproj/argo-events/blob/master/examples/sensors/complete-trigger-parameterization.yaml)
 
 ## Parameter Structure

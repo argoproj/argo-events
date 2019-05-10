@@ -1,6 +1,6 @@
 ## Controllers
 
-* Sensor and Gateway controllers are the components which manage Sensor and Gateway resources. 
+* Sensor and Gateway controllers are the components which manage Sensor and Gateway resources respectively. 
 * Sensor and Gateway are Kubernetes Custom Resources. For more information on K8 CRDs visit [here.](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 
 
