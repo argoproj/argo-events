@@ -20,7 +20,7 @@ before_install:
   # Load cached docker images
   - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - go get github.com/mattn/goveralls
-  - go get sigs.k8s.io/kind
+  - GO111MODULE="on" go get -u sigs.k8s.io/kind@master
   - if [ ! -d $HOME/bin/kubectl ]; then
       mkdir -p $HOME/bin;
       curl -o $HOME/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/v1.13.4/bin/linux/amd64/kubectl;
@@ -34,9 +34,8 @@ before_cache:
     | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
 
 install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep version
-  - dep ensure -vendor-only
+  - go mod tidy
+  - go mod vendor
 
 script:
   - make all
