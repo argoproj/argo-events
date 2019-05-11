@@ -1,7 +1,7 @@
 ## Controllers
 
-* Sensor and Gateway controllers are the components which manage Sensor and Gateway resources. 
-* Sensor and Gateway are Kubernetes Custom Resources. For more information on K8 CRDs visit, https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/
+* Sensor and Gateway controllers are the components which manage Sensor and Gateway resources respectively. 
+* Sensor and Gateway are Kubernetes Custom Resources. For more information on K8 CRDs visit [here.](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 
 
 ### Controller configmap
@@ -21,11 +21,11 @@ data:
 
 <b>`namespace`</b>: If you don't provide namespace, controller will watch all namespaces for gateway resource.
 
-<b>`instance-id`</b>: it is used to map a gateway or sensor to a controller. 
+<b>`instanceID`</b>: it is used to map a gateway or sensor to a controller. 
 e.g. when you create a gateway with label `gateways.argoproj.io/gateway-controller-instanceid: argo-events`, a
- controller with label `argo-events` will process that gateway. `instance-id` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml).
-Basically `instance-id` is used to horizontally scale controllers, so you won't end up overwhelming a controller with large
- number of gateways or sensors. Also keep in mind that `instance-id` has nothing to do with namespace where you are
+ controller with label `argo-events` will process that gateway. `instanceID` for controller are managed using [controller-configmap](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml).
+Basically `instanceID` is used to horizontally scale controllers, so you won't end up overwhelming a controller with large
+ number of gateways or sensors. Also keep in mind that `instanceID` has nothing to do with namespace where you are
  deploying controllers and gateways/sensors.
 
 

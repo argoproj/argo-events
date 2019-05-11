@@ -1,14 +1,5 @@
 # Gateway
 
-- [Gateway](#gateway)
-  - [What is a gateway?](#what-is-a-gateway)
-    - [Components](#components)
-    - [Core gateways](#core-gateways)
-    - [Community gateways](#community-gateways)
-  - [Managing Event Sources](#managing-event-sources)
-  - [How to write a custom gateway?](#how-to-write-a-custom-gateway)
-  - [Examples](#examples)
-
 ## What is a gateway?
 A gateway consumes events from event sources, transforms them into the [cloudevents specification](https://github.com/cloudevents/spec) compliant events and dispatches them to sensors.
 
@@ -20,15 +11,14 @@ A gateway consumes events from event sources, transforms them into the [cloudeve
 
 <br/>
 
-### Components
+## Components
 A gateway has two components:
 
  1. <b>gateway-client</b>: It creates one or more gRPC clients depending on event sources configurations, consumes events from server, transforms these events into cloudevents and dispatches them to sensors.
-     Refer <b>https://github.com/cloudevents/spec </b> for more info on cloudevents specifications.
      
  2. <b>gateway-server</b>: It is a gRPC server that consumes events from event sources and streams them to gateway client.
  
-### Core gateways
+## Core gateways
 
  1. **Calendar**:
     Events produced are based on either a [cron](https://crontab.guru/) schedule or an [interval duration](https://golang.org/pkg/time/#ParseDuration). In addition, calendar gateway supports a `recurrence` field in which to specify special exclusion dates for which this gateway will not produce an event.
@@ -56,15 +46,82 @@ A gateway has two components:
 
     4. **AMQP**:
     [AMQP](https://www.amqp.org/) is a open standard messaging protocol (ISO/IEC 19464). There are a variety of broker implementations including, but not limited to the following:
-      - [Apache ActiveMQ](http://activemq.apache.org/)
-      - [Apache Qpid](https://qpid.apache.org/)
-      - [StormMQ](http://stormmq.com/)
-      - [RabbitMQ](https://www.rabbitmq.com/)
+        - [Apache ActiveMQ](http://activemq.apache.org/)
+        - [Apache Qpid](https://qpid.apache.org/)
+        - [StormMQ](http://stormmq.com/)
+        - [RabbitMQ](https://www.rabbitmq.com/)
 
  You can find core gateways [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)
 
-### Community gateways
+## Community gateways
 You can find gateways built by the community [here](https://github.com/argoproj/argo-events/tree/master/gateways/community). New gateway contributions are always welcome.
+
+## Example
+
+    apiVersion: argoproj.io/v1alpha1
+    kind: Gateway
+    metadata:
+      name: webhook-gateway
+      labels:
+        # gateway controller with instanceId "argo-events" will process this gateway
+        gateways.argoproj.io/gateway-controller-instanceid: argo-events
+        # gateway controller will use this label to match with it's own version
+        # do not remove
+        argo-events-gateway-version: v0.10
+    spec:
+      type: "webhook"
+      eventSource: "webhook-event-source"
+      processorPort: "9330"
+      eventProtocol:
+        type: "HTTP"
+        http:
+          port: "9300"
+      template:
+        metadata:
+          name: "webhook-gateway-http"
+          labels:
+            gateway-name: "webhook-gateway"
+        spec:
+          containers:
+            - name: "gateway-client"
+              image: "argoproj/gateway-client"
+              imagePullPolicy: "Always"
+              command: ["/bin/gateway-client"]
+            - name: "webhook-events"
+              image: "argoproj/webhook-gateway"
+              imagePullPolicy: "Always"
+              command: ["/bin/webhook-gateway"]
+          serviceAccountName: "argo-events-sa"
+      service:
+        metadata:
+          name: webhook-gateway-svc
+        spec:
+          selector:
+            gateway-name: "webhook-gateway"
+          ports:
+            - port: 12000
+              targetPort: 12000
+          type: LoadBalancer
+      watchers:
+        sensors:
+          - name: "webhook-sensor"
+
+
+The gateway `spec` has following fields:
+
+1. `type`: Type of the gateway. This is defined by the user.
+
+2. `eventSource`: Refers to K8s configmap that holds the list of event sources.
+
+3. `processorPort`: This is a gateway server port. You can leave this to `9330` unless you really have to change it to a different port.
+
+4. `eventProtocol`: Communication protocol between sensor and gateway. For more information, head over to [communication](./communication.md)
+
+5. `template`: Defines the specification for gateway pod.
+
+6. `service`: Specification of a K8s service to expose the gateway pod.
+
+7. `watchers`: List of sensors to which events must be dispatched.
 
 ## Managing Event Sources
   * The event sources configurations are managed using K8s configmap. Once the gateway resource is created with the configmap reference in it's spec, it starts watching the configmap.
@@ -87,39 +144,36 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 
 <br/>
 
-  * ### Proto Definition
-    1. The proto file is located at https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto 
+### Proto Definition
+1. The proto file is located [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto) 
 
-    2. If you choose to implement the gateway in `go`, then you can find generated client stubs at https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go
+2. If you choose to implement the gateway in `Go`, then you can find generated client stubs [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go)
 
-    3. To create stubs in other languages, head over to gRPC website https://grpc.io/
+3. To create stubs in other languages, head over to [gRPC website](https://grpc.io/)
+
+4. Service,
+
+        /**
+        * Service for handling event sources.
+        */
+        service Eventing {
+            // StartEventSource starts an event source and returns stream of events.
+            rpc StartEventSource(EventSource) returns (stream Event);
+            // ValidateEventSource validates an event source.
+            rpc ValidateEventSource(EventSource) returns (ValidEventSource);
+        }
+
+
+### Available Environment Variables to Server
  
-    4. Service
-    ```proto
-    /**
-    * Service for handling event sources.
-    */
-    service Eventing {
-        // StartEventSource starts an event source and returns stream of events.
-        rpc StartEventSource(EventSource) returns (stream Event);
-        // ValidateEventSource validates an event source.
-        rpc ValidateEventSource(EventSource) returns (ValidEventSource);
-    }
-    ```
-
-  * ### Available Environment Variables to Server
+ | Field                           | Description                                      |
+ | ------------------------------- | ------------------------------------------------ |
+ | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
+ | GATEWAY_EVENT_SOURCE_CONFIG_MAP | K8s configmap containing event source            |
+ | GATEWAY_NAME                    | name of the gateway                              |
+ | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
+ | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
+ | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
  
-     | Field                           | Description                                      |
-     | ------------------------------- | ------------------------------------------------ |
-     | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
-     | GATEWAY_EVENT_SOURCE_CONFIG_MAP | K8s configmap containing event source            |
-     | GATEWAY_NAME                    | name of the gateway                              |
-     | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
-     | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
-     | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
- 
-  * ### Implementation
-    You can follow existing implementations [here](../gateways)
-
-## Examples
-You can find gateway examples [here](https://github.com/argoproj/argo-events/tree/master/examples/gateways)
+### Implementation
+ You can follow existing implementations [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)

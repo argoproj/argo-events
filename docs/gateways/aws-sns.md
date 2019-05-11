@@ -1,36 +1,26 @@
 # AWS SNS
 
-AWS SNS gateway listens to notifications from SNS.
+The gateway listens to notifications from AWS SNS.
 
-### How to define an event source in confimap?
-An entry in the gateway configmap corresponds to [this](https://github.com/argoproj/argo-events/blob/a913dafbf000eb05401ef2c847b29152af82977f/gateways/community/aws-sns/config.go#L70-L75).
-
-### Why is there webhook in the gateway?
-Because one of the ways you can receive notifications from SNS is over http. So the gateway runs a http server internally.
-Once you create a new gateway configmap or add a new event source entry in the configmap, the gateway will register the url of the server on AWS.
+## Why is there webhook in the gateway?
+Because one of the ways you can receive notifications from SNS is over http. So, the gateway runs a http server internally.
+Once you create an entry in the event source configmap, the gateway will register the url of the server on AWS.
 All notifications for that topic will then be dispatched by SNS over to the endpoint specified in event source.
 
 The gateway spec defined in `examples` has a `serviceSpec`. This service is used to expose the gateway server to the outside world.
 
-**How to get the URL for the service?**
+## How to get the URL for the service?
 Depending upon the Kubernetes provider, you can create the Ingress or Route. 
 
 ## Setup
 
-**1. Install [Gateway](../../examples/gateways/aws-sns.yaml)**
+1. Deploy [gateway](https://github.com/argoproj/argo-events/tree/master/examples/gateways/aws-sns.yaml) before creating event sources because you need to have the gateway pod running and a service backed by the pod, so that you can get the URL for the service. 
 
-We are installing gateway before creating event sources. Because we need to have the gateway pod running and a service backed by the pod, so 
-that we can get the URL for the service. 
+2. Create the [event source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/aws-sns.yaml).
 
-Make sure gateway pod and service is running
+3. Deploy the [sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/aws-sns.yaml).
 
-**2. Install [Event Source](../../examples/event-sources/aws-sns.yaml)**
+## Trigger Workflow
 
-**3. Install [Sensor](../../examples/sensors/aws-sns.yaml)**
-
-Make sure sensor pod is created.
-
-**4. Trigger Workflow**
-
-As soon as there is message on your SNS topic, a workflow will be triggered.
+As soon as a message is published on your SNS topic, a workflow will be triggered.
  

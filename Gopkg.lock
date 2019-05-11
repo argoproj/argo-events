@@ -13,13 +13,13 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "e65d5a7bb2799d5dbfd6ca17030c94951454b08c"
+  revision = "5bc5bc5e61be9ea7fd7aeb95b6957bf5bc0248e8"
 
 [[projects]]
   name = "github.com/DataDog/zstd"
   packages = ["."]
-  revision = "69c5189b6513b1503c9c5332fb2e96362e51d547"
-  version = "v1.3.8"
+  revision = "809b919c325d7887bff7bd876162af73db53e878"
+  version = "v1.4.0"
 
 [[projects]]
   branch = "master"
@@ -42,8 +42,8 @@
 [[projects]]
   name = "github.com/Shopify/sarama"
   packages = ["."]
-  revision = "5d2af84cf5e2dd36f2daecaaafa13c4e286f20fd"
-  version = "v1.22.0"
+  revision = "ea9ab1c316850bee881a07bb2555ee8a685cd4b6"
+  version = "v1.22.1"
 
 [[projects]]
   name = "github.com/argoproj/argo"
@@ -90,7 +90,7 @@
     "service/sqs",
     "service/sts"
   ]
-  revision = "a59596beb512ad4327d1e109267224f01653d877"
+  revision = "594c848f324de48d7b9fa434b213db7283a859e3"
 
 [[projects]]
   name = "github.com/colinmarc/hdfs"
@@ -147,8 +147,8 @@
     ".",
     "packets"
   ]
-  revision = "36d01c2b4cbeb3d2a12063e4880ce30800af9560"
-  version = "v1.1.1"
+  revision = "adca289fdcf8c883800aafa545bc263452290bae"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/emicklei/go-restful"
@@ -311,7 +311,7 @@
   branch = "master"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
-  revision = "8a4e74d23f07f7bff3bc6a7378c7849807f278f6"
+  revision = "3e4dfb77656c424b6d1196a4d5fed0fcf63677cc"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -416,8 +416,8 @@
     "pkg/s3utils",
     "pkg/set"
   ]
-  revision = "a937bac96010803c5460f117490b21f96151c796"
-  version = "v6.0.21"
+  revision = "10b3660b8f09a1c25db63da7bf2d4f7449acc366"
+  version = "v6.0.24"
 
 [[projects]]
   name = "github.com/mitchellh/go-homedir"
@@ -454,13 +454,13 @@
   version = "v1.7.2"
 
 [[projects]]
-  branch = "master"
   name = "github.com/nats-io/go-nats-streaming"
   packages = [
     ".",
     "pb"
   ]
-  revision = "512d9079d04064a6b2788d47e9800269d6e32ba8"
+  revision = "7cd94c239033c0405a43454be55a0810d3a3ca89"
+  version = "v0.4.4"
 
 [[projects]]
   name = "github.com/nats-io/nkeys"
@@ -484,7 +484,7 @@
     "slackevents",
     "slackutilsx"
   ]
-  revision = "c33a46b52751322265b0e3f6243aaa462c738684"
+  revision = "3970c759deadb26ffc8d30324073b43038549cf9"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -498,8 +498,8 @@
     ".",
     "internal/xxh32"
   ]
-  revision = "315a67e90e415bcdaff33057da191569bf4d8479"
-  version = "v2.1.1"
+  revision = "d705d4371bfccdf47f10e45584e896026c83616f"
+  version = "v2.2.3"
 
 [[projects]]
   name = "github.com/pkg/errors"
@@ -541,7 +541,7 @@
   branch = "master"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "9b3cdde74fbe9443d704467498a7dcb61a79de9b"
+  revision = "f0375eb5b588893ff556c71dee32d98e57a9b777"
 
 [[projects]]
   name = "github.com/smartystreets/assertions"
@@ -629,8 +629,8 @@
 [[projects]]
   name = "github.com/xanzy/go-gitlab"
   packages = ["."]
-  revision = "be70cf752294cc5c6ee89a18d6ba0caca08aa5c7"
-  version = "v0.16.1"
+  revision = "1e744e5869fe4f77f58c0d51964e2729fb6e25ad"
+  version = "v0.17.0"
 
 [[projects]]
   name = "github.com/xanzy/ssh-agent"
@@ -659,8 +659,8 @@
     "trace/propagation",
     "trace/tracestate"
   ]
-  revision = "75c0cca22312e51bfd4fafdbe9197ae399e18b38"
-  version = "v0.20.2"
+  revision = "df6e2001952312404b06f5f6f03fcb4aec1648e5"
+  version = "v0.21.0"
 
 [[projects]]
   branch = "master"
@@ -688,7 +688,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "38d8ce5564a5b71b2e3a00553993f1b9a7ae852f"
+  revision = "cbcb750295291b33242907a04be40e80801d0cfc"
 
 [[projects]]
   branch = "master"
@@ -707,7 +707,7 @@
     "trace",
     "websocket"
   ]
-  revision = "eb5bcb51f2a31c7d5141d810b70815c05d9c9146"
+  revision = "a4d6f7feada510cc50e69a37b484cb0fdc6b7876"
 
 [[projects]]
   branch = "master"
@@ -728,7 +728,7 @@
     "errgroup",
     "semaphore"
   ]
-  revision = "e225da77a7e68af35c70ccbf71af2b83e6acac3c"
+  revision = "112230192c580c3556b8cee6403af37a4fc5f28c"
 
 [[projects]]
   branch = "master"
@@ -738,7 +738,7 @@
     "unix",
     "windows"
   ]
-  revision = "cc4d4f50624c67f0af3a3fa307f4be9ab9030144"
+  revision = "a5b02f93d862f065920dd6a40dddc66b60d0dec4"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -747,6 +747,8 @@
     "collate/build",
     "internal/colltab",
     "internal/gen",
+    "internal/language",
+    "internal/language/compact",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
@@ -759,8 +761,8 @@
     "unicode/rangetable",
     "width"
   ]
-  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
-  version = "v0.3.0"
+  revision = "342b2e1fbaa52c93f31447ad2c6abc048c63e475"
+  version = "v0.3.2"
 
 [[projects]]
   branch = "master"
@@ -784,7 +786,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "2538eef75904eff384a2551359968e40c207d9d2"
+  revision = "63859f3815cb436d25749575cb14aef1153e5634"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -799,8 +801,8 @@
     "transport/http",
     "transport/http/internal/propagation"
   ]
-  revision = "0cbcb99a9ea0c8023c794b2693cbe1def82ed4d7"
-  version = "v0.3.2"
+  revision = "721295fe20d585ce7e948146f82188429d14da33"
+  version = "v0.5.0"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -829,9 +831,10 @@
     "googleapis/iam/v1",
     "googleapis/pubsub/v1",
     "googleapis/rpc/status",
+    "googleapis/type/expr",
     "protobuf/field_mask"
   ]
-  revision = "64821d5d210748c883cd2b809589555ae4654203"
+  revision = "b515fa19cec88c32f305a962f34ae60068947aea"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -870,8 +873,8 @@
     "status",
     "tap"
   ]
-  revision = "236199dd5f8031d698fb64091194aecd1c3895b2"
-  version = "v1.20.0"
+  revision = "25c4f928eaa6d96443009bd842389fb4fa48664e"
+  version = "v1.20.1"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -998,8 +1001,8 @@
     "utils/merkletrie/internal/frame",
     "utils/merkletrie/noder"
   ]
-  revision = "db6c41c156481962abf9a55a324858674c25ab08"
-  version = "v4.10.0"
+  revision = "aa6f288c256ff8baf8a7745546a9752323dc0d89"
+  version = "v4.11.0"
 
 [[projects]]
   name = "gopkg.in/warnings.v0"
@@ -1306,8 +1309,8 @@
 [[projects]]
   name = "k8s.io/klog"
   packages = ["."]
-  revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
-  version = "v0.2.0"
+  revision = "e531227889390a39d9533dde61f590fe9f4b0035"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "master"
@@ -1319,11 +1322,11 @@
     "pkg/generators/rules",
     "pkg/util/sets"
   ]
-  revision = "94e1e7b7574c44c4c0f2007de6fe617e259191f3"
+  revision = "411b2483e5034420675ebcdd4a55fc76fe5e55cf"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cfff04f465fd9c945e39622ff33eb96b846b2966adc7b29fc27321e647b52d15"
+  inputs-digest = "035bd330f38e95cdfe61b76941177b60d6b43ea61b017b46a07a06840e31a17a"
   solver-name = "gps-cdcl"
   solver-version = 1
