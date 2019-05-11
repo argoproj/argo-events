@@ -1,0 +1,13 @@
+run:
+  tests: false
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+linters:
+  enable:
+  - gofmt
+  - goimports
+  - unconvert
+  - misspell
+  fast: false

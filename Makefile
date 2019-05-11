@@ -43,7 +43,7 @@ all-controller-images: sensor-controller-image gateway-controller-image
 
 all-core-gateway-images: webhook-image calendar-image artifact-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
-.PHONY: all clean test
+.PHONY: all clean test lint
 
 # Sensor
 sensor:
@@ -272,6 +272,9 @@ slack-linux:
 slack-image: slack-linux
 	docker build -t $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) -f ./gateways/community/slack/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) ; fi
+
+lint:
+	golangci-lint run --config golangci.yml
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
