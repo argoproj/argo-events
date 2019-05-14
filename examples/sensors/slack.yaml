@@ -9,11 +9,12 @@ metadata:
     argo-events-sensor-version: v0.10
 spec:
   template:
-    containers:
-      - name: "sensor"
-        image: "argoproj/sensor"
-        imagePullPolicy: Always
-    serviceAccountName: argo-events-sa
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
   eventProtocol:
     type: "HTTP"
     http:
