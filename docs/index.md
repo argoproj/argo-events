@@ -1,7 +1,7 @@
 # Argo Events
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-events-logo.png?raw=true" alt="Logo"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/logo.png?raw=true" alt="Logo"/>
 </p>
 
 ## What is Argo Events?
