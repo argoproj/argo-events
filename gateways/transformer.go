@@ -20,9 +20,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"net"
 	"net/http"
 	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -149,7 +151,17 @@ func (gc *GatewayConfig) postCloudEventToWatcher(host string, port string, endpo
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
+
+	client := &http.Client{
+		Timeout: 20 * time.Second,
+		Transport: &http.Transport{
+			Dial: (&net.Dialer{
+				KeepAlive: 600 * time.Second,
+			}).Dial,
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 50,
+		},
+	}
 	_, err = client.Do(req)
 	return err
 }
