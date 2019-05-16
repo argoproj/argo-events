@@ -18,12 +18,13 @@ package gateways
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
 	"net"
 	"os"
 	"runtime/debug"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // StartGateway start a gateway

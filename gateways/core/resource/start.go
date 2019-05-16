@@ -19,9 +19,9 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

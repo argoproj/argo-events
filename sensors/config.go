@@ -17,16 +17,15 @@ limitations under the License.
 package sensors
 
 import (
-	"github.com/sirupsen/logrus"
 	"net/http"
-
-	"github.com/nats-io/go-nats"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -52,8 +51,6 @@ type sensorExecutionCtx struct {
 	queue chan *updateNotification
 	// controllerInstanceID is the instance ID of sensor controller processing this sensor
 	controllerInstanceID string
-	// updated indicates update to sensor resource
-	updated bool
 	// nconn is the nats connection
 	nconn natsconn
 }

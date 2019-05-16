@@ -42,17 +42,17 @@ func (gc *GatewayConfig) createInternalEventSources(cm *corev1.ConfigMap) (map[s
 			map[string]interface{}{
 				"config-key":   configKey,
 				"config-value": configValue,
-				"hash":         string(hashKey),
+				"hash":         hashKey,
 			},
 		).Info("event source")
 
 		// create a connection to gateway server
-		ctx, cancel := context.WithCancel(context.Background())
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, common.ServerConnTimeout*time.Second)
 		conn, err := grpc.Dial(
 			fmt.Sprintf("localhost:%s", gc.serverPort),
 			grpc.WithBlock(),
-			grpc.WithInsecure(),
-			grpc.WithTimeout(common.ServerConnTimeout*time.Second))
+			grpc.WithInsecure())
 		if err != nil {
 			gc.Log.WithError(err).Panic("failed to connect to gateway server")
 			cancel()

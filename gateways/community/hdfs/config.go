@@ -2,10 +2,10 @@ package hdfs
 
 import (
 	"errors"
-	"github.com/sirupsen/logrus"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )

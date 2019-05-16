@@ -18,12 +18,12 @@ package artifact
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/common"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/store"
-	"github.com/minio/minio-go"
+	minio "github.com/minio/minio-go"
 )
 
 // StartEventSource activates an event source and streams back events

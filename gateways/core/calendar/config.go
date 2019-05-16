@@ -17,10 +17,10 @@ limitations under the License.
 package calendar
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"

@@ -19,6 +19,7 @@ package gateways
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"

@@ -19,8 +19,9 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"time"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"

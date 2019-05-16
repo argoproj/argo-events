@@ -21,7 +21,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/aws-sns"
+	awssns "github.com/argoproj/argo-events/gateways/community/aws-sns"
+
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -36,7 +37,7 @@ func main() {
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&aws_sns.SNSEventSourceExecutor{
+	gateways.StartGateway(&awssns.SNSEventSourceExecutor{
 		Log:       common.NewArgoEventsLogger(),
 		Clientset: clientset,
 		Namespace: namespace,

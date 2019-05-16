@@ -17,8 +17,9 @@ limitations under the License.
 package gateways
 
 import (
-	gtw "github.com/argoproj/argo-events/controllers/gateway"
 	"time"
+
+	gtw "github.com/argoproj/argo-events/controllers/gateway"
 
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 

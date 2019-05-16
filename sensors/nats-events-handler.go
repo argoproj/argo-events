@@ -17,13 +17,13 @@ limitations under the License.
 package sensors
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/nats-io/go-nats"
 	snats "github.com/nats-io/go-nats-streaming"
 )
@@ -164,13 +164,13 @@ func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) 
 // getNatsStreamingOption returns a streaming option
 func (sec *sensorExecutionCtx) getNatsStreamingOption(eventSource string) (snats.SubscriptionOption, error) {
 	if sec.sensor.Spec.EventProtocol.Nats.StartWithLastReceived {
-		snats.StartWithLastReceived()
+		_ = snats.StartWithLastReceived()
 	}
 	if sec.sensor.Spec.EventProtocol.Nats.DeliverAllAvailable {
-		snats.DeliverAllAvailable()
+		_ = snats.DeliverAllAvailable()
 	}
 	if sec.sensor.Spec.EventProtocol.Nats.Durable {
-		snats.DurableName(eventSource)
+		_ = snats.DurableName(eventSource)
 	}
 	if sec.sensor.Spec.EventProtocol.Nats.StartAtSequence != "" {
 		sequence, err := strconv.Atoi(sec.sensor.Spec.EventProtocol.Nats.StartAtSequence)

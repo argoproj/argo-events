@@ -17,12 +17,11 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/sirupsen/logrus"
-	"net/http"
 	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"
@@ -49,10 +48,6 @@ type storageGridEventSource struct {
 
 	// Filter on object key which caused the notification.
 	Filter *Filter `json:"filter,omitempty"`
-
-	// srv holds reference to http server
-	srv *http.Server
-	mux *http.ServeMux
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects

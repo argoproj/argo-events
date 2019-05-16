@@ -19,7 +19,7 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/gcp-pubsub"
+	pubsub "github.com/argoproj/argo-events/gateways/community/gcp-pubsub"
 )
 
 func main() {

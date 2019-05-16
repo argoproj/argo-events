@@ -18,6 +18,7 @@ package gateway
 
 import (
 	"fmt"
+
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 )

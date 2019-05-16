@@ -18,6 +18,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	sc "github.com/argoproj/argo-events/sensors"
@@ -25,7 +27,6 @@ import (
 	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {

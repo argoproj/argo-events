@@ -18,14 +18,14 @@ package common
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/sirupsen/logrus"
 )
 
 // Webhook is a general purpose REST API
@@ -145,7 +145,7 @@ func startHttpServer(routeManager RouteManager, helper *WebhookHelper) {
 		}
 		r.Webhook.mux = s.mux
 		r.Webhook.srv = &http.Server{
-			Addr:    ":" + fmt.Sprintf("%s", r.Webhook.Port),
+			Addr:    ":" + r.Webhook.Port,
 			Handler: s,
 		}
 		errChan := make(chan error, 1)

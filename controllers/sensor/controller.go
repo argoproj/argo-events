@@ -20,9 +20,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/sirupsen/logrus"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -202,7 +203,7 @@ func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int)
 		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
 		OwnerInformer:         c.informer,
 		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, sensorResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
-		Queue: c.queue,
+		Queue:                 c.queue,
 	}
 
 	c.podInformer = factory.NewPodInformer()

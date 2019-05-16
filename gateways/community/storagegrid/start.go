@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/joncalhoun/qson"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 var (
@@ -152,7 +152,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	}
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Add("Content-Type", "text/plain")
-	writer.Write([]byte(respBody))
+	_, _ = writer.Write([]byte(respBody))
 
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))

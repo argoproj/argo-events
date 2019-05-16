@@ -17,9 +17,10 @@ limitations under the License.
 package sensor
 
 import (
+	"time"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/sirupsen/logrus"
-	"time"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"

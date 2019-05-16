@@ -18,12 +18,12 @@ package webhook
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 var (

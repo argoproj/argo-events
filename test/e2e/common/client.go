@@ -91,7 +91,7 @@ func (clpl *E2EClient) ForwardServicePort(tmpNamespace, podName string, localPor
 	}
 
 	path := fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/portforward", tmpNamespace, podName)
-	hostIP := strings.TrimLeft(clpl.Config.Host, "https://")
+	hostIP := strings.TrimPrefix(clpl.Config.Host, "https://")
 	serverURL := url.URL{Scheme: "https", Path: path, Host: hostIP}
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &serverURL)
@@ -121,7 +121,6 @@ L:
 			break L
 		case <-readyChan:
 			break L
-		default:
 		}
 	}
 

@@ -18,6 +18,7 @@ package common
 
 import (
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 )
 

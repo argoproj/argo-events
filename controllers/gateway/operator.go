@@ -17,14 +17,13 @@ limitations under the License.
 package gateway
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -248,7 +247,7 @@ func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
 			return nil, false, nil
 		}
 
-		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng gateway pod.
+		// By now we are sure that the spec changed, so lets go ahead and delete the existing gateway pod.
 		goc.log.WithField(common.LabelPodName, existingPod.Name).Info("gateway pod spec changed")
 
 		err := goc.gwrctx.deleteGatewayPod(existingPod)
@@ -350,7 +349,7 @@ func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message st
 	}
 	goc.log.WithFields(
 		map[string]interface{}{
-			"old": string(goc.gw.Status.Message),
+			"old": goc.gw.Status.Message,
 			"new": message,
 		},
 	).Info("message")

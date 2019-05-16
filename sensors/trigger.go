@@ -196,7 +196,7 @@ func (sec *sensorExecutionCtx) applyParamsTrigger(trigger *v1alpha1.Trigger) err
 
 // applyParamsResource applies parameters to resource within trigger
 func (sec *sensorExecutionCtx) applyParamsResource(parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
-	if parameters != nil && len(parameters) > 0 {
+	if len(parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
 			return fmt.Errorf("failed to marshal json. err: %+v", err)

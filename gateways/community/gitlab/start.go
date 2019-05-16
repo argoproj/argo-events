@@ -66,12 +66,12 @@ func (rc *RouteConfig) PostStart() error {
 	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &formattedUrl,
-		Token: &c.token,
+		URL:                   &formattedUrl,
+		Token:                 &c.token,
 		EnableSSLVerification: &rc.ges.EnableSSLVerification,
 	}
 
-	elem := reflect.ValueOf(opt).Elem().FieldByName(string(rc.ges.Event))
+	elem := reflect.ValueOf(opt).Elem().FieldByName(rc.ges.Event)
 	if ok := elem.IsValid(); !ok {
 		return fmt.Errorf("unknown event %s", rc.ges.Event)
 	}

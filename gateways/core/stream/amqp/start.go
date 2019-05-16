@@ -18,6 +18,7 @@ package amqp
 
 import (
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	amqplib "github.com/streadway/amqp"

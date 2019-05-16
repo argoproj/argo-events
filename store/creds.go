@@ -22,7 +22,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"k8s.io/api/core/v1"
+
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
@@ -57,7 +58,7 @@ func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1al
 // GetSecrets retrieves the secret value from the secret in namespace with name and key
 func GetSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
 	secretsIf := client.CoreV1().Secrets(namespace)
-	var secret *v1.Secret
+	var secret *corev1.Secret
 	var err error
 	_ = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
 		secret, err = secretsIf.Get(name, metav1.GetOptions{})

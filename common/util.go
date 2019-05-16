@@ -75,19 +75,19 @@ func ServerResourceForGroupVersionKind(disco discovery.DiscoveryInterface, gvk s
 // SendSuccessResponse sends http success response
 func SendSuccessResponse(writer http.ResponseWriter, response string) {
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte(response))
+	_, _ = writer.Write([]byte(response))
 }
 
 // SendErrorResponse sends http error response
 func SendErrorResponse(writer http.ResponseWriter, response string) {
 	writer.WriteHeader(http.StatusBadRequest)
-	writer.Write([]byte(response))
+	_, _ = writer.Write([]byte(response))
 }
 
 // SendInternalErrorResponse sends http internal error response
 func SendInternalErrorResponse(writer http.ResponseWriter, response string) {
 	writer.WriteHeader(http.StatusInternalServerError)
-	writer.Write([]byte(response))
+	_, _ = writer.Write([]byte(response))
 }
 
 // Hasher hashes a string

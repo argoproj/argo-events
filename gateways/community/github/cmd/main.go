@@ -17,11 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/community/github"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {

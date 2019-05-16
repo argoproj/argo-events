@@ -17,14 +17,13 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -245,7 +244,7 @@ func (soc *sOperationCtx) updateSensorPod() (*corev1.Pod, bool, error) {
 			return nil, false, nil
 		}
 
-		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng sensor pod.
+		// By now we are sure that the spec changed, so lets go ahead and delete the existing sensor pod.
 		soc.log.WithField(common.LabelPodName, existingPod.Name).Info("sensor pod spec changed")
 
 		err := soc.srctx.deleteSensorPod(existingPod)

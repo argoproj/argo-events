@@ -17,12 +17,12 @@ limitations under the License.
 package aws_sns
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )

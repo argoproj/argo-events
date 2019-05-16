@@ -19,10 +19,10 @@ package file
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"regexp"
 	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/common/fsevent"
 	"github.com/fsnotify/fsnotify"

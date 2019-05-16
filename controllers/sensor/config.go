@@ -19,6 +19,7 @@ package sensor
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 
 	"github.com/ghodss/yaml"

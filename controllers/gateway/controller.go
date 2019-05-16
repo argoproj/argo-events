@@ -20,8 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
@@ -199,7 +200,7 @@ func (c *GatewayController) Run(ctx context.Context, gwThreads, eventThreads int
 		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
 		OwnerInformer:         c.informer,
 		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, gatewayResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
-		Queue: c.queue,
+		Queue:                 c.queue,
 	}
 
 	c.podInformer = factory.NewPodInformer()

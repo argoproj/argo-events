@@ -19,6 +19,7 @@ package amqp
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )

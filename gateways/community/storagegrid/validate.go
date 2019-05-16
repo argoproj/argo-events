@@ -18,6 +18,7 @@ package storagegrid
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
