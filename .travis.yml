@@ -22,6 +22,7 @@ before_install:
   # Load cached docker images
   - if [[ -d $HOME/docker ]]; then ls $HOME/docker/*.tar.gz | xargs -I {file} sh -c "zcat {file} | docker load"; fi
   - go get github.com/mattn/goveralls
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin v1.16.0
   - if [ ! -d $HOME/bin/kubectl ]; then
       mkdir -p $HOME/bin;
       curl -o $HOME/bin/kubectl -L https://storage.googleapis.com/kubernetes-release/release/v1.13.4/bin/linux/amd64/kubectl;
