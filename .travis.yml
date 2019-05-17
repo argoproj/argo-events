@@ -40,6 +40,7 @@ install:
 
 script:
   - make all
+  - make lint
   - make test coverage
   - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
 
