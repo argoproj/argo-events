@@ -21,7 +21,7 @@ Artifacts are accessed from web via RESTful API. [Example](https://github.com/ar
 Artifacts stored in Kubernetes configmap are accessed using the key. [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/trigger-source-configmap.yaml)
    
 ### Git
-Artifacts stored in either public or private Git repository. [Example](https://github.com/argoproj/argo-events/tree/master//github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
+Artifacts stored in either public or private Git repository. [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
 
 ### Resource
 Artifacts defined as generic K8s resource template. This is specially useful if you use tools like Kustomize to generate the sensor spec. [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-resource.yaml) 
