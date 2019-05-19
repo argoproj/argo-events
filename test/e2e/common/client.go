@@ -113,15 +113,13 @@ func (clpl *E2EClient) ForwardServicePort(tmpNamespace, podName string, localPor
 	}()
 
 	err = nil
-L:
-	for {
-		select {
-		case <-time.After(10 * time.Second):
-			err = errors.New("timed out port forwarding")
-			break L
-		case <-readyChan:
-			break L
-		}
+
+	select {
+	case <-time.After(10 * time.Second):
+		err = errors.New("timed out port forwarding")
+		break
+	case <-readyChan:
+		break
 	}
 
 	return stopChan, err
