@@ -153,6 +153,46 @@ func getCloudEvent() *apicommon.Event {
 	}
 }
 
+func TestDependencyGlobMatch(t *testing.T) {
+	sensor, err := getSensor()
+	convey.Convey("Given a sensor spec, create a sensor", t, func() {
+		globDepName := "test-gateway:*"
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(sensor, convey.ShouldNotBeNil)
+		sensor.Spec.Dependencies[0].Name = globDepName
+		sec := getsensorExecutionCtx(sensor)
+
+		sec.sensor, err = sec.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+		convey.So(err, convey.ShouldBeNil)
+
+		sec.sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+		fmt.Println(sensor.NodeID(globDepName))
+
+		sensor2.InitializeNode(sec.sensor, globDepName, v1alpha1.NodeTypeEventDependency, sec.log, "node is init")
+		sensor2.MarkNodePhase(sec.sensor, globDepName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sec.log, "node is active")
+
+		sensor2.InitializeNode(sec.sensor, "test-workflow-trigger", v1alpha1.NodeTypeTrigger, sec.log, "trigger is init")
+
+		e := &apicommon.Event{
+			Payload: []byte("hello"),
+			Context: apicommon.EventContext{
+				Source: &apicommon.URI{
+					Host: "test-gateway:test",
+				},
+			},
+		}
+		dataCh := make(chan *updateNotification)
+		go func() {
+			data := <-sec.queue
+			dataCh <- data
+		}()
+		ok := sec.sendEventToInternalQueue(e, &mockHttpWriter{})
+		convey.So(ok, convey.ShouldEqual, true)
+		ew := <-dataCh
+		sec.processUpdateNotification(ew)
+	})
+}
+
 func TestEventHandler(t *testing.T) {
 	sensor, err := getSensor()
 	convey.Convey("Given a sensor spec, create a sensor", t, func() {

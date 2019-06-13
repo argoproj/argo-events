@@ -29,6 +29,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/gobwas/glob"
 )
 
 // processUpdateNotification processes event received by sensor, validates it, updates the state of the node representing the event dependency
@@ -65,6 +66,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 
 	switch ew.notificationType {
 	case v1alpha1.EventNotification:
+		nodeName := ew.eventDependency.Name
 		log := sec.log.WithField(common.LabelEventSource, ew.event.Context.Source.Host)
 		log.Info("received event notification")
 
@@ -85,7 +87,7 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 			}
 
 			// change node state to error
-			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
+			sn.MarkNodePhase(sec.sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, fmt.Sprintf("failed to apply filter. err: %v", err))
 			return
 		}
 
@@ -94,11 +96,11 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 			log.Error("event did not pass filters")
 
 			// change node state to error
-			sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, "event did not pass filters")
+			sn.MarkNodePhase(sec.sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sec.log, "event did not pass filters")
 			return
 		}
 
-		sn.MarkNodePhase(sec.sensor, ew.event.Context.Source.Host, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, sec.log, "event is received")
+		sn.MarkNodePhase(sec.sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, ew.event, sec.log, "event is received")
 
 		// check if triggers can be processed and executed
 		canProcess, err := sec.canProcessTriggers()
@@ -218,7 +220,12 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 // validateEvent validates whether the event is indeed from gateway that this sensor is watching
 func (sec *sensorExecutionCtx) validateEvent(events *apicommon.Event) (*ss_v1alpha1.EventDependency, bool) {
 	for _, dependency := range sec.sensor.Spec.Dependencies {
-		if dependency.Name == events.Context.Source.Host {
+		g, err := glob.Compile(dependency.Name)
+		if err != nil {
+			sec.log.WithError(err).Error("invalid glob in dependency name")
+			continue
+		}
+		if g.Match(events.Context.Source.Host) {
 			return &dependency, true
 		}
 	}
