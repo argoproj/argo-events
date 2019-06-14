@@ -68,6 +68,9 @@ func TestListenEvents(t *testing.T) {
 		err = yaml.Unmarshal(data, &cal)
 		convey.So(err, convey.ShouldBeNil)
 
-		convey.So(cal.UserPayload, convey.ShouldEqual, "{\r\n\"hello\": \"world\"\r\n}")
+		payload, err := cal.UserPayload.MarshalJSON()
+		convey.So(err, convey.ShouldBeNil)
+
+		convey.So(string(payload), convey.ShouldEqual, `"{\r\n\"hello\": \"world\"\r\n}"`)
 	})
 }
