@@ -133,3 +133,7 @@ required = [
 [[constraint]]
   name = "k8s.io/gengo"
   revision = "b90029ef6cd877cb3f422d75b3a07707e3aac6b7"
+
+[[constraint]]
+  name = "github.com/gobwas/glob"
+  revision = "e7a84e9525fe90abcda167b604e483cc959ad4aa"

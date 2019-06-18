@@ -10,6 +10,7 @@ Sensors define a set of event dependencies (inputs) and triggers (outputs).
 
 ## What is an event dependency?
 A dependency is an event the sensor is waiting to happen. It is defined as "gateway-name:event-source-name".
+Also, you can use [globs](https://github.com/gobwas/glob#syntax) to catch a set of events (e.g. "gateway-name:*").
 
 ## What is a dependency group?
 A dependency group is basically a group of event dependencies.
