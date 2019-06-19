@@ -40,12 +40,6 @@ func validateSQSConfig(config interface{}) error {
 	if sc.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	if sc.AccessKey == nil {
-		return fmt.Errorf("must specify access key")
-	}
-	if sc.SecretKey == nil {
-		return fmt.Errorf("must specify secret key")
-	}
 	if sc.Queue == "" {
 		return fmt.Errorf("must specify queue name")
 	}

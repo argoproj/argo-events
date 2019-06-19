@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 )
 
@@ -48,16 +49,30 @@ func (ese *SQSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 
 // listenEvents fires an event when interval completes and item is processed from queue.
 func (ese *SQSEventSourceExecutor) listenEvents(s *sqsEventSource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, s.AccessKey, s.SecretKey)
-	if err != nil {
-		errorCh <- err
-		return
-	}
+	var awsSession *session.Session
 
-	awsSession, err := gwcommon.GetAWSSession(creds, s.Region)
-	if err != nil {
-		errorCh <- err
-		return
+	if s.AccessKey == nil && s.SecretKey == nil {
+		awsSessionWithoutCreds, err := gwcommon.GetAWSSessionWithoutCreds(s.Region)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+
+		awsSession = awsSessionWithoutCreds
+	} else {
+		creds, err := gwcommon.GetAWSCreds(ese.Clientset, ese.Namespace, s.AccessKey, s.SecretKey)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+
+		awsSessionWithCreds, err := gwcommon.GetAWSSession(creds, s.Region)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+
+		awsSession = awsSessionWithCreds
 	}
 
 	sqsClient := sqslib.New(awsSession)

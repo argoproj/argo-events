@@ -34,9 +34,23 @@ queue: "test-queue"
 waitTimeSeconds: 10
 `
 
+var esWithoutCreds = `
+region: "us-east-1"
+queue: "test-queue"
+waitTimeSeconds: 10
+`
+
 func TestParseConfig(t *testing.T) {
 	convey.Convey("Given a aws-sqsEventSource event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*sqsEventSource)
+		convey.So(ok, convey.ShouldEqual, true)
+	})
+
+	convey.Convey("Given a aws-sqsEventSource event source without AWS credentials, parse it", t, func() {
+		ps, err := parseEventSource(esWithoutCreds)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
 		_, ok := ps.(*sqsEventSource)

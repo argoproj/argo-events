@@ -17,8 +17,9 @@ limitations under the License.
 package aws_sns
 
 import (
-	"github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var es = `
@@ -36,9 +37,26 @@ secretKey:
     name: sns
 `
 
+var esWithoutCreds = `
+hook:
+ endpoint: "/test"
+ port: "8080"
+ url: "myurl/test"
+topicArn: "test-arn"
+region: "us-east-1"
+`
+
 func TestParseConfig(t *testing.T) {
 	convey.Convey("Given a aws-sns event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+		_, ok := ps.(*snsEventSource)
+		convey.So(ok, convey.ShouldEqual, true)
+	})
+
+	convey.Convey("Given a aws-sns event source without credentials, parse it", t, func() {
+		ps, err := parseEventSource(esWithoutCreds)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
 		_, ok := ps.(*snsEventSource)

@@ -56,4 +56,35 @@ func TestListenEvents(t *testing.T) {
 		err = <-errorCh2
 		convey.So(err, convey.ShouldNotBeNil)
 	})
+
+	convey.Convey("Given an event source without AWS credentials, listen to events", t, func() {
+		ps, err := parseEventSource(esWithoutCreds)
+		convey.So(err, convey.ShouldBeNil)
+		convey.So(ps, convey.ShouldNotBeNil)
+
+		ese := &SQSEventSourceExecutor{
+			Clientset: fake.NewSimpleClientset(),
+			Namespace: "fake",
+			Log:       common.NewArgoEventsLogger(),
+		}
+
+		dataCh := make(chan []byte)
+		errorCh := make(chan error)
+		doneCh := make(chan struct{}, 1)
+		errorCh2 := make(chan error)
+
+		go func() {
+			err := <-errorCh
+			errorCh2 <- err
+		}()
+
+		ese.listenEvents(ps.(*sqsEventSource), &gateways.EventSource{
+			Name: "fake",
+			Data: es,
+			Id:   "1234",
+		}, dataCh, errorCh, doneCh)
+
+		err = <-errorCh2
+		convey.So(err, convey.ShouldNotBeNil)
+	})
 }

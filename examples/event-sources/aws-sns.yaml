@@ -56,3 +56,12 @@ data:
       name: aws-secret
       key: secret
     region: "us-east-1"
+
+  example-without-credentials: |-
+    topicArn: "topic-arn"
+    hook:
+     endpoint: "/"
+     # gateway can run multiple HTTP servers, just define a unique port.
+     port: "13000"
+     url: "http://mysecondfakeurl.fake"
+    region: "us-east-1"
