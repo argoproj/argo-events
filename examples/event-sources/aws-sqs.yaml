@@ -40,3 +40,8 @@ data:
     region: "us-east-1"
     queue: "my-fake-queue-2"
     waitTimeSeconds: 20
+
+  example-3: |-
+    region: "us-east-1"
+    queue: "my-fake-queue-2"
+    waitTimeSeconds: 20

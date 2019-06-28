@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/aws/aws-sdk-go/aws/session"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 )
@@ -113,14 +114,27 @@ func (rc *RouteConfig) PostStart() error {
 	logger.Info("subscribing to sns topic")
 
 	sc := rc.snses
-	creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
-	if err != nil {
-		return fmt.Errorf("failed to get aws credentials. err: %+v", err)
-	}
+	var awsSession *session.Session
 
-	awsSession, err := gwcommon.GetAWSSession(creds, sc.Region)
-	if err != nil {
-		return fmt.Errorf("failed to create aws session. err: %+v", err)
+	if sc.AccessKey == nil && sc.SecretKey == nil {
+		awsSessionWithoutCreds, err := gwcommon.GetAWSSessionWithoutCreds(sc.Region)
+		if err != nil {
+			return fmt.Errorf("failed to create aws session. err: %+v", err)
+		}
+
+		awsSession = awsSessionWithoutCreds
+	} else {
+		creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
+		if err != nil {
+			return fmt.Errorf("failed to create aws session. err: %+v", err)
+		}
+
+		awsSessionWithCreds, err := gwcommon.GetAWSSession(creds, sc.Region)
+		if err != nil {
+			return fmt.Errorf("failed to create aws session. err: %+v", err)
+		}
+
+		awsSession = awsSessionWithCreds
 	}
 
 	rc.session = snslib.New(awsSession)

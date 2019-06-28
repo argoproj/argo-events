@@ -19,6 +19,7 @@ package aws_sns
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
@@ -38,12 +39,6 @@ func validateSNSConfig(config interface{}) error {
 	}
 	if sc.Region == "" {
 		return fmt.Errorf("must specify region")
-	}
-	if sc.AccessKey == nil {
-		return fmt.Errorf("must specify access key")
-	}
-	if sc.SecretKey == nil {
-		return fmt.Errorf("must specify secret key")
 	}
 	return gwcommon.ValidateWebhook(sc.Hook)
 }

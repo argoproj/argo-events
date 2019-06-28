@@ -106,5 +106,15 @@ func TestAWSSNS(t *testing.T) {
 			err = rc.PostStop()
 			convey.So(err, convey.ShouldNotBeNil)
 		})
+
+		psWithoutCreds, err2 := parseEventSource(esWithoutCreds)
+		convey.So(err2, convey.ShouldBeNil)
+
+		rc.snses = psWithoutCreds.(*snsEventSource)
+
+		convey.Convey("Run post activate on event source without credentials", func() {
+			err := rc.PostStart()
+			convey.So(err, convey.ShouldNotBeNil)
+		})
 	})
 }

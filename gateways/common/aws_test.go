@@ -75,4 +75,12 @@ func TestAWS(t *testing.T) {
 			convey.So(session, convey.ShouldNotBeNil)
 		})
 	})
+
+	convey.Convey("create AWS credential using already present config/IAM role", t, func() {
+		convey.Convey("Get a new aws session", func() {
+			session, err := GetAWSSessionWithoutCreds("mock-region")
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(session, convey.ShouldNotBeNil)
+		})
+	})
 }
