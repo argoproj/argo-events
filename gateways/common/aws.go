@@ -48,3 +48,9 @@ func GetAWSSession(creds *credentials.Credentials, region string) (*session.Sess
 		Credentials: creds,
 	})
 }
+
+func GetAWSSessionWithoutCreds(region string) (*session.Session, error) {
+	return session.NewSession(&aws.Config{
+		Region: &region,
+	})
+}

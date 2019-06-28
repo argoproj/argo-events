@@ -56,3 +56,13 @@ data:
       name: aws-secret
       key: secret
     region: "us-east-1"
+
+  example-without-credentials: |-
+    # If AWS access credentials are already present on the Pod's IAM role running the Gateway, 
+    # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
+    topicArn: "topic-arn"
+    hook:
+     endpoint: "/"
+     port: "13000"
+     url: "http://mysecondfakeurl.fake"
+    region: "us-east-1"
