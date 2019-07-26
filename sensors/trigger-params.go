@@ -33,6 +33,25 @@ func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 		if err != nil {
 			return nil, err
 		}
+
+		switch op := param.Operation; op {
+		case v1alpha1.TriggerParameterOpAppend, v1alpha1.TriggerParameterOpPrepend:
+			// prepend or append the current value
+			current := gjson.GetBytes(jsonObj, param.Dest)
+
+			if current.Exists() {
+				if op == v1alpha1.TriggerParameterOpAppend {
+					v = current.String() + v
+				} else {
+					v = v + current.String()
+				}
+			}
+		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:
+			// simply overwrite the current value with the new one
+		default:
+			return nil, fmt.Errorf("unsupported trigger parameter operation: %+v", op)
+		}
+
 		// now let's set the value
 		tmp, err := sjson.SetBytes(jsonObj, param.Dest, v)
 		if err != nil {

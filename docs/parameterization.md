@@ -21,5 +21,6 @@ A `parameter` contains:
    1. `src`:
        1. `event`: the name of the event dependency
        2. `path`: a key within event payload to look for
-       3. `value`: default value if sensor can't find `path` in event payload.   
+       3. `value`: default value if sensor can't find `path` in event payload
    2. `dest`: destination key within resource definition whose corresponding value needs to be replaced with value from event payload
+   3. `operation`: what to do with the existing value at `dest`, either `overwrite`, `prepend`, or `append`
