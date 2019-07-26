@@ -27,7 +27,7 @@ spec:
           image: "argoproj/gateway-client"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
-        - name: "aws-sqs-events"
+        - name: "gcp-pubsub-events"
           image: "argoproj/gcp-pubsub-gateway"
           imagePullPolicy: "Always"
           command: ["/bin/gcp-pubsub-gateway"]
