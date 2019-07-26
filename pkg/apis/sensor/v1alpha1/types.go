@@ -267,7 +267,7 @@ type TriggerParameter struct {
 
 	// Operation is what to do with the existing value at Dest, whether to
 	// 'prepend', 'overwrite', or 'append' it.
-	Operation TriggerParameterOperation `json:"operation" protobuf:"bytes,3,name=operation"`
+	Operation TriggerParameterOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation"`
 }
 
 // TriggerParameterSource defines the source for a parameter from a event event
