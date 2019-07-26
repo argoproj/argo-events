@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"strings"
 
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -74,12 +75,18 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	x := gc.Clientset.CoreV1().RESTClient()
 	resource := "configmaps"
+	namespace := gc.Namespace
+	if strings.Contains(name, "/") {
+		parts := strings.SplitN(name, "/", 2)
+		namespace = parts[0]
+		name = parts[1]
+	}
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -88,7 +95,7 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
