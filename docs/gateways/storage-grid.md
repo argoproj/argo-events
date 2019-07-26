@@ -14,7 +14,7 @@ Depending upon the Kubernetes provider, you can create the Ingress or Route.
 
 2. Create the [event Source](https://github.com/argoproj/argo-events/tree/master/examples/event-sources/storage-grid.yaml).
 
-3. Deployy the [sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/storage-grid.yaml).
+3. Deploy the [sensor](https://github.com/argoproj/argo-events/tree/master/examples/sensors/storage-grid.yaml).
 
 4. Configure notifications
 

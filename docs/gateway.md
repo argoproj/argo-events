@@ -111,7 +111,7 @@ The gateway `spec` has following fields:
 
 1. `type`: Type of the gateway. This is defined by the user.
 
-2. `eventSource`: Refers to K8s configmap that holds the list of event sources.
+2. `eventSource`: Refers to K8s configmap that holds the list of event sources. You can use `namespace/configmap-name` syntax to refer the configmap in a different namespace. 
 
 3. `processorPort`: This is a gateway server port. You can leave this to `9330` unless you really have to change it to a different port.
 
