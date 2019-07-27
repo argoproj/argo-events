@@ -156,6 +156,16 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	if parameter.Dest == "" {
 		return fmt.Errorf("parameter destination can't be empty")
 	}
+
+	switch op := parameter.Operation; op {
+	case v1alpha1.TriggerParameterOpAppend:
+	case v1alpha1.TriggerParameterOpOverwrite:
+	case v1alpha1.TriggerParameterOpPrepend:
+	case v1alpha1.TriggerParameterOpNone:
+	default:
+		return fmt.Errorf("parameter operation %+v is invalid", op)
+	}
+
 	return nil
 }
 
