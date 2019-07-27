@@ -976,6 +976,13 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
+					"operation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"src", "dest"},
 			},
