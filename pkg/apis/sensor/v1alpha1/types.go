@@ -239,6 +239,21 @@ type TriggerCondition struct {
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
 
+// TriggerParameterOperation represents how to set a trigger destination
+// resource key
+type TriggerParameterOperation string
+
+const (
+	// TriggerParameterOpNone is the zero value of TriggerParameterOperation
+	TriggerParameterOpNone TriggerParameterOperation = ""
+	// TriggerParameterOpAppend means append the new value to the existing
+	TriggerParameterOpAppend TriggerParameterOperation = "append"
+	// TriggerParameterOpOverwrite means overwrite the existing value with the new
+	TriggerParameterOpOverwrite TriggerParameterOperation = "overwrite"
+	// TriggerParameterOpPrepend means prepend the new value to the existing
+	TriggerParameterOpPrepend TriggerParameterOperation = "prepend"
+)
+
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
 	// Src contains a source reference to the value of the parameter from a event event
@@ -249,6 +264,10 @@ type TriggerParameter struct {
 	// The -1 key can be used to append a value to an existing array.
 	// See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.
 	Dest string `json:"dest" protobuf:"bytes,2,name=dest"`
+
+	// Operation is what to do with the existing value at Dest, whether to
+	// 'prepend', 'overwrite', or 'append' it.
+	Operation TriggerParameterOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation"`
 }
 
 // TriggerParameterSource defines the source for a parameter from a event event

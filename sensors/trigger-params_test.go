@@ -141,6 +141,44 @@ func Test_applyParams(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "simpleJSON (prepended field) -> success",
+			args: args{
+				jsonObj: []byte(`{"x":"before"}`),
+				params: []v1alpha1.TriggerParameter{
+					{
+						Src: &v1alpha1.TriggerParameterSource{
+							Event: "simpleJSON",
+							Path:  "name.last",
+						},
+						Dest:      "x",
+						Operation: v1alpha1.TriggerParameterOpPrepend,
+					},
+				},
+				events: events,
+			},
+			want:    []byte(`{"x":"magaldibefore"}`),
+			wantErr: false,
+		},
+		{
+			name: "simpleJSON (appended field) -> success",
+			args: args{
+				jsonObj: []byte(`{"x":"before"}`),
+				params: []v1alpha1.TriggerParameter{
+					{
+						Src: &v1alpha1.TriggerParameterSource{
+							Event: "simpleJSON",
+							Path:  "name.last",
+						},
+						Dest:      "x",
+						Operation: v1alpha1.TriggerParameterOpAppend,
+					},
+				},
+				events: events,
+			},
+			want:    []byte(`{"x":"beforemagaldi"}`),
+			wantErr: false,
+		},
+		{
 			name: "non JSON, no default -> pass payload bytes without converting",
 			args: args{
 				jsonObj: []byte(``),
