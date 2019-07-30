@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func TestValidateStorageGridEventSource(t *testing.T) {
+func TestSlackEventSource(t *testing.T) {
 	convey.Convey("Given a slack event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &SlackEventSourceExecutor{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "slack.yaml"))

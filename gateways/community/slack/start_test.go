@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -104,5 +105,29 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})
 
+		convey.Convey("Test an interaction action message", func() {
+			writer := &gwcommon.FakeHttpWriter{}
+			actionString := `{"type":"block_actions","team":{"id":"T9TK3CUKW","domain":"example"},"user":{"id":"UA8RXUSPL","username":"jtorrance","team_id":"T9TK3CUKW"},"api_app_id":"AABA1ABCD","token":"9s8d9as89d8as9d8as989","container":{"type":"message_attachment","message_ts":"1548261231.000200","attachment_id":1,"channel_id":"CBR2V3XEX","is_ephemeral":false,"is_app_unfurl":false},"trigger_id":"12321423423.333649436676.d8c1bb837935619ccad0f624c448ffb3","channel":{"id":"CBR2V3XEX","name":"review-updates"},"message":{"bot_id":"BAH5CA16Z","type":"message","text":"This content can't be displayed.","user":"UAJ2RU415","ts":"1548261231.000200"},"response_url":"https://hooks.slack.com/actions/AABA1ABCD/1232321423432/D09sSasdasdAS9091209","actions":[{"action_id":"WaXA","block_id":"=qXel","text":{"type":"plain_text","text":"View","emoji":true},"value":"click_me_123","type":"button","action_ts":"1548426417.840180"}]}`
+			payload := []byte(`payload=` + actionString)
+			out := make(chan []byte)
+			go func() {
+				out <- <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+			}()
+
+			var buf bytes.Buffer
+			buf.Write(payload)
+
+			headers := make(map[string][]string)
+			headers["Content-Type"] = append(headers["Content-Type"], "application/x-www-form-urlencoded")
+			rc.RouteHandler(writer, &http.Request{
+				Method: http.MethodPost,
+				Header: headers,
+				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
+			})
+			result := <-out
+			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
+			convey.So(string(result), convey.ShouldContainSubstring, "\"type\":\"block_actions\"")
+			convey.So(string(result), convey.ShouldContainSubstring, "\"token\":\"9s8d9as89d8as9d8as989\"")
+		})
 	})
 }
