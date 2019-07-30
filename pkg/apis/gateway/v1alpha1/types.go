@@ -141,18 +141,26 @@ type NotificationWatchers struct {
 // GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway
 type GatewayNotificationWatcher struct {
 	// Name is the gateway name
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
 
 	// Port is http server port on which gateway is running
-	Port string `json:"port" protobuf:"bytes,2,opt,name=port"`
+	Port string `json:"port" protobuf:"bytes,2,name=port"`
 
 	// Endpoint is REST API endpoint to post event to.
 	// Events are sent using HTTP POST method to this endpoint.
-	Endpoint string `json:"endpoint" protobuf:"bytes,3,opt,name=endpoint"`
+	Endpoint string `json:"endpoint" protobuf:"bytes,3,name=endpoint"`
+
+	// Namespace of the gateway
+	// +Optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 }
 
 // SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway
 type SensorNotificationWatcher struct {
-	// Name is name of the sensor
-	Name string `json:"name" protobuf:"bytes,1,opt,name=name"`
+	// Name is the name of the sensor
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
+
+	// Namespace of the sensor
+	// +Optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,2,opt,name=namespace"`
 }
