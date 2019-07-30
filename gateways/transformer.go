@@ -103,13 +103,21 @@ func (gc *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byt
 	completeSuccess := true
 
 	for _, sensor := range gc.gw.Spec.Watchers.Sensors {
-		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(sensor.Name), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
+		namespace := gc.Namespace
+		if sensor.Namespace != "" {
+			namespace = sensor.Namespace
+		}
+		if err := gc.postCloudEventToWatcher(common.ServiceDNSName(sensor.Name, namespace), gc.gw.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
 			gc.Log.WithField(common.LabelSensorName, sensor.Name).WithError(err).Warn("failed to dispatch event to sensor watcher over http. communication error")
 			completeSuccess = false
 		}
 	}
 	for _, gateway := range gc.gw.Spec.Watchers.Gateways {
-		if err := gc.postCloudEventToWatcher(common.DefaultServiceName(gateway.Name), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
+		namespace := gc.Namespace
+		if gateway.Namespace != "" {
+			namespace = gateway.Namespace
+		}
+		if err := gc.postCloudEventToWatcher(common.ServiceDNSName(gateway.Name, namespace), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
 			gc.Log.WithField(common.LabelGatewayName, gateway.Name).WithError(err).Warn("failed to dispatch event to gateway watcher over http. communication error")
 			completeSuccess = false
 		}
