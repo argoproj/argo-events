@@ -159,6 +159,13 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.Refe
 							Format:      "",
 						},
 					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace of the gateway",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"name", "port", "endpoint"},
 			},
@@ -384,7 +391,14 @@ func schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref common.Refer
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is name of the sensor",
+							Description: "Name is the name of the sensor",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace of the sensor",
 							Type:        []string{"string"},
 							Format:      "",
 						},
