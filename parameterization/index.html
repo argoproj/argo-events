@@ -707,10 +707,11 @@
 <li><code>src</code>:<ol>
 <li><code>event</code>: the name of the event dependency</li>
 <li><code>path</code>: a key within event payload to look for</li>
-<li><code>value</code>: default value if sensor can't find <code>path</code> in event payload.   </li>
+<li><code>value</code>: default value if sensor can't find <code>path</code> in event payload</li>
 </ol>
 </li>
 <li><code>dest</code>: destination key within resource definition whose corresponding value needs to be replaced with value from event payload</li>
+<li><code>operation</code>: what to do with the existing value at <code>dest</code>, either <code>overwrite</code>, <code>prepend</code>, or <code>append</code></li>
 </ol>
                 
                   
