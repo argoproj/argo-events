@@ -466,6 +466,11 @@ type GitArtifact struct {
 	// +optional
 	Tag string `json:"tag,omitempty" protobuf:"bytes,8,opt,name=tag"`
 
+	// Ref to use to pull trigger resource. Will result in a shallow clone and
+	// fetch.
+	// +optional
+	Ref string `json:"ref,omitempty" protobuf:"bytes,8,opt,name=ref"`
+
 	// Remote to manage set of tracked repositories. Defaults to "origin".
 	// Refer https://git-scm.com/docs/git-remote
 	// +optional
