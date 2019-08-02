@@ -18,11 +18,16 @@ package slack
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/ghodss/yaml"
@@ -68,19 +73,34 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
 		})
 
-		rc.signingSecret = "9f3948e5883a385579c24f24492679b1"
+		rc.signingSecret = "abcdefghiklm1234567890"
 		convey.Convey("Validate request signature", func() {
 			writer := &gwcommon.FakeHttpWriter{}
-			payload := []byte("payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T24QES0P2%22%2C%22domain%22%3A%22maersk-aa%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U6X4142BW%22%2C%22username%22%3A%22adityasundaramurthy%22%2C%22name%22%3A%22adityasundaramurthy%22%2C%22team_id%22%3A%22T24QES0P2%22%7D%2C%22api_app_id%22%3A%22AKHHAA508%22%2C%22token%22%3A%22QxYPf6wsFFHWDanRC7dzkE6r%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22message_ts%22%3A%221564564667.011700%22%2C%22channel_id%22%3A%22G3PM6F8FQ%22%2C%22is_ephemeral%22%3Afalse%7D%2C%22trigger_id%22%3A%22714362264135.72830884784.fa12b0cef241fdd10c03f5e30c0d5053%22%2C%22channel%22%3A%7B%22id%22%3A%22G3PM6F8FQ%22%2C%22name%22%3A%22privategroup%22%7D%2C%22message%22%3A%7B%22type%22%3A%22message%22%2C%22subtype%22%3A%22bot_message%22%2C%22text%22%3A%22Build+failed+for+platform-docs%5C%2Fmaster%22%2C%22ts%22%3A%221564564667.011700%22%2C%22username%22%3A%22Argo%22%2C%22bot_id%22%3A%22BKHFKMQVA%22%2C%22blocks%22%3A%5B%7B%22type%22%3A%22section%22%2C%22block_id%22%3A%22s0Ga%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22%3Ax%3A+%2ABuild+Failed%2A+for+%2Aplatform-docs%5C%2Fmaster%2A.+Started+by+%2ASinval+Vieira+Mendes+Neto%2A%22%2C%22verbatim%22%3Afalse%7D%7D%2C%7B%22type%22%3A%22actions%22%2C%22block_id%22%3A%22BhQAq%22%2C%22elements%22%3A%5B%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%22l9lS%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22%3Abitbucket%3A+Commits%22%2C%22emoji%22%3Atrue%7D%2C%22url%22%3A%22https%3A%5C%2F%5C%2Fbitbucket.org%5C%2Fmaersk-analytics%5C%2Fplatform-docs%5C%2Fbranches%5C%2Fcompare%5C%2Fcbd11686494a7aee7f3a5298870102ad722231c6..1706a17e7a9a5c2610de03c79380a43975dcb21d%22%7D%2C%7B%22type%22%3A%22button%22%2C%22action_id%22%3A%223CyX%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22%3Aargo%3A+View+Build%22%2C%22emoji%22%3Atrue%7D%2C%22url%22%3A%22https%3A%5C%2F%5C%2Fargo-platform.maersk-digital.net%5C%2Fworkflows%5C%2Fargo-platform%5C%2Fplatform-docs--cbd11686--ci-1y1xo%22%7D%5D%7D%2C%7B%22type%22%3A%22divider%22%2C%22block_id%22%3A%22ktF%22%7D%5D%7D%2C%22response_url%22%3A%22https%3A%5C%2F%5C%2Fhooks.slack.com%5C%2Factions%5C%2FT24QES0P2%5C%2F714657463302%5C%2FwmNFMf3l9YSNfPt8DiNpXTUE%22%2C%22actions%22%3A%5B%7B%22action_id%22%3A%223CyX%22%2C%22block_id%22%3A%22BhQAq%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22%3Aargo%3A+View+Build%22%2C%22emoji%22%3Atrue%7D%2C%22type%22%3A%22button%22%2C%22action_ts%22%3A%221564619544.574857%22%7D%5D%7D")
+			payload := []byte("payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T0CAG%22%2C%22domain%22%3A%22acme-creamery%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U0CA5%22%2C%22username%22%3A%22Amy%20McGee%22%2C%22name%22%3A%22Amy%20McGee%22%2C%22team_id%22%3A%22T3MDE%22%7D%2C%22api_app_id%22%3A%22A0CA5%22%2C%22token%22%3A%22Shh_its_a_seekrit%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22text%22%3A%22The%20contents%20of%20the%20original%20message%20where%20the%20action%20originated%22%7D%2C%22trigger_id%22%3A%2212466734323.1395872398%22%2C%22response_url%22%3A%22https%3A%2F%2Fwww.postresponsestome.com%2FT123567%2F1509734234%22%2C%22actions%22%3A%5B%7B%22type%22%3A%22button%22%2C%22block_id%22%3A%22actionblock789%22%2C%22action_id%22%3A%2227S%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Link%20Button%22%2C%22emoji%22%3Atrue%7D%2C%22action_ts%22%3A%221564701248.149432%22%7D%5D%7D")
 			h := make(http.Header)
-			h.Add("X-Slack-Signature", "v0=1de993bb52746615527d944f2bc12ceebf071e298ac1372a21987ea3aeabb962")
-			h.Add("X-Slack-Request-Timestamp", "1564619544")
+
+			rts := int(time.Now().UTC().UnixNano())
+			hmac := hmac.New(sha256.New, []byte(rc.signingSecret))
+			b := strings.Join([]string{"v0", strconv.Itoa(rts), string(payload)}, ":")
+			hmac.Write([]byte(b))
+			hash := hex.EncodeToString(hmac.Sum(nil))
+			genSig := strings.TrimRight(strings.Join([]string{"v0=", hash}, ""), "\n")
+			h.Add("Content-Type", "application/x-www-form-urlencoded")
+			h.Add("X-Slack-Signature", genSig)
+			h.Add("X-Slack-Request-Timestamp", strconv.FormatInt(int64(rts), 10))
+
+			go func() {
+				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+			}()
+
 			rc.RouteHandler(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 				Header: h,
+				Method: "POST",
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 		})
+		rc.signingSecret = ""
 
 		convey.Convey("Test an event notification", func() {
 			writer := &gwcommon.FakeHttpWriter{}
