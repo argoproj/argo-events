@@ -102,8 +102,9 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 	}
 
 	lastT := time.Now()
+	var location *time.Location
 	if cal.Timezone != "" {
-		location, err := time.LoadLocation(cal.Timezone)
+		location, err = time.LoadLocation(cal.Timezone)
 		if err != nil {
 			errorCh <- err
 			return
@@ -122,6 +123,9 @@ func (ese *CalendarEventSourceExecutor) listenEvents(cal *calSchedule, eventSour
 		select {
 		case tx := <-timer:
 			lastT = tx
+			if location != nil {
+				lastT = lastT.In(location)
+			}
 			response := &calResponse{
 				EventTime:   tx,
 				UserPayload: cal.UserPayload,
