@@ -27,7 +27,7 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Ability to manage event sources at runtime.
 
 ## Core Concepts
-The framework is made up of two components: 
+The framework is made up of three components: 
 
  1. **Gateway** which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
 
