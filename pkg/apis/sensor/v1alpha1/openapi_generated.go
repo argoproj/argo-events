@@ -433,6 +433,13 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
+					"ref": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Ref to use to pull trigger resource. Will result in a shallow clone and fetch.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"remote": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
