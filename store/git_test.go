@@ -94,4 +94,10 @@ func TestGetBranchOrTag(t *testing.T) {
 		tag := gar.getBranchOrTag()
 		convey.So(tag.Branch, convey.ShouldNotEqual, "refs/heads/master")
 	})
+
+	convey.Convey("Given a git artifact with a specific ref, get the ref", t, func() {
+		gar.artifact.Ref = "refs/something/weird/or/specific"
+		br := gar.getBranchOrTag()
+		convey.So(br.Branch, convey.ShouldEqual, "refs/something/weird/or/specific")
+	})
 }
