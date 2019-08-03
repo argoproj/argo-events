@@ -77,7 +77,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 	logger.Info("Subscribing to GCP PubSub topic")
 	subscription_name := fmt.Sprintf("%s-%s", eventSource.Name, eventSource.Id)
 	subscription := client.Subscription(subscription_name)
-	exists, err = sub.Exists(ctx)
+	exists, err = subscription.Exists(ctx)
 
 	if err != nil {
 		errorCh <- err
@@ -93,7 +93,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 		}
 	}
 
-	err = sub.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
+	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		logger.Info("received GCP PubSub Message from topic")
 		dataCh <- m.Data
 		m.Ack()
@@ -107,7 +107,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 
 	// after this point, panic on errors
 	logger.Info("deleting GCP PubSub subscription")
-	if err = sub.Delete(context.Background()); err != nil {
+	if err = subscription.Delete(context.Background()); err != nil {
 		panic(err)
 	}
 
