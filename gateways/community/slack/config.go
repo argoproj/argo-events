@@ -36,14 +36,17 @@ type SlackEventSourceExecutor struct {
 }
 
 type RouteConfig struct {
-	route     *gwcommon.Route
-	ses       *slackEventSource
-	token     string
-	clientset kubernetes.Interface
-	namespace string
+	route         *gwcommon.Route
+	ses           *slackEventSource
+	token         string
+	signingSecret string
+	clientset     kubernetes.Interface
+	namespace     string
 }
 
 type slackEventSource struct {
+	// Slack App signing secret
+	SigningSecret *corev1.SecretKeySelector `json:"signingSecret,omitempty"`
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token"`
 	// Webhook
