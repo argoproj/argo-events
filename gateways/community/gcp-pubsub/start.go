@@ -61,12 +61,16 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 		return
 	}
 
-	var topic *pubsub.Topic
-	if sc.TopicProjectID != "" {
-		topic = client.TopicInProject(sc.Topic, sc.TopicProjectID)
-	} else {
-		topic = client.Topic(sc.Topic)
+	topicClient := client // use same client for topic and subscription by default
+	if sc.TopicProjectID != "" && sc.TopicProjectID != sc.ProjectID {
+		topicClient, err = pubsub.NewClient(ctx, sc.TopicProjectID, option.WithCredentialsFile(sc.CredentialsFile))
+		if err != nil {
+			errorCh <- err
+			return
+		}
 	}
+
+	topic := topicClient.Topic(sc.Topic)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
 		errorCh <- err
@@ -74,7 +78,7 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 	}
 	if !exists {
 		logger.Info("Creating GCP PubSub topic")
-		if _, err := client.CreateTopic(ctx, sc.Topic); err != nil {
+		if _, err := topicClient.CreateTopic(ctx, sc.Topic); err != nil {
 			errorCh <- err
 			return
 		}
