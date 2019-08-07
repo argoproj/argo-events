@@ -11,7 +11,7 @@ metadata:
 data:
   example-1: |-
     # id of your project
-    projectId: "my-fake-project-id"
+    projectID: "my-fake-project-id"
     # topic name
     topic: "my-fake-topic"
     # Refers to the credential file that is mounted in the gateway pod.
