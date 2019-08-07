@@ -17,9 +17,10 @@ limitations under the License.
 package pubsub
 
 import (
-	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
+
+	"cloud.google.com/go/pubsub"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/api/option"
@@ -60,7 +61,12 @@ func (ese *GcpPubSubEventSourceExecutor) listenEvents(ctx context.Context, sc *p
 		return
 	}
 
-	topic := client.Topic(sc.Topic)
+	var topic *pubsub.Topic
+	if sc.TopicProjectID != "" {
+		topic = client.TopicInProject(sc.Topic, sc.TopicProjectID)
+	} else {
+		topic = client.Topic(sc.Topic)
+	}
 	exists, err := topic.Exists(ctx)
 	if err != nil {
 		errorCh <- err
