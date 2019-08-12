@@ -43,8 +43,5 @@ func validateResource(config interface{}) error {
 	if res.Kind == "" {
 		return fmt.Errorf("resource kind must be specified")
 	}
-	if res.Group == "" {
-		return fmt.Errorf("resource group must be specified")
-	}
 	return nil
 }
