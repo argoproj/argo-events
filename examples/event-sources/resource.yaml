@@ -82,3 +82,14 @@ data:
       labels:
         workflows.argoproj.io/completed: "true"
       prefix: "hello"
+
+  # watch for completed workflows in any namespace
+  example-without-namespace: |-
+    # namespace: (omitted to match any namespace)
+    group: "k8s.io"
+    version: v1
+    kind: Workflow
+    type: ADDED
+    filter:
+      labels:
+        workflows.argoproj.io/completed: "true"

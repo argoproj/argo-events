@@ -37,9 +37,6 @@ func validateResource(config interface{}) error {
 	if res.Version == "" {
 		return fmt.Errorf("resource version must be specified")
 	}
-	if res.Namespace == "" {
-		return fmt.Errorf("resource namespace must be specified")
-	}
 	if res.Kind == "" {
 		return fmt.Errorf("resource kind must be specified")
 	}
