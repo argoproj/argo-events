@@ -304,13 +304,6 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 
 // createResourceObject creates K8s object for trigger
 func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, obj *unstructured.Unstructured) error {
-	namespace := obj.GetNamespace()
-	// Defaults to sensor's namespace
-	if namespace == "" {
-		namespace = sec.sensor.Namespace
-	}
-	obj.SetNamespace(namespace)
-
 	// passing parameters to the resource object requires 4 steps
 	// 1. marshaling the obj to JSON
 	// 2. extract the appropriate eventDependency events based on the resource params
@@ -319,6 +312,13 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 	if err := sec.applyParamsResource(trigger.ResourceParameters, obj); err != nil {
 		return err
 	}
+
+	namespace := obj.GetNamespace()
+	// Defaults to sensor's namespace
+	if namespace == "" {
+		namespace = sec.sensor.Namespace
+	}
+	obj.SetNamespace(namespace)
 
 	gvk := obj.GroupVersionKind()
 	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)

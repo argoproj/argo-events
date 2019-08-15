@@ -32,6 +32,9 @@ type GcpPubSubEventSourceExecutor struct {
 type pubSubEventSource struct {
 	// ProjectID is the unique identifier for your project on GCP
 	ProjectID string `json:"projectID"`
+	// TopicProjectID identifies the project where the topic should exist or be created
+	// (assumed to be the same as ProjectID by default)
+	TopicProjectID string `json:"topicProjectID"`
 	// Topic on which a subscription will be created
 	Topic string `json:"topic"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
