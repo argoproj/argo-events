@@ -35,9 +35,15 @@ filter:
 func TestParseConfig(t *testing.T) {
 	convey.Convey("Given a resource event source, parse it", t, func() {
 		ps, err := parseEventSource(es)
+
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*resource)
+
+		resource, ok := ps.(*resource)
 		convey.So(ok, convey.ShouldEqual, true)
+
+		convey.So(resource.Group, convey.ShouldEqual, "")
+		convey.So(resource.Version, convey.ShouldEqual, "v1")
+		convey.So(resource.Kind, convey.ShouldEqual, "Pod")
 	})
 }
