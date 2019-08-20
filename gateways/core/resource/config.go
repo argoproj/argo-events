@@ -39,8 +39,6 @@ type resource struct {
 	Namespace string `json:"namespace"`
 	// Filter is applied on the metadata of the resource
 	Filter *ResourceFilter `json:"filter,omitempty"`
-	// Version of the source
-	Version string `json:"version"`
 	// Group of the resource
 	metav1.GroupVersionKind `json:",inline"`
 	// Type is the event type. Refer https://github.com/kubernetes/apimachinery/blob/dcb391cde5ca0298013d43336817d20b74650702/pkg/watch/watch.go#L43

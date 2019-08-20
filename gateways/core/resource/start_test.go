@@ -71,15 +71,36 @@ func TestResolveGroupVersion(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		gv := ese.resolveGroupVersion(ps.(*resource))
 		convey.So(gv, convey.ShouldEqual, "v1")
+
+		// Resource with defined both Group & Version
 		gv = ese.resolveGroupVersion(&resource{
 			GroupVersionKind: metav1.GroupVersionKind{
 				Group:   "argoproj.io",
 				Kind:    "Fake",
 				Version: "v1alpha1",
 			},
-			Version: "v1alpha1",
 		})
 		convey.So(gv, convey.ShouldEqual, "argoproj.io/v1alpha1")
+
+		// Resource with undefined Group & defined Version
+		gv = ese.resolveGroupVersion(&resource{
+			GroupVersionKind: metav1.GroupVersionKind{
+				Group:   "",
+				Kind:    "Fake",
+				Version: "v1alpha1",
+			},
+		})
+		convey.So(gv, convey.ShouldEqual, "v1alpha1")
+
+		// Resource with Version == "v1"
+		gv = ese.resolveGroupVersion(&resource{
+			GroupVersionKind: metav1.GroupVersionKind{
+				Group:   "argoproj.io",
+				Kind:    "Fake",
+				Version: "v1",
+			},
+		})
+		convey.So(gv, convey.ShouldEqual, "argoproj.io/v1")
 	})
 }
 
@@ -93,7 +114,7 @@ func TestFilter(t *testing.T) {
 				Namespace: "fake",
 				Labels: map[string]string{
 					"workflows.argoproj.io/phase": "Succeeded",
-					"name": "my-workflow",
+					"name":                        "my-workflow",
 				},
 			},
 		}
