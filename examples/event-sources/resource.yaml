@@ -34,7 +34,7 @@ data:
   # watch all namespace related events
   example-with-all-types-and-no-filter: |-
     namespace: argo-events
-    group: "k8s.io"
+    group: ""
     version: "v1"
     kind: "Namespace"
 
@@ -51,7 +51,7 @@ data:
   # create event if pod with specified annotation gets deleted
   example-with-annotations-filter: |-
     namespace: argo-events
-    group: "k8s.io"
+    group: ""
     version: v1
     kind: Pod
     type: DELETED
@@ -71,7 +71,7 @@ data:
 
   example-with-multi-filters: |-
     namespace: argo-events
-    group: "k8s.io"
+    group: ""
     version: v1
     kind: Pod
     type: ADDED
@@ -82,3 +82,14 @@ data:
       labels:
         workflows.argoproj.io/completed: "true"
       prefix: "hello"
+
+  # watch for completed workflows in any namespace
+  example-without-namespace: |-
+    # namespace: (omitted to match any namespace)
+    group: "k8s.io"
+    version: v1
+    kind: Workflow
+    type: ADDED
+    filter:
+      labels:
+        workflows.argoproj.io/completed: "true"

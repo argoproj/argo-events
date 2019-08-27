@@ -217,7 +217,7 @@ func (ese *ResourceEventSourceExecutor) canWatchResource(apiResource *metav1.API
 }
 
 func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {
-	if obj.Version == "v1" {
+	if obj.Group == "" {
 		return obj.Version
 	}
 	return obj.Group + "/" + obj.Version
