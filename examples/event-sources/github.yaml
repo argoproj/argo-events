@@ -11,8 +11,6 @@ metadata:
     argo-events-event-source-version: v0.10
 data:
   example: |-
-    # id of the project
-    id: 123
     # owner of the repo
     owner: "argoproj"
     # repository name
@@ -52,7 +50,6 @@ data:
     contentType: "json"
 
   example-with-secure-connection: |-
-    id: 456
     owner: "argoproj"
     repository: "argo"
     hook:
