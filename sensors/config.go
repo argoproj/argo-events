@@ -28,7 +28,7 @@ import (
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	snats "github.com/nats-io/go-nats-streaming"
 	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
+	dynamic "k8s.io/client-go/deprecated-dynamic"
 	"k8s.io/client-go/kubernetes"
 )
 

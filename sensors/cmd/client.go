@@ -23,7 +23,7 @@ import (
 	sc "github.com/argoproj/argo-events/sensors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/dynamic"
+	dynamic "k8s.io/client-go/deprecated-dynamic"
 	"k8s.io/client-go/kubernetes"
 	"os"
 )
