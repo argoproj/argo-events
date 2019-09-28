@@ -36,7 +36,7 @@ Lets deploy a webhook gateway and sensor,
         
    Open another terminal window and enter 
    
-        kubectl port-forward -n argo-events <name_of_the_webhook_gateway_pod> 9003:9330
+        kubectl port-forward -n argo-events svc/webhook-gateway-svc 9003:12000
    
    You can now use `localhost:9003` to query webhook gateway
    
