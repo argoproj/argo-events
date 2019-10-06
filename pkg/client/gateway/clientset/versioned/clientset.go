@@ -19,17 +19,14 @@ package versioned
 
 import (
 	argoprojv1alpha1 "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
-	glog "github.com/golang/glog"
-	discovery "k8s.io/client-go/discovery"
-	rest "k8s.io/client-go/rest"
-	flowcontrol "k8s.io/client-go/util/flowcontrol"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/util/flowcontrol"
 )
 
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Argoproj() argoprojv1alpha1.ArgoprojV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -41,12 +38,6 @@ type Clientset struct {
 
 // ArgoprojV1alpha1 retrieves the ArgoprojV1alpha1Client
 func (c *Clientset) ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface {
-	return c.argoprojV1alpha1
-}
-
-// Deprecated: Argoproj retrieves the default version of ArgoprojClient.
-// Please explicitly pick a version.
-func (c *Clientset) Argoproj() argoprojv1alpha1.ArgoprojV1alpha1Interface {
 	return c.argoprojV1alpha1
 }
 
@@ -73,7 +64,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil

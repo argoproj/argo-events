@@ -22,7 +22,6 @@ set -o pipefail
 SCRIPT_ROOT=$(dirname "${BASH_SOURCE}")/..
 CODEGEN_PKG="$SCRIPT_ROOT/vendor/k8s.io/code-generator"
 
-
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
 				  github.com/argoproj/argo-events/pkg/client/sensor github.com/argoproj/argo-events/pkg/apis \
 					  "sensor:v1alpha1" \

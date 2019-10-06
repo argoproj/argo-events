@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/apimachinery/pkg/runtime"
 	"net/http"
 	"strings"
 	"testing"
@@ -36,7 +37,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
-	discoveryFake "k8s.io/client-go/discovery/fake"
+	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -65,7 +66,7 @@ spec:
         name: test-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -117,15 +118,10 @@ func (m *mockHttpWriter) WriteHeader(statusCode int) {
 
 func getsensorExecutionCtx(sensor *v1alpha1.Sensor) *sensorExecutionCtx {
 	kubeClientset := fake.NewSimpleClientset()
-	fakeDiscoveryClient := kubeClientset.Discovery().(*discoveryFake.FakeDiscovery)
-	clientPool := &FakeClientPool{
-		Fake: kubeClientset.Fake,
-	}
-	fakeDiscoveryClient.Resources = append(fakeDiscoveryClient.Resources, &podResourceList)
+	fakeDynamicClient := dynamicFake.NewSimpleDynamicClient(&runtime.Scheme{})
 	return &sensorExecutionCtx{
 		kubeClient:           kubeClientset,
-		discoveryClient:      fakeDiscoveryClient,
-		clientPool:           clientPool,
+		dynamicClient:        fakeDynamicClient,
 		log:                  common.NewArgoEventsLogger(),
 		sensorClient:         sensorFake.NewSimpleClientset(),
 		sensor:               sensor,

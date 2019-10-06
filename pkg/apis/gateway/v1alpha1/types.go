@@ -54,7 +54,8 @@ type Gateway struct {
 type GatewayList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Items           []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
+	// +listType=items
+	Items []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
 // GatewaySpec represents gateway specifications
@@ -131,9 +132,11 @@ type NodeStatus struct {
 
 // NotificationWatchers are components which are interested listening to notifications from this gateway
 type NotificationWatchers struct {
+	// +listType=gateways
 	// Gateways is the list of gateways interested in listening to notifications from this gateway
 	Gateways []GatewayNotificationWatcher `json:"gateways,omitempty" protobuf:"bytes,1,opt,name=gateways"`
 
+	// +listType=sensors
 	// Sensors is the list of sensors interested in listening to notifications from this gateway
 	Sensors []SensorNotificationWatcher `json:"sensors,omitempty" protobuf:"bytes,2,rep,name=sensors"`
 }
