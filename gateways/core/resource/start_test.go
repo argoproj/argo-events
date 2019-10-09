@@ -17,7 +17,6 @@ limitations under the License.
 package resource
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"github.com/mitchellh/mapstructure"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -26,83 +25,6 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 	"testing"
 )
-
-var (
-	ese = &ResourceEventSourceExecutor{
-		Log: common.NewArgoEventsLogger(),
-	}
-	resourceList = metav1.APIResourceList{
-		GroupVersion: "v1",
-		APIResources: []metav1.APIResource{
-			{
-				Group:        "",
-				Version:      "v1",
-				Name:         "fake-1",
-				Kind:         "Fake",
-				Namespaced:   true,
-				ShortNames:   []string{"f1"},
-				SingularName: "fake-1",
-				Verbs:        []string{"watch"},
-			},
-		},
-	}
-)
-
-func TestServerResourceForGVK(t *testing.T) {
-	convey.Convey("Given a resource gvk, discover the resource", t, func() {
-		result, err := ese.serverResourceForGVK(&resourceList, "Fake")
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(result.Kind, convey.ShouldEqual, "Fake")
-	})
-}
-
-func TestCanWatchResource(t *testing.T) {
-	convey.Convey("Given a resource, test if it can watched", t, func() {
-		result, err := ese.serverResourceForGVK(&resourceList, "Fake")
-		convey.So(err, convey.ShouldBeNil)
-		ok := ese.canWatchResource(result)
-		convey.So(ok, convey.ShouldEqual, true)
-	})
-}
-
-func TestResolveGroupVersion(t *testing.T) {
-	convey.Convey("Given a resource, resolve the group and version", t, func() {
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		gv := ese.resolveGroupVersion(ps.(*resource))
-		convey.So(gv, convey.ShouldEqual, "v1")
-
-		// Resource with defined both Group & Version
-		gv = ese.resolveGroupVersion(&resource{
-			GroupVersionKind: metav1.GroupVersionKind{
-				Group:   "argoproj.io",
-				Kind:    "Fake",
-				Version: "v1alpha1",
-			},
-		})
-		convey.So(gv, convey.ShouldEqual, "argoproj.io/v1alpha1")
-
-		// Resource with undefined Group & defined Version
-		gv = ese.resolveGroupVersion(&resource{
-			GroupVersionKind: metav1.GroupVersionKind{
-				Group:   "",
-				Kind:    "Fake",
-				Version: "v1alpha1",
-			},
-		})
-		convey.So(gv, convey.ShouldEqual, "v1alpha1")
-
-		// Resource with Version == "v1"
-		gv = ese.resolveGroupVersion(&resource{
-			GroupVersionKind: metav1.GroupVersionKind{
-				Group:   "argoproj.io",
-				Kind:    "Fake",
-				Version: "v1",
-			},
-		})
-		convey.So(gv, convey.ShouldEqual, "argoproj.io/v1")
-	})
-}
 
 func TestFilter(t *testing.T) {
 	convey.Convey("Given a resource object, apply filter on it", t, func() {
@@ -125,9 +47,9 @@ func TestFilter(t *testing.T) {
 		err = mapstructure.Decode(pod, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
-		ok := ese.passFilters("fake", &unstructured.Unstructured{
+		err = passFilters(&unstructured.Unstructured{
 			Object: outmap,
 		}, ps.(*resource).Filter)
-		convey.So(ok, convey.ShouldEqual, true)
+		convey.So(err, convey.ShouldBeNil)
 	})
 }

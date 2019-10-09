@@ -19,23 +19,25 @@ package resource
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/discovery"
+	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/dynamic/dynamicinformer"
+	"k8s.io/client-go/tools/cache"
 )
 
 // StartEventSource starts an event source
-func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+func (executor *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	log := executor.Log.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("operating on event source")
 
 	config, err := parseEventSource(eventSource.Data)
@@ -48,245 +50,160 @@ func (ese *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.E
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(config.(*resource), eventSource, dataCh, errorCh, doneCh)
+	go executor.listenEvents(config.(*resource), eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, executor.Log)
 }
 
 // listenEvents watches resource updates and consume those events
-func (ese *ResourceEventSourceExecutor) listenEvents(res *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	options := metav1.ListOptions{Watch: true}
-	if res.Filter != nil {
-		options.LabelSelector = labels.Set(res.Filter.Labels).AsSelector().String()
-	}
+	executor.Log.WithField(common.LabelEventSource, eventSource.Name).Info("started listening resource notifications")
 
-	ese.Log.WithField(common.LabelEventSource, eventSource.Name).Info("starting to watch to resource notifications")
-
-	resourceList, err := ese.discoverResources(res)
+	client, err := dynamic.NewForConfig(executor.K8RestConfig)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	apiResource, err := ese.serverResourceForGVK(resourceList, res.Kind)
-	if err != nil {
-		errorCh <- err
-		return
+	gvr := schema.GroupVersionResource{
+		Group:    resourceCfg.Group,
+		Version:  resourceCfg.Version,
+		Resource: resourceCfg.Resource,
 	}
 
-	if !ese.canWatchResource(apiResource) {
-		errorCh <- fmt.Errorf("watch functionality is not allowed on resource")
-		return
+	client.Resource(gvr)
+
+	options := &metav1.ListOptions{}
+
+	if resourceCfg.Filter != nil && resourceCfg.Filter.Labels != nil {
+		sel, err := LabelSelector(resourceCfg.Filter.Labels)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		options.LabelSelector = sel.String()
 	}
 
-	dynClientPool := dynamic.NewDynamicClientPool(ese.K8RestConfig)
-
-	gvk := schema.FromAPIVersionAndKind(resourceList.GroupVersion, apiResource.Kind)
-	client, err := dynClientPool.ClientForGroupVersionKind(gvk)
-	if err != nil {
-		errorCh <- err
-		return
+	if resourceCfg.Filter != nil && resourceCfg.Filter.Fields != nil {
+		sel, err := LabelSelector(resourceCfg.Filter.Fields)
+		if err != nil {
+			errorCh <- err
+			return
+		}
+		options.FieldSelector = sel.String()
 	}
 
-	watcher, err := client.Resource(apiResource, res.Namespace).Watch(options)
-	if err != nil {
-		errorCh <- err
-		return
+	tweakListOptions := func(op *metav1.ListOptions) {
+		op = options
 	}
 
-	watchCh := make(chan struct{})
-	// key is group version kind name
-	resourceObjects := make(map[string]string)
+	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceCfg.Namespace, tweakListOptions)
 
-	localDoneCh := doneCh
+	informer := factory.ForResource(gvr)
 
-	go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
-
-	// renews watch
-	// Todo: we shouldn't keep on renewing watch by ourselves but rather use dynamicinformer NewFilteredDynamicSharedInformerFactory https://github.com/kubernetes/client-go/blob/master/dynamic/dynamicinformer/informer.go
-	// But this is available from go client release 1.10. It is not possible to upgrade without upgrading Argo, because it has dependency on release 1.9
-	// Resolution- Create PR for Argo to upgrade go client version.
+	informerEventCh := make(chan *InformerEvent)
 
 	go func() {
 		for {
 			select {
-			case <-watchCh:
-				watcher, err := client.Resource(apiResource, res.Namespace).Watch(options)
-				if err != nil {
-					errorCh <- err
+			case event, ok := <-informerEventCh:
+				if !ok {
 					return
 				}
-				go ese.watchObjectChannel(watcher, res, eventSource, resourceObjects, dataCh, errorCh, watchCh, localDoneCh)
-			case <-localDoneCh:
-				return
+				eventBody, err := json.Marshal(event)
+				if err != nil {
+					executor.Log.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to parse event from resource informer")
+					continue
+				}
+				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceCfg.Filter); err != nil {
+					executor.Log.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Warnln("failed to apply the filter")
+					continue
+				}
+				dataCh <- eventBody
 			}
 		}
 	}()
 
-	<-doneCh
+	sharedInformer := informer.Informer()
+	sharedInformer.AddEventHandler(
+		cache.ResourceEventHandlerFuncs{
+			AddFunc: func(obj interface{}) {
+				informerEventCh <- &InformerEvent{
+					Obj:  obj,
+					Type: ADD,
+				}
+			},
+			UpdateFunc: func(oldObj, newObj interface{}) {
+				informerEventCh <- &InformerEvent{
+					Obj:    newObj,
+					OldObj: oldObj,
+					Type:   UPDATE,
+				}
+			},
+			DeleteFunc: func(obj interface{}) {
+				informerEventCh <- &InformerEvent{
+					Obj:  obj,
+					Type: DELETE,
+				}
+			},
+		},
+	)
+
+	sharedInformer.Run(doneCh)
+	executor.Log.WithField(common.LabelEventSource, eventSource.Name).Infoln("resource informer is stopped")
+	close(informerEventCh)
 	close(doneCh)
 }
 
-func (ese *ResourceEventSourceExecutor) watchObjectChannel(watcher watch.Interface, res *resource, eventSource *gateways.EventSource, resourceObjects map[string]string, dataCh chan []byte, errorCh chan error, watchCh chan struct{}, doneCh chan struct{}) {
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-	for {
-		select {
-		case item := <-watcher.ResultChan():
-			if item.Object == nil {
-				log.Info("watch ended, creating a new watch")
-				watchCh <- struct{}{}
-				return
-			}
-
-			if res.Type != "" && item.Type != res.Type {
-				log.WithFields(
-					map[string]interface{}{
-						"actual-event-type":   string(item.Type),
-						"expected-event-type": string(res.Type),
-					},
-				).Warn("event type mismatched. won't consume the event")
-				continue
-			}
-
-			itemObj, isUnst := item.Object.(*unstructured.Unstructured)
-			if !isUnst {
-				continue
-			}
-			b, err := itemObj.MarshalJSON()
-			if err != nil {
-				errorCh <- err
-				return
-			}
-			if item.Type == watch.Error {
-				err = errors.FromObject(item.Object)
-				errorCh <- err
-				return
-			}
-
-			resourceKey := fmt.Sprintf("%s%s%s%s", res.GroupVersionKind.Group, res.GroupVersionKind.Version, res.GroupVersionKind.Kind, itemObj.GetName())
-
-			watchedObj, _ := json.Marshal((*itemObj).DeepCopyObject())
-
-			if obj, ok := resourceObjects[resourceKey]; ok {
-				if string(watchedObj) == obj {
-					log.Info("update is already watched")
-					continue
-				}
-			}
-			resourceObjects[resourceKey] = string(watchedObj)
-
-			if ese.passFilters(eventSource.Name, itemObj, res.Filter) {
-				dataCh <- b
-			}
-
-		case <-doneCh:
-			return
-		}
-	}
-}
-
-func (ese *ResourceEventSourceExecutor) discoverResources(obj *resource) (*metav1.APIResourceList, error) {
-	disco, err := discovery.NewDiscoveryClientForConfig(ese.K8RestConfig)
+// LabelReq returns label requirements
+func LabelReq(key, value string) (*labels.Requirement, error) {
+	req, err := labels.NewRequirement(key, selection.Equals, []string{value})
 	if err != nil {
 		return nil, err
 	}
-	groupVersion := ese.resolveGroupVersion(obj)
-	return disco.ServerResourcesForGroupVersion(groupVersion)
+	return req, nil
 }
 
-func (ese *ResourceEventSourceExecutor) serverResourceForGVK(resourceInterfaces *metav1.APIResourceList, kind string) (*metav1.APIResource, error) {
-	for i := range resourceInterfaces.APIResources {
-		apiResource := resourceInterfaces.APIResources[i]
-		if apiResource.Kind == kind {
-			return &apiResource, nil
+// LabelSelector returns label selector for resource filtering
+func LabelSelector(resourceLabels map[string]string) (labels.Selector, error) {
+	var labelRequirements []labels.Requirement
+	for key, value := range resourceLabels {
+		req, err := LabelReq(key, value)
+		if err != nil {
+			return nil, err
 		}
+		labelRequirements = append(labelRequirements, *req)
 	}
-	ese.Log.WithField("kind", kind).Error("no resource found")
-	return nil, fmt.Errorf("no resource found")
+	return labels.NewSelector().Add(labelRequirements...), nil
 }
 
-func (ese *ResourceEventSourceExecutor) canWatchResource(apiResource *metav1.APIResource) bool {
-	for _, verb := range apiResource.Verbs {
-		if verb == "watch" {
-			return true
+// FieldSelector returns field selector for resource filtering
+func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
+	var selectors []fields.Selector
+	for key, value := range fieldSelectors {
+		selector, err := fields.ParseSelector(fmt.Sprintf("%s=%s", key, value))
+		if err != nil {
+			return nil, err
 		}
+		selectors = append(selectors, selector)
 	}
-	return false
+	return fields.AndSelectors(selectors...), nil
 }
 
-func (ese *ResourceEventSourceExecutor) resolveGroupVersion(obj *resource) string {
-	if obj.Group == "" {
-		return obj.Version
-	}
-	return obj.Group + "/" + obj.Version
-}
-
-// helper method to return a flag indicating if the object passed the client side filters
-func (ese *ResourceEventSourceExecutor) passFilters(esName string, obj *unstructured.Unstructured, filter *ResourceFilter) bool {
-	log := ese.Log.WithField(common.LabelEventSource, esName)
-
+// helper method to check if the object passed the user defined filters
+func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) error {
 	// no filters are applied.
 	if filter == nil {
-		return true
+		return nil
 	}
-	// check prefix
 	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		log.WithFields(
-			map[string]interface{}{
-				"resource-name": obj.GetName(),
-				"prefix":        filter.Prefix,
-			},
-		).Info("resource name does not match prefix")
-		return false
+		return errors.Errorf("resource name does not match prefix. resource-name: %s, prefix: %s", obj.GetName(), filter.Prefix)
 	}
-	// check creation timestamp
 	created := obj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.WithFields(
-			map[string]interface{}{
-				"creation-timestamp": created.UTC().String(),
-				"createdBy":          filter.CreatedBy.UTC().String(),
-			},
-		).Info("resource creation timestamp is after createdBy")
-		return false
+		return errors.Errorf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
 	}
-	// check labels
-	if ok := checkMap(filter.Labels, obj.GetLabels()); !ok {
-		log.WithFields(
-			map[string]interface{}{
-				"resource-labels": obj.GetLabels(),
-				"filter-labels":   filter.Labels,
-			},
-		).Info("labels mismatch")
-		return false
-	}
-	// check annotations
-	if ok := checkMap(filter.Annotations, obj.GetAnnotations()); !ok {
-		log.WithFields(
-			map[string]interface{}{
-				"resource-annotations": obj.GetAnnotations(),
-				"filter-annotations":   filter.Annotations,
-			},
-		).Info("annotations mismatch")
-		return false
-	}
-	return true
-}
-
-// utility method to check the actual map matches the expected by values
-func checkMap(expected, actual map[string]string) bool {
-	if actual != nil {
-		for k, v := range expected {
-			if actual[k] != v {
-				return false
-			}
-		}
-		return true
-	}
-	if expected != nil {
-		return false
-	}
-	return true
+	return nil
 }

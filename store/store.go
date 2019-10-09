@@ -18,11 +18,11 @@ package store
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 
 	// import packages for the universal deserializer
@@ -45,20 +45,24 @@ func init() {
 	}
 }
 
+var (
+	registry = runtime.NewEquivalentResourceRegistry()
+)
+
 // ArtifactReader enables reading artifacts from an external store
 type ArtifactReader interface {
 	Read() ([]byte, error)
 }
 
 // FetchArtifact from the location, decode it using explicit types, and unstructure it
-func FetchArtifact(reader ArtifactReader, gvk *metav1.GroupVersionKind) (*unstructured.Unstructured, error) {
+func FetchArtifact(reader ArtifactReader, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	var err error
 	var obj []byte
 	obj, err = reader.Read()
 	if err != nil {
 		return nil, err
 	}
-	return decodeAndUnstructure(obj, gvk)
+	return decodeAndUnstructure(obj, gvr)
 }
 
 // GetArtifactReader returns the ArtifactReader for this location
@@ -87,14 +91,14 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, cl
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
-func decodeAndUnstructure(b []byte, gvk *metav1.GroupVersionKind) (*unstructured.Unstructured, error) {
-	gvk1 := &schema.GroupVersionKind{
-		Group:   gvk.Group,
-		Version: gvk.Version,
-		Kind:    gvk.Kind,
-	}
+func decodeAndUnstructure(b []byte, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+	gvk := registry.KindFor(schema.GroupVersionResource{
+		Group:    gvr.Group,
+		Version:  gvr.Version,
+		Resource: gvr.Resource,
+	}, "")
 
-	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(b, gvk1, nil)
+	obj, _, err := scheme.Codecs.UniversalDeserializer().Decode(b, &gvk, nil)
 	if err != nil {
 		return nil, err
 	}

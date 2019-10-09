@@ -25,7 +25,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *ResourceEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (executor *ResourceEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateResource)
 }
 
@@ -35,10 +35,10 @@ func validateResource(config interface{}) error {
 		return gwcommon.ErrNilEventSource
 	}
 	if res.Version == "" {
-		return fmt.Errorf("resource version must be specified")
+		return fmt.Errorf("version must be specified")
 	}
-	if res.Kind == "" {
-		return fmt.Errorf("resource kind must be specified")
+	if res.Resource == "" {
+		return fmt.Errorf("resource must be specified")
 	}
 	return nil
 }

@@ -25,11 +25,11 @@ var es = `
 namespace: "argo-events"
 group: ""
 version: "v1"
-kind: "Pod"
+resource: "pods"
 filter:
     labels:
-    workflows.argoproj.io/phase: Succeeded
-    name: "my-workflow"
+     workflows.argoproj.io/phase: Succeeded
+     name: "my-workflow"
 `
 
 func TestParseConfig(t *testing.T) {
@@ -44,6 +44,6 @@ func TestParseConfig(t *testing.T) {
 
 		convey.So(resource.Group, convey.ShouldEqual, "")
 		convey.So(resource.Version, convey.ShouldEqual, "v1")
-		convey.So(resource.Kind, convey.ShouldEqual, "Pod")
+		convey.So(resource.Resource, convey.ShouldEqual, "pods")
 	})
 }

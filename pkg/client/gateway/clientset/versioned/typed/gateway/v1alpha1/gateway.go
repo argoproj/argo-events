@@ -18,12 +18,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	scheme "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/scheme"
+	"time"
+
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/rest"
 )
 
 // GatewaysGetter has a method to return a GatewayInterface.
@@ -75,11 +77,16 @@ func (c *gateways) Get(name string, options v1.GetOptions) (result *v1alpha1.Gat
 
 // List takes label and field selectors, and returns the list of Gateways that match those selectors.
 func (c *gateways) List(opts v1.ListOptions) (result *v1alpha1.GatewayList, err error) {
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
 	result = &v1alpha1.GatewayList{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("gateways").
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Timeout(timeout).
 		Do().
 		Into(result)
 	return
@@ -87,11 +94,16 @@ func (c *gateways) List(opts v1.ListOptions) (result *v1alpha1.GatewayList, err 
 
 // Watch returns a watch.Interface that watches the requested gateways.
 func (c *gateways) Watch(opts v1.ListOptions) (watch.Interface, error) {
+	var timeout time.Duration
+	if opts.TimeoutSeconds != nil {
+		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
+	}
 	opts.Watch = true
 	return c.client.Get().
 		Namespace(c.ns).
 		Resource("gateways").
 		VersionedParams(&opts, scheme.ParameterCodec).
+		Timeout(timeout).
 		Watch()
 }
 
@@ -149,10 +161,15 @@ func (c *gateways) Delete(name string, options *v1.DeleteOptions) error {
 
 // DeleteCollection deletes a collection of objects.
 func (c *gateways) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+	var timeout time.Duration
+	if listOptions.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("gateways").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
+		Timeout(timeout).
 		Body(options).
 		Do().
 		Error()

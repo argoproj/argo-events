@@ -19,6 +19,7 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/common"
@@ -228,7 +229,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 		if err != nil {
 			return err
 		}
-		uObj, err := store.FetchArtifact(reader, trigger.Template.GroupVersionKind)
+		uObj, err := store.FetchArtifact(reader, trigger.Template.GroupVersionResource)
 		if err != nil {
 			return err
 		}
@@ -240,7 +241,7 @@ func (sec *sensorExecutionCtx) executeTrigger(trigger v1alpha1.Trigger) error {
 }
 
 // applyTriggerPolicy applies backoff and evaluates success/failure for a trigger
-func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, resourceInterface dynamic.ResourceInterface, name, namespace string) error {
+func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, resourceInterface dynamic.NamespaceableResourceInterface, name, namespace string) error {
 	err := wait.ExponentialBackoff(wait.Backoff{
 		Duration: trigger.Policy.Backoff.Duration,
 		Steps:    trigger.Policy.Backoff.Steps,
@@ -320,25 +321,13 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 	}
 	obj.SetNamespace(namespace)
 
-	gvk := obj.GroupVersionKind()
-	client, err := sec.clientPool.ClientForGroupVersionKind(gvk)
-	if err != nil {
-		return fmt.Errorf("failed to get client for given group version and kind. err: %+v", err)
-	}
+	dynamicResInterface := sec.dynamicClient.Resource(schema.GroupVersionResource{
+		Group:    trigger.Template.Group,
+		Version:  trigger.Template.Version,
+		Resource: trigger.Template.Resource,
+	})
 
-	apiResource, err := common.ServerResourceForGroupVersionKind(sec.discoveryClient, gvk)
-	if err != nil {
-		return fmt.Errorf("failed to get server resource for given group version and kind. err: %+v", err)
-	}
-
-	sec.log.WithFields(
-		map[string]interface{}{
-			"api":           apiResource.Name,
-			"group-version": gvk.Version,
-		}).Info("created api resource")
-
-	reIf := client.Resource(apiResource, namespace)
-	liveObj, err := reIf.Create(obj)
+	liveObj, err := dynamicResInterface.Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
@@ -353,7 +342,7 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 	if trigger.Policy != nil {
 		sec.log.Info("applying trigger policy...")
 
-		if err := sec.applyTriggerPolicy(trigger, reIf, liveObj.GetName(), namespace); err != nil {
+		if err := sec.applyTriggerPolicy(trigger, dynamicResInterface, liveObj.GetName(), namespace); err != nil {
 			if err == wait.ErrWaitTimeout {
 				if trigger.Policy.ErrorOnBackoffTimeout {
 					return fmt.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
