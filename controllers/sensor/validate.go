@@ -117,7 +117,7 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template.Source == nil {
 		return fmt.Errorf("trigger '%s' does not contain an absolute action", template.Name)
 	}
-	if template.GroupVersionKind == nil {
+	if template.GroupVersionResource == nil {
 		return fmt.Errorf("must provide group, version and kind for the resource")
 	}
 	if template.When != nil && template.When.All != nil && template.When.Any != nil {

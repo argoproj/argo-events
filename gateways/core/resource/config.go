@@ -20,11 +20,25 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/rest"
 )
 
 const ArgoEventsEventSourceVersion = "v0.10"
+
+type EventType string
+
+const (
+	ADD    EventType = "ADD"
+	UPDATE EventType = "UPDATE"
+	DELETE EventType = "DELETE"
+)
+
+// InformerEvent holds event generated from resource state change
+type InformerEvent struct {
+	Obj    interface{}
+	OldObj interface{}
+	Type   EventType
+}
 
 // ResourceEventSourceExecutor implements Eventing
 type ResourceEventSourceExecutor struct {
@@ -40,10 +54,10 @@ type resource struct {
 	// Filter is applied on the metadata of the resource
 	Filter *ResourceFilter `json:"filter,omitempty"`
 	// Group of the resource
-	metav1.GroupVersionKind `json:",inline"`
-	// Type is the event type. Refer https://github.com/kubernetes/apimachinery/blob/dcb391cde5ca0298013d43336817d20b74650702/pkg/watch/watch.go#L43
+	metav1.GroupVersionResource `json:",inline"`
+	// Type is the event type.
 	// If not provided, the gateway will watch all events for a resource.
-	Type watch.EventType `json:"type,omitempty"`
+	Type EventType `json:"type,omitempty"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
@@ -51,6 +65,7 @@ type ResourceFilter struct {
 	Prefix      string            `json:"prefix,omitempty"`
 	Labels      map[string]string `json:"labels,omitempty"`
 	Annotations map[string]string `json:"annotations,omitempty"`
+	Fields      map[string]string `json:"fields,omitempty"`
 	CreatedBy   metav1.Time       `json:"createdBy,omitempty"`
 }
 

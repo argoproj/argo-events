@@ -22,7 +22,6 @@ import (
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	sc "github.com/argoproj/argo-events/sensors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"os"
@@ -57,10 +56,9 @@ func main() {
 		panic(fmt.Errorf("failed to retrieve sensor. err: %+v", err))
 	}
 
-	clientPool := dynamic.NewDynamicClientPool(restConfig)
-	disco := discovery.NewDiscoveryClientForConfigOrDie(restConfig)
+	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
 
 	// wait for sensor http server to shutdown
-	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, clientPool, disco, sensor, controllerInstanceID)
+	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, dynamicClient, sensor, controllerInstanceID)
 	sensorExecutionCtx.WatchEventsFromGateways()
 }

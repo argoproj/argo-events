@@ -18,13 +18,13 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/testing"
 )
 
 // FakeGateways implements GatewayInterface
@@ -61,7 +61,7 @@ func (c *FakeGateways) List(opts v1.ListOptions) (result *v1alpha1.GatewayList, 
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.GatewayList{}
+	list := &v1alpha1.GatewayList{ListMeta: obj.(*v1alpha1.GatewayList).ListMeta}
 	for _, item := range obj.(*v1alpha1.GatewayList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -130,7 +130,7 @@ func (c *FakeGateways) DeleteCollection(options *v1.DeleteOptions, listOptions v
 // Patch applies the patch and returns the patched gateway.
 func (c *FakeGateways) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Gateway, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(gatewaysResource, c.ns, name, data, subresources...), &v1alpha1.Gateway{})
+		Invokes(testing.NewPatchSubresourceAction(gatewaysResource, c.ns, name, pt, data, subresources...), &v1alpha1.Gateway{})
 
 	if obj == nil {
 		return nil, err

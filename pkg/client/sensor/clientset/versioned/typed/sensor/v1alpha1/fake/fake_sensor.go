@@ -18,13 +18,13 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/testing"
 )
 
 // FakeSensors implements SensorInterface
@@ -61,7 +61,7 @@ func (c *FakeSensors) List(opts v1.ListOptions) (result *v1alpha1.SensorList, er
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1alpha1.SensorList{}
+	list := &v1alpha1.SensorList{ListMeta: obj.(*v1alpha1.SensorList).ListMeta}
 	for _, item := range obj.(*v1alpha1.SensorList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -118,7 +118,7 @@ func (c *FakeSensors) DeleteCollection(options *v1.DeleteOptions, listOptions v1
 // Patch applies the patch and returns the patched sensor.
 func (c *FakeSensors) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Sensor, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(sensorsResource, c.ns, name, data, subresources...), &v1alpha1.Sensor{})
+		Invokes(testing.NewPatchSubresourceAction(sensorsResource, c.ns, name, pt, data, subresources...), &v1alpha1.Sensor{})
 
 	if obj == nil {
 		return nil, err
