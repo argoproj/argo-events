@@ -59,7 +59,7 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 
 	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
-	hdfsConfig, err := createHDFSConfig(ese.Clientset, ese.Namespace, &config.GatewayClientConfig)
+	hdfsConfig, err := createHDFSConfig(ese.Clientset, ese.Namespace, &GatewayClientConfig)
 	if err != nil {
 		errorCh <- err
 		return

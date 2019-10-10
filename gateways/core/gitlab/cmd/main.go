@@ -21,7 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/slack"
+	"github.com/argoproj/argo-events/gateways/core/gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -36,9 +36,9 @@ func main() {
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&slack.SlackEventSourceExecutor{
+	gateways.StartGateway(&gitlab.GitlabEventSourceExecutor{
 		Log:       common.NewArgoEventsLogger(),
-		Clientset: clientset,
 		Namespace: namespace,
+		Clientset: clientset,
 	})
 }

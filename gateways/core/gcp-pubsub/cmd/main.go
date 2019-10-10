@@ -17,28 +17,13 @@ limitations under the License.
 package main
 
 import (
-	"os"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/gitlab"
-	"k8s.io/client-go/kubernetes"
+	"github.com/argoproj/argo-events/gateways/core/gcp-pubsub"
 )
 
 func main() {
-	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
-	restConfig, err := common.GetClientConfig(kubeConfig)
-	if err != nil {
-		panic(err)
-	}
-	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
-	if !ok {
-		panic("namespace is not provided")
-	}
-	gateways.StartGateway(&gitlab.GitlabEventSourceExecutor{
-		Log:       common.NewArgoEventsLogger(),
-		Namespace: namespace,
-		Clientset: clientset,
+	gateways.StartGateway(&pubsub.GcpPubSubEventSourceExecutor{
+		Log: common.NewArgoEventsLogger(),
 	})
 }

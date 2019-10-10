@@ -50,10 +50,10 @@ func validateGatewayConfig(config interface{}) error {
 			return errors.New("failed to parse interval")
 		}
 	}
-	err := gwc.WatchPathConfig.Validate()
+	err := WatchPathConfig.Validate()
 	if err != nil {
 		return err
 	}
-	err = gwc.GatewayClientConfig.Validate()
+	err = GatewayClientConfig.Validate()
 	return err
 }

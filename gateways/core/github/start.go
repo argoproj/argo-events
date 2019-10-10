@@ -218,7 +218,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 			common.LabelEventSource: r.EventSource.Name,
 			common.LabelEndpoint:    r.Webhook.Endpoint,
 			common.LabelPort:        r.Webhook.Port,
-			"hi": "lol",
+			"hi":                    "lol",
 		})
 
 	logger.Info("request received")

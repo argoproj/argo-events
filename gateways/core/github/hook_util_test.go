@@ -1,9 +1,9 @@
 package github
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	gh "github.com/google/go-github/github"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestSliceEqual(t *testing.T) {

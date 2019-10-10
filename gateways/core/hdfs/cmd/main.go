@@ -5,7 +5,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/hdfs"
+	"github.com/argoproj/argo-events/gateways/core/hdfs"
 	"k8s.io/client-go/kubernetes"
 )
 

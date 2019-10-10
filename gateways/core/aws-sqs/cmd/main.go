@@ -1,5 +1,5 @@
 /*
-Copyright 2018 KompiTech GmbH
+Copyright 2018 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/github"
+	"github.com/argoproj/argo-events/gateways/core/aws-sqs"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {
@@ -35,9 +36,9 @@ func main() {
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&github.GithubEventSourceExecutor{
+	gateways.StartGateway(&aws_sqs.SQSEventSourceExecutor{
 		Log:       common.NewArgoEventsLogger(),
-		Namespace: namespace,
 		Clientset: clientset,
+		Namespace: namespace,
 	})
 }

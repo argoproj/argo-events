@@ -66,8 +66,8 @@ func (rc *RouteConfig) PostStart() error {
 	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
 
 	opt := &gitlab.AddProjectHookOptions{
-		URL:   &formattedUrl,
-		Token: &c.token,
+		URL:                   &formattedUrl,
+		Token:                 &c.token,
 		EnableSSLVerification: &rc.ges.EnableSSLVerification,
 	}
 

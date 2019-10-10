@@ -19,7 +19,7 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/community/storagegrid"
+	"github.com/argoproj/argo-events/gateways/core/storagegrid"
 )
 
 func main() {
