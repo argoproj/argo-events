@@ -211,30 +211,87 @@ type PubSubEventSource struct {
 
 // GithubEventSource refers to event-source for github related events
 type GithubEventSource struct {
-	// Webhook ID
-	Id int64 `json:"id"`
-	// Webhook
-	Hook *gwcommon.Webhook `json:"hook"`
-	// GitHub owner name i.e. argoproj
-	Owner string `json:"owner"`
-	// GitHub repo name i.e. argo-events
-	Repository string `json:"repository"`
-	// Github events to subscribe to which the gateway will subscribe
-	Events []string `json:"events"`
-	// K8s secret containing github api token
+	// Id is the webhook's id
+	Id int64 `json:"id" protobuf:"bytes,1,name=id"`
+	// Webhook refers to the configuration required to run a http server
+	Webhook *gwcommon.Webhook `json:"hook" protobuf:"bytes,2,name=webhook"`
+	// Owner refers to GitHub owner name i.e. argoproj
+	Owner string `json:"owner" protobuf:"bytes,3,name=owner"`
+	// Repository refers to GitHub repo name i.e. argo-events
+	Repository string `json:"repository" protobuf:"bytes,4,name=repository"`
+	// Events refer to Github events to subscribe to which the gateway will subscribe
+	// +listType=events
+	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
+	// APIToken refers to a K8s secret containing github api token
 	APIToken *corev1.SecretKeySelector `json:"apiToken"`
-	// K8s secret containing WebHook Secret
-	WebHookSecret *corev1.SecretKeySelector `json:"webHookSecret"`
+	// Webhook secret refers to K8s secret containing Webhook secret
+	// https://developer.github.com/webhooks/securing/
+	// +optional
+	WebHookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
 	// Insecure tls verification
-	Insecure bool `json:"insecure"`
-	// Active
-	Active bool `json:"active"`
-	// ContentType json or form
-	ContentType string `json:"contentType"`
+	Insecure bool `json:"insecure,omitempty" protobuf:"bytes,8,opt,name=insecure"`
+	// Active refers to status of the webhook for event deliveries.
+	// https://developer.github.com/webhooks/creating/#active
+	// +optional
+	Active bool `json:"active,omitempty" protobuf:"bytes,9,opt,name=active"`
+	// ContentType of the event delivery
+	ContentType string `json:"contentType,omitempty" protobuf:"bytes,10,opt,name=contentType"`
 	// GitHub base URL (for GitHub Enterprise)
-	GithubBaseURL string `json:"githubBaseURL"`
+	// +optional
+	GithubBaseURL string `json:"githubBaseURL,omitempty" protobuf:"bytes,11,opt,name=githubBaseURL"`
 	// GitHub upload URL (for GitHub Enterprise)
-	GithubUploadURL string `json:"githubUploadURL"`
+	// +optional
+	GithubUploadURL string `json:"githubUploadURL,omitempty" protobuf:"bytes,12,opt,name=githubUploadURL"`
+}
+
+// GitlabEventSource refers to event-source related to Gitlab events
+type GitlabEventSource struct {
+	// Webhook holds configuration to run a http server
+	Webhook *gwcommon.Webhook `json:"hook" protobuf:"bytes,1,name=webhook"`
+	// ProjectId is the id of project for which integration needs to setup
+	ProjectId string `json:"projectId" protobuf:"bytes,2,name=projectId"`
+	// Event is a gitlab event to listen to.
+	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
+	Event string `json:"event" protobuf:"bytes,3,name=event"`
+	// AccessToken is reference to k8 secret which holds the gitlab api access information
+	AccessToken *corev1.SecretKeySelector `json:"accessToken" protobuf:"bytes,4,name=accessToken"`
+	// EnableSSLVerification to enable ssl verification
+	// +optional
+	EnableSSLVerification bool `json:"enableSSLVerification,omitempty" protobuf:"bytes,5,opt,name=enableSSLVerification"`
+	// GitlabBaseURL is the base URL for API requests to a custom endpoint
+	GitlabBaseURL string `json:"gitlabBaseURL" protobuf:"bytes,6,name=gitlabBaseURL"`
+}
+
+// HDFSEventSource refers to event-source for HDFS related events
+type HDFSEventSource struct {
+	gwcommon.WatchPathConfig `json:",inline"`
+	// Type of file operations to watch
+	Type string `json:"type"`
+	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
+	CheckInterval string `json:"checkInterval,omitempty"`
+	// Addresses is accessible addresses of HDFS name nodes
+	Addresses []string `json:"addresses"`
+	// HDFSUser is the user to access HDFS file system.
+	// It is ignored if either ccache or keytab is used.
+	HDFSUser string `json:"hdfsUser,omitempty"`
+	// KrbCCacheSecret is the secret selector for Kerberos ccache
+	// Either ccache or keytab can be set to use Kerberos.
+	KrbCCacheSecret *corev1.SecretKeySelector `json:"krbCCacheSecret,omitempty"`
+	// KrbKeytabSecret is the secret selector for Kerberos keytab
+	// Either ccache or keytab can be set to use Kerberos.
+	KrbKeytabSecret *corev1.SecretKeySelector `json:"krbKeytabSecret,omitempty"`
+	// KrbUsername is the Kerberos username used with Kerberos keytab
+	// It must be set if keytab is used.
+	KrbUsername string `json:"krbUsername,omitempty"`
+	// KrbRealm is the Kerberos realm used with Kerberos keytab
+	// It must be set if keytab is used.
+	KrbRealm string `json:"krbRealm,omitempty"`
+	// KrbConfig is the configmap selector for Kerberos config as string
+	// It must be set if either ccache or keytab is used.
+	KrbConfigConfigMap *corev1.ConfigMapKeySelector `json:"krbConfigConfigMap,omitempty"`
+	// KrbServicePrincipalName is the principal name of Kerberos service
+	// It must be set if either ccache or keytab is used.
+	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty"`
 }
 
 // EventSourceStatus holds the status of the event-source resource
