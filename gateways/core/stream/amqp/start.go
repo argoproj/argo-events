@@ -18,6 +18,7 @@ package amqp
 
 import (
 	"fmt"
+	"time"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	amqplib "github.com/streadway/amqp"
@@ -44,6 +45,31 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
 }
 
+func getLimitedDelivery(ch *amqplib.Channel, a *amqp, delivery chan amqplib.Delivery, queue string) {
+	for {
+		var elapsedTime int64
+		startTime := time.Now().Unix()
+
+		for i := uint32(0); i < a.RateLimit; i++ {
+			msg, ok, err := ch.Get(queue, true)
+			elapsedTime = time.Now().Unix() - startTime
+
+			if err != nil || ok == false {
+				break
+			}
+			delivery <- msg
+
+			if elapsedTime >= 60 {
+				startTime = time.Now().Unix()
+				elapsedTime = 0
+				i = 0
+			}
+		}
+
+		time.Sleep(time.Duration(60 - elapsedTime) * time.Second)
+	}
+}
+
 func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
 	err := ch.ExchangeDeclare(a.ExchangeName, a.ExchangeType, true, false, false, false, nil)
 	if err != nil {
@@ -58,6 +84,12 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 	err = ch.QueueBind(q.Name, a.RoutingKey, a.ExchangeName, false, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", a.ExchangeType, a.ExchangeName, a.RoutingKey, err)
+	}
+
+	if a.RateLimit != 0 {
+		delivery := make(chan amqplib.Delivery)
+		go getLimitedDelivery(ch, a, delivery, q.Name)
+		return delivery, nil
 	}
 
 	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)

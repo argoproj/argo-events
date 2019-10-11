@@ -46,6 +46,8 @@ type amqp struct {
 	// Connection manages the serialization and deserialization of frames from IO
 	// and dispatches the frames to the appropriate channel.
 	conn *amqplib.Connection
+	// Maximum number of events that can be consumed from the queue per minute.
+	RateLimit uint32 `json:"rateLimit,omitempty"`
 }
 
 func parseEventSource(eventSource string) (interface{}, error) {
