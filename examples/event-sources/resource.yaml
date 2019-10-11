@@ -18,12 +18,11 @@ data:
     # resource version
     version: "v1alpha1"
     # resource kind
-    kind: "Workflow"
+    resource: "workflows"
     # type of event
-    # possible values are ADDED, DELETED, MODIFIED, ERROR
-    # if not provided, listen to all events
+    # possible values are ADD, DELETE, UPDATE
     # Optional
-    type: ADDED
+    type: ADD
     # Filters to apply on watched object
     # Optional
     filter:
@@ -36,35 +35,24 @@ data:
     namespace: argo-events
     group: ""
     version: "v1"
-    kind: "Namespace"
+    resource: "namespaces"
 
   # create event if workflow with prefix "my-workflow" gets modified
   example-with-prefix-filter: |-
     namespace: argo-events
     group: argoproj.io
     version: v1alpha1
-    kind: Workflow
+    resource: workflows
     type: MODIFIED
     filter:
       prefix: "my-workflow"
-
-  # create event if pod with specified annotation gets deleted
-  example-with-annotations-filter: |-
-    namespace: argo-events
-    group: ""
-    version: v1
-    kind: Pod
-    type: DELETED
-    filter:
-      annotations:
-        gateways.argoproj.io/resource-spec-hash: "2978318157"
 
   # create event when a pod is created before 2019-03-27T010:52:32Z
   example-with-created-by-filter: |-
     namespace: argo-events
     group: argoproj.io
     version: v1alpha1
-    kind: Workflow
+    resource: workflows
     type: ADDED
     filter:
       createdBy: "2019-04-06T12:52:11Z"
@@ -73,12 +61,10 @@ data:
     namespace: argo-events
     group: ""
     version: v1
-    kind: Pod
+    resource: pods
     type: ADDED
     filter:
       createdBy: "2019-04-06T12:52:11Z"
-      annotations:
-        workflows.argoproj.io/node-name: hello-world-6j292
       labels:
         workflows.argoproj.io/completed: "true"
       prefix: "hello"
@@ -88,7 +74,7 @@ data:
     # namespace: (omitted to match any namespace)
     group: "k8s.io"
     version: v1
-    kind: Workflow
+    resource: workflows
     type: ADDED
     filter:
       labels:
