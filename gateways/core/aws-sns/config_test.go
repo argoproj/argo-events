@@ -17,6 +17,7 @@ limitations under the License.
 package aws_sns
 
 import (
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"testing"
 
 	"github.com/smartystreets/goconvey/convey"
@@ -51,7 +52,7 @@ func TestParseConfig(t *testing.T) {
 		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*snsEventSource)
+		_, ok := ps.(*v1alpha1.SNSEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 
@@ -59,7 +60,7 @@ func TestParseConfig(t *testing.T) {
 		ps, err := parseEventSource(esWithoutCreds)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ps, convey.ShouldNotBeNil)
-		_, ok := ps.(*snsEventSource)
+		_, ok := ps.(*v1alpha1.SNSEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

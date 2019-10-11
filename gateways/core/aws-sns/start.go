@@ -18,6 +18,7 @@ package aws_sns
 
 import (
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"io/ioutil"
 	"net/http"
 
@@ -138,7 +139,7 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.session = snslib.New(awsSession)
-	formattedUrl := gwcommon.GenerateFormattedURL(sc.Hook)
+	formattedUrl := gwcommon.GenerateFormattedURL(sc.WebHook)
 	if _, err := rc.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
@@ -172,14 +173,14 @@ func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventS
 		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
-	sc := config.(*snsEventSource)
+	sc := config.(*v1alpha1.SNSEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		Route: &gwcommon.Route{
 			Logger:      ese.Log,
 			EventSource: eventSource,
 			StartCh:     make(chan struct{}),
-			Webhook:     sc.Hook,
+			Webhook:     sc.WebHook,
 		},
 		snses:     sc,
 		namespace: ese.Namespace,

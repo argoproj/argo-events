@@ -52,7 +52,6 @@ func (ese *S3EventSourceExecutor) listenEvents(a *apicommon.S3Artifact, eventSou
 	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
-
 	log.Info("retrieving access and secret key")
 	// retrieve access key id and secret access key
 	accessKey, err := store.GetSecrets(ese.Clientset, ese.Namespace, a.AccessKey.Name, a.AccessKey.Key)

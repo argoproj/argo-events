@@ -18,6 +18,7 @@ package aws_sns
 
 import (
 	"bytes"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -64,7 +65,7 @@ func TestAWSSNS(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
-		rc.snses = ps.(*snsEventSource)
+		rc.snses = ps.(*v1alpha1.SNSEventSource)
 
 		convey.Convey("handle the active route", func() {
 			payload := httpNotification{
@@ -110,7 +111,7 @@ func TestAWSSNS(t *testing.T) {
 		psWithoutCreds, err2 := parseEventSource(esWithoutCreds)
 		convey.So(err2, convey.ShouldBeNil)
 
-		rc.snses = psWithoutCreds.(*snsEventSource)
+		rc.snses = psWithoutCreds.(*v1alpha1.SNSEventSource)
 
 		convey.Convey("Run post activate on event source without credentials", func() {
 			err := rc.PostStart()

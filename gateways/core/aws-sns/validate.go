@@ -19,6 +19,7 @@ package aws_sns
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -30,7 +31,7 @@ func (ese *SNSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *
 }
 
 func validateSNSConfig(config interface{}) error {
-	sc := config.(*snsEventSource)
+	sc := config.(*v1alpha1.SNSEventSource)
 	if sc == nil {
 		return gwcommon.ErrNilEventSource
 	}
@@ -40,5 +41,5 @@ func validateSNSConfig(config interface{}) error {
 	if sc.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	return gwcommon.ValidateWebhook(sc.Hook)
+	return gwcommon.ValidateWebhook(sc.WebHook)
 }

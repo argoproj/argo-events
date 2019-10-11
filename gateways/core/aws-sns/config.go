@@ -17,13 +17,13 @@ limitations under the License.
 package aws_sns
 
 import (
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -50,7 +50,7 @@ type SNSEventSourceExecutor struct {
 // RouteConfig contains information for a route
 type RouteConfig struct {
 	Route           *gwcommon.Route
-	snses           *snsEventSource
+	snses           *v1alpha1.SNSEventSource
 	session         *snslib.SNS
 	subscriptionArn *string
 	clientset       kubernetes.Interface
@@ -77,18 +77,8 @@ type httpNotification struct {
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
 }
 
-// snsEventSource contains configuration to subscribe to SNS topic
-type snsEventSource struct {
-	// Hook defines a webhook.
-	Hook      *gwcommon.Webhook         `json:"hook"`
-	TopicArn  string                    `json:"topicArn"`
-	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
-	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
-	Region    string                    `json:"region"`
-}
-
 func parseEventSource(es string) (interface{}, error) {
-	var ses *snsEventSource
+	var ses *v1alpha1.SNSEventSource
 	err := yaml.Unmarshal([]byte(es), &ses)
 	if err != nil {
 		return nil, err
