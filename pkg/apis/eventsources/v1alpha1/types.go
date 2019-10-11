@@ -1,3 +1,18 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package v1alpha1
 
 import (
@@ -25,46 +40,64 @@ type EventSource struct {
 type EventSourceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=items
+	// +listType=eventsource
 	Items []EventSource `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
 // EventSourceSpec refers to specification of event-source resource
 type EventSourceSpec struct {
+	// Minio event sources
 	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,1,opt,name=minio"`
-
+	// Calendar event sources
 	Calendar map[string]CalendarEventSource `json:"calendar,omitempty" protobuf:"bytes,2,opt,name=calendar"`
-
+	// File event sources
 	File map[string]FileEventSource `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
-
+	// Resource event sources
 	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,4,opt,name=resource"`
-
+	// Webhook event sources
 	Webhook map[string]gwcommon.Webhook `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
-
+	// AMQP event sources
 	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,6,opt,name=amqp"`
-
+	// Kafka event sources
 	Kafka map[string]KafkaEventSource `json:"kafka,omitempty" protobuf:"bytes,7,opt,name=kafka"`
-
+	// MQTT event sources
 	MQTT map[string]MQTTEventSource `json:"mqtt,omitempty" protobuf:"bytes,8,opt,name=mqtt"`
-
+	// NATS event sources
 	NATS map[string]NATSEventsSource `json:"nats,omitempty" protobuf:"bytes,9,opt,name=nats"`
+	// SNS event sources
+	SNS map[string]SNSEventSource `json:"sns,omitempty" protobuf:"bytes,10,opt,name=sns"`
+	// SQS event sources
+	SQS map[string]SQSEventSource `json:"sqs,omitempty" protobuf:"bytes,11,opt,name=sqs"`
+	// PubSub eevnt sources
+	PubSub map[string]PubSubEventSource `json:"pubSub,omitempty" protobuf:"bytes,12,opt,name=pubSub"`
+	// Github event sources
+	Github map[string]GithubEventSource `json:"github,omitempty" protobuf:"bytes,13,opt,name=github"`
+	// Gitlab event sources
+	Gitlab map[string]GitlabEventSource `json:"gitlab,omitempty" protobuf:"bytes,14,opt,name=gitlab"`
+	// HDFS event sources
+	HDFS map[string]HDFSEventSource `json:"hdfs,omitempty" protobuf:"bytes,15,opt,name=hdfs"`
+	// Slack event sources
+	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,16,opt,name=slack"`
+	// storageGrid event sources
+	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,17,opt,name=storageGrid"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 type CalendarEventSource struct {
 	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-	Schedule string `json:"schedule"`
+	Schedule string `json:"schedule" protobuf:"bytes,1,name=schedule"`
 	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-	Interval string `json:"interval"`
+	Interval string `json:"interval" protobuf:"bytes,2,name=interval"`
 	// ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
-	ExclusionDates []string `json:"recurrence,omitempty"`
+	// +listType=string
+	ExclusionDates []string `json:"exclusionDates,omitempty" protobuf:"bytes,3,opt,name=exclusionDates"`
 	// Timezone in which to run the schedule
 	// +optional
-	Timezone string `json:"timezone,omitempty"`
+	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
 	// UserPayload will be sent to sensor as extra data once the event is triggered
 	// +optional
-	UserPayload *json.RawMessage `json:"userPayload,omitempty"`
+	UserPayload *json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload"`
 }
 
 // FileEventSource describes an event-source for file related events.
@@ -82,12 +115,14 @@ type FileEventSource struct {
 	EventType string `json:"eventType" protobuf:"bytes,4,name=eventType"`
 }
 
-type EventType string
+// ResourceEventType is the type of event for the K8s resource mutation
+type ResourceEventType string
 
+// possible values of ResourceEventType
 const (
-	ADD    EventType = "ADD"
-	UPDATE EventType = "UPDATE"
-	DELETE EventType = "DELETE"
+	ADD    ResourceEventType = "ADD"
+	UPDATE ResourceEventType = "UPDATE"
+	DELETE ResourceEventType = "DELETE"
 )
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
@@ -102,7 +137,7 @@ type ResourceEventSource struct {
 	// Type is the event type.
 	// If not provided, the gateway will watch all events for a resource.
 	// +optional
-	EventType EventType `json:"eventType,omitempty" protobuf:"bytes,3,opt,name=eventType"`
+	EventType ResourceEventType `json:"eventType,omitempty" protobuf:"bytes,3,opt,name=eventType"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
@@ -220,7 +255,7 @@ type GithubEventSource struct {
 	// Repository refers to GitHub repo name i.e. argo-events
 	Repository string `json:"repository" protobuf:"bytes,4,name=repository"`
 	// Events refer to Github events to subscribe to which the gateway will subscribe
-	// +listType=events
+	// +listType=string
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
 	APIToken *corev1.SecretKeySelector `json:"apiToken"`
@@ -270,6 +305,7 @@ type HDFSEventSource struct {
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
 	CheckInterval string `json:"checkInterval,omitempty"`
 	// Addresses is accessible addresses of HDFS name nodes
+	// +listType=string
 	Addresses []string `json:"addresses"`
 	// HDFSUser is the user to access HDFS file system.
 	// It is ignored if either ccache or keytab is used.
@@ -292,6 +328,36 @@ type HDFSEventSource struct {
 	// KrbServicePrincipalName is the principal name of Kerberos service
 	// It must be set if either ccache or keytab is used.
 	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty"`
+}
+
+// SlackEventSource refers to event-source for Slack related events
+type SlackEventSource struct {
+	// Slack App signing secret
+	SigningSecret *corev1.SecretKeySelector `json:"signingSecret,omitempty" protobuf:"bytes,1,opt,name=signingSecret"`
+	// Token for URL verification handshake
+	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,name=token"`
+	// Webhook holds configuration to run a http server
+	WebHook *gwcommon.Webhook `json:"hook" protobuf:"bytes,3,name=webhook"`
+}
+
+// StorageGridEventSource refers to event-source for StorageGrid related events
+type StorageGridEventSource struct {
+	// Webhook holds configuration to run a http server
+	WebHook *gwcommon.Webhook `json:"hook" protobuf:"bytes,1,name=webhook"`
+	// Events are s3 bucket notification events.
+	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
+	// Note that storage grid notifications do not contain `s3:`
+	// +listType=string
+	Events []string `json:"events,omitempty" protobuf:"bytes,2,opt,name=events"`
+	// Filter on object key which caused the notification.
+	Filter *StorageGridFilter `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+}
+
+// Filter represents filters to apply to bucket notifications for specifying constraints on objects
+// +k8s:openapi-gen=true
+type StorageGridFilter struct {
+	Prefix string `json:"prefix"`
+	Suffix string `json:"suffix"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

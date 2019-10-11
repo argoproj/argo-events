@@ -21,7 +21,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 )
 
-const EventSourceDir = "../../../examples/event-sources"
+const EventSourceDir = "../../../examples/eventsources"
 
 var (
 	ErrNilEventSource = fmt.Errorf("event source can't be nil")

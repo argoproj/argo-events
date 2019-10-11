@@ -93,8 +93,8 @@ func (gc *GatewayConfig) diffEventSources(newConfigs map[string]*EventSourceCont
 		updatedConfigKeys = append(updatedConfigKeys, updatedConfigKey)
 	}
 
-	gc.Log.WithField("current-event-sources-keys", currentConfigKeys).Debug("event sources hashes")
-	gc.Log.WithField("updated-event-sources-keys", updatedConfigKeys).Debug("event sources hashes")
+	gc.Log.WithField("current-eventsources-keys", currentConfigKeys).Debug("event sources hashes")
+	gc.Log.WithField("updated-eventsources-keys", updatedConfigKeys).Debug("event sources hashes")
 
 	swapped := false
 	// iterates over current event sources and updated event sources
