@@ -30,7 +30,7 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
 * Ability to extends framework to add your own event source listener.
 * Define arbitrary boolean logic to resolve event dependencies.
-* CloudEvents compliant.
+* Supports [CloudEvents](https://cloudevents.io/) for describing event data and transmission.
 * Ability to manage event sources at runtime.
 
 ## Documentation
