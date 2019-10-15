@@ -26,7 +26,6 @@ url: amqp://amqp.argo-events:5672
 exchangeName: fooExchangeName
 exchangeType: fanout
 routingKey: fooRoutingKey
-rateLimit: 50
 `
 
 func TestParseConfig(t *testing.T) {

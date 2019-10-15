@@ -46,27 +46,26 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 }
 
 func getLimitedDelivery(ch *amqplib.Channel, a *amqp, delivery chan amqplib.Delivery, queue string) {
+	period := time.Duration(a.RatePeriod)
 	for {
-		var elapsedTime int64
-		startTime := time.Now().Unix()
+		startTime := time.Now()
 
 		for i := uint32(0); i < a.RateLimit; i++ {
 			msg, ok, err := ch.Get(queue, true)
-			elapsedTime = time.Now().Unix() - startTime
 
 			if err != nil || ok == false {
 				break
 			}
 			delivery <- msg
 
-			if elapsedTime >= 60 {
-				startTime = time.Now().Unix()
-				elapsedTime = 0
+			if time.Now().After(startTime.Add(period)) {
+				startTime = time.Now()
 				i = 0
 			}
 		}
 
-		time.Sleep(time.Duration(60 - elapsedTime) * time.Second)
+		remainingTime := startTime.Add(period).Sub(time.Now())
+		time.Sleep(remainingTime)
 	}
 }
 
