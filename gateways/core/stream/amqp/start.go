@@ -46,7 +46,7 @@ func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 }
 
 func getLimitedDelivery(ch *amqplib.Channel, a *amqp, delivery chan amqplib.Delivery, queue string) {
-	period := time.Duration(a.RatePeriod)
+	period := time.Duration(a.RatePeriod) * time.Second
 	for {
 		startTime := time.Now()
 
