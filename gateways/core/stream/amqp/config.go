@@ -17,9 +17,9 @@ limitations under the License.
 package amqp
 
 import (
-	"errors"
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
 )
