@@ -45,7 +45,11 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 	group:
 		for _, group := range sec.sensor.Spec.DependencyGroups {
 			for _, dependency := range group.Dependencies {
-				if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase != v1alpha1.NodePhaseComplete {
+				nodeStatus := sn.GetNodeByName(sec.sensor, dependency)
+				if nodeStatus == nil {
+					return false, fmt.Errorf("failed to get a dependency: %+v", dependency)
+				}
+				if nodeStatus.Phase != v1alpha1.NodePhaseComplete {
 					groups[group.Name] = false
 					continue group
 				}
