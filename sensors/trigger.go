@@ -19,6 +19,7 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/Knetic/govaluate"
@@ -331,7 +332,7 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 		Resource: trigger.Template.Resource,
 	})
 
-	liveObj, err := dynamicResInterface.Create(obj, metav1.CreateOptions{})
+	liveObj, err := dynamicResInterface.Namespace(obj.GetNamespace()).Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}

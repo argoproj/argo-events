@@ -19,6 +19,7 @@ package amqp
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
 )
@@ -46,6 +47,10 @@ type amqp struct {
 	// Connection manages the serialization and deserialization of frames from IO
 	// and dispatches the frames to the appropriate channel.
 	conn *amqplib.Connection
+	// Maximum number of events consumed from the queue per RatePeriod.
+	RateLimit uint32 `json:"rateLimit,omitempty"`
+	// Number of seconds between two consumptions.
+	RatePeriod uint32 `json:"ratePeriod,omitempty"`
 }
 
 func parseEventSource(eventSource string) (interface{}, error) {
@@ -55,4 +60,12 @@ func parseEventSource(eventSource string) (interface{}, error) {
 		return nil, err
 	}
 	return a, nil
+}
+
+// Validate validates amqp
+func (a *amqp) Validate() error {
+	if (a.RateLimit == 0) != (a.RatePeriod == 0) {
+		return errors.New("RateLimit and RatePeriod must be either set or omitted")
+	}
+	return nil
 }
