@@ -72,7 +72,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 // See https://github.com/cloudevents/spec for more info.
 func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, error) {
 	// Generate an event id
-	eventId := suuid.NewV1()
+	eventId, _ := suuid.NewV1()
 
 	gc.Log.WithField(common.LabelEventSource, gatewayEvent.Name).Info("converting gateway event into cloudevents specification compliant event")
 
