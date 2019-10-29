@@ -27,7 +27,9 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
+	"github.com/ghodss/yaml"
 	gh "github.com/google/go-github/github"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -61,9 +63,9 @@ func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 }
 
 func (rc *RouteConfig) PostStart() error {
-	gc := rc.ges
+	githubEventSource := rc.githubEventSource
 
-	c, err := rc.getCredentials(gc.APIToken)
+	c, err := rc.getCredentials(githubEventSource.APIToken)
 	if err != nil {
 		return fmt.Errorf("failed to rtrieve github credentials. err: %+v", err)
 	}
@@ -72,23 +74,23 @@ func (rc *RouteConfig) PostStart() error {
 		Token: c.secret,
 	}
 
-	formattedUrl := gwcommon.GenerateFormattedURL(gc.Hook)
+	formattedUrl := gwcommon.GenerateFormattedURL(githubEventSource.Webhook)
 	hookConfig := map[string]interface{}{
 		"url": &formattedUrl,
 	}
 
-	if gc.ContentType != "" {
-		hookConfig["content_type"] = gc.ContentType
+	if githubEventSource.ContentType != "" {
+		hookConfig["content_type"] = githubEventSource.ContentType
 	}
 
-	if gc.Insecure {
+	if githubEventSource.Insecure {
 		hookConfig["insecure_ssl"] = "1"
 	} else {
 		hookConfig["insecure_ssl"] = "0"
 	}
 
-	if gc.WebHookSecret != nil {
-		sc, err := rc.getCredentials(gc.WebHookSecret)
+	if githubEventSource.WebHookSecret != nil {
+		sc, err := rc.getCredentials(githubEventSource.WebHookSecret)
 		if err != nil {
 			return fmt.Errorf("failed to retrieve webhook secret. err: %+v", err)
 		}
@@ -96,21 +98,21 @@ func (rc *RouteConfig) PostStart() error {
 	}
 
 	rc.hook = &gh.Hook{
-		Events: gc.Events,
-		Active: gh.Bool(gc.Active),
+		Events: githubEventSource.Events,
+		Active: gh.Bool(githubEventSource.Active),
 		Config: hookConfig,
 	}
 
 	rc.client = gh.NewClient(PATTransport.Client())
-	if gc.GithubBaseURL != "" {
-		baseURL, err := url.Parse(gc.GithubBaseURL)
+	if githubEventSource.GithubBaseURL != "" {
+		baseURL, err := url.Parse(githubEventSource.GithubBaseURL)
 		if err != nil {
 			return fmt.Errorf("failed to parse github base url. err: %s", err)
 		}
 		rc.client.BaseURL = baseURL
 	}
-	if gc.GithubUploadURL != "" {
-		uploadURL, err := url.Parse(gc.GithubUploadURL)
+	if githubEventSource.GithubUploadURL != "" {
+		uploadURL, err := url.Parse(githubEventSource.GithubUploadURL)
 		if err != nil {
 			return fmt.Errorf("failed to parse github upload url. err: %s", err)
 		}
@@ -119,7 +121,7 @@ func (rc *RouteConfig) PostStart() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	hook, _, err := rc.client.Repositories.CreateHook(ctx, gc.Owner, gc.Repository, rc.hook)
+	hook, _, err := rc.client.Repositories.CreateHook(ctx, githubEventSource.Owner, githubEventSource.Repository, rc.hook)
 	if err != nil {
 		// Continue if error is because hook already exists
 		er, ok := err.(*gh.ErrorResponse)
@@ -131,18 +133,18 @@ func (rc *RouteConfig) PostStart() error {
 	if hook == nil {
 		ctx, cancel = context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		hooks, _, err := rc.client.Repositories.ListHooks(ctx, gc.Owner, gc.Repository, nil)
+		hooks, _, err := rc.client.Repositories.ListHooks(ctx, githubEventSource.Owner, githubEventSource.Repository, nil)
 		if err != nil {
 			return fmt.Errorf("failed to list existing webhooks. err: %+v", err)
 		}
 
-		hook = getHook(hooks, formattedUrl, gc.Events)
+		hook = getHook(hooks, formattedUrl, githubEventSource.Events)
 		if hook == nil {
 			return fmt.Errorf("failed to find existing webhook.")
 		}
 	}
 
-	if gc.WebHookSecret != nil {
+	if githubEventSource.WebHookSecret != nil {
 		// As secret in hook config is masked with asterisk (*), replace it with unmasked secret.
 		hook.Config["secret"] = hookConfig["secret"]
 	}
@@ -156,7 +158,7 @@ func (rc *RouteConfig) PostStart() error {
 func (rc *RouteConfig) PostStop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.ges.Owner, rc.ges.Repository, *rc.hook.ID); err != nil {
+	if _, err := rc.client.Repositories.DeleteHook(ctx, rc.githubEventSource.Owner, rc.githubEventSource.Repository, *rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
 	rc.route.Logger.WithField(common.LabelEventSource, rc.route.EventSource.Name).Info("github hook deleted")
@@ -164,29 +166,27 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // StartEventSource starts an event source
-func (ese *GithubEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("operating on event source")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
+	var githubEventSource *v1alpha1.GithubEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &githubEventSource); err != nil {
+		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Infoln("failed to parse the event source")
 		return err
 	}
-	gc := config.(*githubEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		route: &gwcommon.Route{
-			Logger:      ese.Log,
+			Logger:      listener.Logger,
 			EventSource: eventSource,
-			Webhook:     gc.Hook,
+			Webhook:     githubEventSource.Webhook,
 			StartCh:     make(chan struct{}),
 		},
-		clientset: ese.Clientset,
-		namespace: ese.Namespace,
-		ges:       gc,
+		clientset:         listener.Clientset,
+		namespace:         listener.Namespace,
+		githubEventSource: githubEventSource,
 	}, helper, eventStream)
 }
 

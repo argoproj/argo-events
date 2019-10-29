@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
 	"github.com/smartystreets/goconvey/convey"
@@ -46,7 +47,6 @@ var (
 
 func TestGetCredentials(t *testing.T) {
 	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
-
 		secret, err := rc.clientset.CoreV1().Secrets(rc.namespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      secretName,
@@ -59,9 +59,26 @@ func TestGetCredentials(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(secret, convey.ShouldNotBeNil)
 
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		creds, err := rc.getCredentials(ps.(*githubEventSource).APIToken)
+		githubEventSource := &v1alpha1.GithubEventSource{
+			Webhook: &gwcommon.Webhook{
+				Endpoint: "/push",
+				URL:      "http://webhook-gateway-svc",
+				Port:     "12000",
+			},
+			Owner:      "fake",
+			Repository: "fake",
+			Events: []string{
+				"PushEvent",
+			},
+			APIToken: &corev1.SecretKeySelector{
+				Key: "accessKey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "github-access",
+				},
+			},
+		}
+
+		creds, err := rc.getCredentials(githubEventSource.APIToken)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(creds, convey.ShouldNotBeNil)
 		convey.So(creds.secret, convey.ShouldEqual, "YWNjZXNz")
@@ -77,12 +94,30 @@ func TestRouteActiveHandler(t *testing.T) {
 
 		convey.Convey("Inactive route should return error", func() {
 			writer := &gwcommon.FakeHttpWriter{}
-			ps, err := parseEventSource(es)
+			githubEventSource := &v1alpha1.GithubEventSource{
+				Webhook: &gwcommon.Webhook{
+					Endpoint: "/push",
+					URL:      "http://webhook-gateway-svc",
+					Port:     "12000",
+				},
+				Owner:      "fake",
+				Repository: "fake",
+				Events: []string{
+					"PushEvent",
+				},
+				APIToken: &corev1.SecretKeySelector{
+					Key: "accessKey",
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "github-access",
+					},
+				},
+			}
+
+			body, err := yaml.Marshal(githubEventSource)
 			convey.So(err, convey.ShouldBeNil)
-			pbytes, err := yaml.Marshal(ps.(*githubEventSource))
-			convey.So(err, convey.ShouldBeNil)
+
 			rc.RouteHandler(writer, &http.Request{
-				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
+				Body: ioutil.NopCloser(bytes.NewReader(body)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
@@ -93,11 +128,11 @@ func TestRouteActiveHandler(t *testing.T) {
 				}
 
 				rc.RouteHandler(writer, &http.Request{
-					Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
+					Body: ioutil.NopCloser(bytes.NewReader(body)),
 				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-				rc.ges = ps.(*githubEventSource)
+				rc.githubEventSource = githubEventSource
 				err = rc.PostStart()
 				convey.So(err, convey.ShouldNotBeNil)
 			})

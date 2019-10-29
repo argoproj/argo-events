@@ -16,36 +16,56 @@ package github
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
-// Validate validates github gateway configuration
-func (ese *GithubEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateGithub)
+// Validate validates an event source
+func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var githubEventSource *v1alpha1.GithubEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &githubEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateGithubEventSource(githubEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateGithub(config interface{}) error {
-	g := config.(*githubEventSource)
-	if g == nil {
+// validateGithubEventSource checks if github event source is valid
+func validateGithubEventSource(githubEventSource *v1alpha1.GithubEventSource) error {
+	if githubEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if g.Repository == "" {
+	if githubEventSource.Repository == "" {
 		return fmt.Errorf("repository cannot be empty")
 	}
-	if g.Owner == "" {
+	if githubEventSource.Owner == "" {
 		return fmt.Errorf("owner cannot be empty")
 	}
-	if g.APIToken == nil {
+	if githubEventSource.APIToken == nil {
 		return fmt.Errorf("api token can't be empty")
 	}
-	if g.Events == nil || len(g.Events) < 1 {
+	if githubEventSource.Events == nil || len(githubEventSource.Events) < 1 {
 		return fmt.Errorf("events must be defined")
 	}
-	if g.ContentType != "" {
-		if !(g.ContentType == "json" || g.ContentType == "form") {
+	if githubEventSource.ContentType != "" {
+		if !(githubEventSource.ContentType == "json" || githubEventSource.ContentType == "form") {
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
-	return gwcommon.ValidateWebhook(g.Hook)
+	return gwcommon.ValidateWebhook(githubEventSource.Webhook)
 }

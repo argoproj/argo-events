@@ -18,19 +18,16 @@ package github
 
 import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/google/go-github/github"
 	"github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
-// GithubEventSourceExecutor implements ConfigExecutor
-type GithubEventSourceExecutor struct {
-	Log *logrus.Logger
-	// Clientset is kubernetes client
+// EventSourceListener implements ConfigExecutor
+type EventSourceListener struct {
+	Logger *logrus.Logger
+	// k8sClient is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
@@ -38,53 +35,15 @@ type GithubEventSourceExecutor struct {
 
 // RouteConfig contains information about the route
 type RouteConfig struct {
-	route     *gwcommon.Route
-	ges       *githubEventSource
-	client    *github.Client
-	hook      *github.Hook
-	clientset kubernetes.Interface
-	namespace string
-}
-
-// githubEventSource contains information to setup a github project integration
-type githubEventSource struct {
-	// Webhook ID
-	Id int64 `json:"id"`
-	// Webhook
-	Hook *gwcommon.Webhook `json:"hook"`
-	// GitHub owner name i.e. argoproj
-	Owner string `json:"owner"`
-	// GitHub repo name i.e. argo-events
-	Repository string `json:"repository"`
-	// Github events to subscribe to which the gateway will subscribe
-	Events []string `json:"events"`
-	// K8s secret containing github api token
-	APIToken *corev1.SecretKeySelector `json:"apiToken"`
-	// K8s secret containing WebHook Secret
-	WebHookSecret *corev1.SecretKeySelector `json:"webHookSecret"`
-	// Insecure tls verification
-	Insecure bool `json:"insecure"`
-	// Active
-	Active bool `json:"active"`
-	// ContentType json or form
-	ContentType string `json:"contentType"`
-	// GitHub base URL (for GitHub Enterprise)
-	GithubBaseURL string `json:"githubBaseURL"`
-	// GitHub upload URL (for GitHub Enterprise)
-	GithubUploadURL string `json:"githubUploadURL"`
+	route             *gwcommon.Route
+	githubEventSource *v1alpha1.GithubEventSource
+	client            *github.Client
+	hook              *github.Hook
+	clientset         kubernetes.Interface
+	namespace         string
 }
 
 // cred stores the api access token or webhook secret
 type cred struct {
 	secret string
-}
-
-// parseEventSource parses a configuration of gateway
-func parseEventSource(config string) (interface{}, error) {
-	var g *githubEventSource
-	err := yaml.Unmarshal([]byte(config), &g)
-	if err != nil {
-		return nil, err
-	}
-	return g, err
 }

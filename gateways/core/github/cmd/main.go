@@ -17,11 +17,12 @@ limitations under the License.
 package main
 
 import (
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/core/github"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {
@@ -35,8 +36,8 @@ func main() {
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&github.GithubEventSourceExecutor{
-		Log:       common.NewArgoEventsLogger(),
+	gateways.StartGateway(&github.EventSourceListener{
+		Logger:    common.NewArgoEventsLogger(),
 		Namespace: namespace,
 		Clientset: clientset,
 	})
