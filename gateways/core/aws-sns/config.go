@@ -17,13 +17,12 @@ limitations under the License.
 package aws_sns
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
-	"github.com/sirupsen/logrus"
 	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
-	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -38,10 +37,10 @@ var (
 	snsProtocol = "http"
 )
 
-// SNSEventSourceExecutor implements Eventing
-type SNSEventSourceExecutor struct {
+// SNSEventSourceListener implements Eventing
+type SNSEventSourceListener struct {
 	Log *logrus.Logger
-	// Clientset is kubernetes client
+	// k8sClient is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
@@ -50,7 +49,7 @@ type SNSEventSourceExecutor struct {
 // RouteConfig contains information for a route
 type RouteConfig struct {
 	Route           *gwcommon.Route
-	snses           *v1alpha1.SNSEventSource
+	eventSource     *v1alpha1.SNSEventSource
 	session         *snslib.SNS
 	subscriptionArn *string
 	clientset       kubernetes.Interface
@@ -75,13 +74,4 @@ type httpNotification struct {
 	Signature        string    `json:"Signature"`
 	SigningCertURL   string    `json:"SigningCertURL"`
 	UnsubscribeURL   string    `json:"UnsubscribeURL,omitempty"` // Only for notifications
-}
-
-func parseEventSource(es string) (interface{}, error) {
-	var ses *v1alpha1.SNSEventSource
-	err := yaml.Unmarshal([]byte(es), &ses)
-	if err != nil {
-		return nil, err
-	}
-	return ses, nil
 }

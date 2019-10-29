@@ -29,8 +29,8 @@ type Interface interface {
 	ArgoprojV1alpha1() argoprojv1alpha1.ArgoprojV1alpha1Interface
 }
 
-// Clientset contains the clients for groups. Each group has exactly one
-// version included in a Clientset.
+// k8sClient contains the clients for groups. Each group has exactly one
+// version included in a k8sClient.
 type Clientset struct {
 	*discovery.DiscoveryClient
 	argoprojV1alpha1 *argoprojv1alpha1.ArgoprojV1alpha1Client
@@ -49,7 +49,7 @@ func (c *Clientset) Discovery() discovery.DiscoveryInterface {
 	return c.DiscoveryClient
 }
 
-// NewForConfig creates a new Clientset for the given config.
+// NewForConfig creates a new k8sClient for the given config.
 func NewForConfig(c *rest.Config) (*Clientset, error) {
 	configShallowCopy := *c
 	if configShallowCopy.RateLimiter == nil && configShallowCopy.QPS > 0 {
@@ -69,7 +69,7 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	return &cs, nil
 }
 
-// NewForConfigOrDie creates a new Clientset for the given config and
+// NewForConfigOrDie creates a new k8sClient for the given config and
 // panics if there is an error in the config.
 func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
@@ -79,7 +79,7 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 	return &cs
 }
 
-// New creates a new Clientset for the given RESTClient.
+// New creates a new k8sClient for the given RESTClient.
 func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.argoprojV1alpha1 = argoprojv1alpha1.New(c)

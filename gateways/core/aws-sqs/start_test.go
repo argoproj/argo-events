@@ -21,17 +21,16 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestListenEvents(t *testing.T) {
 	convey.Convey("Given an event source, listen to events", t, func() {
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(ps, convey.ShouldNotBeNil)
-
-		ese := &SQSEventSourceExecutor{
+		ese := &SQSEventSourceListener{
 			Clientset: fake.NewSimpleClientset(),
 			Namespace: "fake",
 			Log:       common.NewArgoEventsLogger(),
@@ -47,10 +46,33 @@ func TestListenEvents(t *testing.T) {
 			errorCh2 <- err
 		}()
 
-		ese.listenEvents(ps.(*sqsEventSource), &gateways.EventSource{
-			Name: "fake",
-			Data: es,
-			Id:   "1234",
+		sqsEventSource := &v1alpha1.SQSEventSource{
+			Region:          "us-east-1",
+			Queue:           "test-queue",
+			WaitTimeSeconds: 10,
+			AccessKey: &corev1.SecretKeySelector{
+				Key: "accessKey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "sns",
+				},
+			},
+			SecretKey: &corev1.SecretKeySelector{
+				Key: "secretKey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "sns",
+				},
+			},
+		}
+
+		body, err := yaml.Marshal(sqsEventSource)
+		convey.So(err, convey.ShouldBeNil)
+
+		ese.listenEvents(&gateways.EventSource{
+			Name:    "fake",
+			Value:   body,
+			Id:      "1234",
+			Type:    string(v1alpha1.SQSEvent),
+			Version: "v0.10",
 		}, dataCh, errorCh, doneCh)
 
 		err = <-errorCh2
@@ -58,11 +80,16 @@ func TestListenEvents(t *testing.T) {
 	})
 
 	convey.Convey("Given an event source without AWS credentials, listen to events", t, func() {
-		ps, err := parseEventSource(esWithoutCreds)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(ps, convey.ShouldNotBeNil)
+		sqsEventSource := &v1alpha1.SQSEventSource{
+			Region:          "us-east-1",
+			Queue:           "test-queue",
+			WaitTimeSeconds: 10,
+		}
 
-		ese := &SQSEventSourceExecutor{
+		body, err := yaml.Marshal(sqsEventSource)
+		convey.So(err, convey.ShouldBeNil)
+
+		ese := &SQSEventSourceListener{
 			Clientset: fake.NewSimpleClientset(),
 			Namespace: "fake",
 			Log:       common.NewArgoEventsLogger(),
@@ -78,10 +105,10 @@ func TestListenEvents(t *testing.T) {
 			errorCh2 <- err
 		}()
 
-		ese.listenEvents(ps.(*sqsEventSource), &gateways.EventSource{
-			Name: "fake",
-			Data: es,
-			Id:   "1234",
+		ese.listenEvents(&gateways.EventSource{
+			Name:  "fake",
+			Value: body,
+			Id:    "1234",
 		}, dataCh, errorCh, doneCh)
 
 		err = <-errorCh2

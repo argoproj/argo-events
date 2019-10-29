@@ -25,7 +25,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *SQSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *SQSEventSourceListener) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSQSConfig)
 }
 

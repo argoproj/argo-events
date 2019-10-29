@@ -56,7 +56,7 @@ func NewSimpleClientset(objects ...runtime.Object) *Clientset {
 	return cs
 }
 
-// Clientset implements clientset.Interface. Meant to be embedded into a
+// k8sClient implements clientset.Interface. Meant to be embedded into a
 // struct to get a default implementation. This makes faking out just the method
 // you want to test easier.
 type Clientset struct {

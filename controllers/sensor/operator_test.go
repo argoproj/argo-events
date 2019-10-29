@@ -32,7 +32,7 @@ var sensorStr = `
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: artifact-sensor
+  name: minio-sensor
   namespace: argo-events
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
@@ -44,14 +44,14 @@ spec:
         imagePullPolicy: Always
     serviceAccountName: argo-events-sa
   dependencies:
-    - name: artifact-gateway:input
+    - name: minio-gateway:input
   eventProtocol:
     type: "HTTP"
     http:
       port: "9300"
   triggers:
     - template: 
-        name: artifact-workflow-trigger
+        name: minio-workflow-trigger
         group: argoproj.io
         version: v1alpha1
         kind: Workflow
@@ -75,8 +75,8 @@ spec:
 `
 
 var (
-	sensorPodName = "artifact-sensor"
-	sensorSvcName = "artifact-sensor-svc"
+	sensorPodName = "minio-sensor"
+	sensorSvcName = "minio-sensor-svc"
 )
 
 func getSensor() (*v1alpha1.Sensor, error) {

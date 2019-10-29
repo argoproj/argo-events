@@ -18,16 +18,15 @@ package aws_sns
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/aws/aws-sdk-go/aws/session"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
+	"io/ioutil"
+	"net/http"
 )
 
 var (
@@ -82,7 +81,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	case messageTypeSubscriptionConfirmation:
 		awsSession := rc.session
 		out, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
-			TopicArn: &rc.snses.TopicArn,
+			TopicArn: &rc.eventSource.TopicArn,
 			Token:    &snspayload.Token,
 		})
 		if err != nil {
@@ -109,12 +108,12 @@ func (rc *RouteConfig) PostStart() error {
 			common.LabelEndpoint:    r.Webhook.Endpoint,
 			common.LabelPort:        r.Webhook.Port,
 			common.LabelHTTPMethod:  r.Webhook.Method,
-			"topic-arn":             rc.snses.TopicArn,
+			"topic-arn":             rc.eventSource.TopicArn,
 		})
 
 	logger.Info("subscribing to sns topic")
 
-	sc := rc.snses
+	sc := rc.eventSource
 	var awsSession *session.Session
 
 	if sc.AccessKey == nil && sc.SecretKey == nil {
@@ -162,28 +161,27 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // StartEventSource starts an SNS event source
-func (ese *SNSEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *SNSEventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("operating on event source")
+	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log.Info("operating on event source...")
 
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
+	var snsEventSource *v1alpha1.SNSEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
 		log.WithError(err).Error("failed to parse event source")
 		return err
 	}
-	sc := config.(*v1alpha1.SNSEventSource)
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		Route: &gwcommon.Route{
-			Logger:      ese.Log,
+			Logger:      listener.Log,
 			EventSource: eventSource,
 			StartCh:     make(chan struct{}),
-			Webhook:     sc.WebHook,
+			Webhook:     snsEventSource.WebHook,
 		},
-		snses:     sc,
-		namespace: ese.Namespace,
-		clientset: ese.Clientset,
+		eventSource: snsEventSource,
+		namespace:   listener.Namespace,
+		clientset:   listener.Clientset,
 	}, helper, eventStream)
 }

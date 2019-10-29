@@ -18,16 +18,17 @@ package aws_sns
 
 import (
 	"bytes"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -61,11 +62,30 @@ func TestAWSSNS(t *testing.T) {
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
+		snsEventSource := &v1alpha1.SNSEventSource{
+			WebHook: &gwcommon.Webhook{
+				Endpoint: "/test",
+				Port:     "8080",
+				URL:      "myurl/test",
+			},
+			Region:   "us-east-1",
+			TopicArn: "test-arn",
+			AccessKey: &corev1.SecretKeySelector{
+				Key: "accesskey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "sns",
+				},
+			},
+			SecretKey: &corev1.SecretKeySelector{
+				Key: "secretkey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "sns",
+				},
+			},
+		}
 
 		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
-		rc.snses = ps.(*v1alpha1.SNSEventSource)
+		rc.eventSource = snsEventSource
 
 		convey.Convey("handle the active route", func() {
 			payload := httpNotification{
@@ -108,10 +128,15 @@ func TestAWSSNS(t *testing.T) {
 			convey.So(err, convey.ShouldNotBeNil)
 		})
 
-		psWithoutCreds, err2 := parseEventSource(esWithoutCreds)
-		convey.So(err2, convey.ShouldBeNil)
-
-		rc.snses = psWithoutCreds.(*v1alpha1.SNSEventSource)
+		rc.eventSource = &v1alpha1.SNSEventSource{
+			WebHook: &gwcommon.Webhook{
+				Endpoint: "/test",
+				Port:     "8080",
+				URL:      "myurl/test",
+			},
+			TopicArn: "test-arn",
+			Region:   "us-east-1",
+		}
 
 		convey.Convey("Run post activate on event source without credentials", func() {
 			err := rc.PostStart()

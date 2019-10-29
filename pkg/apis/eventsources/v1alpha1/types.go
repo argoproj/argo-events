@@ -17,11 +17,36 @@ package v1alpha1
 
 import (
 	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+// EventSourceType is the type of event source supported by the gateway
+type EventSourceType string
+
+// possible event source types
+var (
+	MinioEvent       EventSourceType = "minio"
+	CalendarEvent    EventSourceType = "calendar"
+	FileEvent        EventSourceType = "file"
+	ResourceEvent    EventSourceType = "resource"
+	WebhookEvent     EventSourceType = "webhook"
+	AMQPEvent        EventSourceType = "amqp"
+	KafkaEvent       EventSourceType = "kafka"
+	MQTTEvent        EventSourceType = "mqtt"
+	NATSEvent        EventSourceType = "nats"
+	SNSEvent         EventSourceType = "sns"
+	SQSEvent         EventSourceType = "sqs"
+	PubSubEvent      EventSourceType = "pubsub"
+	GitHubEvent      EventSourceType = "github"
+	GitLabEvent      EventSourceType = "gitlab"
+	HDFSEvent        EventSourceType = "hdfs"
+	SlackEvent       EventSourceType = "slack"
+	StorageGridEvent EventSourceType = "storagegrid"
 )
 
 // EventSource is the definition of a eventsource resource
@@ -32,7 +57,7 @@ type EventSource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Status            EventSourceStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
-	Spec              EventSourceSpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
+	Spec              *EventSourceSpec  `json:"spec" protobuf:"bytes,3,opt,name=spec"`
 }
 
 // EventSourceList is the list of eventsource resources
@@ -78,8 +103,12 @@ type EventSourceSpec struct {
 	HDFS map[string]HDFSEventSource `json:"hdfs,omitempty" protobuf:"bytes,15,opt,name=hdfs"`
 	// Slack event sources
 	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,16,opt,name=slack"`
-	// storageGrid event sources
+	// StorageGrid event sources
 	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,17,opt,name=storageGrid"`
+	// Version of the event source. It must match with that of gateway version
+	Version string `json:"version" protobuf:"bytes,18,name=version"`
+	// Type of the event source
+	Type EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.

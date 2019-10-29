@@ -39,7 +39,7 @@ import (
 type GatewayConfig struct {
 	// Log provides fast and simple logger dedicated to JSON output
 	Log *logrus.Logger
-	// Clientset is client for kubernetes API
+	// k8sClient is client for kubernetes API
 	Clientset kubernetes.Interface
 	// Name is gateway name
 	Name string

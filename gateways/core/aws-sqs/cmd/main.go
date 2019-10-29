@@ -32,11 +32,13 @@ func main() {
 		panic(err)
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
+
 	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&aws_sqs.SQSEventSourceExecutor{
+
+	gateways.StartGateway(&aws_sqs.SQSEventSourceListener{
 		Log:       common.NewArgoEventsLogger(),
 		Clientset: clientset,
 		Namespace: namespace,

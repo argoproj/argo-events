@@ -20,26 +20,44 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *SNSEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSNSConfig)
+func (listener *SNSEventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var snsEventSource *v1alpha1.SNSEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateSNSEventSource(snsEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateSNSConfig(config interface{}) error {
-	sc := config.(*v1alpha1.SNSEventSource)
-	if sc == nil {
+// validateSNSEventSource checks if sns event source is valid
+func validateSNSEventSource(snsEventSource *v1alpha1.SNSEventSource) error {
+	if snsEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.TopicArn == "" {
+	if snsEventSource.TopicArn == "" {
 		return fmt.Errorf("must specify topic arn")
 	}
-	if sc.Region == "" {
+	if snsEventSource.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	return gwcommon.ValidateWebhook(sc.WebHook)
+	return gwcommon.ValidateWebhook(snsEventSource.WebHook)
 }

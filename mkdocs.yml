@@ -21,7 +21,7 @@ nav:
   - 'installation.md'
   - 'getting_started.md'
   - Setup:
-      - gateways/artifact.md
+      - gateways/minio.md
       - gateways/aws-sns.md
       - gateways/aws-sqs.md
       - gateways/calendar.md

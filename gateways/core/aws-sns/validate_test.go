@@ -25,31 +25,35 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	convey.Convey("Given sns event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &SNSEventSourceExecutor{}
+		ese := &SNSEventSourceListener{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "aws-sns.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
-		var cm *corev1.ConfigMap
-		err = yaml.Unmarshal(content, &cm)
+		var eventSource *v1alpha1.EventSource
+		err = yaml.Unmarshal(content, &eventSource)
 		convey.So(err, convey.ShouldBeNil)
-		convey.So(cm, convey.ShouldNotBeNil)
+		convey.So(eventSource, convey.ShouldNotBeNil)
+		convey.So(eventSource.Spec.SNS, convey.ShouldNotBeNil)
 
-		err = common.CheckEventSourceVersion(cm)
+		err = v1alpha1.ValidateEventSource(eventSource)
 		convey.So(err, convey.ShouldBeNil)
 
-		for key, value := range cm.Data {
+		for key, value := range eventSource.Spec.SNS {
+			body, err := yaml.Marshal(value)
+			convey.So(err, convey.ShouldBeNil)
 			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 				Name:    key,
 				Id:      common.Hasher(key),
-				Data:    value,
-				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
+				Value:   body,
+				Version: eventSource.Spec.Version,
+				Type:    string(eventSource.Spec.Type),
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)
