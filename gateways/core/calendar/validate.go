@@ -20,24 +20,45 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *CalendarEventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(eventSource, ArgoEventsEventSourceVersion, parseEventSource, validateSchedule)
+func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var calendarEventSource *v1alpha1.CalendarEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &calendarEventSource); err != nil {
+		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateCalendarEventSource(calendarEventSource); err != nil {
+		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to validate the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateSchedule(config interface{}) error {
-	cal := config.(*calSchedule)
-	if cal == nil {
+func validateCalendarEventSource(calendarEventSource *v1alpha1.CalendarEventSource) error {
+	if calendarEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if cal.Schedule == "" && cal.Interval == "" {
+	if calendarEventSource.Schedule == "" && calendarEventSource.Interval == "" {
 		return fmt.Errorf("must have either schedule or interval")
 	}
-	if _, err := resolveSchedule(cal); err != nil {
+	if _, err := resolveSchedule(calendarEventSource); err != nil {
 		return err
 	}
 	return nil

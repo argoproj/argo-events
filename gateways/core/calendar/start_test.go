@@ -17,20 +17,21 @@ limitations under the License.
 package calendar
 
 import (
+	"encoding/json"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func TestResolveSchedule(t *testing.T) {
 	convey.Convey("Given a calendar schedule, resolve it", t, func() {
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(ps, convey.ShouldNotBeNil)
-
-		schedule, err := resolveSchedule(ps.(*calSchedule))
+		schedule, err := resolveSchedule(&v1alpha1.CalendarEventSource{
+			Schedule: "* * * * *",
+		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(schedule, convey.ShouldNotBeNil)
 	})
@@ -38,13 +39,10 @@ func TestResolveSchedule(t *testing.T) {
 
 func TestListenEvents(t *testing.T) {
 	convey.Convey("Given a calendar schedule, listen events", t, func() {
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(ps, convey.ShouldNotBeNil)
-
-		ese := &CalendarEventSourceExecutor{
-			Log: common.NewArgoEventsLogger(),
+		listener := &EventSourceListener{
+			Logger: common.NewArgoEventsLogger(),
 		}
+
 		dataCh := make(chan []byte)
 		errorCh := make(chan error)
 		doneCh := make(chan struct{}, 1)
@@ -55,20 +53,33 @@ func TestListenEvents(t *testing.T) {
 			dataCh2 <- data
 		}()
 
-		go ese.listenEvents(ps.(*calSchedule), &gateways.EventSource{
-			Name: "fake",
-			Data: es,
-			Id:   "1234",
+		payload := []byte(`"{\r\n\"hello\": \"world\"\r\n}"`)
+		raw := json.RawMessage(payload)
+
+		calendarEventSource := &v1alpha1.CalendarEventSource{
+			Schedule:    "0 * * * *",
+			UserPayload: &raw,
+		}
+
+		body, err := yaml.Marshal(calendarEventSource)
+		convey.So(err, convey.ShouldBeNil)
+
+		go listener.listenEvents(&gateways.EventSource{
+			Name:    "fake",
+			Value:   body,
+			Id:      "1234",
+			Type:    string(v1alpha1.CalendarEvent),
+			Version: "v0.10",
 		}, dataCh, errorCh, doneCh)
 
 		data := <-dataCh2
 		doneCh <- struct{}{}
 
-		var cal *calResponse
+		var cal *response
 		err = yaml.Unmarshal(data, &cal)
 		convey.So(err, convey.ShouldBeNil)
 
-		payload, err := cal.UserPayload.MarshalJSON()
+		payload, err = cal.UserPayload.MarshalJSON()
 		convey.So(err, convey.ShouldBeNil)
 
 		convey.So(string(payload), convey.ShouldEqual, `"{\r\n\"hello\": \"world\"\r\n}"`)
