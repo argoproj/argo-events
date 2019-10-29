@@ -23,26 +23,45 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *GcpPubSubEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validatePubSubConfig)
+func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var pubsubEventSource *v1alpha1.PubSubEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &pubsubEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validatePubSubEventSource(pubsubEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validatePubSubConfig(config interface{}) error {
-	sc := config.(*pubSubEventSource)
-	if sc == nil {
+// validatePubSubEventSource validates gcp pub-sub event source
+func validatePubSubEventSource(eventSource *v1alpha1.PubSubEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.ProjectID == "" {
+	if eventSource.ProjectID == "" {
 		return fmt.Errorf("must specify projectId")
 	}
-	if sc.Topic == "" {
+	if eventSource.Topic == "" {
 		return fmt.Errorf("must specify topic")
 	}
-	if sc.CredentialsFile != "" {
-		if _, err := os.Stat(sc.CredentialsFile); err != nil {
+	if eventSource.CredentialsFile != "" {
+		if _, err := os.Stat(eventSource.CredentialsFile); err != nil {
 			return err
 		}
 	}

@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&pubsub.GcpPubSubEventSourceExecutor{
-		Log: common.NewArgoEventsLogger(),
+	gateways.StartGateway(&pubsub.EventSourceListener{
+		Logger: common.NewArgoEventsLogger(),
 	})
 }

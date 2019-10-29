@@ -19,39 +19,46 @@ package file
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
+	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/common/fsevent"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/fsnotify/fsnotify"
+	"github.com/ghodss/yaml"
 )
 
-// StartEventSource starts an event source
-func (ese *FileEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("activating event source")
+// EventSourceListener implements Eventing
+type EventSourceListener struct {
+	Log *logrus.Logger
+}
 
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
-		return err
-	}
+// StartEventSource starts an event source
+func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log.Info("started processing event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(config.(*fileWatcher), eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Log)
 }
 
-func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+	var fileEventSource *v1alpha1.FileEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
+
+	}
+
+	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	// create new fs watcher
 	watcher, err := fsnotify.NewWatcher()
@@ -62,15 +69,15 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 	defer watcher.Close()
 
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
-	err = watcher.Add(fwc.Directory)
+	err = watcher.Add(fileEventSource.Directory)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
 	var pathRegexp *regexp.Regexp
-	if fwc.PathRegexp != "" {
-		pathRegexp, err = regexp.Compile(fwc.PathRegexp)
+	if fileEventSource.PathRegexp != "" {
+		pathRegexp, err = regexp.Compile(fileEventSource.PathRegexp)
 		if err != nil {
 			errorCh <- err
 			return
@@ -89,13 +96,13 @@ func (ese *FileEventSourceExecutor) listenEvents(fwc *fileWatcher, eventSource *
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			matched := false
-			relPath := strings.TrimPrefix(event.Name, fwc.Directory)
-			if fwc.Path != "" && fwc.Path == relPath {
+			relPath := strings.TrimPrefix(event.Name, fileEventSource.Directory)
+			if fileEventSource.Path != "" && fileEventSource.Path == relPath {
 				matched = true
 			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
 				matched = true
 			}
-			if matched && fwc.Type == event.Op.String() {
+			if matched && fileEventSource.EventType == event.Op.String() {
 				log.WithFields(
 					map[string]interface{}{
 						"event-type":      event.Op.String(),

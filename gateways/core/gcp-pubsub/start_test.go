@@ -18,21 +18,19 @@ package pubsub
 
 import (
 	"context"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func TestListenEvents(t *testing.T) {
 	convey.Convey("Given a pubsub event source, listen to events", t, func() {
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(ps, convey.ShouldNotBeNil)
-		psc := ps.(*pubSubEventSource)
-
-		ese := &GcpPubSubEventSourceExecutor{
-			Log: common.NewArgoEventsLogger(),
+		ese := &EventSourceListener{
+			Logger: common.NewArgoEventsLogger(),
 		}
 
 		dataCh := make(chan []byte)
@@ -45,10 +43,20 @@ func TestListenEvents(t *testing.T) {
 			errCh2 <- err
 		}()
 
-		ese.listenEvents(context.Background(), psc, &gateways.EventSource{
-			Name: "fake",
-			Data: es,
-			Id:   "1234",
+		pubsubEventSource := &v1alpha1.PubSubEventSource{
+			ProjectID: "1234",
+			Topic:     "test",
+		}
+
+		body, err := yaml.Marshal(pubsubEventSource)
+		convey.So(err, convey.ShouldBeNil)
+
+		ese.listenEvents(context.Background(), &gateways.EventSource{
+			Name:    "fake",
+			Value:   body,
+			Id:      "1234",
+			Type:    string(v1alpha1.PubSubEvent),
+			Version: "v0.10",
 		}, dataCh, errorCh, doneCh)
 
 		err = <-errCh2

@@ -22,21 +22,39 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *FileEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateFileWatcher)
+func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var fileEventSource *v1alpha1.FileEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateFileEventSource(fileEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			Reason:  err.Error(),
+			IsValid: false,
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateFileWatcher(config interface{}) error {
-	fwc := config.(*fileWatcher)
-	if fwc == nil {
+func validateFileEventSource(fileEventSource *v1alpha1.FileEventSource) error {
+	if fileEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if fwc.Type == "" {
+	if fileEventSource.EventType == "" {
 		return fmt.Errorf("type must be specified")
 	}
-	err := fwc.WatchPathConfig.Validate()
+	err := fileEventSource.WatchPathConfig.Validate()
 	return err
 }
