@@ -362,12 +362,6 @@
   version = "v1.4.1"
 
 [[projects]]
-  name = "github.com/hashicorp/go-uuid"
-  packages = ["."]
-  revision = "4f571afc59f3043a65f8fe6bf46d887b10a01d43"
-  version = "v1.0.1"
-
-[[projects]]
   name = "github.com/hashicorp/golang-lru"
   packages = [
     ".",
@@ -563,12 +557,6 @@
   name = "github.com/robfig/cron"
   packages = ["."]
   revision = "b41be1df696709bb6395fe435af20370037c0b4c"
-  version = "v1.2.0"
-
-[[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
   version = "v1.2.0"
 
 [[projects]]

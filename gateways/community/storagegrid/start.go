@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/joncalhoun/qson"
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 )
 
 var (
@@ -50,7 +50,7 @@ func init() {
 
 // generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
-	return uuid.NewV4()
+	return uuid.New()
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
