@@ -30,7 +30,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	gateways.StartGateway(&resource.ResourceEventSourceExecutor{
+	gateways.StartGateway(&resource.EventListener{
 		Log:          common.NewArgoEventsLogger(),
 		K8RestConfig: rest,
 	})

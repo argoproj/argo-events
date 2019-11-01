@@ -25,26 +25,28 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
+	"github.com/ghodss/yaml"
 	"github.com/nlopes/slack"
 	"github.com/nlopes/slack/slackevents"
 	"github.com/pkg/errors"
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	helper = gwcommon.NewWebhookController()
 )
 
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go gwcommon.InitializeRouteChannels(helper)
 }
 
 func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 	return rc.route
 }
 
-// RouteHandler handles new route
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+// HandleRoute handles new route
+func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
 	log := r.Logger.WithFields(
@@ -214,27 +216,25 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // StartEventSource starts a event source
-func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("operating on event source")
+	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+	log.Infoln("operating on event source")
 
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
+	var slackEventSource *v1alpha1.SlackEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &slackEventSource); err != nil {
+		log.WithError(err).Errorln("failed to parse the event source")
 		return err
 	}
 
-	ses := config.(*slackEventSource)
-
-	token, err := store.GetSecrets(ese.Clientset, ese.Namespace, ses.Token.Name, ses.Token.Key)
+	token, err := store.GetSecrets(listener.Clientset, listener.Namespace, slackEventSource.Token.Name, slackEventSource.Token.Key)
 	if err != nil {
 		log.WithError(err).Error("failed to retrieve token")
 		return err
 	}
 
-	signingSecret, err := store.GetSecrets(ese.Clientset, ese.Namespace, ses.SigningSecret.Name, ses.SigningSecret.Key)
+	signingSecret, err := store.GetSecrets(listener.Clientset, listener.Namespace, slackEventSource.SigningSecret.Name, slackEventSource.SigningSecret.Key)
 	if err != nil {
 		log.WithError(err).Warn("Signing secret not provided. Signature not validated.")
 		signingSecret = ""
@@ -242,15 +242,15 @@ func (ese *SlackEventSourceExecutor) StartEventSource(eventSource *gateways.Even
 
 	return gwcommon.ProcessRoute(&RouteConfig{
 		route: &gwcommon.Route{
-			Logger:      ese.Log,
+			Logger:      listener.Logger,
 			StartCh:     make(chan struct{}),
-			Webhook:     ses.Hook,
+			Webhook:     slackEventSource.WebHook,
 			EventSource: eventSource,
 		},
 		token:         token,
 		signingSecret: signingSecret,
-		clientset:     ese.Clientset,
-		namespace:     ese.Namespace,
-		ses:           ses,
+		clientset:     listener.Clientset,
+		namespace:     listener.Namespace,
+		eventSource:   slackEventSource,
 	}, helper, eventStream)
 }

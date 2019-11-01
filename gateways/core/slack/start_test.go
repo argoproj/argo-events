@@ -50,7 +50,7 @@ func TestRouteActiveHandler(t *testing.T) {
 
 		convey.Convey("Inactive route should return 404", func() {
 			writer := &gwcommon.FakeHttpWriter{}
-			rc.RouteHandler(writer, &http.Request{})
+			rc.HandleRoute(writer, &http.Request{})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
@@ -67,7 +67,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			payload, err := yaml.Marshal(urlVer)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(payload, convey.ShouldNotBeNil)
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
@@ -109,7 +109,7 @@ func TestSlackSignature(t *testing.T) {
 				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 			}()
 
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 				Header: h,
 				Method: "POST",
@@ -148,7 +148,7 @@ func TestInteractionHandler(t *testing.T) {
 
 			headers := make(map[string][]string)
 			headers["Content-Type"] = append(headers["Content-Type"], "application/x-www-form-urlencoded")
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Method: http.MethodPost,
 				Header: headers,
 				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
@@ -206,7 +206,7 @@ func TestEventHandler(t *testing.T) {
 				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 			}()
 
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)

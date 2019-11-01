@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package slack
+package minio
 
 import (
 	"context"
@@ -25,36 +25,31 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
 )
 
-func TestSlackEventSource(t *testing.T) {
-	convey.Convey("Given a slack event source spec, parse it and make sure no error occurs", t, func() {
-		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "slack.yaml"))
+func TestValidateS3EventSource(t *testing.T) {
+	convey.Convey("Given a S3 minio spec, parse the spec and make sure no error occurs", t, func() {
+		ese := &MinioEventSourceListener{}
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "minio.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
-		var eventSource *v1alpha1.EventSource
-		err = yaml.Unmarshal(content, &eventSource)
+		var cm *corev1.ConfigMap
+		err = yaml.Unmarshal(content, &cm)
 		convey.So(err, convey.ShouldBeNil)
-		convey.So(eventSource, convey.ShouldNotBeNil)
+		convey.So(cm, convey.ShouldNotBeNil)
 
-		err = v1alpha1.ValidateEventSource(eventSource)
+		err = common.CheckEventSourceVersion(cm)
 		convey.So(err, convey.ShouldBeNil)
 
-		for key, value := range eventSource.Spec.Github {
-			body, err := yaml.Marshal(value)
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(err, convey.ShouldNotBeNil)
-
-			valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+		for key, value := range cm.Data {
+			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 				Name:    key,
 				Id:      common.Hasher(key),
-				Value:   body,
-				Version: eventSource.Spec.Version,
-				Type:    string(eventSource.Spec.Type),
+				Data:    value,
+				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)

@@ -25,34 +25,36 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func TestValidateGitlabEventSource(t *testing.T) {
 	convey.Convey("Given a gitlab event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &GitlabEventSourceExecutor{}
+		ese := &GitlabEventListener{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "gitlab.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
-		var cm *corev1.ConfigMap
-		err = yaml.Unmarshal(content, &cm)
+		var eventsource *v1alpha1.EventSource
+		err = yaml.Unmarshal(content, &eventsource)
 		convey.So(err, convey.ShouldBeNil)
-		convey.So(cm, convey.ShouldNotBeNil)
+		convey.So(eventsource, convey.ShouldNotBeNil)
 
-		err = common.CheckEventSourceVersion(cm)
+		err = v1alpha1.ValidateEventSource(eventsource)
 		convey.So(err, convey.ShouldBeNil)
 
-		for key, value := range cm.Data {
+		for key, value := range eventsource.Spec.Gitlab {
+			body, err := yaml.Marshal(value)
+			convey.So(err, convey.ShouldBeNil)
 			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
 				Name:    key,
 				Id:      common.Hasher(key),
-				Data:    value,
-				Version: cm.Labels[common.LabelArgoEventsEventSourceVersion],
+				Value:   body,
+				Version: eventsource.Spec.Version,
+				Type:    string(eventsource.Spec.Type),
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
-			convey.Println(valid.Reason)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)
 		}
 	})

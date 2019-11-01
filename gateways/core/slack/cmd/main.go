@@ -36,7 +36,7 @@ func main() {
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&slack.SlackEventSourceExecutor{
+	gateways.StartGateway(&slack.EventListener{
 		Log:       common.NewArgoEventsLogger(),
 		Clientset: clientset,
 		Namespace: namespace,

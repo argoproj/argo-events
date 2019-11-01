@@ -71,7 +71,7 @@ var (
   "Version": "2010-03-31"
 }
 `
-	rc = &RouteConfig{
+	rc = &Router{
 		route: gwcommon.GetFakeRoute(),
 	}
 )
@@ -89,7 +89,7 @@ func TestRouteActiveHandler(t *testing.T) {
 		convey.Convey("Inactive route should return error", func() {
 			pbytes, err := yaml.Marshal(ps.(*storageGridEventSource))
 			convey.So(err, convey.ShouldBeNil)
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
@@ -97,14 +97,14 @@ func TestRouteActiveHandler(t *testing.T) {
 
 		convey.Convey("Active route should return success", func() {
 			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
-			rc.sges = ps.(*storageGridEventSource)
+			rc.eventSource = ps.(*storageGridEventSource)
 			dataCh := make(chan []byte)
 			go func() {
 				resp := <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
 				dataCh <- resp
 			}()
 
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(notification))),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)

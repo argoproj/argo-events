@@ -38,9 +38,9 @@ func main() {
 		panic("namespace is not provided")
 	}
 
-	gateways.StartGateway(&aws_sns.SNSEventSourceListener{
+	gateways.StartGateway(&aws_sns.EventListener{
 		Log:       common.NewArgoEventsLogger(),
-		Clientset: clientset,
+		K8sClient: clientset,
 		Namespace: namespace,
 	})
 }

@@ -40,11 +40,11 @@ const (
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	helper = gwcommon.NewWebhookController()
 )
 
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go gwcommon.InitializeRouteChannels(helper)
 }
 
 // getCredentials for github
@@ -210,7 +210,7 @@ func parseValidateRequest(r *http.Request, secret []byte) ([]byte, error) {
 }
 
 // routeActiveHandler handles new route
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
 	logger := r.Logger.WithFields(

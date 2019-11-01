@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/common"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"io/ioutil"
 	"net/http"
 
@@ -27,19 +28,19 @@ import (
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	controller = webhook.NewController()
 )
 
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go webhook.ProcessRouteStatus(controller)
 }
 
 func (rc *RouteConfig) GetRoute() *gwcommon.Route {
 	return rc.Route
 }
 
-// RouteHandler handles new route
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+// HandleRoute handles new route
+func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	var response string
 
 	r := rc.Route
@@ -54,7 +55,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	log.Info("request received")
 
-	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
+	if !controller.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
 		log.Info("endpoint is not active")
 		common.SendErrorResponse(writer, response)
@@ -80,7 +81,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
+	controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	response = "request successfully processed"
 	log.Info(response)
 	common.SendSuccessResponse(writer, response)
@@ -116,5 +117,5 @@ func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.Ev
 			StartCh:     make(chan struct{}),
 			Webhook:     h,
 		},
-	}, helper, eventStream)
+	}, controller, eventStream)
 }

@@ -32,7 +32,7 @@ import (
 
 func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	convey.Convey("Given sns event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &SNSEventSourceListener{}
+		ese := &EventListener{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "aws-sns.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 

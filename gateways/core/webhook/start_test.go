@@ -32,29 +32,29 @@ func TestRouteActiveHandler(t *testing.T) {
 		}
 		r := rc.Route
 		r.Webhook.Method = http.MethodGet
-		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
+		controller.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 
 		writer := &gwcommon.FakeHttpWriter{}
 
 		convey.Convey("Inactive route should return error", func() {
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte("hello"))),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
+		controller.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 
 		convey.Convey("Active route with correct method should return success", func() {
 			dataCh := make(chan []byte)
 			go func() {
-				resp := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				resp := <-controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh
 				dataCh <- resp
 			}()
 
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodGet,
 			})
@@ -64,7 +64,7 @@ func TestRouteActiveHandler(t *testing.T) {
 		})
 
 		convey.Convey("Active route with incorrect method should return failure", func() {
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodHead,
 			})

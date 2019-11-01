@@ -34,14 +34,14 @@ import (
 
 func TestAWSSNS(t *testing.T) {
 	convey.Convey("Given an route configuration", t, func() {
-		rc := &RouteConfig{
+		rc := &Router{
 			Route:     gwcommon.GetFakeRoute(),
 			namespace: "fake",
-			clientset: fake.NewSimpleClientset(),
+			k8sClient: fake.NewSimpleClientset(),
 		}
 		r := rc.Route
 
-		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
+		controller.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
 			DataCh: make(chan []byte),
 		}
 		writer := &gwcommon.FakeHttpWriter{}
@@ -58,7 +58,7 @@ func TestAWSSNS(t *testing.T) {
 		rc.subscriptionArn = &subscriptionArn
 
 		convey.Convey("handle the inactive route", func() {
-			rc.RouteHandler(writer, &http.Request{})
+			rc.HandleRoute(writer, &http.Request{})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
@@ -84,7 +84,7 @@ func TestAWSSNS(t *testing.T) {
 			},
 		}
 
-		helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
+		controller.ActiveEndpoints[r.Webhook.Endpoint].Active = true
 		rc.eventSource = snsEventSource
 
 		convey.Convey("handle the active route", func() {
@@ -96,7 +96,7 @@ func TestAWSSNS(t *testing.T) {
 
 			payloadBytes, err := yaml.Marshal(payload)
 			convey.So(err, convey.ShouldBeNil)
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
@@ -104,14 +104,14 @@ func TestAWSSNS(t *testing.T) {
 			dataCh := make(chan []byte)
 
 			go func() {
-				data := <-helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				data := <-controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh
 				dataCh <- data
 			}()
 
 			payload.Type = messageTypeNotification
 			payloadBytes, err = yaml.Marshal(payload)
 			convey.So(err, convey.ShouldBeNil)
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payloadBytes)),
 			})
 			data := <-dataCh

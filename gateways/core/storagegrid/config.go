@@ -17,49 +17,22 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/sirupsen/logrus"
-	"net/http"
 	"time"
 
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/sirupsen/logrus"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
-// StorageGridEventSourceExecutor implements Eventing
-type StorageGridEventSourceExecutor struct {
-	Log *logrus.Logger
+// EventListener implements Eventing for storage grid events
+type EventListener struct {
+	Logger *logrus.Logger
 }
 
-type RouteConfig struct {
-	route *gwcommon.Route
-	sges  *storageGridEventSource
-}
-
-// storageGridEventSource contains configuration for storage grid sns
-type storageGridEventSource struct {
-	// Webhook
-	Hook *gwcommon.Webhook `json:"hook"`
-
-	// Events are s3 bucket notification events.
-	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
-	// Note that storage grid notifications do not contain `s3:`
-	Events []string `json:"events,omitempty"`
-
-	// Filter on object key which caused the notification.
-	Filter *Filter `json:"filter,omitempty"`
-
-	// srv holds reference to http server
-	srv *http.Server
-	mux *http.ServeMux
-}
-
-// Filter represents filters to apply to bucket notifications for specifying constraints on objects
-// +k8s:openapi-gen=true
-type Filter struct {
-	Prefix string `json:"prefix"`
-	Suffix string `json:"suffix"`
+// Router manages route
+type Router struct {
+	route       *gwcommon.Route
+	eventSource *v1alpha1.StorageGridEventSource
 }
 
 // storageGridNotification is the bucket notification received from storage grid
@@ -101,13 +74,4 @@ type storageGridNotification struct {
 	} `json:"Message"`
 	TopicArn string `json:"TopicArn"`
 	Version  string `json:"Version"`
-}
-
-func parseEventSource(eventSource string) (interface{}, error) {
-	var s *storageGridEventSource
-	err := yaml.Unmarshal([]byte(eventSource), &s)
-	if err != nil {
-		return nil, err
-	}
-	return s, err
 }

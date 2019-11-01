@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"net/http"
+	"strings"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -108,4 +109,17 @@ func GetObjectHash(obj metav1.Object) (string, error) {
 		return "", fmt.Errorf("failed to marshal resource")
 	}
 	return Hasher(string(b)), nil
+}
+
+// FormatEndpoint returns a formatted api endpoint
+func FormatEndpoint(endpoint string) string {
+	if !strings.HasPrefix(endpoint, "/") {
+		return fmt.Sprintf("/%s", endpoint)
+	}
+	return endpoint
+}
+
+// FormattedURL returns a formatted url
+func FormattedURL(url, endpoint string) string {
+	return fmt.Sprintf("%s%s", url, FormatEndpoint(endpoint))
 }

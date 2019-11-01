@@ -114,3 +114,15 @@ func TestServerResourceForGroupVersionKind(t *testing.T) {
 		})
 	})
 }
+
+func TestFormatWebhookEndpoint(t *testing.T) {
+	convey.Convey("Given a webhook endpoint, format it", t, func() {
+		convey.So(FormatEndpoint("hello"), convey.ShouldEqual, "/hello")
+	})
+}
+
+func TestGenerateFormattedURL(t *testing.T) {
+	convey.Convey("Given a webhook, generate formatted URL", t, func() {
+		convey.So(FormattedURL("test-url", "fake"), convey.ShouldEqual, "test-url/fake")
+	})
+}

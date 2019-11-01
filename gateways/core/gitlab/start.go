@@ -25,20 +25,23 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
+	"github.com/ghodss/yaml"
 	"github.com/xanzy/go-gitlab"
+	corev1 "k8s.io/api/core/v1"
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	helper = gwcommon.NewWebhookController()
 )
 
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go gwcommon.InitializeRouteChannels(helper)
 }
 
 // getCredentials for gitlab
-func (rc *RouteConfig) getCredentials(gs *GitlabSecret) (*cred, error) {
+func (rc *Router) getCredentials(gs *corev1.SecretKeySelector) (*cred, error) {
 	token, err := store.GetSecrets(rc.clientset, rc.namespace, gs.Name, gs.Key)
 	if err != nil {
 		return nil, err
@@ -48,39 +51,39 @@ func (rc *RouteConfig) getCredentials(gs *GitlabSecret) (*cred, error) {
 	}, nil
 }
 
-func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+func (rc *Router) GetRoute() *gwcommon.Route {
 	return rc.route
 }
 
-func (rc *RouteConfig) PostStart() error {
-	c, err := rc.getCredentials(rc.ges.AccessToken)
+func (rc *Router) PostStart() error {
+	c, err := rc.getCredentials(rc.eventSource.AccessToken)
 	if err != nil {
 		return fmt.Errorf("failed to get gitlab credentials. err: %+v", err)
 	}
 
 	rc.client = gitlab.NewClient(nil, c.token)
-	if err = rc.client.SetBaseURL(rc.ges.GitlabBaseURL); err != nil {
+	if err = rc.client.SetBaseURL(rc.eventSource.GitlabBaseURL); err != nil {
 		return fmt.Errorf("failed to set gitlab base url, err: %+v", err)
 	}
 
-	formattedUrl := gwcommon.GenerateFormattedURL(rc.ges.Hook)
+	formattedUrl := gwcommon.GenerateFormattedURL(rc.eventSource.Webhook)
 
 	opt := &gitlab.AddProjectHookOptions{
 		URL:                   &formattedUrl,
 		Token:                 &c.token,
-		EnableSSLVerification: &rc.ges.EnableSSLVerification,
+		EnableSSLVerification: &rc.eventSource.EnableSSLVerification,
 	}
 
-	elem := reflect.ValueOf(opt).Elem().FieldByName(string(rc.ges.Event))
+	elem := reflect.ValueOf(opt).Elem().FieldByName(string(rc.eventSource.Event))
 	if ok := elem.IsValid(); !ok {
-		return fmt.Errorf("unknown event %s", rc.ges.Event)
+		return fmt.Errorf("unknown event %s", rc.eventSource.Event)
 	}
 
 	iev := reflect.New(elem.Type().Elem())
 	reflect.Indirect(iev).SetBool(true)
 	elem.Set(iev)
 
-	hook, _, err := rc.client.Projects.AddProjectHook(rc.ges.ProjectId, opt)
+	hook, _, err := rc.client.Projects.AddProjectHook(rc.eventSource.ProjectId, opt)
 	if err != nil {
 		return fmt.Errorf("failed to add project hook. err: %+v", err)
 	}
@@ -90,8 +93,8 @@ func (rc *RouteConfig) PostStart() error {
 	return nil
 }
 
-func (rc *RouteConfig) PostStop() error {
-	if _, err := rc.client.Projects.DeleteProjectHook(rc.ges.ProjectId, rc.hook.ID); err != nil {
+func (rc *Router) PostStop() error {
+	if _, err := rc.client.Projects.DeleteProjectHook(rc.eventSource.ProjectId, rc.hook.ID); err != nil {
 		return fmt.Errorf("failed to delete hook. err: %+v", err)
 	}
 	rc.route.Logger.WithField(common.LabelEventSource, rc.route.EventSource.Name).Info("gitlab hook deleted")
@@ -99,7 +102,7 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // routeActiveHandler handles new route
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
 	log := r.Logger.WithFields(
@@ -130,28 +133,28 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 }
 
 // StartEventSource starts an event source
-func (ese *GitlabEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *GitlabEventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	log.Info("operating on event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
+	log.Info("started processing the event source...")
+
+	var gitlabEventSource *v1alpha1.GitlabEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &gitlabEventSource); err != nil {
+		log.WithError(err).Error("failed to parse the event source")
 		return err
 	}
-	gl := config.(*gitlabEventSource)
 
-	return gwcommon.ProcessRoute(&RouteConfig{
+	return gwcommon.ProcessRoute(&Router{
 		route: &gwcommon.Route{
 			EventSource: eventSource,
-			Logger:      ese.Log,
-			Webhook:     gl.Hook,
+			Logger:      listener.Logger,
+			Webhook:     gitlabEventSource.Webhook,
 			StartCh:     make(chan struct{}),
 		},
-		namespace: ese.Namespace,
-		clientset: ese.Clientset,
-		ges:       gl,
+		namespace:   listener.Namespace,
+		clientset:   listener.Clientset,
+		eventSource: gitlabEventSource,
 	}, helper, eventStream)
 }

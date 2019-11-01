@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/aws/aws-sdk-go/aws/session"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
@@ -30,20 +31,28 @@ import (
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	// controller controls the webhook operations
+	controller = webhook.NewController()
 )
 
+// set up route activation and deactivation channels
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go webhook.ProcessRouteStatus(controller)
 }
 
+// Implement Router
+// 1. GetRoute
+// 2. HandleRoute
+// 3. PostActivate
+// 4. PostDeactivate
+
 // GetRoute returns the route
-func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+func (rc *Router) GetRoute() *webhook.Route {
 	return rc.Route
 }
 
-// RouteHandler handles new routes
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+// HandleRoute handles new routes
+func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.Route
 
 	logger := r.Logger.WithFields(
@@ -56,7 +65,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 
 	logger.Info("request received")
 
-	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
+	if !controller.ActiveEndpoints[r.Webhook.Endpoint].Active {
 		logger.Info("endpoint is not active")
 		common.SendErrorResponse(writer, "")
 		return
@@ -92,14 +101,14 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 		rc.subscriptionArn = out.SubscriptionArn
 
 	case messageTypeNotification:
-		helper.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
+		controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
 	}
 
 	logger.Info("request successfully processed")
 }
 
 // PostStart subscribes to the sns topic
-func (rc *RouteConfig) PostStart() error {
+func (rc *Router) PostStart() error {
 	r := rc.Route
 
 	logger := r.Logger.WithFields(
@@ -124,7 +133,7 @@ func (rc *RouteConfig) PostStart() error {
 
 		awsSession = awsSessionWithoutCreds
 	} else {
-		creds, err := gwcommon.GetAWSCreds(rc.clientset, rc.namespace, sc.AccessKey, sc.SecretKey)
+		creds, err := gwcommon.GetAWSCreds(rc.k8sClient, rc.namespace, sc.AccessKey, sc.SecretKey)
 		if err != nil {
 			return fmt.Errorf("failed to create aws session. err: %+v", err)
 		}
@@ -151,7 +160,7 @@ func (rc *RouteConfig) PostStart() error {
 }
 
 // PostStop unsubscribes from the sns topic
-func (rc *RouteConfig) PostStop() error {
+func (rc *Router) PostStop() error {
 	if _, err := rc.session.Unsubscribe(&snslib.UnsubscribeInput{
 		SubscriptionArn: rc.subscriptionArn,
 	}); err != nil {
@@ -161,7 +170,7 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // StartEventSource starts an SNS event source
-func (listener *SNSEventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
 	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
@@ -173,7 +182,7 @@ func (listener *SNSEventSourceListener) StartEventSource(eventSource *gateways.E
 		return err
 	}
 
-	return gwcommon.ProcessRoute(&RouteConfig{
+	return gwcommon.ProcessRoute(&Router{
 		Route: &gwcommon.Route{
 			Logger:      listener.Log,
 			EventSource: eventSource,
@@ -182,6 +191,6 @@ func (listener *SNSEventSourceListener) StartEventSource(eventSource *gateways.E
 		},
 		eventSource: snsEventSource,
 		namespace:   listener.Namespace,
-		clientset:   listener.Clientset,
-	}, helper, eventStream)
+		k8sClient:   listener.K8sClient,
+	}, controller, eventStream)
 }

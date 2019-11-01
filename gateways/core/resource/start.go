@@ -23,6 +23,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -36,49 +38,48 @@ import (
 )
 
 // StartEventSource starts an event source
-func (executor *ResourceEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := executor.Log.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("operating on event source")
-
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
-		return err
-	}
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go executor.listenEvents(config.(*resource), eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, executor.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
 // listenEvents watches resource updates and consume those events
-func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	executor.Log.WithField(common.LabelEventSource, eventSource.Name).Info("started listening resource notifications")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Info("started processing the event source...")
 
-	client, err := dynamic.NewForConfig(executor.K8RestConfig)
+	var resourceEventSource *v1alpha1.ResourceEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &resourceEventSource); err != nil {
+		errorCh <- err
+		return
+	}
+
+	client, err := dynamic.NewForConfig(listener.K8RestConfig)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
 	gvr := schema.GroupVersionResource{
-		Group:    resourceCfg.Group,
-		Version:  resourceCfg.Version,
-		Resource: resourceCfg.Resource,
+		Group:    resourceEventSource.Group,
+		Version:  resourceEventSource.Version,
+		Resource: resourceEventSource.Resource,
 	}
 
 	client.Resource(gvr)
 
 	options := &metav1.ListOptions{}
 
-	if resourceCfg.Filter != nil && resourceCfg.Filter.Labels != nil {
-		sel, err := LabelSelector(resourceCfg.Filter.Labels)
+	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Labels != nil {
+		sel, err := LabelSelector(resourceEventSource.Filter.Labels)
 		if err != nil {
 			errorCh <- err
 			return
@@ -86,8 +87,8 @@ func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource,
 		options.LabelSelector = sel.String()
 	}
 
-	if resourceCfg.Filter != nil && resourceCfg.Filter.Fields != nil {
-		sel, err := LabelSelector(resourceCfg.Filter.Fields)
+	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Fields != nil {
+		sel, err := LabelSelector(resourceEventSource.Filter.Fields)
 		if err != nil {
 			errorCh <- err
 			return
@@ -99,7 +100,7 @@ func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource,
 		op = options
 	}
 
-	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceCfg.Namespace, tweakListOptions)
+	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceEventSource.Namespace, tweakListOptions)
 
 	informer := factory.ForResource(gvr)
 
@@ -114,11 +115,11 @@ func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource,
 				}
 				eventBody, err := json.Marshal(event)
 				if err != nil {
-					executor.Log.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to parse event from resource informer")
+					listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to parse event from resource informer")
 					continue
 				}
-				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceCfg.Filter); err != nil {
-					executor.Log.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Warnln("failed to apply the filter")
+				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceEventSource.Filter); err != nil {
+					listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Warnln("failed to apply the filter")
 					continue
 				}
 				dataCh <- eventBody
@@ -132,27 +133,27 @@ func (executor *ResourceEventSourceExecutor) listenEvents(resourceCfg *resource,
 			AddFunc: func(obj interface{}) {
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
-					Type: ADD,
+					Type: v1alpha1.ADD,
 				}
 			},
 			UpdateFunc: func(oldObj, newObj interface{}) {
 				informerEventCh <- &InformerEvent{
 					Obj:    newObj,
 					OldObj: oldObj,
-					Type:   UPDATE,
+					Type:   v1alpha1.UPDATE,
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
-					Type: DELETE,
+					Type: v1alpha1.DELETE,
 				}
 			},
 		},
 	)
 
 	sharedInformer.Run(doneCh)
-	executor.Log.WithField(common.LabelEventSource, eventSource.Name).Infoln("resource informer is stopped")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("resource informer is stopped")
 	close(informerEventCh)
 	close(doneCh)
 }
@@ -193,7 +194,7 @@ func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(obj *unstructured.Unstructured, filter *ResourceFilter) error {
+func passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) error {
 	// no filters are applied.
 	if filter == nil {
 		return nil

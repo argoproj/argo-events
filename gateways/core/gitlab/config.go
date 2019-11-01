@@ -18,70 +18,33 @@ package gitlab
 
 import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
-// GitlabEventSourceExecutor implements ConfigExecutor
-type GitlabEventSourceExecutor struct {
-	Log *logrus.Logger
-	// Clientset is kubernetes client
+// GitlabEventListener implements ConfigExecutor
+type GitlabEventListener struct {
+	Logger *logrus.Logger
+	// k8sClient is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
 }
 
-// RouteConfig contains the configuration information for a route
-type RouteConfig struct {
-	route     *gwcommon.Route
-	clientset kubernetes.Interface
-	client    *gitlab.Client
-	hook      *gitlab.ProjectHook
-	namespace string
-	ges       *gitlabEventSource
-}
-
-// gitlabEventSource contains information to setup a gitlab project integration
-type gitlabEventSource struct {
-	// Webhook
-	Hook *gwcommon.Webhook `json:"hook"`
-	// ProjectId is the id of project for which integration needs to setup
-	ProjectId string `json:"projectId"`
-	// Event is a gitlab event to listen to.
-	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
-	Event string `json:"event"`
-	// AccessToken is reference to k8 secret which holds the gitlab api access information
-	AccessToken *GitlabSecret `json:"accessToken"`
-	// EnableSSLVerification to enable ssl verification
-	EnableSSLVerification bool `json:"enableSSLVerification"`
-	// GitlabBaseURL is the base URL for API requests to a custom endpoint
-	GitlabBaseURL string `json:"gitlabBaseUrl"`
-}
-
-// GitlabSecret contains information of k8 secret which holds the gitlab api access information
-type GitlabSecret struct {
-	// Key within the K8 secret for access token
-	Key string
-	// Name of K8 secret containing access token info
-	Name string
+// Router contains the configuration information for a route
+type Router struct {
+	route       *gwcommon.Route
+	clientset   kubernetes.Interface
+	client      *gitlab.Client
+	hook        *gitlab.ProjectHook
+	namespace   string
+	eventSource *v1alpha1.GitlabEventSource
 }
 
 // cred stores the api access token
 type cred struct {
 	// token is gitlab api access token
 	token string
-}
-
-// parseEventSource parses an event sources of gateway
-func parseEventSource(config string) (interface{}, error) {
-	var g *gitlabEventSource
-	err := yaml.Unmarshal([]byte(config), &g)
-	if err != nil {
-		return nil, err
-	}
-	return g, err
 }

@@ -18,46 +18,25 @@ package slack
 
 import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
-// SlackEventSourceExecutor implements Eventing
-type SlackEventSourceExecutor struct {
-	// Clientset is kubernetes client
+// EventListener implements Eventing for slack event source
+type EventListener struct {
+	// k8sClient is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
-	Log       *logrus.Logger
+	Logger    *logrus.Logger
 }
 
 type RouteConfig struct {
 	route         *gwcommon.Route
-	ses           *slackEventSource
+	eventSource   *v1alpha1.SlackEventSource
 	token         string
 	signingSecret string
 	clientset     kubernetes.Interface
 	namespace     string
-}
-
-type slackEventSource struct {
-	// Slack App signing secret
-	SigningSecret *corev1.SecretKeySelector `json:"signingSecret,omitempty"`
-	// Token for URL verification handshake
-	Token *corev1.SecretKeySelector `json:"token"`
-	// Webhook
-	Hook *gwcommon.Webhook `json:"hook"`
-}
-
-func parseEventSource(es string) (interface{}, error) {
-	var n *slackEventSource
-	err := yaml.Unmarshal([]byte(es), &n)
-	if err != nil {
-		return nil, err
-	}
-	return n, nil
 }

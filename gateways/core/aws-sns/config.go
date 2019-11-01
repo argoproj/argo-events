@@ -19,7 +19,7 @@ package aws_sns
 import (
 	"time"
 
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/sirupsen/logrus"
@@ -37,23 +37,28 @@ var (
 	snsProtocol = "http"
 )
 
-// SNSEventSourceListener implements Eventing
-type SNSEventSourceListener struct {
-	Log *logrus.Logger
-	// k8sClient is kubernetes client
-	Clientset kubernetes.Interface
+// EventListener implements Eventing for aws sns event source
+type EventListener struct {
+	// Logger to log stuff
+	Logger *logrus.Logger
+	// K8sClient is kubernetes client
+	K8sClient kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
 }
 
-// RouteConfig contains information for a route
-type RouteConfig struct {
-	Route           *gwcommon.Route
-	eventSource     *v1alpha1.SNSEventSource
-	session         *snslib.SNS
+// Router contains information for a route
+type Router struct {
+	// Route contains webhook context and configuration related to api route
+	Route *webhook.Route
+	// eventSource refers to sns event source configuration
+	eventSource *v1alpha1.SNSEventSource
+	// session refers to aws session
+	session *snslib.SNS
+	// subscriptionArn is sns arn
 	subscriptionArn *string
-	clientset       kubernetes.Interface
-	namespace       string
+	// k8sClient is Kubernetes client
+	k8sClient kubernetes.Interface
 }
 
 // Json http notifications

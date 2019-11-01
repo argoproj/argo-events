@@ -32,7 +32,7 @@ import (
 )
 
 var (
-	rc = &RouteConfig{
+	rc = &Router{
 		route:     gwcommon.GetFakeRoute(),
 		clientset: fake.NewSimpleClientset(),
 		namespace: "fake",
@@ -78,7 +78,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 			pbytes, err := yaml.Marshal(ps.(*gitlabEventSource))
 			convey.So(err, convey.ShouldBeNil)
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
@@ -95,14 +95,14 @@ func TestRouteActiveHandler(t *testing.T) {
 					dataCh <- resp
 				}()
 
-				rc.RouteHandler(writer, &http.Request{
+				rc.HandleRoute(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
 				})
 
 				data := <-dataCh
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
 				convey.So(string(data), convey.ShouldEqual, string(pbytes))
-				rc.ges = ps.(*gitlabEventSource)
+				rc.eventSource = ps.(*gitlabEventSource)
 				err = rc.PostStart()
 				convey.So(err, convey.ShouldNotBeNil)
 			})

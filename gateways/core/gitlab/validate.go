@@ -19,29 +19,50 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gitlab gateway event source
-func (ese *GitlabEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateGitlab)
+func (listener *GitlabEventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var gitlabEventSource *v1alpha1.GitlabEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &gitlabEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validateGitlabEventSource(gitlabEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate gitlab event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateGitlab(config interface{}) error {
-	g := config.(*gitlabEventSource)
-	if g == nil {
+// validateGitlabEventSource validates a gitlab event source
+func validateGitlabEventSource(eventSource *v1alpha1.GitlabEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if g.ProjectId == "" {
+	if eventSource.ProjectId == "" {
 		return fmt.Errorf("project id can't be empty")
 	}
-	if g.Event == "" {
+	if eventSource.Event == "" {
 		return fmt.Errorf("event type can't be empty")
 	}
-	if g.GitlabBaseURL == "" {
+	if eventSource.GitlabBaseURL == "" {
 		return fmt.Errorf("gitlab base url can't be empty")
 	}
-	if g.AccessToken == nil {
+	if eventSource.AccessToken == nil {
 		return fmt.Errorf("access token can't be nil")
 	}
-	return gwcommon.ValidateWebhook(g.Hook)
+	return gwcommon.ValidateWebhook(eventSource.Webhook)
 }

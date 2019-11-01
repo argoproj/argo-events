@@ -27,7 +27,7 @@ import (
 )
 
 // ValidateEventSource validates gateway event source
-func (listener *SNSEventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var snsEventSource *v1alpha1.SNSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
 		return &gateways.ValidEventSource{

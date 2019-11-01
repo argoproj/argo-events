@@ -26,12 +26,14 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
-	"github.com/satori/go.uuid"
 )
 
 var (
-	helper = gwcommon.NewWebhookHelper()
+	helper = gwcommon.NewWebhookController()
 
 	respBody = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
@@ -45,20 +47,20 @@ var (
 )
 
 func init() {
-	go gwcommon.InitRouteChannels(helper)
+	go gwcommon.InitializeRouteChannels(helper)
 }
 
 // generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
-	return uuid.NewV4()
+	return uuid.New()
 }
 
 // filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, sg *storageGridEventSource) bool {
-	if sg.Events == nil {
+func filterEvent(notification *storageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
+	if eventSource.Events == nil {
 		return true
 	}
-	for _, filterEvent := range sg.Events {
+	for _, filterEvent := range eventSource.Events {
 		if notification.Message.Records[0].EventName == filterEvent {
 			return true
 		}
@@ -67,61 +69,61 @@ func filterEvent(notification *storageGridNotification, sg *storageGridEventSour
 }
 
 // filterName filters object key based on configured prefix and/or suffix
-func filterName(notification *storageGridNotification, sg *storageGridEventSource) bool {
-	if sg.Filter == nil {
+func filterName(notification *storageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
+	if eventSource.Filter == nil {
 		return true
 	}
-	if sg.Filter.Prefix != "" && sg.Filter.Suffix != "" {
-		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix) && strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	if eventSource.Filter.Prefix != "" && eventSource.Filter.Suffix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Prefix) && strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Suffix)
 	}
-	if sg.Filter.Prefix != "" {
-		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Prefix)
+	if eventSource.Filter.Prefix != "" {
+		return strings.HasPrefix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Prefix)
 	}
-	if sg.Filter.Suffix != "" {
-		return strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, sg.Filter.Suffix)
+	if eventSource.Filter.Suffix != "" {
+		return strings.HasSuffix(notification.Message.Records[0].S3.Object.Key, eventSource.Filter.Suffix)
 	}
 	return true
 }
 
-func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+func (rc *Router) GetRoute() *gwcommon.Route {
 	return rc.route
 }
 
 // StartConfig runs a configuration
-func (ese *StorageGridEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	log.Info("operating on event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
+	log.Info("started processing the event source...")
+
+	var storagegridEventSource *v1alpha1.StorageGridEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &storagegridEventSource); err != nil {
+		log.WithError(err).Errorln("failed to parse the event source")
 		return err
 	}
-	sges := config.(*storageGridEventSource)
 
-	return gwcommon.ProcessRoute(&RouteConfig{
+	return gwcommon.ProcessRoute(&Router{
 		route: &gwcommon.Route{
-			Webhook:     sges.Hook,
+			Webhook:     storagegridEventSource.WebHook,
 			EventSource: eventSource,
-			Logger:      ese.Log,
+			Logger:      listener.Logger,
 			StartCh:     make(chan struct{}),
 		},
-		sges: sges,
+		eventSource: storagegridEventSource,
 	}, helper, eventStream)
 }
 
-func (rc *RouteConfig) PostStart() error {
+func (rc *Router) PostStart() error {
 	return nil
 }
 
-func (rc *RouteConfig) PostStop() error {
+func (rc *Router) PostStop() error {
 	return nil
 }
 
-// RouteHandler handles new route
-func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Request) {
+// HandleRoute handles new route
+func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
 	log := r.Logger.WithFields(
@@ -141,7 +143,7 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	log.Info("received a request")
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		log.WithError(err).Error("failed to parse request body")
+		log.WithError(err).Errorln("failed to parse request body")
 		common.SendErrorResponse(writer, "")
 		return
 	}
@@ -157,27 +159,27 @@ func (rc *RouteConfig) RouteHandler(writer http.ResponseWriter, request *http.Re
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))
 	if err != nil {
-		log.WithError(err).Error("failed to unescape request body url")
+		log.WithError(err).Errorln("failed to unescape request body url")
 		return
 	}
 	b, err := qson.ToJSON(parsedURL)
 	if err != nil {
-		log.WithError(err).Error("failed to convert request body in JSON format")
+		log.WithError(err).Errorln("failed to convert request body in JSON format")
 		return
 	}
 
 	var notification *storageGridNotification
 	err = json.Unmarshal(b, &notification)
 	if err != nil {
-		log.WithError(err).Error("failed to unmarshal request body")
+		log.WithError(err).Errorln("failed to unmarshal request body")
 		return
 	}
 
-	if filterEvent(notification, rc.sges) && filterName(notification, rc.sges) {
-		log.WithError(err).Error("new event received, dispatching to gateway client")
+	if filterEvent(notification, rc.eventSource) && filterName(notification, rc.eventSource) {
+		log.WithError(err).Errorln("new event received, dispatching to gateway client")
 		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- b
 		return
 	}
 
-	log.Warn("discarding notification since it did not pass all filters")
+	log.Warnln("discarding notification since it did not pass all filters")
 }

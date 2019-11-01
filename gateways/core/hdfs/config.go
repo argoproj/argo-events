@@ -15,7 +15,7 @@ const ArgoEventsEventSourceVersion = "v0.10"
 // EventSourceExecutor implements Eventing
 type EventSourceExecutor struct {
 	Log *logrus.Logger
-	// Clientset is kubernetes client
+	// k8sClient is kubernetes client
 	Clientset kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string

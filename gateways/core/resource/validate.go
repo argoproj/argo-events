@@ -19,25 +19,45 @@ package resource
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
-// ValidateEventSource validates gateway event source
-func (executor *ResourceEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateResource)
+// ValidateEventSource validates an event source
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var resourceEventSource *v1alpha1.ResourceEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &resourceEventSource); err != nil {
+		listener.Logger.WithError(err).Errorln("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateResourceEventSource(resourceEventSource); err != nil {
+		listener.Logger.WithError(err).Errorln("failed to validate the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateResource(config interface{}) error {
-	res := config.(*resource)
-	if res == nil {
+func validateResourceEventSource(eventSource *v1alpha1.ResourceEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if res.Version == "" {
+	if eventSource.Version == "" {
 		return fmt.Errorf("version must be specified")
 	}
-	if res.Resource == "" {
+	if eventSource.Resource == "" {
 		return fmt.Errorf("resource must be specified")
 	}
 	return nil

@@ -116,7 +116,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			body, err := yaml.Marshal(githubEventSource)
 			convey.So(err, convey.ShouldBeNil)
 
-			rc.RouteHandler(writer, &http.Request{
+			rc.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(body)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
@@ -127,7 +127,7 @@ func TestRouteActiveHandler(t *testing.T) {
 					Config: make(map[string]interface{}),
 				}
 
-				rc.RouteHandler(writer, &http.Request{
+				rc.HandleRoute(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(body)),
 				})
 

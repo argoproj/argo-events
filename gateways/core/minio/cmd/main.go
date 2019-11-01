@@ -21,7 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/gitlab"
+	"github.com/argoproj/argo-events/gateways/core/minio"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -32,13 +32,15 @@ func main() {
 		panic(err)
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
+
 	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
 	if !ok {
 		panic("namespace is not provided")
 	}
-	gateways.StartGateway(&gitlab.GitlabEventListener{
-		Log:       common.NewArgoEventsLogger(),
-		Namespace: namespace,
-		Clientset: clientset,
+
+	gateways.StartGateway(&minio.EventListener{
+		common.NewArgoEventsLogger(),
+		clientset,
+		namespace,
 	})
 }

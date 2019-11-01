@@ -22,20 +22,40 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *SlackEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSlack)
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var slackEventSource *v1alpha1.SlackEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &slackEventSource); err != nil {
+		listener.Logger.WithError(err).Errorln("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateSlackEventSource(slackEventSource); err != nil {
+		listener.Logger.WithError(err).Errorln("failed to validate the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateSlack(config interface{}) error {
-	sc := config.(*slackEventSource)
-	if sc == nil {
+func validateSlackEventSource(eventSource *v1alpha1.SlackEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.Token == nil {
+	if eventSource.Token == nil {
 		return fmt.Errorf("token not provided")
 	}
-	return gwcommon.ValidateWebhook(sc.Hook)
+	return gwcommon.ValidateWebhook(eventSource.WebHook)
 }
