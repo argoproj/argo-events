@@ -7,10 +7,6 @@
 [![GoDoc](https://godoc.org/github.com/argoproj/argo-events?status.svg)](https://godoc.org/github.com/argoproj/argo-events/pkg/apis)	
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/logo.png?raw=true" alt="Logo"/>
-</p>
-
 ## What is Argo Events?
 **Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
 and trigger Kubernetes objects after successful event dependencies resolution.
