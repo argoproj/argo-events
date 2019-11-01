@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&amqp.AMQPEventSourceExecutor{
+	gateways.StartGateway(&amqp.EventListener{
 		Log: common.NewArgoEventsLogger(),
 	})
 }

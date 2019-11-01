@@ -17,7 +17,7 @@ limitations under the License.
 package amqp
 
 import (
-	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
@@ -25,24 +25,15 @@ import (
 
 const ArgoEventsEventSourceVersion = "v0.10"
 
-// AMQPEventSourceExecutor implements Eventing
-type AMQPEventSourceExecutor struct {
+// EventListener implements Eventing for amqp event source
+type EventListener struct {
 	Log *logrus.Logger
 }
 
 // amqp contains configuration required to connect to rabbitmq service and process messages
 type amqp struct {
-	// URL for rabbitmq service
-	URL string `json:"url"`
-	// ExchangeName is the exchange name
-	// For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html
-	ExchangeName string `json:"exchangeName"`
-	// ExchangeType is rabbitmq exchange type
-	ExchangeType string `json:"exchangeType"`
-	// Routing key for bindings
-	RoutingKey string `json:"routingKey"`
-	// Backoff holds parameters applied to connection.
-	Backoff *common.Backoff `json:"backoff,omitempty"`
+	// eventSource contains configuration to connect to amqp service to consume messages
+	eventSource *v1alpha1.AMQPEventSource
 	// Connection manages the serialization and deserialization of frames from IO
 	// and dispatches the frames to the appropriate channel.
 	conn *amqplib.Connection

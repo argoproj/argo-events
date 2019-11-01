@@ -25,7 +25,7 @@ import (
 )
 
 // StartEventSource starts an event source
-func (ese *AMQPEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (ese *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("operating on event source")
@@ -67,7 +67,7 @@ func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) 
 	return delivery, nil
 }
 
-func (ese *AMQPEventSourceExecutor) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (ese *EventListener) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	if err := gateways.Connect(&wait.Backoff{

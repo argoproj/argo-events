@@ -32,7 +32,7 @@ import (
 
 func TestValidateAMQPEventSource(t *testing.T) {
 	convey.Convey("Given a amqp event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &AMQPEventSourceExecutor{}
+		ese := &EventListener{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("../%s/%s", gwcommon.EventSourceDir, "amqp.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 

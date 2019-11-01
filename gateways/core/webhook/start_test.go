@@ -18,43 +18,41 @@ package webhook
 
 import (
 	"bytes"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/smartystreets/goconvey/convey"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := &RouteConfig{
-			Route: gwcommon.GetFakeRoute(),
+		router := &Router{
+			route: webhook.GetFakeRoute(),
 		}
-		r := rc.Route
-		r.Webhook.Method = http.MethodGet
-		controller.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
-			DataCh: make(chan []byte),
-		}
+		route := router.route
+		route.Context.Method = http.MethodGet
 
-		writer := &gwcommon.FakeHttpWriter{}
+		writer := &webhook.FakeHttpWriter{}
 
 		convey.Convey("Inactive route should return error", func() {
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte("hello"))),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		controller.ActiveEndpoints[r.Webhook.Endpoint].Active = true
+		route.Active = true
 
 		convey.Convey("Active route with correct method should return success", func() {
 			dataCh := make(chan []byte)
 			go func() {
-				resp := <-controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh
+				resp := <-route.DataCh
 				dataCh <- resp
 			}()
 
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodGet,
 			})
@@ -64,7 +62,7 @@ func TestRouteActiveHandler(t *testing.T) {
 		})
 
 		convey.Convey("Active route with incorrect method should return failure", func() {
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader([]byte("fake notification"))),
 				Method: http.MethodHead,
 			})

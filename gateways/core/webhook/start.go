@@ -17,105 +17,128 @@ limitations under the License.
 package webhook
 
 import (
-	"fmt"
-	"github.com/argoproj/argo-events/common"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"encoding/json"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"github.com/ghodss/yaml"
 )
 
+// EventListener implements Eventing for webhook events
+type EventListener struct {
+	// Logger logs stuff
+	Logger *logrus.Logger
+}
+
+// Router contains the configuration information for a route
+type Router struct {
+	// route contains information about a API endpoint
+	route *webhook.Route
+}
+
+// controller controls the webhook operations
 var (
 	controller = webhook.NewController()
 )
 
+// set up the activation and inactivation channels to control the state of routes.
 func init() {
 	go webhook.ProcessRouteStatus(controller)
 }
 
-func (rc *RouteConfig) GetRoute() *gwcommon.Route {
-	return rc.Route
+// webhook event payload
+type payload struct {
+	// Header is the http request header
+	Header http.Header `json:"header"`
+	// Body is http request body
+	Body []byte `json:"body"`
 }
 
-// HandleRoute handles new route
-func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	var response string
+// Implement Router
+// 1. GetRoute
+// 2. HandleRoute
+// 3. PostActivate
+// 4. PostDeactivate
 
-	r := rc.Route
+// GetRoute returns the route
+func (router *Router) GetRoute() *webhook.Route {
+	return router.route
+}
 
-	log := r.Logger.WithFields(
+// HandleRoute handles incoming requests on the route
+func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
+	route := router.route
+
+	logger := route.Logger.WithFields(
 		map[string]interface{}{
-			common.LabelEventSource: r.EventSource.Name,
-			common.LabelEndpoint:    r.Webhook.Endpoint,
-			common.LabelPort:        r.Webhook.Port,
-			common.LabelHTTPMethod:  r.Webhook.Method,
+			common.LabelEventSource: route.EventSource.Name,
+			common.LabelEndpoint:    route.Context.Endpoint,
+			common.LabelPort:        route.Context.Port,
+			common.LabelHTTPMethod:  route.Context.Method,
 		})
 
-	log.Info("request received")
+	logger.Info("a request received, processing it...")
 
-	if !controller.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		response = fmt.Sprintf("the route: endpoint %s and method %s is deactived", r.Webhook.Endpoint, r.Webhook.Method)
-		log.Info("endpoint is not active")
-		common.SendErrorResponse(writer, response)
-		return
-	}
-
-	if r.Webhook.Method != request.Method {
-		log.WithFields(
-			map[string]interface{}{
-				"expected": r.Webhook.Method,
-				"actual":   request.Method,
-			},
-		).Warn("method mismatch")
-
-		common.SendErrorResponse(writer, fmt.Sprintf("the method %s is not defined for endpoint %s", r.Webhook.Method, r.Webhook.Endpoint))
+	if !route.Active {
+		logger.Info("endpoint is not active, wont't process the request")
+		common.SendErrorResponse(writer, "endpoint is inactive")
 		return
 	}
 
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		log.WithError(err).Error("failed to parse request body")
-		common.SendErrorResponse(writer, fmt.Sprintf("failed to parse request. err: %+v", err))
+		logger.WithError(err).Error("failed to parse request body")
+		common.SendErrorResponse(writer, err.Error())
 		return
 	}
 
-	controller.ActiveEndpoints[r.Webhook.Endpoint].DataCh <- body
-	response = "request successfully processed"
-	log.Info(response)
-	common.SendSuccessResponse(writer, response)
+	data, err := json.Marshal(&payload{
+		Header: request.Header,
+		Body:   body,
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to construct the event payload")
+		common.SendErrorResponse(writer, err.Error())
+		return
+	}
+
+	logger.Infoln("dispatching event on route's data channel...")
+	route.DataCh <- data
+	logger.Info("successfully processed the request")
+	common.SendSuccessResponse(writer, "success")
 }
 
-func (rc *RouteConfig) PostStart() error {
+// PostActivate performs operations once the route is activated and ready to consume requests
+func (router *Router) PostActivate() error {
 	return nil
 }
 
-func (rc *RouteConfig) PostStop() error {
+// PostInactivate performs operations after the route is inactivated
+func (router *Router) PostInactivate() error {
 	return nil
 }
 
 // StartEventSource starts a event source
-func (ese *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	log.Info("operating on event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
+	log.Info("started operating on the event source...")
+
+	var webhookEventSource *webhook.Context
+	if err := yaml.Unmarshal(eventSource.Value, &webhookEventSource); err != nil {
+		log.WithError(err).Error("failed to parse the event source")
 		return err
 	}
-	h := config.(*gwcommon.Webhook)
-	h.Endpoint = gwcommon.FormatWebhookEndpoint(h.Endpoint)
 
-	return gwcommon.ProcessRoute(&RouteConfig{
-		Route: &gwcommon.Route{
-			Logger:      ese.Log,
-			EventSource: eventSource,
-			StartCh:     make(chan struct{}),
-			Webhook:     h,
-		},
+	route := webhook.NewRoute(webhookEventSource, listener.Logger, eventSource)
+
+	return webhook.ManageRoute(&Router{
+		route: route,
 	}, controller, eventStream)
 }

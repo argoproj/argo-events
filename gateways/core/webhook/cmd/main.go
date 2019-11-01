@@ -24,6 +24,6 @@ import (
 
 func main() {
 	gateways.StartGateway(&webhook.EventListener{
-		Log: common.NewArgoEventsLogger(),
+		Logger: common.NewArgoEventsLogger(),
 	})
 }
