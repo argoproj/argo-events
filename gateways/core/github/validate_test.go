@@ -32,7 +32,7 @@ import (
 
 func TestValidateGithubEventSource(t *testing.T) {
 	convey.Convey("Given github event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &EventSourceListener{}
+		ese := &EventListener{}
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "github.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 

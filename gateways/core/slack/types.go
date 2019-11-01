@@ -14,37 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package gitlab
+package slack
 
 import (
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
-	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
-// GitlabEventListener implements ConfigExecutor
-type GitlabEventListener struct {
+// EventListener implements Eventing for slack event source
+type EventListener struct {
+	// K8sClient is kubernetes client
+	K8sClient kubernetes.Interface
+	// Logger logs stuff
 	Logger *logrus.Logger
-	// k8sClient is kubernetes client
-	Clientset kubernetes.Interface
-	// Namespace where gateway is deployed
-	Namespace string
 }
 
-// Router contains the configuration information for a route
+// Router contains information about a REST endpoint
 type Router struct {
-	route       *gwcommon.Route
-	clientset   kubernetes.Interface
-	client      *gitlab.Client
-	hook        *gitlab.ProjectHook
-	namespace   string
-	eventSource *v1alpha1.GitlabEventSource
-}
-
-// cred stores the api access token
-type cred struct {
-	// token is gitlab api access token
+	// route holds information to process an incoming request
+	route *webhook.Route
+	// slackEventSource is the event source which refers to configuration required to consume events from slack
+	slackEventSource *v1alpha1.SlackEventSource
+	// token is the slack token
 	token string
+	// refer to https://api.slack.com/docs/verifying-requests-from-slack
+	signingSecret string
+	// k8sClient is the Kubernetes client
+	k8sClient kubernetes.Interface
 }

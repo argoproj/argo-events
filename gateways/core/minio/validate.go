@@ -30,8 +30,8 @@ import (
 
 // ValidateEventSource validates the minio event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	var sourceValue *apicommon.S3Artifact
-	err := yaml.Unmarshal(eventSource.Value, &sourceValue)
+	var minioEventSource *apicommon.S3Artifact
+	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
 		log.WithError(err).Error("failed to parse the minio event source")
 		return &gateways.ValidEventSource{
@@ -40,7 +40,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateMinioEventSource(sourceValue); err != nil {
+	if err := validateMinioEventSource(minioEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
@@ -51,25 +51,24 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-// validates the minio event source
-func validateMinioEventSource(sourceValue *apicommon.S3Artifact) error {
-	if sourceValue == nil {
+func validateMinioEventSource(eventSource *apicommon.S3Artifact) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sourceValue.AccessKey == nil {
+	if eventSource.AccessKey == nil {
 		return fmt.Errorf("access key can't be empty")
 	}
-	if sourceValue.SecretKey == nil {
+	if eventSource.SecretKey == nil {
 		return fmt.Errorf("secret key can't be empty")
 	}
-	if sourceValue.Endpoint == "" {
+	if eventSource.Endpoint == "" {
 		return fmt.Errorf("endpoint url can't be empty")
 	}
-	if sourceValue.Bucket != nil && sourceValue.Bucket.Name == "" {
+	if eventSource.Bucket != nil && eventSource.Bucket.Name == "" {
 		return fmt.Errorf("bucket name can't be empty")
 	}
-	if sourceValue.Events != nil {
-		for _, event := range sourceValue.Events {
+	if eventSource.Events != nil {
+		for _, event := range eventSource.Events {
 			if minio.NotificationEventType(event) == "" {
 				return fmt.Errorf("unknown event %s", event)
 			}

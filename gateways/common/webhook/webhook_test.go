@@ -17,70 +17,10 @@ limitations under the License.
 package webhook
 
 import (
-	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/smartystreets/goconvey/convey"
 )
-
-var Hook = &Context{
-	Endpoint: "/fake",
-	Port:     "12000",
-	URL:      "test-url",
-}
-
-type FakeHttpWriter struct {
-	HeaderStatus int
-	Payload      []byte
-}
-
-func (f *FakeHttpWriter) Header() http.Header {
-	return http.Header{}
-}
-
-func (f *FakeHttpWriter) Write(body []byte) (int, error) {
-	f.Payload = body
-	return len(body), nil
-}
-
-func (f *FakeHttpWriter) WriteHeader(status int) {
-	f.HeaderStatus = status
-}
-
-type FakeRouter struct {
-	route *Route
-}
-
-func (f *FakeRouter) GetRoute() *Route {
-	return f.route
-}
-
-func (f *FakeRouter) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-}
-
-func (f *FakeRouter) PostActivate() error {
-	return nil
-}
-
-func (f *FakeRouter) PostInactivate() error {
-	return nil
-}
-
-func GetFakeRoute() *Route {
-	logger := common.NewArgoEventsLogger()
-	return &Route{
-		Context: Hook,
-		EventSource: &gateways.EventSource{
-			Name:  "fake-event-source",
-			Value: []byte("hello"),
-			Id:    "123",
-		},
-		Logger:  logger,
-		StartCh: make(chan struct{}),
-	}
-}
 
 var rc = &FakeRouter{
 	route: GetFakeRoute(),

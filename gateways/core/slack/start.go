@@ -41,12 +41,12 @@ func init() {
 	go gwcommon.InitializeRouteChannels(helper)
 }
 
-func (rc *RouteConfig) GetRoute() *gwcommon.Route {
+func (rc *Router) GetRoute() *gwcommon.Route {
 	return rc.route
 }
 
 // HandleRoute handles new route
-func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Request) {
+func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
 	r := rc.route
 
 	log := r.Logger.WithFields(
@@ -110,7 +110,7 @@ func (rc *RouteConfig) HandleRoute(writer http.ResponseWriter, request *http.Req
 	common.SendSuccessResponse(writer, "")
 }
 
-func (rc *RouteConfig) handleEvent(request *http.Request) ([]byte, []byte, error) {
+func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	var err error
 	var response []byte
 	var data []byte
@@ -143,7 +143,7 @@ func (rc *RouteConfig) handleEvent(request *http.Request) ([]byte, []byte, error
 	return data, response, nil
 }
 
-func (rc *RouteConfig) handleInteraction(request *http.Request) ([]byte, error) {
+func (rc *Router) handleInteraction(request *http.Request) ([]byte, error) {
 	var err error
 	err = request.ParseForm()
 	if err != nil {
@@ -180,7 +180,7 @@ func getRequestBody(request *http.Request) ([]byte, error) {
 // X-Slack-Signature header value.
 // The signature is a hash generated as per Slack documentation at:
 // https://api.slack.com/docs/verifying-requests-from-slack
-func (rc *RouteConfig) verifyRequest(request *http.Request) error {
+func (rc *Router) verifyRequest(request *http.Request) error {
 	signingSecret := rc.signingSecret
 	if len(signingSecret) > 0 {
 		sv, err := slack.NewSecretsVerifier(request.Header, signingSecret)
@@ -207,11 +207,11 @@ func (rc *RouteConfig) verifyRequest(request *http.Request) error {
 	return nil
 }
 
-func (rc *RouteConfig) PostStart() error {
+func (rc *Router) PostStart() error {
 	return nil
 }
 
-func (rc *RouteConfig) PostStop() error {
+func (rc *Router) PostStop() error {
 	return nil
 }
 
@@ -240,17 +240,17 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		signingSecret = ""
 	}
 
-	return gwcommon.ProcessRoute(&RouteConfig{
+	return gwcommon.ProcessRoute(&Router{
 		route: &gwcommon.Route{
 			Logger:      listener.Logger,
 			StartCh:     make(chan struct{}),
 			Webhook:     slackEventSource.WebHook,
 			EventSource: eventSource,
 		},
-		token:         token,
-		signingSecret: signingSecret,
-		clientset:     listener.Clientset,
-		namespace:     listener.Namespace,
-		eventSource:   slackEventSource,
+		token:            token,
+		signingSecret:    signingSecret,
+		clientset:        listener.Clientset,
+		namespace:        listener.Namespace,
+		slackEventSource: slackEventSource,
 	}, helper, eventStream)
 }

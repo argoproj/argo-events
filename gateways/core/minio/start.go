@@ -41,60 +41,67 @@ type EventListener struct {
 
 // StartEventSource activates an event source and streams back events
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := listener.logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Infoln("activating event source")
-
-	var sourceValue *apicommon.S3Artifact
-	err := yaml.Unmarshal(eventSource.Value, &sourceValue)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
-		return err
-	}
+	listener.logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("activating the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go listener.listenEvents(sourceValue, eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.logger)
 }
 
 // listenEvents listens to minio bucket notifications
-func (listener *EventListener) listenEvents(sourceValue *apicommon.S3Artifact, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := listener.logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("operating on event source...")
+	logger := listener.logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	log.Info("retrieving access and secret key")
-	accessKey, err := store.GetSecrets(listener.k8sClient, listener.namespace, sourceValue.AccessKey.Name, sourceValue.AccessKey.Key)
-	if err != nil {
-		errorCh <- err
-		return
-	}
-	secretKey, err := store.GetSecrets(listener.k8sClient, listener.namespace, sourceValue.SecretKey.Name, sourceValue.SecretKey.Key)
-	if err != nil {
-		errorCh <- err
-		return
-	}
+	logger.Infoln("parsing minio event source...")
 
-	minioClient, err := minio.New(sourceValue.Endpoint, accessKey, secretKey, !sourceValue.Insecure)
+	var minioEventSource *apicommon.S3Artifact
+	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	log.Info("started listening to bucket notifications...")
-	for notification := range minioClient.ListenBucketNotification(sourceValue.Bucket.Name, sourceValue.Filter.Prefix, sourceValue.Filter.Suffix, sourceValue.Events, doneCh) {
+	logger.Info("started processing the event source...")
+
+	logger.Info("retrieving access and secret key...")
+	accessKey, err := store.GetSecrets(listener.k8sClient, listener.namespace, minioEventSource.AccessKey.Name, minioEventSource.AccessKey.Key)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+	secretKey, err := store.GetSecrets(listener.k8sClient, listener.namespace, minioEventSource.SecretKey.Name, minioEventSource.SecretKey.Key)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	logger.Infoln("setting up a minio client...")
+	minioClient, err := minio.New(minioEventSource.Endpoint, accessKey, secretKey, !minioEventSource.Insecure)
+	if err != nil {
+		errorCh <- err
+		return
+	}
+
+	logger.Info("started listening to bucket notifications...")
+	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, minioEventSource.Filter.Prefix, minioEventSource.Filter.Suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err
 			return
 		}
+
+		logger.Infoln("parsing notification from minio...")
 		payload, err := json.Marshal(notification.Records[0])
 		if err != nil {
 			errorCh <- err
 			return
 		}
+
+		logger.Infoln("dispatching notification on data channel...")
 		dataCh <- payload
 	}
 }

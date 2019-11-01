@@ -17,30 +17,35 @@ limitations under the License.
 package github
 
 import (
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/google/go-github/github"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
 
-// EventSourceListener implements ConfigExecutor
-type EventSourceListener struct {
+// EventListener implements Eventing for GitHub event source
+type EventListener struct {
+	// Logger to log stuff
 	Logger *logrus.Logger
-	// k8sClient is kubernetes client
-	Clientset kubernetes.Interface
+	// K8sClient is the Kubernetes client
+	K8sClient kubernetes.Interface
 	// Namespace where gateway is deployed
 	Namespace string
 }
 
-// RouteConfig contains information about the route
-type RouteConfig struct {
-	route             *gwcommon.Route
+// Router contains information about the route
+type Router struct {
+	// route contains configuration for an API endpoint
+	route *webhook.Route
+	// githubEventSource is the event source that holds information to consume events from GitHub
 	githubEventSource *v1alpha1.GithubEventSource
-	client            *github.Client
-	hook              *github.Hook
-	clientset         kubernetes.Interface
-	namespace         string
+	// githubClient is the client to connect to GitHub
+	githubClient *github.Client
+	// hook represents a GitHub (web and service) hook for a repository.
+	hook *github.Hook
+	// K8sClient is the Kubernetes client
+	k8sClient kubernetes.Interface
 }
 
 // cred stores the api access token or webhook secret

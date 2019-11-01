@@ -24,6 +24,6 @@ import (
 
 func main() {
 	gateways.StartGateway(&file.EventSourceListener{
-		Log: common.NewArgoEventsLogger(),
+		Logger: common.NewArgoEventsLogger(),
 	})
 }

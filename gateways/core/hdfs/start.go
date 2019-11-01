@@ -4,6 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,6 +19,14 @@ import (
 	"github.com/argoproj/argo-events/gateways/common/naivewatcher"
 	"github.com/colinmarc/hdfs"
 )
+
+// EventListener implements Eventing for HDFS events
+type EventListener struct {
+	// Logger logs stuff
+	Logger *logrus.Logger
+	// k8sClient is kubernetes client
+	K8sClient kubernetes.Interface
+}
 
 // WatchableHDFS wraps hdfs.Client for naivewatcher
 type WatchableHDFS struct {
@@ -35,36 +47,42 @@ func (w *WatchableHDFS) GetFileID(fi os.FileInfo) interface{} {
 }
 
 // StartEventSource starts an event source
-func (ese *EventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
-	ese.Log.WithField(common.LabelEventSource, eventSource.Name).Info("activating event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		return err
-	}
-	gwc := config.(*GatewayConfig)
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Info("start processing the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(gwc, eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
-func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+// listenEvents listens to HDFS events
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	hdfsConfig, err := createHDFSConfig(ese.Clientset, ese.Namespace, &GatewayClientConfig)
+	logger.Infoln("parsing the event source...")
+
+	var hdfsEventSource *v1alpha1.HDFSEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &hdfsEventSource); err != nil {
+		errorCh <- err
+		return
+	}
+
+	logger.Infoln("setting up HDFS configuration...")
+	hdfsConfig, err := createHDFSConfig(listener.K8sClient, hdfsEventSource.Namespace, hdfsEventSource)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
+	logger.Infoln("setting up HDFS client...")
 	hdfscli, err := createHDFSClient(hdfsConfig.Addresses, hdfsConfig.HDFSUser, hdfsConfig.KrbOptions)
 	if err != nil {
 		errorCh <- err
@@ -72,7 +90,7 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 	}
 	defer hdfscli.Close()
 
-	// create new watcher
+	logger.Infoln("setting up a new watcher...")
 	watcher, err := naivewatcher.NewWatcher(&WatchableHDFS{hdfscli: hdfscli})
 	if err != nil {
 		errorCh <- err
@@ -81,8 +99,8 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 	defer watcher.Close()
 
 	intervalDuration := 1 * time.Minute
-	if config.CheckInterval != "" {
-		d, err := time.ParseDuration(config.CheckInterval)
+	if hdfsEventSource.CheckInterval != "" {
+		d, err := time.ParseDuration(hdfsEventSource.CheckInterval)
 		if err != nil {
 			errorCh <- err
 			return
@@ -90,6 +108,7 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 		intervalDuration = d
 	}
 
+	logger.Infoln("started HDFS watcher")
 	err = watcher.Start(intervalDuration)
 	if err != nil {
 		errorCh <- err
@@ -97,51 +116,59 @@ func (ese *EventSourceExecutor) listenEvents(config *GatewayConfig, eventSource 
 	}
 
 	// directory to watch must be available in HDFS. You can't watch a directory that is not present.
-	err = watcher.Add(config.Directory)
+	logger.Infoln("adding configured directory to watcher...")
+	err = watcher.Add(hdfsEventSource.Directory)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	op := fsevent.NewOp(config.Type)
+	op := fsevent.NewOp(hdfsEventSource.Type)
 	var pathRegexp *regexp.Regexp
-	if config.PathRegexp != "" {
-		pathRegexp, err = regexp.Compile(config.PathRegexp)
+	if hdfsEventSource.PathRegexp != "" {
+		pathRegexp, err = regexp.Compile(hdfsEventSource.PathRegexp)
 		if err != nil {
 			errorCh <- err
 			return
 		}
 	}
-	log.Info("starting to watch to HDFS notifications")
+
+	logger.Infoln("listening to HDFS notifications...")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				log.Info("HDFS watcher has stopped")
+				logger.Info("HDFS watcher has stopped")
 				// watcher stopped watching file events
 				errorCh <- fmt.Errorf("HDFS watcher stopped")
 				return
 			}
 			matched := false
-			relPath := strings.TrimPrefix(event.Name, config.Directory)
-			if config.Path != "" && config.Path == relPath {
+			relPath := strings.TrimPrefix(event.Name, hdfsEventSource.Directory)
+
+			if hdfsEventSource.Path != "" && hdfsEventSource.Path == relPath {
 				matched = true
 			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
 				matched = true
 			}
+
 			if matched && (op&event.Op != 0) {
-				log.WithFields(
+				logger := logger.WithFields(
 					map[string]interface{}{
 						"event-type":      event.Op.String(),
 						"descriptor-name": event.Name,
 					},
-				).Debug("HDFS event")
+				)
+				logger.Infoln("received an event")
 
+				logger.Infoln("parsing the event...")
 				payload, err := json.Marshal(event)
 				if err != nil {
 					errorCh <- err
 					return
 				}
+
+				logger.Infoln("dispatching event on data channel")
 				dataCh <- payload
 			}
 		case err := <-watcher.Errors:

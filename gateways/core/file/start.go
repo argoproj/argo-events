@@ -18,8 +18,6 @@ package file
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 
@@ -29,16 +27,19 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/fsnotify/fsnotify"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
-// EventSourceListener implements Eventing
+// EventSourceListener implements Eventing for file event source
 type EventSourceListener struct {
-	Log *logrus.Logger
+	// Logger to log stuff
+	Logger *logrus.Logger
 }
 
 // StartEventSource starts an event source
 func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
+	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("started processing event source...")
 
 	dataCh := make(chan []byte)
@@ -46,21 +47,23 @@ func (listener *EventSourceListener) StartEventSource(eventSource *gateways.Even
 	doneCh := make(chan struct{}, 1)
 
 	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
-
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
+// listenEvents listen to file related events
 func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
 	var fileEventSource *v1alpha1.FileEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
-
+		errorCh <- err
+		return
 	}
 
-	log := listener.Log.WithField(common.LabelEventSource, eventSource.Name)
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	// create new fs watcher
+	logger.Infoln("setting up a new file watcher...")
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		errorCh <- err
@@ -69,6 +72,7 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 	defer watcher.Close()
 
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
+	logger.Infoln("adding directory to monitor for the watcher...")
 	err = watcher.Add(fileEventSource.Directory)
 	if err != nil {
 		errorCh <- err
@@ -77,6 +81,7 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 
 	var pathRegexp *regexp.Regexp
 	if fileEventSource.PathRegexp != "" {
+		logger.WithField("regex", fileEventSource.PathRegexp).Infoln("matching file path with configured regex...")
 		pathRegexp, err = regexp.Compile(fileEventSource.PathRegexp)
 		if err != nil {
 			errorCh <- err
@@ -84,14 +89,14 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 		}
 	}
 
-	log.Info("starting to watch to file notifications")
+	logger.Info("listening to file notifications...")
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
-				log.Info("fs watcher has stopped")
+				logger.Info("fs watcher has stopped")
 				// watcher stopped watching file events
-				errorCh <- fmt.Errorf("fs watcher stopped")
+				errorCh <- errors.New("fs watcher stopped")
 				return
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
@@ -103,12 +108,12 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 				matched = true
 			}
 			if matched && fileEventSource.EventType == event.Op.String() {
-				log.WithFields(
+				logger.WithFields(
 					map[string]interface{}{
 						"event-type":      event.Op.String(),
 						"descriptor-name": event.Name,
 					},
-				).Debug("fs event")
+				).Infoln("file event")
 
 				// Assume fsnotify event has the same Op spec of our file event
 				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String())}
@@ -117,6 +122,12 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 					errorCh <- err
 					return
 				}
+				logger.WithFields(
+					map[string]interface{}{
+						"event-type":      event.Op.String(),
+						"descriptor-name": event.Name,
+					},
+				).Infoln("dispatching file event on data channel...")
 				dataCh <- payload
 			}
 		case err := <-watcher.Errors:

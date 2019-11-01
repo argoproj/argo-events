@@ -19,11 +19,11 @@ package github
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
@@ -34,10 +34,12 @@ import (
 )
 
 var (
-	rc = &RouteConfig{
-		route:     gwcommon.GetFakeRoute(),
-		clientset: fake.NewSimpleClientset(),
-		namespace: "fake",
+	router = &Router{
+		route:     webhook.GetFakeRoute(),
+		k8sClient: fake.NewSimpleClientset(),
+		githubEventSource: &v1alpha1.GithubEventSource{
+			Namespace: "fake",
+		},
 	}
 
 	secretName     = "githab-access"
@@ -47,10 +49,9 @@ var (
 
 func TestGetCredentials(t *testing.T) {
 	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
-		secret, err := rc.clientset.CoreV1().Secrets(rc.namespace).Create(&corev1.Secret{
+		secret, err := router.k8sClient.CoreV1().Secrets(router.githubEventSource.Namespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      secretName,
-				Namespace: rc.namespace,
+				Name: secretName,
 			},
 			Data: map[string][]byte{
 				LabelAccessKey: []byte(accessKey),
@@ -60,7 +61,7 @@ func TestGetCredentials(t *testing.T) {
 		convey.So(secret, convey.ShouldNotBeNil)
 
 		githubEventSource := &v1alpha1.GithubEventSource{
-			Webhook: &gwcommon.Webhook{
+			Webhook: &webhook.Context{
 				Endpoint: "/push",
 				URL:      "http://webhook-gateway-svc",
 				Port:     "12000",
@@ -78,7 +79,7 @@ func TestGetCredentials(t *testing.T) {
 			},
 		}
 
-		creds, err := rc.getCredentials(githubEventSource.APIToken)
+		creds, err := router.getCredentials(githubEventSource.APIToken, githubEventSource.Namespace)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(creds, convey.ShouldNotBeNil)
 		convey.So(creds.secret, convey.ShouldEqual, "YWNjZXNz")
@@ -87,15 +88,13 @@ func TestGetCredentials(t *testing.T) {
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		r := rc.route
-		helper.ActiveEndpoints[r.Webhook.Endpoint] = &gwcommon.Endpoint{
-			DataCh: make(chan []byte),
-		}
+		route := router.route
+		route.DataCh = make(chan []byte)
 
 		convey.Convey("Inactive route should return error", func() {
-			writer := &gwcommon.FakeHttpWriter{}
+			writer := &webhook.FakeHttpWriter{}
 			githubEventSource := &v1alpha1.GithubEventSource{
-				Webhook: &gwcommon.Webhook{
+				Webhook: &webhook.Context{
 					Endpoint: "/push",
 					URL:      "http://webhook-gateway-svc",
 					Port:     "12000",
@@ -116,24 +115,24 @@ func TestRouteActiveHandler(t *testing.T) {
 			body, err := yaml.Marshal(githubEventSource)
 			convey.So(err, convey.ShouldBeNil)
 
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(body)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 
 			convey.Convey("Active route should return success", func() {
-				helper.ActiveEndpoints[r.Webhook.Endpoint].Active = true
-				rc.hook = &github.Hook{
+				route.Active = true
+				router.hook = &github.Hook{
 					Config: make(map[string]interface{}),
 				}
 
-				rc.HandleRoute(writer, &http.Request{
+				router.HandleRoute(writer, &http.Request{
 					Body: ioutil.NopCloser(bytes.NewReader(body)),
 				})
 
 				convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
-				rc.githubEventSource = githubEventSource
-				err = rc.PostStart()
+				router.githubEventSource = githubEventSource
+				err = router.PostActivate()
 				convey.So(err, convey.ShouldNotBeNil)
 			})
 		})

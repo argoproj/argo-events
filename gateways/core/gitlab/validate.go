@@ -16,6 +16,7 @@ package gitlab
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -64,5 +65,5 @@ func validateGitlabEventSource(eventSource *v1alpha1.GitlabEventSource) error {
 	if eventSource.AccessToken == nil {
 		return fmt.Errorf("access token can't be nil")
 	}
-	return gwcommon.ValidateWebhook(eventSource.Webhook)
+	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }

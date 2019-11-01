@@ -38,7 +38,7 @@ import (
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := &RouteConfig{
+		rc := &Router{
 			route:     gwcommon.GetFakeRoute(),
 			clientset: fake.NewSimpleClientset(),
 			namespace: "fake",
@@ -78,7 +78,7 @@ func TestRouteActiveHandler(t *testing.T) {
 func TestSlackSignature(t *testing.T) {
 
 	convey.Convey("Given a route that receives a message from Slack", t, func() {
-		rc := &RouteConfig{
+		rc := &Router{
 			route:     gwcommon.GetFakeRoute(),
 			clientset: fake.NewSimpleClientset(),
 			namespace: "fake",
@@ -122,7 +122,7 @@ func TestSlackSignature(t *testing.T) {
 func TestInteractionHandler(t *testing.T) {
 
 	convey.Convey("Given a route that receives an interaction event", t, func() {
-		rc := &RouteConfig{
+		rc := &Router{
 			route:     gwcommon.GetFakeRoute(),
 			clientset: fake.NewSimpleClientset(),
 			namespace: "fake",
@@ -164,7 +164,7 @@ func TestInteractionHandler(t *testing.T) {
 func TestEventHandler(t *testing.T) {
 
 	convey.Convey("Given a route that receives an event", t, func() {
-		rc := &RouteConfig{
+		rc := &Router{
 			route:     gwcommon.GetFakeRoute(),
 			clientset: fake.NewSimpleClientset(),
 			namespace: "fake",

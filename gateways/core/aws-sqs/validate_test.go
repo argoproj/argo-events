@@ -19,13 +19,13 @@ package aws_sqs
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"io/ioutil"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 )

@@ -69,7 +69,7 @@ func HandleEventsFromEventSource(name string, eventStream Eventing_StartEventSou
 			}
 
 		case err := <-errorCh:
-			log.WithField(common.LabelEventSource, name).WithError(err).Error("error occurred while getting event from event source")
+			log.WithField(common.LabelEventSource, name).WithError(err).Error("error occurred processing the event source")
 			return err
 
 		case <-eventStream.Context().Done():

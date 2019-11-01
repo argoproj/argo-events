@@ -3,6 +3,7 @@ package hdfs
 import (
 	"fmt"
 
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/colinmarc/hdfs"
 	krb "gopkg.in/jcmturner/gokrb5.v5/client"
 	"gopkg.in/jcmturner/gokrb5.v5/config"
@@ -67,19 +68,19 @@ func getSecretKey(clientset kubernetes.Interface, namespace string, selector *co
 }
 
 // createHDFSConfig constructs HDFSConfig
-func createHDFSConfig(clientset kubernetes.Interface, namespace string, config *GatewayClientConfig) (*HDFSConfig, error) {
+func createHDFSConfig(clientset kubernetes.Interface, namespace string, hdfsEventSource *v1alpha1.HDFSEventSource) (*HDFSConfig, error) {
 	var krbConfig string
 	var krbOptions *KrbOptions
 	var err error
 
-	if config.KrbConfigConfigMap != nil && config.KrbConfigConfigMap.Name != "" {
-		krbConfig, err = getConfigMapKey(clientset, namespace, config.KrbConfigConfigMap)
+	if hdfsEventSource.KrbConfigConfigMap != nil && hdfsEventSource.KrbConfigConfigMap.Name != "" {
+		krbConfig, err = getConfigMapKey(clientset, namespace, hdfsEventSource.KrbConfigConfigMap)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if config.KrbCCacheSecret != nil && config.KrbCCacheSecret.Name != "" {
-		bytes, err := getSecretKey(clientset, namespace, config.KrbCCacheSecret)
+	if hdfsEventSource.KrbCCacheSecret != nil && hdfsEventSource.KrbCCacheSecret.Name != "" {
+		bytes, err := getSecretKey(clientset, namespace, hdfsEventSource.KrbCCacheSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -92,11 +93,11 @@ func createHDFSConfig(clientset kubernetes.Interface, namespace string, config *
 				CCache: ccache,
 			},
 			Config:               krbConfig,
-			ServicePrincipalName: config.KrbServicePrincipalName,
+			ServicePrincipalName: hdfsEventSource.KrbServicePrincipalName,
 		}
 	}
-	if config.KrbKeytabSecret != nil && config.KrbKeytabSecret.Name != "" {
-		bytes, err := getSecretKey(clientset, namespace, config.KrbKeytabSecret)
+	if hdfsEventSource.KrbKeytabSecret != nil && hdfsEventSource.KrbKeytabSecret.Name != "" {
+		bytes, err := getSecretKey(clientset, namespace, hdfsEventSource.KrbKeytabSecret)
 		if err != nil {
 			return nil, err
 		}
@@ -107,17 +108,17 @@ func createHDFSConfig(clientset kubernetes.Interface, namespace string, config *
 		krbOptions = &KrbOptions{
 			KeytabOptions: &KeytabOptions{
 				Keytab:   ktb,
-				Username: config.KrbUsername,
-				Realm:    config.KrbRealm,
+				Username: hdfsEventSource.KrbUsername,
+				Realm:    hdfsEventSource.KrbRealm,
 			},
 			Config:               krbConfig,
-			ServicePrincipalName: config.KrbServicePrincipalName,
+			ServicePrincipalName: hdfsEventSource.KrbServicePrincipalName,
 		}
 	}
 
 	hdfsConfig := HDFSConfig{
-		Addresses:  config.Addresses,
-		HDFSUser:   config.HDFSUser,
+		Addresses:  hdfsEventSource.Addresses,
+		HDFSUser:   hdfsEventSource.HDFSUser,
 		KrbOptions: krbOptions,
 	}
 	return &hdfsConfig, nil

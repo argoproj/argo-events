@@ -16,6 +16,7 @@ package github
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -24,7 +25,7 @@ import (
 )
 
 // Validate validates an event source
-func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var githubEventSource *v1alpha1.GithubEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &githubEventSource); err != nil {
 		return &gateways.ValidEventSource{
@@ -67,5 +68,5 @@ func validateGithubEventSource(githubEventSource *v1alpha1.GithubEventSource) er
 			return fmt.Errorf("content type must be \"json\" or \"form\"")
 		}
 	}
-	return gwcommon.ValidateWebhook(githubEventSource.Webhook)
+	return webhook.ValidateWebhookContext(githubEventSource.Webhook)
 }

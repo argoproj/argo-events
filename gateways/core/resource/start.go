@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/fields"
@@ -34,12 +35,28 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 )
 
+// InformerEvent holds event generated from resource state change
+type InformerEvent struct {
+	Obj    interface{}
+	OldObj interface{}
+	Type   v1alpha1.ResourceEventType
+}
+
+// EventListener implements Eventing
+type EventListener struct {
+	// Logger to log stuff
+	Logger *logrus.Logger
+	// K8RestConfig is kubernetes cluster config
+	K8RestConfig *rest.Config
+}
+
 // StartEventSource starts an event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("activating the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
@@ -54,14 +71,18 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Info("started processing the event source...")
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
+	logger.Infoln("started processing the event source...")
+
+	logger.Infoln("parsing resource event source...")
 	var resourceEventSource *v1alpha1.ResourceEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &resourceEventSource); err != nil {
 		errorCh <- err
 		return
 	}
 
+	logger.Infoln("setting up a K8s client")
 	client, err := dynamic.NewForConfig(listener.K8RestConfig)
 	if err != nil {
 		errorCh <- err
@@ -78,6 +99,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 
 	options := &metav1.ListOptions{}
 
+	logger.Infoln("configuring label selectors if filters are selected...")
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Labels != nil {
 		sel, err := LabelSelector(resourceEventSource.Filter.Labels)
 		if err != nil {
@@ -100,6 +122,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		op = options
 	}
 
+	logger.Infoln("setting up informer factory...")
 	factory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(client, 0, resourceEventSource.Namespace, tweakListOptions)
 
 	informer := factory.ForResource(gvr)
@@ -107,6 +130,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	informerEventCh := make(chan *InformerEvent)
 
 	go func() {
+		logger.Infoln("listening to resource events...")
 		for {
 			select {
 			case event, ok := <-informerEventCh:
@@ -115,11 +139,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 				}
 				eventBody, err := json.Marshal(event)
 				if err != nil {
-					listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to parse event from resource informer")
+					logger.WithError(err).Errorln("failed to parse event from resource informer")
 					continue
 				}
 				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceEventSource.Filter); err != nil {
-					listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Warnln("failed to apply the filter")
+					logger.WithError(err).Warnln("failed to apply the filter")
 					continue
 				}
 				dataCh <- eventBody
@@ -153,7 +177,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	)
 
 	sharedInformer.Run(doneCh)
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("resource informer is stopped")
+	logger.Infoln("resource informer is stopped")
 	close(informerEventCh)
 	close(doneCh)
 }

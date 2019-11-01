@@ -17,12 +17,12 @@ limitations under the License.
 package minio
 
 import (
-	"github.com/ghodss/yaml"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,15 +59,42 @@ func TestListeEvents(t *testing.T) {
 			errCh2 <- err
 		}()
 
-		var minioEventSource *apicommon.S3Artifact
-		yaml.Unmarshal(secret.Data)
+		minioEventSource := &apicommon.S3Artifact{
+			Bucket: &apicommon.S3Bucket{
+				Name: "input",
+			},
+			Endpoint: "minio-service.argo-events:9000",
+			Events: []string{
+				"s3:ObjectCreated:Put",
+			},
+			Filter: &apicommon.S3Filter{
+				Prefix: "",
+				Suffix: "",
+			},
+			Insecure: true,
+			AccessKey: &corev1.SecretKeySelector{
+				Key: "accesskey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "artifacts-minio",
+				},
+			},
+			SecretKey: &corev1.SecretKeySelector{
+				Key: "secretkey",
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: "artifacts-minio",
+				},
+			},
+		}
 
-		ps, err := parseEventSource(es)
 		convey.So(err, convey.ShouldBeNil)
-		listener.listenEvents(ps.(*apicommon.S3Artifact), &gateways.EventSource{
-			Id:   "1234",
-			Data: es,
-			Name: "fake",
+
+		body, err := yaml.Marshal(minioEventSource)
+		convey.So(err, convey.ShouldBeNil)
+
+		listener.listenEvents(&gateways.EventSource{
+			Id:    "1234",
+			Value: body,
+			Name:  "fake",
 		}, dataCh, errorCh, doneCh)
 
 		err = <-errCh2
