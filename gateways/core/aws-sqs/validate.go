@@ -22,25 +22,43 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *SQSEventSourceListener) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateSQSConfig)
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var sqsEventSource *v1alpha1.SQSEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &sqsEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	if err := validateSQSEventSource(sqsEventSource); err != nil {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, err
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateSQSConfig(config interface{}) error {
-	sc := config.(*sqsEventSource)
-	if sc == nil {
+func validateSQSEventSource(eventSource *v1alpha1.SQSEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if sc.WaitTimeSeconds == 0 {
+	if eventSource.WaitTimeSeconds == 0 {
 		return fmt.Errorf("must specify polling timeout")
 	}
-	if sc.Region == "" {
+	if eventSource.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	if sc.Queue == "" {
+	if eventSource.Queue == "" {
 		return fmt.Errorf("must specify queue name")
 	}
 	return nil

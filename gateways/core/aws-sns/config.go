@@ -26,8 +26,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
 const (
 	messageTypeSubscriptionConfirmation = "SubscriptionConfirmation"
 	messageTypeNotification             = "Notification"
@@ -43,8 +41,6 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface
-	// Namespace where gateway is deployed
-	Namespace string
 }
 
 // Router contains information for a route

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package aws
 
 import (
 	"github.com/argoproj/argo-events/store"
@@ -53,4 +53,18 @@ func GetAWSSessionWithoutCreds(region string) (*session.Session, error) {
 	return session.NewSession(&aws.Config{
 		Region: &region,
 	})
+}
+
+// CreateAWSSession based on credentials settings return a aws session
+func CreateAWSSession(client kubernetes.Interface, namespace, region string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+	if accessKey == nil && secretKey == nil {
+		return GetAWSSessionWithoutCreds(region)
+	}
+
+	creds, err := GetAWSCreds(client, namespace, accessKey, secretKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return GetAWSSession(creds, region)
 }

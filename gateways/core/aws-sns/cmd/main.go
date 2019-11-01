@@ -39,7 +39,7 @@ func main() {
 	}
 
 	gateways.StartGateway(&aws_sns.EventListener{
-		Log:       common.NewArgoEventsLogger(),
+		Logger:    common.NewArgoEventsLogger(),
 		K8sClient: clientset,
 		Namespace: namespace,
 	})

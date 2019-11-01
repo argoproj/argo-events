@@ -19,6 +19,7 @@ package aws_sns
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 
@@ -59,5 +60,5 @@ func validateSNSEventSource(snsEventSource *v1alpha1.SNSEventSource) error {
 	if snsEventSource.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	return gwcommon.ValidateWebhook(snsEventSource.WebHook)
+	return webhook.ValidateWebhookContext(snsEventSource.WebHook)
 }

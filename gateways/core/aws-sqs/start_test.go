@@ -30,10 +30,10 @@ import (
 
 func TestListenEvents(t *testing.T) {
 	convey.Convey("Given an event source, listen to events", t, func() {
-		ese := &SQSEventSourceListener{
-			Clientset: fake.NewSimpleClientset(),
+		ese := &EventListener{
+			K8sClient: fake.NewSimpleClientset(),
 			Namespace: "fake",
-			Log:       common.NewArgoEventsLogger(),
+			Logger:    common.NewArgoEventsLogger(),
 		}
 
 		dataCh := make(chan []byte)
@@ -89,10 +89,10 @@ func TestListenEvents(t *testing.T) {
 		body, err := yaml.Marshal(sqsEventSource)
 		convey.So(err, convey.ShouldBeNil)
 
-		ese := &SQSEventSourceListener{
-			Clientset: fake.NewSimpleClientset(),
+		ese := &EventListener{
+			K8sClient: fake.NewSimpleClientset(),
 			Namespace: "fake",
-			Log:       common.NewArgoEventsLogger(),
+			Logger:    common.NewArgoEventsLogger(),
 		}
 
 		dataCh := make(chan []byte)

@@ -18,19 +18,20 @@ package calendar
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	cronlib "github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
 )
 
 // EventSourceListener implements Eventing for calendar based events
 type EventSourceListener struct {
+	// Logger to log stuff
 	Logger *logrus.Logger
 }
 
@@ -47,8 +48,7 @@ type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
 func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("activating event source")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
@@ -59,22 +59,27 @@ func (listener *EventSourceListener) StartEventSource(eventSource *gateways.Even
 	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
-// listenEvents fires an event when schedule is passed.
+// listenEvents fires an event when schedule completes.
 func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+
+	logger.Infoln("parsing calendar event source...")
 	var calendarEventSource *v1alpha1.CalendarEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &calendarEventSource); err != nil {
 		errorCh <- err
 		return
 	}
 
+	logger.Infoln("resolving calendar schedule...")
 	schedule, err := resolveSchedule(calendarEventSource)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
+	logger.Infoln("parsing exclusion dates if any...")
 	exDates, err := common.ParseExclusionDates(calendarEventSource.ExclusionDates)
 	if err != nil {
 		errorCh <- err
@@ -99,6 +104,7 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 	lastT := time.Now()
 	var location *time.Location
 	if calendarEventSource.Timezone != "" {
+		logger.WithField("location", calendarEventSource.Timezone).Infoln("loading location for the schedule...")
 		location, err = time.LoadLocation(calendarEventSource.Timezone)
 		if err != nil {
 			errorCh <- err
@@ -110,11 +116,7 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 	for {
 		t := next(lastT)
 		timer := time.After(time.Until(t))
-		listener.Logger.WithFields(
-			map[string]interface{}{
-				common.LabelEventSource: eventSource.Name,
-				common.LabelTime:        t.UTC().String(),
-			}).Info("expected next calendar event")
+		logger.WithField(common.LabelTime, t.UTC().String()).Info("expected next calendar event")
 		select {
 		case tx := <-timer:
 			lastT = tx
@@ -130,6 +132,7 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 				errorCh <- err
 				return
 			}
+			logger.Infoln("event dispatched on data channel")
 			dataCh <- payload
 		case <-doneCh:
 			return
@@ -137,23 +140,24 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 	}
 }
 
+// resolveSchedule parses the schedule and returns a valid cron schedule
 func resolveSchedule(cal *v1alpha1.CalendarEventSource) (cronlib.Schedule, error) {
 	if cal.Schedule != "" {
 		// standard cron expression
 		specParser := cronlib.NewParser(cronlib.Minute | cronlib.Hour | cronlib.Dom | cronlib.Month | cronlib.Dow)
 		schedule, err := specParser.Parse(cal.Schedule)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse schedule %s from calendar event. Cause: %+v", cal.Schedule, err.Error())
+			return nil, errors.Errorf("failed to parse schedule %s from calendar event. Cause: %+v", cal.Schedule, err.Error())
 		}
 		return schedule, nil
 	} else if cal.Interval != "" {
 		intervalDuration, err := time.ParseDuration(cal.Interval)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse interval %s from calendar event. Cause: %+v", cal.Interval, err.Error())
+			return nil, errors.Errorf("failed to parse interval %s from calendar event. Cause: %+v", cal.Interval, err.Error())
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
 	} else {
-		return nil, fmt.Errorf("calendar event must contain either a schedule or interval")
+		return nil, errors.New("calendar event must contain either a schedule or interval")
 	}
 }

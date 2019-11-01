@@ -21,7 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/aws-sqs"
+	aws_sqs "github.com/argoproj/argo-events/gateways/core/aws-sqs"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -38,9 +38,9 @@ func main() {
 		panic("namespace is not provided")
 	}
 
-	gateways.StartGateway(&aws_sqs.SQSEventSourceListener{
-		Log:       common.NewArgoEventsLogger(),
-		Clientset: clientset,
+	gateways.StartGateway(&aws_sqs.EventListener{
+		Logger:    common.NewArgoEventsLogger(),
+		K8sClient: clientset,
 		Namespace: namespace,
 	})
 }
