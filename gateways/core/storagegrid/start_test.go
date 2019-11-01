@@ -19,12 +19,14 @@ package storagegrid
 import (
 	"bytes"
 	"encoding/json"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 var (
@@ -35,7 +37,7 @@ var (
     "Records": [
       {
         "eventName": "ObjectCreated:Put",
-        "eventSource": "sgws:s3",
+        "storageGridEventSource": "sgws:s3",
         "eventTime": "2019-02-27T21:15:09Z",
         "eventVersion": "2.0",
         "requestParameters": {
@@ -71,40 +73,49 @@ var (
   "Version": "2010-03-31"
 }
 `
-	rc = &Router{
-		route: gwcommon.GetFakeRoute(),
+	router = &Router{
+		route: webhook.GetFakeRoute(),
 	}
 )
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
-			DataCh: make(chan []byte),
+		storageGridEventSource := &v1alpha1.StorageGridEventSource{
+			WebHook: &webhook.Context{
+				Endpoint: "/",
+				URL:      "testurl",
+				Port:     "8080",
+			},
+			Events: []string{
+				"ObjectCreated:Put",
+			},
+			Filter: &v1alpha1.StorageGridFilter{
+				Prefix: "hello-",
+				Suffix: ".txt",
+			},
 		}
 
-		ps, err := parseEventSource(es)
-		convey.So(err, convey.ShouldBeNil)
-		writer := &gwcommon.FakeHttpWriter{}
+		writer := &webhook.FakeHttpWriter{}
 
 		convey.Convey("Inactive route should return error", func() {
-			pbytes, err := yaml.Marshal(ps.(*storageGridEventSource))
+			pbytes, err := yaml.Marshal(storageGridEventSource)
 			convey.So(err, convey.ShouldBeNil)
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(pbytes)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
 		convey.Convey("Active route should return success", func() {
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
-			rc.eventSource = ps.(*storageGridEventSource)
+			router.route.Active = true
+			router.storageGridEventSource = storageGridEventSource
 			dataCh := make(chan []byte)
 			go func() {
-				resp := <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+				resp := <-router.route.DataCh
 				dataCh <- resp
 			}()
 
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader([]byte(notification))),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusOK)
@@ -122,28 +133,52 @@ func TestGenerateUUID(t *testing.T) {
 
 func TestFilterEvent(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether it passes the filter", t, func() {
-		ps, err := parseEventSource(es)
+		storageGridEventSource := &v1alpha1.StorageGridEventSource{
+			WebHook: &webhook.Context{
+				Endpoint: "/",
+				URL:      "testurl",
+				Port:     "8080",
+			},
+			Events: []string{
+				"ObjectCreated:Put",
+			},
+			Filter: &v1alpha1.StorageGridFilter{
+				Prefix: "hello-",
+				Suffix: ".txt",
+			},
+		}
+		var gridNotification *storageGridNotification
+		err := json.Unmarshal([]byte(notification), &gridNotification)
 		convey.So(err, convey.ShouldBeNil)
-		var sg *storageGridNotification
-		err = json.Unmarshal([]byte(notification), &sg)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(sg, convey.ShouldNotBeNil)
+		convey.So(gridNotification, convey.ShouldNotBeNil)
 
-		ok := filterEvent(sg, ps.(*storageGridEventSource))
+		ok := filterEvent(gridNotification, storageGridEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }
 
 func TestFilterName(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether the object key passes the filter", t, func() {
-		ps, err := parseEventSource(es)
+		storageGridEventSource := &v1alpha1.StorageGridEventSource{
+			WebHook: &webhook.Context{
+				Endpoint: "/",
+				URL:      "testurl",
+				Port:     "8080",
+			},
+			Events: []string{
+				"ObjectCreated:Put",
+			},
+			Filter: &v1alpha1.StorageGridFilter{
+				Prefix: "hello-",
+				Suffix: ".txt",
+			},
+		}
+		var gridNotification *storageGridNotification
+		err := json.Unmarshal([]byte(notification), &gridNotification)
 		convey.So(err, convey.ShouldBeNil)
-		var sg *storageGridNotification
-		err = json.Unmarshal([]byte(notification), &sg)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(sg, convey.ShouldNotBeNil)
+		convey.So(gridNotification, convey.ShouldNotBeNil)
 
-		ok := filterName(sg, ps.(*storageGridEventSource))
+		ok := filterName(gridNotification, storageGridEventSource)
 		convey.So(ok, convey.ShouldEqual, true)
 	})
 }

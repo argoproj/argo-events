@@ -18,19 +18,41 @@ package storagegrid
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *StorageGridEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateStorageGrid)
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var storageGridEventSource *v1alpha1.StorageGridEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &storageGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validateStorageGridEventSource(storageGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate storage grid event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateStorageGrid(config interface{}) error {
-	sg := config.(*storageGridEventSource)
-	if sg == nil {
+func validateStorageGridEventSource(eventSource *v1alpha1.StorageGridEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	return gwcommon.ValidateWebhook(sg.Hook)
+	return webhook.ValidateWebhookContext(eventSource.WebHook)
 }

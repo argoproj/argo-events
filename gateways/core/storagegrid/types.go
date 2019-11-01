@@ -17,22 +17,25 @@ limitations under the License.
 package storagegrid
 
 import (
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"time"
 
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
 )
 
 // EventListener implements Eventing for storage grid events
 type EventListener struct {
+	// Logger logs stuff
 	Logger *logrus.Logger
 }
 
 // Router manages route
 type Router struct {
-	route       *gwcommon.Route
-	eventSource *v1alpha1.StorageGridEventSource
+	// route contains configuration of a REST endpoint
+	route *webhook.Route
+	// storageGridEventSource refers to event source which contains configuration to consume events from storage grid
+	storageGridEventSource *v1alpha1.StorageGridEventSource
 }
 
 // storageGridNotification is the bucket notification received from storage grid
@@ -41,7 +44,7 @@ type storageGridNotification struct {
 	Message struct {
 		Records []struct {
 			EventVersion string    `json:"eventVersion"`
-			EventSource  string    `json:"eventSource"`
+			EventSource  string    `json:"storageGridEventSource"`
 			EventTime    time.Time `json:"eventTime"`
 			EventName    string    `json:"eventName"`
 			UserIdentity struct {

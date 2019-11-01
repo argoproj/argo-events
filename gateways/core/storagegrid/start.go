@@ -25,16 +25,19 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
 )
 
+// controller controls the webhook operations
 var (
-	helper = gwcommon.NewWebhookController()
+	controller = webhook.NewController()
+)
 
+var (
 	respBody = `
 <PublishResponse xmlns="http://argoevents-sns-server/">
     <PublishResult> 
@@ -46,8 +49,9 @@ var (
 </PublishResponse>` + "\n"
 )
 
+// set up the activation and inactivation channels to control the state of routes.
 func init() {
-	go gwcommon.InitializeRouteChannels(helper)
+	go webhook.ProcessRouteStatus(controller)
 }
 
 // generateUUID returns a new uuid
@@ -85,8 +89,90 @@ func filterName(notification *storageGridNotification, eventSource *v1alpha1.Sto
 	return true
 }
 
-func (rc *Router) GetRoute() *gwcommon.Route {
-	return rc.route
+// Implement Router
+// 1. GetRoute
+// 2. HandleRoute
+// 3. PostActivate
+// 4. PostDeactivate
+
+// GetRoute returns the route
+func (router *Router) GetRoute() *webhook.Route {
+	return router.route
+}
+
+// HandleRoute handles new route
+func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
+	route := router.route
+
+	logger := route.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: route.EventSource.Name,
+			common.LabelEndpoint:    route.Context.Endpoint,
+			common.LabelPort:        route.Context.Port,
+			common.LabelHTTPMethod:  route.Context.Method,
+		})
+
+	logger.Infoln("processing incoming request...")
+
+	if !route.Active {
+		logger.Warnln("endpoint is inactive, won't process the request")
+		common.SendErrorResponse(writer, "inactive endpoint")
+		return
+	}
+
+	logger.Infoln("parsing the request body...")
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		logger.WithError(err).Errorln("failed to parse request body")
+		common.SendErrorResponse(writer, "")
+		return
+	}
+
+	switch request.Method {
+	case http.MethodHead:
+		respBody = ""
+	}
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Add("Content-Type", "text/plain")
+	writer.Write([]byte(respBody))
+
+	// notification received from storage grid is url encoded.
+	parsedURL, err := url.QueryUnescape(string(body))
+	if err != nil {
+		logger.WithError(err).Errorln("failed to unescape request body url")
+		return
+	}
+	b, err := qson.ToJSON(parsedURL)
+	if err != nil {
+		logger.WithError(err).Errorln("failed to convert request body in JSON format")
+		return
+	}
+
+	logger.Infoln("converting request body to storage grid notification")
+	var notification *storageGridNotification
+	err = json.Unmarshal(b, &notification)
+	if err != nil {
+		logger.WithError(err).Errorln("failed to convert the request body into storage grid notification")
+		return
+	}
+
+	if filterEvent(notification, router.storageGridEventSource) && filterName(notification, router.storageGridEventSource) {
+		logger.WithError(err).Errorln("new event received, dispatching event on route's data channel")
+		route.DataCh <- b
+		return
+	}
+
+	logger.Warnln("discarding notification since it did not pass all filters")
+}
+
+// PostActivate performs operations once the route is activated and ready to consume requests
+func (router *Router) PostActivate() error {
+	return nil
+}
+
+// PostInactivate performs operations after the route is inactivated
+func (router *Router) PostInactivate() error {
+	return nil
 }
 
 // StartConfig runs a configuration
@@ -103,83 +189,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	return gwcommon.ProcessRoute(&Router{
-		route: &gwcommon.Route{
-			Webhook:     storagegridEventSource.WebHook,
-			EventSource: eventSource,
-			Logger:      listener.Logger,
-			StartCh:     make(chan struct{}),
-		},
-		eventSource: storagegridEventSource,
-	}, helper, eventStream)
-}
+	route := webhook.NewRoute(storagegridEventSource.WebHook, listener.Logger, eventSource)
 
-func (rc *Router) PostStart() error {
-	return nil
-}
-
-func (rc *Router) PostStop() error {
-	return nil
-}
-
-// HandleRoute handles new route
-func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	r := rc.route
-
-	log := r.Logger.WithFields(
-		map[string]interface{}{
-			common.LabelEventSource: r.EventSource.Name,
-			common.LabelEndpoint:    r.Webhook.Endpoint,
-			common.LabelPort:        r.Webhook.Port,
-			common.LabelHTTPMethod:  r.Webhook.Method,
-		})
-
-	if !helper.ActiveEndpoints[r.Webhook.Endpoint].Active {
-		log.Warn("inactive route")
-		common.SendErrorResponse(writer, "")
-		return
-	}
-
-	log.Info("received a request")
-	body, err := ioutil.ReadAll(request.Body)
-	if err != nil {
-		log.WithError(err).Errorln("failed to parse request body")
-		common.SendErrorResponse(writer, "")
-		return
-	}
-
-	switch request.Method {
-	case http.MethodHead:
-		respBody = ""
-	}
-	writer.WriteHeader(http.StatusOK)
-	writer.Header().Add("Content-Type", "text/plain")
-	writer.Write([]byte(respBody))
-
-	// notification received from storage grid is url encoded.
-	parsedURL, err := url.QueryUnescape(string(body))
-	if err != nil {
-		log.WithError(err).Errorln("failed to unescape request body url")
-		return
-	}
-	b, err := qson.ToJSON(parsedURL)
-	if err != nil {
-		log.WithError(err).Errorln("failed to convert request body in JSON format")
-		return
-	}
-
-	var notification *storageGridNotification
-	err = json.Unmarshal(b, &notification)
-	if err != nil {
-		log.WithError(err).Errorln("failed to unmarshal request body")
-		return
-	}
-
-	if filterEvent(notification, rc.eventSource) && filterName(notification, rc.eventSource) {
-		log.WithError(err).Errorln("new event received, dispatching to gateway client")
-		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh <- b
-		return
-	}
-
-	log.Warnln("discarding notification since it did not pass all filters")
+	return webhook.ManageRoute(&Router{
+		route:                  route,
+		storageGridEventSource: storagegridEventSource,
+	}, controller, eventStream)
 }

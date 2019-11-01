@@ -96,7 +96,7 @@ func (rc *RouteConfig) PostStop() error {
 }
 
 // StartEventSource starts a event source
-func (ese *WebhookEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (ese *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer gateways.Recover(eventSource.Name)
 
 	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)

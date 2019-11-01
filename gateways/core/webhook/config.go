@@ -17,27 +17,15 @@ limitations under the License.
 package webhook
 
 import (
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
-	"github.com/ghodss/yaml"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	"github.com/sirupsen/logrus"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
-
-// WebhookEventSourceExecutor implements Eventing
-type WebhookEventSourceExecutor struct {
+// EventListener implements Eventing for webhook events
+type EventListener struct {
 	Log *logrus.Logger
 }
 
 type RouteConfig struct {
-	Route *gwcommon.Route
-}
-
-func parseEventSource(es string) (interface{}, error) {
-	var n *gwcommon.Webhook
-	err := yaml.Unmarshal([]byte(es), &n)
-	if err != nil {
-		return nil, err
-	}
-	return n, nil
+	Route *webhook.Route
 }

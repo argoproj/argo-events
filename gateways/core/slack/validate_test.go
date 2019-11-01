@@ -44,7 +44,7 @@ func TestSlackEventSource(t *testing.T) {
 		err = v1alpha1.ValidateEventSource(eventSource)
 		convey.So(err, convey.ShouldBeNil)
 
-		for key, value := range eventSource.Spec.Github {
+		for key, value := range eventSource.Spec.Slack {
 			body, err := yaml.Marshal(value)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(err, convey.ShouldNotBeNil)

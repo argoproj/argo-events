@@ -19,6 +19,7 @@ package slack
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
@@ -57,5 +58,5 @@ func validateSlackEventSource(eventSource *v1alpha1.SlackEventSource) error {
 	if eventSource.Token == nil {
 		return fmt.Errorf("token not provided")
 	}
-	return gwcommon.ValidateWebhook(eventSource.WebHook)
+	return webhook.ValidateWebhookContext(eventSource.WebHook)
 }

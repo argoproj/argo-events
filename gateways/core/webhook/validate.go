@@ -26,7 +26,7 @@ import (
 )
 
 // ValidateEventSource validates webhook event source
-func (ese *WebhookEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (ese *EventListener) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	ese.Log.WithFields(
 		map[string]interface{}{
 			common.LabelEventSource: es.Name,

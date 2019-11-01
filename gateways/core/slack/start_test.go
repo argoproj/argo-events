@@ -29,7 +29,8 @@ import (
 	"testing"
 	"time"
 
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/nlopes/slack/slackevents"
 	"github.com/smartystreets/goconvey/convey"
@@ -38,27 +39,25 @@ import (
 
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
-		rc := &Router{
-			route:     gwcommon.GetFakeRoute(),
-			clientset: fake.NewSimpleClientset(),
-			namespace: "fake",
-		}
-
-		helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
-			DataCh: make(chan []byte),
+		router := &Router{
+			route:     webhook.GetFakeRoute(),
+			k8sClient: fake.NewSimpleClientset(),
+			slackEventSource: &v1alpha1.SlackEventSource{
+				Namespace: "fake",
+			},
 		}
 
 		convey.Convey("Inactive route should return 404", func() {
-			writer := &gwcommon.FakeHttpWriter{}
-			rc.HandleRoute(writer, &http.Request{})
+			writer := &webhook.FakeHttpWriter{}
+			router.HandleRoute(writer, &http.Request{})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusBadRequest)
 		})
 
-		rc.token = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
-		helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+		router.token = "Jhj5dZrVaK7ZwHHjRyZWjbDl"
+		router.route.Active = true
 
 		convey.Convey("Test url verification request", func() {
-			writer := &gwcommon.FakeHttpWriter{}
+			writer := &webhook.FakeHttpWriter{}
 			urlVer := slackevents.EventsAPIURLVerificationEvent{
 				Type:      slackevents.URLVerification,
 				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
@@ -67,7 +66,7 @@ func TestRouteActiveHandler(t *testing.T) {
 			payload, err := yaml.Marshal(urlVer)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(payload, convey.ShouldNotBeNil)
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewReader(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)
@@ -78,20 +77,22 @@ func TestRouteActiveHandler(t *testing.T) {
 func TestSlackSignature(t *testing.T) {
 
 	convey.Convey("Given a route that receives a message from Slack", t, func() {
-		rc := &Router{
-			route:     gwcommon.GetFakeRoute(),
-			clientset: fake.NewSimpleClientset(),
-			namespace: "fake",
+		router := &Router{
+			route:     webhook.GetFakeRoute(),
+			k8sClient: fake.NewSimpleClientset(),
+			slackEventSource: &v1alpha1.SlackEventSource{
+				Namespace: "fake",
+			},
 		}
 
-		rc.signingSecret = "abcdefghiklm1234567890"
+		router.signingSecret = "abcdefghiklm1234567890"
 		convey.Convey("Validate request signature", func() {
-			writer := &gwcommon.FakeHttpWriter{}
+			writer := &webhook.FakeHttpWriter{}
 			payload := []byte("payload=%7B%22type%22%3A%22block_actions%22%2C%22team%22%3A%7B%22id%22%3A%22T0CAG%22%2C%22domain%22%3A%22acme-creamery%22%7D%2C%22user%22%3A%7B%22id%22%3A%22U0CA5%22%2C%22username%22%3A%22Amy%20McGee%22%2C%22name%22%3A%22Amy%20McGee%22%2C%22team_id%22%3A%22T3MDE%22%7D%2C%22api_app_id%22%3A%22A0CA5%22%2C%22token%22%3A%22Shh_its_a_seekrit%22%2C%22container%22%3A%7B%22type%22%3A%22message%22%2C%22text%22%3A%22The%20contents%20of%20the%20original%20message%20where%20the%20action%20originated%22%7D%2C%22trigger_id%22%3A%2212466734323.1395872398%22%2C%22response_url%22%3A%22https%3A%2F%2Fwww.postresponsestome.com%2FT123567%2F1509734234%22%2C%22actions%22%3A%5B%7B%22type%22%3A%22button%22%2C%22block_id%22%3A%22actionblock789%22%2C%22action_id%22%3A%2227S%22%2C%22text%22%3A%7B%22type%22%3A%22plain_text%22%2C%22text%22%3A%22Link%20Button%22%2C%22emoji%22%3Atrue%7D%2C%22action_ts%22%3A%221564701248.149432%22%7D%5D%7D")
 			h := make(http.Header)
 
 			rts := int(time.Now().UTC().UnixNano())
-			hmac := hmac.New(sha256.New, []byte(rc.signingSecret))
+			hmac := hmac.New(sha256.New, []byte(router.signingSecret))
 			b := strings.Join([]string{"v0", strconv.Itoa(rts), string(payload)}, ":")
 			hmac.Write([]byte(b))
 			hash := hex.EncodeToString(hmac.Sum(nil))
@@ -100,16 +101,13 @@ func TestSlackSignature(t *testing.T) {
 			h.Add("X-Slack-Signature", genSig)
 			h.Add("X-Slack-Request-Timestamp", strconv.FormatInt(int64(rts), 10))
 
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
-				DataCh: make(chan []byte),
-			}
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+			router.route.Active = true
 
 			go func() {
-				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+				<-router.route.DataCh
 			}()
 
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body:   ioutil.NopCloser(bytes.NewReader(payload)),
 				Header: h,
 				Method: "POST",
@@ -122,25 +120,23 @@ func TestSlackSignature(t *testing.T) {
 func TestInteractionHandler(t *testing.T) {
 
 	convey.Convey("Given a route that receives an interaction event", t, func() {
-		rc := &Router{
-			route:     gwcommon.GetFakeRoute(),
-			clientset: fake.NewSimpleClientset(),
-			namespace: "fake",
+		router := &Router{
+			route:     webhook.GetFakeRoute(),
+			k8sClient: fake.NewSimpleClientset(),
+			slackEventSource: &v1alpha1.SlackEventSource{
+				Namespace: "fake",
+			},
 		}
 
 		convey.Convey("Test an interaction action message", func() {
-			writer := &gwcommon.FakeHttpWriter{}
+			writer := &webhook.FakeHttpWriter{}
 			actionString := `{"type":"block_actions","team":{"id":"T9TK3CUKW","domain":"example"},"user":{"id":"UA8RXUSPL","username":"jtorrance","team_id":"T9TK3CUKW"},"api_app_id":"AABA1ABCD","token":"9s8d9as89d8as9d8as989","container":{"type":"message_attachment","message_ts":"1548261231.000200","attachment_id":1,"channel_id":"CBR2V3XEX","is_ephemeral":false,"is_app_unfurl":false},"trigger_id":"12321423423.333649436676.d8c1bb837935619ccad0f624c448ffb3","channel":{"id":"CBR2V3XEX","name":"review-updates"},"message":{"bot_id":"BAH5CA16Z","type":"message","text":"This content can't be displayed.","user":"UAJ2RU415","ts":"1548261231.000200"},"response_url":"https://hooks.slack.com/actions/AABA1ABCD/1232321423432/D09sSasdasdAS9091209","actions":[{"action_id":"WaXA","block_id":"=qXel","text":{"type":"plain_text","text":"View","emoji":true},"value":"click_me_123","type":"button","action_ts":"1548426417.840180"}]}`
 			payload := []byte(`payload=` + actionString)
 			out := make(chan []byte)
-
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
-				DataCh: make(chan []byte),
-			}
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+			router.route.Active = true
 
 			go func() {
-				out <- <-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+				out <- <-router.route.DataCh
 			}()
 
 			var buf bytes.Buffer
@@ -148,7 +144,7 @@ func TestInteractionHandler(t *testing.T) {
 
 			headers := make(map[string][]string)
 			headers["Content-Type"] = append(headers["Content-Type"], "application/x-www-form-urlencoded")
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Method: http.MethodPost,
 				Header: headers,
 				Body:   ioutil.NopCloser(strings.NewReader(buf.String())),
@@ -164,14 +160,16 @@ func TestInteractionHandler(t *testing.T) {
 func TestEventHandler(t *testing.T) {
 
 	convey.Convey("Given a route that receives an event", t, func() {
-		rc := &Router{
-			route:     gwcommon.GetFakeRoute(),
-			clientset: fake.NewSimpleClientset(),
-			namespace: "fake",
+		router := &Router{
+			route:     webhook.GetFakeRoute(),
+			k8sClient: fake.NewSimpleClientset(),
+			slackEventSource: &v1alpha1.SlackEventSource{
+				Namespace: "fake",
+			},
 		}
 
 		convey.Convey("Test an event notification", func() {
-			writer := &gwcommon.FakeHttpWriter{}
+			writer := &webhook.FakeHttpWriter{}
 			event := []byte(`
 {
 "type": "name_of_event",
@@ -197,16 +195,13 @@ func TestEventHandler(t *testing.T) {
 			payload, err := yaml.Marshal(ce)
 			convey.So(err, convey.ShouldBeNil)
 
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint] = &gwcommon.Endpoint{
-				DataCh: make(chan []byte),
-			}
-			helper.ActiveEndpoints[rc.route.Webhook.Endpoint].Active = true
+			router.route.Active = true
 
 			go func() {
-				<-helper.ActiveEndpoints[rc.route.Webhook.Endpoint].DataCh
+				<-router.route.DataCh
 			}()
 
-			rc.HandleRoute(writer, &http.Request{
+			router.HandleRoute(writer, &http.Request{
 				Body: ioutil.NopCloser(bytes.NewBuffer(payload)),
 			})
 			convey.So(writer.HeaderStatus, convey.ShouldEqual, http.StatusInternalServerError)

@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&webhook.WebhookEventSourceExecutor{
+	gateways.StartGateway(&webhook.EventListener{
 		Log: common.NewArgoEventsLogger(),
 	})
 }
