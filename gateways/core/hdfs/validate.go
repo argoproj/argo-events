@@ -28,7 +28,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates hdfs event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var hdfsEventSource *v1alpha1.HDFSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &hdfsEventSource); err != nil {
@@ -39,7 +39,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validateHDFSEventSource(hdfsEventSource); err != nil {
+	if err := validate(hdfsEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to validate HDFS event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -52,7 +52,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateHDFSEventSource(eventSource *v1alpha1.HDFSEventSource) error {
+func validate(eventSource *v1alpha1.HDFSEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

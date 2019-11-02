@@ -19,11 +19,10 @@ package gateways
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
-	"strings"
 
+	"github.com/argoproj/argo-events/common"
+	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,37 +30,29 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// WatchGatewayEventSources watches change in configuration for the gateway
-func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
-	source := gc.newConfigMapWatch(gc.configName)
+// WatchGatewayEventSources watches change in event source for the gateway
+func (gatewayCfg *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
+	source := gatewayCfg.newEventSourceWatch(gatewayCfg.eventSourceRef)
 	_, controller := cache.NewInformer(
 		source,
-		&corev1.ConfigMap{},
+		&eventSourceV1Alpha1.EventSource{},
 		0,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				if newCm, ok := obj.(*corev1.ConfigMap); ok {
-					if err := common.CheckEventSourceVersion(newCm); err != nil {
-						gc.Log.WithField("name", newCm.Name).Error(err)
-					} else {
-						gc.Log.WithField("name", newCm.Name).Info("detected configmap addition")
-						err := gc.manageEventSources(newCm)
-						if err != nil {
-							gc.Log.WithError(err).Error("add config failed")
-						}
+				if newEventSource, ok := obj.(*eventSourceV1Alpha1.EventSource); ok {
+					gatewayCfg.Logger.WithField(common.LabelEventSource, newEventSource.Name).Infoln("detected a new event-source...")
+					err := gatewayCfg.manageEventSources(newEventSource)
+					if err != nil {
+						gatewayCfg.Logger.WithField(common.LabelEventSource, newEventSource.Name).WithError(err).Errorln("failed to process the event-source reference")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
-				if cm, ok := new.(*corev1.ConfigMap); ok {
-					if err := common.CheckEventSourceVersion(cm); err != nil {
-						gc.Log.WithField("name", cm.Name).Error(err)
-					} else {
-						gc.Log.Info("detected EventSource update. Updating the controller run config.")
-						err := gc.manageEventSources(cm)
-						if err != nil {
-							gc.Log.WithError(err).Error("update config failed")
-						}
+				if eventSource, ok := new.(*eventSourceV1Alpha1.EventSource); ok {
+					gatewayCfg.Logger.WithField(common.LabelEventSource, eventSource.Name).Info("detected event-source update...")
+					err := gatewayCfg.manageEventSources(eventSource)
+					if err != nil {
+						gatewayCfg.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Error("failed to process event source update")
 					}
 				}
 			},
@@ -71,22 +62,21 @@ func (gc *GatewayConfig) WatchGatewayEventSources(ctx context.Context) (cache.Co
 	return controller, nil
 }
 
-// newConfigMapWatch creates a new configmap watcher
-func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
-	x := gc.Clientset.CoreV1().RESTClient()
-	resource := "configmaps"
-	namespace := gc.Namespace
-	if strings.Contains(name, "/") {
-		parts := strings.SplitN(name, "/", 2)
-		namespace = parts[0]
-		name = parts[1]
+// newEventSourceWatch creates a new event source watcher
+func (gatewayCfg *GatewayConfig) newEventSourceWatch(eventSourceRef *v1alpha1.EventSourceRef) *cache.ListWatch {
+	client := gatewayCfg.EventSourceClient.ArgoprojV1alpha1().RESTClient()
+	resource := "eventsources"
+
+	if eventSourceRef.Namespace == "" {
+		eventSourceRef.Namespace = gatewayCfg.Namespace
 	}
-	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
+
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", eventSourceRef.Name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
-		req := x.Get().
-			Namespace(namespace).
+		req := client.Get().
+			Namespace(eventSourceRef.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -94,8 +84,8 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	watchFunc := func(options metav1.ListOptions) (watch.Interface, error) {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
-		req := x.Get().
-			Namespace(namespace).
+		req := client.Get().
+			Namespace(eventSourceRef.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -103,10 +93,9 @@ func (gc *GatewayConfig) newConfigMapWatch(name string) *cache.ListWatch {
 	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
-// WatchGateway watches for changes in the gateway resource
-// This will act as replacement for old gateway-transformer-configmap. Changes to watchers, event version and event type will be reflected.
-func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, error) {
-	source := gc.newGatewayWatch(gc.Name)
+// WatchGatewayUpdates watches for changes in the gateway resource
+func (gatewayCfg *GatewayConfig) WatchGatewayUpdates(ctx context.Context) (cache.Controller, error) {
+	source := gatewayCfg.newGatewayWatch(gatewayCfg.Name)
 	_, controller := cache.NewInformer(
 		source,
 		&v1alpha1.Gateway{},
@@ -114,10 +103,10 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
-					gc.Log.Info("detected gateway update. updating gateway watchers")
-					gc.StatusCh <- EventSourceStatus{
+					gatewayCfg.Logger.Info("detected gateway update. updating gateway watchers")
+					gatewayCfg.StatusCh <- EventSourceStatus{
 						Phase:   v1alpha1.NodePhaseResourceUpdate,
-						Gw:      g,
+						Gateway: g,
 						Message: "gateway_resource_update",
 					}
 				}
@@ -129,15 +118,15 @@ func (gc *GatewayConfig) WatchGateway(ctx context.Context) (cache.Controller, er
 }
 
 // newGatewayWatch creates a new gateway watcher
-func (gc *GatewayConfig) newGatewayWatch(name string) *cache.ListWatch {
-	x := gc.gwcs.ArgoprojV1alpha1().RESTClient()
+func (gatewayCfg *GatewayConfig) newGatewayWatch(name string) *cache.ListWatch {
+	x := gatewayCfg.gatewayClient.ArgoprojV1alpha1().RESTClient()
 	resource := "gateways"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(gatewayCfg.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -146,7 +135,7 @@ func (gc *GatewayConfig) newGatewayWatch(name string) *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gc.Namespace).
+			Namespace(gatewayCfg.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()

@@ -27,7 +27,7 @@ func TestGatewayState(t *testing.T) {
 	convey.Convey("Given a gateway", t, func() {
 		convey.Convey("Create the gateway", func() {
 			var err error
-			gc.gw, err = gc.gwcs.ArgoprojV1alpha1().Gateways(gc.gw.Namespace).Create(gc.gw)
+			gc.gateway, err = gc.gatewayClient.ArgoprojV1alpha1().Gateways(gc.gateway.Namespace).Create(gc.gateway)
 			convey.So(err, convey.ShouldBeNil)
 		})
 
@@ -38,11 +38,11 @@ func TestGatewayState(t *testing.T) {
 				Message: "node is marked as running",
 				Id:      "test-node",
 			})
-			convey.So(len(gc.gw.Status.Nodes), convey.ShouldEqual, 1)
-			convey.So(gc.gw.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
+			convey.So(len(gc.gateway.Status.Nodes), convey.ShouldEqual, 1)
+			convey.So(gc.gateway.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
 		})
 
-		updatedGw := gc.gw
+		updatedGw := gc.gateway
 		updatedGw.Spec.Watchers = &v1alpha1.NotificationWatchers{
 			Sensors: []v1alpha1.SensorNotificationWatcher{
 				{
@@ -57,9 +57,9 @@ func TestGatewayState(t *testing.T) {
 				Name:    "test-node",
 				Message: "gateway resource is updated",
 				Id:      "test-node",
-				Gw:      updatedGw,
+				Gateway: updatedGw,
 			})
-			convey.So(len(gc.gw.Spec.Watchers.Sensors), convey.ShouldEqual, 1)
+			convey.So(len(gc.gateway.Spec.Watchers.Sensors), convey.ShouldEqual, 1)
 		})
 
 		convey.Convey("Update gateway resource test-node node state to completed", func() {
@@ -69,7 +69,7 @@ func TestGatewayState(t *testing.T) {
 				Message: "node is marked completed",
 				Id:      "test-node",
 			})
-			convey.So(gc.gw.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseCompleted)
+			convey.So(gc.gateway.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseCompleted)
 		})
 
 		convey.Convey("Remove gateway resource test-node node", func() {
@@ -79,7 +79,7 @@ func TestGatewayState(t *testing.T) {
 				Message: "node is removed",
 				Id:      "test-node",
 			})
-			convey.So(len(gc.gw.Status.Nodes), convey.ShouldEqual, 0)
+			convey.So(len(gc.gateway.Status.Nodes), convey.ShouldEqual, 0)
 		})
 	})
 }
@@ -92,9 +92,9 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 			Id:      "1234",
 			Message: "running",
 			Phase:   v1alpha1.NodePhaseRunning,
-			Gw:      gc.gw,
+			Gateway: gc.gateway,
 		}
-		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"1234": v1alpha1.NodeStatus{
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
@@ -107,7 +107,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 		convey.So(resultStatus, convey.ShouldNotBeNil)
 		convey.So(resultStatus.Name, convey.ShouldEqual, nodeStatus.Name)
 
-		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"4567": v1alpha1.NodeStatus{
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
@@ -124,7 +124,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 func TestGetNodeByID(t *testing.T) {
 	convey.Convey("Given a node id, retrieve the node", t, func() {
 		gc := getGatewayConfig()
-		gc.gw.Status.Nodes = map[string]v1alpha1.NodeStatus{
+		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"1234": v1alpha1.NodeStatus{
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
@@ -146,6 +146,6 @@ func TestInitializeNode(t *testing.T) {
 		convey.So(status.ID, convey.ShouldEqual, "1234")
 		convey.So(status.Name, convey.ShouldEqual, "fake")
 		convey.So(status.Message, convey.ShouldEqual, "init")
-		convey.So(len(gc.gw.Status.Nodes), convey.ShouldEqual, 1)
+		convey.So(len(gc.gateway.Status.Nodes), convey.ShouldEqual, 1)
 	})
 }

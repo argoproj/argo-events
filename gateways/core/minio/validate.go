@@ -40,7 +40,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateMinioEventSource(minioEventSource); err != nil {
+	if err := validate(minioEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
@@ -51,7 +51,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateMinioEventSource(eventSource *apicommon.S3Artifact) error {
+func validate(eventSource *apicommon.S3Artifact) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

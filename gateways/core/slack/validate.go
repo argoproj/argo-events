@@ -27,7 +27,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates slack event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var slackEventSource *v1alpha1.SlackEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &slackEventSource); err != nil {
@@ -38,7 +38,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateSlackEventSource(slackEventSource); err != nil {
+	if err := validate(slackEventSource); err != nil {
 		listener.Logger.WithError(err).Errorln("failed to validate the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -51,7 +51,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateSlackEventSource(eventSource *v1alpha1.SlackEventSource) error {
+func validate(eventSource *v1alpha1.SlackEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

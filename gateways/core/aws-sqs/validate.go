@@ -26,7 +26,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates sqs event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var sqsEventSource *v1alpha1.SQSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &sqsEventSource); err != nil {
@@ -36,7 +36,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateSQSEventSource(sqsEventSource); err != nil {
+	if err := validate(sqsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
@@ -48,7 +48,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateSQSEventSource(eventSource *v1alpha1.SQSEventSource) error {
+func validate(eventSource *v1alpha1.SQSEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

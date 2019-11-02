@@ -26,7 +26,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates an event source
+// ValidateEventSource validates a resource event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var resourceEventSource *v1alpha1.ResourceEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &resourceEventSource); err != nil {
@@ -37,7 +37,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateResourceEventSource(resourceEventSource); err != nil {
+	if err := validate(resourceEventSource); err != nil {
 		listener.Logger.WithError(err).Errorln("failed to validate the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -50,7 +50,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateResourceEventSource(eventSource *v1alpha1.ResourceEventSource) error {
+func validate(eventSource *v1alpha1.ResourceEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

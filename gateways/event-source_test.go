@@ -24,21 +24,23 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways/common/webhook"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	eventSourceFake "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/fake"
 	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/smartystreets/goconvey/convey"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
 func getGatewayConfig() *GatewayConfig {
 	return &GatewayConfig{
-		Log:        common.NewArgoEventsLogger(),
+		Logger:     common.NewArgoEventsLogger(),
 		serverPort: "1234",
 		StatusCh:   make(chan EventSourceStatus),
-		gw: &v1alpha1.Gateway{
+		gateway: &v1alpha1.Gateway{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-agteway",
 				Namespace: "test-nm",
@@ -55,8 +57,8 @@ func getGatewayConfig() *GatewayConfig {
 				},
 			},
 		},
-		Clientset: fake.NewSimpleClientset(),
-		gwcs:      gwfake.NewSimpleClientset(),
+		K8sClient:     fake.NewSimpleClientset(),
+		gatewayClient: gwfake.NewSimpleClientset(),
 	}
 }
 
@@ -92,31 +94,34 @@ func TestEventSources(t *testing.T) {
 	var eventSrcCtxMap map[string]*EventSourceContext
 	var eventSourceKeys []string
 
-	convey.Convey("Given a gateway configmap, create event sources", t, func() {
-		cm := &corev1.ConfigMap{
+	convey.Convey("Given a EventSource resource, create internal event sources", t, func() {
+		eventSource := &eventSourceV1Alpha1.EventSource{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "gateway-configmap",
+				Name:      "fake-event-source",
 				Namespace: "test-namespace",
-				Labels: map[string]string{
-					common.LabelArgoEventsEventSourceVersion: "v0.10",
+			},
+			Spec: &eventSourceV1Alpha1.EventSourceSpec{
+				Webhook: map[string]webhook.Context{
+					"fake": {
+						Port:     "80",
+						URL:      "fake-url",
+						Endpoint: "xx",
+						Method:   "GET",
+					},
 				},
 			},
-			Data: map[string]string{
-				"event-source-1": `
-testKey: testValue
-`,
-			},
 		}
-		fakeclientset := fake.NewSimpleClientset()
-		_, err := fakeclientset.CoreV1().ConfigMaps(cm.Namespace).Create(cm)
+
+		fakeclientset := eventSourceFake.NewSimpleClientset()
+		_, err := fakeclientset.ArgoprojV1alpha1().EventSources(eventSource.Namespace).Create(eventSource)
 		convey.So(err, convey.ShouldBeNil)
 
-		eventSrcCtxMap, err = gc.createInternalEventSources(cm)
+		eventSrcCtxMap, err = gc.createInternalEventSources(eventSource)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(eventSrcCtxMap, convey.ShouldNotBeNil)
 		convey.So(len(eventSrcCtxMap), convey.ShouldEqual, 1)
 		for _, data := range eventSrcCtxMap {
-			convey.So(data.Source.Data, convey.ShouldEqual, `
+			convey.So(data.Source.Value, convey.ShouldEqual, `
 testKey: testValue
 `)
 			convey.So(data.Source.Version, convey.ShouldEqual, "v0.10")

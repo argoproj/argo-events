@@ -50,17 +50,17 @@ func TestDispatchEvent(t *testing.T) {
 		err := gc.DispatchEvent(event)
 		convey.So(err, convey.ShouldBeNil)
 
-		gc.gw.Spec.EventProtocol.Type = common.NATS
+		gc.gateway.Spec.EventProtocol.Type = common.NATS
 
 		err = gc.DispatchEvent(event)
 		convey.So(err, convey.ShouldBeNil)
 
-		gc.gw.Spec.EventProtocol.Type = common.NATS
+		gc.gateway.Spec.EventProtocol.Type = common.NATS
 
 		err = gc.DispatchEvent(event)
 		convey.So(err, convey.ShouldBeNil)
 
-		gc.gw.Spec.EventProtocol.Type = common.EventProtocolType("fake")
+		gc.gateway.Spec.EventProtocol.Type = common.EventProtocolType("fake")
 		err = gc.DispatchEvent(event)
 		convey.So(err, convey.ShouldNotBeNil)
 	})
@@ -75,6 +75,6 @@ func TestTransformEvent(t *testing.T) {
 		})
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(ce, convey.ShouldNotBeNil)
-		convey.So(ce.Context.Source.Host, convey.ShouldEqual, fmt.Sprintf("%s:%s", gc.gw.Name, "fake"))
+		convey.So(ce.Context.Source.Host, convey.ShouldEqual, fmt.Sprintf("%s:%s", gc.gateway.Name, "fake"))
 	})
 }

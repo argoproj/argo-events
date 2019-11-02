@@ -38,7 +38,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validateWebhookEventSource(webhookEventSource); err != nil {
+	if err := validate(webhookEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to validate the webhook event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -51,7 +51,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateWebhookEventSource(webhookEventSource *webhook.Context) error {
+func validate(webhookEventSource *webhook.Context) error {
 	if webhookEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

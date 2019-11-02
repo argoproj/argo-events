@@ -24,7 +24,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// Validate validates an event source
+// ValidateEventSource validates a github event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var githubEventSource *v1alpha1.GithubEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &githubEventSource); err != nil {
@@ -34,7 +34,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateGithubEventSource(githubEventSource); err != nil {
+	if err := validate(githubEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
@@ -46,8 +46,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-// validateGithubEventSource checks if github event source is valid
-func validateGithubEventSource(githubEventSource *v1alpha1.GithubEventSource) error {
+func validate(githubEventSource *v1alpha1.GithubEventSource) error {
 	if githubEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

@@ -24,7 +24,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gitlab gateway event source
+// ValidateEventSource validates gitlab event source
 func (listener *GitlabEventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var gitlabEventSource *v1alpha1.GitlabEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &gitlabEventSource); err != nil {
@@ -35,7 +35,7 @@ func (listener *GitlabEventListener) ValidateEventSource(ctx context.Context, ev
 		}, nil
 	}
 
-	if err := validateGitlabEventSource(gitlabEventSource); err != nil {
+	if err := validate(gitlabEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to validate gitlab event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -48,8 +48,7 @@ func (listener *GitlabEventListener) ValidateEventSource(ctx context.Context, ev
 	}, nil
 }
 
-// validateGitlabEventSource validates a gitlab event source
-func validateGitlabEventSource(eventSource *v1alpha1.GitlabEventSource) error {
+func validate(eventSource *v1alpha1.GitlabEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

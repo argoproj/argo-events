@@ -26,7 +26,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates storage grid event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var storageGridEventSource *v1alpha1.StorageGridEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &storageGridEventSource); err != nil {
@@ -37,7 +37,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validateStorageGridEventSource(storageGridEventSource); err != nil {
+	if err := validate(storageGridEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to validate storage grid event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -50,7 +50,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validateStorageGridEventSource(eventSource *v1alpha1.StorageGridEventSource) error {
+func validate(eventSource *v1alpha1.StorageGridEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

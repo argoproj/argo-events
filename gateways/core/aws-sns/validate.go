@@ -27,7 +27,7 @@ import (
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates sns event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var snsEventSource *v1alpha1.SNSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
@@ -37,7 +37,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, err
 	}
 
-	if err := validateSNSEventSource(snsEventSource); err != nil {
+	if err := validate(snsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
@@ -49,8 +49,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-// validateSNSEventSource checks if sns event source is valid
-func validateSNSEventSource(snsEventSource *v1alpha1.SNSEventSource) error {
+func validate(snsEventSource *v1alpha1.SNSEventSource) error {
 	if snsEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

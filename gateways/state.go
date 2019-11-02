@@ -17,12 +17,11 @@ limitations under the License.
 package gateways
 
 import (
-	gtw "github.com/argoproj/argo-events/controllers/gateway"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
-
 	"github.com/argoproj/argo-events/common"
+	gtw "github.com/argoproj/argo-events/controllers/gateway"
+	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -38,38 +37,38 @@ type EventSourceStatus struct {
 	// Phase of the event source
 	Phase v1alpha1.NodePhase
 	// Gateway reference
-	Gw *v1alpha1.Gateway
+	Gateway *v1alpha1.Gateway
 }
 
 // markGatewayNodePhase marks the node with a phase, returns the node
-func (gc *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
-	log := gc.Log.WithFields(
+func (gatewayCfg *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
+	logger := gatewayCfg.Logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: nodeStatus.Name,
 			common.LabelPhase:    string(nodeStatus.Phase),
 		},
 	)
 
-	log.Info("marking node phase")
+	logger.Infoln("marking node phase")
 
-	node := gc.getNodeByID(nodeStatus.Id)
+	node := gatewayCfg.getNodeByID(nodeStatus.Id)
 	if node == nil {
-		log.Warn("node is not initialized")
+		logger.Warnln("node is not initialized")
 		return nil
 	}
 	if node.Phase != nodeStatus.Phase {
-		log.WithField("new-phase", string(nodeStatus.Phase)).Info("phase updated")
+		logger.WithField("new-phase", string(nodeStatus.Phase)).Infoln("phase updated")
 		node.Phase = nodeStatus.Phase
 	}
 	node.Message = nodeStatus.Message
-	gc.gw.Status.Nodes[node.ID] = *node
-	gc.updated = true
+	gatewayCfg.gateway.Status.Nodes[node.ID] = *node
+	gatewayCfg.updated = true
 	return node
 }
 
 // getNodeByName returns the node from this gateway for the nodeName
-func (gc *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
-	node, ok := gc.gw.Status.Nodes[nodeID]
+func (gatewayCfg *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
+	node, ok := gatewayCfg.gateway.Status.Nodes[nodeID]
 	if !ok {
 		return nil
 	}
@@ -77,12 +76,14 @@ func (gc *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
 }
 
 // create a new node
-func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
-	if gc.gw.Status.Nodes == nil {
-		gc.gw.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+func (gatewayCfg *GatewayConfig) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
+	if gatewayCfg.gateway.Status.Nodes == nil {
+		gatewayCfg.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
-	gc.Log.WithField(common.LabelNodeName, nodeName).Info("node")
-	node, ok := gc.gw.Status.Nodes[nodeID]
+
+	gatewayCfg.Logger.WithField(common.LabelNodeName, nodeName).Infoln("node")
+
+	node, ok := gatewayCfg.gateway.Status.Nodes[nodeID]
 	if !ok {
 		node = v1alpha1.NodeStatus{
 			ID:          nodeID,
@@ -93,66 +94,68 @@ func (gc *GatewayConfig) initializeNode(nodeID string, nodeName string, messages
 	}
 	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
-	gc.gw.Status.Nodes[nodeID] = node
-	gc.Log.WithFields(
+	gatewayCfg.gateway.Status.Nodes[nodeID] = node
+
+	gatewayCfg.Logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: nodeName,
 			"node-message":       node.Message,
 		},
-	).Info("node is running")
-	gc.updated = true
+	).Infoln("node is running")
+
+	gatewayCfg.updated = true
 	return node
 }
 
 // UpdateGatewayResourceState updates gateway resource nodes state
-func (gc *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
-	log := gc.Log
+func (gatewayCfg *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
+	logger := gatewayCfg.Logger
 	if status.Phase != v1alpha1.NodePhaseResourceUpdate {
-		log = log.WithField(common.LabelEventSource, status.Name).Logger
+		logger = logger.WithField(common.LabelEventSource, status.Name).Logger
 	}
 
-	log.Info("received a gateway state update notification")
+	logger.Infoln("received a gateway state update notification")
 
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
 		// init the node and mark it as running
-		gc.initializeNode(status.Id, status.Name, status.Message)
+		gatewayCfg.initializeNode(status.Id, status.Name, status.Message)
 
 	case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
-		gc.markGatewayNodePhase(status)
+		gatewayCfg.markGatewayNodePhase(status)
 
 	case v1alpha1.NodePhaseResourceUpdate:
-		gc.gw = status.Gw
+		gatewayCfg.gateway = status.Gateway
 
 	case v1alpha1.NodePhaseRemove:
-		delete(gc.gw.Status.Nodes, status.Id)
-		log.Info("event source is removed")
-		gc.updated = true
+		delete(gatewayCfg.gateway.Status.Nodes, status.Id)
+		logger.Infoln("event source is removed")
+		gatewayCfg.updated = true
 	}
 
-	if gc.updated {
+	if gatewayCfg.updated {
 		// persist changes and create K8s event logging the change
 		eventType := common.StateChangeEventType
 		labels := map[string]string{
 			common.LabelGatewayEventSourceName: status.Name,
-			common.LabelGatewayName:            gc.Name,
+			common.LabelGatewayName:            gatewayCfg.Name,
 			common.LabelGatewayEventSourceID:   status.Id,
 			common.LabelOperation:              "persist_event_source_state",
 		}
-		updatedGw, err := gtw.PersistUpdates(gc.gwcs, gc.gw, gc.Log)
+		updatedGw, err := gtw.PersistUpdates(gatewayCfg.gatewayClient, gatewayCfg.gateway, gatewayCfg.Logger)
 		if err != nil {
-			log.WithError(err).Error("failed to persist gateway resource updates, reverting to old state")
+			logger.WithError(err).Errorln("failed to persist gateway resource updates, reverting to old state")
 			eventType = common.EscalationEventType
 		}
 
 		// update gateway ref. in case of failure to persist updates, this is a deep copy of old gateway resource
-		gc.gw = updatedGw
+		gatewayCfg.gateway = updatedGw
 		labels[common.LabelEventType] = string(eventType)
 
 		// generate a K8s event for persist event source state change
-		if err := common.GenerateK8sEvent(gc.Clientset, status.Message, eventType, "event source state update", gc.Name, gc.Namespace, gc.controllerInstanceID, gateway.Kind, labels); err != nil {
-			log.WithError(err).Error("failed to create K8s event to log event source state change")
+		if err := common.GenerateK8sEvent(gatewayCfg.K8sClient, status.Message, eventType, "event source state update", gatewayCfg.Name, gatewayCfg.Namespace, gatewayCfg.controllerInstanceID, gateway.Kind, labels); err != nil {
+			logger.WithError(err).Errorln("failed to create K8s event to log event source state change")
 		}
 	}
-	gc.updated = false
+	gatewayCfg.updated = false
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates calendar event source
 func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	var calendarEventSource *v1alpha1.CalendarEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &calendarEventSource); err != nil {
@@ -38,7 +38,7 @@ func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, ev
 		}, err
 	}
 
-	if err := validateCalendarEventSource(calendarEventSource); err != nil {
+	if err := validate(calendarEventSource); err != nil {
 		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to validate the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -51,7 +51,7 @@ func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, ev
 	}, nil
 }
 
-func validateCalendarEventSource(calendarEventSource *v1alpha1.CalendarEventSource) error {
+func validate(calendarEventSource *v1alpha1.CalendarEventSource) error {
 	if calendarEventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

@@ -37,7 +37,7 @@ func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, ev
 		}, err
 	}
 
-	if err := validatePubSubEventSource(pubsubEventSource); err != nil {
+	if err := validate(pubsubEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
@@ -49,8 +49,7 @@ func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, ev
 	}, nil
 }
 
-// validatePubSubEventSource validates gcp pub-sub event source
-func validatePubSubEventSource(eventSource *v1alpha1.PubSubEventSource) error {
+func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}

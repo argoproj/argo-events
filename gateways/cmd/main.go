@@ -61,7 +61,7 @@ func main() {
 	}()
 
 	// watch updates to gateway resource
-	if _, err := gc.WatchGateway(context.Background()); err != nil {
+	if _, err := gc.WatchGatewayUpdates(context.Background()); err != nil {
 		panic(err)
 	}
 	// watch for event source updates

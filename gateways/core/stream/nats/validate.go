@@ -18,6 +18,7 @@ package nats
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
