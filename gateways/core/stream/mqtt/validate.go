@@ -21,25 +21,45 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
-// ValidateEventSource validates gateway event source
-func (ese *MqttEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateMQTT)
+// ValidateEventSource validates mqtt event source
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var mqttGridEventSource *v1alpha1.MQTTEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &mqttGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validate(mqttGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate mqtt event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateMQTT(config interface{}) error {
-	m := config.(*mqtt)
-	if m == nil {
+func validate(eventSource *v1alpha1.MQTTEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if m.URL == "" {
+	if eventSource.URL == "" {
 		return fmt.Errorf("url must be specified")
 	}
-	if m.Topic == "" {
+	if eventSource.Topic == "" {
 		return fmt.Errorf("topic must be specified")
 	}
-	if m.ClientId == "" {
+	if eventSource.ClientId == "" {
 		return fmt.Errorf("client id must be specified")
 	}
 	return nil

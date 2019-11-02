@@ -17,67 +17,59 @@ limitations under the License.
 package amqp
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// StartEventSource starts an event source
-func (ese *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+// EventListener implements Eventing for amqp event source
+type EventListener struct {
+	// Logger logs stuff
+	Logger *logrus.Logger
+}
 
-	log.Info("operating on event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
-		return err
-	}
+// StartEventSource starts an event source
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(config.(*amqp), eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
-func getDelivery(ch *amqplib.Channel, a *amqp) (<-chan amqplib.Delivery, error) {
-	err := ch.ExchangeDeclare(a.ExchangeName, a.ExchangeType, true, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare exchange with name %s and type %s. err: %+v", a.ExchangeName, a.ExchangeType, err)
-	}
-
-	q, err := ch.QueueDeclare("", false, false, true, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to declare queue: %s", err)
-	}
-
-	err = ch.QueueBind(q.Name, a.RoutingKey, a.ExchangeName, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", a.ExchangeType, a.ExchangeName, a.RoutingKey, err)
-	}
-
-	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to begin consuming messages: %s", err)
-	}
-	return delivery, nil
-}
-
-func (ese *EventListener) listenEvents(a *amqp, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+// listenEvents listens to events from amqp server
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+
+	logger.Infoln("parsing the event source...")
+	var amqpEventSource *v1alpha1.AMQPEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &amqpEventSource); err != nil {
+		errorCh <- err
+		return
+	}
+
+	var conn *amqplib.Connection
+
+	logger.Infoln("dialing connection...")
 	if err := gateways.Connect(&wait.Backoff{
-		Steps:    a.Backoff.Steps,
-		Factor:   a.Backoff.Factor,
-		Duration: a.Backoff.Duration,
-		Jitter:   a.Backoff.Jitter,
+		Steps:    amqpEventSource.ConnectionBackoff.Steps,
+		Factor:   amqpEventSource.ConnectionBackoff.Factor,
+		Duration: amqpEventSource.ConnectionBackoff.Duration,
+		Jitter:   amqpEventSource.ConnectionBackoff.Jitter,
 	}, func() error {
 		var err error
-		a.conn, err = amqplib.Dial(a.URL)
+		conn, err = amqplib.Dial(amqpEventSource.URL)
 		if err != nil {
 			return err
 		}
@@ -87,31 +79,56 @@ func (ese *EventListener) listenEvents(a *amqp, eventSource *gateways.EventSourc
 		return
 	}
 
-	ch, err := a.conn.Channel()
+	logger.Infoln("opening the server channel...")
+	ch, err := conn.Channel()
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	delivery, err := getDelivery(ch, a)
+	logger.Infoln("setting up the delivery channel...")
+	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
-
-	log.Info("starting to subscribe to messages")
+	logger.Info("listening to messages on channel...")
 	for {
 		select {
 		case msg := <-delivery:
+			logger.Infoln("dispatching event on data channel...")
 			dataCh <- msg.Body
 		case <-doneCh:
-			err = a.conn.Close()
+			err = conn.Close()
 			if err != nil {
-				log.WithError(err).Info("failed to close connection")
+				logger.WithError(err).Info("failed to close connection")
 			}
 			return
 		}
 	}
+}
+
+// getDelivery sets up a channel for message deliveries
+func getDelivery(ch *amqplib.Channel, eventSource *v1alpha1.AMQPEventSource) (<-chan amqplib.Delivery, error) {
+	err := ch.ExchangeDeclare(eventSource.ExchangeName, eventSource.ExchangeType, true, false, false, false, nil)
+	if err != nil {
+		return nil, errors.Errorf("failed to declare exchange with name %s and type %s. err: %+v", eventSource.ExchangeName, eventSource.ExchangeType, err)
+	}
+
+	q, err := ch.QueueDeclare("", false, false, true, false, nil)
+	if err != nil {
+		return nil, errors.Errorf("failed to declare queue: %s", err)
+	}
+
+	err = ch.QueueBind(q.Name, eventSource.RoutingKey, eventSource.ExchangeName, false, nil)
+	if err != nil {
+		return nil, errors.Errorf("failed to bind %s exchange '%s' to queue with routingKey: %s: %s", eventSource.ExchangeType, eventSource.ExchangeName, eventSource.RoutingKey, err)
+	}
+
+	delivery, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	if err != nil {
+		return nil, errors.Errorf("failed to begin consuming messages: %s", err)
+	}
+	return delivery, nil
 }

@@ -24,6 +24,6 @@ import (
 
 func main() {
 	gateways.StartGateway(&amqp.EventListener{
-		Log: common.NewArgoEventsLogger(),
+		Logger: common.NewArgoEventsLogger(),
 	})
 }

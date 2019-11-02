@@ -19,73 +19,91 @@ package mqtt
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
+	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// StartEventSource starts an event source
-func (ese *MqttEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := ese.Log.WithField(common.LabelEventSource, eventSource.Name)
+// EventListener implements Eventing for mqtt event source
+type EventListener struct {
+	// Logger to log stuff
+	Logger *logrus.Logger
+}
 
-	log.Info("operating on event source")
-	config, err := parseEventSource(eventSource.Data)
-	if err != nil {
-		log.WithError(err).Error("failed to parse event source")
-		return err
-	}
+// StartEventSource starts an event source
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
 	dataCh := make(chan []byte)
 	errorCh := make(chan error)
 	doneCh := make(chan struct{}, 1)
 
-	go ese.listenEvents(config.(*mqtt), eventSource, dataCh, errorCh, doneCh)
+	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
 
-	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, ese.Log)
+	return gateways.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
 }
 
-func (ese *MqttEventSourceExecutor) listenEvents(m *mqtt, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+// listenEvents listens to events from a mqtt broker
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer gateways.Recover(eventSource.Name)
 
-	log := ese.Log.WithFields(
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+
+	logger.Infoln("parsing the event source...")
+	var mqttEventSource *v1alpha1.MQTTEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &mqttEventSource); err != nil {
+		errorCh <- err
+		return
+	}
+
+	logger = logger.WithFields(
 		map[string]interface{}{
-			common.LabelEventSource: eventSource.Name,
-			common.LabelURL:         m.URL,
-			common.LabelClientID:    m.ClientId,
+			common.LabelURL:      mqttEventSource.URL,
+			common.LabelClientID: mqttEventSource.ClientId,
 		},
 	)
 
+	logger.Infoln("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
+		logger.Infoln("dispatching event on data channel...")
 		dataCh <- msg.Payload()
 	}
-	opts := mqttlib.NewClientOptions().AddBroker(m.URL).SetClientID(m.ClientId)
 
+	logger.Infoln("setting up the mqtt broker client...")
+	opts := mqttlib.NewClientOptions().AddBroker(mqttEventSource.URL).SetClientID(mqttEventSource.ClientId)
+
+	var client mqttlib.Client
+
+	logger.Infoln("connecting to mqtt broker...")
 	if err := gateways.Connect(&wait.Backoff{
-		Factor:   m.Backoff.Factor,
-		Duration: m.Backoff.Duration,
-		Jitter:   m.Backoff.Jitter,
-		Steps:    m.Backoff.Steps,
+		Factor:   mqttEventSource.ConnectionBackoff.Factor,
+		Duration: mqttEventSource.ConnectionBackoff.Duration,
+		Jitter:   mqttEventSource.ConnectionBackoff.Jitter,
+		Steps:    mqttEventSource.ConnectionBackoff.Steps,
 	}, func() error {
-		client := mqttlib.NewClient(opts)
+		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()
 		}
 		return nil
 	}); err != nil {
-		log.Info("failed to connect")
+		logger.Info("failed to connect")
 		errorCh <- err
 		return
 	}
 
-	log.Info("subscribing to topic")
-	if token := m.client.Subscribe(m.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		log.WithError(token.Error()).Error("failed to subscribe")
+	logger.Info("subscribing to the topic...")
+	if token := client.Subscribe(mqttEventSource.Topic, 0, handler); token.Wait() && token.Error() != nil {
+		logger.WithError(token.Error()).Error("failed to subscribe")
 		errorCh <- token.Error()
 		return
 	}
 
 	<-doneCh
-	token := m.client.Unsubscribe(m.Topic)
+	token := client.Unsubscribe(mqttEventSource.Topic)
 	if token.Error() != nil {
-		log.WithError(token.Error()).Error("failed to unsubscribe client")
+		logger.WithError(token.Error()).Error("failed to unsubscribe client")
 	}
 }

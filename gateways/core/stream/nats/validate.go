@@ -18,26 +18,45 @@ package nats
 
 import (
 	"context"
-	"fmt"
 	"github.com/argoproj/argo-events/gateways"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 )
 
-// ValidateEventSource validates gateway event source
-func (ese *NatsEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateNATS)
+// ValidateEventSource validates nats event source
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var natsGridEventSource *v1alpha1.NATSEventsSource
+	if err := yaml.Unmarshal(eventSource.Value, &natsGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validate(natsGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate nats event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateNATS(config interface{}) error {
-	n := config.(*natsConfig)
-	if n == nil {
-		return fmt.Errorf("configuration must be non empty")
+func validate(eventSource *v1alpha1.NATSEventsSource) error {
+	if eventSource == nil {
+		return errors.New("configuration must be non empty")
 	}
-	if n.URL == "" {
-		return fmt.Errorf("url must be specified")
+	if eventSource.URL == "" {
+		return errors.New("url must be specified")
 	}
-	if n.Subject == "" {
-		return fmt.Errorf("subject must be specified")
+	if eventSource.Subject == "" {
+		return errors.New("subject must be specified")
 	}
 	return nil
 }

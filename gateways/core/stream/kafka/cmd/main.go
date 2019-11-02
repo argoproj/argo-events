@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&kafka.KafkaEventSourceExecutor{
-		Log: common.NewArgoEventsLogger(),
+	gateways.StartGateway(&kafka.EventListener{
+		Logger: common.NewArgoEventsLogger(),
 	})
 }

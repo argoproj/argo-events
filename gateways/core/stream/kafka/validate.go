@@ -22,25 +22,45 @@ import (
 
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates the gateway event source
-func (ese *KafkaEventSourceExecutor) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateKafka)
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var kafkaGridEventSource *v1alpha1.KafkaEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &kafkaGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validate(kafkaGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate kafka event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateKafka(config interface{}) error {
-	k := config.(*kafka)
-	if k == nil {
+func validate(eventSource *v1alpha1.KafkaEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if k.URL == "" {
+	if eventSource.URL == "" {
 		return fmt.Errorf("url must be specified")
 	}
-	if k.Topic == "" {
+	if eventSource.Topic == "" {
 		return fmt.Errorf("topic must be specified")
 	}
-	if k.Partition == "" {
+	if eventSource.Partition == "" {
 		return fmt.Errorf("partition must be specified")
 	}
 	return nil

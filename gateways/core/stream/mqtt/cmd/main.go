@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	gateways.StartGateway(&mqtt.MqttEventSourceExecutor{
-		Log: common.NewArgoEventsLogger(),
+	gateways.StartGateway(&mqtt.EventListener{
+		Logger: common.NewArgoEventsLogger(),
 	})
 }

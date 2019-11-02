@@ -18,32 +18,53 @@ package amqp
 
 import (
 	"context"
-	"fmt"
+	"github.com/pkg/errors"
+
 	"github.com/argoproj/argo-events/gateways"
 	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gateway event source
-func (ese *EventListener) ValidateEventSource(ctx context.Context, es *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	return gwcommon.ValidateGatewayEventSource(es, ArgoEventsEventSourceVersion, parseEventSource, validateAMQP)
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	var amqpEventSource *v1alpha1.AMQPEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &amqpEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to parse the event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	if err := validate(amqpEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate amqp event source")
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  err.Error(),
+		}, nil
+	}
+
+	return &gateways.ValidEventSource{
+		IsValid: true,
+	}, nil
 }
 
-func validateAMQP(config interface{}) error {
-	a := config.(*amqp)
-	if a == nil {
+func validate(eventSource *v1alpha1.AMQPEventSource) error {
+	if eventSource == nil {
 		return gwcommon.ErrNilEventSource
 	}
-	if a.URL == "" {
-		return fmt.Errorf("url must be specified")
+	if eventSource.URL == "" {
+		return errors.New("url must be specified")
 	}
-	if a.RoutingKey == "" {
-		return fmt.Errorf("routing key must be specified")
+	if eventSource.RoutingKey == "" {
+		return errors.New("routing key must be specified")
 	}
-	if a.ExchangeName == "" {
-		return fmt.Errorf("exchange name must be specified")
+	if eventSource.ExchangeName == "" {
+		return errors.New("exchange name must be specified")
 	}
-	if a.ExchangeType == "" {
-		return fmt.Errorf("exchange type must be specified")
+	if eventSource.ExchangeType == "" {
+		return errors.New("exchange type must be specified")
 	}
 	return nil
 }
