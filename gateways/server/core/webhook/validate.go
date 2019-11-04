@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gwcommon "github.com/argoproj/argo-events/gateways/server/common"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/ghodss/yaml"
 )
@@ -53,7 +53,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 
 func validate(webhookEventSource *webhook.Context) error {
 	if webhookEventSource == nil {
-		return gwcommon.ErrNilEventSource
+		return common.ErrNilEventSource
 	}
 
 	switch webhookEventSource.Method {

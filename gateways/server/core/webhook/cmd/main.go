@@ -18,12 +18,12 @@ package main
 
 import (
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/core/webhook"
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/gateways/server/core/webhook"
 )
 
 func main() {
-	gateways.StartGateway(&webhook.EventListener{
+	server.StartGateway(&webhook.EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	})
 }

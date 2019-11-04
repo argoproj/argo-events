@@ -18,14 +18,15 @@ package webhook
 
 import (
 	"encoding/json"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/ghodss/yaml"
+	"github.com/sirupsen/logrus"
 )
 
 // EventListener implements Eventing for webhook events
@@ -124,7 +125,7 @@ func (router *Router) PostInactivate() error {
 
 // StartEventSource starts a event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer gateways.Recover(eventSource.Name)
+	defer server.Recover(eventSource.Name)
 
 	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 

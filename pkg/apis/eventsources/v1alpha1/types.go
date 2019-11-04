@@ -17,37 +17,13 @@ package v1alpha1
 
 import (
 	"encoding/json"
-	"github.com/argoproj/argo-events/gateways/common/webhook"
 
 	"github.com/argoproj/argo-events/common"
-	gwcommon "github.com/argoproj/argo-events/gateways/common"
+	"github.com/argoproj/argo-events/gateways/server/common/fsevent"
+	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-// EventSourceType is the type of event source supported by the gateway
-type EventSourceType string
-
-// possible event source types
-var (
-	MinioEvent       EventSourceType = "minio"
-	CalendarEvent    EventSourceType = "calendar"
-	FileEvent        EventSourceType = "file"
-	ResourceEvent    EventSourceType = "resource"
-	WebhookEvent     EventSourceType = "webhook"
-	AMQPEvent        EventSourceType = "amqp"
-	KafkaEvent       EventSourceType = "kafka"
-	MQTTEvent        EventSourceType = "mqtt"
-	NATSEvent        EventSourceType = "nats"
-	SNSEvent         EventSourceType = "sns"
-	SQSEvent         EventSourceType = "sqs"
-	PubSubEvent      EventSourceType = "pubsub"
-	GitHubEvent      EventSourceType = "github"
-	GitLabEvent      EventSourceType = "gitlab"
-	HDFSEvent        EventSourceType = "hdfs"
-	SlackEvent       EventSourceType = "slack"
-	StorageGridEvent EventSourceType = "storagegrid"
 )
 
 // EventSource is the definition of a eventsource resource
@@ -81,7 +57,7 @@ type EventSourceSpec struct {
 	// Resource event sources
 	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,4,opt,name=resource"`
 	// Context event sources
-	Webhook map[string]gwcommon.Webhook `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
+	Webhook map[string]webhook.Context `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
 	// AMQP event sources
 	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,6,opt,name=amqp"`
 	// Kafka event sources
@@ -109,7 +85,7 @@ type EventSourceSpec struct {
 	// Version of the event source. It must match with that of gateway version
 	Version string `json:"version" protobuf:"bytes,18,name=version"`
 	// Type of the event source
-	Type EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -144,7 +120,7 @@ type FileEventSource struct {
 	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
 	EventType string `json:"eventType" protobuf:"bytes,4,name=eventType"`
 	// WatchPathConfig contains configuration about the file path to watch
-	WatchPathConfig gwcommon.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,5,name=watchPathConfig"`
+	WatchPathConfig fsevent.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,5,name=watchPathConfig"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
@@ -350,7 +326,7 @@ type GitlabEventSource struct {
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {
-	gwcommon.WatchPathConfig `json:",inline"`
+	fsevent.WatchPathConfig `json:",inline"`
 	// Type of file operations to watch
 	Type string `json:"type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
@@ -398,7 +374,7 @@ type SlackEventSource struct {
 // StorageGridEventSource refers to event-source for StorageGrid related events
 type StorageGridEventSource struct {
 	// Context holds configuration for a REST endpoint
-	WebHook *gwcommon.Webhook `json:"hook" protobuf:"bytes,1,name=webhook"`
+	WebHook *webhook.Context `json:"hook" protobuf:"bytes,1,name=webhook"`
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`

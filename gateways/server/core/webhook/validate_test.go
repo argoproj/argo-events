@@ -24,7 +24,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gwcommon "github.com/argoproj/argo-events/gateways/server/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
@@ -35,7 +34,7 @@ func TestValidateEventSource(t *testing.T) {
 		listener := &EventListener{
 			Logger: common.NewArgoEventsLogger(),
 		}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gwcommon.EventSourceDir, "webhook.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "webhook.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource
