@@ -19,6 +19,7 @@ package common
 import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -169,4 +170,12 @@ const (
 	// CloudEventsVersion is the version of the CloudEvents spec targeted+
 	// by this library.
 	CloudEventsVersion = "0.1"
+)
+
+const (
+	EventSourceDir = "../../../examples/eventsources"
+)
+
+var (
+	ErrNilEventSource = errors.New("event source can't be nil")
 )
