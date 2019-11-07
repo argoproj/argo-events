@@ -9,13 +9,13 @@ theme:
     text: 'Work Sans'
   logo: 'assets/logo.png'
 google_analytics:
-- 'UA-105170809-2'
-- 'auto'
+  - 'UA-105170809-2'
+  - 'auto'
 markdown_extensions:
-- codehilite
-- admonition
-- toc:
-    permalink: true
+  - codehilite
+  - admonition
+  - toc:
+      permalink: true
 nav:
   - Overview: 'index.md'
   - 'installation.md'

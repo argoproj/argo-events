@@ -25,7 +25,7 @@ import (
 )
 
 func TestInformer(t *testing.T) {
-	convey.Convey("Given a gateway controller", t, func() {
+	convey.Convey("Given a controller", t, func() {
 		controller := getGatewayController()
 		convey.Convey("Instance ID required key must match", func() {
 			req := controller.instanceIDReq()
@@ -35,7 +35,7 @@ func TestInformer(t *testing.T) {
 		})
 	})
 
-	convey.Convey("Given a gateway controller", t, func() {
+	convey.Convey("Given a controller", t, func() {
 		controller := getGatewayController()
 		convey.Convey("Get a new gateway informer and make sure its not nil", func() {
 			i := controller.newGatewayInformer()

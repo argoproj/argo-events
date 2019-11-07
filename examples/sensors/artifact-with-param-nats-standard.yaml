@@ -1,14 +1,12 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: artifact-with-param-nats-standard-sensor
+  name: minio-with-param-nats-standard-sensor
   labels:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.10
 spec:
+  version: "v0.11"
   template:
     spec:
       containers:
@@ -22,7 +20,7 @@ spec:
       type: "Standard"
       url: "nats://example-nats.argo-events:4222"
   dependencies:
-    - name: "artifact-gateway-nats-standard:example-1"
+    - name: "minio-gateway-nats-standard:example-1"
   triggers:
     - template:
         name: argo-workflow
@@ -46,6 +44,6 @@ spec:
       # The container args from the workflow are overridden by the s3 notification key
       resourceParameters:
         - src:
-            event: "artifact-gateway-nats-standard:example-1"
+            event: "minio-gateway-nats-standard:example-1"
             path: s3.object.key
           dest: spec.templates.0.container.args.0

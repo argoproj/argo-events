@@ -1,157 +1,114 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package gateway
 
 import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-type gwResourceCtx struct {
-	// gw is the gateway-controller object
-	gw *v1alpha1.Gateway
-	// reference to the gateway-controller-controller
-	controller *GatewayController
+// buildServiceResource builds a new service that exposes gateway.
+func (opctx *operationContext) buildServiceResource() (*corev1.Service, error) {
+	serviceTemplateSpec := opctx.gatewayObj.Spec.Service.DeepCopy()
+	if serviceTemplateSpec == nil {
+		return nil, nil
+	}
 
-	controllerscommon.ChildResourceContext
+	service := &corev1.Service{
+		ObjectMeta: serviceTemplateSpec.ObjectMeta,
+		Spec:       serviceTemplateSpec.Spec,
+	}
+
+	service.Namespace = opctx.gatewayObj.Namespace
+
+	service.Name = common.DefaultServiceName(opctx.gatewayObj.Name)
+
+	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, service, schema.GroupVersionKind{
+		Kind:    opctx.gatewayObj.Kind,
+		Group:   opctx.gatewayObj.GroupVersionKind().Group,
+		Version: opctx.gatewayObj.GroupVersionKind().Version,
+	}); err != nil {
+		return nil, err
+	}
+
+	return service, nil
 }
 
-// NewGatewayResourceContext returns new gwResourceCtx
-func NewGatewayResourceContext(gw *v1alpha1.Gateway, controller *GatewayController) gwResourceCtx {
-	return gwResourceCtx{
-		gw:         gw,
-		controller: controller,
-		ChildResourceContext: controllerscommon.ChildResourceContext{
-			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
-			LabelOwnerName:                    common.LabelGatewayName,
-			LabelKeyOwnerControllerInstanceID: common.LabelKeyGatewayControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationGatewayResourceSpecHashName,
-			InstanceID:                        controller.Config.InstanceID,
+// buildDeploymentResource builds a deployment resource for the gateway
+func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, error) {
+	podTemplate := opctx.gatewayObj.Spec.Template.DeepCopy()
+
+	replica := int32(opctx.gatewayObj.Spec.Replica)
+
+	if replica == 0 {
+		replica = 1
+	}
+
+	deployment := &appv1.Deployment{
+		ObjectMeta: podTemplate.ObjectMeta,
+		Spec: appv1.DeploymentSpec{
+			Replicas: &replica,
+			Template: *podTemplate,
 		},
 	}
-}
 
-// gatewayResourceLabelSelector returns label selector of the gateway of the context
-func (grc *gwResourceCtx) gatewayResourceLabelSelector() (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelGatewayName, selection.Equals, []string{grc.gw.Name})
-	if err != nil {
+	deployment.Namespace = opctx.gatewayObj.Namespace
+
+	if deployment.Name == "" {
+		deployment.Name = opctx.gatewayObj.Name
+	}
+
+	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, deployment, schema.GroupVersionKind{
+		Kind:    opctx.gatewayObj.Kind,
+		Group:   opctx.gatewayObj.GroupVersionKind().Group,
+		Version: opctx.gatewayObj.GroupVersionKind().Version,
+	}); err != nil {
 		return nil, err
 	}
-	return labels.NewSelector().Add(*req), nil
-}
 
-// createGatewayService creates a given service
-func (grc *gwResourceCtx) createGatewayService(svc *corev1.Service) (*corev1.Service, error) {
-	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Create(svc)
-}
+	opctx.setupContainersForGatewayDeployment(deployment)
 
-// deleteGatewayService deletes a given service
-func (grc *gwResourceCtx) deleteGatewayService(svc *corev1.Service) error {
-	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
-}
-
-// getGatewayService returns the service of gateway
-func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
-	selector, err := grc.gatewayResourceLabelSelector()
-	if err != nil {
-		return nil, err
-	}
-	svcs, err := grc.controller.svcInformer.Lister().Services(grc.gw.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(svcs) == 0 {
-		return nil, nil
-	}
-	return svcs[0], nil
-}
-
-// newGatewayService returns a new service that exposes gateway.
-func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
-	servicTemplateSpec := grc.gw.Spec.Service.DeepCopy()
-	if servicTemplateSpec == nil {
-		return nil, nil
-	}
-	service := &corev1.Service{
-		ObjectMeta: servicTemplateSpec.ObjectMeta,
-		Spec:       servicTemplateSpec.Spec,
-	}
-	if service.Namespace == "" {
-		service.Namespace = grc.gw.Namespace
-	}
-	if service.Name == "" {
-		service.Name = common.DefaultServiceName(grc.gw.Name)
-	}
-	err := grc.SetObjectMeta(grc.gw, service)
-	return service, err
-}
-
-// getGatewayPod returns the pod of gateway
-func (grc *gwResourceCtx) getGatewayPod() (*corev1.Pod, error) {
-	selector, err := grc.gatewayResourceLabelSelector()
-	if err != nil {
-		return nil, err
-	}
-	pods, err := grc.controller.podInformer.Lister().Pods(grc.gw.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(pods) == 0 {
-		return nil, nil
-	}
-	return pods[0], nil
-}
-
-// createGatewayPod creates a given pod
-func (grc *gwResourceCtx) createGatewayPod(pod *corev1.Pod) (*corev1.Pod, error) {
-	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Create(pod)
-}
-
-// deleteGatewayPod deletes a given pod
-func (grc *gwResourceCtx) deleteGatewayPod(pod *corev1.Pod) error {
-	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
-}
-
-// newGatewayPod returns a new pod of gateway
-func (grc *gwResourceCtx) newGatewayPod() (*corev1.Pod, error) {
-	podTemplateSpec := grc.gw.Spec.Template.DeepCopy()
-	pod := &corev1.Pod{
-		ObjectMeta: podTemplateSpec.ObjectMeta,
-		Spec:       podTemplateSpec.Spec,
-	}
-	if pod.Namespace == "" {
-		pod.Namespace = grc.gw.Namespace
-	}
-	if pod.Name == "" {
-		pod.Name = grc.gw.Name
-	}
-	grc.setupContainersForGatewayPod(pod)
-	err := grc.SetObjectMeta(grc.gw, pod)
-	return pod, err
+	return deployment, nil
 }
 
 // containers required for gateway deployment
-func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
+func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *appv1.Deployment) {
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarGatewayNamespace,
-			Value: grc.gw.Namespace,
+			Value: opctx.gatewayObj.Namespace,
 		},
 		{
-			Name:  common.EnvVarGatewayEventSourceConfigMap,
-			Value: grc.gw.Spec.EventSource,
+			Name:  common.EnvVarEventSource,
+			Value: opctx.gatewayObj.Spec.EventSourceRef.Name,
 		},
 		{
 			Name:  common.EnvVarGatewayName,
-			Value: grc.gw.Name,
+			Value: opctx.gatewayObj.Name,
 		},
 		{
 			Name:  common.EnvVarGatewayControllerInstanceID,
-			Value: grc.controller.Config.InstanceID,
+			Value: opctx.controller.Config.InstanceID,
 		},
 		{
 			Name:  common.EnvVarGatewayControllerName,
@@ -159,11 +116,109 @@ func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,
-			Value: grc.gw.Spec.ProcessorPort,
+			Value: opctx.gatewayObj.Spec.ProcessorPort,
 		},
 	}
-	for i, container := range pod.Spec.Containers {
+
+	for i, container := range deployment.Spec.Template.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
-		pod.Spec.Containers[i] = container
+		deployment.Spec.Template.Spec.Containers[i] = container
 	}
+}
+
+// createGatewayResources creates K8s resources corresponding to a gateway object
+func (opctx *operationContext) createGatewayResources() error {
+	// Gateway deployment has two components,
+	// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
+	// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
+	//                          compliant events and dispatch them to watchers.
+	deployment, err := opctx.buildDeploymentResource()
+	if err != nil {
+		return err
+	}
+
+	if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(deployment); err != nil {
+		return err
+	}
+
+	opctx.logger.WithField(common.LabelDeploymentName, deployment.Name).Info("a deployment for the gateway is created")
+
+	// expose gateway if service is configured
+	if opctx.gatewayObj.Spec.Service != nil {
+		svc, err := opctx.buildServiceResource()
+		if err != nil {
+			return err
+		}
+
+		if _, err := opctx.controller.k8sClient.CoreV1().Services(svc.Namespace).Create(svc); err != nil {
+			return err
+		}
+
+		opctx.logger.WithField(common.LabelServiceName, svc.Name).Infoln("gateway service is created")
+	}
+	return nil
+}
+
+// updateGatewayResources updates the gateway deployment and service if the gateway resource spec has changed since last deployment
+func (opctx *operationContext) updateGatewayResources() error {
+	if err := Validate(opctx.gatewayObj); err != nil {
+		opctx.logger.WithError(err).Error("gateway validation failed")
+
+		if opctx.gatewayObj.Status.Phase != v1alpha1.NodePhaseError {
+			opctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
+		}
+
+		return err
+	}
+
+	selector, err := controllerscommon.OwnerLabelSelector(opctx.gatewayObj.Name)
+	if err != nil {
+		return err
+	}
+
+	gatewayDeployment, err := opctx.buildDeploymentResource()
+	if err != nil {
+		return err
+	}
+
+	deployments, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).List(metav1.ListOptions{
+		LabelSelector: selector.String(),
+	})
+	if err != nil {
+		if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(gatewayDeployment); err != nil {
+			return err
+		}
+	} else {
+		deployment := deployments.Items[0]
+
+		gatewayDeploymentHash, err := common.GetObjectHash(gatewayDeployment)
+		if err != nil {
+			return err
+		}
+
+		if deployment.Annotations != nil && deployment.Annotations[common.AnnotationResourceSpecHashName] != gatewayDeploymentHash {
+			if err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Delete(deployment.Name, &metav1.DeleteOptions{}); err != nil {
+				return err
+			}
+
+			if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(gatewayDeployment); err != nil {
+				return err
+			}
+		}
+	}
+
+	if opctx.gatewayObj.Spec.Service != nil {
+		serviceObj, err := opctx.buildServiceResource()
+		if err != nil {
+			return err
+		}
+
+		if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Update(serviceObj); err != nil {
+			return err
+		}
+	}
+
+	opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
+
+	return nil
 }

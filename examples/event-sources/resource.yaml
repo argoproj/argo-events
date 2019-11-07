@@ -1,81 +1,78 @@
-# This configmap contains the event sources configurations for Resource gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: resource-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  # watch workflows that are in successful state
-  example: |-
-    # namespace to listen events within
-    namespace: argo-events
-    # resource group
-    group: "argoproj.io"
-    # resource version
-    version: "v1alpha1"
-    # resource kind
-    resource: "workflows"
-    # type of event
-    # possible values are ADD, DELETE, UPDATE
-    # Optional
-    type: ADD
-    # Filters to apply on watched object
-    # Optional
-    filter:
-      labels:
-        workflows.argoproj.io/phase: Succeeded
-        name: "my-workflow"
+spec:
+  type: "resource"
+  version: "v0.11"
+  resource:
+    # watch workflows that are in successful state
+    example:
+      # namespace to listen events within
+      namespace: "argo-events"
+      # resource group
+      group: "argoproj.io"
+      # resource version
+      version: "v1alpha1"
+      # resource kind
+      resource: "workflows"
+      # type of event
+      # possible values are ADD, DELETE, UPDATE
+      # Optional
+      type: ADD
+      # Filters to apply on watched object
+      # Optional
+      filter:
+        labels:
+          workflows.argoproj.io/phase: Succeeded
+          name: "my-workflow"
 
-  # watch all namespace related events
-  example-with-all-types-and-no-filter: |-
-    namespace: argo-events
-    group: ""
-    version: "v1"
-    resource: "namespaces"
+    # watch all namespace related events
+    example-with-all-types-and-no-filter:
+      namespace: "argo-events"
+      group: ""
+      version: "v1"
+      resource: "namespaces"
 
-  # create event if workflow with prefix "my-workflow" gets modified
-  example-with-prefix-filter: |-
-    namespace: argo-events
-    group: argoproj.io
-    version: v1alpha1
-    resource: workflows
-    type: MODIFIED
-    filter:
-      prefix: "my-workflow"
+    # create event if workflow with prefix "my-workflow" gets modified
+    example-with-prefix-filter:
+      namespace: "argo-events"
+      group: argoproj.io
+      version: v1alpha1
+      resource: workflows
+      type: MODIFIED
+      filter:
+        prefix: "my-workflow"
 
-  # create event when a pod is created before 2019-03-27T010:52:32Z
-  example-with-created-by-filter: |-
-    namespace: argo-events
-    group: argoproj.io
-    version: v1alpha1
-    resource: workflows
-    type: ADDED
-    filter:
-      createdBy: "2019-04-06T12:52:11Z"
+    # create event when a pod is created before 2019-03-27T010:52:32Z
+    example-with-created-by-filter:
+      namespace: "argo-events"
+      group: argoproj.io
+      version: v1alpha1
+      resource: workflows
+      type: ADDED
+      filter:
+        createdBy: "2019-04-06T12:52:11Z"
 
-  example-with-multi-filters: |-
-    namespace: argo-events
-    group: ""
-    version: v1
-    resource: pods
-    type: ADDED
-    filter:
-      createdBy: "2019-04-06T12:52:11Z"
-      labels:
-        workflows.argoproj.io/completed: "true"
-      prefix: "hello"
+    example-with-multi-filters:
+      namespace: "argo-events"
+      group: ""
+      version: v1
+      resource: pods
+      type: ADDED
+      filter:
+        createdBy: "2019-04-06T12:52:11Z"
+        labels:
+          workflows.argoproj.io/completed: "true"
+        prefix: "hello"
 
-  # watch for completed workflows in any namespace
-  example-without-namespace: |-
-    # namespace: (omitted to match any namespace)
-    group: "k8s.io"
-    version: v1
-    resource: workflows
-    type: ADDED
-    filter:
-      labels:
-        workflows.argoproj.io/completed: "true"
+    # watch for completed workflows in any namespace
+    example-without-namespace:
+      # namespace: (omitted to match any namespace)
+      group: "k8s.io"
+      version: v1
+      resource: workflows
+      type: ADDED
+      filter:
+        labels:
+          workflows.argoproj.io/completed: "true"

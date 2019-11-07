@@ -23,7 +23,6 @@ import (
 )
 
 const (
-
 	// ErrorResponse for http request
 	ErrorResponse = "Error"
 
@@ -137,9 +136,6 @@ const (
 	// LabelArgoEventsGatewayVersion is the label for the gateway version
 	LabelArgoEventsGatewayVersion = "argo-events-gateway-version"
 
-	// AnnotationGatewayResourceSpecHashName is the annotation of a gateway resource spec hash
-	AnnotationGatewayResourceSpecHashName = gateway.FullName + "/resource-spec-hash"
-
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve gateway-controller configuration from.
 	// Content encoding is expected to be YAML.
 	GatewayControllerConfigMapKey = "config"
@@ -153,16 +149,22 @@ const (
 	// LabelGatewayEventSourceID is the label for gateway configuration ID
 	LabelGatewayEventSourceID = "event-source-id"
 
-	// LabelArgoEventsEventSourceVersion is the label for event source version
-	LabelArgoEventsEventSourceVersion = "argo-events-event-source-version"
-
-	// EnvVarGatewayEventSourceConfigMap is used to get map containing event sources to run in a gateway
-	EnvVarGatewayEventSourceConfigMap = "GATEWAY_EVENT_SOURCE_CONFIG_MAP"
-
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
+)
+
+const (
+	LabelOwnerName = "owner-name"
+)
+
+const (
+	// EnvVarEventSource refers to event source name
+	EnvVarEventSource = "EVENT_SOURCE"
+
+	// AnnotationResourceSpecHashName is the annotation of a K8s resource spec hash
+	AnnotationResourceSpecHashName = "resource-spec-hash"
 )
 
 // CloudEvents constants

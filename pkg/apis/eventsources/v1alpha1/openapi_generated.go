@@ -325,13 +325,13 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 					},
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook event sources",
+							Description: "Context event sources",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+										Ref: ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 									},
 								},
 							},
@@ -509,7 +509,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource"},
 	}
 }
 
@@ -591,8 +591,8 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 					},
 					"hook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook refers to the configuration required to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+							Description: "Context refers to the configuration required to run a http server",
+							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 						},
 					},
 					"owner": {
@@ -636,7 +636,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 					},
 					"webhookSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook secret refers to K8s secret containing Webhook secret https://developer.github.com/webhooks/securing/",
+							Description: "Context secret refers to K8s secret containing Context secret https://developer.github.com/webhooks/securing/",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -680,7 +680,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -693,8 +693,8 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"hook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook holds configuration to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+							Description: "Context holds configuration to run a http server",
+							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 						},
 					},
 					"projectId": {
@@ -736,7 +736,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1138,7 +1138,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SNSEventSource(ref common.ReferenceCa
 					"hook": {
 						SchemaProps: spec.SchemaProps{
 							Description: "WebHook configuration for http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 						},
 					},
 					"topicArn": {
@@ -1172,7 +1172,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SNSEventSource(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1246,8 +1246,8 @@ func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.Reference
 					},
 					"hook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook holds configuration to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+							Description: "Context holds configuration to run a http server",
+							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 						},
 					},
 				},
@@ -1255,7 +1255,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1268,8 +1268,8 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 				Properties: map[string]spec.Schema{
 					"hook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Webhook holds configuration to run a http server",
-							Ref:         ref("github.com/argoproj/argo-events/gateways/common.Webhook"),
+							Description: "Context holds configuration to run a http server",
+							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common.Context"),
 						},
 					},
 					"events": {
@@ -1302,7 +1302,7 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/common.Webhook", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter"},
+			"github.com/argoproj/argo-events/gateways/server/common.Context", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter"},
 	}
 }
 

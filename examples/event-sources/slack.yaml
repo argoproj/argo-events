@@ -1,54 +1,49 @@
-# This configmap contains the event sources configurations for Slack gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: slack-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  example-1: |-
-    # hook contains configuration for the HTTP server running in the gateway.
-    # Slack will send events to following port and endpoint
-    hook:
-      # endpoint to listen events on
-      endpoint: "/"
-      # port to run HTTP server on
-      port: "12000"
-    # token contains information about K8s secret that stores the token
-    token:
-      # Name of the K8s secret that contains the token
-      name: slack-secret
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is token
-      key: tokenkey
-    # signingSecret contains information about the K8s secret that stores
-    # Slack Signing Secret used to sign every request from Slack
-    signingSecret:
-      # Name of the K8s secret that contains the signingSecret
-      name: slack-secret
-      # Key within the K8s secret whose corresponding value contains the
-      # base64-encoded Slack signing secret
-      key: signingSecret
+spec:
+  version: "v0.11"
+  type: "slack"
+  slack:
+    example-insecure:
+      # hook contains configuration for the HTTP server running in the gateway.
+      # Slack will send events to following port and endpoint
+      hook:
+        # endpoint to listen events on
+        endpoint: "/"
+        # port to run HTTP server on
+        port: "12000"
+      # token contains information about K8s secret that stores the token
+      token:
+        # Name of the K8s secret that contains the token
+        name: "slack-secret"
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is token
+        key: tokenkey
+      # signingSecret contains information about the K8s secret that stores
+      # Slack Signing Secret used to sign every request from Slack
+      signingSecret:
+        # Name of the K8s secret that contains the signingSecret
+        name: "slack-secret"
+        # Key within the K8s secret whose corresponding value contains the
+        # base64-encoded Slack signing secret
+        key: signingSecret
 
-  example-2: |-
-    hook:
-      endpoint: "/"
-      port: "13000"
-    token:
-      name: slack-secret-2
-      key: tokenkey
-
-  # with secure connection
-  example-3: |-
-    hook:
-      endpoint: "/"
-      port: "14000"
-      # path to file that is mounted in gateway pod which contains certs
-      serverCertPath: "some path in pod"
-      # path to file that is mounted in gateway pod which contains private key
-      serverKeyPath: "some path in pod"
-    token:
-      name: slack-secret-3
-      key: tokenkey
+    # with secure connection
+    example-secure:
+      hook:
+        endpoint: "/"
+        port: "14000"
+        # path to file that is mounted in gateway pod which contains certs
+        serverCertPath: "some path in pod"
+        # path to file that is mounted in gateway pod which contains private key
+        serverKeyPath: "some path in pod"
+      token:
+        name: "slack-secret"
+        key: tokenkey
+      signingSecret:
+        # Name of the K8s secret that contains the signingSecret
+        name: "slack-secret"
+        # Key within the K8s secret whose corresponding value contains the
+        # base64-encoded Slack signing secret
+        key: signingSecret

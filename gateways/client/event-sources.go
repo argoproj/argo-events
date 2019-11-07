@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/pkg/errors"
 	"io"
 	"time"
 
@@ -345,6 +346,10 @@ func (gatewayCfg *GatewayConfig) stopEventSources(eventSourceNames []string) {
 
 // manageEventSources syncs active event-sources and the updated ones
 func (gatewayCfg *GatewayConfig) manageEventSources(eventSource *eventSourceV1Alpha1.EventSource) error {
+	if gatewayCfg.gateway.Spec.Version != eventSource.Spec.Version {
+		return errors.Errorf("gateway and event-source version mismatch. gateway-version: %s, event-source-version: %s", gatewayCfg.gateway.Spec.Version, eventSource.Spec.Version)
+	}
+
 	internalEventSources, err := gatewayCfg.createInternalEventSources(eventSource)
 	if err != nil {
 		return err

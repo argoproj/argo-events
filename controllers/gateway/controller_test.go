@@ -45,7 +45,7 @@ func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedI
 	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
 }
 
-func getGatewayController() *GatewayController {
+func getGatewayController() *Controller {
 	clientset := fake.NewSimpleClientset()
 	done := make(chan struct{})
 	informer := getFakePodSharedIndexInformer(clientset)
@@ -55,25 +55,25 @@ func getGatewayController() *GatewayController {
 	go podInformer.Informer().Run(done)
 	svcInformer := factory.Core().V1().Services()
 	go svcInformer.Informer().Run(done)
-	return &GatewayController{
+	return &Controller{
 		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
-		Config: GatewayControllerConfig{
+		Config: ControllerConfig{
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
-		kubeClientset:    clientset,
-		gatewayClientset: fakegateway.NewSimpleClientset(),
-		podInformer:      podInformer,
-		svcInformer:      svcInformer,
-		informer:         informer,
-		queue:            workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		log:              common.NewArgoEventsLogger(),
+		k8sClient:     clientset,
+		gatewayClient: fakegateway.NewSimpleClientset(),
+		podInformer:   podInformer,
+		svcInformer:   svcInformer,
+		informer:      informer,
+		queue:         workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		logger:        common.NewArgoEventsLogger(),
 	}
 }
 
 func TestGatewayController(t *testing.T) {
-	convey.Convey("Given a gateway controller, process queue items", t, func() {
+	convey.Convey("Given a controller, process queue items", t, func() {
 		controller := getGatewayController()
 
 		convey.Convey("Create a resource queue, add new item and process it", func() {
@@ -94,7 +94,7 @@ func TestGatewayController(t *testing.T) {
 		})
 	})
 
-	convey.Convey("Given a gateway controller, handle errors in queue", t, func() {
+	convey.Convey("Given a controller, handle errors in queue", t, func() {
 		controller := getGatewayController()
 		convey.Convey("Create a resource queue and add an item", func() {
 			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())

@@ -46,7 +46,7 @@ func TestSensorControllerConfigWatch(t *testing.T) {
 					common.SensorControllerConfigMapKey: `instanceID: fake-instance-id`,
 				},
 			}
-			cm, err := sc.kubeClientset.CoreV1().ConfigMaps(sc.Namespace).Create(cmObj)
+			cm, err := sc.k8sClient.CoreV1().ConfigMaps(sc.Namespace).Create(cmObj)
 			convey.Convey("Make sure no error occurs", func() {
 				convey.So(err, convey.ShouldBeNil)
 

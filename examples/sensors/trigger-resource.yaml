@@ -5,6 +5,7 @@ metadata:
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
+  version: "v0.11"
   template:
     spec:
       containers:
@@ -28,26 +29,26 @@ spec:
           # resource is generic template for K8s resource
           # This is similar to `inline` trigger but useful if you are using kustomize and want to parameterize the trigger
           resource:
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: webhook-
-              spec:
-                entrypoint: whalesay
-                arguments:
-                  parameters:
-                    - name: message
-                      # this is the value that should be overridden
-                      value: hello world
-                templates:
-                  - name: whalesay
-                    inputs:
-                      parameters:
-                        - name: message
-                    container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
-                      args: ["{{inputs.parameters.message}}"]
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: webhook-
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                  - name: message
+                    # this is the value that should be overridden
+                    value: hello world
+              templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                      - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
             event: "webhook-gateway-http:foo"

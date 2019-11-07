@@ -1,68 +1,65 @@
-# This configmap contains the event sources configurations for AWS SNS gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: aws-sns-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  example: |-
-    # topic arn
-    topicArn: "topic-arn"
-    # hook contains configuration for the HTTP server running in the gateway.
-    # AWS will send events to following port and endpoint
-    hook:
-     # endpoint to listen events on
-     endpoint: "/"
-     # port to run HTTP server on
-     port: "12000"
-     # url the gateway will use to register at AWS.
-     # This url must be reachable from outside the cluster.
-     # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
-     url: "http://myfakeurl.fake"
-    # accessKey contains information about K8s secret that stores the access key
-    accessKey:
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
-      key: accesskey
-      # Name of the K8s secret that contains the access key
-      name: aws-secret
-    # secretKey contains information about K8s secret that stores the secret key
-    secretKey:
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is secret key
-      key: secretkey
-      # Name of the K8s secret that contains the secret key
-      name: aws-secret
-    # aws region
-    region: "us-east-1"
+spec:
+  version: "v0.11"
+  type: "sns"
+  sns:
+    example:
+      # topic arn
+      topicArn: "topic-arn"
+      # hook contains configuration for the HTTP server running in the gateway.
+      # AWS will send events to following port and endpoint
+      hook:
+        # endpoint to listen events on
+        endpoint: "/"
+        # port to run HTTP server on
+        port: "12000"
+        # url the gateway will use to register at AWS.
+        # This url must be reachable from outside the cluster.
+        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
+        url: "http://myfakeurl.fake"
+      # accessKey contains information about K8s secret that stores the access key
+      accessKey:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
+        key: accesskey
+        # Name of the K8s secret that contains the access key
+        name: aws-secret
+      # secretKey contains information about K8s secret that stores the secret key
+      secretKey:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is secret key
+        key: secretkey
+        # Name of the K8s secret that contains the secret key
+        name: aws-secret
+      # aws region
+      region: "us-east-1"
 
-  example-with-secure-connection: |-
-    topicArn: "topic-arn"
-    hook:
-     endpoint: "/"
-     # gateway can run multiple HTTP servers, just define a unique port.
-     port: "13000"
-     url: "http://mysecondfakeurl.fake"
-     # path to file that is mounted in gateway pod which contains certs
-     serverCertPath: "some path in pod"
-     # path to file that is mounted in gateway pod which contains private key
-     serverKeyPath: "some path in pod"
-    accessKey:
-      name: aws-secret
-      key: access
-    secretKey:
-      name: aws-secret
-      key: secret
-    region: "us-east-1"
+    example-with-secure-connection:
+      topicArn: "topic-arn"
+      hook:
+        endpoint: "/"
+        # gateway can run multiple HTTP servers, just define a unique port.
+        port: "13000"
+        url: "http://mysecondfakeurl.fake"
+        # path to file that is mounted in gateway pod which contains certs
+        serverCertPath: "some path in pod"
+        # path to file that is mounted in gateway pod which contains private key
+        serverKeyPath: "some path in pod"
+      accessKey:
+        name: aws-secret
+        key: access
+      secretKey:
+        name: aws-secret
+        key: secret
+      region: "us-east-1"
 
-  example-without-credentials: |-
-    # If AWS access credentials are already present on the Pod's IAM role running the Gateway, 
-    # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
-    topicArn: "topic-arn"
-    hook:
-     endpoint: "/"
-     port: "13000"
-     url: "http://mysecondfakeurl.fake"
-    region: "us-east-1"
+    example-without-credentials:
+      # If AWS access credentials are already present on the Pod's IAM role running the Gateway,
+      # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
+      topicArn: "topic-arn"
+      hook:
+        endpoint: "/"
+        port: "13000"
+        url: "http://mysecondfakeurl.fake"
+      region: "us-east-1"

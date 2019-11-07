@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/argoproj/argo-events/common"
+	"github.com/pkg/errors"
 
 	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
@@ -32,10 +33,10 @@ import (
 )
 
 // watchControllerConfigMap watches updates to sensor controller configmap
-func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
+func (controller *Controller) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
 	log.Info("watching sensor-controller config map updates")
-	source := c.newControllerConfigMapWatch()
-	_, controller := cache.NewInformer(
+	source := controller.newControllerConfigMapWatch()
+	_, ctrl := cache.NewInformer(
 		source,
 		&corev1.ConfigMap{},
 		0,
@@ -43,7 +44,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
 					log.Info("detected EventSource update. updating the sensor-controller config.")
-					err := c.updateConfig(cm)
+					err := controller.updateConfig(cm)
 					if err != nil {
 						log.Errorf("update of config failed due to: %v", err)
 					}
@@ -52,7 +53,7 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
 					log.Info("detected EventSource update. updating the sensor-controller config.")
-					err := c.updateConfig(newCm)
+					err := controller.updateConfig(newCm)
 					if err != nil {
 						log.Errorf("update of config failed due to: %v", err)
 					}
@@ -60,21 +61,21 @@ func (c *SensorController) watchControllerConfigMap(ctx context.Context) (cache.
 			},
 		})
 
-	go controller.Run(ctx.Done())
-	return controller, nil
+	go ctrl.Run(ctx.Done())
+	return ctrl, nil
 }
 
 // newControllerConfigMapWatch returns a configmap watcher
-func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
-	x := c.kubeClientset.CoreV1().RESTClient()
+func (controller *Controller) newControllerConfigMapWatch() *cache.ListWatch {
+	x := controller.k8sClient.CoreV1().RESTClient()
 	resource := "configmaps"
-	name := c.ConfigMap
-	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
+	name := controller.ConfigMap
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%sensorObj", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(c.Namespace).
+			Namespace(controller.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -83,7 +84,7 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(c.Namespace).
+			Namespace(controller.Namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
@@ -91,26 +92,26 @@ func (c *SensorController) newControllerConfigMapWatch() *cache.ListWatch {
 	return &cache.ListWatch{ListFunc: listFunc, WatchFunc: watchFunc}
 }
 
-// ResyncConfig reloads the sensor-controller config from the configmap
-func (c *SensorController) ResyncConfig(namespace string) error {
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
-	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
+// ResyncConfig reloads the controller config from the configmap
+func (controller *Controller) ResyncConfig(namespace string) error {
+	cmClient := controller.k8sClient.CoreV1().ConfigMaps(namespace)
+	cm, err := cmClient.Get(controller.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	return c.updateConfig(cm)
+	return controller.updateConfig(cm)
 }
 
-func (c *SensorController) updateConfig(cm *corev1.ConfigMap) error {
+func (controller *Controller) updateConfig(cm *corev1.ConfigMap) error {
 	configStr, ok := cm.Data[common.SensorControllerConfigMapKey]
 	if !ok {
-		return fmt.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.SensorControllerConfigMapKey)
+		return errors.Errorf("configMap '%sensorObj' does not have key '%sensorObj'", controller.ConfigMap, common.SensorControllerConfigMapKey)
 	}
-	var config SensorControllerConfig
+	var config ControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err
 	}
-	c.Config = config
+	controller.Config = config
 	return nil
 }

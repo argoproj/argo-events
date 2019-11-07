@@ -22,6 +22,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -31,8 +32,8 @@ import (
 )
 
 // watches configuration for gateway controller
-func (c *GatewayController) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
-	c.log.Info("watching gateway-controller config map updates")
+func (c *Controller) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
+	c.logger.Infoln("watching gateway-controller config map updates")
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
 		source,
@@ -41,19 +42,19 @@ func (c *GatewayController) watchControllerConfigMap(ctx context.Context) (cache
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected EventSource update. updating the gateway-controller config.")
+					c.logger.Info("detected new gateway controller configmap")
 					err := c.updateConfig(cm)
 					if err != nil {
-						c.log.Error("update of config failed", "err", err)
+						c.logger.WithError(err).Errorln("update of gateway controller configuration failed")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*apiv1.ConfigMap); ok {
-					c.log.Info("detected EventSource update. updating the gateway-controller config.")
+					c.logger.Infoln("detected gateway controller configmap update.")
 					err := c.updateConfig(newCm)
 					if err != nil {
-						c.log.WithError(err).Error("update of config failed")
+						c.logger.WithError(err).Errorln("update of gateway controller configuration failed")
 					}
 				}
 			},
@@ -64,8 +65,8 @@ func (c *GatewayController) watchControllerConfigMap(ctx context.Context) (cache
 }
 
 // creates a new config map watcher
-func (c *GatewayController) newControllerConfigMapWatch() *cache.ListWatch {
-	x := c.kubeClientset.CoreV1().RESTClient()
+func (c *Controller) newControllerConfigMapWatch() *cache.ListWatch {
+	x := c.k8sClient.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := c.ConfigMap
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
@@ -91,8 +92,8 @@ func (c *GatewayController) newControllerConfigMapWatch() *cache.ListWatch {
 }
 
 // ResyncConfig reloads the gateway-controller config from the configmap
-func (c *GatewayController) ResyncConfig(namespace string) error {
-	cmClient := c.kubeClientset.CoreV1().ConfigMaps(namespace)
+func (c *Controller) ResyncConfig(namespace string) error {
+	cmClient := c.k8sClient.CoreV1().ConfigMaps(namespace)
 	cm, err := cmClient.Get(c.ConfigMap, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -101,12 +102,12 @@ func (c *GatewayController) ResyncConfig(namespace string) error {
 }
 
 // updates the gateway controller configuration
-func (c *GatewayController) updateConfig(cm *apiv1.ConfigMap) error {
+func (c *Controller) updateConfig(cm *apiv1.ConfigMap) error {
 	configStr, ok := cm.Data[common.GatewayControllerConfigMapKey]
 	if !ok {
-		return fmt.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.GatewayControllerConfigMapKey)
+		return errors.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.GatewayControllerConfigMapKey)
 	}
-	var config GatewayControllerConfig
+	var config ControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)
 	if err != nil {
 		return err

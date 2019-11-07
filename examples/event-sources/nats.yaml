@@ -1,32 +1,29 @@
-# This configmap contains the event sources configurations for NATS gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: nats-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  # no retries if connection to nats service is not successful
-  example-without-retry: |-
-    # url of the nats service
-    url: nats://nats.argo-events:4222
-    # subject name
-    subject: foo
+spec:
+  type: "nats"
+  version: "v0.11"
+  nats:
+    # no retries if connection to nats service is not successful
+    example-without-retry:
+      # url of the nats service
+      url: "nats://nats.argo-events:4222"
+      # subject name
+      subject: "foo"
 
-  # retry after each backoff to set up a successful connection
-  example-with-retry: |-
-    # url of the nats service
-    url: nats://nats.argo-events:4222
-    # subject name
-    subject: foo
-    backoff:
-      # duration in nanoseconds. following value is 10 seconds
-      duration: 10000000000
-      # how many backoffs
-      steps: 5
-      # factor to increase on each step.
-      # setting factor > 1 makes backoff exponential.
-      factor: 2
+    # retry after each backoff to set up a successful connection
+    example-with-retry:
+      # url of the nats service
+      url: "nats://nats.argo-events:4222"
+      # subject name
+      subject: "foo"
+      backoff:
+        # duration in nanoseconds. following value is 10 seconds
+        duration: 10000000000
+        # how many backoffs
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes backoff exponential.
+        factor: 2

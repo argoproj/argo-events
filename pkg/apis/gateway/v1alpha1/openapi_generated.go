@@ -193,7 +193,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"eventSource": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventSource is name of the configmap that stores event source configurations for the gateway",
+							Description: "EventSourceRef is name of the configmap that stores event source configurations for the gateway",
 							Type:        []string{"string"},
 							Format:      "",
 						},

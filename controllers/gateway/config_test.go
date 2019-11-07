@@ -50,7 +50,7 @@ func TestGatewayControllerConfigWatch(t *testing.T) {
 					common.GatewayControllerConfigMapKey: `instanceID: fake-instance-id`,
 				},
 			}
-			cm, err := gc.kubeClientset.CoreV1().ConfigMaps(gc.Namespace).Create(cmObj)
+			cm, err := gc.k8sClient.CoreV1().ConfigMaps(gc.Namespace).Create(cmObj)
 			convey.Convey("Make sure no error occurs", func() {
 				convey.So(err, convey.ShouldBeNil)
 

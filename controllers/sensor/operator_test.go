@@ -85,30 +85,30 @@ func getSensor() (*v1alpha1.Sensor, error) {
 	return sensor, err
 }
 
-func waitForAllInformers(done chan struct{}, controller *SensorController) {
+func waitForAllInformers(done chan struct{}, controller *Controller) {
 	cache.WaitForCacheSync(done, controller.informer.HasSynced)
 	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
 	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
 }
 
-func getPodAndService(controller *SensorController, namespace string) (*corev1.Pod, *corev1.Service, error) {
-	pod, err := controller.kubeClientset.CoreV1().Pods(namespace).Get(sensorPodName, metav1.GetOptions{})
+func getPodAndService(controller *Controller, namespace string) (*corev1.Pod, *corev1.Service, error) {
+	pod, err := controller.k8sClient.CoreV1().Pods(namespace).Get(sensorPodName, metav1.GetOptions{})
 	if err != nil {
 		return nil, nil, err
 	}
-	svc, err := controller.kubeClientset.CoreV1().Services(namespace).Get(sensorSvcName, metav1.GetOptions{})
+	svc, err := controller.k8sClient.CoreV1().Services(namespace).Get(sensorSvcName, metav1.GetOptions{})
 	if err != nil {
 		return nil, nil, err
 	}
 	return pod, svc, err
 }
 
-func deletePodAndService(controller *SensorController, namespace string) error {
-	err := controller.kubeClientset.CoreV1().Pods(namespace).Delete(sensorPodName, &metav1.DeleteOptions{})
+func deletePodAndService(controller *Controller, namespace string) error {
+	err := controller.k8sClient.CoreV1().Pods(namespace).Delete(sensorPodName, &metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
-	err = controller.kubeClientset.CoreV1().Services(namespace).Delete(sensorSvcName, &metav1.DeleteOptions{})
+	err = controller.k8sClient.CoreV1().Services(namespace).Delete(sensorSvcName, &metav1.DeleteOptions{})
 	return err
 }
 
@@ -120,12 +120,12 @@ func TestSensorOperations(t *testing.T) {
 		convey.So(sensor, convey.ShouldNotBeNil)
 
 		controller := getSensorController()
-		soc := newSensorOperationCtx(sensor, controller)
-		convey.ShouldPanic(soc.log, nil)
+		soc := newOperationCtx(sensor, controller)
+		convey.ShouldPanic(soc.logger, nil)
 		convey.So(soc, convey.ShouldNotBeNil)
 
 		convey.Convey("Create the sensor", func() {
-			sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+			sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(sensor, convey.ShouldNotBeNil)
 
@@ -137,13 +137,13 @@ func TestSensorOperations(t *testing.T) {
 				convey.So(err, convey.ShouldBeNil)
 				waitForAllInformers(done, controller)
 
-				convey.Convey("Sensor should be marked as active with it's nodes initialized", func() {
-					sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(soc.s.Namespace).Get(soc.s.Name, metav1.GetOptions{})
+				convey.Convey("Sensor should be marked as active with it'sensorObj nodes initialized", func() {
+					sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(soc.sensorObj.Namespace).Get(soc.sensorObj.Name, metav1.GetOptions{})
 					convey.So(err, convey.ShouldBeNil)
 					convey.So(sensor, convey.ShouldNotBeNil)
 					convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 
-					for _, node := range soc.s.Status.Nodes {
+					for _, node := range soc.sensorObj.Status.Nodes {
 						switch node.Type {
 						case v1alpha1.NodeTypeEventDependency:
 							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
@@ -162,7 +162,7 @@ func TestSensorOperations(t *testing.T) {
 					convey.So(sensorSvc, convey.ShouldNotBeNil)
 
 					convey.Convey("Go to active state", func() {
-						sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+						sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 						convey.So(err, convey.ShouldBeNil)
 						convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 					})
@@ -170,9 +170,9 @@ func TestSensorOperations(t *testing.T) {
 			})
 
 			convey.Convey("Operate on sensor in active state", func() {
-				err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Delete(sensor.Name, &metav1.DeleteOptions{})
+				err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Delete(sensor.Name, &metav1.DeleteOptions{})
 				convey.So(err, convey.ShouldBeNil)
-				sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+				sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
 				convey.So(err, convey.ShouldBeNil)
 				convey.So(sensor, convey.ShouldNotBeNil)
 
@@ -204,7 +204,7 @@ func TestSensorOperations(t *testing.T) {
 						convey.So(sensorSvc, convey.ShouldNotBeNil)
 
 						convey.Convey("Stay in active state", func() {
-							sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+							sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 							convey.So(err, convey.ShouldBeNil)
 							convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 						})
@@ -230,7 +230,7 @@ func TestSensorOperations(t *testing.T) {
 							convey.So(sensorSvc, convey.ShouldNotBeNil)
 
 							convey.Convey("Stay in active state", func() {
-								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 								convey.So(err, convey.ShouldBeNil)
 								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 							})
@@ -262,7 +262,7 @@ func TestSensorOperations(t *testing.T) {
 							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
 
 							convey.Convey("Stay in active state", func() {
-								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 								convey.So(err, convey.ShouldBeNil)
 								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 							})
@@ -272,9 +272,9 @@ func TestSensorOperations(t *testing.T) {
 			})
 
 			convey.Convey("Operate on sensor in error state", func() {
-				err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Delete(sensor.Name, &metav1.DeleteOptions{})
+				err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Delete(sensor.Name, &metav1.DeleteOptions{})
 				convey.So(err, convey.ShouldBeNil)
-				sensor, err = controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
+				sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Create(sensor)
 				convey.So(err, convey.ShouldBeNil)
 				convey.So(sensor, convey.ShouldNotBeNil)
 
@@ -301,7 +301,7 @@ func TestSensorOperations(t *testing.T) {
 						convey.So(sensorSvc, convey.ShouldNotBeNil)
 
 						convey.Convey("Stay in error state", func() {
-							sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+							sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 							convey.So(err, convey.ShouldBeNil)
 							convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseError)
 						})
@@ -327,7 +327,7 @@ func TestSensorOperations(t *testing.T) {
 							convey.So(sensorSvc, convey.ShouldNotBeNil)
 
 							convey.Convey("Go to active state", func() {
-								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 								convey.So(err, convey.ShouldBeNil)
 								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 							})
@@ -359,7 +359,7 @@ func TestSensorOperations(t *testing.T) {
 							convey.So(sensorSvc.Spec.Ports[0].TargetPort.IntVal, convey.ShouldEqual, 1234)
 
 							convey.Convey("Go to active state", func() {
-								sensor, err := controller.sensorClientset.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
+								sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace).Get(sensor.Name, metav1.GetOptions{})
 								convey.So(err, convey.ShouldBeNil)
 								convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 							})

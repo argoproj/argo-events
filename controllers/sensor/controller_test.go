@@ -50,7 +50,7 @@ func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedI
 	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
 }
 
-func getSensorController() *SensorController {
+func getSensorController() *Controller {
 	clientset := fake.NewSimpleClientset()
 	done := make(chan struct{})
 	informer := getFakePodSharedIndexInformer(clientset)
@@ -60,20 +60,18 @@ func getSensorController() *SensorController {
 	go podInformer.Informer().Run(done)
 	svcInformer := factory.Core().V1().Services()
 	go svcInformer.Informer().Run(done)
-	return &SensorController{
+	return &Controller{
 		ConfigMap: SensorControllerConfigmap,
 		Namespace: common.DefaultControllerNamespace,
-		Config: SensorControllerConfig{
+		Config: ControllerConfig{
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: SensorControllerInstanceID,
 		},
-		kubeClientset:   clientset,
-		sensorClientset: fakesensor.NewSimpleClientset(),
-		podInformer:     podInformer,
-		svcInformer:     svcInformer,
-		informer:        informer,
-		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		log:             common.NewArgoEventsLogger(),
+		k8sClient:    clientset,
+		sensorClient: fakesensor.NewSimpleClientset(),
+		informer:     informer,
+		queue:        workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		logger:       common.NewArgoEventsLogger(),
 	}
 }
 

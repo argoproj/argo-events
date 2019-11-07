@@ -17,7 +17,6 @@ limitations under the License.
 package gateway
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
@@ -28,8 +27,7 @@ import (
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
-func (c *GatewayController) instanceIDReq() labels.Requirement {
-	// it makes sense to make instance id is mandatory.
+func (c *Controller) instanceIDReq() labels.Requirement {
 	if c.Config.InstanceID == "" {
 		panic("instance id is required")
 	}
@@ -40,23 +38,15 @@ func (c *GatewayController) instanceIDReq() labels.Requirement {
 	return *instanceIDReq
 }
 
-func (c *GatewayController) versionReq() labels.Requirement {
-	versionReq, err := labels.NewRequirement(common.LabelArgoEventsGatewayVersion, selection.Equals, []string{v1alpha1.ArgoEventsGatewayVersion})
-	if err != nil {
-		panic(err)
-	}
-	return *versionReq
-}
-
-// The gateway-controller informer adds new Gateways to the gateway-controller-controller's queue based on Add, Update, and Delete Event Handlers for the Gateway Resources
-func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
+// The controller informer adds new gateways to the controller's queue based on Add, Update, and Delete Event Handlers for the gateway Resources
+func (c *Controller) newGatewayInformer() cache.SharedIndexInformer {
 	gatewayInformerFactory := gatewayinformers.NewFilteredSharedInformerFactory(
-		c.gatewayClientset,
+		c.gatewayClient,
 		gatewayResyncPeriod,
 		c.Config.Namespace,
 		func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-			labelSelector := labels.NewSelector().Add(c.instanceIDReq(), c.versionReq())
+			labelSelector := labels.NewSelector().Add(c.instanceIDReq())
 			options.LabelSelector = labelSelector.String()
 		},
 	)

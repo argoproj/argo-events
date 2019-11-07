@@ -4,10 +4,8 @@ metadata:
   name: url-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.10
 spec:
+  version: "v0.11"
   template:
     spec:
       containers:
@@ -20,7 +18,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "artifact-gateway:input"
+    - name: "minio-gateway:input"
   triggers:
     - template:
         name: url-workflow-trigger

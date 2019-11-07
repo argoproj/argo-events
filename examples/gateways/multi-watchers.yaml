@@ -5,12 +5,14 @@ metadata:
   labels:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    # gateway controller will use this label to match with it's own version
-    # do not remove
-    argo-events-gateway-version: v0.10
 spec:
+  replica: 1
   type: "webhook"
-  eventSource: "webhook-event-source"
+  version: "v0.11"
+  eventSourceRef:
+    name: "webhook-event-source"
+    # optional, if event source is deployed in a different namespace than the gateway
+    # namespace: "other-namespace"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -47,10 +49,10 @@ spec:
     # and user must provide port and endpoint on which event should be dispatched.
     # Adding gateways as watchers are particularly useful when you want to chain events.
     gateways:
-    - name: "webhook-gateway"
-      port: "9070"
-      endpoint: "/notifications"
+      - name: "webhook-gateway"
+        port: "9070"
+        endpoint: "/notifications"
     sensors:
-    - name: "webhook-sensor"
-    - name: "multi-signal-sensor"
-    - name: "webhook-time-filter-sensor"
+      - name: "webhook-sensor"
+      - name: "multi-signal-sensor"
+      - name: "webhook-time-filter-sensor"
