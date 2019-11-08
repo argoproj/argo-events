@@ -31,6 +31,10 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 ## Documentation
 To learn more about Argo Events, [go to complete documentation](https://argoproj.github.io/argo-events/)
 
+## Who uses Argo Events?
+Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
+1. [BlackRock](https://www.blackrock.com/)
+
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
 
