@@ -24,7 +24,9 @@ spec:
           - path: bucket
             type: string
             value:
-              - "argo-workflow-input"
+              # regular expression
+              - "^bucket-.*"
+              # normal value
               - "argo-workflow-input1"
   eventProtocol:
     type: "HTTP"
