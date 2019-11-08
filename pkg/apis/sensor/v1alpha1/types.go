@@ -201,7 +201,7 @@ type DataFilter struct {
 	// Value is the allowed string values for this key
 	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
-	// Strings are taken as is
+	// Strings are treated as regular expressions
 	// Nils this value is ignored
 	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
 }
