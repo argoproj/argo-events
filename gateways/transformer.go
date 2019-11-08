@@ -29,8 +29,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
-	suuid "github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/google/uuid"
 )
 
 // TransformerPayload contains payload of cloudevents.
@@ -72,7 +72,7 @@ func (gc *GatewayConfig) DispatchEvent(gatewayEvent *Event) error {
 // See https://github.com/cloudevents/spec for more info.
 func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, error) {
 	// Generate an event id
-	eventId := suuid.NewV1()
+	eventId := uuid.New()
 
 	gc.Log.WithField(common.LabelEventSource, gatewayEvent.Name).Info("converting gateway event into cloudevents specification compliant event")
 
@@ -80,7 +80,7 @@ func (gc *GatewayConfig) transformEvent(gatewayEvent *Event) (*apicommon.Event, 
 	ce := &apicommon.Event{
 		Context: apicommon.EventContext{
 			CloudEventsVersion: common.CloudEventsVersion,
-			EventID:            fmt.Sprintf("%x", eventId),
+			EventID:            eventId.String(),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          gc.gw.Spec.Type,
