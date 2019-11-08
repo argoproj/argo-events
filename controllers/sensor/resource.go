@@ -136,5 +136,37 @@ func (opctx *operationContext) setupContainersForSensorDeployment(deployment *ap
 
 // createSensorDeployment creates the sensor deployment and
 func (opctx *operationContext) createSensorDeployment() error {
+    deploymentObj, err := opctx.buildSensorDeployment()
+    if err != nil {
+        return err
+    }
 
+    opctx.logger.Infoln("installing deployment for the sensor...")
+
+    if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.sensorObj.Namespace).Create(deploymentObj); err != nil {
+        return err
+    }
+
+    opctx.logger.Infoln("deployment for the sensor installed successfully")
+
+    opctx.logger.Infoln("checking if a service is required to be deployed for the sensor...")
+
+    serviceObj, err := opctx.buildSensorService()
+    if err != nil {
+        return err
+    }
+
+    if serviceObj != nil {
+        opctx.logger.Infoln("installing the service for the sensor...")
+
+        if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.sensorObj.Namespace).Create(serviceObj); err != nil {
+            return err
+        }
+
+        opctx.logger.Infoln("service for the sensor is installed successfully")
+        return nil
+    }
+
+    opctx.logger.Infoln("a service is not required for the sensor")
+    return nil
 }
