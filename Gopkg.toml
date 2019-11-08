@@ -74,7 +74,7 @@ required = [
 
 [[constraint]]
   name = "github.com/argoproj/argo"
-  version = "v2.3.0"
+  version = "v2.4.2"
 
 [[constraint]]
   name = "github.com/Shopify/sarama"
