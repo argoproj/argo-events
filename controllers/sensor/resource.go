@@ -30,7 +30,7 @@ import (
 
 // sensorResourceLabelSelector returns label selector of the sensor of the context
 func (opctx *operationContext) sensorResourceLabelSelector() (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{opctx.sensorObj.Name})
+	req, err := labels.NewRequirement(common.LabelOwnerName, selection.Equals, []string{opctx.sensorObj.Name})
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,13 @@ func (opctx *operationContext) buildSensorService() (*corev1.Service, error) {
 // buildSensorDeployment builds the deployment specification for the sensor
 func (opctx *operationContext) buildSensorDeployment() (*appv1.Deployment, error) {
 	podTemplateSpec := opctx.sensorObj.Spec.Template.DeepCopy()
-
 	replicas := int32(1)
+
+	if podTemplateSpec.Labels == nil {
+		podTemplateSpec.Labels = map[string]string{}
+	}
+
+	podTemplateSpec.Labels[common.LabelOwnerName] = opctx.sensorObj.Name
 
 	deployment := &appv1.Deployment{
 		ObjectMeta: podTemplateSpec.ObjectMeta,
@@ -134,39 +139,77 @@ func (opctx *operationContext) setupContainersForSensorDeployment(deployment *ap
 	}
 }
 
-// createSensorDeployment creates the sensor deployment and
-func (opctx *operationContext) createSensorDeployment() error {
-    deploymentObj, err := opctx.buildSensorDeployment()
-    if err != nil {
-        return err
-    }
+// installSensorResources installs the associated K8s resources with the sensor object
+func (opctx *operationContext) installSensorResources() error {
+	deploymentObj, err := opctx.buildSensorDeployment()
+	if err != nil {
+		return err
+	}
 
-    opctx.logger.Infoln("installing deployment for the sensor...")
+	opctx.logger.Infoln("installing deployment for the sensor...")
 
-    if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.sensorObj.Namespace).Create(deploymentObj); err != nil {
-        return err
-    }
+	if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.sensorObj.Namespace).Create(deploymentObj); err != nil {
+		return err
+	}
 
-    opctx.logger.Infoln("deployment for the sensor installed successfully")
+	opctx.logger.Infoln("deployment for the sensor installed successfully")
 
-    opctx.logger.Infoln("checking if a service is required to be deployed for the sensor...")
+	opctx.logger.Infoln("checking if a service is required to be deployed for the sensor...")
 
-    serviceObj, err := opctx.buildSensorService()
-    if err != nil {
-        return err
-    }
+	serviceObj, err := opctx.buildSensorService()
+	if err != nil {
+		return err
+	}
 
-    if serviceObj != nil {
-        opctx.logger.Infoln("installing the service for the sensor...")
+	if serviceObj != nil {
+		opctx.logger.Infoln("installing the service for the sensor...")
 
-        if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.sensorObj.Namespace).Create(serviceObj); err != nil {
-            return err
-        }
+		if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.sensorObj.Namespace).Create(serviceObj); err != nil {
+			return err
+		}
 
-        opctx.logger.Infoln("service for the sensor is installed successfully")
-        return nil
-    }
+		opctx.logger.Infoln("service for the sensor is installed successfully")
+		return nil
+	}
 
-    opctx.logger.Infoln("a service is not required for the sensor")
-    return nil
+	opctx.logger.Infoln("a service is not required for the sensor")
+	return nil
+}
+
+// updateSensorResources updates the K8s resources associated with the sensor object
+func (opctx *operationContext) updateSensorResources() error {
+	opctx.logger.Infoln("fetching the label selector to list the deployment for the sensor")
+	selectorLabel, err := opctx.sensorResourceLabelSelector()
+	if err != nil {
+		return err
+	}
+
+	deployments, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.sensorObj.Namespace).List(metav1.ListOptions{
+		LabelSelector: selectorLabel.String(),
+	})
+	if err != nil {
+		return err
+	}
+
+	deployment := deployments.Items[0]
+
+	newDeploymentObjHash, err := common.GetObjectHash(opctx.sensorObj)
+	if err != nil {
+		return err
+	}
+
+	if deployment.Annotations[common.AnnotationResourceSpecHash] != newDeploymentObjHash {
+		opctx.logger.Infoln("updating deployment for the sensor...")
+
+		updatedDeploymentObj, err := opctx.buildSensorDeployment()
+		if err != nil {
+			return err
+		}
+
+		if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.sensorObj.Namespace).Update(updatedDeploymentObj); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

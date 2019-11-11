@@ -163,8 +163,8 @@ const (
 	// EnvVarEventSource refers to event source name
 	EnvVarEventSource = "EVENT_SOURCE"
 
-	// AnnotationResourceSpecHashName is the annotation of a K8s resource spec hash
-	AnnotationResourceSpecHashName = "resource-spec-hash"
+	// AnnotationResourceSpecHash is the annotation of a K8s resource spec hash
+	AnnotationResourceSpecHash = "resource-spec-hash"
 )
 
 // CloudEvents constants

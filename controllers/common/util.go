@@ -51,7 +51,7 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 	if annotations == nil {
 		annotations = make(map[string]string)
 	}
-	annotations[common.AnnotationResourceSpecHashName] = hash
+	annotations[common.AnnotationResourceSpecHash] = hash
 	obj.SetAnnotations(annotations)
 
 	return nil

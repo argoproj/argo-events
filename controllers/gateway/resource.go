@@ -196,7 +196,7 @@ func (opctx *operationContext) updateGatewayResources() error {
 			return err
 		}
 
-		if deployment.Annotations != nil && deployment.Annotations[common.AnnotationResourceSpecHashName] != gatewayDeploymentHash {
+		if deployment.Annotations != nil && deployment.Annotations[common.AnnotationResourceSpecHash] != gatewayDeploymentHash {
 			if err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Delete(deployment.Name, &metav1.DeleteOptions{}); err != nil {
 				return err
 			}
