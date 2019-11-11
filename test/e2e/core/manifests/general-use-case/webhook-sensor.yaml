@@ -12,7 +12,7 @@ spec:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor:v0.11-test"
+          image: "argoproj/sensor:v0.11"
           imagePullPolicy: "IfNotPresent"
       serviceAccountName: argo-events-sa
   dependencies:
