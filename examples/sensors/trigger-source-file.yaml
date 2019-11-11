@@ -27,7 +27,7 @@ spec:
         name: file-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         # The following requires that the sensor-controller be run with a
         # volume mount that has the workflow yamls in it.
         source:

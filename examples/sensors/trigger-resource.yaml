@@ -23,7 +23,7 @@ spec:
         name: trigger1
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           # resource is generic template for K8s resource
           # This is similar to `inline` trigger but useful if you are using kustomize and want to parameterize the trigger
