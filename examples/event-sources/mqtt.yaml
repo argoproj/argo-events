@@ -7,7 +7,7 @@ metadata:
   name: mqtt-event-source
   labels:
     # do not remove
-    argo-events-event-source-version: v0.10
+    argo-events-event-source-version: v0.11
 data:
   # no retries if connection to mqtt service is not successful
   example-without-retry: |-

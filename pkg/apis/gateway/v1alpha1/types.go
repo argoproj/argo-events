@@ -23,7 +23,7 @@ import (
 )
 
 // Gateway version
-const ArgoEventsGatewayVersion = "v0.10"
+const ArgoEventsGatewayVersion = "v0.11"
 
 // NodePhase is the label for the condition of a node.
 type NodePhase string

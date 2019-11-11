@@ -98,7 +98,7 @@ func TestEventSources(t *testing.T) {
 				Name:      "gateway-configmap",
 				Namespace: "test-namespace",
 				Labels: map[string]string{
-					common.LabelArgoEventsEventSourceVersion: "v0.10",
+					common.LabelArgoEventsEventSourceVersion: "v0.11",
 				},
 			},
 			Data: map[string]string{
@@ -119,7 +119,7 @@ testKey: testValue
 			convey.So(data.Source.Data, convey.ShouldEqual, `
 testKey: testValue
 `)
-			convey.So(data.Source.Version, convey.ShouldEqual, "v0.10")
+			convey.So(data.Source.Version, convey.ShouldEqual, "v0.11")
 		}
 	})
 

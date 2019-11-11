@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
+const ArgoEventsEventSourceVersion = "v0.11"
 
 type EventType string
 

@@ -8,7 +8,7 @@ metadata:
   name: gitlab-event-source
   labels:
     # do not remove
-    argo-events-event-source-version: v0.10
+    argo-events-event-source-version: v0.11
 data:
   example: |-
     # id of the project

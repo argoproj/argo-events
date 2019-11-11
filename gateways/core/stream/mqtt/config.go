@@ -23,7 +23,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
+const ArgoEventsEventSourceVersion = "v0.11"
 
 // MqttEventSourceExecutor implements Eventing
 type MqttEventSourceExecutor struct {

@@ -24,7 +24,7 @@ import (
 	amqplib "github.com/streadway/amqp"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
+const ArgoEventsEventSourceVersion = "v0.11"
 
 // AMQPEventSourceExecutor implements Eventing
 type AMQPEventSourceExecutor struct {
