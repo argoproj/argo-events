@@ -35,7 +35,7 @@ metadata:
  labels:
    gateways.argoproj.io/gateway-controller-instanceid: argo-events
    gateway-name: "webhook-gateway"
-   argo-events-gateway-version: v0.10
+   argo-events-gateway-version: v0.11
 spec:
   eventSource: "webhook-gateway-configmap"
   type: "webhook"

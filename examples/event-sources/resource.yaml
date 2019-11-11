@@ -7,7 +7,7 @@ metadata:
   name: resource-event-source
   labels:
     # do not remove
-    argo-events-event-source-version: v0.10
+    argo-events-event-source-version: v0.11
 data:
   # watch workflows that are in successful state
   example: |-

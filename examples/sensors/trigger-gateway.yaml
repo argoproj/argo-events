@@ -6,7 +6,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
     # sensor controller will use this label to match with it's own version
     # do not remove
-    argo-events-sensor-version: v0.10
+    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -35,7 +35,7 @@ spec:
             metadata:
               name: artifact-event-source
               labels:
-                argo-events-event-source-version: v0.10
+                argo-events-event-source-version: v0.11
             spec:
               data:
                 example: |-
@@ -66,7 +66,7 @@ spec:
               name: artifact-gateway
               labels:
                 gateways.argoproj.io/gateway-controller-instanceid: argo-events
-                argo-events-gateway-version: v0.10
+                argo-events-gateway-version: v0.11
             spec:
               type: "artifact"
               eventSource: "artifact-event-source"

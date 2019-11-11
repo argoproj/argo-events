@@ -8,7 +8,7 @@ metadata:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
     # sensor controller will use this label to match with it's own version
     # do not remove
-    argo-events-sensor-version: v0.10
+    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:

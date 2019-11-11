@@ -24,7 +24,7 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
+const ArgoEventsEventSourceVersion = "v0.11"
 
 // CalendarEventSourceExecutor implements Eventing
 type CalendarEventSourceExecutor struct {
