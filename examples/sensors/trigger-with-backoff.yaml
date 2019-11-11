@@ -56,7 +56,7 @@ spec:
           errorOnBackoffTimeout: true
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
@@ -97,7 +97,7 @@ spec:
           errorOnBackoffTimeout: false
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1

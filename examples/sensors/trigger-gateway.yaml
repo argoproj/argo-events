@@ -27,7 +27,7 @@ spec:
         name: artifact-event-source-trigger
         group: ""
         version: v1
-        kind: Configmap
+        resource: configmaps
         source:
           inline: |
             apiVersion: v1
@@ -57,7 +57,7 @@ spec:
         name: artifact-gateway-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Gateway
+        resource: gateways
         source:
           inline: |-
             apiVersion: argoproj.io/v1alpha1
