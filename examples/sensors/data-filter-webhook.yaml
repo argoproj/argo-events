@@ -37,7 +37,7 @@ spec:
         name: data-workflow
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1
