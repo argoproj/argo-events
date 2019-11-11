@@ -22,7 +22,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const ArgoEventsEventSourceVersion = "v0.10"
+const ArgoEventsEventSourceVersion = "v0.11"
 
 // FileEventSourceExecutor implements Eventing
 type FileEventSourceExecutor struct {

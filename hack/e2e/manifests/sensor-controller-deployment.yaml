@@ -16,7 +16,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
       - name: sensor-controller
-        image: argoproj/sensor-controller:v0.10-test
+        image: argoproj/sensor-controller:v0.11
         imagePullPolicy: Always
         env:
           - name: SENSOR_NAMESPACE

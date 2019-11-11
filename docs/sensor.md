@@ -59,7 +59,7 @@ Lets look at a basic example,
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:
@@ -128,7 +128,7 @@ Now, lets look at a more complex example involving a circuit,
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:
@@ -290,7 +290,7 @@ In the example, the first template will get triggered when either `group_1` or `
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:

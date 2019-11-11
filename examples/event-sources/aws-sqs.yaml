@@ -7,7 +7,7 @@ metadata:
   name: aws-sqs-event-source
   labels:
     # do not remove
-    argo-events-event-source-version: v0.10
+    argo-events-event-source-version: v0.11
 data:
   example-1: |-
     # accessKey contains information about K8s secret that stores the access key
