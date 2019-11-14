@@ -293,6 +293,7 @@ openapi-gen:
 
 .PHONY: codegen
 codegen: clientgen openapigen
+	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
 
 .PHONY: e2e
 e2e:

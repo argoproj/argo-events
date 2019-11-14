@@ -1,0 +1,926 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Argo",
+    "version": "v0.11"
+  },
+  "paths": {},
+  "definitions": {
+    "io.argoproj.gateway.v1alpha1.Gateway": {
+      "description": "Gateway is the definition of a gateway resource",
+      "type": "object",
+      "required": [
+        "metadata",
+        "status",
+        "spec"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.GatewaySpec"
+        },
+        "status": {
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.GatewayStatus"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.GatewayList": {
+      "description": "GatewayList is the list of Gateway resources",
+      "type": "object",
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Gateway"
+          },
+          "x-kubernetes-list-type": "items"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.GatewayNotificationWatcher": {
+      "description": "GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway",
+      "type": "object",
+      "required": [
+        "name",
+        "port",
+        "endpoint"
+      ],
+      "properties": {
+        "endpoint": {
+          "description": "Endpoint is REST API endpoint to post event to. Events are sent using HTTP POST method to this endpoint.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is the gateway name",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace of the gateway",
+          "type": "string"
+        },
+        "port": {
+          "description": "Port is http server port on which gateway is running",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.GatewaySpec": {
+      "description": "GatewaySpec represents gateway specifications",
+      "type": "object",
+      "required": [
+        "template",
+        "type",
+        "processorPort",
+        "eventProtocol"
+      ],
+      "properties": {
+        "eventProtocol": {
+          "description": "EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
+          "$ref": "#/definitions/io.argoproj.common.EventProtocol"
+        },
+        "eventSource": {
+          "description": "EventSource is name of the configmap that stores event source configurations for the gateway",
+          "type": "string"
+        },
+        "processorPort": {
+          "description": "Port on which the gateway event source processor is running on.",
+          "type": "string"
+        },
+        "service": {
+          "description": "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
+          "$ref": "#/definitions/io.argoproj.common.ServiceTemplateSpec"
+        },
+        "template": {
+          "description": "Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
+        },
+        "type": {
+          "description": "Type is the type of gateway. Used as metadata.",
+          "type": "string"
+        },
+        "watchers": {
+          "description": "Watchers are components which are interested listening to notifications from this gateway These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications. In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case specifying watchers would be unnecessary.",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NotificationWatchers"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.GatewayStatus": {
+      "description": "GatewayStatus contains information about the status of a gateway.",
+      "type": "object",
+      "required": [
+        "phase"
+      ],
+      "properties": {
+        "message": {
+          "description": "Message is a human readable string indicating details about a gateway in its phase",
+          "type": "string"
+        },
+        "nodes": {
+          "description": "Nodes is a mapping between a node ID and the node's status it records the states for the configurations of gateway.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NodeStatus"
+          }
+        },
+        "phase": {
+          "description": "Phase is the high-level summary of the gateway",
+          "type": "string"
+        },
+        "startedAt": {
+          "description": "StartedAt is the time at which this gateway was initiated",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.NodeStatus": {
+      "description": "NodeStatus describes the status for an individual node in the gateway configurations. A single node can represent one configuration.",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "displayName",
+        "phase"
+      ],
+      "properties": {
+        "displayName": {
+          "description": "DisplayName is the human readable representation of the node",
+          "type": "string"
+        },
+        "id": {
+          "description": "ID is a unique identifier of a node within a sensor It is a hash of the node name",
+          "type": "string"
+        },
+        "message": {
+          "description": "Message store data or something to save for configuration",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is a unique name in the node tree used to generate the node ID",
+          "type": "string"
+        },
+        "phase": {
+          "description": "Phase of the node",
+          "type": "string"
+        },
+        "updateTime": {
+          "description": "UpdateTime is the time when node(gateway configuration) was updated",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.NotificationWatchers": {
+      "description": "NotificationWatchers are components which are interested listening to notifications from this gateway",
+      "type": "object",
+      "properties": {
+        "gateways": {
+          "description": "Gateways is the list of gateways interested in listening to notifications from this gateway",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.GatewayNotificationWatcher"
+          },
+          "x-kubernetes-list-type": "gateways"
+        },
+        "sensors": {
+          "description": "Sensors is the list of sensors interested in listening to notifications from this gateway",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.SensorNotificationWatcher"
+          },
+          "x-kubernetes-list-type": "sensors"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.SensorNotificationWatcher": {
+      "description": "SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name is the name of the sensor",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace of the sensor",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.ArtifactLocation": {
+      "description": "ArtifactLocation describes the source location for an external artifact",
+      "type": "object",
+      "properties": {
+        "configmap": {
+          "description": "Configmap that stores the artifact",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConfigmapArtifact"
+        },
+        "file": {
+          "description": "File artifact is artifact stored in a file",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.FileArtifact"
+        },
+        "git": {
+          "description": "Git repository hosting the artifact",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitArtifact"
+        },
+        "inline": {
+          "description": "Inline artifact is embedded in sensor spec as a string",
+          "type": "string"
+        },
+        "resource": {
+          "description": "Resource is generic template for K8s resource",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.unstructured.Unstructured"
+        },
+        "s3": {
+          "description": "S3 compliant artifact",
+          "$ref": "#/definitions/io.argoproj.common.S3Artifact"
+        },
+        "url": {
+          "description": "URL to fetch the artifact from",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.URLArtifact"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.Backoff": {
+      "description": "Backoff for an operation",
+      "type": "object",
+      "required": [
+        "duration",
+        "factor",
+        "jitter",
+        "steps"
+      ],
+      "properties": {
+        "duration": {
+          "description": "Duration is the duration in nanoseconds",
+          "type": "integer",
+          "format": "int64"
+        },
+        "factor": {
+          "description": "Duration is multiplied by factor each iteration",
+          "type": "number",
+          "format": "double"
+        },
+        "jitter": {
+          "description": "The amount of jitter applied each iteration",
+          "type": "number",
+          "format": "double"
+        },
+        "steps": {
+          "description": "Exit with error after this many steps",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.ConfigmapArtifact": {
+      "description": "ConfigmapArtifact contains information about artifact in k8 configmap",
+      "type": "object",
+      "required": [
+        "name",
+        "namespace",
+        "key"
+      ],
+      "properties": {
+        "key": {
+          "description": "Key within configmap data which contains trigger resource definition",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the configmap",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace where configmap is deployed",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.DataFilter": {
+      "description": "DataFilter describes constraints and filters for event data Regular Expressions are purposefully not a feature as they are overkill for our uses here See Rob Pike's Post: https://commandcenter.blogspot.com/2011/08/regular-expressions-in-lexing-and.html",
+      "type": "object",
+      "required": [
+        "path",
+        "type",
+        "value"
+      ],
+      "properties": {
+        "path": {
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Type contains the JSON type of the data",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are treated as regular expressions Nils this value is ignored",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "value"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.DependencyGroup": {
+      "description": "DependencyGroup is the group of dependencies",
+      "type": "object",
+      "required": [
+        "name",
+        "dependencies"
+      ],
+      "properties": {
+        "dependencies": {
+          "description": "Dependencies of events",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "dependencies"
+        },
+        "name": {
+          "description": "Name of the group",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.EventDependency": {
+      "description": "EventDependency describes a dependency",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "connected": {
+          "description": "Connected tells if subscription is already setup in case of nats protocol.",
+          "type": "boolean"
+        },
+        "filters": {
+          "description": "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
+        },
+        "name": {
+          "description": "Name is a unique name of this dependency",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.EventDependencyFilter": {
+      "description": "EventDependencyFilter defines filters and constraints for a event.",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "context": {
+          "description": "Context filter constraints with escalation",
+          "$ref": "#/definitions/io.argoproj.common.EventContext"
+        },
+        "data": {
+          "description": "Data filter constraints with escalation",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
+          },
+          "x-kubernetes-list-type": "data"
+        },
+        "name": {
+          "description": "Name is the name of event filter",
+          "type": "string"
+        },
+        "time": {
+          "description": "Time filter on the event with escalation",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TimeFilter"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.FileArtifact": {
+      "description": "FileArtifact contains information about an artifact in a filesystem",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.GitArtifact": {
+      "description": "GitArtifact contains information about an artifact stored in git",
+      "type": "object",
+      "required": [
+        "url",
+        "cloneDirectory",
+        "filePath"
+      ],
+      "properties": {
+        "branch": {
+          "description": "Branch to use to pull trigger resource",
+          "type": "string"
+        },
+        "cloneDirectory": {
+          "description": "Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers. Hence we don't use any specific git provider client.",
+          "type": "string"
+        },
+        "creds": {
+          "description": "Creds contain reference to git username and password",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitCreds"
+        },
+        "filePath": {
+          "description": "Path to file that contains trigger resource definition",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace where creds are stored.",
+          "type": "string"
+        },
+        "ref": {
+          "description": "Ref to use to pull trigger resource. Will result in a shallow clone and fetch.",
+          "type": "string"
+        },
+        "remote": {
+          "description": "Remote to manage set of tracked repositories. Defaults to \"origin\". Refer https://git-scm.com/docs/git-remote",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitRemoteConfig"
+        },
+        "sshKeyPath": {
+          "description": "SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password. ssh key path must be mounted in sensor pod.",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Tag to use to pull trigger resource",
+          "type": "string"
+        },
+        "url": {
+          "description": "Git URL",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.GitCreds": {
+      "description": "GitCreds contain reference to git username and password",
+      "type": "object",
+      "required": [
+        "username",
+        "password"
+      ],
+      "properties": {
+        "password": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "username": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.GitRemoteConfig": {
+      "description": "GitRemoteConfig contains the configuration of a Git remote",
+      "type": "object",
+      "required": [
+        "name",
+        "urls"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name of the remote to fetch from.",
+          "type": "string"
+        },
+        "urls": {
+          "description": "URLs the URLs of a remote repository. It must be non-empty. Fetch will always use the first URL, while push will use all of them.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "urls"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.NodeStatus": {
+      "description": "NodeStatus describes the status for an individual node in the sensor's FSM. A single node can represent the status for event or a trigger.",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "displayName",
+        "type",
+        "phase"
+      ],
+      "properties": {
+        "completedAt": {
+          "description": "CompletedAt is the time at which this node completed",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
+        },
+        "displayName": {
+          "description": "DisplayName is the human readable representation of the node",
+          "type": "string"
+        },
+        "event": {
+          "description": "Event stores the last seen event for this node",
+          "$ref": "#/definitions/io.argoproj.common.Event"
+        },
+        "id": {
+          "description": "ID is a unique identifier of a node within a sensor It is a hash of the node name",
+          "type": "string"
+        },
+        "message": {
+          "description": "store data or something to save for event notifications or trigger events",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name is a unique name in the node tree used to generate the node ID",
+          "type": "string"
+        },
+        "phase": {
+          "description": "Phase of the node",
+          "type": "string"
+        },
+        "startedAt": {
+          "description": "StartedAt is the time at which this node started",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
+        },
+        "type": {
+          "description": "Type is the type of the node",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.Sensor": {
+      "description": "Sensor is the definition of a sensor resource",
+      "type": "object",
+      "required": [
+        "metadata",
+        "spec",
+        "status"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        },
+        "spec": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SensorSpec"
+        },
+        "status": {
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SensorStatus"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.SensorList": {
+      "description": "SensorList is the list of Sensor resources",
+      "type": "object",
+      "required": [
+        "metadata",
+        "items"
+      ],
+      "properties": {
+        "apiVersion": {
+          "description": "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Sensor"
+          },
+          "x-kubernetes-list-type": "items"
+        },
+        "kind": {
+          "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ListMeta"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.SensorSpec": {
+      "description": "SensorSpec represents desired sensor state",
+      "type": "object",
+      "required": [
+        "dependencies",
+        "triggers",
+        "template",
+        "eventProtocol"
+      ],
+      "properties": {
+        "circuit": {
+          "description": "Circuit is a boolean expression of dependency groups",
+          "type": "string"
+        },
+        "dependencies": {
+          "description": "Dependencies is a list of the events that this sensor is dependent on.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
+          },
+          "x-kubernetes-list-type": "dependencies"
+        },
+        "dependencyGroups": {
+          "description": "DependencyGroups is a list of the groups of events.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
+          },
+          "x-kubernetes-list-type": "dependencyGroups"
+        },
+        "errorOnFailedRound": {
+          "description": "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
+          "type": "boolean"
+        },
+        "eventProtocol": {
+          "description": "EventProtocol is the protocol through which sensor receives events from gateway",
+          "$ref": "#/definitions/io.argoproj.common.EventProtocol"
+        },
+        "template": {
+          "description": "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
+        },
+        "triggers": {
+          "description": "Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Trigger"
+          },
+          "x-kubernetes-list-type": "triggers"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.SensorStatus": {
+      "description": "SensorStatus contains information about the status of a sensor.",
+      "type": "object",
+      "required": [
+        "phase",
+        "triggerCycleStatus",
+        "lastCycleTime"
+      ],
+      "properties": {
+        "completedAt": {
+          "description": "CompletedAt is the time at which this sensor was completed",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "lastCycleTime": {
+          "description": "LastCycleTime is the time when last trigger cycle completed",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "message": {
+          "description": "Message is a human readable string indicating details about a sensor in its phase",
+          "type": "string"
+        },
+        "nodes": {
+          "description": "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.NodeStatus"
+          }
+        },
+        "phase": {
+          "description": "Phase is the high-level summary of the sensor",
+          "type": "string"
+        },
+        "startedAt": {
+          "description": "StartedAt is the time at which this sensor was initiated",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        },
+        "triggerCycleCount": {
+          "description": "TriggerCycleCount is the count of sensor's trigger cycle runs.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "triggerCycleStatus": {
+          "description": "TriggerCycleState is the status from last cycle of triggers execution.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TimeFilter": {
+      "description": "TimeFilter describes a window in time. DataFilters out event events that occur outside the time limits. In other words, only events that occur after Start and before Stop will pass this filter.",
+      "type": "object",
+      "properties": {
+        "start": {
+          "description": "Start is the beginning of a time window. Before this time, events for this event are ignored and format is hh:mm:ss",
+          "type": "string"
+        },
+        "stop": {
+          "description": "StopPattern is the end of a time window. After this time, events for this event are ignored and format is hh:mm:ss",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.Trigger": {
+      "description": "Trigger is an action taken, output produced, an event created, a message sent",
+      "type": "object",
+      "required": [
+        "template",
+        "policy"
+      ],
+      "properties": {
+        "policy": {
+          "description": "Policy to configure backoff and execution criteria for the trigger",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerPolicy"
+        },
+        "resourceParameters": {
+          "description": "ResourceParameters is the list of resource parameters to pass to resolved resource object in template object",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          },
+          "x-kubernetes-list-type": "resourceParameters"
+        },
+        "template": {
+          "description": "Template describes the trigger specification.",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerTemplate"
+        },
+        "templateParameters": {
+          "description": "TemplateParameters is the list of resource parameters to pass to the template object",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
+          },
+          "x-kubernetes-list-type": "templateParameters"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerCondition": {
+      "description": "TriggerCondition describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
+      "type": "object",
+      "properties": {
+        "all": {
+          "description": "All acts as a AND operator between dependencies",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "all"
+        },
+        "any": {
+          "description": "Any acts as a OR operator between dependencies",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "any"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerParameter": {
+      "description": "TriggerParameter indicates a passed parameter to a service template",
+      "type": "object",
+      "required": [
+        "src",
+        "dest"
+      ],
+      "properties": {
+        "dest": {
+          "description": "Dest is the JSONPath of a resource key. A path is a series of keys separated by a dot. The colon character can be escaped with '.' The -1 key can be used to append a value to an existing array. See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.",
+          "type": "string"
+        },
+        "operation": {
+          "description": "Operation is what to do with the existing value at Dest, whether to 'prepend', 'overwrite', or 'append' it.",
+          "type": "string"
+        },
+        "src": {
+          "description": "Src contains a source reference to the value of the parameter from a event event",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameterSource"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerParameterSource": {
+      "description": "TriggerParameterSource defines the source for a parameter from a event event",
+      "type": "object",
+      "required": [
+        "event",
+        "path"
+      ],
+      "properties": {
+        "event": {
+          "description": "Event is the name of the event for which to retrieve this event",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+          "type": "string"
+        },
+        "value": {
+          "description": "Value is the default literal value to use for this parameter source This is only used if the path is invalid. If the path is invalid and this is not defined, this param source will produce an error.",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerPolicy": {
+      "description": "TriggerPolicy dictates the policy for the trigger retries",
+      "type": "object",
+      "required": [
+        "backoff",
+        "state",
+        "errorOnBackoffTimeout"
+      ],
+      "properties": {
+        "backoff": {
+          "description": "Backoff before checking resource state",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Backoff"
+        },
+        "errorOnBackoffTimeout": {
+          "description": "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.",
+          "type": "boolean"
+        },
+        "state": {
+          "description": "State refers to labels used to check the resource state",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerStateLabels"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerStateLabels": {
+      "description": "TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.",
+      "type": "object",
+      "required": [
+        "success",
+        "failure"
+      ],
+      "properties": {
+        "failure": {
+          "description": "Failure defines labels required to identify a resource in failed state",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "success": {
+          "description": "Success defines labels required to identify a resource in success state",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.TriggerTemplate": {
+      "description": "TriggerTemplate is the template that describes trigger specification.",
+      "type": "object",
+      "required": [
+        "name",
+        "source"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name is a unique name of the action to take",
+          "type": "string"
+        },
+        "source": {
+          "description": "Source of the K8 resource file(s)",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
+        },
+        "when": {
+          "description": "When is the condition to execute the trigger",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerCondition"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.URLArtifact": {
+      "description": "URLArtifact contains information about an artifact at an http endpoint.",
+      "type": "object",
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "description": "Path is the complete URL",
+          "type": "string"
+        },
+        "verifyCert": {
+          "description": "VerifyCert decides whether the connection is secure or not",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
