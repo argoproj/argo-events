@@ -92,15 +92,15 @@ func NewGatewayConfiguration() *GatewayConfig {
 	if err != nil {
 		panic(err)
 	}
-	name, ok := os.LookupEnv(common.EnvVarGatewayName)
+	name, ok := os.LookupEnv(common.EnvVarResourceName)
 	if !ok {
 		panic("gateway name not provided")
 	}
-	namespace, ok := os.LookupEnv(common.EnvVarGatewayNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
 	if !ok {
 		panic("no namespace provided")
 	}
-	controllerInstanceID, ok := os.LookupEnv(common.EnvVarGatewayControllerInstanceID)
+	controllerInstanceID, ok := os.LookupEnv(common.EnvVarControllerInstanceID)
 	if !ok {
 		panic("gateway controller instance ID is not provided")
 	}
@@ -119,14 +119,14 @@ func NewGatewayConfiguration() *GatewayConfig {
 	gatewayConfig := &GatewayConfig{
 		logger: common.NewArgoEventsLogger().WithFields(
 			map[string]interface{}{
-				common.LabelGatewayName: gateway.Name,
-				common.LabelNamespace:   gateway.Namespace,
+				common.LabelResourceName: gateway.Name,
+				common.LabelNamespace:    gateway.Namespace,
 			}).Logger,
 		k8sClient:            clientset,
 		namespace:            namespace,
 		name:                 name,
 		registeredConfigs:    make(map[string]*EventSourceContext),
-		eventSourceRef:       &gateway.Spec.EventSourceRef,
+		eventSourceRef:       gateway.Spec.EventSourceRef,
 		gatewayClient:        gatewayClient,
 		gateway:              gateway,
 		controllerInstanceID: controllerInstanceID,

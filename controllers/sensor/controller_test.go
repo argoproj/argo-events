@@ -81,7 +81,9 @@ func TestGatewayController(t *testing.T) {
 
 		convey.Convey("Create a resource queue, add new item and process it", func() {
 			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-			controller.informer = controller.newSensorInformer()
+			informer, err := controller.newSensorInformer()
+			convey.So(err, convey.ShouldBeNil)
+			controller.informer = informer
 			controller.queue.Add("hi")
 			res := controller.processNextItem()
 

@@ -34,7 +34,7 @@ func TestValidateCalendarEventSource(t *testing.T) {
 		listener := &EventSourceListener{
 			Logger: common.NewArgoEventsLogger(),
 		}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "calendar.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "calendar.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

@@ -32,7 +32,7 @@ import (
 func TestSlackEventSource(t *testing.T) {
 	convey.Convey("Given a slack event source spec, parse it and make sure no error occurs", t, func() {
 		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "slack.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "slack.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

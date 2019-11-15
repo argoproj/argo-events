@@ -36,10 +36,9 @@ import (
 )
 
 const (
-	gatewayResyncPeriod         = 20 * time.Minute
-	gatewayResourceResyncPeriod = 30 * time.Minute
-	rateLimiterBaseDelay        = 5 * time.Second
-	rateLimiterMaxDelay         = 1000 * time.Second
+	gatewayResyncPeriod  = 20 * time.Minute
+	rateLimiterBaseDelay = 5 * time.Second
+	rateLimiterMaxDelay  = 1000 * time.Second
 )
 
 // ControllerConfig contain the configuration settings for the controller
@@ -98,7 +97,7 @@ func (c *Controller) processNextItem() bool {
 
 	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.logger.WithField(common.LabelGatewayName, key.(string)).WithError(err).Warnln("failed to get gateway from informer index")
+		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Warnln("failed to get gateway from informer index")
 		return true
 	}
 
@@ -109,7 +108,7 @@ func (c *Controller) processNextItem() bool {
 
 	gw, ok := obj.(*v1alpha1.Gateway)
 	if !ok {
-		c.logger.WithField(common.LabelGatewayName, key.(string)).WithError(err).Warnln("key in index is not a gateway")
+		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Warnln("key in index is not a gateway")
 		return true
 	}
 
@@ -126,8 +125,8 @@ func (c *Controller) processNextItem() bool {
 			c.Config.InstanceID,
 			gw.Kind,
 			map[string]string{
-				common.LabelGatewayName: gw.Name,
-				common.LabelEventType:   string(common.EscalationEventType),
+				common.LabelResourceName: gw.Name,
+				common.LabelEventType:    string(common.EscalationEventType),
 			},
 		); err != nil {
 			ctx.logger.WithError(err).Errorln("failed to create K8s event to escalate controller operation failure")
@@ -156,7 +155,7 @@ func (c *Controller) handleErr(err error, key interface{}) error {
 	// requeues will happen very quickly even after a gateway pod goes down
 	// we want to give the event pod a chance to come back up so we give a generous number of retries
 	if c.queue.NumRequeues(key) < 20 {
-		c.logger.WithField(common.LabelGatewayName, key.(string)).WithError(err).Errorln("error syncing gateway")
+		c.logger.WithField(common.LabelResourceName, key.(string)).WithError(err).Errorln("error syncing gateway")
 
 		// Re-enqueue the key rate limited. This key will be processed later again.
 		c.queue.AddRateLimited(key)

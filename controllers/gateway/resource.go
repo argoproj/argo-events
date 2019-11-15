@@ -95,7 +95,7 @@ func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *a
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
-			Name:  common.EnvVarGatewayNamespace,
+			Name:  common.EnvVarNamespace,
 			Value: opctx.gatewayObj.Namespace,
 		},
 		{
@@ -103,16 +103,12 @@ func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *a
 			Value: opctx.gatewayObj.Spec.EventSourceRef.Name,
 		},
 		{
-			Name:  common.EnvVarGatewayName,
+			Name:  common.EnvVarResourceName,
 			Value: opctx.gatewayObj.Name,
 		},
 		{
-			Name:  common.EnvVarGatewayControllerInstanceID,
+			Name:  common.EnvVarControllerInstanceID,
 			Value: opctx.controller.Config.InstanceID,
-		},
-		{
-			Name:  common.EnvVarGatewayControllerName,
-			Value: common.LabelGatewayControllerName,
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,

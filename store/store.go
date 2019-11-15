@@ -88,7 +88,7 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, cl
 	if loc.Resource != nil {
 		return NewResourceReader(loc.Resource)
 	}
-	return nil, fmt.Errorf("unknown minio location: %v", *loc)
+	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
 func decodeAndUnstructure(b []byte, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {

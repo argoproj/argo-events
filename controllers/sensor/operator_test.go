@@ -28,7 +28,6 @@ import (
 )
 
 var sensorStr = `
-
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -87,8 +86,6 @@ func getSensor() (*v1alpha1.Sensor, error) {
 
 func waitForAllInformers(done chan struct{}, controller *Controller) {
 	cache.WaitForCacheSync(done, controller.informer.HasSynced)
-	cache.WaitForCacheSync(done, controller.podInformer.Informer().HasSynced)
-	cache.WaitForCacheSync(done, controller.svcInformer.Informer().HasSynced)
 }
 
 func getPodAndService(controller *Controller, namespace string) (*corev1.Pod, *corev1.Service, error) {
@@ -239,8 +236,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
-					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
+					soc.sensorObj.Spec.Template.Spec.RestartPolicy = "Never"
+					soc.sensorObj.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
 					convey.So(err, convey.ShouldBeNil)
@@ -336,8 +333,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.srctx.s.Spec.Template.Spec.RestartPolicy = "Never"
-					soc.srctx.s.Spec.EventProtocol.Http.Port = "1234"
+					soc.sensorObj.Spec.Template.Spec.RestartPolicy = "Never"
+					soc.sensorObj.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
 					convey.So(err, convey.ShouldBeNil)

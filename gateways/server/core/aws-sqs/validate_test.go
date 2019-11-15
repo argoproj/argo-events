@@ -32,7 +32,7 @@ import (
 func TestSQSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	convey.Convey("Given a valid sqs event source event spec, parse it and make sure no error occurs", t, func() {
 		ese := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "aws-sqs.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "aws-sqs.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

@@ -109,7 +109,7 @@ func (gatewayCfg *GatewayConfig) dispatchEventOverHttp(source string, eventPaylo
 			namespace = gateway.Namespace
 		}
 		if err := gatewayCfg.postCloudEventToWatcher(common.ServiceDNSName(gateway.Name, namespace), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
-			gatewayCfg.logger.WithField(common.LabelGatewayName, gateway.Name).WithError(err).Warnln("failed to dispatch event to gateway watcher over http. communication error")
+			gatewayCfg.logger.WithField(common.LabelResourceName, gateway.Name).WithError(err).Warnln("failed to dispatch event to gateway watcher over http. communication error")
 			completeSuccess = false
 		}
 	}

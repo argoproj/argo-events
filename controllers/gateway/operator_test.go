@@ -19,7 +19,9 @@ package gateway
 import (
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
@@ -219,8 +221,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gatewayResourceCtx.gw.Spec.Template.Spec.RestartPolicy = "Never"
-								goc.gatewayResourceCtx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
+								goc.gatewayObj.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gatewayObj.Spec.Service.Spec.ClusterIP = "127.0.0.1"
 
 								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
 								convey.So(err, convey.ShouldBeNil)
@@ -316,8 +318,8 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 
 							convey.Convey("Change pod and service spec", func() {
-								goc.gatewayResourceCtx.gw.Spec.Template.Spec.RestartPolicy = "Never"
-								goc.gatewayResourceCtx.gw.Spec.Service.Spec.ClusterIP = "127.0.0.1"
+								goc.gatewayObj.Spec.Template.Spec.RestartPolicy = "Never"
+								goc.gatewayObj.Spec.Service.Spec.ClusterIP = "127.0.0.1"
 
 								gatewayPod, gatewaySvc, err := getPodAndService(fakeController, gateway.Namespace)
 								convey.So(err, convey.ShouldBeNil)
@@ -348,6 +350,41 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 							})
 						})
 					})
+				})
+			})
+		})
+	})
+}
+
+func TestPersistUpdates(t *testing.T) {
+	convey.Convey("Given a gateway resource", t, func() {
+		namespace := "argo-events"
+		client := fake.NewSimpleClientset()
+		logger := common.NewArgoEventsLogger()
+		gw, err := getGateway()
+		convey.So(err, convey.ShouldBeNil)
+
+		convey.Convey("Create the gateway", func() {
+			gw, err = client.ArgoprojV1alpha1().Gateways(namespace).Create(gw)
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(gw, convey.ShouldNotBeNil)
+
+			gw.ObjectMeta.Labels = map[string]string{
+				"default": "default",
+			}
+
+			convey.Convey("Update the gateway", func() {
+				updatedGw, err := PersistUpdates(client, gw, logger)
+				convey.So(err, convey.ShouldBeNil)
+				convey.So(updatedGw, convey.ShouldNotEqual, gw)
+				convey.So(updatedGw.Labels, convey.ShouldResemble, gw.Labels)
+
+				updatedGw.Labels["new"] = "new"
+
+				convey.Convey("Reapply the gateway", func() {
+					err := ReapplyUpdates(client, updatedGw)
+					convey.So(err, convey.ShouldBeNil)
+					convey.So(len(updatedGw.Labels), convey.ShouldEqual, 2)
 				})
 			})
 		})

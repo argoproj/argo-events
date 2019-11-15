@@ -16,7 +16,7 @@ import (
 func TestValidateEventSource(t *testing.T) {
 	convey.Convey("Given a hdfs event source spec, parse it and make sure no error occurs", t, func() {
 		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "hdfs.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "hdfs.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

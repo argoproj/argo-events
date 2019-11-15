@@ -52,8 +52,8 @@ func (opctx *operationContext) getServiceTemplateSpec() *pc.ServiceTemplateSpec 
 				},
 				Type: corev1.ServiceTypeClusterIP,
 				Selector: map[string]string{
-					common.LabelSensorName:                    opctx.sensorObj.Name,
-					common.LabelKeySensorControllerInstanceID: opctx.controller.Config.InstanceID,
+					common.LabelSensorName:    opctx.sensorObj.Name,
+					LabelControllerInstanceID: opctx.controller.Config.InstanceID,
 				},
 			},
 		}
@@ -129,7 +129,7 @@ func (opctx *operationContext) setupContainersForSensorDeployment(deployment *ap
 			Value: opctx.sensorObj.Namespace,
 		},
 		{
-			Name:  common.EnvVarSensorControllerInstanceID,
+			Name:  common.EnvVarControllerInstanceID,
 			Value: opctx.controller.Config.InstanceID,
 		},
 	}

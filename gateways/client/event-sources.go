@@ -19,17 +19,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/pkg/errors"
 	"io"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
 )
@@ -304,11 +304,11 @@ func (gatewayCfg *GatewayConfig) startEventSources(eventSources map[string]*Even
 				if err != nil {
 					// escalate error through a K8s event
 					labels := map[string]string{
-						common.LabelEventType:              string(common.EscalationEventType),
-						common.LabelGatewayEventSourceName: eventSource.source.Name,
-						common.LabelGatewayName:            gatewayCfg.name,
-						common.LabelGatewayEventSourceID:   eventSource.source.Id,
-						common.LabelOperation:              "dispatch_event_to_watchers",
+						common.LabelEventType:       string(common.EscalationEventType),
+						common.LabelEventSourceName: eventSource.source.Name,
+						common.LabelResourceName:    gatewayCfg.name,
+						common.LabelEventSourceID:   eventSource.source.Id,
+						common.LabelOperation:       "dispatch_event_to_watchers",
 					}
 					if err := common.GenerateK8sEvent(gatewayCfg.k8sClient, fmt.Sprintf("failed to dispatch event to watchers"), common.EscalationEventType, "event dispatch failed", gatewayCfg.name, gatewayCfg.namespace, gatewayCfg.controllerInstanceID, gateway.Kind, labels); err != nil {
 						logger.WithError(err).Errorln("failed to create K8s event to escalate event dispatch failure")

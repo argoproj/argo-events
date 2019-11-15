@@ -22,8 +22,11 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // the context of an operation on a sensor.
@@ -53,42 +56,52 @@ func newOperationCtx(sensorObj *v1alpha1.Sensor, controller *Controller) *operat
 	}
 }
 
-// operate on the sensor resource
+// operate manages the lifecycle of a sensor object
 func (opctx *operationContext) operate() error {
 	defer opctx.updateSensorState()
 
+	// Validation failure prevents any sort processing of the sensor object
 	if err := ValidateSensor(opctx.sensorObj); err != nil {
-		opctx.logger.WithError(err).Error("failed to validate sensor")
+		opctx.logger.WithError(err).Errorln("failed to validate sensor")
 		opctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
 
 	switch opctx.sensorObj.Status.Phase {
 	case v1alpha1.NodePhaseNew:
+		// If the sensor phase is new
+		// 1. Initialize all nodes - dependencies, dependency groups and triggers
+		// 2. Make dependencies and dependency groups as active
+		// 3. Create a deployment and service (if needed) for the sensor
 		opctx.logger.Infoln("initializing the sensor object...")
-
 		opctx.initializeAllNodes()
-		err := opctx.createSensorResources()
+		opctx.markDependencyNodesActive()
+
+		err := opctx.installSensorResources()
 		if err != nil {
 			return err
 		}
+		opctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseActive:
-		opctx.logger.Info("sensor is already running, checking for updates to the sensor object...")
-
+		// If the sensor is already active and if the sensor podTemplate spec has changed, then update the corresponding deployment
+		opctx.logger.Infoln("sensor is already running, checking for updates to the sensor object...")
 		err := opctx.updateSensorResources()
 		if err != nil {
 			return err
 		}
+		opctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
+		// If the sensor is in error state and if the sensor podTemplate spec has changed, then update the corresponding deployment
 		opctx.logger.Info("sensor is in error state, checking for updates to the sensor object...")
-
 		err := opctx.updateSensorResources()
 		if err != nil {
 			return err
 		}
+		opctx.logger.Infoln("successfully processed sensor state update")
 	}
+
 	return nil
 }
 
@@ -97,16 +110,16 @@ func (opctx *operationContext) updateSensorState() {
 	if opctx.updated {
 		// persist updates to sensor resource
 		labels := map[string]string{
-			common.LabelSensorName:                    opctx.sensorObj.Name,
-			common.LabelSensorKeyPhase:                string(opctx.sensorObj.Status.Phase),
-			common.LabelKeySensorControllerInstanceID: opctx.controller.Config.InstanceID,
-			common.LabelOperation:                     "persist_state_update",
+			common.LabelSensorName:    opctx.sensorObj.Name,
+			LabelPhase:                string(opctx.sensorObj.Status.Phase),
+			LabelControllerInstanceID: opctx.controller.Config.InstanceID,
+			common.LabelOperation:     "persist_state_update",
 		}
 		eventType := common.StateChangeEventType
 
-		updatedSensor, err := PersistUpdates(opctx.controller.sensorClient, opctx.sensorObj, opctx.controller.Config.InstanceID, opctx.logger)
+		updatedSensor, err := PersistUpdates(opctx.controller.sensorClient, opctx.sensorObj, opctx.logger)
 		if err != nil {
-			opctx.logger.WithError(err).Error("failed to persist sensor update")
+			opctx.logger.WithError(err).Errorln("failed to persist sensor update")
 
 			// escalate failure
 			eventType = common.EscalationEventType
@@ -154,9 +167,8 @@ func (opctx *operationContext) markSensorPhase(phase v1alpha1.NodePhase, markCom
 			opctx.sensorObj.ObjectMeta.Annotations = make(map[string]string)
 		}
 
-		opctx.sensorObj.ObjectMeta.Labels[common.LabelSensorKeyPhase] = string(phase)
-		// add annotations so a resource sensor can watch this sensor.
-		opctx.sensorObj.ObjectMeta.Annotations[common.LabelSensorKeyPhase] = string(phase)
+		opctx.sensorObj.ObjectMeta.Labels[LabelPhase] = string(phase)
+		opctx.sensorObj.ObjectMeta.Annotations[LabelPhase] = string(phase)
 	}
 
 	if opctx.sensorObj.Status.StartedAt.IsZero() {
@@ -187,8 +199,8 @@ func (opctx *operationContext) markSensorPhase(phase v1alpha1.NodePhase, markCom
 				opctx.sensorObj.ObjectMeta.Annotations = make(map[string]string)
 			}
 
-			opctx.sensorObj.ObjectMeta.Labels[common.LabelSensorKeyComplete] = "true"
-			opctx.sensorObj.ObjectMeta.Annotations[common.LabelSensorKeyComplete] = string(phase)
+			opctx.sensorObj.ObjectMeta.Labels[LabelComplete] = "true"
+			opctx.sensorObj.ObjectMeta.Annotations[LabelComplete] = string(phase)
 		}
 	}
 	opctx.updated = true
@@ -227,4 +239,44 @@ func (opctx *operationContext) markDependencyNodesActive() {
 			MarkNodePhase(opctx.sensorObj, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, opctx.logger, "node is active")
 		}
 	}
+}
+
+// PersistUpdates persists the updates to the Sensor resource
+func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor, log *logrus.Logger) (*v1alpha1.Sensor, error) {
+	sensorClient := client.ArgoprojV1alpha1().Sensors(sensorObj.ObjectMeta.Namespace)
+	// in case persist update fails
+	oldsensor := sensorObj.DeepCopy()
+
+	sensorObj, err := sensorClient.Update(sensorObj)
+	if err != nil {
+		if errors.IsConflict(err) {
+			log.WithError(err).Error("error updating sensorObj")
+			return oldsensor, err
+		}
+
+		log.Info("re-applying updates on latest version and retrying update")
+		err = ReapplyUpdate(client, sensorObj)
+		if err != nil {
+			log.WithError(err).Error("failed to re-apply update")
+			return oldsensor, err
+		}
+	}
+	log.WithField(common.LabelPhase, string(sensorObj.Status.Phase)).Info("sensorObj state updated successfully")
+	return sensorObj, nil
+}
+
+// Reapply the update to sensor
+func ReapplyUpdate(sensorClient sensorclientset.Interface, sensor *v1alpha1.Sensor) error {
+	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		client := sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace)
+		s, err := client.Update(sensor)
+		if err != nil {
+			if !common.IsRetryableKubeAPIError(err) {
+				return false, err
+			}
+			return false, nil
+		}
+		sensor = s
+		return true, nil
+	})
 }

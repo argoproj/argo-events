@@ -19,7 +19,6 @@ package gateway
 import (
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/selection"
 )
@@ -29,7 +28,7 @@ func TestInformer(t *testing.T) {
 		controller := getGatewayController()
 		convey.Convey("Instance ID required key must match", func() {
 			req := controller.instanceIDReq()
-			convey.So(req.Key(), convey.ShouldEqual, common.LabelKeyGatewayControllerInstanceID)
+			convey.So(req.Key(), convey.ShouldEqual, LabelControllerInstanceID)
 			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
 			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
 		})

@@ -17,16 +17,13 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/sirupsen/logrus"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	sclient "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"k8s.io/apimachinery/pkg/api/errors"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // GetNodeByName returns a copy of the node from this sensor for the nodename
@@ -48,7 +45,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 	nodeID := sensor.NodeID(nodeName)
 	oldNode, ok := sensor.Status.Nodes[nodeID]
 	if ok {
-		log.WithField(common.LabelNodeName, nodeName).Info("node already initialized")
+		log.WithField(common.LabelNodeName, nodeName).Infoln("node already initialized")
 		return &oldNode
 	}
 	node := v1alpha1.NodeStatus{
@@ -69,48 +66,8 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 			common.LabelNodeName: node.DisplayName,
 			"node-message":       node.Message,
 		},
-	).Info("node is initialized")
+	).Infoln("node is initialized")
 	return &node
-}
-
-// PersistUpdates persists the updates to the Sensor resource
-func PersistUpdates(client sclient.Interface, sensor *v1alpha1.Sensor, controllerInstanceId string, log *logrus.Logger) (*v1alpha1.Sensor, error) {
-	sensorClient := client.ArgoprojV1alpha1().Sensors(sensor.ObjectMeta.Namespace)
-	// in case persist update fails
-	oldsensor := sensor.DeepCopy()
-
-	sensor, err := sensorClient.Update(sensor)
-	if err != nil {
-		if errors.IsConflict(err) {
-			log.WithError(err).Error("error updating sensor")
-			return oldsensor, err
-		}
-
-		log.Info("re-applying updates on latest version and retrying update")
-		err = ReapplyUpdate(client, sensor)
-		if err != nil {
-			log.WithError(err).Error("failed to re-apply update")
-			return oldsensor, err
-		}
-	}
-	log.WithField(common.LabelPhase, string(sensor.Status.Phase)).Info("sensor state updated successfully")
-	return sensor, nil
-}
-
-// Reapply the update to sensor
-func ReapplyUpdate(sensorClient sclient.Interface, sensor *v1alpha1.Sensor) error {
-	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		client := sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace)
-		s, err := client.Update(sensor)
-		if err != nil {
-			if !common.IsRetryableKubeAPIError(err) {
-				return false, err
-			}
-			return false, nil
-		}
-		sensor = s
-		return true, nil
-	})
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
@@ -123,7 +80,7 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 				common.LabelNodeName: node.Name,
 				common.LabelPhase:    string(node.Phase),
 			},
-		).Info("marking node phase")
+		).Infoln("marking node phase")
 		node.Phase = phase
 	}
 

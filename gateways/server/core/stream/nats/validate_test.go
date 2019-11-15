@@ -25,7 +25,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gwcommon "github.com/argoproj/argo-events/gateways/server/common"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
 )
@@ -33,7 +32,7 @@ import (
 func TestValidateNatsEventSource(t *testing.T) {
 	convey.Convey("Given a nats event source spec, parse it and make sure no error occurs", t, func() {
 		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("../%s/%s", gwcommon.EventSourceDir, "nats.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("../%s/%s", gateways.EventSourceDir, "nats.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

@@ -32,7 +32,7 @@ import (
 func TestGcpPubSubEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	convey.Convey("Given a valid gcp pub-sub event source spec, parse it and make sure no error occurs", t, func() {
 		listener := &EventSourceListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "gcp-pubsub.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "gcp-pubsub.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

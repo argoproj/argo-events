@@ -32,7 +32,7 @@ import (
 func TestValidateGitlabEventSource(t *testing.T) {
 	convey.Convey("Given a gitlab event source spec, parse it and make sure no error occurs", t, func() {
 		ese := &GitlabEventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "gitlab.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "gitlab.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventsource *v1alpha1.EventSource

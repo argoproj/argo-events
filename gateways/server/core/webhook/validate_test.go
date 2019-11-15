@@ -34,7 +34,7 @@ func TestValidateEventSource(t *testing.T) {
 		listener := &EventListener{
 			Logger: common.NewArgoEventsLogger(),
 		}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "webhook.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "webhook.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

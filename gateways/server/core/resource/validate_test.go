@@ -32,7 +32,7 @@ import (
 func TestValidateResourceEventSource(t *testing.T) {
 	convey.Convey("Given a resource event source spec, parse it and make sure no error occurs", t, func() {
 		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "resource.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "resource.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

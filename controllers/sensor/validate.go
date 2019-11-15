@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/Knetic/govaluate"
-
 	"github.com/argoproj/argo-events/common"
 	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"

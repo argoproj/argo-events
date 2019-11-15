@@ -59,7 +59,7 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 
 // OwnerLabelSelector returns label selector for a K8s resource by it's owner
 func OwnerLabelSelector(ownerName string) (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelGatewayName, selection.Equals, []string{ownerName})
+	req, err := labels.NewRequirement(common.LabelResourceName, selection.Equals, []string{ownerName})
 	if err != nil {
 		return nil, err
 	}

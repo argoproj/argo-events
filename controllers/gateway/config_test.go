@@ -47,7 +47,7 @@ func TestGatewayControllerConfigWatch(t *testing.T) {
 					Name:      gc.ConfigMap,
 				},
 				Data: map[string]string{
-					common.GatewayControllerConfigMapKey: `instanceID: fake-instance-id`,
+					common.ControllerConfigMapKey: `instanceID: fake-instance-id`,
 				},
 			}
 			cm, err := gc.k8sClient.CoreV1().ConfigMaps(gc.Namespace).Create(cmObj)

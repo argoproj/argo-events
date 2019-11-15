@@ -23,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/argoproj/argo-events/common"
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
@@ -31,7 +30,7 @@ func (c *Controller) instanceIDReq() labels.Requirement {
 	if c.Config.InstanceID == "" {
 		panic("instance id is required")
 	}
-	instanceIDReq, err := labels.NewRequirement(common.LabelKeyGatewayControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+	instanceIDReq, err := labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}

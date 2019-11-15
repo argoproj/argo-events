@@ -103,9 +103,9 @@ func (c *Controller) ResyncConfig(namespace string) error {
 
 // updates the gateway controller configuration
 func (c *Controller) updateConfig(cm *apiv1.ConfigMap) error {
-	configStr, ok := cm.Data[common.GatewayControllerConfigMapKey]
+	configStr, ok := cm.Data[common.ControllerConfigMapKey]
 	if !ok {
-		return errors.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.GatewayControllerConfigMapKey)
+		return errors.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.ControllerConfigMapKey)
 	}
 	var config ControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)

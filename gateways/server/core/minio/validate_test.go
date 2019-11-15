@@ -32,7 +32,7 @@ import (
 func TestValidateS3EventSource(t *testing.T) {
 	convey.Convey("Given a S3 minio spec, parse the spec and make sure no error occurs", t, func() {
 		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", common.EventSourceDir, "minio.yaml"))
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "minio.yaml"))
 		convey.So(err, convey.ShouldBeNil)
 
 		var eventSource *v1alpha1.EventSource

@@ -137,10 +137,10 @@ func (gatewayCfg *GatewayConfig) UpdateGatewayResourceState(status *EventSourceS
 		// persist changes and create K8s event logging the change
 		eventType := common.StateChangeEventType
 		labels := map[string]string{
-			common.LabelGatewayEventSourceName: status.Name,
-			common.LabelGatewayName:            gatewayCfg.name,
-			common.LabelGatewayEventSourceID:   status.Id,
-			common.LabelOperation:              "persist_event_source_state",
+			common.LabelEventSourceName: status.Name,
+			common.LabelResourceName:    gatewayCfg.name,
+			common.LabelEventSourceID:   status.Id,
+			common.LabelOperation:       "persist_event_source_state",
 		}
 		updatedGw, err := gtw.PersistUpdates(gatewayCfg.gatewayClient, gatewayCfg.gateway, gatewayCfg.logger)
 		if err != nil {
