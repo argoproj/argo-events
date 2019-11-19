@@ -2,10 +2,254 @@
   "swagger": "2.0",
   "info": {
     "title": "Argo",
-    "version": "v0.11"
+    "version": "v0.12-rc"
   },
   "paths": {},
   "definitions": {
+    "io.argoproj.common.Event": {
+      "description": "Event is a data and its context. Adheres to the CloudEvents v0.3 specification",
+      "type": "object",
+      "required": [
+        "context",
+        "data"
+      ],
+      "properties": {
+        "context": {
+          "$ref": "#/definitions/io.argoproj.common.EventContext"
+        },
+        "data": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "io.argoproj.common.EventContext": {
+      "description": "EventContext contains metadata that provides circumstantial information about the occurrence.",
+      "type": "object",
+      "required": [
+        "type",
+        "specVersion",
+        "source",
+        "eventID",
+        "time",
+        "dataContentType",
+        "subject"
+      ],
+      "properties": {
+        "dataContentType": {
+          "description": "Content type of the data attribute value. Enables the data attribute to carry any type of content, whereby format and encoding might differ from that of the chosen event format. For example, the data attribute may carry an XML or JSON payload and the consumer is informed by this attribute being set to \"application/xml\" or \"application/json\" respectively.",
+          "type": "string"
+        },
+        "eventID": {
+          "description": "ID of the event. The semantics are explicitly undefined to ease the implementation of producers.",
+          "type": "string"
+        },
+        "source": {
+          "description": "This describes the event producer.",
+          "type": "string"
+        },
+        "specVersion": {
+          "description": "The version of the CloudEvents specification which the event uses. Enables the interpretation of the context.",
+          "type": "string"
+        },
+        "subject": {
+          "description": "Subject of the event",
+          "type": "string"
+        },
+        "time": {
+          "description": "Time when the event happened. Must adhere to format specified in RFC 3339.",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.MicroTime"
+        },
+        "type": {
+          "description": "The type of occurrence which has happened. Often this attribute is used for routing, observability, policy enforcement, etc. should be prefixed with a reverse-DNS name. The prefixed domain dictates the organization which defines the semantics of this event type. ex: com.github.pull.create",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.common.EventProtocol": {
+      "description": "Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols",
+      "type": "object",
+      "required": [
+        "type",
+        "http",
+        "nats"
+      ],
+      "properties": {
+        "http": {
+          "$ref": "#/definitions/io.argoproj.common.Http"
+        },
+        "nats": {
+          "$ref": "#/definitions/io.argoproj.common.Nats"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.common.Http": {
+      "description": "Http contains the information required to setup a http server and listen to incoming events",
+      "type": "object",
+      "required": [
+        "port"
+      ],
+      "properties": {
+        "annotations": {
+          "description": "Annotations to be set for the service generated",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "description": "Labels to be set for the service generated",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "port": {
+          "description": "Port on which server will run",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.common.Nats": {
+      "description": "Nats contains the information required to connect to nats server and get subscriptions",
+      "type": "object",
+      "required": [
+        "url",
+        "type"
+      ],
+      "properties": {
+        "clientId": {
+          "description": "The NATS Streaming cluster ID",
+          "type": "string"
+        },
+        "clusterId": {
+          "description": "The NATS Streaming cluster ID",
+          "type": "string"
+        },
+        "deliverAllAvailable": {
+          "description": "Receive all stored values in order.",
+          "type": "boolean"
+        },
+        "durable": {
+          "description": "Durable subscriptions allow clients to assign a durable name to a subscription when it is created",
+          "type": "boolean"
+        },
+        "startAtSequence": {
+          "description": "Receive messages starting at a specific sequence number",
+          "type": "string"
+        },
+        "startAtTime": {
+          "description": "Subscribe starting at a specific time",
+          "type": "string"
+        },
+        "startAtTimeDelta": {
+          "description": "Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)",
+          "type": "string"
+        },
+        "startWithLastReceived": {
+          "description": "Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming",
+          "type": "boolean"
+        },
+        "type": {
+          "description": "Type of the connection. either standard or streaming",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL is nats server/service URL",
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.common.S3Artifact": {
+      "description": "S3Artifact contains information about an S3 connection and bucket",
+      "type": "object",
+      "required": [
+        "endpoint",
+        "bucket",
+        "accessKey",
+        "secretKey"
+      ],
+      "properties": {
+        "accessKey": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        },
+        "bucket": {
+          "$ref": "#/definitions/io.argoproj.common.S3Bucket"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "filter": {
+          "$ref": "#/definitions/io.argoproj.common.S3Filter"
+        },
+        "insecure": {
+          "type": "boolean"
+        },
+        "region": {
+          "type": "string"
+        },
+        "secretKey": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecretKeySelector"
+        }
+      }
+    },
+    "io.argoproj.common.S3Bucket": {
+      "description": "S3Bucket contains information to describe an S3 Bucket",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.common.S3Filter": {
+      "description": "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
+      "type": "object",
+      "required": [
+        "prefix",
+        "suffix"
+      ],
+      "properties": {
+        "prefix": {
+          "type": "string"
+        },
+        "suffix": {
+          "type": "string"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.EventSourceRef": {
+      "description": "EventSourceRef holds information about the EventSourceRef custom resource",
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "description": "Name of the event source",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace of the event source Default value is the namespace where referencing gateway is deployed",
+          "type": "string"
+        }
+      }
+    },
     "io.argoproj.gateway.v1alpha1.Gateway": {
       "description": "Gateway is the definition of a gateway resource",
       "type": "object",
@@ -62,30 +306,20 @@
         }
       }
     },
-    "io.argoproj.gateway.v1alpha1.GatewayNotificationWatcher": {
-      "description": "GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway",
+    "io.argoproj.gateway.v1alpha1.GatewayResource": {
+      "description": "GatewayResource holds the metadata about the gateway resources",
       "type": "object",
       "required": [
-        "name",
-        "port",
-        "endpoint"
+        "deployment"
       ],
       "properties": {
-        "endpoint": {
-          "description": "Endpoint is REST API endpoint to post event to. Events are sent using HTTP POST method to this endpoint.",
-          "type": "string"
+        "deployment": {
+          "description": "Metadata of the deployment for the gateway",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
         },
-        "name": {
-          "description": "Name is the gateway name",
-          "type": "string"
-        },
-        "namespace": {
-          "description": "Namespace of the gateway",
-          "type": "string"
-        },
-        "port": {
-          "description": "Port is http server port on which gateway is running",
-          "type": "string"
+        "service": {
+          "description": "Metadata of the service for the gateway",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
         }
       }
     },
@@ -103,17 +337,30 @@
           "description": "EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
           "$ref": "#/definitions/io.argoproj.common.EventProtocol"
         },
-        "eventSource": {
-          "description": "EventSource is name of the configmap that stores event source configurations for the gateway",
-          "type": "string"
+        "eventSourceRef": {
+          "description": "EventSourceRef refers to event-source that stores event source configurations for the gateway",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.EventSourceRef"
         },
         "processorPort": {
           "description": "Port on which the gateway event source processor is running on.",
           "type": "string"
         },
+        "replica": {
+          "description": "Replica is the gateway deployment replicas",
+          "type": "integer",
+          "format": "int32"
+        },
         "service": {
           "description": "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-          "$ref": "#/definitions/io.argoproj.common.ServiceTemplateSpec"
+          "$ref": "#/definitions/io.k8s.api.core.v1.Service"
+        },
+        "subscribers": {
+          "description": "Subscribers are HTTP endpoints to send events to.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-kubernetes-list-type": "subscribers"
         },
         "template": {
           "description": "Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
@@ -122,10 +369,6 @@
         "type": {
           "description": "Type is the type of gateway. Used as metadata.",
           "type": "string"
-        },
-        "watchers": {
-          "description": "Watchers are components which are interested listening to notifications from this gateway These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications. In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case specifying watchers would be unnecessary.",
-          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NotificationWatchers"
         }
       }
     },
@@ -133,7 +376,8 @@
       "description": "GatewayStatus contains information about the status of a gateway.",
       "type": "object",
       "required": [
-        "phase"
+        "phase",
+        "resources"
       ],
       "properties": {
         "message": {
@@ -150,6 +394,10 @@
         "phase": {
           "description": "Phase is the high-level summary of the gateway",
           "type": "string"
+        },
+        "resources": {
+          "description": "Resources refers to the metadata about the gateway resources",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.GatewayResource"
         },
         "startedAt": {
           "description": "StartedAt is the time at which this gateway was initiated",
@@ -193,63 +441,24 @@
         }
       }
     },
-    "io.argoproj.gateway.v1alpha1.NotificationWatchers": {
-      "description": "NotificationWatchers are components which are interested listening to notifications from this gateway",
-      "type": "object",
-      "properties": {
-        "gateways": {
-          "description": "Gateways is the list of gateways interested in listening to notifications from this gateway",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.GatewayNotificationWatcher"
-          },
-          "x-kubernetes-list-type": "gateways"
-        },
-        "sensors": {
-          "description": "Sensors is the list of sensors interested in listening to notifications from this gateway",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.SensorNotificationWatcher"
-          },
-          "x-kubernetes-list-type": "sensors"
-        }
-      }
-    },
-    "io.argoproj.gateway.v1alpha1.SensorNotificationWatcher": {
-      "description": "SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway",
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "name": {
-          "description": "Name is the name of the sensor",
-          "type": "string"
-        },
-        "namespace": {
-          "description": "Namespace of the sensor",
-          "type": "string"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.ArtifactLocation": {
-      "description": "ArtifactLocation describes the source location for an external artifact",
+      "description": "ArtifactLocation describes the source location for an external minio",
       "type": "object",
       "properties": {
         "configmap": {
-          "description": "Configmap that stores the artifact",
+          "description": "Configmap that stores the minio",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConfigmapArtifact"
         },
         "file": {
-          "description": "File artifact is artifact stored in a file",
+          "description": "File minio is minio stored in a file",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.FileArtifact"
         },
         "git": {
-          "description": "Git repository hosting the artifact",
+          "description": "Git repository hosting the minio",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitArtifact"
         },
         "inline": {
-          "description": "Inline artifact is embedded in sensor spec as a string",
+          "description": "Inline minio is embedded in sensor spec as a string",
           "type": "string"
         },
         "resource": {
@@ -257,11 +466,11 @@
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.unstructured.Unstructured"
         },
         "s3": {
-          "description": "S3 compliant artifact",
+          "description": "S3 compliant minio",
           "$ref": "#/definitions/io.argoproj.common.S3Artifact"
         },
         "url": {
-          "description": "URL to fetch the artifact from",
+          "description": "URL to fetch the minio from",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.URLArtifact"
         }
       }
@@ -299,7 +508,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.ConfigmapArtifact": {
-      "description": "ConfigmapArtifact contains information about artifact in k8 configmap",
+      "description": "ConfigmapArtifact contains information about minio in k8 configmap",
       "type": "object",
       "required": [
         "name",
@@ -339,7 +548,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are treated as regular expressions Nils this value is ignored",
+          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
           "type": "array",
           "items": {
             "type": "string"
@@ -374,16 +583,22 @@
       "description": "EventDependency describes a dependency",
       "type": "object",
       "required": [
-        "name"
+        "name",
+        "gatewayName",
+        "eventName"
       ],
       "properties": {
-        "connected": {
-          "description": "Connected tells if subscription is already setup in case of nats protocol.",
-          "type": "boolean"
+        "eventName": {
+          "description": "EventName is the name of the event",
+          "type": "string"
         },
         "filters": {
-          "description": "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+          "description": "Filters and rules governing toleration of success and constraints on the context and data of an event",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
+        },
+        "gatewayName": {
+          "description": "GatewayName is the name of the gateway from whom the event is received",
+          "type": "string"
         },
         "name": {
           "description": "Name is a unique name of this dependency",
@@ -399,7 +614,7 @@
       ],
       "properties": {
         "context": {
-          "description": "Context filter constraints with escalation",
+          "description": "Context filter constraints",
           "$ref": "#/definitions/io.argoproj.common.EventContext"
         },
         "data": {
@@ -421,7 +636,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.FileArtifact": {
-      "description": "FileArtifact contains information about an artifact in a filesystem",
+      "description": "FileArtifact contains information about an minio in a filesystem",
       "type": "object",
       "properties": {
         "path": {
@@ -430,7 +645,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.GitArtifact": {
-      "description": "GitArtifact contains information about an artifact stored in git",
+      "description": "GitArtifact contains information about an minio stored in git",
       "type": "object",
       "required": [
         "url",
@@ -567,6 +782,22 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.ResourceLabelsPolicy": {
+      "description": "ResourceLabels refers to the policy used to check the resource state using labels",
+      "type": "object",
+      "required": [
+        "labels"
+      ],
+      "properties": {
+        "labels": {
+          "description": "Labels required to identify whether a resource is in success state",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.Sensor": {
       "description": "Sensor is the definition of a sensor resource",
       "type": "object",
@@ -623,6 +854,23 @@
         }
       }
     },
+    "io.argoproj.sensor.v1alpha1.SensorResources": {
+      "description": "SensorResources holds the metadata of the resources created for the sensor",
+      "type": "object",
+      "required": [
+        "deployment"
+      ],
+      "properties": {
+        "deployment": {
+          "description": "Deployment holds the metadata of the deployment for the sensor",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        },
+        "service": {
+          "description": "Service holds the metadata of the service for the sensor",
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"
+        }
+      }
+    },
     "io.argoproj.sensor.v1alpha1.SensorSpec": {
       "description": "SensorSpec represents desired sensor state",
       "type": "object",
@@ -661,6 +909,11 @@
           "description": "EventProtocol is the protocol through which sensor receives events from gateway",
           "$ref": "#/definitions/io.argoproj.common.EventProtocol"
         },
+        "port": {
+          "description": "Port on which sensor server should run.",
+          "type": "integer",
+          "format": "int32"
+        },
         "template": {
           "description": "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
           "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
@@ -681,7 +934,8 @@
       "required": [
         "phase",
         "triggerCycleStatus",
-        "lastCycleTime"
+        "lastCycleTime",
+        "resources"
       ],
       "properties": {
         "completedAt": {
@@ -706,6 +960,10 @@
         "phase": {
           "description": "Phase is the high-level summary of the sensor",
           "type": "string"
+        },
+        "resources": {
+          "description": "Resources refers to metadata of the resources created for the sensor",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SensorResources"
         },
         "startedAt": {
           "description": "StartedAt is the time at which this sensor was initiated",
@@ -770,28 +1028,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.TriggerCondition": {
-      "description": "TriggerCondition describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
-      "type": "object",
-      "properties": {
-        "all": {
-          "description": "All acts as a AND operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-kubernetes-list-type": "all"
-        },
-        "any": {
-          "description": "Any acts as a OR operator between dependencies",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-kubernetes-list-type": "any"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.TriggerParameter": {
       "description": "TriggerParameter indicates a passed parameter to a service template",
       "type": "object",
@@ -818,16 +1054,18 @@
       "description": "TriggerParameterSource defines the source for a parameter from a event event",
       "type": "object",
       "required": [
-        "event",
-        "path"
+        "event"
       ],
       "properties": {
-        "event": {
-          "description": "Event is the name of the event for which to retrieve this event",
+        "contextKey": {
+          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
           "type": "string"
         },
-        "path": {
-          "description": "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+        "dataKey": {
+          "type": "string"
+        },
+        "event": {
+          "description": "Event is the name of the event for which to retrieve this event",
           "type": "string"
         },
         "value": {
@@ -841,45 +1079,43 @@
       "type": "object",
       "required": [
         "backoff",
-        "state",
-        "errorOnBackoffTimeout"
+        "errorOnBackoffTimeout",
+        "resourceLabels"
       ],
       "properties": {
         "backoff": {
           "description": "Backoff before checking resource state",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Backoff"
+          "$ref": "#/definitions/io.k8s.apimachinery.pkg.util.wait.Backoff"
         },
         "errorOnBackoffTimeout": {
-          "description": "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.",
+          "description": "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
           "type": "boolean"
         },
-        "state": {
-          "description": "State refers to labels used to check the resource state",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerStateLabels"
+        "resourceLabels": {
+          "description": "ResourceLabels refers to the policy used to check the resource state using labels",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ResourceLabelsPolicy"
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.TriggerStateLabels": {
-      "description": "TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.",
+    "io.argoproj.sensor.v1alpha1.TriggerSwitch": {
+      "description": "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
       "type": "object",
-      "required": [
-        "success",
-        "failure"
-      ],
       "properties": {
-        "failure": {
-          "description": "Failure defines labels required to identify a resource in failed state",
-          "type": "object",
-          "additionalProperties": {
+        "all": {
+          "description": "All acts as a AND operator between dependencies",
+          "type": "array",
+          "items": {
             "type": "string"
-          }
+          },
+          "x-kubernetes-list-type": "all"
         },
-        "success": {
-          "description": "Success defines labels required to identify a resource in success state",
-          "type": "object",
-          "additionalProperties": {
+        "any": {
+          "description": "Any acts as a OR operator between dependencies",
+          "type": "array",
+          "items": {
             "type": "string"
-          }
+          },
+          "x-kubernetes-list-type": "any"
         }
       }
     },
@@ -895,18 +1131,22 @@
           "description": "Name is a unique name of the action to take",
           "type": "string"
         },
+        "operation": {
+          "description": "Operation refers to the type of operation performed on the trigger resource. Default value is Create.",
+          "type": "string"
+        },
         "source": {
           "description": "Source of the K8 resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
         },
-        "when": {
-          "description": "When is the condition to execute the trigger",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerCondition"
+        "switch": {
+          "description": "Switch is the condition to execute the trigger",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerSwitch"
         }
       }
     },
     "io.argoproj.sensor.v1alpha1.URLArtifact": {
-      "description": "URLArtifact contains information about an artifact at an http endpoint.",
+      "description": "URLArtifact contains information about an minio at an http endpoint.",
       "type": "object",
       "required": [
         "path"
