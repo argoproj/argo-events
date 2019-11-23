@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -82,7 +83,7 @@ func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, err
 		Group:   opctx.gatewayObj.GroupVersionKind().Group,
 		Version: opctx.gatewayObj.GroupVersionKind().Version,
 	}); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
 	}
 
 	opctx.setupContainersForGatewayDeployment(deployment)

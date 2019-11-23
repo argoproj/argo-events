@@ -87,7 +87,7 @@ gateway-client-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-client
 
 gateway-client-image: gateway-client-linux
-	docker build -t $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) -f ./gateways/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) -f ./gateways/client/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) ; fi
 
 

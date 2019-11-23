@@ -165,7 +165,7 @@ func (c *Controller) handleErr(err error, key interface{}) error {
 }
 
 // Run processes the gateway resources on the controller's queue
-func (c *Controller) Run(ctx context.Context, gwThreads, eventThreads int) {
+func (c *Controller) Run(ctx context.Context, threads int) {
 	defer c.queue.ShutDown()
 	c.logger.WithFields(
 		map[string]interface{}{
@@ -179,7 +179,11 @@ func (c *Controller) Run(ctx context.Context, gwThreads, eventThreads int) {
 		return
 	}
 
-	c.informer = c.newGatewayInformer()
+	c.informer, err = c.newGatewayInformer()
+	if err != nil {
+		panic(err)
+	}
+
 	go c.informer.Run(ctx.Done())
 
 	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
@@ -187,7 +191,7 @@ func (c *Controller) Run(ctx context.Context, gwThreads, eventThreads int) {
 		return
 	}
 
-	for i := 0; i < gwThreads; i++ {
+	for i := 0; i < threads; i++ {
 		go wait.Until(c.runWorker, time.Second, ctx.Done())
 	}
 

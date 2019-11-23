@@ -164,7 +164,7 @@ func (controller *Controller) handleErr(err error, key interface{}) error {
 }
 
 // Run executes the controller
-func (controller *Controller) Run(ctx context.Context, ssThreads, eventThreads int) {
+func (controller *Controller) Run(ctx context.Context, threads int) {
 	defer controller.queue.ShutDown()
 
 	controller.logger.WithFields(
@@ -190,7 +190,7 @@ func (controller *Controller) Run(ctx context.Context, ssThreads, eventThreads i
 		return
 	}
 
-	for i := 0; i < ssThreads; i++ {
+	for i := 0; i < threads; i++ {
 		go wait.Until(controller.runWorker, time.Second, ctx.Done())
 	}
 

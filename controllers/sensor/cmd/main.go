@@ -35,10 +35,10 @@ func main() {
 	// sensor-controller configuration
 	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigMap)
 	if !ok {
-		configMap = common.DefaultConfigMapName(common.LabelControllerName)
+		panic("controller configmap is not provided")
 	}
 
-	namespace, ok := os.LookupEnv(common.SensorNamespace)
+	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
 	if !ok {
 		namespace = common.DefaultControllerNamespace
 	}
@@ -51,6 +51,6 @@ func main() {
 		panic(err)
 	}
 
-	go controller.Run(context.Background(), 1, 1)
+	go controller.Run(context.Background(), 1)
 	select {}
 }

@@ -26,28 +26,32 @@ import (
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
-func (c *Controller) instanceIDReq() labels.Requirement {
+func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
 	if c.Config.InstanceID == "" {
 		panic("instance id is required")
 	}
 	instanceIDReq, err := labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return *instanceIDReq
+	c.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
+	return instanceIDReq, nil
 }
 
 // The controller informer adds new gateways to the controller's queue based on Add, Update, and Delete Event Handlers for the gateway Resources
-func (c *Controller) newGatewayInformer() cache.SharedIndexInformer {
-	gatewayInformerFactory := gatewayinformers.NewFilteredSharedInformerFactory(
+func (c *Controller) newGatewayInformer() (cache.SharedIndexInformer, error) {
+	labelSelector, err := c.instanceIDReq()
+	if err != nil {
+		return nil, err
+	}
+	gatewayInformerFactory := gatewayinformers.NewSharedInformerFactoryWithOptions(
 		c.gatewayClient,
 		gatewayResyncPeriod,
-		c.Config.Namespace,
-		func(options *metav1.ListOptions) {
+		gatewayinformers.WithNamespace(c.Config.Namespace),
+		gatewayinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-			labelSelector := labels.NewSelector().Add(c.instanceIDReq())
 			options.LabelSelector = labelSelector.String()
-		},
+		}),
 	)
 	informer := gatewayInformerFactory.Argoproj().V1alpha1().Gateways().Informer()
 	informer.AddEventHandler(
@@ -72,5 +76,5 @@ func (c *Controller) newGatewayInformer() cache.SharedIndexInformer {
 			},
 		},
 	)
-	return informer
+	return informer, nil
 }

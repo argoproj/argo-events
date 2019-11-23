@@ -35,7 +35,7 @@ func main() {
 	// gateway-controller configuration
 	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigMap)
 	if !ok {
-		configMap = common.DefaultConfigMapName(common.LabelControllerName)
+		panic("controller configmap is not provided")
 	}
 
 	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
@@ -51,6 +51,6 @@ func main() {
 		panic(err)
 	}
 
-	go controller.Run(context.Background(), 1, 1)
+	go controller.Run(context.Background(), 1)
 	select {}
 }
