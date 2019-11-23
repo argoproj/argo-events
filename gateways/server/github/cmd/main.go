@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2018 KompiTech GmbH
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,40 +17,28 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers/gateway"
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/gateways/server/github"
+	"k8s.io/client-go/kubernetes"
 )
 
 func main() {
-	// kubernetes configuration
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
 		panic(err)
 	}
-
-	// gateway-controller configuration
-	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigMap)
-	if !ok {
-		configMap = common.DefaultConfigMapName(common.LabelControllerName)
-	}
-
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
 	if !ok {
-		namespace = common.DefaultControllerNamespace
+		panic("namespace is not provided")
 	}
-
-	// create new gateway controller
-	controller := gateway.NewGatewayController(restConfig, configMap, namespace)
-	// watch for configuration updates for the controller
-	err = controller.ResyncConfig(namespace)
-	if err != nil {
-		panic(err)
-	}
-
-	go controller.Run(context.Background(), 1, 1)
-	select {}
+	server.StartGateway(&github.EventListener{
+		Logger:    common.NewArgoEventsLogger(),
+		Namespace: namespace,
+		K8sClient: clientset,
+	})
 }

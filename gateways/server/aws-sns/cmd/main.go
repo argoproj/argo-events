@@ -17,40 +17,24 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/controllers/gateway"
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/gateways/server/aws-sns"
+	"k8s.io/client-go/kubernetes"
 )
 
 func main() {
-	// kubernetes configuration
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
 		panic(err)
 	}
+	clientset := kubernetes.NewForConfigOrDie(restConfig)
 
-	// gateway-controller configuration
-	configMap, ok := os.LookupEnv(common.EnvVarControllerConfigMap)
-	if !ok {
-		configMap = common.DefaultConfigMapName(common.LabelControllerName)
-	}
-
-	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
-	if !ok {
-		namespace = common.DefaultControllerNamespace
-	}
-
-	// create new gateway controller
-	controller := gateway.NewGatewayController(restConfig, configMap, namespace)
-	// watch for configuration updates for the controller
-	err = controller.ResyncConfig(namespace)
-	if err != nil {
-		panic(err)
-	}
-
-	go controller.Run(context.Background(), 1, 1)
-	select {}
+	server.StartGateway(&aws_sns.EventListener{
+		Logger:    common.NewArgoEventsLogger(),
+		K8sClient: clientset,
+	})
 }

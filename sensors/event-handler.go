@@ -37,14 +37,14 @@ func (sec *sensorExecutionCtx) processUpdateNotification(ew *updateNotification)
 	defer func() {
 		// persist updates to sensor resource
 		labels := map[string]string{
-			common.LabelSensorName:                    sec.sensor.Name,
-			common.LabelSensorKeyPhase:                string(sec.sensor.Status.Phase),
-			common.LabelKeySensorControllerInstanceID: sec.controllerInstanceID,
-			common.LabelOperation:                     "persist_state_update",
+			common.LabelSensorName:       sec.sensor.Name,
+			sn.LabelPhase:                string(sec.sensor.Status.Phase),
+			sn.LabelControllerInstanceID: sec.controllerInstanceID,
+			common.LabelOperation:        "persist_state_update",
 		}
 		eventType := common.StateChangeEventType
 
-		updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, sec.log)
+		updatedSensor, err := sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.log)
 		if err != nil {
 			sec.log.WithError(err).Error("failed to persist sensor update, escalating...")
 			// escalate failure
@@ -202,7 +202,7 @@ func (sec *sensorExecutionCtx) WatchEventsFromGateways() {
 	case pc.NATS:
 		sec.NatsEventProtocol()
 		var err error
-		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.controllerInstanceID, sec.log); err != nil {
+		if sec.sensor, err = sn.PersistUpdates(sec.sensorClient, sec.sensor, sec.log); err != nil {
 			sec.log.WithError(err).Error("failed to persist sensor update")
 			labels := map[string]string{
 				common.LabelEventType:  string(common.OperationFailureEventType),

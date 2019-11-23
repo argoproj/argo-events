@@ -13,22 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package v1alpha1
+
+package main
 
 import (
-	"github.com/pkg/errors"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/gateways/server/calendar"
 )
 
-// ValidateEventSource validates a generic event source
-func ValidateEventSource(eventSource *EventSource) error {
-	if eventSource == nil {
-		return errors.New("event source can't be nil")
-	}
-	if eventSource.Spec == nil {
-		return errors.New("event source specification can't be nil")
-	}
-	if eventSource.Spec.Version == "" {
-		return errors.New("event source version can't be empty")
-	}
-	return nil
+func main() {
+	server.StartGateway(&calendar.EventSourceListener{
+		Logger: common.NewArgoEventsLogger(),
+	})
 }

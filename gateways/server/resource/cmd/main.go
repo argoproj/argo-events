@@ -13,22 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package v1alpha1
+
+package main
 
 import (
-	"github.com/pkg/errors"
+	"os"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/gateways/server/resource"
 )
 
-// ValidateEventSource validates a generic event source
-func ValidateEventSource(eventSource *EventSource) error {
-	if eventSource == nil {
-		return errors.New("event source can't be nil")
+func main() {
+	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
+	rest, err := common.GetClientConfig(kubeConfig)
+	if err != nil {
+		panic(err)
 	}
-	if eventSource.Spec == nil {
-		return errors.New("event source specification can't be nil")
-	}
-	if eventSource.Spec.Version == "" {
-		return errors.New("event source version can't be empty")
-	}
-	return nil
+	server.StartGateway(&resource.EventListener{
+		Logger:       common.NewArgoEventsLogger(),
+		K8RestConfig: rest,
+	})
 }
