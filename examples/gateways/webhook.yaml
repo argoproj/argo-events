@@ -25,11 +25,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-test"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "webhook-events"
-          image: "argoproj/webhook-gateway"
+          image: "argoproj/webhook-gateway:v0.12-test"
           imagePullPolicy: "Always"
           command: ["/bin/webhook-gateway"]
       # To make webhook secure, mount the secret that contains certificate and private key in the container

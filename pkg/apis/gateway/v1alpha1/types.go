@@ -66,7 +66,7 @@ type GatewaySpec struct {
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// Service is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
-	Service *apicommon.ServiceTemplateSpec `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
+	Service *corev1.Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
 	// Watchers are components which are interested listening to notifications from this gateway
 	// These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
 	// In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
@@ -76,8 +76,6 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,7,opt,name=eventProtocol"`
-	// Version of the gateway. The version maps directly to the gateway release tag
-	Version string `json:"version" protobuf:"bytes,8,name=version"`
 	// Replica is the gateway deployment replicas
 	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
 }

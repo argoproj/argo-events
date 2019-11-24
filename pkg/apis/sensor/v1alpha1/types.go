@@ -28,8 +28,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const ArgoEventsSensorVersion = "v0.10"
-
 // NotificationType represent a type of notifications that are handled by a sensor
 type NotificationType string
 
@@ -113,8 +111,6 @@ type SensorSpec struct {
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
-	// Version of the sensor. It must match with version of the sensor controller
-	Version string `json:"version" protobuf:"bytes,8,name=version"`
 }
 
 // EventDependency describes a dependency

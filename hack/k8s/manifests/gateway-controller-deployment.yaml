@@ -16,12 +16,12 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
         - name: gateway-controller
-          image: argoproj/gateway-controller
+          image: argoproj/gateway-controller:v0.12-test
           imagePullPolicy: Always
           env:
-            - name: GATEWAY_NAMESPACE
+            - name: NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: GATEWAY_CONTROLLER_CONFIG_MAP
+            - name: CONTROLLER_CONFIG_MAP
               value: gateway-controller-configmap

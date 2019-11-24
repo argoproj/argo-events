@@ -8,4 +8,4 @@ metadata:
 data:
   config: |
     instanceID: argo-events
-    namespace: argo-events
+    namespace: dev-axis

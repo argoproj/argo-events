@@ -133,7 +133,7 @@ func (in *GatewaySpec) DeepCopyInto(out *GatewaySpec) {
 	}
 	if in.Service != nil {
 		in, out := &in.Service, &out.Service
-		*out = new(common.ServiceTemplateSpec)
+		*out = new(v1.Service)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Watchers != nil {

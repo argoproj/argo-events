@@ -24,33 +24,23 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // buildServiceResource builds a new service that exposes gateway.
 func (opctx *operationContext) buildServiceResource() (*corev1.Service, error) {
-	serviceTemplateSpec := opctx.gatewayObj.Spec.Service.DeepCopy()
-	if serviceTemplateSpec == nil {
+	if opctx.gatewayObj.Spec.Service == nil {
 		return nil, nil
 	}
-
-	service := &corev1.Service{
-		ObjectMeta: serviceTemplateSpec.ObjectMeta,
-		Spec:       serviceTemplateSpec.Spec,
+	service := opctx.gatewayObj.Spec.Service
+	if service.Name == "" {
+		service.Name = common.DefaultServiceName(opctx.gatewayObj.Name)
 	}
-
-	service.Namespace = opctx.gatewayObj.Namespace
-
-	service.Name = common.DefaultServiceName(opctx.gatewayObj.Name)
-
-	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, service, schema.GroupVersionKind{
-		Kind:    opctx.gatewayObj.Kind,
-		Group:   opctx.gatewayObj.GroupVersionKind().Group,
-		Version: opctx.gatewayObj.GroupVersionKind().Version,
-	}); err != nil {
+	if service.Namespace == "" {
+		service.Namespace = opctx.gatewayObj.Namespace
+	}
+	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, service, opctx.gatewayObj.GroupVersionKind()); err != nil {
 		return nil, err
 	}
-
 	return service, nil
 }
 
@@ -59,7 +49,6 @@ func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, err
 	podTemplate := opctx.gatewayObj.Spec.Template.DeepCopy()
 
 	replica := int32(opctx.gatewayObj.Spec.Replica)
-
 	if replica == 0 {
 		replica = 1
 	}
@@ -71,23 +60,17 @@ func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, err
 			Template: *podTemplate,
 		},
 	}
-
-	deployment.Namespace = opctx.gatewayObj.Namespace
-
 	if deployment.Name == "" {
 		deployment.Name = opctx.gatewayObj.Name
 	}
-
-	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, deployment, schema.GroupVersionKind{
-		Kind:    opctx.gatewayObj.Kind,
-		Group:   opctx.gatewayObj.GroupVersionKind().Group,
-		Version: opctx.gatewayObj.GroupVersionKind().Version,
-	}); err != nil {
-		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
+	if deployment.Namespace == "" {
+		deployment.Namespace = opctx.gatewayObj.Namespace
 	}
 
+	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, deployment, opctx.gatewayObj.GroupVersionKind()); err != nil {
+		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
+	}
 	opctx.setupContainersForGatewayDeployment(deployment)
-
 	return deployment, nil
 }
 

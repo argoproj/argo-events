@@ -17,28 +17,29 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
-func TestInformer(t *testing.T) {
-	convey.Convey("Given a controller", t, func() {
-		controller := getGatewayController()
-		convey.Convey("Instance ID required key must match", func() {
-			req := controller.instanceIDReq()
-			convey.So(req.Key(), convey.ShouldEqual, LabelControllerInstanceID)
-			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
-			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
-		})
-	})
+func TestInformer_InstanceIDReq(t *testing.T) {
+	controller := newController()
+	req, err := controller.instanceIDReq()
+	assert.Nil(t, err)
+	assert.Equal(t, req.Key(), LabelControllerInstanceID)
+	assert.Equal(t, req.Operator(), selection.Equals)
+	assert.Equal(t, req.Values().Has("argo-events"), true)
+	assert.Equal(t, req.String(), fmt.Sprintf("%s=%s", LabelControllerInstanceID, "argo-events"))
+}
 
-	convey.Convey("Given a controller", t, func() {
-		controller := getGatewayController()
-		convey.Convey("Get a new gateway informer and make sure its not nil", func() {
-			i := controller.newGatewayInformer()
-			convey.So(i, convey.ShouldNotBeNil)
-		})
-	})
+func TestInformer_NewInformer(t *testing.T) {
+	controller := newController()
+	i, err := controller.newGatewayInformer()
+	assert.Nil(t, err)
+	assert.NotNil(t, i)
+	err = i.GetIndexer().Add(&v1alpha1.Gateway{})
+	assert.Nil(t, err)
 }

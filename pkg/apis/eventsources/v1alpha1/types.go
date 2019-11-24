@@ -82,8 +82,6 @@ type EventSourceSpec struct {
 	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,16,opt,name=slack"`
 	// StorageGrid event sources
 	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,17,opt,name=storageGrid"`
-	// Version of the event source. It must match with that of gateway version
-	Version string `json:"version" protobuf:"bytes,18,name=version"`
 	// Type of the event source
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
 }

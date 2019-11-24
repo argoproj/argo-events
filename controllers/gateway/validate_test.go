@@ -18,28 +18,25 @@ package gateway
 
 import (
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"io/ioutil"
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidate(t *testing.T) {
 	dir := "../../examples/gateways"
-	convey.Convey("Validate list of gateways", t, func() {
-		files, err := ioutil.ReadDir(dir)
-		convey.So(err, convey.ShouldBeNil)
-		for _, file := range files {
-			fmt.Println("filename: ", file.Name())
-			content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
-			convey.So(err, convey.ShouldBeNil)
-			var gateway *v1alpha1.Gateway
-			err = yaml.Unmarshal([]byte(content), &gateway)
-			convey.So(err, convey.ShouldBeNil)
-			err = Validate(gateway)
-			convey.So(err, convey.ShouldBeNil)
-		}
-	})
+	files, err := ioutil.ReadDir(dir)
+	assert.Nil(t, err)
+	for _, file := range files {
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+		assert.Nil(t, err)
+		var gateway *v1alpha1.Gateway
+		err = yaml.Unmarshal([]byte(content), &gateway)
+		assert.Nil(t, err)
+		err = Validate(gateway)
+		assert.Nil(t, err)
+	}
 }

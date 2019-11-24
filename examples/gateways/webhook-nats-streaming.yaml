@@ -8,7 +8,7 @@ metadata:
 spec:
   type: "webhook"
   version: "v0.11"
-  eventSource:
+  eventSourceRef:
     name: "webhook-event-source"
     # optional, if event source is deployed in a different namespace than the gateway
     # namespace: "other-namespace"

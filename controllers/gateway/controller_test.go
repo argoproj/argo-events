@@ -19,99 +19,67 @@ package gateway
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
-	"github.com/smartystreets/goconvey/convey"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedIndexInformer {
-	// NewListWatchFromClient doesn't work with fake client.
-	// ref: https://github.com/kubernetes/client-go/issues/352
-	return cache.NewSharedIndexInformer(&cache.ListWatch{
-		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-			return clientset.CoreV1().Pods("").List(options)
-		},
-		WatchFunc: clientset.CoreV1().Pods("").Watch,
-	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
-}
-
-func getGatewayController() *Controller {
-	clientset := fake.NewSimpleClientset()
-	done := make(chan struct{})
-	informer := getFakePodSharedIndexInformer(clientset)
-	go informer.Run(done)
-	factory := informers.NewSharedInformerFactory(clientset, 0)
-	podInformer := factory.Core().V1().Pods()
-	go podInformer.Informer().Run(done)
-	svcInformer := factory.Core().V1().Services()
-	go svcInformer.Informer().Run(done)
-	return &Controller{
+func newController() *Controller {
+	controller := &Controller{
 		ConfigMap: configmapName,
 		Namespace: common.DefaultControllerNamespace,
 		Config: ControllerConfig{
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
-		k8sClient:     clientset,
+		k8sClient:     fake.NewSimpleClientset(),
 		gatewayClient: fakegateway.NewSimpleClientset(),
-		podInformer:   podInformer,
-		svcInformer:   svcInformer,
-		informer:      informer,
 		queue:         workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
 		logger:        common.NewArgoEventsLogger(),
 	}
+	informer, err := controller.newGatewayInformer()
+	if err != nil {
+		panic(err)
+	}
+	controller.informer = informer
+	return controller
 }
 
-func TestGatewayController(t *testing.T) {
-	convey.Convey("Given a controller, process queue items", t, func() {
-		controller := getGatewayController()
+func TestGatewayController_ProcessNextItem(t *testing.T) {
+	controller := newController()
+	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	gw := &v1alpha1.Gateway{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-gateway",
+			Namespace: common.DefaultControllerNamespace,
+		},
+		Spec: v1alpha1.GatewaySpec{},
+	}
+	err := controller.informer.GetIndexer().Add(gw)
+	assert.Nil(t, err)
 
-		convey.Convey("Create a resource queue, add new item and process it", func() {
-			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-			controller.informer = controller.newGatewayInformer()
-			controller.queue.Add("hi")
-			res := controller.processNextItem()
+	controller.queue.Add("fake-gateway")
+	res := controller.processNextItem()
+	assert.Equal(t, res, true)
 
-			convey.Convey("Item from queue must be successfully processed", func() {
-				convey.So(res, convey.ShouldBeTrue)
-			})
+	controller.queue.ShutDown()
+	res = controller.processNextItem()
+	assert.Equal(t, res, false)
+}
 
-			convey.Convey("Shutdown queue and make sure queue does not process next item", func() {
-				controller.queue.ShutDown()
-				res := controller.processNextItem()
-				convey.So(res, convey.ShouldBeFalse)
-			})
-		})
-	})
-
-	convey.Convey("Given a controller, handle errors in queue", t, func() {
-		controller := getGatewayController()
-		convey.Convey("Create a resource queue and add an item", func() {
-			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-			controller.queue.Add("hi")
-			convey.Convey("Handle an nil error", func() {
-				err := controller.handleErr(nil, "hi")
-				convey.So(err, convey.ShouldBeNil)
-			})
-			convey.Convey("Exceed max requeues", func() {
-				controller.queue.Add("bye")
-				var err error
-				for i := 0; i < 21; i++ {
-					err = controller.handleErr(fmt.Errorf("real error"), "bye")
-				}
-				convey.So(err, convey.ShouldNotBeNil)
-				convey.So(err.Error(), convey.ShouldEqual, "exceeded max requeues")
-			})
-		})
-	})
+func TestGatewayController_HandleErr(t *testing.T) {
+	controller := newController()
+	controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	controller.queue.Add("hi")
+	var err error
+	for i := 0; i < 21; i++ {
+		err = controller.handleErr(fmt.Errorf("real error"), "bye")
+	}
+	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "exceeded max requeues")
 }

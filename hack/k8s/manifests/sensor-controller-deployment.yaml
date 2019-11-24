@@ -16,12 +16,12 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
         - name: sensor-controller
-          image: argoproj/sensor-controller
+          image: argoproj/sensor-controller:v0.12-test
           imagePullPolicy: Always
           env:
-            - name: SENSOR_NAMESPACE
+            - name: NAMESPACE
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: SENSOR_CONFIG_MAP
+            - name: CONTROLLER_CONFIG_MAP
               value: sensor-controller-configmap

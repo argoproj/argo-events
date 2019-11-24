@@ -28,6 +28,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef":             schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
@@ -36,6 +37,34 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers":       schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher":  schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref),
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventSourceRef holds information about the EventSourceRef custom resource",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the event source",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace of the event source Default value is the namespace where referencing gateway is deployed",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
 	}
 }
 
@@ -191,11 +220,10 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"eventSource": {
+					"eventSourceRef": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventSourceRef is name of the configmap that stores event source configurations for the gateway",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "EventSourceRef refers to event-source that stores event source configurations for the gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef"),
 						},
 					},
 					"type": {
@@ -208,7 +236,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"service": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec"),
+							Ref:         ref("k8s.io/api/core/v1.Service"),
 						},
 					},
 					"watchers": {
@@ -230,12 +258,19 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
 						},
 					},
+					"replica": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replica is the gateway deployment replicas",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"template", "type", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
 	}
 }
 

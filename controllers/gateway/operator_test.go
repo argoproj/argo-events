@@ -117,7 +117,7 @@ func deletePodAndService(controller *Controller, namespace string) error {
 func TestGatewayOperateLifecycle(t *testing.T) {
 	done := make(chan struct{})
 	convey.Convey("Given a gateway resource spec, parse it", t, func() {
-		fakeController := getGatewayController()
+		fakeController := newController()
 		gateway, err := getGateway()
 		convey.Convey("Make sure no error occurs", func() {
 			convey.So(err, convey.ShouldBeNil)
