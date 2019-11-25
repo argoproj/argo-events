@@ -9,7 +9,7 @@ an active endpoint and if you remove an endpoint entry, server will mark that en
 
 ## Why is there a service spec in gateway spec?
 Because you'd probably want to expose the gateway to the outside world as gateway pod is running http servers. 
-If you don't to expose the gateway, just remove the `serviceSpec` from the gateway spec. 
+If you don't want to expose the gateway, just remove the `serviceSpec` from the gateway spec. 
 
 ## Setup
 
