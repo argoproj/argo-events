@@ -53,13 +53,13 @@ data:
     owner: "argoproj"
     repository: "argo"
     hook:
-     endpoint: "/push"
-     port: "13000"
-     url: "http://myargofakeurl.fake"
-     # path to file that is mounted in gateway pod which contains certs
-     serverCertPath: "some path in pod"
-     # path to file that is mounted in gateway pod which contains private key
-     serverKeyPath: "some path in pod"
+      endpoint: "/push"
+      port: "13000"
+      url: "http://myargofakeurl.fake"
+      # path to file that is mounted in gateway pod which contains certs
+      serverCertPath: "some path in pod"
+      # path to file that is mounted in gateway pod which contains private key
+      serverKeyPath: "some path in pod"
     events:
     - "push"
     - "delete"
