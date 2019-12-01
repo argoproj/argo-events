@@ -18,9 +18,9 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/scheme"
-	"k8s.io/client-go/rest"
+	rest "k8s.io/client-go/rest"
 )
 
 type ArgoprojV1alpha1Interface interface {

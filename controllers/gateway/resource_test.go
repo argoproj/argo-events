@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -182,25 +183,168 @@ func TestResource_SetupContainersForGatewayDeployment(t *testing.T) {
 }
 
 func TestResource_CreateGatewayResource(t *testing.T) {
-	controller := newController()
-	opctx := newOperationCtx(gatewayObj, controller)
-	err := opctx.createGatewayResources()
-	assert.Nil(t, err)
-	deployment, err := controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Template.Name, metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.NotNil(t, deployment)
-	assert.NotNil(t, deployment.Labels)
-	assert.NotNil(t, deployment.Annotations)
-	assert.Equal(t, deployment.Labels[common.LabelOwnerName], opctx.gatewayObj.Name)
-	deploymentObj, err := opctx.buildDeploymentResource()
-	assert.Nil(t, err)
-	deploymentObj.Annotations = nil
-	deploymentHash, err := common.GetObjectHash(deploymentObj)
-	assert.Nil(t, err)
-	assert.Equal(t, deployment.Annotations[common.AnnotationResourceSpecHash], deploymentHash)
-	service, err := controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Service.Name, metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.Equal(t, service.Spec.Type, corev1.ServiceTypeLoadBalancer)
+	tests := []struct {
+		name               string
+		gatewayObj         *v1alpha1.Gateway
+		deploymentMetadata *metav1.ObjectMeta
+		deploymentNotFound bool
+		serviceMetadata    *metav1.ObjectMeta
+		serviceNotFound    bool
+	}{
+		{
+			name:       "gateway with deployment and service",
+			gatewayObj: gatewayObj.DeepCopy(),
+			deploymentMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Template.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			serviceMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Service.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			deploymentNotFound: false,
+			serviceNotFound:    false,
+		},
+		{
+			name: "gateway with no service template",
+			gatewayObj: &v1alpha1.Gateway{
+				ObjectMeta: gatewayObj.ObjectMeta,
+				Spec: v1alpha1.GatewaySpec{
+					Template:       gatewayObj.Spec.Template,
+					EventSourceRef: gatewayObj.Spec.EventSourceRef,
+					Type:           gatewayObj.Spec.Type,
+					Service:        nil,
+					ProcessorPort:  gatewayObj.Spec.ProcessorPort,
+					EventProtocol:  gatewayObj.Spec.EventProtocol,
+					Replica:        0,
+				},
+			},
+			deploymentMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Template.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			serviceMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Service.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			serviceNotFound:    true,
+			deploymentNotFound: false,
+		},
+		{
+			name: "gateway with resources in different namespaces",
+			gatewayObj: &v1alpha1.Gateway{
+				ObjectMeta: gatewayObj.ObjectMeta,
+				Spec: v1alpha1.GatewaySpec{
+					Template: &corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      gatewayObj.Spec.Template.Name,
+							Namespace: "new-namespace",
+						},
+						Spec: gatewayObj.Spec.Template.Spec,
+					},
+					Service: &corev1.Service{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      gatewayObj.Spec.Service.Name,
+							Namespace: "new-namespace",
+						},
+						Spec: gatewayObj.Spec.Service.Spec,
+					},
+					EventSourceRef: gatewayObj.Spec.EventSourceRef,
+					Type:           gatewayObj.Spec.Type,
+					ProcessorPort:  gatewayObj.Spec.ProcessorPort,
+					EventProtocol:  gatewayObj.Spec.EventProtocol,
+					Replica:        0,
+				},
+			},
+			deploymentMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Template.Name,
+				Namespace: "new-namespace",
+			},
+			serviceMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Spec.Service.Name,
+				Namespace: "new-namespace",
+			},
+			serviceNotFound:    false,
+			deploymentNotFound: false,
+		},
+		{
+			name: "gateway with resources with empty names and namespaces",
+			gatewayObj: &v1alpha1.Gateway{
+				ObjectMeta: gatewayObj.ObjectMeta,
+				Spec: v1alpha1.GatewaySpec{
+					Template: &corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "",
+							Namespace: "",
+						},
+						Spec: gatewayObj.Spec.Template.Spec,
+					},
+					Service: &corev1.Service{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "",
+							Namespace: "",
+						},
+						Spec: gatewayObj.Spec.Service.Spec,
+					},
+					EventSourceRef: gatewayObj.Spec.EventSourceRef,
+					Type:           gatewayObj.Spec.Type,
+					ProcessorPort:  gatewayObj.Spec.ProcessorPort,
+					EventProtocol:  gatewayObj.Spec.EventProtocol,
+					Replica:        0,
+				},
+			},
+			deploymentMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			serviceMetadata: &metav1.ObjectMeta{
+				Name:      gatewayObj.Name,
+				Namespace: gatewayObj.Namespace,
+			},
+			serviceNotFound:    false,
+			deploymentNotFound: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := newController()
+			opctx := newOperationCtx(test.gatewayObj, controller)
+			err := opctx.createGatewayResources()
+			assert.Nil(t, err)
+			deployment, err := controller.k8sClient.AppsV1().Deployments(test.deploymentMetadata.Namespace).Get(test.deploymentMetadata.Name, metav1.GetOptions{})
+			assert.Equal(t, apierror.IsNotFound(err), test.deploymentNotFound)
+			service, err := controller.k8sClient.CoreV1().Services(test.serviceMetadata.Namespace).Get(test.serviceMetadata.Name, metav1.GetOptions{})
+			assert.Equal(t, apierror.IsNotFound(err), test.serviceNotFound)
+
+			if !test.deploymentNotFound {
+				assert.NotNil(t, deployment)
+				assert.NotNil(t, deployment.Labels)
+				assert.GreaterOrEqual(t, int(*deployment.Spec.Replicas), 1)
+				assert.NotNil(t, deployment.Annotations)
+				assert.Equal(t, deployment.Labels[common.LabelOwnerName], opctx.gatewayObj.Name)
+				deploymentObj, err := opctx.buildDeploymentResource()
+				assert.Nil(t, err)
+				deploymentObj.Annotations = nil
+				deploymentHash, err := common.GetObjectHash(deploymentObj)
+				assert.Nil(t, err)
+				assert.Equal(t, deployment.Annotations[common.AnnotationResourceSpecHash], deploymentHash)
+			}
+
+			if !test.serviceNotFound {
+				assert.NotNil(t, service)
+				assert.NotNil(t, service.Labels)
+				assert.NotNil(t, service.Annotations)
+				assert.Equal(t, service.Labels[common.LabelOwnerName], opctx.gatewayObj.Name)
+				serviceObj, err := opctx.buildServiceResource()
+				assert.Nil(t, err)
+				serviceObj.Annotations = nil
+				serviceHash, err := common.GetObjectHash(serviceObj)
+				assert.Nil(t, err)
+				assert.Equal(t, service.Annotations[common.AnnotationResourceSpecHash], serviceHash)
+			}
+		})
+	}
 }
 
 func TestResource_UpdateGatewayResource(t *testing.T) {

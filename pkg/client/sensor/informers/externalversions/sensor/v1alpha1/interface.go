@@ -18,7 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

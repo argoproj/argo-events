@@ -32,6 +32,7 @@ const (
 	NodePhaseNew            NodePhase = ""               // the node is new
 	NodePhaseCompleted      NodePhase = "Completed"      // node has completed running
 	NodePhaseRemove         NodePhase = "Remove"         // stale node
+	NodePhaseNoOp           NodePhase = "NoOp"           // no op
 	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
 )
 
@@ -90,6 +91,15 @@ type EventSourceRef struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,2,opt,name=namespace"`
 }
 
+// GatewayResource holds the metadata about the gateway resources
+type GatewayResource struct {
+	// Metadata of the deployment for the gateway
+	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,name=deployment"`
+	// Metadata of the service for the gateway
+	// +optional
+	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
+}
+
 // GatewayStatus contains information about the status of a gateway.
 type GatewayStatus struct {
 	// Phase is the high-level summary of the gateway
@@ -101,6 +111,8 @@ type GatewayStatus struct {
 	// Nodes is a mapping between a node ID and the node's status
 	// it records the states for the configurations of gateway.
 	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
+	// Resources refers to the metadata about the gateway resources
+	Resources *GatewayResource `json:"resources" protobuf:"bytes,6,opt,name=resources"`
 }
 
 // NodeStatus describes the status for an individual node in the gateway configurations.

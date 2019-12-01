@@ -33,7 +33,10 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 	obj.SetOwnerReferences(references)
 
 	if obj.GetName() == "" && obj.GetGenerateName() == "" {
-		obj.SetGenerateName(owner.GetName())
+		obj.SetName(owner.GetName())
+	}
+	if obj.GetNamespace() == "" {
+		obj.SetNamespace(owner.GetNamespace())
 	}
 
 	objLabels := obj.GetLabels()

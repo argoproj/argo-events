@@ -18,8 +18,8 @@ limitations under the License.
 package argoproj
 
 import (
-	"github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
-	"github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/sensor/v1alpha1"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/sensor/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

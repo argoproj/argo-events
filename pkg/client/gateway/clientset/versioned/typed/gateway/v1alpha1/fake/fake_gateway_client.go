@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/testing"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1"
+	rest "k8s.io/client-go/rest"
+	testing "k8s.io/client-go/testing"
 )
 
 type FakeArgoprojV1alpha1 struct {

@@ -20,12 +20,12 @@ package v1alpha1
 import (
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/scheme"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	scheme "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/rest"
+	types "k8s.io/apimachinery/pkg/types"
+	watch "k8s.io/apimachinery/pkg/watch"
+	rest "k8s.io/client-go/rest"
 )
 
 // EventSourcesGetter has a method to return a EventSourceInterface.

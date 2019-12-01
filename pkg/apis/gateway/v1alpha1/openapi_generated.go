@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/go-openapi/spec"
-	"k8s.io/kube-openapi/pkg/common"
+	spec "github.com/go-openapi/spec"
+	common "k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -32,6 +32,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource":            schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":                schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":              schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
@@ -207,6 +208,34 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.Refe
 	}
 }
 
+func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GatewayResource holds the names of the gateway resources",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"deployment": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the deployment for the gateway",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"service": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the service for the gateway",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"deployment"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -315,12 +344,18 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 							},
 						},
 					},
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resources refers to the names of the gateway resources",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource"),
+						},
+					},
 				},
-				Required: []string{"phase"},
+				Required: []string{"phase", "resources"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

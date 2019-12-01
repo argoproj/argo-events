@@ -18,13 +18,13 @@ limitations under the License.
 package fake
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/testing"
+	labels "k8s.io/apimachinery/pkg/labels"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
+	types "k8s.io/apimachinery/pkg/types"
+	watch "k8s.io/apimachinery/pkg/watch"
+	testing "k8s.io/client-go/testing"
 )
 
 // FakeGateways implements GatewayInterface

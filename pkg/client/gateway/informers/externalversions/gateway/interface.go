@@ -18,8 +18,8 @@ limitations under the License.
 package argoproj
 
 import (
-	"github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/gateway/v1alpha1"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

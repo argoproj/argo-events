@@ -17,16 +17,14 @@ limitations under the License.
 package gateway
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 // buildServiceResource builds a new service that exposes gateway.
@@ -34,13 +32,7 @@ func (opctx *operationContext) buildServiceResource() (*corev1.Service, error) {
 	if opctx.gatewayObj.Spec.Service == nil {
 		return nil, nil
 	}
-	service := opctx.gatewayObj.Spec.Service
-	if service.Name == "" {
-		service.Name = common.DefaultServiceName(opctx.gatewayObj.Name)
-	}
-	if service.Namespace == "" {
-		service.Namespace = opctx.gatewayObj.Namespace
-	}
+	service := opctx.gatewayObj.Spec.Service.DeepCopy()
 	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, service, opctx.gatewayObj.GroupVersionKind()); err != nil {
 		return nil, err
 	}
@@ -62,13 +54,6 @@ func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, err
 			Replicas: &replica,
 			Template: *podTemplate,
 		},
-	}
-
-	// specifically set the deployment name to that of gateway name
-	deployment.Name = opctx.gatewayObj.Name
-
-	if deployment.Namespace == "" {
-		deployment.Namespace = opctx.gatewayObj.Namespace
 	}
 
 	if deployment.Spec.Template.Labels == nil {
@@ -124,104 +109,138 @@ func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *a
 	return deployment
 }
 
-// createGatewayResources creates K8s resources corresponding to a gateway object
+// createGatewayResources creates gateway deployment and service
 func (opctx *operationContext) createGatewayResources() error {
-	// Gateway deployment has two components,
-	// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
-	// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
-	//                          compliant events and dispatch them to watchers.
-	deployment, err := opctx.buildDeploymentResource()
+	if opctx.gatewayObj.Status.Resources == nil {
+		opctx.gatewayObj.Status.Resources = &v1alpha1.GatewayResource{}
+	}
+
+	deployment, err := opctx.createGatewayDeployment()
 	if err != nil {
 		return err
 	}
+	opctx.gatewayObj.Status.Resources.Deployment = &deployment.ObjectMeta
+	opctx.logger.WithField("name", deployment.Name).WithField("namespace", deployment.Namespace).Infoln("gateway deployment is created")
 
-	if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(deployment); err != nil {
-		return err
-	}
-
-	opctx.logger.WithField(common.LabelDeploymentName, deployment.Name).Info("a deployment for the gateway is created")
-
-	// expose gateway if service is configured
 	if opctx.gatewayObj.Spec.Service != nil {
-		svc, err := opctx.buildServiceResource()
+		service, err := opctx.createGatewayService()
 		if err != nil {
 			return err
 		}
-
-		if _, err := opctx.controller.k8sClient.CoreV1().Services(svc.Namespace).Create(svc); err != nil {
-			return err
-		}
-
-		opctx.logger.WithField(common.LabelServiceName, svc.Name).Infoln("gateway service is created")
+		opctx.gatewayObj.Status.Resources.Service = &service.ObjectMeta
+		opctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is created")
 	}
+
 	return nil
 }
 
-// updateGatewayResources updates the gateway deployment and service if the gateway resource spec has changed since last deployment
+// createGatewayDeployment creates a deployment for the gateway
+func (opctx *operationContext) createGatewayDeployment() (*appv1.Deployment, error) {
+	deployment, err := opctx.buildDeploymentResource()
+	if err != nil {
+		return nil, err
+	}
+	return opctx.controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+}
+
+// createGatewayService creates a service for the gateway
+func (opctx *operationContext) createGatewayService() (*corev1.Service, error) {
+	svc, err := opctx.buildServiceResource()
+	if err != nil {
+		return nil, err
+	}
+	return opctx.controller.k8sClient.CoreV1().Services(svc.Namespace).Create(svc)
+}
+
+// updateGatewayResources updates gateway deployment and service
 func (opctx *operationContext) updateGatewayResources() error {
-	if err := Validate(opctx.gatewayObj); err != nil {
-		opctx.logger.WithError(err).Error("gateway validation failed")
-
-		if opctx.gatewayObj.Status.Phase != v1alpha1.NodePhaseError {
-			opctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		}
-
-		return err
-	}
-
-	selector, err := controllerscommon.OwnerLabelSelector(opctx.gatewayObj.Name)
+	deployment, err := opctx.updateGatewayDeployment()
 	if err != nil {
 		return err
 	}
+	if deployment != nil {
+		opctx.gatewayObj.Status.Resources.Deployment = &deployment.ObjectMeta
+		opctx.logger.WithField("name", deployment.Name).WithField("namespace", deployment.Namespace).Infoln("gateway deployment is updated")
+	}
 
-	gatewayDeployment, err := opctx.buildDeploymentResource()
+	service, err := opctx.updateGatewayService()
 	if err != nil {
 		return err
 	}
-
-	deployments, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).List(metav1.ListOptions{
-		LabelSelector: selector.String(),
-	})
-	if err != nil {
-		return err
+	if service != nil {
+		opctx.gatewayObj.Status.Resources.Service = &service.ObjectMeta
+		opctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is updated")
 	}
-	if len(deployments.Items) == 0 {
-		fmt.Println(gatewayDeployment.Name)
-		if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(gatewayDeployment); err != nil {
-			return err
-		}
-	} else {
-		deployment := deployments.Items[0]
-
-		gatewayDeploymentHash, err := common.GetObjectHash(gatewayDeployment)
-		if err != nil {
-			return err
-		}
-
-		if deployment.Annotations != nil && deployment.Annotations[common.AnnotationResourceSpecHash] != gatewayDeploymentHash {
-			deploymentBody, err := yaml.Marshal(gatewayDeployment)
-			if err != nil {
-				return err
-			}
-			if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Patch(deployment.Name, types.ApplyPatchType, deploymentBody); err != nil {
-				return err
-			}
-		}
-	}
-
-	if opctx.gatewayObj.Spec.Service != nil {
-		serviceObj, err := opctx.buildServiceResource()
-		if err != nil {
-			return err
-		}
-		fmt.Println(serviceObj.Name)
-
-		if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Update(serviceObj); err != nil {
-			return err
-		}
-	}
-
-	opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 	return nil
+}
+
+// updateGatewayDeployment updates the gateway deployment
+func (opctx *operationContext) updateGatewayDeployment() (*appv1.Deployment, error) {
+	newDeployment, err := opctx.buildDeploymentResource()
+	if err != nil {
+		return nil, err
+	}
+
+	oldDeploymentMetadata := opctx.gatewayObj.Status.Resources.Deployment
+	if oldDeploymentMetadata == nil {
+		return nil, errors.New("deployment metadata is expected to be set in gateway object")
+	}
+
+	oldDeployment, err := opctx.controller.k8sClient.AppsV1().Deployments(oldDeploymentMetadata.Namespace).Get(oldDeploymentMetadata.Name, metav1.GetOptions{})
+	if err != nil {
+		if apierr.IsNotFound(err) {
+			return opctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+		}
+		return nil, err
+	}
+
+	gatewayDeploymentHash, err := common.GetObjectHash(newDeployment)
+	if err != nil {
+		return nil, err
+	}
+
+	if oldDeployment.Annotations != nil && oldDeployment.Annotations[common.AnnotationResourceSpecHash] != gatewayDeploymentHash {
+		if err := opctx.controller.k8sClient.AppsV1().Deployments(oldDeployment.Namespace).Delete(oldDeployment.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		return opctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+	}
+
+	return nil, nil
+}
+
+// updateGatewayService updates the gateway service
+func (opctx *operationContext) updateGatewayService() (*corev1.Service, error) {
+	serviceObj, err := opctx.buildServiceResource()
+	if err != nil {
+		return nil, err
+	}
+	if serviceObj == nil && opctx.gatewayObj.Status.Resources.Service != nil {
+		if err := opctx.controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Status.Resources.Service.Namespace).Delete(opctx.gatewayObj.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+	}
+
+	if opctx.gatewayObj.Status.Resources.Service == nil {
+		return opctx.controller.k8sClient.CoreV1().Services(serviceObj.Namespace).Create(serviceObj)
+	}
+
+	oldServiceMetadata := opctx.gatewayObj.Status.Resources.Service
+	oldService, err := opctx.controller.k8sClient.CoreV1().Services(oldServiceMetadata.Namespace).Get(oldServiceMetadata.Name, metav1.GetOptions{})
+	if err != nil {
+		return opctx.controller.k8sClient.CoreV1().Services(serviceObj.Namespace).Create(serviceObj)
+	}
+
+	serviceHash, err := common.GetObjectHash(serviceObj)
+	if oldService.Annotations != nil && oldService.Annotations[common.AnnotationResourceSpecHash] != serviceHash {
+		if err := opctx.controller.k8sClient.CoreV1().Services(oldServiceMetadata.Namespace).Delete(oldServiceMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		if opctx.gatewayObj.Spec.Service != nil {
+			return opctx.controller.k8sClient.CoreV1().Services(serviceObj.Namespace).Create(serviceObj)
+		}
+	}
+
+	return nil, nil
 }

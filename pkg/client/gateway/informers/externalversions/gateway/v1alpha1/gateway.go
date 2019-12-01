@@ -18,16 +18,16 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"time"
+	time "time"
 
 	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/internalinterfaces"
-	"github.com/argoproj/argo-events/pkg/client/gateway/listers/gateway/v1alpha1"
+	versioned "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/argoproj/argo-events/pkg/client/gateway/listers/gateway/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/tools/cache"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+	watch "k8s.io/apimachinery/pkg/watch"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // GatewayInformer provides access to a shared informer and lister for

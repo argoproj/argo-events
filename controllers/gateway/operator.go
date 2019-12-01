@@ -63,26 +63,30 @@ func (opctx *operationContext) operate() error {
 
 	opctx.logger.WithField(common.LabelPhase, string(opctx.gatewayObj.Status.Phase)).Infoln("operating on the gateway...")
 
+	if err := Validate(opctx.gatewayObj); err != nil {
+		opctx.logger.WithError(err).Infoln("invalid gateway object")
+		return err
+	}
+
 	// check the state of a gateway and take actions accordingly
 	switch opctx.gatewayObj.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		if err := opctx.createGatewayResources(); err != nil {
-			opctx.logger.WithError(err).Errorln("failed to create resources for gateway object")
+			opctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
 			opctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
-
 		opctx.logger.Infoln("marking gateway as active")
-
 		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		opctx.logger.Errorln("gateway is in error state. please check the escalated K8 event for any error")
+		opctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
 		err := opctx.updateGatewayResources()
 		if err != nil {
 			return err
 		}
+		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
 
 	// Gateway is already running
 	case v1alpha1.NodePhaseRunning:
@@ -91,6 +95,10 @@ func (opctx *operationContext) operate() error {
 		if err != nil {
 			return err
 		}
+		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is updated")
+
+	case v1alpha1.NodePhaseNoOp:
+		opctx.logger.Infoln("no-op")
 
 	default:
 		opctx.logger.WithField(common.LabelPhase, string(opctx.gatewayObj.Status.Phase)).Errorln("unknown gateway phase")
