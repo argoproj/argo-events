@@ -17,13 +17,16 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // buildServiceResource builds a new service that exposes gateway.
@@ -60,22 +63,36 @@ func (opctx *operationContext) buildDeploymentResource() (*appv1.Deployment, err
 			Template: *podTemplate,
 		},
 	}
-	if deployment.Name == "" {
-		deployment.Name = opctx.gatewayObj.Name
-	}
+
+	// specifically set the deployment name to that of gateway name
+	deployment.Name = opctx.gatewayObj.Name
+
 	if deployment.Namespace == "" {
 		deployment.Namespace = opctx.gatewayObj.Namespace
 	}
 
+	if deployment.Spec.Template.Labels == nil {
+		deployment.Spec.Template.Labels = map[string]string{}
+	}
+	deployment.Spec.Template.Labels[common.LabelObjectName] = opctx.gatewayObj.Name
+
+	if deployment.Spec.Selector == nil {
+		deployment.Spec.Selector = &metav1.LabelSelector{
+			MatchLabels: map[string]string{},
+		}
+	}
+	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = opctx.gatewayObj.Name
+
+	opctx.setupContainersForGatewayDeployment(deployment)
+
 	if err := controllerscommon.SetObjectMeta(opctx.gatewayObj, deployment, opctx.gatewayObj.GroupVersionKind()); err != nil {
 		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
 	}
-	opctx.setupContainersForGatewayDeployment(deployment)
 	return deployment, nil
 }
 
 // containers required for gateway deployment
-func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *appv1.Deployment) {
+func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *appv1.Deployment) *appv1.Deployment {
 	// env variables
 	envVars := []corev1.EnvVar{
 		{
@@ -104,6 +121,7 @@ func (opctx *operationContext) setupContainersForGatewayDeployment(deployment *a
 		container.Env = append(container.Env, envVars...)
 		deployment.Spec.Template.Spec.Containers[i] = container
 	}
+	return deployment
 }
 
 // createGatewayResources creates K8s resources corresponding to a gateway object
@@ -165,6 +183,10 @@ func (opctx *operationContext) updateGatewayResources() error {
 		LabelSelector: selector.String(),
 	})
 	if err != nil {
+		return err
+	}
+	if len(deployments.Items) == 0 {
+		fmt.Println(gatewayDeployment.Name)
 		if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(gatewayDeployment); err != nil {
 			return err
 		}
@@ -177,11 +199,11 @@ func (opctx *operationContext) updateGatewayResources() error {
 		}
 
 		if deployment.Annotations != nil && deployment.Annotations[common.AnnotationResourceSpecHash] != gatewayDeploymentHash {
-			if err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Delete(deployment.Name, &metav1.DeleteOptions{}); err != nil {
+			deploymentBody, err := yaml.Marshal(gatewayDeployment)
+			if err != nil {
 				return err
 			}
-
-			if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Create(gatewayDeployment); err != nil {
+			if _, err := opctx.controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Patch(deployment.Name, types.ApplyPatchType, deploymentBody); err != nil {
 				return err
 			}
 		}
@@ -192,6 +214,7 @@ func (opctx *operationContext) updateGatewayResources() error {
 		if err != nil {
 			return err
 		}
+		fmt.Println(serviceObj.Name)
 
 		if _, err := opctx.controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Update(serviceObj); err != nil {
 			return err

@@ -117,4 +117,6 @@ const (
 	LabelEventSource = "event-source"
 	// LabelOwnerName is the label for resource owner name
 	LabelOwnerName = "owner-name"
+	// LabelObjectName is the label for object name
+	LabelObjectName = "object-name"
 )
