@@ -234,6 +234,11 @@ func (opctx *operationContext) updateGatewayService() (*corev1.Service, error) {
 	}
 
 	serviceHash, err := common.GetObjectHash(serviceObj)
+
+	if oldServiceMetadata == nil {
+		return nil, errors.New("service metadata is expected to be set in gateway object")
+	}
+
 	if oldService.Annotations != nil && oldService.Annotations[common.AnnotationResourceSpecHash] != serviceHash {
 		if err := opctx.controller.k8sClient.CoreV1().Services(oldServiceMetadata.Namespace).Delete(oldServiceMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
