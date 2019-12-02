@@ -114,7 +114,7 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 		return fmt.Errorf("trigger must define a name")
 	}
 	if template.Source == nil {
-		return fmt.Errorf("trigger '%sensorObj' does not contain an absolute action", template.Name)
+		return fmt.Errorf("trigger '%sensor' does not contain an absolute action", template.Name)
 	}
 	if template.GroupVersionResource == nil {
 		return fmt.Errorf("must provide group, version and kind for the resource")
@@ -211,26 +211,26 @@ func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 	currentT = time.Date(currentT.Year(), currentT.Month(), currentT.Day(), 0, 0, 0, 0, time.UTC)
 	currentTStr := currentT.Format(common.StandardYYYYMMDDFormat)
 	if tFilter.Start != "" && tFilter.Stop != "" {
-		startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensorObj %sensorObj", currentTStr, tFilter.Start))
+		startTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensor %sensor", currentTStr, tFilter.Start))
 		if err != nil {
 			return err
 		}
-		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensorObj %sensorObj", currentTStr, tFilter.Stop))
+		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensor %sensor", currentTStr, tFilter.Stop))
 		if err != nil {
 			return err
 		}
 		if stopTime.Before(startTime) || startTime.Equal(stopTime) {
-			return fmt.Errorf("invalid event time filter: stop '%sensorObj' is before or equal to start '%sensorObj", tFilter.Stop, tFilter.Start)
+			return fmt.Errorf("invalid event time filter: stop '%sensor' is before or equal to start '%sensor", tFilter.Stop, tFilter.Start)
 		}
 	}
 	if tFilter.Stop != "" {
-		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensorObj %sensorObj", currentTStr, tFilter.Stop))
+		stopTime, err := time.Parse(common.StandardTimeFormat, fmt.Sprintf("%sensor %sensor", currentTStr, tFilter.Stop))
 		if err != nil {
 			return err
 		}
 		stopTime = stopTime.UTC()
 		if stopTime.Before(currentT.UTC()) {
-			return fmt.Errorf("invalid event time filter: stop '%sensorObj' is before the current time '%sensorObj'", tFilter.Stop, currentT)
+			return fmt.Errorf("invalid event time filter: stop '%sensor' is before the current time '%sensor'", tFilter.Stop, currentT)
 		}
 	}
 	return nil

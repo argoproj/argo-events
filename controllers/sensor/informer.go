@@ -39,7 +39,7 @@ func (controller *Controller) instanceIDReq() (*labels.Requirement, error) {
 	return instanceIDReq, nil
 }
 
-// The sensor informer adds new sensors to the controller'sensorObj queue based on Add, Update, and Delete event handlers for the sensor resources
+// The sensor informer adds new sensors to the controller'sensor queue based on Add, Update, and Delete event handlers for the sensor resources
 func (controller *Controller) newSensorInformer() (cache.SharedIndexInformer, error) {
 	labelSelector, err := controller.instanceIDReq()
 	if err != nil {

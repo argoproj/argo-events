@@ -33,7 +33,7 @@ func TestValidateSensor(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		for _, file := range files {
 			fmt.Println("filename: ", file.Name())
-			content, err := ioutil.ReadFile(fmt.Sprintf("%sensorObj/%sensorObj", dir, file.Name()))
+			content, err := ioutil.ReadFile(fmt.Sprintf("%sensor/%sensor", dir, file.Name()))
 			convey.So(err, convey.ShouldBeNil)
 			var sensor *v1alpha1.Sensor
 			err = yaml.Unmarshal([]byte(content), &sensor)

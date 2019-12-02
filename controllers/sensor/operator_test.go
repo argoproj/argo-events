@@ -134,13 +134,13 @@ func TestSensorOperations(t *testing.T) {
 				convey.So(err, convey.ShouldBeNil)
 				waitForAllInformers(done, controller)
 
-				convey.Convey("Sensor should be marked as active with it'sensorObj nodes initialized", func() {
-					sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(soc.sensorObj.Namespace).Get(soc.sensorObj.Name, metav1.GetOptions{})
+				convey.Convey("Sensor should be marked as active with it'sensor nodes initialized", func() {
+					sensor, err = controller.sensorClient.ArgoprojV1alpha1().Sensors(soc.sensor.Namespace).Get(soc.sensor.Name, metav1.GetOptions{})
 					convey.So(err, convey.ShouldBeNil)
 					convey.So(sensor, convey.ShouldNotBeNil)
 					convey.So(sensor.Status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
 
-					for _, node := range soc.sensorObj.Status.Nodes {
+					for _, node := range soc.sensor.Status.Nodes {
 						switch node.Type {
 						case v1alpha1.NodeTypeEventDependency:
 							convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
@@ -236,8 +236,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.sensorObj.Spec.Template.Spec.RestartPolicy = "Never"
-					soc.sensorObj.Spec.EventProtocol.Http.Port = "1234"
+					soc.sensor.Spec.Template.Spec.RestartPolicy = "Never"
+					soc.sensor.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
 					convey.So(err, convey.ShouldBeNil)
@@ -333,8 +333,8 @@ func TestSensorOperations(t *testing.T) {
 				})
 
 				convey.Convey("Change pod and service spec", func() {
-					soc.sensorObj.Spec.Template.Spec.RestartPolicy = "Never"
-					soc.sensorObj.Spec.EventProtocol.Http.Port = "1234"
+					soc.sensor.Spec.Template.Spec.RestartPolicy = "Never"
+					soc.sensor.Spec.EventProtocol.Http.Port = "1234"
 
 					sensorPod, sensorSvc, err := getPodAndService(controller, sensor.Namespace)
 					convey.So(err, convey.ShouldBeNil)

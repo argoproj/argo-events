@@ -301,6 +301,15 @@ type TriggerStateLabels struct {
 	Failure map[string]string `json:"failure" protobuf:"bytes,2,opt,name=failure"`
 }
 
+// SensorResources holds the metadata of the resources created for the sensor
+type SensorResources struct {
+	// Deployment holds the metadata of the deployment for the sensor
+	Deployment *metav1.ObjectMeta `json:"deployment" protobuf:"bytes,1,name=deployment"`
+	// Service holds the metadata of the service for the sensor
+	// +optional
+	Service *metav1.ObjectMeta `json:"service,omitempty" protobuf:"bytes,2,opt,name=service"`
+}
+
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
 	// Phase is the high-level summary of the sensor
@@ -320,6 +329,8 @@ type SensorStatus struct {
 	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,7,opt,name=triggerCycleStatus"`
 	// LastCycleTime is the time when last trigger cycle completed
 	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,8,opt,name=lastCycleTime"`
+	// Resources refers to metadata of the resources created for the sensor
+	Resources *SensorResources `json:"resources" protobuf:"bytes,9,name=resources"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.

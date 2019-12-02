@@ -44,10 +44,10 @@ const (
 
 // ControllerConfig contain the configuration settings for the controller
 type ControllerConfig struct {
-	// InstanceID is a label selector to limit the controller'sensorObj watch of sensor jobs to a specific instance.
+	// InstanceID is a label selector to limit the controller'sensor watch of sensor jobs to a specific instance.
 	// If omitted, the controller watches sensors that *are not* labeled with an instance id.
 	InstanceID string
-	// Namespace is a label selector filter to limit controller'sensorObj watch to specific namespace
+	// Namespace is a label selector filter to limit controller'sensor watch to specific namespace
 	Namespace string
 }
 
@@ -57,7 +57,7 @@ type Controller struct {
 	ConfigMap string
 	// Namespace for controller
 	Namespace string
-	// Config is the controller'sensorObj configuration
+	// Config is the controller'sensor configuration
 	Config ControllerConfig
 	// logger to logger stuff
 	logger *logrus.Logger
@@ -118,7 +118,7 @@ func (controller *Controller) processNextItem() bool {
 	err = ctx.operate()
 	if err != nil {
 		if err := common.GenerateK8sEvent(controller.k8sClient,
-			fmt.Sprintf("failed to operate on sensor %sensorObj", s.Name),
+			fmt.Sprintf("failed to operate on sensor %sensor", s.Name),
 			common.EscalationEventType,
 			"sensor operation failed",
 			s.Name,
