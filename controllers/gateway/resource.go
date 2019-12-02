@@ -220,6 +220,7 @@ func (opctx *operationContext) updateGatewayService() (*corev1.Service, error) {
 		if err := opctx.controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Status.Resources.Service.Namespace).Delete(opctx.gatewayObj.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
+		return nil, nil
 	}
 
 	if opctx.gatewayObj.Status.Resources.Service == nil {

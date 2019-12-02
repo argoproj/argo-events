@@ -317,6 +317,8 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 			service, err := controller.k8sClient.CoreV1().Services(test.serviceMetadata.Namespace).Get(test.serviceMetadata.Name, metav1.GetOptions{})
 			assert.Equal(t, apierror.IsNotFound(err), test.serviceNotFound)
 
+			assert.NotNil(t, test.gatewayObj.Status.Resources)
+
 			if !test.deploymentNotFound {
 				assert.NotNil(t, deployment)
 				assert.NotNil(t, deployment.Labels)
@@ -349,14 +351,49 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 
 func TestResource_UpdateGatewayResource(t *testing.T) {
 	controller := newController()
-	opctx := newOperationCtx(gatewayObj, controller)
-	// Update gateway resources without the ones already deployed
-	err := opctx.updateGatewayResources()
-	assert.NotNil(t, err)
-	deployment, err := controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Template.Name, metav1.GetOptions{})
+	opctx := newOperationCtx(gatewayObj.DeepCopy(), controller)
+	err := opctx.createGatewayResources()
 	assert.Nil(t, err)
-	assert.NotNil(t, deployment)
-	service, err := controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Service.Name, metav1.GetOptions{})
-	assert.Nil(t, err)
-	assert.NotNil(t, service)
+
+	oldDeploymentMetadata := opctx.gatewayObj.Status.Resources.Deployment
+	oldServiceMetadata := opctx.gatewayObj.Status.Resources.Service
+
+	tests := []struct {
+		updateFunc      func()
+		name            string
+		serviceNotFound bool
+	}{
+		{
+			name: "update deployment resource on gateway template change",
+			updateFunc: func() {
+				opctx.gatewayObj.Spec.Template.Spec.Containers[0].ImagePullPolicy = corev1.PullIfNotPresent
+				opctx.gatewayObj.Spec.Service.Spec.Type = corev1.ServiceTypeClusterIP
+			},
+			serviceNotFound: false,
+		},
+		{
+			name: "delete service resource if gateway service spec is removed",
+			updateFunc: func() {
+				opctx.gatewayObj.Spec.Service = nil
+			},
+			serviceNotFound: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.updateFunc()
+			err := opctx.updateGatewayResources()
+			assert.Nil(t, err)
+			deployment, err := controller.k8sClient.AppsV1().Deployments(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Template.Name, metav1.GetOptions{})
+			assert.Nil(t, err)
+			assert.NotNil(t, deployment)
+			assert.NotEqual(t, deployment.Annotations[common.AnnotationResourceSpecHash], oldDeploymentMetadata.Annotations[common.AnnotationResourceSpecHash])
+			if !test.serviceNotFound {
+				service, err := controller.k8sClient.CoreV1().Services(opctx.gatewayObj.Namespace).Get(opctx.gatewayObj.Spec.Service.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotEqual(t, service.Annotations[common.AnnotationResourceSpecHash], oldServiceMetadata.Annotations[common.AnnotationResourceSpecHash])
+			}
+		})
+	}
 }
