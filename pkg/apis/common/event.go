@@ -103,10 +103,8 @@ type URI struct {
 // Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
 type EventProtocol struct {
 	Type EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
-
-	Http Http `json:"http" protobuf:"bytes,2,opt,name=http"`
-
-	Nats Nats `json:"nats" protobuf:"bytes,3,opt,name=nats"`
+	Http Http              `json:"http" protobuf:"bytes,2,opt,name=http"`
+	Nats Nats              `json:"nats" protobuf:"bytes,3,opt,name=nats"`
 }
 
 // Http contains the information required to setup a http server and listen to incoming events
