@@ -241,4 +241,5 @@ func (opctx *operationContext) updateService() (*corev1.Service, error) {
 		}
 		return opctx.controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
 	}
+	return nil, nil
 }

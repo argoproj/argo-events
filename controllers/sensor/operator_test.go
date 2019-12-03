@@ -116,7 +116,7 @@ func TestSensorOperations(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(sensor, convey.ShouldNotBeNil)
 
-		controller := getSensorController()
+		controller := getController()
 		soc := newOperationCtx(sensor, controller)
 		convey.ShouldPanic(soc.logger, nil)
 		convey.So(soc, convey.ShouldNotBeNil)

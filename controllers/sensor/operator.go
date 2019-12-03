@@ -254,7 +254,8 @@ func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor
 			return oldsensor, err
 		}
 
-		log.Info("re-applying updates on latest version and retrying update")
+		log.Infoln(err)
+		log.Infoln("re-applying updates on latest version and retrying update")
 		err = ReapplyUpdate(client, sensorObj)
 		if err != nil {
 			log.WithError(err).Error("failed to re-apply update")

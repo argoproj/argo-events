@@ -23,59 +23,71 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestSensorState(t *testing.T) {
 	fakeSensorClient := fakesensor.NewSimpleClientset()
 	logger := common.NewArgoEventsLogger()
-	sn := &v1alpha1.Sensor{
+	fakeSensor := &v1alpha1.Sensor{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-sensor",
 			Namespace: "test",
 		},
 	}
 
-	convey.Convey("Given a sensor", t, func() {
-		convey.Convey("Create the sensor", func() {
-			sn, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(sn.Namespace).Create(sn)
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(sn, convey.ShouldNotBeNil)
-		})
+	fakeSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Create(fakeSensor)
+	assert.Nil(t, err)
 
-		convey.Convey("Initialize a new node", func() {
-			status := InitializeNode(sn, "first_node", v1alpha1.NodeTypeEventDependency, logger)
-			convey.So(status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseNew)
-		})
+	tests := []struct {
+		name     string
+		testFunc func(t *testing.T)
+	}{
+		{
+			name: "initialize a new node",
+			testFunc: func(t *testing.T) {
+				status := InitializeNode(fakeSensor, "first_node", v1alpha1.NodeTypeEventDependency, logger)
+				assert.Equal(t, status.Phase, v1alpha1.NodePhaseNew)
+			},
+		},
+		{
+			name: "persist updates to the sensor",
+			testFunc: func(t *testing.T) {
+				sensor, err := PersistUpdates(fakeSensorClient, fakeSensor, logger)
+				assert.Nil(t, err)
+				assert.Equal(t, len(sensor.Status.Nodes), 1)
+			},
+		},
+		{
+			name: "mark node state to active",
+			testFunc: func(t *testing.T) {
+				status := MarkNodePhase(fakeSensor, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
+					Payload: []byte("test payload"),
+				}, logger)
+				assert.Equal(t, status.Phase, v1alpha1.NodePhaseActive)
+			},
+		},
+		{
+			name: "reapply the update",
+			testFunc: func(t *testing.T) {
+				err := ReapplyUpdate(fakeSensorClient, fakeSensor)
+				assert.Nil(t, err)
+			},
+		},
+		{
+			name: "fetch sensor and check updates are applied",
+			testFunc: func(t *testing.T) {
+				updatedSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Get(fakeSensor.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.Equal(t, len(updatedSensor.Status.Nodes), 1)
+			},
+		},
+	}
 
-		convey.Convey("Persist updates to sn", func() {
-			sensor, err := PersistUpdates(fakeSensorClient, sn, logger)
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(len(sensor.Status.Nodes), convey.ShouldEqual, 1)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.testFunc(t)
 		})
-
-		convey.Convey("Mark sn node state to active", func() {
-			status := MarkNodePhase(sn, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
-				Payload: []byte("test payload"),
-			}, logger)
-			convey.So(status.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
-		})
-
-		convey.Convey("Reapply sn update", func() {
-			err := ReapplyUpdate(fakeSensorClient, sn)
-			convey.So(err, convey.ShouldBeNil)
-		})
-
-		convey.Convey("Fetch sn and check updates are applied", func() {
-			sensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(sn.Namespace).Get(sn.Name, metav1.GetOptions{})
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(len(sensor.Status.Nodes), convey.ShouldEqual, 1)
-			convey.Convey("Get the first_node node", func() {
-				node := GetNodeByName(sensor, "first_node")
-				convey.So(node, convey.ShouldNotBeNil)
-				convey.So(node.Phase, convey.ShouldEqual, v1alpha1.NodePhaseActive)
-			})
-		})
-	})
+	}
 }
