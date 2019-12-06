@@ -170,8 +170,9 @@ func (opctx *operationContext) updateGatewayResources() error {
 	if service != nil {
 		opctx.gatewayObj.Status.Resources.Service = &service.ObjectMeta
 		opctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is updated")
+		return nil
 	}
-
+	opctx.gatewayObj.Status.Resources.Service = nil
 	return nil
 }
 
