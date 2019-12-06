@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -31,7 +32,7 @@ import (
 
 // the context of an operation on a sensor.
 // the controller creates this context each time it picks a Sensor off its queue.
-type operationContext struct {
+type sensorContext struct {
 	// sensor is the sensor object
 	sensor *v1alpha1.Sensor
 	// updated indicates whether the sensor object was updated and needs to be persisted back to k8
@@ -42,9 +43,9 @@ type operationContext struct {
 	controller *Controller
 }
 
-// newOperationCtx creates and initializes a new operationContext object
-func newOperationCtx(sensorObj *v1alpha1.Sensor, controller *Controller) *operationContext {
-	return &operationContext{
+// newSensorContext creates and initializes a new sensorContext object
+func newSensorContext(sensorObj *v1alpha1.Sensor, controller *Controller) *sensorContext {
+	return &sensorContext{
 		sensor:  sensorObj.DeepCopy(),
 		updated: false,
 		logger: common.NewArgoEventsLogger().WithFields(
@@ -57,186 +58,239 @@ func newOperationCtx(sensorObj *v1alpha1.Sensor, controller *Controller) *operat
 }
 
 // operate manages the lifecycle of a sensor object
-func (opctx *operationContext) operate() error {
-	defer opctx.updateSensorState()
+func (ctx *sensorContext) operate() error {
+	defer ctx.updateSensorState()
 
 	// Validation failure prevents any sort processing of the sensor object
-	if err := ValidateSensor(opctx.sensor); err != nil {
-		opctx.logger.WithError(err).Errorln("failed to validate sensor")
-		opctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+	if err := ValidateSensor(ctx.sensor); err != nil {
+		ctx.logger.WithError(err).Errorln("failed to validate sensor")
+		ctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 		return err
 	}
 
-	switch opctx.sensor.Status.Phase {
+	switch ctx.sensor.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		// If the sensor phase is new
 		// 1. Initialize all nodes - dependencies, dependency groups and triggers
 		// 2. Make dependencies and dependency groups as active
 		// 3. Create a deployment and service (if needed) for the sensor
-		opctx.logger.Infoln("initializing the sensor object...")
-		opctx.initializeAllNodes()
-		opctx.markDependencyNodesActive()
+		ctx.logger.Infoln("initializing the sensor object...")
+		ctx.initializeAllNodes()
+		ctx.markDependencyNodesActive()
 
-		err := opctx.createResources()
-		if err != nil {
-			return err
+		if err := ctx.createSensorResources(); err != nil {
+			return nil
 		}
-		opctx.logger.Infoln("successfully processed sensor state update")
+
+		ctx.logger.Infoln("successfully created resources for the sensor. sensor is in active state")
 
 	case v1alpha1.NodePhaseActive:
-		// If the sensor is already active and if the sensor podTemplate spec has changed, then update the corresponding deployment
-		opctx.logger.Infoln("sensor is already running, checking for updates to the sensor object...")
-		err := opctx.updateResources()
-		if err != nil {
+		ctx.logger.Infoln("checking for updates to the sensor object")
+		if err := ctx.updateSensorResources(); err != nil {
 			return err
 		}
-		opctx.logger.Infoln("successfully processed sensor state update")
+		ctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
 		// If the sensor is in error state and if the sensor podTemplate spec has changed, then update the corresponding deployment
-		opctx.logger.Info("sensor is in error state, checking for updates to the sensor object...")
-		err := opctx.updateResources()
-		if err != nil {
+		ctx.logger.Info("sensor is in error state, checking for updates to the sensor object")
+		if err := ctx.updateSensorResources(); err != nil {
 			return err
 		}
-		opctx.logger.Infoln("successfully processed sensor state update")
+		ctx.logger.Infoln("successfully processed the update")
 	}
 
 	return nil
 }
 
+// createSensorResources creates the K8s resources for a sensor object
+func (ctx *sensorContext) createSensorResources() error {
+	if ctx.sensor.Status.Resources == nil {
+		ctx.sensor.Status.Resources = &v1alpha1.SensorResources{}
+	}
+
+	ctx.logger.Infoln("generating deployment specification for the sensor")
+	deployment, err := ctx.deploymentBuilder()
+	if err != nil {
+		return err
+	}
+
+	ctx.logger.WithField("name", deployment.Name).Infoln("creating the deployment resource for the sensor")
+	deployment, err = ctx.createDeployment(deployment)
+	if err != nil {
+		return err
+	}
+	ctx.sensor.Status.Resources.Deployment = &deployment.ObjectMeta
+
+	if ctx.sensor.Spec.EventProtocol.Type == apicommon.HTTP {
+		ctx.logger.Infoln("generating service specification for the sensor")
+		service, err := ctx.serviceBuilder()
+		if err != nil {
+			return err
+		}
+
+		ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
+		service, err = ctx.createService(service)
+		if err != nil {
+			return err
+		}
+		ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+		return err
+	}
+	return nil
+}
+
+// updateSensorResources updates the sensor resources
+func (ctx *sensorContext) updateSensorResources() error {
+	deployment, err := ctx.updateDeployment()
+	if err != nil {
+		return err
+	}
+	ctx.sensor.Status.Resources.Deployment = &deployment.ObjectMeta
+	service, err := ctx.updateService()
+	if err != nil {
+		return err
+	}
+	if service == nil {
+		ctx.sensor.Status.Resources.Service = nil
+		return nil
+	}
+	ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+	return nil
+}
+
 // updateSensorState updates the sensor resource state
-func (opctx *operationContext) updateSensorState() {
-	if opctx.updated {
+func (ctx *sensorContext) updateSensorState() {
+	if ctx.updated {
 		// persist updates to sensor resource
 		labels := map[string]string{
-			common.LabelSensorName:    opctx.sensor.Name,
-			LabelPhase:                string(opctx.sensor.Status.Phase),
-			LabelControllerInstanceID: opctx.controller.Config.InstanceID,
+			common.LabelSensorName:    ctx.sensor.Name,
+			LabelPhase:                string(ctx.sensor.Status.Phase),
+			LabelControllerInstanceID: ctx.controller.Config.InstanceID,
 			common.LabelOperation:     "persist_state_update",
 		}
 		eventType := common.StateChangeEventType
 
-		updatedSensor, err := PersistUpdates(opctx.controller.sensorClient, opctx.sensor, opctx.logger)
+		updatedSensor, err := PersistUpdates(ctx.controller.sensorClient, ctx.sensor, ctx.logger)
 		if err != nil {
-			opctx.logger.WithError(err).Errorln("failed to persist sensor update")
+			ctx.logger.WithError(err).Errorln("failed to persist sensor update")
 
 			// escalate failure
 			eventType = common.EscalationEventType
 		}
 
 		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
-		opctx.sensor = updatedSensor
+		ctx.sensor = updatedSensor
 
 		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(opctx.controller.k8sClient,
+		if err := common.GenerateK8sEvent(ctx.controller.k8sClient,
 			"persist update",
 			eventType,
 			"sensor state update",
-			opctx.sensor.Name,
-			opctx.sensor.Namespace,
-			opctx.controller.Config.InstanceID,
+			ctx.sensor.Name,
+			ctx.sensor.Namespace,
+			ctx.controller.Config.InstanceID,
 			sensor.Kind,
 			labels); err != nil {
-			opctx.logger.WithError(err).Error("failed to create K8s event to logger sensor state persist operation")
+			ctx.logger.WithError(err).Error("failed to create K8s event to logger sensor state persist operation")
 			return
 		}
-		opctx.logger.Info("successfully persisted sensor resource update and created K8s event")
+		ctx.logger.Info("successfully persisted sensor resource update and created K8s event")
 	}
-	opctx.updated = false
+	ctx.updated = false
 }
 
 // mark the overall sensor phase
-func (opctx *operationContext) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
-	justCompleted := opctx.sensor.Status.Phase != phase
+func (ctx *sensorContext) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
+	justCompleted := ctx.sensor.Status.Phase != phase
 	if justCompleted {
-		opctx.logger.WithFields(
+		ctx.logger.WithFields(
 			map[string]interface{}{
-				"old": string(opctx.sensor.Status.Phase),
+				"old": string(ctx.sensor.Status.Phase),
 				"new": string(phase),
 			},
 		).Infoln("phase updated")
 
-		opctx.sensor.Status.Phase = phase
+		ctx.sensor.Status.Phase = phase
 
-		if opctx.sensor.ObjectMeta.Labels == nil {
-			opctx.sensor.ObjectMeta.Labels = make(map[string]string)
+		if ctx.sensor.ObjectMeta.Labels == nil {
+			ctx.sensor.ObjectMeta.Labels = make(map[string]string)
 		}
 
-		if opctx.sensor.ObjectMeta.Annotations == nil {
-			opctx.sensor.ObjectMeta.Annotations = make(map[string]string)
+		if ctx.sensor.ObjectMeta.Annotations == nil {
+			ctx.sensor.ObjectMeta.Annotations = make(map[string]string)
 		}
 
-		opctx.sensor.ObjectMeta.Labels[LabelPhase] = string(phase)
-		opctx.sensor.ObjectMeta.Annotations[LabelPhase] = string(phase)
+		ctx.sensor.ObjectMeta.Labels[LabelPhase] = string(phase)
+		ctx.sensor.ObjectMeta.Annotations[LabelPhase] = string(phase)
 	}
 
-	if opctx.sensor.Status.StartedAt.IsZero() {
-		opctx.sensor.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
+	if ctx.sensor.Status.StartedAt.IsZero() {
+		ctx.sensor.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 	}
 
-	if len(message) > 0 && opctx.sensor.Status.Message != message[0] {
-		opctx.logger.WithFields(
+	if len(message) > 0 && ctx.sensor.Status.Message != message[0] {
+		ctx.logger.WithFields(
 			map[string]interface{}{
-				"old": opctx.sensor.Status.Message,
+				"old": ctx.sensor.Status.Message,
 				"new": message[0],
 			},
 		).Infoln("sensor message updated")
 
-		opctx.sensor.Status.Message = message[0]
+		ctx.sensor.Status.Message = message[0]
 	}
 
 	switch phase {
 	case v1alpha1.NodePhaseError:
 		if markComplete && justCompleted {
-			opctx.logger.Infoln("marking sensor state as complete")
-			opctx.sensor.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
+			ctx.logger.Infoln("marking sensor state as complete")
+			ctx.sensor.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
 
-			if opctx.sensor.ObjectMeta.Labels == nil {
-				opctx.sensor.ObjectMeta.Labels = make(map[string]string)
+			if ctx.sensor.ObjectMeta.Labels == nil {
+				ctx.sensor.ObjectMeta.Labels = make(map[string]string)
 			}
-			if opctx.sensor.ObjectMeta.Annotations == nil {
-				opctx.sensor.ObjectMeta.Annotations = make(map[string]string)
+			if ctx.sensor.ObjectMeta.Annotations == nil {
+				ctx.sensor.ObjectMeta.Annotations = make(map[string]string)
 			}
 
-			opctx.sensor.ObjectMeta.Labels[LabelComplete] = "true"
-			opctx.sensor.ObjectMeta.Annotations[LabelComplete] = string(phase)
+			ctx.sensor.ObjectMeta.Labels[LabelComplete] = "true"
+			ctx.sensor.ObjectMeta.Annotations[LabelComplete] = string(phase)
 		}
 	}
-	opctx.updated = true
+	ctx.updated = true
 }
 
 // initializeAllNodes initializes nodes of all types within a sensor
-func (opctx *operationContext) initializeAllNodes() {
+func (ctx *sensorContext) initializeAllNodes() {
 	// Initialize all event dependency nodes
-	for _, dependency := range opctx.sensor.Spec.Dependencies {
-		InitializeNode(opctx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, opctx.logger)
+	for _, dependency := range ctx.sensor.Spec.Dependencies {
+		InitializeNode(ctx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, ctx.logger)
 	}
 
 	// Initialize all dependency groups
-	if opctx.sensor.Spec.DependencyGroups != nil {
-		for _, group := range opctx.sensor.Spec.DependencyGroups {
-			InitializeNode(opctx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, opctx.logger)
+	if ctx.sensor.Spec.DependencyGroups != nil {
+		for _, group := range ctx.sensor.Spec.DependencyGroups {
+			InitializeNode(ctx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, ctx.logger)
 		}
 	}
 
 	// Initialize all trigger nodes
-	for _, trigger := range opctx.sensor.Spec.Triggers {
-		InitializeNode(opctx.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, opctx.logger)
+	for _, trigger := range ctx.sensor.Spec.Triggers {
+		InitializeNode(ctx.sensor, trigger.Template.Name, v1alpha1.NodeTypeTrigger, ctx.logger)
 	}
 }
 
 // markDependencyNodesActive marks phase of all dependencies and dependency groups as active
-func (opctx *operationContext) markDependencyNodesActive() {
+func (ctx *sensorContext) markDependencyNodesActive() {
 	// Mark all event dependency nodes as active
-	for _, dependency := range opctx.sensor.Spec.Dependencies {
-		MarkNodePhase(opctx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, opctx.logger, "node is active")
+	for _, dependency := range ctx.sensor.Spec.Dependencies {
+		MarkNodePhase(ctx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, ctx.logger, "node is active")
 	}
 
 	// Mark all dependency groups as active
-	if opctx.sensor.Spec.DependencyGroups != nil {
-		for _, group := range opctx.sensor.Spec.DependencyGroups {
-			MarkNodePhase(opctx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, opctx.logger, "node is active")
+	if ctx.sensor.Spec.DependencyGroups != nil {
+		for _, group := range ctx.sensor.Spec.DependencyGroups {
+			MarkNodePhase(ctx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, ctx.logger, "node is active")
 		}
 	}
 }

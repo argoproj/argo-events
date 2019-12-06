@@ -113,7 +113,7 @@ func (controller *Controller) processNextItem() bool {
 		return true
 	}
 
-	ctx := newOperationCtx(s, controller)
+	ctx := newSensorContext(s, controller)
 
 	err = ctx.operate()
 	if err != nil {

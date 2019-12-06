@@ -32,6 +32,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
   name: minio-sensor
+
   namespace: argo-events
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
@@ -117,7 +118,7 @@ func TestSensorOperations(t *testing.T) {
 		convey.So(sensor, convey.ShouldNotBeNil)
 
 		controller := getController()
-		soc := newOperationCtx(sensor, controller)
+		soc := newSensorContext(sensor, controller)
 		convey.ShouldPanic(soc.logger, nil)
 		convey.So(soc, convey.ShouldNotBeNil)
 
