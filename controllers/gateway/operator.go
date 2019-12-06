@@ -31,9 +31,9 @@ import (
 
 // the context of an operation in the controller.
 // the controller creates this context each time it picks a Gateway off its queue.
-type operationContext struct {
-	// gatewayObj is the controller object
-	gatewayObj *v1alpha1.Gateway
+type gatewayContext struct {
+	// gateway is the controller object
+	gateway *v1alpha1.Gateway
 	// updated indicates whether the controller object was updated and needs to be persisted back to k8
 	updated bool
 	// logger is the logger for a gateway
@@ -42,12 +42,12 @@ type operationContext struct {
 	controller *Controller
 }
 
-// newOperationCtx creates and initializes a new operationContext object
-func newOperationCtx(gatewayObj *v1alpha1.Gateway, controller *Controller) *operationContext {
+// newGatewayContext creates and initializes a new gatewayContext object
+func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *gatewayContext {
 	gatewayObj = gatewayObj.DeepCopy()
-	return &operationContext{
-		gatewayObj: gatewayObj,
-		updated:    false,
+	return &gatewayContext{
+		gateway: gatewayObj,
+		updated: false,
 		logger: common.NewArgoEventsLogger().WithFields(
 			map[string]interface{}{
 				common.LabelResourceName: gatewayObj.Name,
@@ -58,18 +58,18 @@ func newOperationCtx(gatewayObj *v1alpha1.Gateway, controller *Controller) *oper
 }
 
 // operate checks the status of gateway resource and takes action based on it.
-func (opctx *operationContext) operate() error {
+func (opctx *gatewayContext) operate() error {
 	defer opctx.updateGatewayState()
 
-	opctx.logger.WithField(common.LabelPhase, string(opctx.gatewayObj.Status.Phase)).Infoln("operating on the gateway...")
+	opctx.logger.WithField(common.LabelPhase, string(opctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
 
-	if err := Validate(opctx.gatewayObj); err != nil {
+	if err := Validate(opctx.gateway); err != nil {
 		opctx.logger.WithError(err).Infoln("invalid gateway object")
 		return err
 	}
 
 	// check the state of a gateway and take actions accordingly
-	switch opctx.gatewayObj.Status.Phase {
+	switch opctx.gateway.Status.Phase {
 	case v1alpha1.NodePhaseNew:
 		if err := opctx.createGatewayResources(); err != nil {
 			opctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
@@ -101,24 +101,24 @@ func (opctx *operationContext) operate() error {
 		opctx.logger.Infoln("no-op")
 
 	default:
-		opctx.logger.WithField(common.LabelPhase, string(opctx.gatewayObj.Status.Phase)).Errorln("unknown gateway phase")
+		opctx.logger.WithField(common.LabelPhase, string(opctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
 	}
 	return nil
 }
 
 // updateGatewayState updates the gateway state
-func (opctx *operationContext) updateGatewayState() {
+func (opctx *gatewayContext) updateGatewayState() {
 	if opctx.updated {
 		var err error
 		eventType := common.StateChangeEventType
 		labels := map[string]string{
-			common.LabelResourceName:  opctx.gatewayObj.Name,
-			LabelPhase:                string(opctx.gatewayObj.Status.Phase),
+			common.LabelResourceName:  opctx.gateway.Name,
+			LabelPhase:                string(opctx.gateway.Status.Phase),
 			LabelControllerInstanceID: opctx.controller.Config.InstanceID,
 			common.LabelOperation:     "persist_gateway_state",
 		}
 
-		opctx.gatewayObj, err = PersistUpdates(opctx.controller.gatewayClient, opctx.gatewayObj, opctx.logger)
+		opctx.gateway, err = PersistUpdates(opctx.controller.gatewayClient, opctx.gateway, opctx.logger)
 		if err != nil {
 			opctx.logger.WithError(err).Errorln("failed to persist gateway update, escalating...")
 			eventType = common.EscalationEventType
@@ -129,8 +129,8 @@ func (opctx *operationContext) updateGatewayState() {
 			"persist update",
 			eventType,
 			"gateway state update",
-			opctx.gatewayObj.Name,
-			opctx.gatewayObj.Namespace,
+			opctx.gateway.Name,
+			opctx.gateway.Namespace,
 			opctx.controller.Config.InstanceID,
 			gateway.Kind,
 			labels,
@@ -144,41 +144,41 @@ func (opctx *operationContext) updateGatewayState() {
 }
 
 // mark the gateway phase
-func (opctx *operationContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
-	justCompleted := opctx.gatewayObj.Status.Phase != phase
+func (opctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
+	justCompleted := opctx.gateway.Status.Phase != phase
 	if justCompleted {
 		opctx.logger.WithFields(
 			map[string]interface{}{
-				"old": string(opctx.gatewayObj.Status.Phase),
+				"old": string(opctx.gateway.Status.Phase),
 				"new": string(phase),
 			},
 		).Infoln("phase changed")
 
-		opctx.gatewayObj.Status.Phase = phase
-		if opctx.gatewayObj.ObjectMeta.Labels == nil {
-			opctx.gatewayObj.ObjectMeta.Labels = make(map[string]string)
+		opctx.gateway.Status.Phase = phase
+		if opctx.gateway.ObjectMeta.Labels == nil {
+			opctx.gateway.ObjectMeta.Labels = make(map[string]string)
 		}
-		if opctx.gatewayObj.Annotations == nil {
-			opctx.gatewayObj.Annotations = make(map[string]string)
+		if opctx.gateway.Annotations == nil {
+			opctx.gateway.Annotations = make(map[string]string)
 		}
 
-		opctx.gatewayObj.ObjectMeta.Labels[LabelPhase] = string(phase)
+		opctx.gateway.ObjectMeta.Labels[LabelPhase] = string(phase)
 		// add annotations so a resource sensor can watch this gateway.
-		opctx.gatewayObj.Annotations[LabelPhase] = string(phase)
+		opctx.gateway.Annotations[LabelPhase] = string(phase)
 	}
 
-	if opctx.gatewayObj.Status.StartedAt.IsZero() {
-		opctx.gatewayObj.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
+	if opctx.gateway.Status.StartedAt.IsZero() {
+		opctx.gateway.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 	}
 
 	opctx.logger.WithFields(
 		map[string]interface{}{
-			"old": string(opctx.gatewayObj.Status.Message),
+			"old": string(opctx.gateway.Status.Message),
 			"new": message,
 		},
 	).Infoln("phase change message")
 
-	opctx.gatewayObj.Status.Message = message
+	opctx.gateway.Status.Message = message
 	opctx.updated = true
 }
 

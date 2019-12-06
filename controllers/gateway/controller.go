@@ -112,7 +112,7 @@ func (c *Controller) processNextItem() bool {
 		return true
 	}
 
-	ctx := newOperationCtx(gw, c)
+	ctx := newGatewayContext(gw, c)
 
 	err = ctx.operate()
 	if err != nil {
