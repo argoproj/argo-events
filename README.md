@@ -35,6 +35,7 @@ To learn more about Argo Events, [go to complete documentation](https://argoproj
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
 1. [BlackRock](https://www.blackrock.com/)
 2. [Viaduct](https://www.viaduct.ai/)
+3. [Fairwinds](https://fairwinds.com/)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
