@@ -19,9 +19,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
-	"time"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -29,9 +26,9 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
+	"io"
 )
 
 // setupInternalEventSources sets up an internal representation of event sources within given EventSource resource
@@ -58,8 +55,7 @@ func (gatewayCfg *GatewayConfig) setupInternalEventSources(eventSourceName strin
 	conn, err := grpc.Dial(
 		fmt.Sprintf("localhost:%s", gatewayCfg.serverPort),
 		grpc.WithBlock(),
-		grpc.WithInsecure(),
-		grpc.WithTimeout(common.ServerConnTimeout*time.Second))
+		grpc.WithInsecure())
 	if err != nil {
 		logger.WithError(err).Errorln("failed to connect to gateway server")
 		cancel()
@@ -69,11 +65,10 @@ func (gatewayCfg *GatewayConfig) setupInternalEventSources(eventSourceName strin
 
 	internalEventSources[hashKey] = &EventSourceContext{
 		source: &gateways.EventSource{
-			Id:      hashKey,
-			Name:    eventSourceName,
-			Value:   value,
-			Version: gatewayCfg.gateway.Spec.Version,
-			Type:    string(gatewayCfg.gateway.Spec.Type),
+			Id:    hashKey,
+			Name:  eventSourceName,
+			Value: value,
+			Type:  string(gatewayCfg.gateway.Spec.Type),
 		},
 		cancel: cancel,
 		ctx:    ctx,
@@ -346,10 +341,6 @@ func (gatewayCfg *GatewayConfig) stopEventSources(eventSourceNames []string) {
 
 // manageEventSources syncs active event-sources and the updated ones
 func (gatewayCfg *GatewayConfig) manageEventSources(eventSource *eventSourceV1Alpha1.EventSource) error {
-	if gatewayCfg.gateway.Spec.Version != eventSource.Spec.Version {
-		return errors.Errorf("gateway and event-source version mismatch. gateway-version: %s, event-source-version: %s", gatewayCfg.gateway.Spec.Version, eventSource.Spec.Version)
-	}
-
 	internalEventSources, err := gatewayCfg.createInternalEventSources(eventSource)
 	if err != nil {
 		return err

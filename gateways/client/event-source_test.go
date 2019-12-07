@@ -126,7 +126,6 @@ func TestEventSources(t *testing.T) {
 			convey.So(data.source.Value, convey.ShouldEqual, `
 testKey: testValue
 `)
-			convey.So(data.source.Version, convey.ShouldEqual, "v0.10")
 		}
 	})
 

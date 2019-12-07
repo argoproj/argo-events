@@ -27,8 +27,5 @@ func ValidateEventSource(eventSource *EventSource) error {
 	if eventSource.Spec == nil {
 		return errors.New("event source specification can't be nil")
 	}
-	if eventSource.Spec.Version == "" {
-		return errors.New("event source version can't be empty")
-	}
 	return nil
 }

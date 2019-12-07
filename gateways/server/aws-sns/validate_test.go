@@ -48,11 +48,10 @@ func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 			body, err := yaml.Marshal(value)
 			convey.So(err, convey.ShouldBeNil)
 			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-				Name:    key,
-				Id:      common.Hasher(key),
-				Value:   body,
-				Version: eventSource.Spec.Version,
-				Type:    string(eventSource.Spec.Type),
+				Name:  key,
+				Id:    common.Hasher(key),
+				Value: body,
+				Type:  string(eventSource.Spec.Type),
 			})
 			convey.So(valid, convey.ShouldNotBeNil)
 			convey.So(valid.IsValid, convey.ShouldBeTrue)

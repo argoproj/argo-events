@@ -19,30 +19,31 @@ package common
 import (
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/argoproj/argo-events/common"
+	"github.com/stretchr/testify/assert"
+	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func TestSetObjectMeta(t *testing.T) {
-	convey.Convey("Given an object, set meta", t, func() {
-		groupVersionKind := schema.GroupVersionKind{
-			Group:   "grp",
-			Version: "ver",
-			Kind:    "kind",
-		}
-		owner := corev1.Pod{}
-		pod := corev1.Pod{}
-		ref := metav1.NewControllerRef(&owner, groupVersionKind)
+	owner := appv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-deployment",
+			Namespace: "fake-namespace",
+		},
+	}
+	pod := corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "fake-pod",
+		},
+	}
 
-		err := SetObjectMeta(&owner, &pod, groupVersionKind)
-		convey.So(err, convey.ShouldBeEmpty)
-		convey.So(pod.Labels["foo"], convey.ShouldEqual, "")
-		convey.So(pod.Labels["id"], convey.ShouldEqual, "ID")
-		convey.So(pod.Annotations, convey.ShouldContainKey, "hash")
-		convey.So(pod.Name, convey.ShouldEqual, "")
-		convey.So(pod.GenerateName, convey.ShouldEqual, "")
-		convey.So(pod.OwnerReferences, convey.ShouldContain, *ref)
-	})
+	err := SetObjectMeta(&owner, &pod, owner.GroupVersionKind())
+	assert.Nil(t, err)
+	assert.Equal(t, "fake-namespace", pod.Namespace)
+	assert.Equal(t, owner.GroupVersionKind().Kind, pod.OwnerReferences[0].Kind)
+	assert.NotEmpty(t, pod.Annotations[common.AnnotationResourceSpecHash])
+	assert.NotEmpty(t, pod.Labels)
+	assert.Equal(t, owner.Name, pod.Labels[common.LabelOwnerName])
 }

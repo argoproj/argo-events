@@ -75,7 +75,6 @@ func (gatewayCfg *GatewayConfig) transformEvent(gatewayEvent *gateways.Event) (*
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
 			EventType:          string(gatewayCfg.gateway.Spec.Type),
-			EventTypeVersion:   gatewayCfg.gateway.Spec.Version,
 			Source: &apicommon.URI{
 				Host: common.DefaultEventSourceName(gatewayCfg.gateway.Name, gatewayEvent.Name),
 			},

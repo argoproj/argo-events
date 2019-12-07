@@ -28,8 +28,6 @@ message EventSource {
     bytes value = 3;
     // Type of the event source
     string type = 4;
-    // Version of the event source
-    string version = 5;
 }
 
 /**
