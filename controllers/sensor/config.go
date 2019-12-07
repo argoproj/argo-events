@@ -70,7 +70,7 @@ func (controller *Controller) newControllerConfigMapWatch() *cache.ListWatch {
 	x := controller.k8sClient.CoreV1().RESTClient()
 	resource := "configmaps"
 	name := controller.ConfigMap
-	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%sensor", name))
+	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
@@ -105,7 +105,7 @@ func (controller *Controller) ResyncConfig(namespace string) error {
 func (controller *Controller) updateConfig(cm *corev1.ConfigMap) error {
 	configStr, ok := cm.Data[common.ControllerConfigMapKey]
 	if !ok {
-		return errors.Errorf("configMap '%sensor' does not have key '%sensor'", controller.ConfigMap, common.ControllerConfigMapKey)
+		return errors.Errorf("configMap '%s' does not have key '%s'", controller.ConfigMap, common.ControllerConfigMapKey)
 	}
 	var config ControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)

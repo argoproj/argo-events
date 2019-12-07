@@ -124,5 +124,39 @@ func TestMarkSensorPhase(t *testing.T) {
 }
 
 func TestInitializeAllNodes(t *testing.T) {
+	controller := getController()
+	ctx := newSensorContext(sensorObj.DeepCopy(), controller)
+	ctx.initializeAllNodes()
+	for _, node := range ctx.sensor.Status.Nodes {
+		assert.Equal(t, v1alpha1.NodePhaseNew, node.Phase)
+		assert.NotEmpty(t, node.Name)
+		assert.NotEmpty(t, node.ID)
+	}
+}
 
+func TestMarkDependencyNodesActive(t *testing.T) {
+	controller := getController()
+	ctx := newSensorContext(sensorObj.DeepCopy(), controller)
+	ctx.initializeAllNodes()
+	ctx.markDependencyNodesActive()
+	for _, node := range ctx.sensor.Status.Nodes {
+		if node.Type == v1alpha1.NodeTypeEventDependency {
+			assert.Equal(t, v1alpha1.NodePhaseActive, node.Phase)
+		} else {
+			assert.Equal(t, v1alpha1.NodePhaseNew, node.Phase)
+		}
+	}
+}
+
+func TestPersistUpdates(t *testing.T) {
+	controller := getController()
+	ctx := newSensorContext(sensorObj.DeepCopy(), controller)
+	sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensorObj.Namespace).Create(sensorObj)
+	assert.Nil(t, err)
+	ctx.sensor = sensor.DeepCopy()
+	ctx.sensor.Spec.Circuit = "fake-group"
+	sensor, err = PersistUpdates(controller.sensorClient, ctx.sensor.DeepCopy(), ctx.logger)
+	assert.Nil(t, err)
+	assert.Equal(t, "fake-group", sensor.Spec.Circuit)
+	assert.Equal(t, "fake-group", ctx.sensor.Spec.Circuit)
 }

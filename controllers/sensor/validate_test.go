@@ -20,26 +20,22 @@ import (
 	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
-
-	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestValidateSensor(t *testing.T) {
 	dir := "../../examples/sensors"
-	convey.Convey("Validate list of sensor", t, func() {
-		files, err := ioutil.ReadDir(dir)
-		convey.So(err, convey.ShouldBeNil)
-		for _, file := range files {
-			fmt.Println("filename: ", file.Name())
-			content, err := ioutil.ReadFile(fmt.Sprintf("%sensor/%sensor", dir, file.Name()))
-			convey.So(err, convey.ShouldBeNil)
-			var sensor *v1alpha1.Sensor
-			err = yaml.Unmarshal([]byte(content), &sensor)
-			convey.So(err, convey.ShouldBeNil)
-			err = ValidateSensor(sensor)
-			convey.So(err, convey.ShouldBeNil)
-		}
-	})
+	files, err := ioutil.ReadDir(dir)
+	assert.Nil(t, err)
+	for _, file := range files {
+		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
+		assert.Nil(t, err)
+		var sensor *v1alpha1.Sensor
+		err = yaml.Unmarshal([]byte(content), &sensor)
+		assert.Nil(t, err)
+		err = ValidateSensor(sensor)
+		assert.Nil(t, err)
+	}
 }

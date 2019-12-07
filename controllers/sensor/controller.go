@@ -118,7 +118,7 @@ func (controller *Controller) processNextItem() bool {
 	err = ctx.operate()
 	if err != nil {
 		if err := common.GenerateK8sEvent(controller.k8sClient,
-			fmt.Sprintf("failed to operate on sensor %sensor", s.Name),
+			fmt.Sprintf("failed to operate on sensor %s", s.Name),
 			common.EscalationEventType,
 			"sensor operation failed",
 			s.Name,
