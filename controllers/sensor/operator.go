@@ -61,6 +61,8 @@ func newSensorContext(sensorObj *v1alpha1.Sensor, controller *Controller) *senso
 func (ctx *sensorContext) operate() error {
 	defer ctx.updateSensorState()
 
+	ctx.logger.Infoln("processing the sensor")
+
 	// Validation failure prevents any sort processing of the sensor object
 	if err := ValidateSensor(ctx.sensor); err != nil {
 		ctx.logger.WithError(err).Errorln("failed to validate sensor")
@@ -74,29 +76,35 @@ func (ctx *sensorContext) operate() error {
 		// 1. Initialize all nodes - dependencies, dependency groups and triggers
 		// 2. Make dependencies and dependency groups as active
 		// 3. Create a deployment and service (if needed) for the sensor
-		ctx.logger.Infoln("initializing the sensor object...")
 		ctx.initializeAllNodes()
 		ctx.markDependencyNodesActive()
 
 		if err := ctx.createSensorResources(); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to create resources for the sensor")
+			ctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return nil
 		}
 
+		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
 		ctx.logger.Infoln("successfully created resources for the sensor. sensor is in active state")
 
 	case v1alpha1.NodePhaseActive:
 		ctx.logger.Infoln("checking for updates to the sensor object")
 		if err := ctx.updateSensorResources(); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
+		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is updated")
 		ctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
 		// If the sensor is in error state and if the sensor podTemplate spec has changed, then update the corresponding deployment
 		ctx.logger.Info("sensor is in error state, checking for updates to the sensor object")
 		if err := ctx.updateSensorResources(); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
+		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
 		ctx.logger.Infoln("successfully processed the update")
 	}
 

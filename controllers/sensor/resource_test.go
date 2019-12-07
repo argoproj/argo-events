@@ -67,6 +67,11 @@ var sensorObj = &v1alpha1.Sensor{
 				},
 			},
 		},
+		Dependencies: []v1alpha1.EventDependency{
+			{
+				Name: "fake-gateway:fake-one",
+			},
+		},
 	},
 }
 
