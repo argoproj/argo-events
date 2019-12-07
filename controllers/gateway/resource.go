@@ -68,17 +68,6 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 	}
 	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = ctx.gateway.Name
 
-	ctx.setupContainersForGatewayDeployment(deployment)
-
-	if err := controllerscommon.SetObjectMeta(ctx.gateway, deployment, ctx.gateway.GroupVersionKind()); err != nil {
-		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
-	}
-	return deployment, nil
-}
-
-// containers required for gateway deployment
-func (ctx *gatewayContext) setupContainersForGatewayDeployment(deployment *appv1.Deployment) *appv1.Deployment {
-	// env variables
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarNamespace,
@@ -106,7 +95,11 @@ func (ctx *gatewayContext) setupContainersForGatewayDeployment(deployment *appv1
 		container.Env = append(container.Env, envVars...)
 		deployment.Spec.Template.Spec.Containers[i] = container
 	}
-	return deployment
+
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, deployment, ctx.gateway.GroupVersionKind()); err != nil {
+		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
+	}
+	return deployment, nil
 }
 
 // createGatewayResources creates gateway deployment and service
