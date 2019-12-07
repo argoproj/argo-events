@@ -58,128 +58,128 @@ func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *ga
 }
 
 // operate checks the status of gateway resource and takes action based on it.
-func (opctx *gatewayContext) operate() error {
-	defer opctx.updateGatewayState()
+func (ctx *gatewayContext) operate() error {
+	defer ctx.updateGatewayState()
 
-	opctx.logger.WithField(common.LabelPhase, string(opctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
+	ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
 
-	if err := Validate(opctx.gateway); err != nil {
-		opctx.logger.WithError(err).Infoln("invalid gateway object")
+	if err := Validate(ctx.gateway); err != nil {
+		ctx.logger.WithError(err).Infoln("invalid gateway object")
 		return err
 	}
 
 	// check the state of a gateway and take actions accordingly
-	switch opctx.gateway.Status.Phase {
+	switch ctx.gateway.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		if err := opctx.createGatewayResources(); err != nil {
-			opctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
-			opctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
+		if err := ctx.createGatewayResources(); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
+			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
-		opctx.logger.Infoln("marking gateway as active")
-		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
+		ctx.logger.Infoln("marking gateway as active")
+		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		opctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
-		err := opctx.updateGatewayResources()
+		ctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
+		err := ctx.updateGatewayResources()
 		if err != nil {
 			return err
 		}
-		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
+		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
 
 	// Gateway is already running
 	case v1alpha1.NodePhaseRunning:
-		opctx.logger.Infoln("gateway is running")
-		err := opctx.updateGatewayResources()
+		ctx.logger.Infoln("gateway is running")
+		err := ctx.updateGatewayResources()
 		if err != nil {
 			return err
 		}
-		opctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is updated")
+		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is updated")
 
 	case v1alpha1.NodePhaseNoOp:
-		opctx.logger.Infoln("no-op")
+		ctx.logger.Infoln("no-op")
 
 	default:
-		opctx.logger.WithField(common.LabelPhase, string(opctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
+		ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
 	}
 	return nil
 }
 
 // updateGatewayState updates the gateway state
-func (opctx *gatewayContext) updateGatewayState() {
-	if opctx.updated {
+func (ctx *gatewayContext) updateGatewayState() {
+	if ctx.updated {
 		var err error
 		eventType := common.StateChangeEventType
 		labels := map[string]string{
-			common.LabelResourceName:  opctx.gateway.Name,
-			LabelPhase:                string(opctx.gateway.Status.Phase),
-			LabelControllerInstanceID: opctx.controller.Config.InstanceID,
+			common.LabelResourceName:  ctx.gateway.Name,
+			LabelPhase:                string(ctx.gateway.Status.Phase),
+			LabelControllerInstanceID: ctx.controller.Config.InstanceID,
 			common.LabelOperation:     "persist_gateway_state",
 		}
 
-		opctx.gateway, err = PersistUpdates(opctx.controller.gatewayClient, opctx.gateway, opctx.logger)
+		ctx.gateway, err = PersistUpdates(ctx.controller.gatewayClient, ctx.gateway, ctx.logger)
 		if err != nil {
-			opctx.logger.WithError(err).Errorln("failed to persist gateway update, escalating...")
+			ctx.logger.WithError(err).Errorln("failed to persist gateway update, escalating...")
 			eventType = common.EscalationEventType
 		}
 
 		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(opctx.controller.k8sClient,
+		if err := common.GenerateK8sEvent(ctx.controller.k8sClient,
 			"persist update",
 			eventType,
 			"gateway state update",
-			opctx.gateway.Name,
-			opctx.gateway.Namespace,
-			opctx.controller.Config.InstanceID,
+			ctx.gateway.Name,
+			ctx.gateway.Namespace,
+			ctx.controller.Config.InstanceID,
 			gateway.Kind,
 			labels,
 		); err != nil {
-			opctx.logger.WithError(err).Errorln("failed to create K8s event to logger gateway state persist operation")
+			ctx.logger.WithError(err).Errorln("failed to create K8s event to logger gateway state persist operation")
 			return
 		}
-		opctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
+		ctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
 	}
-	opctx.updated = false
+	ctx.updated = false
 }
 
 // mark the gateway phase
-func (opctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
-	justCompleted := opctx.gateway.Status.Phase != phase
+func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
+	justCompleted := ctx.gateway.Status.Phase != phase
 	if justCompleted {
-		opctx.logger.WithFields(
+		ctx.logger.WithFields(
 			map[string]interface{}{
-				"old": string(opctx.gateway.Status.Phase),
+				"old": string(ctx.gateway.Status.Phase),
 				"new": string(phase),
 			},
 		).Infoln("phase changed")
 
-		opctx.gateway.Status.Phase = phase
-		if opctx.gateway.ObjectMeta.Labels == nil {
-			opctx.gateway.ObjectMeta.Labels = make(map[string]string)
+		ctx.gateway.Status.Phase = phase
+		if ctx.gateway.ObjectMeta.Labels == nil {
+			ctx.gateway.ObjectMeta.Labels = make(map[string]string)
 		}
-		if opctx.gateway.Annotations == nil {
-			opctx.gateway.Annotations = make(map[string]string)
+		if ctx.gateway.Annotations == nil {
+			ctx.gateway.Annotations = make(map[string]string)
 		}
 
-		opctx.gateway.ObjectMeta.Labels[LabelPhase] = string(phase)
+		ctx.gateway.ObjectMeta.Labels[LabelPhase] = string(phase)
 		// add annotations so a resource sensor can watch this gateway.
-		opctx.gateway.Annotations[LabelPhase] = string(phase)
+		ctx.gateway.Annotations[LabelPhase] = string(phase)
 	}
 
-	if opctx.gateway.Status.StartedAt.IsZero() {
-		opctx.gateway.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
+	if ctx.gateway.Status.StartedAt.IsZero() {
+		ctx.gateway.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 	}
 
-	opctx.logger.WithFields(
+	ctx.logger.WithFields(
 		map[string]interface{}{
-			"old": string(opctx.gateway.Status.Message),
+			"old": string(ctx.gateway.Status.Message),
 			"new": message,
 		},
 	).Infoln("phase change message")
 
-	opctx.gateway.Status.Message = message
-	opctx.updated = true
+	ctx.gateway.Status.Message = message
+	ctx.updated = true
 }
 
 // PersistUpdates of the gateway resource
