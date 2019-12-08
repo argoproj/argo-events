@@ -30,14 +30,14 @@ import (
 	"google.golang.org/api/option"
 )
 
-// EventSourceListener implements Eventing for gcp pub-sub event source
-type EventSourceListener struct {
+// EventListener implements Eventing for gcp pub-sub event source
+type EventListener struct {
 	// Logger to log stuff
 	Logger *logrus.Logger
 }
 
 // StartEventSource starts processing the GCP PubSub event source
-func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer server.Recover(eventSource.Name)
 
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
@@ -53,7 +53,7 @@ func (listener *EventSourceListener) StartEventSource(eventSource *gateways.Even
 }
 
 // listenEvents listens to GCP PubSub events
-func (listener *EventSourceListener) listenEvents(ctx context.Context, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(ctx context.Context, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	// In order to listen events from GCP PubSub,
 	// 1. Parse the event source that contains configuration to connect to GCP PubSub
 	// 2. Create a new PubSub client

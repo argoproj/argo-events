@@ -22,18 +22,26 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates file event source
-func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.FileEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.FileEvent)),
+		}, nil
+	}
+
 	var fileEventSource *v1alpha1.FileEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	if err := validate(fileEventSource); err != nil {

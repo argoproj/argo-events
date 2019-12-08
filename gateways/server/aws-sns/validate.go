@@ -33,7 +33,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	if apicommon.EventSourceType(eventSource.Type) != apicommon.SNSEvent {
 		return &gateways.ValidEventSource{
 			IsValid: false,
-			Reason:  "event source is not type of sns",
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.SNSEvent)),
 		}, nil
 	}
 

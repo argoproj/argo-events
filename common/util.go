@@ -123,3 +123,7 @@ func FormatEndpoint(endpoint string) string {
 func FormattedURL(url, endpoint string) string {
 	return fmt.Sprintf("%s%s", url, FormatEndpoint(endpoint))
 }
+
+func ErrEventSourceTypeMismatch(eventSourceType string) string {
+	return fmt.Sprintf("event source is not type of %s", eventSourceType)
+}

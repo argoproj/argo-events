@@ -106,19 +106,11 @@ type CalendarEventSource struct {
 
 // FileEventSource describes an event-source for file related events.
 type FileEventSource struct {
-	// Directory to watch for events
-	Directory string `json:"directory" protobuf:"bytes,1,name=directory"`
-	// Path is relative path of object to watch with respect to the directory
-	// +optional
-	Path string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
-	// PathRegexp is regexp of relative path of object to watch with respect to the directory
-	// +optional
-	PathRegexp string `json:"pathRegexp,omitempty" protobuf:"bytes,3,opt,name=pathRegexp"`
 	// Type of file operations to watch
 	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
-	EventType string `json:"eventType" protobuf:"bytes,4,name=eventType"`
+	EventType string `json:"eventType" protobuf:"bytes,1,name=eventType"`
 	// WatchPathConfig contains configuration about the file path to watch
-	WatchPathConfig fsevent.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,5,name=watchPathConfig"`
+	WatchPathConfig fsevent.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,name=watchPathConfig"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation

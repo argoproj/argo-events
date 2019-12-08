@@ -22,25 +22,33 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates sqs event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.SQSEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.SQSEvent)),
+		}, nil
+	}
+
 	var sqsEventSource *v1alpha1.SQSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &sqsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	if err := validate(sqsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	return &gateways.ValidEventSource{

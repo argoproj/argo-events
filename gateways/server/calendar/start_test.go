@@ -40,7 +40,7 @@ func TestResolveSchedule(t *testing.T) {
 
 func TestListenEvents(t *testing.T) {
 	convey.Convey("Given a calendar schedule, listen events", t, func() {
-		listener := &EventSourceListener{
+		listener := &EventListener{
 			Logger: common.NewArgoEventsLogger(),
 		}
 
@@ -66,11 +66,10 @@ func TestListenEvents(t *testing.T) {
 		convey.So(err, convey.ShouldBeNil)
 
 		go listener.listenEvents(&gateways.EventSource{
-			Name:    "fake",
-			Value:   body,
-			Id:      "1234",
-			Type:    string(apicommon.CalendarEvent),
-			Version: "v0.10",
+			Name:  "fake",
+			Value: body,
+			Id:    "1234",
+			Type:  string(apicommon.CalendarEvent),
 		}, dataCh, errorCh, doneCh)
 
 		data := <-dataCh2

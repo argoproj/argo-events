@@ -19,6 +19,7 @@ package aws_sns
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/common"
 	"io/ioutil"
 	"testing"
 
@@ -38,7 +39,7 @@ func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 		Type:  "sq",
 	})
 	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, "event source is not type of sns", valid.Reason)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("sns"), valid.Reason)
 
 	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "aws-sns.yaml"))
 	assert.Nil(t, err)

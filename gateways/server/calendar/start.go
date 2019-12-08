@@ -30,8 +30,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// EventSourceListener implements Eventing for calendar based events
-type EventSourceListener struct {
+// EventListener implements Eventing for calendar based events
+type EventListener struct {
 	// Logger to log stuff
 	Logger *logrus.Logger
 }
@@ -48,7 +48,7 @@ type response struct {
 type Next func(time.Time) time.Time
 
 // StartEventSource starts an event source
-func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
 	dataCh := make(chan []byte)
@@ -61,7 +61,7 @@ func (listener *EventSourceListener) StartEventSource(eventSource *gateways.Even
 }
 
 // listenEvents fires an event when schedule completes.
-func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer server.Recover(eventSource.Name)
 
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)

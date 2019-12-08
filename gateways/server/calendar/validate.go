@@ -22,19 +22,29 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
+const ()
+
 // ValidateEventSource validates calendar event source
-func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.CalendarEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.CalendarEvent)),
+		}, nil
+	}
+
 	var calendarEventSource *v1alpha1.CalendarEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &calendarEventSource); err != nil {
 		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to parse the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	if err := validate(calendarEventSource); err != nil {
@@ -42,7 +52,7 @@ func (listener *EventSourceListener) ValidateEventSource(ctx context.Context, ev
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	return &gateways.ValidEventSource{

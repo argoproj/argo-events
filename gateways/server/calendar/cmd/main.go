@@ -23,7 +23,7 @@ import (
 )
 
 func main() {
-	server.StartGateway(&calendar.EventSourceListener{
+	server.StartGateway(&calendar.EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	})
 }

@@ -32,14 +32,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// EventSourceListener implements Eventing for file event source
-type EventSourceListener struct {
+// EventListener implements Eventing for file event source
+type EventListener struct {
 	// Logger to log stuff
 	Logger *logrus.Logger
 }
 
 // StartEventSource starts an event source
-func (listener *EventSourceListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 	log.Info("started processing event source...")
 
@@ -52,7 +52,7 @@ func (listener *EventSourceListener) StartEventSource(eventSource *gateways.Even
 }
 
 // listenEvents listen to file related events
-func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer server.Recover(eventSource.Name)
 
 	var fileEventSource *v1alpha1.FileEventSource
@@ -74,16 +74,16 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 
 	// file descriptor to watch must be available in file system. You can't watch an fs descriptor that is not present.
 	logger.Infoln("adding directory to monitor for the watcher...")
-	err = watcher.Add(fileEventSource.Directory)
+	err = watcher.Add(fileEventSource.WatchPathConfig.Directory)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
 	var pathRegexp *regexp.Regexp
-	if fileEventSource.PathRegexp != "" {
-		logger.WithField("regex", fileEventSource.PathRegexp).Infoln("matching file path with configured regex...")
-		pathRegexp, err = regexp.Compile(fileEventSource.PathRegexp)
+	if fileEventSource.WatchPathConfig.PathRegexp != "" {
+		logger.WithField("regex", fileEventSource.WatchPathConfig.PathRegexp).Infoln("matching file path with configured regex...")
+		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
 			errorCh <- err
 			return
@@ -102,8 +102,8 @@ func (listener *EventSourceListener) listenEvents(eventSource *gateways.EventSou
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			matched := false
-			relPath := strings.TrimPrefix(event.Name, fileEventSource.Directory)
-			if fileEventSource.Path != "" && fileEventSource.Path == relPath {
+			relPath := strings.TrimPrefix(event.Name, fileEventSource.WatchPathConfig.Directory)
+			if fileEventSource.WatchPathConfig.Path != "" && fileEventSource.WatchPathConfig.Path == relPath {
 				matched = true
 			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
 				matched = true
