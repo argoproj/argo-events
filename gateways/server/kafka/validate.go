@@ -14,21 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nats
+package kafka
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 )
 
-// ValidateEventSource validates nats event source
+// ValidateEventSource validates the gateway event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	var natsGridEventSource *v1alpha1.NATSEventsSource
-	if err := yaml.Unmarshal(eventSource.Value, &natsGridEventSource); err != nil {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.KafkaEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.KafkaEvent)),
+		}, nil
+	}
+
+	var kafkaGridEventSource *v1alpha1.KafkaEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &kafkaGridEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -36,8 +45,8 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validate(natsGridEventSource); err != nil {
-		listener.Logger.WithError(err).Error("failed to validate nats event source")
+	if err := validate(kafkaGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate kafka event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
@@ -49,15 +58,18 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validate(eventSource *v1alpha1.NATSEventsSource) error {
+func validate(eventSource *v1alpha1.KafkaEventSource) error {
 	if eventSource == nil {
-		return errors.New("configuration must be non empty")
+		return common.ErrNilEventSource
 	}
 	if eventSource.URL == "" {
-		return errors.New("url must be specified")
+		return fmt.Errorf("url must be specified")
 	}
-	if eventSource.Subject == "" {
-		return errors.New("subject must be specified")
+	if eventSource.Topic == "" {
+		return fmt.Errorf("topic must be specified")
+	}
+	if eventSource.Partition == "" {
+		return fmt.Errorf("partition must be specified")
 	}
 	return nil
 }

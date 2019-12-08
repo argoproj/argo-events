@@ -19,11 +19,11 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways/server"
-	"github.com/argoproj/argo-events/gateways/server/stream/nats"
+	"github.com/argoproj/argo-events/gateways/server/mqtt"
 )
 
 func main() {
-	server.StartGateway(&nats.EventListener{
+	server.StartGateway(&mqtt.EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	})
 }

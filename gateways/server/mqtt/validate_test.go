@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package webhook
+package mqtt
 
 import (
 	"context"
@@ -29,34 +29,34 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-func TestValidateEventSource(t *testing.T) {
+func TestValidateMqttEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",
-		Name:  "webhook",
+		Name:  "mqtt",
 		Value: nil,
 		Type:  "sq",
 	})
 	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, common.ErrEventSourceTypeMismatch("webhook"), valid.Reason)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("mqtt"), valid.Reason)
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "webhook.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "mqtt.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
 
-	for name, value := range eventSource.Spec.Webhook {
+	for name, value := range eventSource.Spec.MQTT {
 		fmt.Println(name)
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Id:    "1",
-			Name:  "webhook",
+			Name:  "mqtt",
 			Value: content,
-			Type:  "webhook",
+			Type:  "mqtt",
 		})
 		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)

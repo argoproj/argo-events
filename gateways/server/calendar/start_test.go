@@ -58,7 +58,7 @@ func TestListenEvents(t *testing.T) {
 		raw := json.RawMessage(payload)
 
 		calendarEventSource := &v1alpha1.CalendarEventSource{
-			Schedule:    "0 * * * *",
+			Schedule:    "* * * * *",
 			UserPayload: &raw,
 		}
 

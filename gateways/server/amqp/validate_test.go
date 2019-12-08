@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package webhook
+package amqp
 
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 
@@ -27,36 +26,37 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateEventSource(t *testing.T) {
+func TestValidateAMQPEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",
-		Name:  "webhook",
+		Name:  "amqp",
 		Value: nil,
 		Type:  "sq",
 	})
 	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, common.ErrEventSourceTypeMismatch("webhook"), valid.Reason)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("amqp"), valid.Reason)
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "webhook.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "amqp.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
 
-	for name, value := range eventSource.Spec.Webhook {
+	for name, value := range eventSource.Spec.AMQP {
 		fmt.Println(name)
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Id:    "1",
-			Name:  "webhook",
+			Name:  "amqp",
 			Value: content,
-			Type:  "webhook",
+			Type:  "amqp",
 		})
 		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)

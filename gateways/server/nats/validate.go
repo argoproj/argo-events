@@ -14,22 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package amqp
+package nats
 
 import (
 	"context"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 )
 
-// ValidateEventSource validates gateway event source
+// ValidateEventSource validates nats event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	var amqpEventSource *v1alpha1.AMQPEventSource
-	if err := yaml.Unmarshal(eventSource.Value, &amqpEventSource); err != nil {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.NATSEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.NATSEvent)),
+		}, nil
+	}
+
+	var natsGridEventSource *v1alpha1.NATSEventsSource
+	if err := yaml.Unmarshal(eventSource.Value, &natsGridEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -37,8 +45,8 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validate(amqpEventSource); err != nil {
-		listener.Logger.WithError(err).Error("failed to validate amqp event source")
+	if err := validate(natsGridEventSource); err != nil {
+		listener.Logger.WithError(err).Error("failed to validate nats event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
@@ -50,21 +58,15 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validate(eventSource *v1alpha1.AMQPEventSource) error {
+func validate(eventSource *v1alpha1.NATSEventsSource) error {
 	if eventSource == nil {
-		return common.ErrNilEventSource
+		return errors.New("configuration must be non empty")
 	}
 	if eventSource.URL == "" {
 		return errors.New("url must be specified")
 	}
-	if eventSource.RoutingKey == "" {
-		return errors.New("routing key must be specified")
-	}
-	if eventSource.ExchangeName == "" {
-		return errors.New("exchange name must be specified")
-	}
-	if eventSource.ExchangeType == "" {
-		return errors.New("exchange type must be specified")
+	if eventSource.Subject == "" {
+		return errors.New("subject must be specified")
 	}
 	return nil
 }

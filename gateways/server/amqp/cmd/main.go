@@ -19,7 +19,7 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways/server"
-	"github.com/argoproj/argo-events/gateways/server/stream/amqp"
+	"github.com/argoproj/argo-events/gateways/server/amqp"
 )
 
 func main() {

@@ -22,12 +22,20 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates mqtt event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.MQTTEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.MQTTEvent)),
+		}, nil
+	}
+
 	var mqttGridEventSource *v1alpha1.MQTTEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &mqttGridEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")

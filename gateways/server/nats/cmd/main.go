@@ -19,11 +19,11 @@ package main
 import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways/server"
-	"github.com/argoproj/argo-events/gateways/server/stream/kafka"
+	"github.com/argoproj/argo-events/gateways/server/nats"
 )
 
 func main() {
-	server.StartGateway(&kafka.EventListener{
+	server.StartGateway(&nats.EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	})
 }
