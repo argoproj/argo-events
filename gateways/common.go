@@ -10,5 +10,5 @@ const (
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
 	// EventSourceDir
-	EventSourceDir = "../../../examples/eventsources"
+	EventSourceDir = "../../../examples/event-sources"
 )

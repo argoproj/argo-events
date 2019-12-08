@@ -22,39 +22,42 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
-	convey.Convey("Given sns event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "aws-sns.yaml"))
-		convey.So(err, convey.ShouldBeNil)
+	listener := &EventListener{}
 
-		var eventSource *v1alpha1.EventSource
-		err = yaml.Unmarshal(content, &eventSource)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(eventSource, convey.ShouldNotBeNil)
-		convey.So(eventSource.Spec.SNS, convey.ShouldNotBeNil)
-
-		err = v1alpha1.ValidateEventSource(eventSource)
-		convey.So(err, convey.ShouldBeNil)
-
-		for key, value := range eventSource.Spec.SNS {
-			body, err := yaml.Marshal(value)
-			convey.So(err, convey.ShouldBeNil)
-			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-				Name:  key,
-				Id:    common.Hasher(key),
-				Value: body,
-				Type:  string(eventSource.Spec.Type),
-			})
-			convey.So(valid, convey.ShouldNotBeNil)
-			convey.So(valid.IsValid, convey.ShouldBeTrue)
-		}
+	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+		Id:    "1",
+		Name:  "sns",
+		Value: nil,
+		Type:  "sq",
 	})
+	assert.Equal(t, false, valid.IsValid)
+	assert.Equal(t, "event source is not type of sns", valid.Reason)
+
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "aws-sns.yaml"))
+	assert.Nil(t, err)
+
+	var eventSource *esv1alpha1.EventSource
+	err = yaml.Unmarshal(content, &eventSource)
+	assert.Nil(t, err)
+
+	for name, value := range eventSource.Spec.SNS {
+		fmt.Println(name)
+		content, err := yaml.Marshal(value)
+		assert.Nil(t, err)
+		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Id:    "1",
+			Name:  "sns",
+			Value: content,
+			Type:  "sns",
+		})
+		fmt.Println(valid.Reason)
+		assert.Equal(t, true, valid.IsValid)
+	}
 }

@@ -23,25 +23,33 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates sns event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.SNSEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  "event source is not type of sns",
+		}, nil
+	}
+
 	var snsEventSource *v1alpha1.SNSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	if err := validate(snsEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
-		}, err
+		}, nil
 	}
 
 	return &gateways.ValidEventSource{
