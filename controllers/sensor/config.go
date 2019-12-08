@@ -34,7 +34,7 @@ import (
 
 // watchControllerConfigMap watches updates to sensor controller configmap
 func (controller *Controller) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
-	log.Info("watching sensor-controller config map updates")
+	log.Info("watching controller config map updates")
 	source := controller.newControllerConfigMapWatch()
 	_, ctrl := cache.NewInformer(
 		source,
@@ -43,19 +43,19 @@ func (controller *Controller) watchControllerConfigMap(ctx context.Context) (cac
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if cm, ok := obj.(*corev1.ConfigMap); ok {
-					log.Info("detected EventSource update. updating the sensor-controller config.")
+					log.Info("detected configuration update. updating the controller configuration")
 					err := controller.updateConfig(cm)
 					if err != nil {
-						log.Errorf("update of config failed due to: %v", err)
+						log.Errorf("update of controller configuration failed due to: %v", err)
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if newCm, ok := new.(*corev1.ConfigMap); ok {
-					log.Info("detected EventSource update. updating the sensor-controller config.")
+					log.Info("detected configuration update. updating the controller configuration")
 					err := controller.updateConfig(newCm)
 					if err != nil {
-						log.Errorf("update of config failed due to: %v", err)
+						log.Errorf("update of controller configuration failed due to: %v", err)
 					}
 				}
 			},

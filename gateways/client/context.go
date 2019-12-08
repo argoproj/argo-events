@@ -111,6 +111,7 @@ func NewGatewayContext() *GatewayContext {
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayClient := gwclientset.NewForConfigOrDie(restConfig)
+	eventSourceClient := eventsourceClientset.NewForConfigOrDie(restConfig)
 
 	gateway, err := gatewayClient.ArgoprojV1alpha1().Gateways(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
@@ -128,6 +129,7 @@ func NewGatewayContext() *GatewayContext {
 		name:                 name,
 		eventSourceContexts:  make(map[string]*EventSourceContext),
 		eventSourceRef:       gateway.Spec.EventSourceRef,
+		eventSourceClient:    eventSourceClient,
 		gatewayClient:        gatewayClient,
 		gateway:              gateway,
 		controllerInstanceID: controllerInstanceID,

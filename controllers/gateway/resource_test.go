@@ -135,6 +135,7 @@ func TestResource_BuildDeploymentResource(t *testing.T) {
 	deployment, err := ctx.buildDeploymentResource()
 	assert.Nil(t, err)
 	assert.NotNil(t, deployment)
+
 	for _, container := range deployment.Spec.Template.Spec.Containers {
 		assert.NotNil(t, container.Env)
 		assert.Equal(t, container.Env[0].Name, common.EnvVarNamespace)

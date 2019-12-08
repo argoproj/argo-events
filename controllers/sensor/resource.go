@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -56,7 +57,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 // serviceBuilder builds a new service that exposes sensor.
 func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
 	service := ctx.generateServiceSpec()
-	if err := controllerscommon.SetObjectMeta(ctx.sensor, service, ctx.sensor.GroupVersionKind()); err != nil {
+	if err := controllerscommon.SetObjectMeta(ctx.sensor, service, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return service, nil
@@ -98,7 +99,7 @@ func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
 		container.Env = append(container.Env, envVars...)
 		deployment.Spec.Template.Spec.Containers[i] = container
 	}
-	if err := controllerscommon.SetObjectMeta(ctx.sensor, deployment, ctx.sensor.GroupVersionKind()); err != nil {
+	if err := controllerscommon.SetObjectMeta(ctx.sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return deployment, nil

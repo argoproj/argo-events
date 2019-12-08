@@ -79,26 +79,27 @@ func (ctx *gatewayContext) operate() error {
 		ctx.logger.Infoln("marking gateway as active")
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
+		// Gateway is already running
+	case v1alpha1.NodePhaseRunning:
+		ctx.logger.Infoln("gateway is running")
+		err := ctx.updateGatewayResources()
+		if err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
+			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
+			return err
+		}
+		ctx.updated = true
+
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
 		ctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
 		err := ctx.updateGatewayResources()
 		if err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
+			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
-
-	// Gateway is already running
-	case v1alpha1.NodePhaseRunning:
-		ctx.logger.Infoln("gateway is running")
-		err := ctx.updateGatewayResources()
-		if err != nil {
-			return err
-		}
-		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is updated")
-
-	case v1alpha1.NodePhaseNoOp:
-		ctx.logger.Infoln("no-op")
 
 	default:
 		ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
@@ -173,7 +174,7 @@ func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message st
 
 	ctx.logger.WithFields(
 		map[string]interface{}{
-			"old": string(ctx.gateway.Status.Message),
+			"old": ctx.gateway.Status.Message,
 			"new": message,
 		},
 	).Infoln("phase change message")
