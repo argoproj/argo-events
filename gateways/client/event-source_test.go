@@ -19,54 +19,76 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
-	"sync"
+	"net"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	pc "github.com/argoproj/argo-events/pkg/apis/common"
-	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	eventSourceFake "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/fake"
 	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-func getGatewayConfig() *GatewayConfig {
-	return &GatewayConfig{
+func getGatewayContext() *GatewayContext {
+	return &GatewayContext{
 		logger:     common.NewArgoEventsLogger(),
-		serverPort: "1234",
+		serverPort: "20000",
 		statusCh:   make(chan EventSourceStatus),
 		gateway: &v1alpha1.Gateway{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "test-agteway",
-				Namespace: "test-nm",
+				Name:      "fake-gateway",
+				Namespace: "fake-namespace",
 			},
 			Spec: v1alpha1.GatewaySpec{
 				Watchers: &v1alpha1.NotificationWatchers{
 					Sensors: []v1alpha1.SensorNotificationWatcher{},
 				},
-				EventProtocol: &pc.EventProtocol{
-					Type: pc.HTTP,
-					Http: pc.Http{
+				EventProtocol: &apicommon.EventProtocol{
+					Type: apicommon.HTTP,
+					Http: apicommon.Http{
 						Port: "9000",
 					},
 				},
+				Type: apicommon.WebhookEvent,
 			},
 		},
-		k8sClient:     fake.NewSimpleClientset(),
-		gatewayClient: gwfake.NewSimpleClientset(),
+		eventSourceContexts: make(map[string]*EventSourceContext),
+		k8sClient:           fake.NewSimpleClientset(),
+		gatewayClient:       gwfake.NewSimpleClientset(),
 	}
 }
 
-type testEventSourceExecutor struct{}
+func getEventSource() *esv1alpha1.EventSource {
+	return &esv1alpha1.EventSource{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-event-source",
+			Namespace: "fake-namespace",
+		},
+		Spec: &esv1alpha1.EventSourceSpec{
+			Webhook: map[string]webhook.Context{
+				"first-webhook": {
+					Endpoint: "/first-webhook",
+					Method:   http.MethodPost,
+					Port:     "13000",
+				},
+			},
+			Type: apicommon.WebhookEvent,
+		},
+	}
+}
 
-func (ese *testEventSourceExecutor) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+// Set up a fake gateway server
+type testEventListener struct{}
+
+func (listener *testEventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println(r)
@@ -82,95 +104,137 @@ func (ese *testEventSourceExecutor) StartEventSource(eventSource *gateways.Event
 	return nil
 }
 
-func (ese *testEventSourceExecutor) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *testEventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	return &gateways.ValidEventSource{
 		IsValid: true,
 	}, nil
 }
 
-func TestEventSources(t *testing.T) {
-	_ = os.Setenv(common.EnvVarGatewayServerPort, "1234")
-	go server.StartGateway(&testEventSourceExecutor{})
-	gc := getGatewayConfig()
+func getGatewayServer() *grpc.Server {
+	srv := grpc.NewServer()
+	gateways.RegisterEventingServer(srv, &testEventListener{})
+	return srv
+}
 
-	var eventSrcCtxMap map[string]*EventSourceContext
-	var eventSourceKeys []string
+func TestInitEventSourceContexts(t *testing.T) {
+	gatewayContext := getGatewayContext()
+	eventSource := getEventSource().DeepCopy()
 
-	convey.Convey("Given a EventSource resource, create internal event sources", t, func() {
-		eventSource := &eventSourceV1Alpha1.EventSource{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "fake-event-source",
-				Namespace: "test-namespace",
-			},
-			Spec: &eventSourceV1Alpha1.EventSourceSpec{
-				Webhook: map[string]webhook.Context{
-					"fake": {
-						Port:     "80",
-						URL:      "fake-url",
-						Endpoint: "xx",
-						Method:   "GET",
-					},
-				},
-			},
-		}
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", gatewayContext.serverPort))
+	if err != nil {
+		panic(err)
+	}
 
-		fakeclientset := eventSourceFake.NewSimpleClientset()
-		_, err := fakeclientset.ArgoprojV1alpha1().EventSources(eventSource.Namespace).Create(eventSource)
-		convey.So(err, convey.ShouldBeNil)
+	server := getGatewayServer()
+	stopCh := make(chan struct{})
 
-		eventSrcCtxMap, err = gc.createInternalEventSources(eventSource)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(eventSrcCtxMap, convey.ShouldNotBeNil)
-		convey.So(len(eventSrcCtxMap), convey.ShouldEqual, 1)
-		for _, data := range eventSrcCtxMap {
-			convey.So(data.source.Value, convey.ShouldEqual, `
-testKey: testValue
-`)
-		}
-	})
-
-	convey.Convey("Given old and new event sources, return diff", t, func() {
-		gc.registeredConfigs = make(map[string]*EventSourceContext)
-		staleEventSources, newEventSources := gc.diffEventSources(eventSrcCtxMap)
-		convey.So(staleEventSources, convey.ShouldBeEmpty)
-		convey.So(newEventSources, convey.ShouldNotBeEmpty)
-		convey.So(len(newEventSources), convey.ShouldEqual, 1)
-		eventSourceKeys = newEventSources
-	})
-
-	var wg sync.WaitGroup
-	wg.Add(1)
 	go func() {
-		i := 0
-		for event := range gc.statusCh {
-			switch event.Phase {
-			case v1alpha1.NodePhaseRunning:
-				convey.Convey("Event source is running", t, func() {
-					convey.So(i, convey.ShouldEqual, 0)
-					convey.So(event.Message, convey.ShouldEqual, "event_source_is_running")
-					i++
-					go gc.stopEventSources(eventSourceKeys)
-				})
-			case v1alpha1.NodePhaseError:
-				convey.Convey("Event source is in error", t, func() {
-					convey.So(i, convey.ShouldNotEqual, 0)
-					convey.So(event.Message, convey.ShouldEqual, "failed_to_receive_event_from_event_source_stream")
-				})
-
-			case v1alpha1.NodePhaseRemove:
-				convey.Convey("Event source should be removed", t, func() {
-					convey.So(i, convey.ShouldNotEqual, 0)
-					convey.So(event.Message, convey.ShouldEqual, "event_source_is_removed")
-				})
-				goto end
-			}
+		if err := server.Serve(lis); err != nil {
+			return
 		}
-	end:
-		wg.Done()
 	}()
 
-	convey.Convey("Given new event sources, start consuming events", t, func() {
-		gc.startEventSources(eventSrcCtxMap, eventSourceKeys)
-		wg.Wait()
-	})
+	go func() {
+		<-stopCh
+		server.GracefulStop()
+		fmt.Println("server is stopped")
+	}()
+
+	contexts := gatewayContext.initEventSourceContexts(eventSource)
+	assert.NotNil(t, contexts)
+	for _, esContext := range contexts {
+		assert.Equal(t, "first-webhook", esContext.source.Name)
+		assert.NotNil(t, esContext.conn)
+	}
+
+	stopCh <- struct{}{}
+
+	time.Sleep(5 * time.Second)
+}
+
+func TestSyncEventSources(t *testing.T) {
+	gatewayContext := getGatewayContext()
+	eventSource := getEventSource().DeepCopy()
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", gatewayContext.serverPort))
+	if err != nil {
+		panic(err)
+	}
+
+	server := getGatewayServer()
+	stopCh := make(chan struct{})
+	stopStatus := make(chan struct{})
+
+	go func() {
+		if err := server.Serve(lis); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case status := <-gatewayContext.statusCh:
+				fmt.Println(status.Message)
+			case <-stopStatus:
+				fmt.Println("returning from status")
+				return
+			}
+		}
+	}()
+
+	go func() {
+		<-stopCh
+		server.GracefulStop()
+		fmt.Println("server is stopped")
+		stopStatus <- struct{}{}
+	}()
+
+	err = gatewayContext.syncEventSources(eventSource)
+	assert.Nil(t, err)
+
+	time.Sleep(5 * time.Second)
+
+	delete(eventSource.Spec.Webhook, "first-webhook")
+
+	eventSource.Spec.Webhook["second-webhook"] = webhook.Context{
+		Endpoint: "/second-webhook",
+		Method:   http.MethodPost,
+		Port:     "13000",
+	}
+
+	err = gatewayContext.syncEventSources(eventSource)
+	assert.Nil(t, err)
+
+	time.Sleep(5 * time.Second)
+
+	delete(eventSource.Spec.Webhook, "second-webhook")
+
+	err = gatewayContext.syncEventSources(eventSource)
+	assert.Nil(t, err)
+
+	time.Sleep(5 * time.Second)
+
+	stopCh <- struct{}{}
+
+	time.Sleep(5 * time.Second)
+}
+
+func TestDiffEventSources(t *testing.T) {
+	gatewayContext := getGatewayContext()
+	eventSourceContexts := map[string]*EventSourceContext{
+		"first-webhook": {},
+	}
+	assert.NotNil(t, eventSourceContexts)
+	staleEventSources, newEventSources := gatewayContext.diffEventSources(eventSourceContexts)
+	assert.Nil(t, staleEventSources)
+	assert.NotNil(t, newEventSources)
+	gatewayContext.eventSourceContexts = map[string]*EventSourceContext{
+		"first-webhook": {},
+	}
+	delete(eventSourceContexts, "first-webhook")
+	staleEventSources, newEventSources = gatewayContext.diffEventSources(eventSourceContexts)
+	assert.NotNil(t, staleEventSources)
+	assert.Nil(t, newEventSources)
 }

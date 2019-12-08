@@ -35,8 +35,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// GatewayConfig provides a generic event source for a gateway
-type GatewayConfig struct {
+// GatewayContext holds the context for a gateway
+type GatewayContext struct {
 	// logger logs stuff
 	logger *logrus.Logger
 	// k8sClient is client for kubernetes API
@@ -57,8 +57,8 @@ type GatewayConfig struct {
 	updated bool
 	// serverPort is gateway server port to listen events from
 	serverPort string
-	// registeredConfigs stores information about current event sources that are running in the gateway
-	registeredConfigs map[string]*EventSourceContext
+	// eventSourceContexts stores information about current event sources that are running in the gateway
+	eventSourceContexts map[string]*EventSourceContext
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
 	// statusCh is used to communicate the status of an event source
@@ -85,8 +85,8 @@ type EventSourceContext struct {
 	conn *grpc.ClientConn
 }
 
-// NewGatewayConfiguration returns a new gateway configuration
-func NewGatewayConfiguration() *GatewayConfig {
+// NewGatewayContext returns a new gateway context
+func NewGatewayContext() *GatewayContext {
 	kubeConfig, _ := os.LookupEnv(common.EnvVarKubeConfig)
 	restConfig, err := common.GetClientConfig(kubeConfig)
 	if err != nil {
@@ -111,12 +111,13 @@ func NewGatewayConfiguration() *GatewayConfig {
 
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	gatewayClient := gwclientset.NewForConfigOrDie(restConfig)
+
 	gateway, err := gatewayClient.ArgoprojV1alpha1().Gateways(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		panic(err)
 	}
 
-	gatewayConfig := &GatewayConfig{
+	gatewayConfig := &GatewayContext{
 		logger: common.NewArgoEventsLogger().WithFields(
 			map[string]interface{}{
 				common.LabelResourceName: gateway.Name,
@@ -125,7 +126,7 @@ func NewGatewayConfiguration() *GatewayConfig {
 		k8sClient:            clientset,
 		namespace:            namespace,
 		name:                 name,
-		registeredConfigs:    make(map[string]*EventSourceContext),
+		eventSourceContexts:  make(map[string]*EventSourceContext),
 		eventSourceRef:       gateway.Spec.EventSourceRef,
 		gatewayClient:        gatewayClient,
 		gateway:              gateway,

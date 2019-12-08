@@ -40,7 +40,7 @@ func (m *MyMockedObject) dispatchEventOverNats(source string, eventPayload []byt
 
 func TestDispatchEvent(t *testing.T) {
 	convey.Convey("Given an event, dispatch it to sensor", t, func() {
-		gc := getGatewayConfig()
+		gc := getGatewayContext()
 		event := &gateways.Event{
 			Name:    "fake",
 			Payload: []byte("fake"),
@@ -70,7 +70,7 @@ func TestDispatchEvent(t *testing.T) {
 
 func TestTransformEvent(t *testing.T) {
 	convey.Convey("Given a gateway event, convert it into cloud event", t, func() {
-		gc := getGatewayConfig()
+		gc := getGatewayContext()
 		ce, err := gc.transformEvent(&gateways.Event{
 			Name:    "fake",
 			Payload: []byte("fake"),

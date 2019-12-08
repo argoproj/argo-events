@@ -28,8 +28,8 @@ import (
 )
 
 func main() {
-	// initialize gateway configuration
-	gatewayConfig := NewGatewayConfiguration()
+	// initialize gateway context
+	ctx := NewGatewayContext()
 
 	serverPort, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
 	if !ok {
@@ -52,19 +52,19 @@ func main() {
 		panic(fmt.Errorf("failed to connect to server on port %s", serverPort))
 	}
 
-	// handle event source's status updates
+	// handle gateway status updates
 	go func() {
-		for status := range gatewayConfig.statusCh {
-			gatewayConfig.UpdateGatewayResourceState(&status)
+		for status := range ctx.statusCh {
+			ctx.UpdateGatewayState(&status)
 		}
 	}()
 
 	// watch updates to gateway resource
-	if _, err := gatewayConfig.WatchGatewayUpdates(context.Background()); err != nil {
+	if _, err := ctx.WatchGatewayUpdates(context.Background()); err != nil {
 		panic(err)
 	}
 	// watch for event source updates
-	if _, err := gatewayConfig.WatchGatewayEventSources(context.Background()); err != nil {
+	if _, err := ctx.WatchGatewayEventSources(context.Background()); err != nil {
 		panic(err)
 	}
 	select {}

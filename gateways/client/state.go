@@ -41,8 +41,8 @@ type EventSourceStatus struct {
 }
 
 // markGatewayNodePhase marks the node with a phase, returns the node
-func (gatewayCfg *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
-	logger := gatewayCfg.logger.WithFields(
+func (gatewayContext *GatewayContext) markGatewayNodePhase(nodeStatus *EventSourceStatus) *v1alpha1.NodeStatus {
+	logger := gatewayContext.logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: nodeStatus.Name,
 			common.LabelPhase:    string(nodeStatus.Phase),
@@ -51,7 +51,7 @@ func (gatewayCfg *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceSta
 
 	logger.Infoln("marking node phase")
 
-	node := gatewayCfg.getNodeByID(nodeStatus.Id)
+	node := gatewayContext.getNodeByID(nodeStatus.Id)
 	if node == nil {
 		logger.Warnln("node is not initialized")
 		return nil
@@ -61,14 +61,14 @@ func (gatewayCfg *GatewayConfig) markGatewayNodePhase(nodeStatus *EventSourceSta
 		node.Phase = nodeStatus.Phase
 	}
 	node.Message = nodeStatus.Message
-	gatewayCfg.gateway.Status.Nodes[node.ID] = *node
-	gatewayCfg.updated = true
+	gatewayContext.gateway.Status.Nodes[node.ID] = *node
+	gatewayContext.updated = true
 	return node
 }
 
 // getNodeByName returns the node from this gateway for the nodeName
-func (gatewayCfg *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
-	node, ok := gatewayCfg.gateway.Status.Nodes[nodeID]
+func (gatewayContext *GatewayContext) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
+	node, ok := gatewayContext.gateway.Status.Nodes[nodeID]
 	if !ok {
 		return nil
 	}
@@ -76,14 +76,14 @@ func (gatewayCfg *GatewayConfig) getNodeByID(nodeID string) *v1alpha1.NodeStatus
 }
 
 // create a new node
-func (gatewayCfg *GatewayConfig) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
-	if gatewayCfg.gateway.Status.Nodes == nil {
-		gatewayCfg.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
+	if gatewayContext.gateway.Status.Nodes == nil {
+		gatewayContext.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 
-	gatewayCfg.logger.WithField(common.LabelNodeName, nodeName).Infoln("node")
+	gatewayContext.logger.WithField(common.LabelNodeName, nodeName).Infoln("node")
 
-	node, ok := gatewayCfg.gateway.Status.Nodes[nodeID]
+	node, ok := gatewayContext.gateway.Status.Nodes[nodeID]
 	if !ok {
 		node = v1alpha1.NodeStatus{
 			ID:          nodeID,
@@ -94,22 +94,22 @@ func (gatewayCfg *GatewayConfig) initializeNode(nodeID string, nodeName string, 
 	}
 	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
-	gatewayCfg.gateway.Status.Nodes[nodeID] = node
+	gatewayContext.gateway.Status.Nodes[nodeID] = node
 
-	gatewayCfg.logger.WithFields(
+	gatewayContext.logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: nodeName,
 			"node-message":       node.Message,
 		},
 	).Infoln("node is running")
 
-	gatewayCfg.updated = true
+	gatewayContext.updated = true
 	return node
 }
 
-// UpdateGatewayResourceState updates gateway resource nodes state
-func (gatewayCfg *GatewayConfig) UpdateGatewayResourceState(status *EventSourceStatus) {
-	logger := gatewayCfg.logger
+// UpdateGatewayState updates gateway resource nodes state
+func (gatewayContext *GatewayContext) UpdateGatewayState(status *EventSourceStatus) {
+	logger := gatewayContext.logger
 	if status.Phase != v1alpha1.NodePhaseResourceUpdate {
 		logger = logger.WithField(common.LabelEventSource, status.Name).Logger
 	}
@@ -119,43 +119,43 @@ func (gatewayCfg *GatewayConfig) UpdateGatewayResourceState(status *EventSourceS
 	switch status.Phase {
 	case v1alpha1.NodePhaseRunning:
 		// init the node and mark it as running
-		gatewayCfg.initializeNode(status.Id, status.Name, status.Message)
+		gatewayContext.initializeNode(status.Id, status.Name, status.Message)
 
 	case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
-		gatewayCfg.markGatewayNodePhase(status)
+		gatewayContext.markGatewayNodePhase(status)
 
 	case v1alpha1.NodePhaseResourceUpdate:
-		gatewayCfg.gateway = status.Gateway
+		gatewayContext.gateway = status.Gateway
 
 	case v1alpha1.NodePhaseRemove:
-		delete(gatewayCfg.gateway.Status.Nodes, status.Id)
+		delete(gatewayContext.gateway.Status.Nodes, status.Id)
 		logger.Infoln("event source is removed")
-		gatewayCfg.updated = true
+		gatewayContext.updated = true
 	}
 
-	if gatewayCfg.updated {
+	if gatewayContext.updated {
 		// persist changes and create K8s event logging the change
 		eventType := common.StateChangeEventType
 		labels := map[string]string{
 			common.LabelEventSourceName: status.Name,
-			common.LabelResourceName:    gatewayCfg.name,
+			common.LabelResourceName:    gatewayContext.name,
 			common.LabelEventSourceID:   status.Id,
 			common.LabelOperation:       "persist_event_source_state",
 		}
-		updatedGw, err := gtw.PersistUpdates(gatewayCfg.gatewayClient, gatewayCfg.gateway, gatewayCfg.logger)
+		updatedGw, err := gtw.PersistUpdates(gatewayContext.gatewayClient, gatewayContext.gateway, gatewayContext.logger)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to persist gateway resource updates, reverting to old state")
 			eventType = common.EscalationEventType
 		}
 
 		// update gateway ref. in case of failure to persist updates, this is a deep copy of old gateway resource
-		gatewayCfg.gateway = updatedGw
+		gatewayContext.gateway = updatedGw
 		labels[common.LabelEventType] = string(eventType)
 
 		// generate a K8s event for persist event source state change
-		if err := common.GenerateK8sEvent(gatewayCfg.k8sClient, status.Message, eventType, "event source state update", gatewayCfg.name, gatewayCfg.namespace, gatewayCfg.controllerInstanceID, gateway.Kind, labels); err != nil {
+		if err := common.GenerateK8sEvent(gatewayContext.k8sClient, status.Message, eventType, "event source state update", gatewayContext.name, gatewayContext.namespace, gatewayContext.controllerInstanceID, gateway.Kind, labels); err != nil {
 			logger.WithError(err).Errorln("failed to create K8s event to log event source state change")
 		}
 	}
-	gatewayCfg.updated = false
+	gatewayContext.updated = false
 }

@@ -34,8 +34,8 @@ import (
 )
 
 // DispatchEvent dispatches event to gateway transformer for further processing
-func (gatewayCfg *GatewayConfig) DispatchEvent(gatewayEvent *gateways.Event) error {
-	transformedEvent, err := gatewayCfg.transformEvent(gatewayEvent)
+func (gatewayContext *GatewayContext) DispatchEvent(gatewayEvent *gateways.Event) error {
+	transformedEvent, err := gatewayContext.transformEvent(gatewayEvent)
 	if err != nil {
 		return err
 	}
@@ -45,25 +45,25 @@ func (gatewayCfg *GatewayConfig) DispatchEvent(gatewayEvent *gateways.Event) err
 		return errors.Errorf("failed to dispatch event to watchers over http. marshalling failed. err: %+v", err)
 	}
 
-	switch gatewayCfg.gateway.Spec.EventProtocol.Type {
+	switch gatewayContext.gateway.Spec.EventProtocol.Type {
 	case pc.HTTP:
-		if err = gatewayCfg.dispatchEventOverHttp(transformedEvent.Context.Source.Host, payload); err != nil {
+		if err = gatewayContext.dispatchEventOverHttp(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
 	case pc.NATS:
-		if err = gatewayCfg.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
+		if err = gatewayContext.dispatchEventOverNats(transformedEvent.Context.Source.Host, payload); err != nil {
 			return err
 		}
 	default:
-		return errors.Errorf("unknown dispatch mechanism %s", gatewayCfg.gateway.Spec.EventProtocol.Type)
+		return errors.Errorf("unknown dispatch mechanism %s", gatewayContext.gateway.Spec.EventProtocol.Type)
 	}
 	return nil
 }
 
 // transformEvent transforms an event from event source into a CloudEvents specification compliant event
 // See https://github.com/cloudevents/spec for more info.
-func (gatewayCfg *GatewayConfig) transformEvent(gatewayEvent *gateways.Event) (*apicommon.Event, error) {
-	logger := gatewayCfg.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
+func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*apicommon.Event, error) {
+	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 
 	logger.Infoln("converting gateway event into cloudevents specification compliant event")
 
@@ -74,9 +74,9 @@ func (gatewayCfg *GatewayConfig) transformEvent(gatewayEvent *gateways.Event) (*
 			EventID:            fmt.Sprintf("%x", uuid.New()),
 			ContentType:        "application/json",
 			EventTime:          metav1.MicroTime{Time: time.Now().UTC()},
-			EventType:          string(gatewayCfg.gateway.Spec.Type),
+			EventType:          string(gatewayContext.gateway.Spec.Type),
 			Source: &apicommon.URI{
-				Host: common.DefaultEventSourceName(gatewayCfg.gateway.Name, gatewayEvent.Name),
+				Host: common.DefaultEventSourceName(gatewayContext.gateway.Name, gatewayEvent.Name),
 			},
 		},
 		Payload: gatewayEvent.Payload,
@@ -87,28 +87,28 @@ func (gatewayCfg *GatewayConfig) transformEvent(gatewayEvent *gateways.Event) (*
 }
 
 // dispatchEventOverHttp dispatches event to watchers over http.
-func (gatewayCfg *GatewayConfig) dispatchEventOverHttp(source string, eventPayload []byte) error {
-	gatewayCfg.logger.WithField(common.LabelEventSource, source).Infoln("dispatching event to watchers")
+func (gatewayContext *GatewayContext) dispatchEventOverHttp(source string, eventPayload []byte) error {
+	gatewayContext.logger.WithField(common.LabelEventSource, source).Infoln("dispatching event to watchers")
 
 	completeSuccess := true
 
-	for _, sensor := range gatewayCfg.gateway.Spec.Watchers.Sensors {
-		namespace := gatewayCfg.namespace
+	for _, sensor := range gatewayContext.gateway.Spec.Watchers.Sensors {
+		namespace := gatewayContext.namespace
 		if sensor.Namespace != "" {
 			namespace = sensor.Namespace
 		}
-		if err := gatewayCfg.postCloudEventToWatcher(common.ServiceDNSName(sensor.Name, namespace), gatewayCfg.gateway.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
-			gatewayCfg.logger.WithField(common.LabelSensorName, sensor.Name).WithError(err).Warnln("failed to dispatch event to sensor watcher over http. communication error")
+		if err := gatewayContext.postCloudEventToWatcher(common.ServiceDNSName(sensor.Name, namespace), gatewayContext.gateway.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint, eventPayload); err != nil {
+			gatewayContext.logger.WithField(common.LabelSensorName, sensor.Name).WithError(err).Warnln("failed to dispatch event to sensor watcher over http. communication error")
 			completeSuccess = false
 		}
 	}
-	for _, gateway := range gatewayCfg.gateway.Spec.Watchers.Gateways {
-		namespace := gatewayCfg.namespace
+	for _, gateway := range gatewayContext.gateway.Spec.Watchers.Gateways {
+		namespace := gatewayContext.namespace
 		if gateway.Namespace != "" {
 			namespace = gateway.Namespace
 		}
-		if err := gatewayCfg.postCloudEventToWatcher(common.ServiceDNSName(gateway.Name, namespace), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
-			gatewayCfg.logger.WithField(common.LabelResourceName, gateway.Name).WithError(err).Warnln("failed to dispatch event to gateway watcher over http. communication error")
+		if err := gatewayContext.postCloudEventToWatcher(common.ServiceDNSName(gateway.Name, namespace), gateway.Port, gateway.Endpoint, eventPayload); err != nil {
+			gatewayContext.logger.WithField(common.LabelResourceName, gateway.Name).WithError(err).Warnln("failed to dispatch event to gateway watcher over http. communication error")
 			completeSuccess = false
 		}
 	}
@@ -118,32 +118,32 @@ func (gatewayCfg *GatewayConfig) dispatchEventOverHttp(source string, eventPaylo
 		response = fmt.Sprintf("%s.%s", response, " although some of the dispatch operations failed, check logs for more info")
 	}
 
-	gatewayCfg.logger.Infoln(response)
+	gatewayContext.logger.Infoln(response)
 	return nil
 }
 
 // dispatchEventOverNats dispatches event over nats
-func (gatewayCfg *GatewayConfig) dispatchEventOverNats(source string, eventPayload []byte) error {
+func (gatewayContext *GatewayContext) dispatchEventOverNats(source string, eventPayload []byte) error {
 	var err error
 
-	switch gatewayCfg.gateway.Spec.EventProtocol.Nats.Type {
+	switch gatewayContext.gateway.Spec.EventProtocol.Nats.Type {
 	case pc.Standard:
-		err = gatewayCfg.natsConn.Publish(source, eventPayload)
+		err = gatewayContext.natsConn.Publish(source, eventPayload)
 	case pc.Streaming:
-		err = gatewayCfg.natsStreamingConn.Publish(source, eventPayload)
+		err = gatewayContext.natsStreamingConn.Publish(source, eventPayload)
 	}
 
 	if err != nil {
-		gatewayCfg.logger.WithField(common.LabelEventSource, source).WithError(err).Errorln("failed to publish event")
+		gatewayContext.logger.WithField(common.LabelEventSource, source).WithError(err).Errorln("failed to publish event")
 		return err
 	}
 
-	gatewayCfg.logger.WithField(common.LabelEventSource, source).Infoln("event published successfully")
+	gatewayContext.logger.WithField(common.LabelEventSource, source).Infoln("event published successfully")
 	return nil
 }
 
 // postCloudEventToWatcher makes a HTTP POST call to watcher's service
-func (gatewayCfg *GatewayConfig) postCloudEventToWatcher(host string, port string, endpoint string, payload []byte) error {
+func (gatewayContext *GatewayContext) postCloudEventToWatcher(host string, port string, endpoint string, payload []byte) error {
 	req, err := http.NewRequest("POST", fmt.Sprintf("http://%s:%s%s", host, port, endpoint), bytes.NewBuffer(payload))
 	if err != nil {
 		return err

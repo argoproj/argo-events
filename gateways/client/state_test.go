@@ -23,7 +23,7 @@ import (
 )
 
 func TestGatewayState(t *testing.T) {
-	gc := getGatewayConfig()
+	gc := getGatewayContext()
 	convey.Convey("Given a gateway", t, func() {
 		convey.Convey("Create the gateway", func() {
 			var err error
@@ -32,7 +32,7 @@ func TestGatewayState(t *testing.T) {
 		})
 
 		convey.Convey("Update gateway resource test-node node state to running", func() {
-			gc.UpdateGatewayResourceState(&EventSourceStatus{
+			gc.UpdateGatewayState(&EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseRunning,
 				Name:    "test-node",
 				Message: "node is marked as running",
@@ -52,7 +52,7 @@ func TestGatewayState(t *testing.T) {
 		}
 
 		convey.Convey("Update gateway watchers", func() {
-			gc.UpdateGatewayResourceState(&EventSourceStatus{
+			gc.UpdateGatewayState(&EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseResourceUpdate,
 				Name:    "test-node",
 				Message: "gateway resource is updated",
@@ -63,7 +63,7 @@ func TestGatewayState(t *testing.T) {
 		})
 
 		convey.Convey("Update gateway resource test-node node state to completed", func() {
-			gc.UpdateGatewayResourceState(&EventSourceStatus{
+			gc.UpdateGatewayState(&EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseCompleted,
 				Name:    "test-node",
 				Message: "node is marked completed",
@@ -73,7 +73,7 @@ func TestGatewayState(t *testing.T) {
 		})
 
 		convey.Convey("Remove gateway resource test-node node", func() {
-			gc.UpdateGatewayResourceState(&EventSourceStatus{
+			gc.UpdateGatewayState(&EventSourceStatus{
 				Phase:   v1alpha1.NodePhaseRemove,
 				Name:    "test-node",
 				Message: "node is removed",
@@ -86,7 +86,7 @@ func TestGatewayState(t *testing.T) {
 
 func TestMarkGatewayNodePhase(t *testing.T) {
 	convey.Convey("Given a node status, mark node state", t, func() {
-		gc := getGatewayConfig()
+		gc := getGatewayContext()
 		nodeStatus := &EventSourceStatus{
 			Name:    "fake",
 			Id:      "1234",
@@ -123,7 +123,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 
 func TestGetNodeByID(t *testing.T) {
 	convey.Convey("Given a node id, retrieve the node", t, func() {
-		gc := getGatewayConfig()
+		gc := getGatewayContext()
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"1234": v1alpha1.NodeStatus{
 				Phase:   v1alpha1.NodePhaseNew,
@@ -140,7 +140,7 @@ func TestGetNodeByID(t *testing.T) {
 
 func TestInitializeNode(t *testing.T) {
 	convey.Convey("Given a node, initialize it", t, func() {
-		gc := getGatewayConfig()
+		gc := getGatewayContext()
 		status := gc.initializeNode("1234", "fake", "init")
 		convey.So(status, convey.ShouldNotBeNil)
 		convey.So(status.ID, convey.ShouldEqual, "1234")
