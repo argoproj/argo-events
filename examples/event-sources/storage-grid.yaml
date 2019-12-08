@@ -8,7 +8,7 @@ spec:
     example-insecure:
       # hook contains configuration for the HTTP server running in the gateway.
       # StorageGrid will send events to following port and endpoint
-      hook:
+      webhook:
         # port to run HTTP server on
         port: "8080"
         # endpoint to listen events on
@@ -19,7 +19,7 @@ spec:
         - "ObjectCreated:Put"
 
     example-secure:
-      hook:
+      webhook:
         # port to run HTTP server on
         port: "8090"
         # endpoint to listen events on

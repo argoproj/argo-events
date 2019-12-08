@@ -8,7 +8,7 @@ spec:
     example-insecure:
       # hook contains configuration for the HTTP server running in the gateway.
       # Slack will send events to following port and endpoint
-      hook:
+      webhook:
         # endpoint to listen events on
         endpoint: "/"
         # port to run HTTP server on
@@ -30,7 +30,7 @@ spec:
 
     # with secure connection
     example-secure:
-      hook:
+      webhook:
         endpoint: "/"
         port: "14000"
         # path to file that is mounted in gateway pod which contains certs

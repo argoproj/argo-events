@@ -12,7 +12,7 @@ spec:
       # repository name
       repository: "argo-events"
       # Github will send events to following port and endpoint
-      hook:
+      webhook:
         # endpoint to listen to events on
         endpoint: "/push"
         # port to run internal HTTP server on
@@ -48,7 +48,7 @@ spec:
     example-with-secure-connection:
       owner: "argoproj"
       repository: "argo"
-      hook:
+      webhook:
         endpoint: "/push"
         port: "13000"
         url: "http://myargofakeurl.fake"
