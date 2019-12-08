@@ -149,46 +149,46 @@ file-image: file-linux
 
 #Stream gateways
 nats:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/server/stream/nats/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nats-gateway ./gateways/server/nats/cmd
 
 nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
 
 nats-image: nats-linux
-	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/server/stream/nats/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/server/nats/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
 
 
 kafka:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/server/stream/kafka/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/kafka-gateway ./gateways/server/kafka/cmd
 
 kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
 
 kafka-image: kafka-linux
-	docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/server/stream/kafka/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/server/kafka/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
 
 
 amqp:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/server/stream/amqp/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/amqp-gateway ./gateways/server/amqp/cmd
 
 amqp-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
 
 amqp-image: amqp-linux
-	docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/server/stream/amqp/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/server/amqp/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) ; fi
 
 
 mqtt:
-	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/server/stream/mqtt/cmd
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/mqtt-gateway ./gateways/server/mqtt/cmd
 
 mqtt-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
 
 mqtt-image: mqtt-linux
-	docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/server/stream/mqtt/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/server/mqtt/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
 
 
