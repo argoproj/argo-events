@@ -41,7 +41,7 @@ spec:
         version: v1alpha1
         kind: Workflow
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -65,7 +65,7 @@ spec:
         version: v1alpha1
         kind: Workflow
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:

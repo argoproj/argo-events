@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: aws-sqs-event-source
 spec:
-  version: "v0.11"
   type: "sqs"
   spec:
     example-1:

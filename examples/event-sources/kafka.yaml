@@ -4,7 +4,6 @@ metadata:
   name: kafka-event-source
 spec:
   type: "kafka"
-  version: "v0.11"
   kafka:
     # no retries if connection to kafka service is not successful
     example-without-retry:

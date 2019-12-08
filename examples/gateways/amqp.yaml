@@ -9,8 +9,6 @@ spec:
   replica: 1
   # type of the gateway
   type: "amqp"
-  # version of the gateway
-  version: "v0.11"
   # event source configmap name
   eventSourceRef:
     name: "amqp-event-source"

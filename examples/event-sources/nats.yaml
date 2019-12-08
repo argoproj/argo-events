@@ -4,7 +4,6 @@ metadata:
   name: nats-event-source
 spec:
   type: "nats"
-  version: "v0.11"
   nats:
     # no retries if connection to nats service is not successful
     example-without-retry:

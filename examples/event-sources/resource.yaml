@@ -4,7 +4,6 @@ metadata:
   name: resource-event-source
 spec:
   type: "resource"
-  version: "v0.11"
   resource:
     # watch workflows that are in successful state
     example:

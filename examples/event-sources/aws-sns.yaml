@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: aws-sns-event-source
 spec:
-  version: "v0.11"
   type: "sns"
   sns:
     example:
@@ -11,7 +10,7 @@ spec:
       topicArn: "topic-arn"
       # hook contains configuration for the HTTP server running in the gateway.
       # AWS will send events to following port and endpoint
-      hook:
+      webhook:
         # endpoint to listen events on
         endpoint: "/"
         # port to run HTTP server on
@@ -37,7 +36,7 @@ spec:
 
     example-with-secure-connection:
       topicArn: "topic-arn"
-      hook:
+      webhook:
         endpoint: "/"
         # gateway can run multiple HTTP servers, just define a unique port.
         port: "13000"
@@ -58,7 +57,7 @@ spec:
       # If AWS access credentials are already present on the Pod's IAM role running the Gateway,
       # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
       topicArn: "topic-arn"
-      hook:
+      webhook:
         endpoint: "/"
         port: "13000"
         url: "http://mysecondfakeurl.fake"

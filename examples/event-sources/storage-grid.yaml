@@ -4,7 +4,6 @@ metadata:
   name: storage-grid-event-source
 spec:
   type: "storage-grid"
-  version: "v0.11"
   storageGrid:
     example-insecure:
       # hook contains configuration for the HTTP server running in the gateway.

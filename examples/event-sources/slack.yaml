@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: slack-event-source
 spec:
-  version: "v0.11"
   type: "slack"
   slack:
     example-insecure:

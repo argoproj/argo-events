@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: calendar-source
 spec:
-  version: "v0.11"
   type: "calendar"
   calendar:
     example-with-interval:

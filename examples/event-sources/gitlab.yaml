@@ -4,7 +4,6 @@ kind: EventSource
 metadata:
   name: gitlab-event-source
 spec:
-  version: "v0.11"
   type: "gitlab"
   gitlab:
     example:

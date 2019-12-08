@@ -3,7 +3,6 @@ kind: EventSource
 metadata:
   name: amqp-event-source
 spec:
-  version: v0.11
   type: amqp
   amqp:
     # no retries if connection to amqp service is not successful

@@ -3,20 +3,21 @@ kind: EventSource
 metadata:
   name: file-event-source
 spec:
-  version: v0.11
   type: file
   file:
     example-with-path:
-      # directory to watch
-      directory: "/bin/"
+      watchPathConfig:
+        # directory to watch
+        directory: "/bin/"
+        # path to watch
+        path: "x.txt"
       # type of the event
       # supported types are: CREATE, WRITE, REMOVE, RENAME, CHMOD
-      type: "CREATE"
-      # path to watch
-      path: "x.txt"
+      eventType: "CREATE"
 
     example-with-path-regex:
-      directory: "/bin/"
-      type: "CREATE"
-      # the gateway will watch events for path that matches following regex
-      pathRegexp: "([a-z]+).txt"
+      watchPathConfig:
+        directory: "/bin/"
+        # the gateway will watch events for path that matches following regex
+        pathRegexp: "([a-z]+).txt"
+      eventType: "CREATE"

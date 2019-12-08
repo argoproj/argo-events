@@ -4,7 +4,6 @@ metadata:
   name: hdfs-event-source
 spec:
   type: "hdfs"
-  version: "v0.11"
   hdfs:
     example-1:
       directory: "/tmp/"
