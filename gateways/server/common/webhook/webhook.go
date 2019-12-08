@@ -31,7 +31,7 @@ func NewController() *Controller {
 		ActiveRoutes:         make(map[string]*Route),
 		ActiveServerHandlers: make(map[string]*mux.Router),
 		RouteActivateChan:    make(chan Router),
-		RouteInactivateChan:  make(chan Router),
+		RouteDeactivateChan:  make(chan Router),
 	}
 }
 
@@ -57,7 +57,7 @@ func ProcessRouteStatus(ctrl *Controller) {
 			// to allow route process incoming requests
 			router.GetRoute().StartCh <- struct{}{}
 
-		case router := <-ctrl.RouteInactivateChan:
+		case router := <-ctrl.RouteDeactivateChan:
 			router.GetRoute().Active = false
 		}
 	}
@@ -144,7 +144,7 @@ func manageRouteStream(router Router, controller *Controller, eventStream gatewa
 
 		case <-eventStream.Context().Done():
 			route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("connection is closed by client")
-			controller.RouteInactivateChan <- router
+			controller.RouteDeactivateChan <- router
 			return nil
 		}
 	}
@@ -154,7 +154,7 @@ func manageRouteStream(router Router, controller *Controller, eventStream gatewa
 func ManageRoute(router Router, controller *Controller, eventStream gateways.Eventing_StartEventSourceServer) error {
 	route := router.GetRoute()
 
-	log := route.Logger.WithField(common.LabelEventSource, route.EventSource.Name)
+	logger := route.Logger.WithField(common.LabelEventSource, route.EventSource.Name)
 
 	// in order to process a route, it needs to go through
 	// 1. validation - basic configuration checks
@@ -163,30 +163,30 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 	// 4. consume data from route's data channel
 	// 5. post stop operations - operations that must be performed after route is inactivated
 
-	log.Info("validating the route...")
+	logger.Info("validating the route...")
 	if err := validateRoute(router.GetRoute()); err != nil {
-		log.WithError(err).Error("route is invalid, won't initialize it")
+		logger.WithError(err).Error("route is invalid, won't initialize it")
 		return err
 	}
 
-	log.Info("activating the route...")
+	logger.Info("activating the route...")
 	activateRoute(router, controller)
 
-	log.Info("running operations post route activation...")
+	logger.Info("running operations post route activation...")
 	if err := router.PostActivate(); err != nil {
-		log.WithError(err).Error("error occurred while performing post route activation operations")
+		logger.WithError(err).Error("error occurred while performing post route activation operations")
 		return err
 	}
 
-	log.Info("consuming payload from the route...")
+	logger.Info("listening to payloads for the route...")
 	if err := manageRouteStream(router, controller, eventStream); err != nil {
-		log.WithError(err).Error("error occurred in consuming payload from the route")
+		logger.WithError(err).Error("error occurred in consuming payload from the route")
 		return err
 	}
 
-	log.Info("running operations post route inactivation...")
+	logger.Info("running operations post route inactivation...")
 	if err := router.PostInactivate(); err != nil {
-		log.WithError(err).Error("error occurred while running operations post route inactivation")
+		logger.WithError(err).Error("error occurred while running operations post route inactivation")
 	}
 
 	return nil

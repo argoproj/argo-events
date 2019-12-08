@@ -70,8 +70,8 @@ type Controller struct {
 	ActiveRoutes map[string]*Route
 	// RouteActivateChan handles activation of routes
 	RouteActivateChan chan Router
-	// RouteInactivateChan handles inactivation of routes
-	RouteInactivateChan chan Router
+	// RouteDeactivateChan handles inactivation of routes
+	RouteDeactivateChan chan Router
 }
 
 // Context holds a general purpose REST API context
