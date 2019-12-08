@@ -56,7 +56,7 @@ type EventSourceSpec struct {
 	File map[string]FileEventSource `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
 	// Resource event sources
 	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,4,opt,name=resource"`
-	// Context event sources
+	// Webhook event sources
 	Webhook map[string]webhook.Context `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
 	// AMQP event sources
 	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,6,opt,name=amqp"`
@@ -187,7 +187,7 @@ type MQTTEventSource struct {
 	// ClientID is the id of the client
 	ClientId string `json:"clientId" protobuf:"bytes,3,name=clientId"`
 	// ConnectionBackoff holds backoff applied to connection.
-	ConnectionBackoff *common.Backoff `json:"backoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 }
 
 // NATSEventSource refers to event-source for NATS related events
@@ -202,8 +202,8 @@ type NATSEventsSource struct {
 
 // SNSEventSource refers to event-source for AWS SNS related events
 type SNSEventSource struct {
-	// WebHook configuration for http server
-	WebHook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	// Webhook configuration for http server
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// TopicArn
 	TopicArn string `json:"topicArn" protobuf:"bytes,2,name=topicArn"`
 	// AccessKey refers K8 secret containing aws access key
@@ -255,8 +255,8 @@ type PubSubEventSource struct {
 type GithubEventSource struct {
 	// Id is the webhook's id
 	Id int64 `json:"id" protobuf:"bytes,1,name=id"`
-	// Context refers to the configuration required to run a http server
-	Webhook *webhook.Context `json:"hook" protobuf:"bytes,2,name=webhook"`
+	// Webhook refers to the configuration required to run a http server
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,2,name=webhook"`
 	// Owner refers to GitHub owner name i.e. argoproj
 	Owner string `json:"owner" protobuf:"bytes,3,name=owner"`
 	// Repository refers to GitHub repo name i.e. argo-events
@@ -266,10 +266,10 @@ type GithubEventSource struct {
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
 	APIToken *corev1.SecretKeySelector `json:"apiToken"`
-	// Context secret refers to K8s secret containing Context secret
+	// WebhookSecret refers to K8s secret containing GitHub webhook secret
 	// https://developer.github.com/webhooks/securing/
 	// +optional
-	WebHookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
+	WebhookSecret *corev1.SecretKeySelector `json:"webhookSecret,omitempty" protobuf:"bytes,7,opt,name=webhookSecret"`
 	// Insecure tls verification
 	Insecure bool `json:"insecure,omitempty" protobuf:"bytes,8,opt,name=insecure"`
 	// Active refers to status of the webhook for event deliveries.
@@ -293,8 +293,8 @@ type GithubEventSource struct {
 
 // GitlabEventSource refers to event-source related to Gitlab events
 type GitlabEventSource struct {
-	// Context holds configuration to run a http server
-	Webhook *webhook.Context `json:"hook" protobuf:"bytes,1,name=webhook"`
+	// Webhook holds configuration to run a http server
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId" protobuf:"bytes,2,name=projectId"`
 	// Event is a gitlab event to listen to.
@@ -355,16 +355,16 @@ type SlackEventSource struct {
 	SigningSecret *corev1.SecretKeySelector `json:"signingSecret,omitempty" protobuf:"bytes,1,opt,name=signingSecret"`
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,name=token"`
-	// Context holds configuration for a REST endpoint
-	WebHook *webhook.Context `json:"hook" protobuf:"bytes,3,name=webhook"`
+	// Webhook holds configuration for a REST endpoint
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
 	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
 type StorageGridEventSource struct {
-	// Context holds configuration for a REST endpoint
-	WebHook *webhook.Context `json:"hook" protobuf:"bytes,1,name=webhook"`
+	// Webhook holds configuration for a REST endpoint
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`

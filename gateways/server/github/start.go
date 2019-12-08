@@ -157,8 +157,8 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("retrieving webhook secret credentials...")
-	if githubEventSource.WebHookSecret != nil {
-		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebHookSecret, githubEventSource.Namespace)
+	if githubEventSource.WebhookSecret != nil {
+		webhookSecretCreds, err := router.getCredentials(githubEventSource.WebhookSecret, githubEventSource.Namespace)
 		if err != nil {
 			return errors.Errorf("failed to retrieve webhook secret. err: %+v", err)
 		}
@@ -222,7 +222,7 @@ func (router *Router) PostActivate() error {
 		}
 	}
 
-	if githubEventSource.WebHookSecret != nil {
+	if githubEventSource.WebhookSecret != nil {
 		// As secret in hook config is masked with asterisk (*), replace it with unmasked secret.
 		hook.Config["secret"] = hookConfig["secret"]
 	}

@@ -67,5 +67,5 @@ func validate(snsEventSource *v1alpha1.SNSEventSource) error {
 	if snsEventSource.Region == "" {
 		return fmt.Errorf("must specify region")
 	}
-	return webhook.ValidateWebhookContext(snsEventSource.WebHook)
+	return webhook.ValidateWebhookContext(snsEventSource.Webhook)
 }

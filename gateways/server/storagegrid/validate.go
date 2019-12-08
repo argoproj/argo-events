@@ -62,5 +62,5 @@ func validate(eventSource *v1alpha1.StorageGridEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	return webhook.ValidateWebhookContext(eventSource.WebHook)
+	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }

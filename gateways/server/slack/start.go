@@ -261,7 +261,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	route := webhook.NewRoute(slackEventSource.WebHook, listener.Logger, eventSource)
+	route := webhook.NewRoute(slackEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
 		route:            route,

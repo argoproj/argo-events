@@ -66,5 +66,5 @@ func validate(eventSource *v1alpha1.SlackEventSource) error {
 	if eventSource.Token == nil {
 		return fmt.Errorf("token not provided")
 	}
-	return webhook.ValidateWebhookContext(eventSource.WebHook)
+	return webhook.ValidateWebhookContext(eventSource.Webhook)
 }

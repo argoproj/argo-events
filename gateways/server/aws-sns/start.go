@@ -140,7 +140,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	router.session = snslib.New(awsSession)
-	formattedUrl := common.FormattedURL(snsEventSource.WebHook.URL, snsEventSource.WebHook.Endpoint)
+	formattedUrl := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
 		Protocol: &snsProtocol,
@@ -176,7 +176,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	route := webhook.NewRoute(snsEventSource.WebHook, listener.Logger, eventSource)
+	route := webhook.NewRoute(snsEventSource.Webhook, listener.Logger, eventSource)
 
 	logger.Infoln("operating on the route...")
 	return webhook.ManageRoute(&Router{

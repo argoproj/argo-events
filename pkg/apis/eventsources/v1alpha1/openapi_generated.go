@@ -325,7 +325,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 					},
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context event sources",
+							Description: "Webhook event sources",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -548,27 +548,6 @@ func schema_pkg_apis_eventsources_v1alpha1_FileEventSource(ref common.ReferenceC
 				Description: "FileEventSource describes an event-source for file related events.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"directory": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Directory to watch for events",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"path": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Path is relative path of object to watch with respect to the directory",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"pathRegexp": {
-						SchemaProps: spec.SchemaProps{
-							Description: "PathRegexp is regexp of relative path of object to watch with respect to the directory",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"eventType": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information",
@@ -583,7 +562,7 @@ func schema_pkg_apis_eventsources_v1alpha1_FileEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"directory", "eventType", "watchPathConfig"},
+				Required: []string{"eventType", "watchPathConfig"},
 			},
 		},
 		Dependencies: []string{
@@ -605,9 +584,9 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 							Format:      "int64",
 						},
 					},
-					"hook": {
+					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context refers to the configuration required to run a http server",
+							Description: "Webhook refers to the configuration required to run a http server",
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
@@ -652,7 +631,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 					},
 					"webhookSecret": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context secret refers to K8s secret containing Context secret https://developer.github.com/webhooks/securing/",
+							Description: "WebhookSecret refers to K8s secret containing GitHub webhook secret https://developer.github.com/webhooks/securing/",
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
@@ -706,7 +685,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"id", "hook", "owner", "repository", "events", "apiToken", "namespace"},
+				Required: []string{"id", "webhook", "owner", "repository", "events", "apiToken", "namespace"},
 			},
 		},
 		Dependencies: []string{
@@ -721,9 +700,9 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 				Description: "GitlabEventSource refers to event-source related to Gitlab events",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"hook": {
+					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context holds configuration to run a http server",
+							Description: "Webhook holds configuration to run a http server",
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
@@ -776,7 +755,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"hook", "projectId", "event", "accessToken", "gitlabBaseURL", "namespace"},
+				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL", "namespace"},
 			},
 		},
 		Dependencies: []string{
@@ -978,7 +957,7 @@ func schema_pkg_apis_eventsources_v1alpha1_MQTTEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
-					"backoff": {
+					"connectionBackoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ConnectionBackoff holds backoff applied to connection.",
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
@@ -1195,7 +1174,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SNSEventSource(ref common.ReferenceCa
 				Properties: map[string]spec.Schema{
 					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "WebHook configuration for http server",
+							Description: "Webhook configuration for http server",
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
@@ -1316,9 +1295,9 @@ func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.Reference
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
-					"hook": {
+					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context holds configuration for a REST endpoint",
+							Description: "Webhook holds configuration for a REST endpoint",
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
@@ -1330,7 +1309,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"hook", "namespace"},
+				Required: []string{"webhook", "namespace"},
 			},
 		},
 		Dependencies: []string{
@@ -1345,9 +1324,9 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 				Description: "StorageGridEventSource refers to event-source for StorageGrid related events",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"hook": {
+					"webhook": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context holds configuration for a REST endpoint",
+							Description: "Webhook holds configuration for a REST endpoint",
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
@@ -1377,7 +1356,7 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 						},
 					},
 				},
-				Required: []string{"hook"},
+				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{

@@ -212,27 +212,27 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GatewayResource holds the names of the gateway resources",
+				Description: "GatewayResource holds the metadata about the gateway resources",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"deployment": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name of the deployment for the gateway",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Metadata of the deployment for the gateway",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
 					"service": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name of the service for the gateway",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Metadata of the service for the gateway",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
 						},
 					},
 				},
 				Required: []string{"deployment"},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -346,7 +346,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 					},
 					"resources": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Resources refers to the names of the gateway resources",
+							Description: "Resources refers to the metadata about the gateway resources",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource"),
 						},
 					},

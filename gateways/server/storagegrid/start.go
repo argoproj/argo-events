@@ -190,7 +190,7 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	route := webhook.NewRoute(storagegridEventSource.WebHook, listener.Logger, eventSource)
+	route := webhook.NewRoute(storagegridEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
 		route:                  route,
