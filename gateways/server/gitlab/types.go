@@ -24,8 +24,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// GitlabEventListener implements ConfigExecutor
-type GitlabEventListener struct {
+// EventListener implements ConfigExecutor
+type EventListener struct {
 	Logger *logrus.Logger
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface

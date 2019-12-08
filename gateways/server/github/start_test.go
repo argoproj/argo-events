@@ -42,7 +42,7 @@ var (
 		},
 	}
 
-	secretName     = "githab-access"
+	secretName     = "github-access"
 	accessKey      = "YWNjZXNz"
 	LabelAccessKey = "accesskey"
 )
@@ -72,7 +72,7 @@ func TestGetCredentials(t *testing.T) {
 				"PushEvent",
 			},
 			APIToken: &corev1.SecretKeySelector{
-				Key: "accessKey",
+				Key: LabelAccessKey,
 				LocalObjectReference: corev1.LocalObjectReference{
 					Name: "github-access",
 				},

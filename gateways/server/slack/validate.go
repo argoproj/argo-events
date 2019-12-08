@@ -23,19 +23,27 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates slack event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.SlackEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.SlackEvent)),
+		}, nil
+	}
+
 	var slackEventSource *v1alpha1.SlackEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &slackEventSource); err != nil {
 		listener.Logger.WithError(err).Errorln("failed to parse the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	if err := validate(slackEventSource); err != nil {
@@ -43,7 +51,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		return &gateways.ValidEventSource{
 			IsValid: false,
 			Reason:  err.Error(),
-		}, err
+		}, nil
 	}
 
 	return &gateways.ValidEventSource{

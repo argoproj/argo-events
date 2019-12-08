@@ -19,6 +19,7 @@ package gitlab
 import (
 	"context"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 
@@ -26,35 +27,40 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestValidateGitlabEventSource(t *testing.T) {
-	convey.Convey("Given a gitlab event source spec, parse it and make sure no error occurs", t, func() {
-		ese := &GitlabEventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "gitlab.yaml"))
-		convey.So(err, convey.ShouldBeNil)
+	listener := &EventListener{
+		Logger: common.NewArgoEventsLogger(),
+	}
 
-		var eventsource *v1alpha1.EventSource
-		err = yaml.Unmarshal(content, &eventsource)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(eventsource, convey.ShouldNotBeNil)
-
-		err = v1alpha1.ValidateEventSource(eventsource)
-		convey.So(err, convey.ShouldBeNil)
-
-		for key, value := range eventsource.Spec.Gitlab {
-			body, err := yaml.Marshal(value)
-			convey.So(err, convey.ShouldBeNil)
-			valid, _ := ese.ValidateEventSource(context.Background(), &gateways.EventSource{
-				Name:    key,
-				Id:      common.Hasher(key),
-				Value:   body,
-				Version: eventsource.Spec.Version,
-				Type:    string(eventsource.Spec.Type),
-			})
-			convey.So(valid, convey.ShouldNotBeNil)
-			convey.So(valid.IsValid, convey.ShouldBeTrue)
-		}
+	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+		Id:    "1",
+		Name:  "gitlab",
+		Value: nil,
+		Type:  "sq",
 	})
+	assert.Equal(t, false, valid.IsValid)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("gitlab"), valid.Reason)
+
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "gitlab.yaml"))
+	assert.Nil(t, err)
+
+	var eventSource *v1alpha1.EventSource
+	err = yaml.Unmarshal(content, &eventSource)
+	assert.Nil(t, err)
+
+	for name, value := range eventSource.Spec.Gitlab {
+		fmt.Println(name)
+		content, err := yaml.Marshal(value)
+		assert.Nil(t, err)
+		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Id:    "1",
+			Name:  "gitlab",
+			Value: content,
+			Type:  "gitlab",
+		})
+		fmt.Println(valid.Reason)
+		assert.Equal(t, true, valid.IsValid)
+	}
 }

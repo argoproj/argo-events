@@ -26,37 +26,41 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateS3EventSource(t *testing.T) {
-	convey.Convey("Given a S3 minio spec, parse the spec and make sure no error occurs", t, func() {
-		listener := &EventListener{}
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "minio.yaml"))
-		convey.So(err, convey.ShouldBeNil)
+	listener := &EventListener{
+		Logger: common.NewArgoEventsLogger(),
+	}
 
-		var eventSource *v1alpha1.EventSource
-		err = yaml.Unmarshal(content, &eventSource)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(eventSource, convey.ShouldNotBeNil)
-
-		err = v1alpha1.ValidateEventSource(eventSource)
-		convey.So(err, convey.ShouldBeNil)
-
-		for key, value := range eventSource.Spec.Minio {
-			body, err := yaml.Marshal(value)
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(err, convey.ShouldNotBeNil)
-
-			valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
-				Name:    key,
-				Id:      common.Hasher(key),
-				Value:   body,
-				Version: eventSource.Spec.Version,
-				Type:    string(eventSource.Spec.Type),
-			})
-			convey.So(valid, convey.ShouldNotBeNil)
-			convey.So(valid.IsValid, convey.ShouldBeTrue)
-		}
+	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+		Id:    "1",
+		Name:  "minio",
+		Value: nil,
+		Type:  "sq",
 	})
+	assert.Equal(t, false, valid.IsValid)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("minio"), valid.Reason)
+
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "minio.yaml"))
+	assert.Nil(t, err)
+
+	var eventSource *v1alpha1.EventSource
+	err = yaml.Unmarshal(content, &eventSource)
+	assert.Nil(t, err)
+
+	for name, value := range eventSource.Spec.Minio {
+		fmt.Println(name)
+		content, err := yaml.Marshal(value)
+		assert.Nil(t, err)
+		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Id:    "1",
+			Name:  "minio",
+			Value: content,
+			Type:  "minio",
+		})
+		fmt.Println(valid.Reason)
+		assert.Equal(t, true, valid.IsValid)
+	}
 }

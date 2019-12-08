@@ -179,7 +179,7 @@ func (router *Router) PostInactivate() error {
 }
 
 // StartEventSource starts an event source
-func (listener *GitlabEventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
+func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer server.Recover(eventSource.Name)
 
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)

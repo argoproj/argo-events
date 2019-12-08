@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	server.StartGateway(&gitlab.GitlabEventListener{
+	server.StartGateway(&gitlab.EventListener{
 		Logger:    common.NewArgoEventsLogger(),
 		K8sClient: clientset,
 	})

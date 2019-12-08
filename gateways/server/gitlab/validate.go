@@ -20,12 +20,20 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates gitlab event source
-func (listener *GitlabEventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.GitLabEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.GitLabEvent)),
+		}, nil
+	}
+
 	var gitlabEventSource *v1alpha1.GitlabEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &gitlabEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")

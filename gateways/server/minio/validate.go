@@ -29,6 +29,13 @@ import (
 
 // ValidateEventSource validates the minio event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.MinioEvent {
+		return &gateways.ValidEventSource{
+			IsValid: false,
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.MinioEvent)),
+		}, nil
+	}
+
 	var minioEventSource *apicommon.S3Artifact
 	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
@@ -36,14 +43,14 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
-		}, err
+		}, nil
 	}
 
 	if err := validate(minioEventSource); err != nil {
 		return &gateways.ValidEventSource{
 			Reason:  err.Error(),
 			IsValid: false,
-		}, err
+		}, nil
 	}
 	return &gateways.ValidEventSource{
 		IsValid: true,
