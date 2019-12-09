@@ -84,7 +84,6 @@ func (ctx *sensorContext) operate() error {
 			ctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
 			return nil
 		}
-
 		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
 		ctx.logger.Infoln("successfully created resources for the sensor. sensor is in active state")
 
@@ -94,7 +93,7 @@ func (ctx *sensorContext) operate() error {
 			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
-		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is updated")
+		ctx.updated = true
 		ctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
@@ -122,7 +121,6 @@ func (ctx *sensorContext) createSensorResources() error {
 	if err != nil {
 		return err
 	}
-
 	ctx.logger.WithField("name", deployment.Name).Infoln("creating the deployment resource for the sensor")
 	deployment, err = ctx.createDeployment(deployment)
 	if err != nil {

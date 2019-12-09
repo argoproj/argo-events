@@ -71,7 +71,7 @@ func TestOperate(t *testing.T) {
 				assert.NotNil(t, service)
 				assert.Equal(t, oldMetadata.Service.Annotations[common.AnnotationResourceSpecHash], service.Annotations[common.AnnotationResourceSpecHash])
 				assert.Equal(t, v1alpha1.NodePhaseActive, ctx.sensor.Status.Phase)
-				assert.Equal(t, "sensor is updated", ctx.sensor.Status.Message)
+				assert.Equal(t, "sensor is active", ctx.sensor.Status.Message)
 			},
 		},
 		{

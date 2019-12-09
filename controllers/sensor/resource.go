@@ -47,8 +47,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 			},
 			Type: corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{
-				common.LabelSensorName:    ctx.sensor.Name,
-				LabelControllerInstanceID: ctx.controller.Config.InstanceID,
+				common.LabelOwnerName: ctx.sensor.Name,
 			},
 		},
 	}
@@ -135,12 +134,7 @@ func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
 		return nil, err
 	}
 
-	newHash, err := common.GetObjectHash(newDeployment)
-	if err != nil {
-		return nil, err
-	}
-
-	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newHash {
+	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
 		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
@@ -160,26 +154,25 @@ func (ctx *sensorContext) updateService() (*corev1.Service, error) {
 	if currentMetadata != nil && !isHttpTransport {
 		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			// warning is sufficient instead of halting the entire sensor operation by marking it as failed.
-			ctx.logger.WithField("service-name", currentMetadata.Name).WithError(err).Warnln("failed to delete the service")
+			ctx.logger.WithField("service-name", currentMetadata.Name).WithError(err).Warnln("failed to delete the current service")
 		}
 		return nil, nil
 	}
-	service, err := ctx.serviceBuilder()
+	newService, err := ctx.serviceBuilder()
 	if err != nil {
 		return nil, err
 	}
 	if currentMetadata == nil && isHttpTransport {
-		return ctx.controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 	if currentMetadata == nil {
 		return nil, nil
 	}
-	newHash, err := common.GetObjectHash(service)
-	if currentMetadata.Annotations != nil && currentMetadata.Annotations[common.AnnotationResourceSpecHash] != newHash {
+	if currentMetadata.Annotations != nil && currentMetadata.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
 		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
-		return ctx.controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 	return ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 }
