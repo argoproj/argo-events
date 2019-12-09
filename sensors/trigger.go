@@ -248,7 +248,7 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 		Factor:   trigger.Policy.Backoff.Factor,
 		Jitter:   trigger.Policy.Backoff.Jitter,
 	}, func() (bool, error) {
-		obj, err := resourceInterface.Get(name, metav1.GetOptions{})
+		obj, err := resourceInterface.Namespace(namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			sec.log.WithError(err).WithField("resource-name", obj.GetName()).Error("failed to get triggered resource")
 			return false, nil
@@ -327,7 +327,7 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 		Resource: trigger.Template.Resource,
 	})
 
-	liveObj, err := dynamicResInterface.Create(obj, metav1.CreateOptions{})
+	liveObj, err := dynamicResInterface.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
