@@ -96,7 +96,6 @@ func (ctx *gatewayContext) operate() error {
 		err := ctx.updateGatewayResources()
 		if err != nil {
 			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
-			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")

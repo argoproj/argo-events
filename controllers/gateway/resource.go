@@ -181,12 +181,12 @@ func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) 
 		return nil, err
 	}
 
-	oldDeploymentMetadata := ctx.gateway.Status.Resources.Deployment
-	if oldDeploymentMetadata == nil {
+	currentMetadata := ctx.gateway.Status.Resources.Deployment
+	if currentMetadata == nil {
 		return nil, errors.New("deployment metadata is expected to be set in gateway object")
 	}
 
-	oldDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(oldDeploymentMetadata.Namespace).Get(oldDeploymentMetadata.Name, metav1.GetOptions{})
+	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
 			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
@@ -194,8 +194,8 @@ func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) 
 		return nil, err
 	}
 
-	if oldDeployment.Annotations != nil && oldDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
-		if err := ctx.controller.k8sClient.AppsV1().Deployments(oldDeployment.Namespace).Delete(oldDeployment.Name, &metav1.DeleteOptions{}); err != nil {
+	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
 		return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
@@ -225,18 +225,18 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 
-	oldServiceMetadata := ctx.gateway.Status.Resources.Service
-	oldService, err := ctx.controller.k8sClient.CoreV1().Services(oldServiceMetadata.Namespace).Get(oldServiceMetadata.Name, metav1.GetOptions{})
+	currentMetadata := ctx.gateway.Status.Resources.Service
+	currentService, err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 
-	if oldServiceMetadata == nil {
+	if currentMetadata == nil {
 		return nil, errors.New("service metadata is expected to be set in gateway object")
 	}
 
-	if oldService.Annotations != nil && oldService.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
-		if err := ctx.controller.k8sClient.CoreV1().Services(oldServiceMetadata.Namespace).Delete(oldServiceMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+	if currentService.Annotations != nil && currentService.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
 		if ctx.gateway.Spec.Service != nil {
@@ -244,5 +244,5 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 		}
 	}
 
-	return oldService, nil
+	return currentService, nil
 }
