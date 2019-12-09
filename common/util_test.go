@@ -17,7 +17,6 @@ limitations under the License.
 package common
 
 import (
-	"fmt"
 	"github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"testing"
@@ -64,12 +63,6 @@ func TestHasher(t *testing.T) {
 func TestDefaultConfigMapName(t *testing.T) {
 	res := DefaultConfigMapName("sensor-controller")
 	assert.Equal(t, "sensor-controller-configmap", res)
-}
-
-func TestDefaultServiceName(t *testing.T) {
-	convey.Convey("Given a service, get the default name", t, func() {
-		convey.So(DefaultServiceName("default"), convey.ShouldEqual, fmt.Sprintf("%s-svc", "default"))
-	})
 }
 
 func TestDefaultNatsQueueName(t *testing.T) {

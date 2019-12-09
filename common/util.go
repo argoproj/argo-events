@@ -35,14 +35,9 @@ func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
 }
 
-// DefaultServiceName returns a formulated name for a service
-func DefaultServiceName(serviceName string) string {
-	return fmt.Sprintf("%s-svc", serviceName)
-}
-
 // ServiceDNSName returns a formulated dns name for a service
 func ServiceDNSName(serviceName, namespace string) string {
-	return fmt.Sprintf("%s-svc.%s.svc.cluster.local", serviceName, namespace)
+	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 }
 
 // DefaultEventSourceName returns a formulated name for a gateway configuration
