@@ -32,7 +32,6 @@ const (
 	NodePhaseNew            NodePhase = ""               // the node is new
 	NodePhaseCompleted      NodePhase = "Completed"      // node has completed running
 	NodePhaseRemove         NodePhase = "Remove"         // stale node
-	NodePhaseNoOp           NodePhase = "NoOp"           // no op
 	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
 )
 
