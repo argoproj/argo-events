@@ -9,7 +9,7 @@ Sensors define a set of event dependencies (inputs) and triggers (outputs).
 <br/>
 
 ## What is an event dependency?
-A dependency is an event the sensor is waiting to happen. It is defined as "gateway-name:event-source-name".
+A dependency is an event the sensor is expecting to happen. It is defined as "gateway-name:event-source-name".
 Also, you can use [globs](https://github.com/gobwas/glob#syntax) to catch a set of events (e.g. "gateway-name:*").
 
 ## What is a dependency group?
@@ -19,26 +19,31 @@ A dependency group is basically a group of event dependencies.
 Circuit is any arbitrary boolean logic that can be applied on dependency groups.
 
 ## What is a trigger?
-Refer [Triggers](trigger.md).
+Refer to [Triggers](trigger.md).
 
-## How it works?
-  1. Once the sensor receives an event from gateway either over HTTP or through NATS, it validates
-  the event against dependencies defined in sensor spec. If the event is expected, then it is marked as a valid
-  event and the dependency is marked as resolved.
+## How does it work?
+  1. Once a Sensor receives an event from a Gateway, either over HTTP or through NATS, it validates
+  the event against dependencies defined in the Sensor spec. If the Sensor expects the event then the
+  event is marked as valid and the dependency is marked as resolved.
     
-  2. If you haven't defined dependency groups, sensor basically waits for all dependencies to resolve
-  and then kicks off triggers in sequence. If filters are defined, sensor applies the filter on target event 
-  and if events pass the filters, triggers are fired.
+  2. If you haven't defined dependency groups, a Sensor waits for all dependencies to resolve and then
+  kicks off each of its triggers in sequence. If filters are defined, the Sensor applies the filters to the
+  incoming event. If the event passes the filters the Sensor's triggers are fired.
   
-  3. If you have defined dependency groups, sensor upon receiving an event evaluates the group to which the event belongs to
-  and marks the group as resolved if all other event dependencies in the group are already resolved.
+  3. If you have defined dependency groups, a Sensor evaluates the group that the incoming event belongs to
+  and marks the group as resolved if all other event dependencies in the group have already been resolved.
   
-  4. Whenever a dependency group is resolved, sensor evaluates the `circuit` defined in spec. If the `circuit` resolves to true, the
-  triggers are fired. Sensor always waits for `circuit` to resolve to true before firing triggers.
+  4. Whenever a dependency group is resolved, the Sensor evaluates the `circuit` defined in spec. If
+  the `circuit` resolves to true, the triggers are fired. Sensors always wait for a `circuit` to resolve
+  to true before firing triggers.
   
-  5. You may not want to fire all the triggers defined in sensor spec. For that, sensor offers `when` switch on triggers. Basically `when` switch is way to control when to fire certain trigger depending upon which dependency group is resolved. 
+  5. You may not want to fire all of the triggers defined in your Sensor spec. The `when` switch can be
+  used to control when a certain trigger should be fired depending on which dependency group has been
+  resolved.
 
-  6. After sensor fires triggers, it transitions into `complete` state, increments completion counter and initializes it's state back to running and start the process all over again. Any event that is received in-between are stored on the internal queue.
+  6. After a Sensor fires its triggers, it transitions into `complete` state, increments completion
+  counter and initializes it's state back to running, starting the process all over again. Any event that
+  is received while the Sensor is waiting to restart is stored in an internal queue.
 
   **Note**: If you don't provide dependency groups and `circuit`, sensor performs an `AND` operation on event dependencies.
 
@@ -54,7 +59,7 @@ Lets look at a basic example,
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:
@@ -123,7 +128,7 @@ Now, lets look at a more complex example involving a circuit,
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:
@@ -285,7 +290,7 @@ In the example, the first template will get triggered when either `group_1` or `
         sensors.argoproj.io/sensor-controller-instanceid: argo-events
         # sensor controller will use this label to match with it's own version
         # do not remove
-        argo-events-sensor-version: v0.10
+        argo-events-sensor-version: v0.11
     spec:
       template:
         spec:

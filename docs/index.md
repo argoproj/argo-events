@@ -29,9 +29,9 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 ## Core Concepts
 The framework is made up of three components: 
 
- 1. **Gateway** which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
+ 1. [**Gateway**](gateway.md) which is implemented as a Kubernetes-native Custom Resource Definition processes events from event source.
 
- 2. **Sensor** which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
+ 2. [**Sensor**](sensor.md) which is implemented as a Kubernetes-native Custom Resource Definition defines a set of event dependencies and triggers K8s resources.
 
  3. **Event Source** is a configmap that contains configurations which is interpreted by gateway as source for events producing entity. 
 

@@ -5,7 +5,9 @@
 * Kubernetes cluster >v1.9
 * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
 
-### Helm Chart
+### Using Helm Chart
+
+Note: as of today (5 Dec 2019) this method does not work with Helm 3, only Helm 2.
 
 Make sure you have helm client installed and Tiller server is running. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a>
 

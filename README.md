@@ -3,13 +3,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/argoproj/argo-events)](https://goreportcard.com/report/github.com/argoproj/argo-events)
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
 [![Build Status](https://travis-ci.org/argoproj/argo-events.svg?branch=master)](https://travis-ci.org/argoproj/argo-events)
-[![Coverage Status](https://coveralls.io/repos/github/argoproj/argo-events/badge.svg)](https://coveralls.io/github/argoproj/argo-events)
 [![GoDoc](https://godoc.org/github.com/argoproj/argo-events?status.svg)](https://godoc.org/github.com/argoproj/argo-events/pkg/apis)	
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/logo.png?raw=true" alt="Logo"/>
-</p>
 
 ## What is Argo Events?
 **Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
@@ -35,6 +30,15 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 
 ## Documentation
 To learn more about Argo Events, [go to complete documentation](https://argoproj.github.io/argo-events/)
+
+## Who uses Argo Events?
+Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
+* [BlackRock](https://www.blackrock.com/)
+* [Canva](https://www.canva.com/)
+* [Fairwinds](https://fairwinds.com/)
+* [Intuit](https://www.intuit.com/)
+* [Viaduct](https://www.viaduct.ai/)
+* [BioBox Analytics](https://biobox.io)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)

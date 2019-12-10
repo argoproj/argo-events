@@ -20,16 +20,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/ghodss/yaml"
-
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/ghodss/yaml"
 	"github.com/tidwall/gjson"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -197,7 +196,12 @@ filter:
 
 		case v1alpha1.JSONTypeString:
 			for _, value := range f.Value {
-				if value == res.Str {
+				exp, err := regexp.Compile(value)
+				if err != nil {
+					return false, err
+				}
+
+				if exp.Match([]byte(res.Str)) {
 					continue filter
 				}
 			}

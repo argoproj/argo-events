@@ -13,7 +13,7 @@ cache:
 env:
   global:
     - DOCKER_PUSH=false
-    - IMAGE_TAG=v0.10-test
+    - IMAGE_TAG=v0.11
     - PATH=$HOME/bin:$PATH
 
 before_install:
