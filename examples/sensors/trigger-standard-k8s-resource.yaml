@@ -24,9 +24,9 @@ spec:
         name: webhook-pod-trigger
         group: ""
         version: v1
-        kind: Pod
+        resource: pods
         source:
-          inline: |
+          resource:
             apiVersion: v1
             kind: Pod
             metadata:
@@ -43,9 +43,9 @@ spec:
         name: webhook-deployment-trigger
         group: apps
         version: v1
-        kind: Deployment
+        resource: deployments
         source:
-          inline: |
+          resource:
             apiVersion: apps/v1
             kind: Deployment
             metadata:

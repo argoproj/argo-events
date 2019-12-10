@@ -23,7 +23,7 @@ spec:
         name: multi-trigger-workflow-1
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           s3:
             bucket:
@@ -41,9 +41,9 @@ spec:
         name: multi-trigger-workflow-2
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:

@@ -23,7 +23,7 @@ spec:
         name: url-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           url:
             path: "https://raw.githubusercontent.com/argoproj/argo/master/examples/hello-world.yaml"

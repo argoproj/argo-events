@@ -46,7 +46,7 @@ spec:
         name: workflow-trigger-1
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           git:
             url: "https://github.com/argoproj/argo.git"
@@ -65,7 +65,7 @@ spec:
         name: workflow-trigger-2
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           git:
             url: "git@github.com:argoproj/argo.git"

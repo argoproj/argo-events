@@ -38,7 +38,7 @@ spec:
         name: webhook-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           resource:
             apiVersion: argoproj.io/v1alpha1
@@ -62,7 +62,7 @@ spec:
         name: webhook-workflow-trigger-2
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           resource:
             apiVersion: argoproj.io/v1alpha1

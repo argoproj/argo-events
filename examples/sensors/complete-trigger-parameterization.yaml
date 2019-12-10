@@ -40,7 +40,7 @@ spec:
         name: THIS_WILL_BE_REPLACED_NAME
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           s3:
             bucket:

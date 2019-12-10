@@ -24,9 +24,9 @@ spec:
         name: minio-event-source-trigger
         group: ""
         version: v1
-        kind: Configmap
+        resource: configmaps
         source:
-          inline: |
+          resource:
             apiVersion: v1
             kind: Configmap
             metadata:
@@ -54,9 +54,9 @@ spec:
         name: minio-gateway-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Gateway
+        resource: gateways
         source:
-          inline: |-
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Gateway
             metadata:
