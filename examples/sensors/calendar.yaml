@@ -6,7 +6,6 @@ metadata:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
-  version: "v0.11"
   template:
     spec:
       containers:
@@ -25,7 +24,7 @@ spec:
         name: calendar-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
           inline: |
             apiVersion: argoproj.io/v1alpha1

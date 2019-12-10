@@ -9,8 +9,6 @@ spec:
   replica: 1
   # type of the gateway
   type: "minio"
-  # version of the gateway
-  version: "v0.11"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"

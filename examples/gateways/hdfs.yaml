@@ -8,7 +8,6 @@ metadata:
 spec:
   replica: 1
   type: "hdfs"
-  version: "v0.11"
   eventSourceRef:
     name: "hdfs-event-source"
     # optional, if event source is deployed in a different namespace than the gateway

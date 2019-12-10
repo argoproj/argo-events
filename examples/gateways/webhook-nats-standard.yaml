@@ -11,7 +11,6 @@ spec:
     # optional, if event source is deployed in a different namespace than the gateway
     # namespace: "other-namespace"
   type: "webhook"
-  version: "v0.11"
   processorPort: "9330"
   eventProtocol:
     type: "NATS"

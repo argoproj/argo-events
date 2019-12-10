@@ -7,7 +7,6 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  version: "v0.11"
   type: "sns"
   eventSourceRef:
     name: "aws-sns-event-source"
