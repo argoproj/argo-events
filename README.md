@@ -38,6 +38,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 * [Fairwinds](https://fairwinds.com/)
 * [Intuit](https://www.intuit.com/)
 * [Viaduct](https://www.viaduct.ai/)
+* [BioBox Analytics](https://biobox.io)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
