@@ -6,6 +6,7 @@ metadata:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
+  replica: 1
   type: "storage-grid"
   eventSourceRef:
     name: "storage-grid-event-source"
