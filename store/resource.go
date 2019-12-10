@@ -38,6 +38,6 @@ func NewResourceReader(resourceArtifact *unstructured.Unstructured) (ArtifactRea
 }
 
 func (reader *ResourceReader) Read() ([]byte, error) {
-	log.WithField("resource", reader.resourceArtifact.Object).Debug("reading artifact from resource template")
+	log.WithField("resource", reader.resourceArtifact.Object).Debug("reading minio from resource template")
 	return yaml.Marshal(reader.resourceArtifact.Object)
 }

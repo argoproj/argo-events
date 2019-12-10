@@ -1,55 +1,51 @@
-# This configmap contains the event sources configurations for Gitlab gateway
-# More info: https://docs.gitlab.com/ce/api/projects.html#add-project-hook
-
----
-apiVersion: v1
-kind: ConfigMap
+# More info on GitLab project hooks: https://docs.gitlab.com/ce/api/projects.html#add-project-hook
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: gitlab-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.11
-data:
-  example: |-
-    # id of the project
-    projectId: "1"
-    # Github will send events to following port and endpoint
-    hook:
-      # endpoint to listen to events on
-      endpoint: "/push"
-      # port to run internal HTTP server on
-      port: "12000"
-      # url the gateway will use to register at Github.
-      # This url must be reachable from outside the cluster.
-      # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-      url: "http://myfakeurl.fake"
-    # event to listen to
-    # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
-    event: "PushEvents"
-    # accessToken refers to K8s secret that stores the gitlab api token
-    accessToken:
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
-      key: accesskey
-      # Name of the K8s secret that contains the access token
-      name: gitlab-access
-    # Do SSL verification when triggering the hook
-    enableSSLVerification: false
-    # Gitlab Base url
-    gitlabBaseUrl: "YOUR_GITLAB_URL"
+spec:
+  type: "gitlab"
+  gitlab:
+    example:
+      # id of the project
+      projectId: "1"
+      # Github will send events to following port and endpoint
+      webhook:
+        # endpoint to listen to events on
+        endpoint: "/push"
+        # port to run internal HTTP server on
+        port: "12000"
+        # url the gateway will use to register at Github.
+        # This url must be reachable from outside the cluster.
+        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
+        url: "http://myfakeurl.fake"
+      # event to listen to
+      # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
+      event: "PushEvents"
+      # accessToken refers to K8s secret that stores the gitlab api token
+      accessToken:
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
+        key: accesskey
+        # Name of the K8s secret that contains the access token
+        name: gitlab-access
+      # Do SSL verification when triggering the hook
+      enableSSLVerification: false
+      # Gitlab Base url
+      gitlabBaseUrl: "YOUR_GITLAB_URL"
 
-  example-secure: |-
-    projectId: "2"
-    hook:
-      endpoint: "/push"
-      port: "13000"
-      url: "http://mysecondfakeurl.fake"
-      # path to file that is mounted in gateway pod which contains certs
-      serverCertPath: "some path in pod"
-      # path to file that is mounted in gateway pod which contains private key
-      serverKeyPath: "some path in pod"
-    event: "PushEvents"
-    accessToken:
-      key: accesskey
-      name: gitlab-access
-    enableSSLVerification: true
-    gitlabBaseUrl: "YOUR_GITLAB_URL"
+    example-secure:
+      projectId: "2"
+      webhook:
+        endpoint: "/push"
+        port: "13000"
+        url: "http://mysecondfakeurl.fake"
+        # path to file that is mounted in gateway pod which contains certs
+        serverCertPath: "some path in pod"
+        # path to file that is mounted in gateway pod which contains private key
+        serverKeyPath: "some path in pod"
+      event: "PushEvents"
+      accessToken:
+        key: accesskey
+        name: gitlab-access
+      enableSSLVerification: true
+      gitlabBaseUrl: "YOUR_GITLAB_URL"

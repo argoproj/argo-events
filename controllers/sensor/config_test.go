@@ -20,52 +20,26 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestSensorControllerConfigWatch(t *testing.T) {
-	sc := getSensorController()
-
-	convey.Convey("Given a sensor", t, func() {
-		convey.Convey("Create a new watch and make sure watcher is not nil", func() {
-			watcher := sc.newControllerConfigMapWatch()
-			convey.So(watcher, convey.ShouldNotBeNil)
-		})
-	})
-
-	convey.Convey("Given a sensor, resync config", t, func() {
-		convey.Convey("Update a sensor configmap with new instance id and remove namespace", func() {
-			cmObj := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: common.DefaultControllerNamespace,
-					Name:      sc.ConfigMap,
-				},
-				Data: map[string]string{
-					common.SensorControllerConfigMapKey: `instanceID: fake-instance-id`,
-				},
-			}
-			cm, err := sc.kubeClientset.CoreV1().ConfigMaps(sc.Namespace).Create(cmObj)
-			convey.Convey("Make sure no error occurs", func() {
-				convey.So(err, convey.ShouldBeNil)
-
-				convey.Convey("Updated sensor configmap must be non-nil", func() {
-					convey.So(cm, convey.ShouldNotBeNil)
-
-					convey.Convey("Resync the sensor configuration", func() {
-						err := sc.ResyncConfig(cmObj.Namespace)
-						convey.Convey("No error should occur while resyncing sensor configuration", func() {
-							convey.So(err, convey.ShouldBeNil)
-
-							convey.Convey("The updated instance id must be fake-instance-id", func() {
-								convey.So(sc.Config.InstanceID, convey.ShouldEqual, "fake-instance-id")
-								convey.So(sc.Config.Namespace, convey.ShouldBeEmpty)
-							})
-						})
-					})
-				})
-			})
-		})
-	})
+	sensorController := getController()
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: common.DefaultControllerNamespace,
+			Name:      sensorController.ConfigMap,
+		},
+		Data: map[string]string{
+			common.ControllerConfigMapKey: `instanceID: fake-instance-id`,
+		},
+	}
+	cm, err := sensorController.k8sClient.CoreV1().ConfigMaps(sensorController.Namespace).Create(configmap)
+	assert.Nil(t, err)
+	assert.NotNil(t, cm)
+	err = sensorController.ResyncConfig(sensorController.Namespace)
+	assert.Nil(t, err)
+	assert.Equal(t, sensorController.Config.InstanceID, "fake-instance-id")
 }

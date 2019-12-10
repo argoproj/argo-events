@@ -4,9 +4,6 @@ metadata:
   name: webhook-sensor-http
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -27,7 +24,7 @@ spec:
         name: webhook-pod-trigger
         group: ""
         version: v1
-        resource: pods
+        kind: Pod
         source:
           inline: |
             apiVersion: v1
@@ -46,7 +43,7 @@ spec:
         name: webhook-deployment-trigger
         group: apps
         version: v1
-        resource: deployments
+        kind: Deployment
         source:
           inline: |
             apiVersion: apps/v1

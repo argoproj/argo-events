@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -29,47 +29,24 @@ var (
 	configmapName = common.DefaultConfigMapName("gateway-controller")
 )
 
-func TestGatewayControllerConfigWatch(t *testing.T) {
-	gc := getGatewayController()
+func TestController_ResyncConfig(t *testing.T) {
+	controller := newController()
 
-	convey.Convey("Given a gateway", t, func() {
-		convey.Convey("Create a new watch and make sure watcher is not nil", func() {
-			watcher := gc.newControllerConfigMapWatch()
-			convey.So(watcher, convey.ShouldNotBeNil)
-		})
-	})
+	cmObj := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: common.DefaultControllerNamespace,
+			Name:      controller.ConfigMap,
+		},
+		Data: map[string]string{
+			common.ControllerConfigMapKey: `instanceID: fake-instance-id`,
+		},
+	}
 
-	convey.Convey("Given a gateway, resync config", t, func() {
-		convey.Convey("Update a gateway configmap with new instance id and remove namespace", func() {
-			cmObj := &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Namespace: common.DefaultControllerNamespace,
-					Name:      gc.ConfigMap,
-				},
-				Data: map[string]string{
-					common.GatewayControllerConfigMapKey: `instanceID: fake-instance-id`,
-				},
-			}
-			cm, err := gc.kubeClientset.CoreV1().ConfigMaps(gc.Namespace).Create(cmObj)
-			convey.Convey("Make sure no error occurs", func() {
-				convey.So(err, convey.ShouldBeNil)
-
-				convey.Convey("Updated gateway configmap must be non-nil", func() {
-					convey.So(cm, convey.ShouldNotBeNil)
-
-					convey.Convey("Resync the gateway configuration", func() {
-						err := gc.ResyncConfig(cmObj.Namespace)
-						convey.Convey("No error should occur while resyncing gateway configuration", func() {
-							convey.So(err, convey.ShouldBeNil)
-
-							convey.Convey("The updated instance id must be fake-instance-id", func() {
-								convey.So(gc.Config.InstanceID, convey.ShouldEqual, "fake-instance-id")
-								convey.So(gc.Config.Namespace, convey.ShouldBeEmpty)
-							})
-						})
-					})
-				})
-			})
-		})
-	})
+	cm, err := controller.k8sClient.CoreV1().ConfigMaps(controller.Namespace).Create(cmObj)
+	assert.Nil(t, err)
+	assert.NotNil(t, cm)
+	err = controller.ResyncConfig(common.DefaultControllerNamespace)
+	assert.Nil(t, err)
+	assert.Equal(t, controller.Config.Namespace, "")
+	assert.Equal(t, controller.Config.InstanceID, "fake-instance-id")
 }

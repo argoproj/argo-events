@@ -20,93 +20,85 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
-	"github.com/sirupsen/logrus"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
+	base "github.com/argoproj/argo-events"
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/informers"
-	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
-
-	base "github.com/argoproj/argo-events"
-	"github.com/argoproj/argo-events/common"
-	ccommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 )
 
 // informer constants
 const (
-	sensorResyncPeriod         = 20 * time.Minute
-	sensorResourceResyncPeriod = 30 * time.Minute
-	rateLimiterBaseDelay       = 5 * time.Second
-	rateLimiterMaxDelay        = 1000 * time.Second
+	sensorResyncPeriod   = 20 * time.Minute
+	rateLimiterBaseDelay = 5 * time.Second
+	rateLimiterMaxDelay  = 1000 * time.Second
 )
 
-// SensorControllerConfig contain the configuration settings for the sensor-controller
-type SensorControllerConfig struct {
-	// InstanceID is a label selector to limit the sensor-controller's watch of sensor jobs to a specific instance.
-	// If omitted, the sensor-controller watches sensors that *are not* labeled with an instance id.
+// ControllerConfig contain the configuration settings for the controller
+type ControllerConfig struct {
+	// InstanceID is a label selector to limit the controller'sensor watch of sensor jobs to a specific instance.
+	// If omitted, the controller watches sensors that *are not* labeled with an instance id.
 	InstanceID string
-
-	// Namespace is a label selector filter to limit sensor-controller's watch to specific namespace
+	// Namespace is a label selector filter to limit controller'sensor watch to specific namespace
 	Namespace string
 }
 
-// SensorController listens for new sensors and hands off handling of each sensor on the queue to the operator
-type SensorController struct {
-	// EventSource is the name of the config map in which to derive configuration of the contoller
+// Controller listens for new sensors and hands off handling of each sensor on the queue to the operator
+type Controller struct {
+	// ConfigMap is the name of the config map in which to derive configuration of the controller
 	ConfigMap string
-	// Namespace for sensor controller
+	// Namespace for controller
 	Namespace string
-	// Config is the sensor-controller's configuration
-	Config SensorControllerConfig
-	// log is the logger for a gateway
-	log *logrus.Logger
-
-	// kubernetes config and apis
-	kubeConfig      *rest.Config
-	kubeClientset   kubernetes.Interface
-	sensorClientset clientset.Interface
-
-	// sensor informer and queue
-	podInformer informersv1.PodInformer
-	svcInformer informersv1.ServiceInformer
-	informer    cache.SharedIndexInformer
-	queue       workqueue.RateLimitingInterface
+	// Config is the controller'sensor configuration
+	Config ControllerConfig
+	// logger to logger stuff
+	logger *logrus.Logger
+	// kubeConfig is the rest K8s config
+	kubeConfig *rest.Config
+	// k8sClient is the Kubernetes client
+	k8sClient kubernetes.Interface
+	// sensorClient is the client for operations on the sensor custom resource
+	sensorClient clientset.Interface
+	// informer for sensor resource updates
+	informer cache.SharedIndexInformer
+	// queue to process watched sensor resources
+	queue workqueue.RateLimitingInterface
 }
 
-// NewSensorController creates a new Controller
-func NewSensorController(rest *rest.Config, configMap, namespace string) *SensorController {
+// NewController creates a new Controller
+func NewController(rest *rest.Config, configMap, namespace string) *Controller {
 	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
-	return &SensorController{
-		ConfigMap:       configMap,
-		Namespace:       namespace,
-		kubeConfig:      rest,
-		kubeClientset:   kubernetes.NewForConfigOrDie(rest),
-		sensorClientset: clientset.NewForConfigOrDie(rest),
-		queue:           workqueue.NewRateLimitingQueue(rateLimiter),
-		log:             common.NewArgoEventsLogger(),
+	return &Controller{
+		ConfigMap:    configMap,
+		Namespace:    namespace,
+		kubeConfig:   rest,
+		k8sClient:    kubernetes.NewForConfigOrDie(rest),
+		sensorClient: clientset.NewForConfigOrDie(rest),
+		queue:        workqueue.NewRateLimitingQueue(rateLimiter),
+		logger:       common.NewArgoEventsLogger(),
 	}
 }
 
-func (c *SensorController) processNextItem() bool {
+// processNextItem processes the sensor resource object on the queue
+func (controller *Controller) processNextItem() bool {
 	// Wait until there is a new item in the queue
-	key, quit := c.queue.Get()
+	key, quit := controller.queue.Get()
 	if quit {
 		return false
 	}
-	defer c.queue.Done(key)
+	defer controller.queue.Done(key)
 
-	obj, exists, err := c.informer.GetIndexer().GetByKey(key.(string))
+	obj, exists, err := controller.informer.GetIndexer().GetByKey(key.(string))
 	if err != nil {
-		c.log.WithField(common.LabelSensorName, key.(string)).WithError(err).Warn("failed to get sensor from informer index")
+		controller.logger.WithField(common.LabelSensorName, key.(string)).WithError(err).Warnln("failed to get sensor from informer index")
 		return true
 	}
 
@@ -117,21 +109,21 @@ func (c *SensorController) processNextItem() bool {
 
 	s, ok := obj.(*v1alpha1.Sensor)
 	if !ok {
-		c.log.WithField(common.LabelSensorName, key.(string)).WithError(err).Warn("key in index is not a sensor")
+		controller.logger.WithField(common.LabelSensorName, key.(string)).WithError(err).Warnln("key in index is not a sensor")
 		return true
 	}
 
-	ctx := newSensorOperationCtx(s, c)
+	ctx := newSensorContext(s, controller)
 
 	err = ctx.operate()
 	if err != nil {
-		if err := common.GenerateK8sEvent(c.kubeClientset,
+		if err := common.GenerateK8sEvent(controller.k8sClient,
 			fmt.Sprintf("failed to operate on sensor %s", s.Name),
 			common.EscalationEventType,
 			"sensor operation failed",
 			s.Name,
 			s.Namespace,
-			c.Config.InstanceID,
+			controller.Config.InstanceID,
 			sensor.Kind,
 			map[string]string{
 				common.LabelSensorName: s.Name,
@@ -139,96 +131,73 @@ func (c *SensorController) processNextItem() bool {
 				common.LabelOperation:  "controller_operation",
 			},
 		); err != nil {
-			ctx.log.WithError(err).Error("failed to create K8s event to escalate sensor operation failure")
+			ctx.logger.WithError(err).Errorln("failed to create K8s event to escalate sensor operation failure")
 		}
 	}
 
-	err = c.handleErr(err, key)
+	err = controller.handleErr(err, key)
 	if err != nil {
-		ctx.log.WithError(err).Error("sensor controller is unable to handle the error")
+		ctx.logger.WithError(err).Errorln("controller is unable to handle the error")
 	}
 	return true
 }
 
 // handleErr checks if an error happened and make sure we will retry later
 // returns an error if unable to handle the error
-func (c *SensorController) handleErr(err error, key interface{}) error {
+func (controller *Controller) handleErr(err error, key interface{}) error {
 	if err == nil {
 		// Forget about the #AddRateLimited history of key on every successful sync
 		// Ensure future updates for this key are not delayed because of outdated error history
-		c.queue.Forget(key)
+		controller.queue.Forget(key)
 		return nil
 	}
 
 	// due to the base delay of 5ms of the DefaultControllerRateLimiter
-	// requeues will happen very quickly even after a sensor pod goes down
-	// we want to give the sensor pod a chance to come back up so we give a genorous number of retries
-	if c.queue.NumRequeues(key) < 20 {
+	// re-queues will happen very quickly even after a sensor pod goes down
+	// we want to give the sensor pod a chance to come back up so we give a generous number of retries
+	if controller.queue.NumRequeues(key) < 20 {
 		// Re-enqueue the key rate limited. This key will be processed later again.
-		c.queue.AddRateLimited(key)
+		controller.queue.AddRateLimited(key)
 		return nil
 	}
-	return errors.New("exceeded max requeues")
+	return errors.New("exceeded max re-queues")
 }
 
-// Run executes the sensor-controller
-func (c *SensorController) Run(ctx context.Context, ssThreads, eventThreads int) {
-	defer c.queue.ShutDown()
+// Run executes the controller
+func (controller *Controller) Run(ctx context.Context, threads int) {
+	defer controller.queue.ShutDown()
 
-	c.log.WithFields(
+	controller.logger.WithFields(
 		map[string]interface{}{
-			common.LabelInstanceID: c.Config.InstanceID,
+			common.LabelInstanceID: controller.Config.InstanceID,
 			common.LabelVersion:    base.GetVersion().Version,
-		}).Info("starting sensor controller")
-	_, err := c.watchControllerConfigMap(ctx)
+		}).Infoln("starting the controller...")
+
+	_, err := controller.watchControllerConfigMap(ctx)
 	if err != nil {
-		c.log.WithError(err).Error("failed to register watch for sensor controller config map")
+		controller.logger.WithError(err).Error("failed to register watch for controller config map")
 		return
 	}
 
-	c.informer = c.newSensorInformer()
-	go c.informer.Run(ctx.Done())
+	controller.informer, err = controller.newSensorInformer()
+	if err != nil {
+		controller.logger.WithError(err).Errorln("failed to create a new sensor controller")
+	}
+	go controller.informer.Run(ctx.Done())
 
-	if !cache.WaitForCacheSync(ctx.Done(), c.informer.HasSynced) {
-		c.log.Panic("timed out waiting for the caches to sync for sensors")
+	if !cache.WaitForCacheSync(ctx.Done(), controller.informer.HasSynced) {
+		controller.logger.Panic("timed out waiting for the caches to sync for sensors")
 		return
 	}
 
-	listOptionsFunc := func(options *metav1.ListOptions) {
-		labelSelector := labels.NewSelector().Add(c.instanceIDReq())
-		options.LabelSelector = labelSelector.String()
-	}
-	factory := ccommon.ArgoEventInformerFactory{
-		OwnerGroupVersionKind: v1alpha1.SchemaGroupVersionKind,
-		OwnerInformer:         c.informer,
-		SharedInformerFactory: informers.NewFilteredSharedInformerFactory(c.kubeClientset, sensorResourceResyncPeriod, c.Config.Namespace, listOptionsFunc),
-		Queue: c.queue,
-	}
-
-	c.podInformer = factory.NewPodInformer()
-	go c.podInformer.Informer().Run(ctx.Done())
-
-	if !cache.WaitForCacheSync(ctx.Done(), c.podInformer.Informer().HasSynced) {
-		c.log.Panic("timed out waiting for the caches to sync for sensor pods")
-		return
-	}
-
-	c.svcInformer = factory.NewServiceInformer()
-	go c.svcInformer.Informer().Run(ctx.Done())
-
-	if !cache.WaitForCacheSync(ctx.Done(), c.svcInformer.Informer().HasSynced) {
-		c.log.Panic("timed out waiting for the caches to sync for sensor services")
-		return
-	}
-
-	for i := 0; i < ssThreads; i++ {
-		go wait.Until(c.runWorker, time.Second, ctx.Done())
+	for i := 0; i < threads; i++ {
+		go wait.Until(controller.runWorker, time.Second, ctx.Done())
 	}
 
 	<-ctx.Done()
 }
 
-func (c *SensorController) runWorker() {
-	for c.processNextItem() {
+func (controller *Controller) runWorker() {
+	for controller.processNextItem() {
 	}
 }

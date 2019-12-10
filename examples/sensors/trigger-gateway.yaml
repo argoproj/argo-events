@@ -4,9 +4,6 @@ metadata:
   name: trigger-gateway-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -21,13 +18,13 @@ spec:
       port: "9300"
   dependencies:
     - name: "webhook-gateway:example"
-  # once sensor receives an event from webhook gateway, it will create an artifact gateway.
+  # once sensor receives an event from webhook gateway, it will create an minio gateway.
   triggers:
     - template:
-        name: artifact-event-source-trigger
+        name: minio-event-source-trigger
         group: ""
         version: v1
-        resource: configmaps
+        kind: Configmap
         source:
           inline: |
             apiVersion: v1
@@ -35,7 +32,7 @@ spec:
             metadata:
               name: artifact-event-source
               labels:
-                argo-events-event-source-version: v0.11
+                argo-events-event-source-version: v0.10
             spec:
               data:
                 example: |-
@@ -54,10 +51,10 @@ spec:
                     key: secretkey
                     name: artifacts-minio
     - template:
-        name: artifact-gateway-trigger
+        name: minio-gateway-trigger
         group: argoproj.io
         version: v1alpha1
-        resource: gateways
+        kind: Gateway
         source:
           inline: |-
             apiVersion: argoproj.io/v1alpha1
@@ -66,7 +63,7 @@ spec:
               name: artifact-gateway
               labels:
                 gateways.argoproj.io/gateway-controller-instanceid: argo-events
-                argo-events-gateway-version: v0.11
+                argo-events-gateway-version: v0.10
             spec:
               type: "artifact"
               eventSource: "artifact-event-source"

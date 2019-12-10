@@ -1,44 +1,37 @@
-# This configmap contains the event sources configurations for Calendar gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
-  name: calendar-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.11
-data:
-  example-with-interval: |-
-    # creates an event every 10 seconds
-    interval: 10s
+  name: calendar-source
+spec:
+  type: "calendar"
+  calendar:
+    example-with-interval:
+      # creates an event every 10 seconds
+      interval: "10s"
 
-  example-with-schedule: |-
-    # schedules an event at 30 minutes past each hour
-    schedule: "30 * * * *"
+    example-with-schedule:
+      # schedules an event at 30 minutes past each hour
+      schedule: "30 * * * *"
 
-  schedule-with-static-user-payload: |-
-    schedule: "30 * * * *"
-    # userPayload is a static string that will be send to the the sensor with each event payload
-    # whatever you put here is blindly delivered to sensor.
-    userPayload: "{\"hello\": \"world\"}"
+    schedule-with-static-user-payload:
+      schedule: "30 * * * *"
+      # userPayload is a static string that will be send to the the sensor with each event payload
+      # whatever you put here is blindly delivered to sensor.
+      userPayload: "{\"hello\": \"world\"}"
 
-  schedule-in-specific-timezone: |-
-    # creates an event every 20 seconds
-    interval: 20s
-    # userPayload is a static string that will be send to the the sensor with each event payload
-    # whatever you put here is blindly delivered to sensor.
-    userPayload: "{\"hello\": \"world\"}"
-    # timezone
-    # more info: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-    timezone: "America/New_York"
+    schedule-in-specific-timezone:
+      # creates an event every 20 seconds
+      interval: "20s"
+      # userPayload is a static string that will be send to the the sensor with each event payload
+      # whatever you put here is blindly delivered to sensor.
+      userPayload: "{\"hello\": \"world\"}"
+      # timezone
+      # more info: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      timezone: "America/New_York"
 
-  schedule-with-exclusion-dates: |-
-    schedule: "30 * * * *"
-    # more info https://icalendar.org/iCalendar-RFC-5545/3-8-5-3-recurrence-rule.html
-    # only exclusion dates are supported
-    # year, month and day are matched
-    recurrence:
-      - "EXDATE:20190102T150405Z"
-      - "EXDATE:20190602T160210Z"
-    timezone: "America/New_York"
+    schedule-with-exclusion-dates:
+      schedule: "30 * * * *"
+      # year, month and day are matched
+      exclusionDates:
+        - "EXDATE:20190102T150405Z"
+        - "EXDATE:20190602T160210Z"

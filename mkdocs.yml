@@ -9,19 +9,19 @@ theme:
     text: 'Work Sans'
   logo: 'assets/logo.png'
 google_analytics:
-- 'UA-105170809-2'
-- 'auto'
+  - 'UA-105170809-2'
+  - 'auto'
 markdown_extensions:
-- codehilite
-- admonition
-- toc:
-    permalink: true
+  - codehilite
+  - admonition
+  - toc:
+      permalink: true
 nav:
   - Overview: 'index.md'
   - 'installation.md'
   - 'getting_started.md'
   - Setup:
-      - gateways/artifact.md
+      - gateways/minio.md
       - gateways/aws-sns.md
       - gateways/aws-sqs.md
       - gateways/calendar.md

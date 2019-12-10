@@ -19,7 +19,6 @@ package sensors
 import (
 	"encoding/json"
 	"fmt"
-
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/Knetic/govaluate"
@@ -46,11 +45,7 @@ func (sec *sensorExecutionCtx) canProcessTriggers() (bool, error) {
 	group:
 		for _, group := range sec.sensor.Spec.DependencyGroups {
 			for _, dependency := range group.Dependencies {
-				nodeStatus := sn.GetNodeByName(sec.sensor, dependency)
-				if nodeStatus == nil {
-					return false, fmt.Errorf("failed to get a dependency: %+v", dependency)
-				}
-				if nodeStatus.Phase != v1alpha1.NodePhaseComplete {
+				if nodeStatus := sn.GetNodeByName(sec.sensor, dependency); nodeStatus.Phase != v1alpha1.NodePhaseComplete {
 					groups[group.Name] = false
 					continue group
 				}
@@ -253,7 +248,7 @@ func (sec *sensorExecutionCtx) applyTriggerPolicy(trigger *v1alpha1.Trigger, res
 		Factor:   trigger.Policy.Backoff.Factor,
 		Jitter:   trigger.Policy.Backoff.Jitter,
 	}, func() (bool, error) {
-		obj, err := resourceInterface.Get(name, metav1.GetOptions{})
+		obj, err := resourceInterface.Namespace(namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			sec.log.WithError(err).WithField("resource-name", obj.GetName()).Error("failed to get triggered resource")
 			return false, nil
@@ -332,7 +327,7 @@ func (sec *sensorExecutionCtx) createResourceObject(trigger *v1alpha1.Trigger, o
 		Resource: trigger.Template.Resource,
 	})
 
-	liveObj, err := dynamicResInterface.Namespace(obj.GetNamespace()).Create(obj, metav1.CreateOptions{})
+	liveObj, err := dynamicResInterface.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource object. err: %+v", err)
 	}
