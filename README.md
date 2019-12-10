@@ -36,8 +36,8 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 * [BlackRock](https://www.blackrock.com/)
 * [Canva](https://www.canva.com/)
 * [Fairwinds](https://fairwinds.com/)
-* [Viaduct](https://www.viaduct.ai/)
 * [Intuit](https://www.intuit.com/)
+* [Viaduct](https://www.viaduct.ai/)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
