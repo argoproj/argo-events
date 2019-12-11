@@ -46,7 +46,7 @@ spec:
                 container:
                   image: docker/whalesay:latest
                   command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
+                  args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
             event: "gitlab-gateway:example"
