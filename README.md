@@ -36,6 +36,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 * [BlackRock](https://www.blackrock.com/)
 * [Canva](https://www.canva.com/)
 * [Fairwinds](https://fairwinds.com/)
+* [InsideBoard](https://www.insideboard.com)
 * [Intuit](https://www.intuit.com/)
 * [Viaduct](https://www.viaduct.ai/)
 * [BioBox Analytics](https://biobox.io)
