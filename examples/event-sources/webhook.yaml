@@ -14,11 +14,12 @@ spec:
       # HTTP request method to allow. In this case, only POST requests are accepted
       method: "POST"
 
-    example-secure:
-      port: "13000"
-      endpoint: "/secure"
-      method: "POST"
-      # path to file that is mounted in gateway pod which contains certs
-      serverCertPath: "/bin/webhook-secure/crt"
-      # path to file that is mounted in gateway pod which contains private key
-      serverKeyPath: "/bin/webhook-secure/key"
+# Uncomment to use secure webhook
+#    example-secure:
+#      port: "13000"
+#      endpoint: "/secure"
+#      method: "POST"
+#      # path to file that is mounted in gateway pod which contains certs
+#      serverCertPath: "/bin/webhook-secure/crt"
+#      # path to file that is mounted in gateway pod which contains private key
+#      serverKeyPath: "/bin/webhook-secure/key"

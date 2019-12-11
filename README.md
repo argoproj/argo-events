@@ -28,11 +28,13 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Supports [CloudEvents](https://cloudevents.io/) for describing event data and transmission.
 * Ability to manage event sources at runtime.
 
-## Documentation
+## Get Started
+Follow [setup] instructions for installation. To see the Argo-Events in action, follow the
+[getting started] guide. 
 Complete documentation is available at https://argoproj.github.io/argo-events/
 
 
-## Event Listeners
+## Available Event Listeners
 1. AMQP
 2. AWS SNS
 3. AWS SQS
