@@ -13,7 +13,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:

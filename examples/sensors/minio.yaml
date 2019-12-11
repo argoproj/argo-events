@@ -18,7 +18,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "minio-gateway:example-1"
+    - name: "minio-gateway:example-with-filter"
   triggers:
     - template:
         name: minio-workflow-trigger
@@ -44,6 +44,6 @@ spec:
       # The container args from the workflow are overridden by the s3 notification key
       resourceParameters:
         - src:
-            event: "minio-gateway:example-1"
+            event: "minio-gateway:example-with-filter"
             path: s3.object.key
           dest: spec.templates.0.container.args.0

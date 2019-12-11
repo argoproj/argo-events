@@ -14,17 +14,17 @@ spec:
       serviceAccountName: argo-events-sa
   # defines list of all events sensor will accept
   dependencies:
-    - name: "webhook-gateway-http:foo"
-    - name: "webhook-gateway-http:index"
+    - name: "webhook-gateway:example"
+    - name: "webhook-gateway:example-secure"
   # divides event dependencies into groups
   dependencyGroups:
     - name: "group_1"
       dependencies:
-        - "webhook-gateway-http:foo"
+        - "webhook-gateway:example"
     - name: "group_2"
       dependencies:
-        - "webhook-gateway-http:index"
-  # either "webhook-gateway-http:foo" or "webhook-gateway-http:index" happens
+        - "webhook-gateway:example-secure"
+  # either "webhook-gateway:example" or "webhook-gateway-http:index" happens
   circuit: "group_1 || group_2"
   eventProtocol:
     type: "HTTP"

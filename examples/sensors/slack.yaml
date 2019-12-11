@@ -17,7 +17,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "slack-gateway:example-1"
+    - name: "slack-gateway:example-insecure"
   triggers:
     - template:
         name: slack-workflow
@@ -48,5 +48,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "slack-gateway:example-1"
+            event: "slack-gateway:example-insecure"
           dest: spec.arguments.parameters.0.value

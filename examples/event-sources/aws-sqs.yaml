@@ -5,7 +5,7 @@ metadata:
 spec:
   type: "sqs"
   spec:
-    example-1:
+    example:
       # accessKey contains information about K8s secret that stores the access key
       accessKey:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key

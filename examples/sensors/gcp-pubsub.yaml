@@ -18,7 +18,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "gcp-pubsub-gateway:example-1"
+    - name: "gcp-pubsub-gateway:example"
   triggers:
     - template:
         name: gcp-workflow
@@ -26,7 +26,7 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -49,5 +49,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "gcp-pubsub-gateway:example-1"
+            event: "gcp-pubsub-gateway:example"
           dest: spec.arguments.parameters.0.value

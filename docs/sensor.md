@@ -81,7 +81,7 @@ Lets look at a basic example,
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:
@@ -197,7 +197,7 @@ Now, lets look at a more complex example involving a circuit,
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:
@@ -232,7 +232,7 @@ Now, lets look at a more complex example involving a circuit,
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:
@@ -253,7 +253,7 @@ Now, lets look at a more complex example involving a circuit,
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:
@@ -300,7 +300,7 @@ In the example, the first template will get triggered when either `group_1` or `
               imagePullPolicy: Always
           serviceAccountName: argo-events-sa
       dependencies:
-        - name: "webhook-gateway-http:foo"
+        - name: "webhook-gateway:example"
       eventProtocol:
         type: "HTTP"
         http:
@@ -342,7 +342,7 @@ In the example, the first template will get triggered when either `group_1` or `
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:
@@ -365,7 +365,7 @@ In the example, the first template will get triggered when either `group_1` or `
                       args: ["{{inputs.parameters.message}}"]
           resourceParameters:
             - src:
-                event: "webhook-gateway-http:foo"
+                event: "webhook-gateway:example"
               dest: spec.arguments.parameters.0.value
         - template:
             name: trigger-2
@@ -383,7 +383,7 @@ In the example, the first template will get triggered when either `group_1` or `
             version: v1alpha1
             kind: Workflow
             source:
-              inline: |
+              resource:
                 apiVersion: argoproj.io/v1alpha1
                 kind: Workflow
                 metadata:

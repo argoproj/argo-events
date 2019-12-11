@@ -17,7 +17,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "minio-gateway:input"
+    - name: "minio-gateway:example-with-filter"
   triggers:
     - template:
         name: url-workflow-trigger

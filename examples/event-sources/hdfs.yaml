@@ -5,7 +5,7 @@ metadata:
 spec:
   type: "hdfs"
   hdfs:
-    example-1:
+    example:
       directory: "/tmp/"
       type: "CREATE"
       path: x.txt
