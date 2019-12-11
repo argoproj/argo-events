@@ -13,7 +13,4 @@ spec:
     shortNames:
       - sn
   scope: Namespaced
-  versions:
-    - name: "v1alpha1"
-      served: true
-      storage: true
+  version: "v1alpha1"

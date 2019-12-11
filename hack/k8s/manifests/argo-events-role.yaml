@@ -30,6 +30,8 @@ rules:
     resources:
       - workflows
       - workflows/finalizers
+      - workflowtemplates
+      - workflowtemplates/finalizers
       - gateways
       - gateways/finalizers
       - sensors
@@ -67,9 +69,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - "apps/v1"
-      - "apps/v1beta2"
-      - "apps/v1beta1"
+      - "apps"
     resources:
       - deployments
     verbs:
