@@ -29,9 +29,9 @@ import (
 )
 
 // resyncs the sensor object for status updates
-func (se *sensorExecutionCtx) syncSensor(ctx context.Context) cache.Controller {
-	se.log.Info("watching sensor updates")
-	source := se.newSensorWatch()
+func (sensorCtx *sensorContext) syncSensor(ctx context.Context) cache.Controller {
+	sensorCtx.logger.Info("watching sensor updates")
+	source := sensorCtx.newSensorWatch()
 	_, controller := cache.NewInformer(
 		source,
 		&v1alpha1.Sensor{},
@@ -39,7 +39,7 @@ func (se *sensorExecutionCtx) syncSensor(ctx context.Context) cache.Controller {
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if newSensor, ok := new.(*v1alpha1.Sensor); ok {
-					se.queue <- &updateNotification{
+					sensorCtx.notificationQueue <- &notification{
 						sensor:           newSensor,
 						notificationType: v1alpha1.ResourceUpdateNotification,
 					}
@@ -51,11 +51,11 @@ func (se *sensorExecutionCtx) syncSensor(ctx context.Context) cache.Controller {
 	return controller
 }
 
-func (se *sensorExecutionCtx) newSensorWatch() *cache.ListWatch {
-	x := se.sensorClient.ArgoprojV1alpha1().RESTClient()
+func (sensorCtx *sensorContext) newSensorWatch() *cache.ListWatch {
+	x := sensorCtx.sensorClient.ArgoprojV1alpha1().RESTClient()
 	resource := "sensors"
-	name := se.sensor.Name
-	namespace := se.sensor.Namespace
+	name := sensorCtx.sensor.Name
+	namespace := sensorCtx.sensor.Namespace
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {

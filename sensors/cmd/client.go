@@ -60,5 +60,7 @@ func main() {
 
 	// wait for sensor http server to shutdown
 	sensorExecutionCtx := sc.NewSensorExecutionCtx(sensorClient, kubeClient, dynamicClient, sensor, controllerInstanceID)
-	sensorExecutionCtx.WatchEventsFromGateways()
+	if err := sensorExecutionCtx.ListenEvents(); err != nil {
+		panic(err)
+	}
 }

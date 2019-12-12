@@ -78,6 +78,8 @@ const (
 	SensorNamespace = "SENSOR_NAMESPACE"
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
+	// Port for the sensor server to listen events on
+	SensorServerPort = 12000
 )
 
 // Gateway constants
@@ -96,13 +98,6 @@ const (
 	EnvVarEventSource = "EVENT_SOURCE"
 	// AnnotationResourceSpecHash is the annotation of a K8s resource spec hash
 	AnnotationResourceSpecHash = "resource-spec-hash"
-)
-
-// CloudEvents constants
-const (
-	// CloudEventsVersion is the version of the CloudEvents spec targeted+
-	// by this library.
-	CloudEventsVersion = "0.1"
 )
 
 var (

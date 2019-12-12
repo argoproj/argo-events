@@ -101,8 +101,9 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
-	// EventProtocol is the protocol through which sensor receives events from gateway
-	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
+	// Port on which sensor server should run.
+	// +optional
+	Port *int `json:"port" protobuf:"bytes,4,name=port"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,rep,name=circuit"`
 	// +listType=dependencyGroups
@@ -117,10 +118,12 @@ type SensorSpec struct {
 type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	// GatewayName is the name of the gateway from whom the event is received
+	GatewayName string `json:"gatewayName" protobuf:"bytes,2,name=gatewayName"`
+	// EventName is the name of the event
+	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
 	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,2,opt,name=filters"`
-	// Connected tells if subscription is already setup in case of nats protocol.
-	Connected bool `json:"connected,omitempty" protobuf:"bytes,3,opt,name=connected"`
+	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
 }
 
 // DependencyGroup is the group of dependencies
