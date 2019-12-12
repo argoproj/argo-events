@@ -18,12 +18,12 @@ limitations under the License.
 package internalinterfaces
 
 import (
-	"time"
+	time "time"
 
-	"github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	versioned "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/cache"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // NewInformerFunc takes versioned.Interface and time.Duration to return a SharedIndexInformer.

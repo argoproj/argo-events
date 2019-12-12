@@ -4,9 +4,6 @@ metadata:
   name: trigger-backoff
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -16,7 +13,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -58,7 +55,7 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -81,7 +78,7 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "webhook-gateway-http:foo"
+            event: "webhook-gateway:example"
           dest: spec.arguments.parameters.0.value
     - template:
         name: trigger-2
@@ -97,9 +94,9 @@ spec:
           errorOnBackoffTimeout: false
         group: argoproj.io
         version: v1alpha1
-        resource: workflows
+        kind: Workflow
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:

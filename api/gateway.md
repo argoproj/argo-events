@@ -1,0 +1,1451 @@
+<p>
+
+Packages:
+
+</p>
+
+<ul>
+
+<li>
+
+<a href="#argoproj.io%2fv1alpha1">argoproj.io/v1alpha1</a>
+
+</li>
+
+</ul>
+
+<h2 id="argoproj.io/v1alpha1">
+
+argoproj.io/v1alpha1
+
+</h2>
+
+<p>
+
+<p>
+
+Package v1alpha1 is the v1alpha1 version of the API.
+
+</p>
+
+</p>
+
+Resource Types:
+
+<ul>
+
+</ul>
+
+<h3 id="argoproj.io/v1alpha1.EventSourceRef">
+
+EventSourceRef
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventSourceRef holds information about the EventSourceRef custom
+resource
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace of the event source Default value is the namespace where
+referencing gateway is deployed
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Gateway">
+
+Gateway
+
+</h3>
+
+<p>
+
+<p>
+
+Gateway is the definition of a gateway resource
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta </a> </em>
+
+</td>
+
+<td>
+
+Refer to the Kubernetes API documentation for the fields of the
+<code>metadata</code> field.
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>status</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GatewayStatus"> GatewayStatus </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>spec</code></br> <em> <a href="#argoproj.io/v1alpha1.GatewaySpec">
+GatewaySpec </a> </em>
+
+</td>
+
+<td>
+
+<br/> <br/>
+
+<table>
+
+<tr>
+
+<td>
+
+<code>template</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
+Kubernetes core/v1.PodTemplateSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Template is the pod specification for the gateway Refer
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventSourceRef</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceRef"> EventSourceRef </a>
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+EventSourceRef refers to event-source that stores event source
+configurations for the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+
+</td>
+
+<td>
+
+<p>
+
+Type is the type of gateway. Used as metadata.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core">
+Kubernetes core/v1.Service </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Service is the specifications of the service to expose the gateway Refer
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#service-v1-core</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>watchers</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NotificationWatchers">
+NotificationWatchers </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Watchers are components which are interested listening to notifications
+from this gateway These only need to be specified when gateway dispatch
+mechanism is through HTTP POST notifications. In future, support for
+NATS, KAFKA will be added as a means to dispatch notifications in which
+case specifying watchers would be unnecessary.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>processorPort</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which the gateway event source processor is running on.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+EventProtocol is the underlying protocol used to send events from
+gateway to watchers(components interested in listening to event from
+this gateway)
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GatewayNotificationWatcher">
+
+GatewayNotificationWatcher
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NotificationWatchers">NotificationWatchers</a>)
+
+</p>
+
+<p>
+
+<p>
+
+GatewayNotificationWatcher is the gateway interested in listening to
+notifications from this gateway
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name is the gateway name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>port</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port is http server port on which gateway is running
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Endpoint is REST API endpoint to post event to. Events are sent using
+HTTP POST method to this endpoint.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Namespace of the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GatewayResource">
+
+GatewayResource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewayStatus">GatewayStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+GatewayResource holds the metadata about the gateway resources
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>deployment</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metadata of the deployment for the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#objectmeta-v1-meta">
+Kubernetes meta/v1.ObjectMeta </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Metadata of the service for the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GatewaySpec">
+
+GatewaySpec
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Gateway">Gateway</a>)
+
+</p>
+
+<p>
+
+<p>
+
+GatewaySpec represents gateway specifications
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>template</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
+Kubernetes core/v1.PodTemplateSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Template is the pod specification for the gateway Refer
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventSourceRef</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventSourceRef"> EventSourceRef </a>
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+EventSourceRef refers to event-source that stores event source
+configurations for the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+
+</td>
+
+<td>
+
+<p>
+
+Type is the type of gateway. Used as metadata.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>service</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core">
+Kubernetes core/v1.Service </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Service is the specifications of the service to expose the gateway Refer
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#service-v1-core</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>watchers</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NotificationWatchers">
+NotificationWatchers </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Watchers are components which are interested listening to notifications
+from this gateway These only need to be specified when gateway dispatch
+mechanism is through HTTP POST notifications. In future, support for
+NATS, KAFKA will be added as a means to dispatch notifications in which
+case specifying watchers would be unnecessary.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>processorPort</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which the gateway event source processor is running on.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+EventProtocol is the underlying protocol used to send events from
+gateway to watchers(components interested in listening to event from
+this gateway)
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>replica</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+Replica is the gateway deployment replicas
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GatewayStatus">
+
+GatewayStatus
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Gateway">Gateway</a>)
+
+</p>
+
+<p>
+
+<p>
+
+GatewayStatus contains information about the status of a gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>phase</code></br> <em> <a href="#argoproj.io/v1alpha1.NodePhase">
+NodePhase </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Phase is the high-level summary of the gateway
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>startedAt</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+StartedAt is the time at which this gateway was initiated
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>message</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Message is a human readable string indicating details about a gateway in
+its phase
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nodes</code></br> <em> <a href="#argoproj.io/v1alpha1.NodeStatus">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Nodes is a mapping between a node ID and the node’s status it records
+the states for the configurations of gateway.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>resources</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GatewayResource"> GatewayResource </a>
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+Resources refers to the metadata about the gateway resources
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.NodePhase">
+
+NodePhase (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewayStatus">GatewayStatus</a>,
+<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NodePhase is the label for the condition of a node.
+
+</p>
+
+</p>
+
+<h3 id="argoproj.io/v1alpha1.NodeStatus">
+
+NodeStatus
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewayStatus">GatewayStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NodeStatus describes the status for an individual node in the gateway
+configurations. A single node can represent one configuration.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>id</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ID is a unique identifier of a node within a sensor It is a hash of the
+node name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name is a unique name in the node tree used to generate the node ID
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>displayName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DisplayName is the human readable representation of the node
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>phase</code></br> <em> <a href="#argoproj.io/v1alpha1.NodePhase">
+NodePhase </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Phase of the node
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>startedAt</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
+Kubernetes meta/v1.MicroTime </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+StartedAt is the time at which this node started
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>message</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Message store data or something to save for configuration
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>updateTime</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
+Kubernetes meta/v1.MicroTime </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+UpdateTime is the time when node(gateway configuration) was updated
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.NotificationWatchers">
+
+NotificationWatchers
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NotificationWatchers are components which are interested listening to
+notifications from this gateway
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>gateways</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GatewayNotificationWatcher">
+\[\]GatewayNotificationWatcher </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Gateways is the list of gateways interested in listening to
+notifications from this gateway
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>sensors</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SensorNotificationWatcher">
+\[\]SensorNotificationWatcher </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Sensors is the list of sensors interested in listening to notifications
+from this gateway
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.SensorNotificationWatcher">
+
+SensorNotificationWatcher
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NotificationWatchers">NotificationWatchers</a>)
+
+</p>
+
+<p>
+
+<p>
+
+SensorNotificationWatcher is the sensor interested in listening to
+notifications from this gateway
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name is the name of the sensor
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Namespace of the sensor
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<hr/>
+
+<p>
+
+<em> Generated with <code>gen-crd-api-reference-docs</code> on git
+commit <code>8d85191</code>. </em>
+
+</p>

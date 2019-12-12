@@ -41,13 +41,13 @@ func TestGetCredentials(t *testing.T) {
 	_, err := fakeClient.CoreV1().Secrets("testing").Create(mySecretCredentials)
 	assert.Nil(t, err)
 
-	// creds should be nil for unknown artifact type
+	// creds should be nil for unknown minio type
 	unknownArtifact := &v1alpha1.ArtifactLocation{}
 	creds, err := GetCredentials(fakeClient, "testing", unknownArtifact)
 	assert.Nil(t, creds)
 	assert.Nil(t, err)
 
-	// succeed for S3 artifact type
+	// succeed for S3 minio type
 	s3Artifact := &v1alpha1.ArtifactLocation{
 		S3: &apicommon.S3Artifact{
 			AccessKey: &apiv1.SecretKeySelector{

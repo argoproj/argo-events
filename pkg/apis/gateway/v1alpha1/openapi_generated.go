@@ -22,20 +22,50 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/go-openapi/spec"
-	"k8s.io/kube-openapi/pkg/common"
+	spec "github.com/go-openapi/spec"
+	common "k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef":             schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource":            schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":                schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":              schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers":       schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher":  schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref),
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventSourceRef holds information about the EventSourceRef custom resource",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the event source",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace of the event source Default value is the namespace where referencing gateway is deployed",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"name"},
+			},
+		},
 	}
 }
 
@@ -178,6 +208,34 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.Refe
 	}
 }
 
+func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GatewayResource holds the metadata about the gateway resources",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"deployment": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata of the deployment for the gateway",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"service": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metadata of the service for the gateway",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+				},
+				Required: []string{"deployment"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
 func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -191,11 +249,10 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"eventSource": {
+					"eventSourceRef": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventSource is name of the configmap that stores event source configurations for the gateway",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "EventSourceRef refers to event-source that stores event source configurations for the gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef"),
 						},
 					},
 					"type": {
@@ -208,7 +265,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					"service": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec"),
+							Ref:         ref("k8s.io/api/core/v1.Service"),
 						},
 					},
 					"watchers": {
@@ -230,12 +287,19 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
 						},
 					},
+					"replica": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Replica is the gateway deployment replicas",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
 				},
 				Required: []string{"template", "type", "processorPort", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/common.ServiceTemplateSpec", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
 	}
 }
 
@@ -280,12 +344,18 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 							},
 						},
 					},
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Resources refers to the metadata about the gateway resources",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource"),
+						},
+					},
 				},
-				Required: []string{"phase"},
+				Required: []string{"phase", "resources"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 

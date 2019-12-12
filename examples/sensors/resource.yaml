@@ -4,9 +4,6 @@ metadata:
   name: resource-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -28,7 +25,7 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
