@@ -1,182 +1,178 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package sensor
 
 import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	pc "github.com/argoproj/argo-events/pkg/apis/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
+	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-type sResourceCtx struct {
-	// s is the gateway-controller object
-	s *v1alpha1.Sensor
-	// reference to the gateway-controller-controller
-	controller *SensorController
-
-	controllerscommon.ChildResourceContext
-}
-
-// NewSensorResourceContext returns new sResourceCtx
-func NewSensorResourceContext(s *v1alpha1.Sensor, controller *SensorController) sResourceCtx {
-	return sResourceCtx{
-		s:          s,
-		controller: controller,
-		ChildResourceContext: controllerscommon.ChildResourceContext{
-			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
-			LabelOwnerName:                    common.LabelSensorName,
-			LabelKeyOwnerControllerInstanceID: common.LabelKeySensorControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationSensorResourceSpecHashName,
-			InstanceID:                        controller.Config.InstanceID,
+// generateServiceSpec returns a K8s service spec for the sensor
+func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				common.LabelSensorName:    ctx.sensor.Name,
+				LabelControllerInstanceID: ctx.controller.Config.InstanceID,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Port:       intstr.Parse(ctx.sensor.Spec.EventProtocol.Http.Port).IntVal,
+					TargetPort: intstr.FromInt(int(intstr.Parse(ctx.sensor.Spec.EventProtocol.Http.Port).IntVal)),
+				},
+			},
+			Type: corev1.ServiceTypeClusterIP,
+			Selector: map[string]string{
+				common.LabelOwnerName: ctx.sensor.Name,
+			},
 		},
 	}
 }
 
-// sensorResourceLabelSelector returns label selector of the sensor of the context
-func (src *sResourceCtx) sensorResourceLabelSelector() (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelSensorName, selection.Equals, []string{src.s.Name})
-	if err != nil {
+// serviceBuilder builds a new service that exposes sensor.
+func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
+	service := ctx.generateServiceSpec()
+	if err := controllerscommon.SetObjectMeta(ctx.sensor, service, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
-	return labels.NewSelector().Add(*req), nil
+	return service, nil
 }
 
-// createSensorService creates a service
-func (src *sResourceCtx) createSensorService(svc *corev1.Service) (*corev1.Service, error) {
-	return src.controller.kubeClientset.CoreV1().Services(src.s.Namespace).Create(svc)
-}
-
-// deleteSensorService deletes a given service
-func (src *sResourceCtx) deleteSensorService(svc *corev1.Service) error {
-	return src.controller.kubeClientset.CoreV1().Services(src.s.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
-}
-
-// getSensorService returns the service of sensor
-func (src *sResourceCtx) getSensorService() (*corev1.Service, error) {
-	selector, err := src.sensorResourceLabelSelector()
-	if err != nil {
-		return nil, err
+// deploymentBuilder builds the deployment specification for the sensor
+func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
+	replicas := int32(1)
+	podTemplateSpec := ctx.sensor.Spec.Template.DeepCopy()
+	if podTemplateSpec.Labels == nil {
+		podTemplateSpec.Labels = map[string]string{}
 	}
-	svcs, err := src.controller.svcInformer.Lister().Services(src.s.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(svcs) == 0 {
-		return nil, nil
-	}
-	return svcs[0], nil
-}
-
-// newSensorService returns a new service that exposes sensor.
-func (src *sResourceCtx) newSensorService() (*corev1.Service, error) {
-	serviceTemplateSpec := src.getServiceTemplateSpec()
-	if serviceTemplateSpec == nil {
-		return nil, nil
-	}
-	service := &corev1.Service{
-		ObjectMeta: serviceTemplateSpec.ObjectMeta,
-		Spec:       serviceTemplateSpec.Spec,
-	}
-	if service.Namespace == "" {
-		service.Namespace = src.s.Namespace
-	}
-	if service.Name == "" {
-		service.Name = common.DefaultServiceName(src.s.Name)
-	}
-	err := src.SetObjectMeta(src.s, service)
-	return service, err
-}
-
-// getSensorPod returns the pod of sensor
-func (src *sResourceCtx) getSensorPod() (*corev1.Pod, error) {
-	selector, err := src.sensorResourceLabelSelector()
-	if err != nil {
-		return nil, err
-	}
-	pods, err := src.controller.podInformer.Lister().Pods(src.s.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(pods) == 0 {
-		return nil, nil
-	}
-	return pods[0], nil
-}
-
-// createSensorPod creates a pod of sensor
-func (src *sResourceCtx) createSensorPod(pod *corev1.Pod) (*corev1.Pod, error) {
-	return src.controller.kubeClientset.CoreV1().Pods(src.s.Namespace).Create(pod)
-}
-
-// deleteSensorPod deletes a given pod
-func (src *sResourceCtx) deleteSensorPod(pod *corev1.Pod) error {
-	return src.controller.kubeClientset.CoreV1().Pods(src.s.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
-}
-
-// newSensorPod returns a new pod of sensor
-func (src *sResourceCtx) newSensorPod() (*corev1.Pod, error) {
-	podTemplateSpec := src.s.Spec.Template.DeepCopy()
-	pod := &corev1.Pod{
+	podTemplateSpec.Labels[common.LabelOwnerName] = ctx.sensor.Name
+	deployment := &appv1.Deployment{
 		ObjectMeta: podTemplateSpec.ObjectMeta,
-		Spec:       podTemplateSpec.Spec,
+		Spec: appv1.DeploymentSpec{
+			Template: *podTemplateSpec,
+			Replicas: &replicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: podTemplateSpec.Labels,
+			},
+		},
 	}
-	if pod.Namespace == "" {
-		pod.Namespace = src.s.Namespace
-	}
-	if pod.Name == "" {
-		pod.Name = src.s.Name
-	}
-	src.setupContainersForSensorPod(pod)
-	err := src.SetObjectMeta(src.s, pod)
-	return pod, err
-}
-
-// containers required for sensor deployment
-func (src *sResourceCtx) setupContainersForSensorPod(pod *corev1.Pod) {
-	// env variables
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.SensorName,
-			Value: src.s.Name,
+			Value: ctx.sensor.Name,
 		},
 		{
 			Name:  common.SensorNamespace,
-			Value: src.s.Namespace,
+			Value: ctx.sensor.Namespace,
 		},
 		{
-			Name:  common.EnvVarSensorControllerInstanceID,
-			Value: src.controller.Config.InstanceID,
+			Name:  common.EnvVarControllerInstanceID,
+			Value: ctx.controller.Config.InstanceID,
 		},
 	}
-	for i, container := range pod.Spec.Containers {
+	for i, container := range deployment.Spec.Template.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
-		pod.Spec.Containers[i] = container
+		deployment.Spec.Template.Spec.Containers[i] = container
 	}
+	if err := controllerscommon.SetObjectMeta(ctx.sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+	return deployment, nil
 }
 
-func (src *sResourceCtx) getServiceTemplateSpec() *pc.ServiceTemplateSpec {
-	var serviceSpec *pc.ServiceTemplateSpec
-	// Create a ClusterIP service to expose sensor in cluster if the event protocol type is HTTP
-	if src.s.Spec.EventProtocol.Type == pc.HTTP {
-		serviceSpec = &pc.ServiceTemplateSpec{
-			Spec: corev1.ServiceSpec{
-				Ports: []corev1.ServicePort{
-					{
-						Port:       intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal,
-						TargetPort: intstr.FromInt(int(intstr.Parse(src.s.Spec.EventProtocol.Http.Port).IntVal)),
-					},
-				},
-				Type: corev1.ServiceTypeClusterIP,
-				Selector: map[string]string{
-					common.LabelSensorName:                    src.s.Name,
-					common.LabelKeySensorControllerInstanceID: src.controller.Config.InstanceID,
-				},
-			},
-		}
+// createDeployment creates a deployment for the sensor
+func (ctx *sensorContext) createDeployment(deployment *appv1.Deployment) (*appv1.Deployment, error) {
+	return ctx.controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+}
+
+// createService creates a service for the sensor
+func (ctx *sensorContext) createService(service *corev1.Service) (*corev1.Service, error) {
+	return ctx.controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
+}
+
+// updateDeployment updates the deployment for the sensor
+func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
+	newDeployment, err := ctx.deploymentBuilder()
+	if err != nil {
+		return nil, err
 	}
-	return serviceSpec
+
+	currentMetadata := ctx.sensor.Status.Resources.Deployment
+	if currentMetadata == nil {
+		return nil, errors.New("deployment metadata is expected to be set in gateway object")
+	}
+
+	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	if err != nil {
+		if apierror.IsNotFound(err) {
+			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+		}
+		return nil, err
+	}
+
+	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+	}
+	return currentDeployment, nil
+}
+
+// updateService updates the service for the sensor
+func (ctx *sensorContext) updateService() (*corev1.Service, error) {
+	isHttpTransport := ctx.sensor.Spec.EventProtocol.Type == apicommon.HTTP
+	currentMetadata := ctx.sensor.Status.Resources.Service
+
+	if currentMetadata == nil && !isHttpTransport {
+		return nil, nil
+	}
+	if currentMetadata != nil && !isHttpTransport {
+		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+			// warning is sufficient instead of halting the entire sensor operation by marking it as failed.
+			ctx.logger.WithField("service-name", currentMetadata.Name).WithError(err).Warnln("failed to delete the current service")
+		}
+		return nil, nil
+	}
+	newService, err := ctx.serviceBuilder()
+	if err != nil {
+		return nil, err
+	}
+	if currentMetadata == nil && isHttpTransport {
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+	}
+	if currentMetadata == nil {
+		return nil, nil
+	}
+	if currentMetadata.Annotations != nil && currentMetadata.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+	}
+	return ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 }

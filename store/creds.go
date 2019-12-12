@@ -28,13 +28,13 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// Credentials contains the information necessary to access the artifact
+// Credentials contains the information necessary to access the minio
 type Credentials struct {
 	accessKey string
 	secretKey string
 }
 
-// GetCredentials for this artifact
+// GetCredentials for this minio
 func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1alpha1.ArtifactLocation) (*Credentials, error) {
 	if art.S3 != nil {
 		accessKey, err := GetSecrets(kubeClient, namespace, art.S3.AccessKey.Name, art.S3.AccessKey.Key)

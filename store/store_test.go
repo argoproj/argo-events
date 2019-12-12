@@ -18,12 +18,12 @@ package store
 
 import (
 	"io/ioutil"
-	"k8s.io/client-go/kubernetes/fake"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 type FakeWorkflowArtifactReader struct{}
@@ -34,12 +34,12 @@ func (f *FakeWorkflowArtifactReader) Read() ([]byte, error) {
 
 func TestFetchArtifact(t *testing.T) {
 	reader := &FakeWorkflowArtifactReader{}
-	gvk := &metav1.GroupVersionKind{
-		Group:   "argoproj.io",
-		Version: "v1alpha1",
-		Kind:    "Workflow",
+	gvr := &metav1.GroupVersionResource{
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
+		Resource: "workflows",
 	}
-	obj, err := FetchArtifact(reader, gvk)
+	obj, err := FetchArtifact(reader, gvr)
 	assert.Nil(t, err)
 	assert.Equal(t, "argoproj.io/v1alpha1", obj.GetAPIVersion())
 	assert.Equal(t, "Workflow", obj.GetKind())
@@ -57,37 +57,27 @@ func TestGetArtifactReader(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
-func TestDecodeAndUnstructure(t *testing.T) {
-	t.Run("sensor", decodeSensor)
-	t.Run("workflow", decodeWorkflow)
-	// Note that since #16 - Restrict ResourceObject creation via RBAC roles
-	// decoding&converting to unstructure objects should pass fine for any valid objects
-	// the store no longer should control restrictions around object creation
-	t.Run("unsupported", decodeUnsupported)
-	t.Run("unknown", decodeUnknown)
-}
-
-func decodeSensor(t *testing.T) {
+func TestDecodeSensor(t *testing.T) {
 	b, err := ioutil.ReadFile("../examples/sensors/multi-trigger-sensor.yaml")
 	assert.Nil(t, err)
 
-	gvk := &metav1.GroupVersionKind{
-		Group:   v1alpha1.SchemaGroupVersionKind.Group,
-		Version: v1alpha1.SchemaGroupVersionKind.Version,
-		Kind:    v1alpha1.SchemaGroupVersionKind.Kind,
+	gvr := &metav1.GroupVersionResource{
+		Group:    v1alpha1.SchemaGroupVersionKind.Group,
+		Version:  v1alpha1.SchemaGroupVersionKind.Version,
+		Resource: v1alpha1.Resource("sensors").Resource,
 	}
 
-	_, err = decodeAndUnstructure(b, gvk)
+	_, err = decodeAndUnstructure(b, gvr)
 	assert.Nil(t, err)
 }
 
-func decodeWorkflow(t *testing.T) {
-	gvk := &metav1.GroupVersionKind{
-		Group:   "argoproj.io",
-		Version: "v1alpha1",
-		Kind:    "Workflow",
+func TestDecodeWorkflow(t *testing.T) {
+	gvr := &metav1.GroupVersionResource{
+		Group:    "argoproj.io",
+		Version:  "v1alpha1",
+		Resource: "workflows",
 	}
-	_, err := decodeAndUnstructure([]byte(workflowv1alpha1), gvk)
+	_, err := decodeAndUnstructure([]byte(workflowv1alpha1), gvr)
 	assert.Nil(t, err)
 }
 
@@ -106,13 +96,13 @@ spec:
       args: ["hello world"]
 `
 
-func decodeDeploymentv1(t *testing.T) {
-	gvk := &metav1.GroupVersionKind{
-		Group:   "apps",
-		Version: "v1",
-		Kind:    "Deployment",
+func TestDecodeDeploymentv1(t *testing.T) {
+	gvr := &metav1.GroupVersionResource{
+		Group:    "apps",
+		Version:  "v1",
+		Resource: "deployments",
 	}
-	_, err := decodeAndUnstructure([]byte(deploymentv1), gvk)
+	_, err := decodeAndUnstructure([]byte(deploymentv1), gvr)
 	assert.Nil(t, err)
 }
 
@@ -157,13 +147,13 @@ var deploymentv1 = `
   }
 `
 
-func decodeJobv1(t *testing.T) {
-	gvk := &metav1.GroupVersionKind{
-		Group:   "batch",
-		Version: "v1",
-		Kind:    "Job",
+func TestDecodeJobv1(t *testing.T) {
+	gvr := &metav1.GroupVersionResource{
+		Group:    "batch",
+		Version:  "v1",
+		Resource: "jobs",
 	}
-	_, err := decodeAndUnstructure([]byte(jobv1), gvk)
+	_, err := decodeAndUnstructure([]byte(jobv1), gvr)
 	assert.Nil(t, err)
 }
 
@@ -187,13 +177,13 @@ spec:
       restartPolicy: Never
 `
 
-func decodeUnsupported(t *testing.T) {
-	gvk := &metav1.GroupVersionKind{
-		Group:   "batch",
-		Version: "v1",
-		Kind:    "Job",
+func TestDecodeUnsupported(t *testing.T) {
+	gvr := &metav1.GroupVersionResource{
+		Group:    "batch",
+		Version:  "v1",
+		Resource: "jobs",
 	}
-	_, err := decodeAndUnstructure([]byte(unsupportedType), gvk)
+	_, err := decodeAndUnstructure([]byte(unsupportedType), gvr)
 	assert.Nil(t, err)
 }
 
@@ -224,12 +214,12 @@ spec:
           done
 `
 
-func decodeUnknown(t *testing.T) {
-	gvk := &metav1.GroupVersionKind{
-		Group:   "unknown",
-		Version: "123",
-		Kind:    "What??",
+func TestDecodeUnknown(t *testing.T) {
+	gvr := &metav1.GroupVersionResource{
+		Group:    "unknown",
+		Version:  "123",
+		Resource: "What??",
 	}
-	_, err := decodeAndUnstructure([]byte(unsupportedType), gvk)
+	_, err := decodeAndUnstructure([]byte(unsupportedType), gvr)
 	assert.Nil(t, err, "expected nil error but got", err)
 }

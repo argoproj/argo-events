@@ -41,7 +41,7 @@ func main() {
 	if !ok {
 		panic("sensor namespace is not provided")
 	}
-	controllerInstanceID, ok := os.LookupEnv(common.EnvVarSensorControllerInstanceID)
+	controllerInstanceID, ok := os.LookupEnv(common.EnvVarControllerInstanceID)
 	if !ok {
 		panic("sensor controller instance ID is not provided")
 	}

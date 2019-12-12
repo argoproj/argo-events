@@ -5,9 +5,6 @@ metadata:
   labels:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -20,9 +17,9 @@ spec:
     type: "HTTP"
     http:
       port: "9300"
-  # wait for both "webhook-gateway-http:foo" and "calendar-gateway:interval" to happen
+  # wait for both "webhook-gateway:example" and "calendar-gateway:interval" to happen
   dependencies:
-    - name: "webhook-gateway-http:example"
+    - name: "webhook-gateway:example"
     - name: "calendar-gateway:example-with-interval"
   triggers:
     - template:
@@ -31,7 +28,7 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -41,7 +38,7 @@ spec:
               arguments:
                 parameters:
                 - name: message1
-                  # this is the value that should be overridden by event payload from webhook-gateway-http:foo
+                  # this is the value that should be overridden by event payload from webhook-gateway:example
                   value: hello world
                 - name: message2
                   # this is the value that should be overridden by event payload from calendar-gateway:interval

@@ -19,9 +19,9 @@ package versioned
 
 import (
 	argoprojv1alpha1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1"
-	"k8s.io/client-go/discovery"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/util/flowcontrol"
+	discovery "k8s.io/client-go/discovery"
+	rest "k8s.io/client-go/rest"
+	flowcontrol "k8s.io/client-go/util/flowcontrol"
 )
 
 type Interface interface {

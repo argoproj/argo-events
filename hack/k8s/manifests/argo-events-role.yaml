@@ -1,0 +1,82 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-events-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-events-role
+subjects:
+  - kind: ServiceAccount
+    name: argo-events-sa
+    namespace: argo-events
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-events-role
+rules:
+  - apiGroups:
+      - argoproj.io
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
+    resources:
+      - workflows
+      - workflows/finalizers
+      - workflowtemplates
+      - workflowtemplates/finalizers
+      - gateways
+      - gateways/finalizers
+      - sensors
+      - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - pods/exec
+      - configmaps
+      - secrets
+      - services
+      - events
+      - persistentvolumeclaims
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - "batch"
+    resources:
+      - jobs
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - "apps"
+    resources:
+      - deployments
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+      - patch
+      - delete

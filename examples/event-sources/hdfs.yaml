@@ -1,31 +1,27 @@
-# This configmap contains the event sources configurations for HDFS gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
-  name: hdfs-gateway-configmap
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.11
-data:
-  example-1: |-
-    directory: "/tmp/"
-    type: "CREATE"
-    path: x.txt
-    addresses:
-    - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
-    - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
-    hdfsUser: root
-    # krbCCacheSecret:
-    #   name: krb
-    #   key: krb5cc_0
-    # krbKeytabSecret:
-    #   name: krb
-    #   key: user1.keytab
-    # krbUsername: "user1"
-    # krbRealm: "MYCOMPANY.COM"
-    # krbConfigConfigMap:
-    #   name: my-hdfs-krb5-config
-    #   key: krb5.conf
-    # krbServicePrincipalName: hdfs/_HOST
+  name: hdfs-event-source
+spec:
+  type: "hdfs"
+  hdfs:
+    example:
+      directory: "/tmp/"
+      type: "CREATE"
+      path: x.txt
+      addresses:
+        - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020
+        - my-hdfs-namenode-1.my-hdfs-namenode.default.svc.cluster.local:8020
+      hdfsUser: root
+      # krbCCacheSecret:
+      #   name: krb
+      #   key: krb5cc_0
+      # krbKeytabSecret:
+      #   name: krb
+      #   key: user1.keytab
+      # krbUsername: "user1"
+      # krbRealm: "MYCOMPANY.COM"
+      # krbConfigConfigMap:
+      #   name: my-hdfs-krb5-config
+      #   key: krb5.conf
+      # krbServicePrincipalName: hdfs/_HOST

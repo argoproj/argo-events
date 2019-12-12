@@ -4,9 +4,6 @@ metadata:
   name: webhook-sensor-http
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -16,7 +13,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway-http:foo"
+    - name: "webhook-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -29,7 +26,7 @@ spec:
         version: v1
         resource: pods
         source:
-          inline: |
+          resource:
             apiVersion: v1
             kind: Pod
             metadata:
@@ -48,7 +45,7 @@ spec:
         version: v1
         resource: deployments
         source:
-          inline: |
+          resource:
             apiVersion: apps/v1
             kind: Deployment
             metadata:
