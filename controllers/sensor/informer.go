@@ -17,49 +17,43 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
-
-	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
 	"k8s.io/apimachinery/pkg/selection"
+	"k8s.io/client-go/tools/cache"
 )
 
-func (c *SensorController) instanceIDReq() labels.Requirement {
+func (controller *Controller) instanceIDReq() (*labels.Requirement, error) {
 	var instanceIDReq *labels.Requirement
 	var err error
-	if c.Config.InstanceID == "" {
-		panic("controller instance id must be specified")
+	if controller.Config.InstanceID == "" {
+		return nil, errors.New("controller instance id must be specified")
 	}
-	instanceIDReq, err = labels.NewRequirement(common.LabelKeySensorControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{controller.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}
-	return *instanceIDReq
+	return instanceIDReq, nil
 }
 
-func (c *SensorController) versionReq() labels.Requirement {
-	versionReq, err := labels.NewRequirement(common.LabelArgoEventsSensorVersion, selection.Equals, []string{v1alpha1.ArgoEventsSensorVersion})
+// The sensor informer adds new sensors to the controller'sensor queue based on Add, Update, and Delete event handlers for the sensor resources
+func (controller *Controller) newSensorInformer() (cache.SharedIndexInformer, error) {
+	labelSelector, err := controller.instanceIDReq()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return *versionReq
-}
 
-// The sensor informer adds new Sensors to the sensor-controller's queue based on Add, Update, and Delete Event Handlers for the Sensor Resources
-func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
-	sensorInformerFactory := sensorinformers.NewFilteredSharedInformerFactory(
-		c.sensorClientset,
+	sensorInformerFactory := sensorinformers.NewSharedInformerFactoryWithOptions(
+		controller.sensorClient,
 		sensorResyncPeriod,
-		c.Config.Namespace,
-		func(options *metav1.ListOptions) {
+		sensorinformers.WithNamespace(controller.Config.Namespace),
+		sensorinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-			labelSelector := labels.NewSelector().Add(c.instanceIDReq(), c.versionReq())
 			options.LabelSelector = labelSelector.String()
-		},
+		}),
 	)
 	informer := sensorInformerFactory.Argoproj().V1alpha1().Sensors().Informer()
 	informer.AddEventHandler(
@@ -67,22 +61,22 @@ func (c *SensorController) newSensorInformer() cache.SharedIndexInformer {
 			AddFunc: func(obj interface{}) {
 				key, err := cache.MetaNamespaceKeyFunc(obj)
 				if err == nil {
-					c.queue.Add(key)
+					controller.queue.Add(key)
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				key, err := cache.MetaNamespaceKeyFunc(new)
 				if err == nil {
-					c.queue.Add(key)
+					controller.queue.Add(key)
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
 				key, err := cache.DeletionHandlingMetaNamespaceKeyFunc(obj)
 				if err == nil {
-					c.queue.Add(key)
+					controller.queue.Add(key)
 				}
 			},
 		},
 	)
-	return informer
+	return informer, nil
 }

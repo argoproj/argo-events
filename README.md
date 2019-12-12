@@ -28,18 +28,41 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Supports [CloudEvents](https://cloudevents.io/) for describing event data and transmission.
 * Ability to manage event sources at runtime.
 
-## Documentation
-To learn more about Argo Events, [go to complete documentation](https://argoproj.github.io/argo-events/)
+## Getting Started
+Follow [setup](https://argoproj.github.io/argo-events/installation/) instructions for installation. To see the Argo-Events in action, follow the
+[getting started](https://argoproj.github.io/argo-events/getting_started/) guide. 
+Complete documentation is available at https://argoproj.github.io/argo-events/
+
+[![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
+
+## Available Event Listeners
+1. AMQP
+2. AWS SNS
+3. AWS SQS
+4. Cron Schedules
+5. GCP PubSub
+6. GitHub
+7. GitLab
+8. HDFS
+9. File Based Events
+10. Kafka
+11. Minio
+12. NATS
+13. MQTT
+14. K8s Resources
+15. Slack
+16. NetApp StorageGrid
+17. Webhooks
 
 ## Who uses Argo Events?
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
+* [BioBox Analytics](https://biobox.io)
 * [BlackRock](https://www.blackrock.com/)
 * [Canva](https://www.canva.com/)
 * [Fairwinds](https://fairwinds.com/)
 * [InsideBoard](https://www.insideboard.com)
 * [Intuit](https://www.intuit.com/)
 * [Viaduct](https://www.viaduct.ai/)
-* [BioBox Analytics](https://biobox.io)
 
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)

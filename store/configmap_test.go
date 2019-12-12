@@ -53,7 +53,7 @@ spec:
 			convey.So(err, convey.ShouldBeNil)
 			convey.So(cmReader, convey.ShouldNotBeNil)
 
-			convey.Convey("Create a workflow from configmap artifact", func() {
+			convey.Convey("Create a workflow from configmap minio", func() {
 				resourceBody, err := cmReader.Read()
 				convey.So(err, convey.ShouldBeNil)
 

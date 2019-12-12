@@ -17,48 +17,41 @@ limitations under the License.
 package gateway
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/argoproj/argo-events/common"
 	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
-func (c *GatewayController) instanceIDReq() labels.Requirement {
-	// it makes sense to make instance id is mandatory.
+func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
 	if c.Config.InstanceID == "" {
 		panic("instance id is required")
 	}
-	instanceIDReq, err := labels.NewRequirement(common.LabelKeyGatewayControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+	instanceIDReq, err := labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return *instanceIDReq
+	c.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
+	return instanceIDReq, nil
 }
 
-func (c *GatewayController) versionReq() labels.Requirement {
-	versionReq, err := labels.NewRequirement(common.LabelArgoEventsGatewayVersion, selection.Equals, []string{v1alpha1.ArgoEventsGatewayVersion})
+// The controller informer adds new gateways to the controller's queue based on Add, Update, and Delete Event Handlers for the gateway Resources
+func (c *Controller) newGatewayInformer() (cache.SharedIndexInformer, error) {
+	labelSelector, err := c.instanceIDReq()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return *versionReq
-}
-
-// The gateway-controller informer adds new Gateways to the gateway-controller-controller's queue based on Add, Update, and Delete Event Handlers for the Gateway Resources
-func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
-	gatewayInformerFactory := gatewayinformers.NewFilteredSharedInformerFactory(
-		c.gatewayClientset,
+	gatewayInformerFactory := gatewayinformers.NewSharedInformerFactoryWithOptions(
+		c.gatewayClient,
 		gatewayResyncPeriod,
-		c.Config.Namespace,
-		func(options *metav1.ListOptions) {
+		gatewayinformers.WithNamespace(c.Config.Namespace),
+		gatewayinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
 			options.FieldSelector = fields.Everything().String()
-			labelSelector := labels.NewSelector().Add(c.instanceIDReq(), c.versionReq())
 			options.LabelSelector = labelSelector.String()
-		},
+		}),
 	)
 	informer := gatewayInformerFactory.Argoproj().V1alpha1().Gateways().Informer()
 	informer.AddEventHandler(
@@ -83,5 +76,5 @@ func (c *GatewayController) newGatewayInformer() cache.SharedIndexInformer {
 			},
 		},
 	)
-	return informer
+	return informer, nil
 }

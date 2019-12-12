@@ -19,18 +19,13 @@ package sensor
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
-	"github.com/smartystreets/goconvey/convey"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/informers"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/fake"
-	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
@@ -39,84 +34,55 @@ var (
 	SensorControllerInstanceID = "argo-events"
 )
 
-func getFakePodSharedIndexInformer(clientset kubernetes.Interface) cache.SharedIndexInformer {
-	// NewListWatchFromClient doesn't work with fake client.
-	// ref: https://github.com/kubernetes/client-go/issues/352
-	return cache.NewSharedIndexInformer(&cache.ListWatch{
-		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-			return clientset.CoreV1().Pods("").List(options)
-		},
-		WatchFunc: clientset.CoreV1().Pods("").Watch,
-	}, &corev1.Pod{}, 1*time.Second, cache.Indexers{})
-}
-
-func getSensorController() *SensorController {
+func getController() *Controller {
 	clientset := fake.NewSimpleClientset()
-	done := make(chan struct{})
-	informer := getFakePodSharedIndexInformer(clientset)
-	go informer.Run(done)
-	factory := informers.NewSharedInformerFactory(clientset, 0)
-	podInformer := factory.Core().V1().Pods()
-	go podInformer.Informer().Run(done)
-	svcInformer := factory.Core().V1().Services()
-	go svcInformer.Informer().Run(done)
-	return &SensorController{
+	controller := &Controller{
 		ConfigMap: SensorControllerConfigmap,
 		Namespace: common.DefaultControllerNamespace,
-		Config: SensorControllerConfig{
+		Config: ControllerConfig{
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: SensorControllerInstanceID,
 		},
-		kubeClientset:   clientset,
-		sensorClientset: fakesensor.NewSimpleClientset(),
-		podInformer:     podInformer,
-		svcInformer:     svcInformer,
-		informer:        informer,
-		queue:           workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
-		log:             common.NewArgoEventsLogger(),
+		k8sClient:    clientset,
+		sensorClient: fakesensor.NewSimpleClientset(),
+		queue:        workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
+		logger:       common.NewArgoEventsLogger(),
 	}
+	informer, err := controller.newSensorInformer()
+	if err != nil {
+		panic(err)
+	}
+	controller.informer = informer
+	return controller
 }
 
-func TestGatewayController(t *testing.T) {
-	convey.Convey("Given a sensor controller, process queue items", t, func() {
-		controller := getSensorController()
-
-		convey.Convey("Create a resource queue, add new item and process it", func() {
-			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-			controller.informer = controller.newSensorInformer()
-			controller.queue.Add("hi")
-			res := controller.processNextItem()
-
-			convey.Convey("Item from queue must be successfully processed", func() {
-				convey.So(res, convey.ShouldBeTrue)
-			})
-
-			convey.Convey("Shutdown queue and make sure queue does not process next item", func() {
-				controller.queue.ShutDown()
-				res := controller.processNextItem()
-				convey.So(res, convey.ShouldBeFalse)
-			})
-		})
+func TestController_ProcessNextItem(t *testing.T) {
+	controller := getController()
+	err := controller.informer.GetIndexer().Add(&v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-sensor",
+			Namespace: "fake-namespace",
+		},
+		Spec: v1alpha1.SensorSpec{},
 	})
+	assert.Nil(t, err)
+	controller.queue.Add("fake-sensor")
+	res := controller.processNextItem()
+	assert.Equal(t, res, true)
+	controller.queue.ShutDown()
+	res = controller.processNextItem()
+	assert.Equal(t, res, false)
+}
 
-	convey.Convey("Given a sensor controller, handle errors in queue", t, func() {
-		controller := getSensorController()
-		convey.Convey("Create a resource queue and add an item", func() {
-			controller.queue = workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
-			controller.queue.Add("hi")
-			convey.Convey("Handle an nil error", func() {
-				err := controller.handleErr(nil, "hi")
-				convey.So(err, convey.ShouldBeNil)
-			})
-			convey.Convey("Exceed max requeues", func() {
-				controller.queue.Add("bye")
-				var err error
-				for i := 0; i < 21; i++ {
-					err = controller.handleErr(fmt.Errorf("real error"), "bye")
-				}
-				convey.So(err, convey.ShouldNotBeNil)
-				convey.So(err.Error(), convey.ShouldEqual, "exceeded max requeues")
-			})
-		})
-	})
+func TestController_HandleErr(t *testing.T) {
+	controller := getController()
+	controller.queue.Add("hi")
+	err := controller.handleErr(nil, "hi")
+	assert.Nil(t, err)
+	controller.queue.Add("bye")
+	for i := 0; i < 21; i++ {
+		err = controller.handleErr(fmt.Errorf("real error"), "bye")
+	}
+	assert.NotNil(t, err)
+	assert.Equal(t, err.Error(), "exceeded max re-queues")
 }

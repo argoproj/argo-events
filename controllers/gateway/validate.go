@@ -17,50 +17,50 @@ limitations under the License.
 package gateway
 
 import (
-	"fmt"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 // Validate validates the gateway resource.
-// Exporting this function so that external APIs can use this to validate gateway resource.
-func Validate(gw *v1alpha1.Gateway) error {
-	if gw.Spec.Template == nil {
-		return fmt.Errorf("gateway  pod template is not specified")
+func Validate(gatewayObj *v1alpha1.Gateway) error {
+	if gatewayObj.Spec.Template == nil {
+		return errors.New("gateway  pod template is not specified")
 	}
-	if gw.Spec.Type == "" {
-		return fmt.Errorf("gateway type is not specified")
+	if gatewayObj.Spec.Type == "" {
+		return errors.New("gateway type is not specified")
 	}
-	if gw.Spec.EventSource == "" {
-		return fmt.Errorf("event source for the gateway is not specified")
-	}
-	if gw.Spec.ProcessorPort == "" {
-		return fmt.Errorf("gateway processor port is not specified")
+	if gatewayObj.Spec.EventSourceRef == nil {
+		return errors.New("event source for the gateway is not specified")
 	}
 
-	switch gw.Spec.EventProtocol.Type {
+	if gatewayObj.Spec.ProcessorPort == "" {
+		return errors.New("gateway processor port is not specified")
+	}
+
+	switch gatewayObj.Spec.EventProtocol.Type {
 	case apicommon.HTTP:
-		if gw.Spec.Watchers == nil || (gw.Spec.Watchers.Gateways == nil && gw.Spec.Watchers.Sensors == nil) {
-			return fmt.Errorf("no associated watchers with gateway")
+		if gatewayObj.Spec.Watchers == nil || (gatewayObj.Spec.Watchers.Gateways == nil && gatewayObj.Spec.Watchers.Sensors == nil) {
+			return errors.New("no associated watchers with gateway")
 		}
-		if gw.Spec.EventProtocol.Http.Port == "" {
-			return fmt.Errorf("http server port is not defined")
+		if gatewayObj.Spec.EventProtocol.Http.Port == "" {
+			return errors.New("http server port is not defined")
 		}
 	case apicommon.NATS:
-		if gw.Spec.EventProtocol.Nats.URL == "" {
-			return fmt.Errorf("nats url is not defined")
+		if gatewayObj.Spec.EventProtocol.Nats.URL == "" {
+			return errors.New("nats url is not defined")
 		}
-		if gw.Spec.EventProtocol.Nats.Type == "" {
-			return fmt.Errorf("nats service type is not defined")
+		if gatewayObj.Spec.EventProtocol.Nats.Type == "" {
+			return errors.New("nats service type is not defined")
 		}
-		if gw.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gw.Spec.EventProtocol.Nats.ClientId == "" {
-			return fmt.Errorf("client id must be specified when using nats streaming")
+		if gatewayObj.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gatewayObj.Spec.EventProtocol.Nats.ClientId == "" {
+			return errors.New("client id must be specified when using nats streaming")
 		}
-		if gw.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gw.Spec.EventProtocol.Nats.ClusterId == "" {
-			return fmt.Errorf("cluster id must be specified when using nats streaming")
+		if gatewayObj.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gatewayObj.Spec.EventProtocol.Nats.ClusterId == "" {
+			return errors.New("cluster id must be specified when using nats streaming")
 		}
 	default:
-		return fmt.Errorf("unknown gateway type")
+		return errors.New("unknown gateway type")
 	}
 	return nil
 }

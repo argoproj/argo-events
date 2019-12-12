@@ -4,9 +4,6 @@ metadata:
   name: slack-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -20,7 +17,7 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "slack-gateway:example-1"
+    - name: "slack-gateway:example-insecure"
   triggers:
     - template:
         name: slack-workflow
@@ -28,7 +25,7 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -51,5 +48,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "slack-gateway:example-1"
+            event: "slack-gateway:example-insecure"
           dest: spec.arguments.parameters.0.value

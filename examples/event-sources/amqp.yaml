@@ -1,36 +1,32 @@
-# This configmap contains the event sources configurations for AMQP gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: amqp-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.11
-data:
-  # no retries if connection to amqp service is not successful
-  example-without-retry: |-
-    # url of the service
-    url: amqp://amqp.argo-events:5672
-    # name of the exchange
-    exchangeName: "name of the exchange"
-    # type of the exchange
-    exchangeType: fanout
-    # routing key for the exchange
-    routingKey: "routing key"
+spec:
+  type: amqp
+  amqp:
+    # no retries if connection to amqp service is not successful
+    example-without-retry:
+      # url of the service
+      url: "amqp://amqp.argo-events:5672"
+      # name of the exchange
+      exchangeName: "name of the exchange"
+      # type of the exchange
+      exchangeType: "fanout"
+      # routing key for the exchange
+      routingKey: "routing key"
 
-  # retry after each backoff to set up a successful connection
-  example-with-retry: |-
-    url: amqp://amqp.argo-events:5672
-    exchangeName: "name of the exchange"
-    exchangeType: fanout
-    routingKey: "routing key"
-    backoff:
-      # duration in nanoseconds. following value is 10 seconds
-      duration: 10000000000
-      # how many backoffs
-      steps: 5
-      # factor to increase on each step.
-      # setting factor > 1 makes backoff exponential.
-      factor: 2
+    # retry after each backoff to set up a successful connection
+    example-with-retry:
+      url: "amqp://amqp.argo-events:5672"
+      exchangeName: "name of the exchange"
+      exchangeType: "fanout"
+      routingKey: "routing key"
+      backoff:
+        # duration in nanoseconds. following value is 10 seconds
+        duration: 10000000000
+        # how many backoffs
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes backoff exponential.
+        factor: 2

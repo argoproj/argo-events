@@ -18,17 +18,17 @@ limitations under the License.
 package externalversions
 
 import (
-	"reflect"
-	"sync"
-	"time"
+	reflect "reflect"
+	sync "sync"
+	time "time"
 
-	"github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	"github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
+	versioned "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	internalinterfaces "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces"
 	sensor "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/sensor"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/tools/cache"
+	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // SharedInformerOption defines the functional option type for SharedInformerFactory.

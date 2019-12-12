@@ -5,9 +5,6 @@ metadata:
   labels:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.11
 spec:
   template:
     spec:
@@ -17,7 +14,7 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "hdfs-gateway:example-1"
+    - name: "hdfs-gateway:example"
   eventProtocol:
     type: "HTTP"
     http:
@@ -29,23 +26,23 @@ spec:
         version: v1alpha1
         resource: workflows
         source:
-          inline: |
-              apiVersion: argoproj.io/v1alpha1
-              kind: Workflow
-              metadata:
-                generateName: hello-world-
-              spec:
-                entrypoint: whalesay
-                templates:
-                  - name: whalesay
-                    container:
-                      args:
-                        - "hello "
-                      command:
-                        - cowsay
-                      image: "docker/whalesay:latest"
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+                - name: whalesay
+                  container:
+                    args:
+                      - "hello "
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
       resourceParameters:
         - src:
-            event: "hdfs-gateway:example-1"
+            event: "hdfs-gateway:example"
             path: name
           dest: spec.templates.0.container.args.1

@@ -10,5 +10,7 @@ spec:
     listKind: SensorList
     plural: sensors
     singular: sensor
+    shortNames:
+      - sn
   scope: Namespaced
-  version: v1alpha1
+  version: "v1alpha1"
