@@ -30,7 +30,6 @@ spec:
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "minio-events"
-          image: "argoproj/minio-gateway"
+          image: "argoproj/artifact-gateway"
           imagePullPolicy: "Always"
-          command: ["/bin/minio-gateway"]
       serviceAccountName: "argo-events-sa"
