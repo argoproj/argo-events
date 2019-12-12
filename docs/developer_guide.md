@@ -1,4 +1,4 @@
-# Developer Guider
+# Developer Guide
 
 ## Setup your DEV environment
 Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for `Minikube` for local development, but if you have another cluster you can ignore the Minikube specific step 3.
