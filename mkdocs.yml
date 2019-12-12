@@ -20,25 +20,13 @@ nav:
   - Overview: 'index.md'
   - 'installation.md'
   - 'getting_started.md'
-  - Setup:
-      - gateways/minio.md
-      - gateways/aws-sns.md
-      - gateways/aws-sqs.md
-      - gateways/calendar.md
-      - gateways/file.md
-      - gateways/gcp-pubsub.md
-      - gateways/github.md
-      - gateways/gitlab.md
-      - gateways/resource.md
-      - gateways/slack.md
-      - gateways/storage-grid.md
-      - gateways/streams.md
-      - gateways/webhook.md
-  - 'gateway.md'
-  - 'sensor.md'
-  - 'trigger.md'
-  - 'parameterization.md'
-  - 'communication.md'
+  - Concepts:
+      - 'concepts/gateway.md'
+      - 'concepts/sensor.md'
+      - 'concepts/event_source.md'
+      - 'concepts/trigger.md'
+      - 'concepts/parameterization.md'
+  - 'developer_guide.md'
   - 'controllers.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
