@@ -64,6 +64,9 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 * [Intuit](https://www.intuit.com/)
 * [Viaduct](https://www.viaduct.ai/)
 
+## Community Blogs and Presentations
+* [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
+
 ## Contribute
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
 
