@@ -33,6 +33,7 @@ Follow [setup](https://argoproj.github.io/argo-events/installation/) instruction
 [getting started](https://argoproj.github.io/argo-events/getting_started/) guide. 
 Complete documentation is available at https://argoproj.github.io/argo-events/
 
+[![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
 ## Available Event Listeners
 1. AMQP
