@@ -28,9 +28,9 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Supports [CloudEvents](https://cloudevents.io/) for describing event data and transmission.
 * Ability to manage event sources at runtime.
 
-## Get Started
-Follow [setup] instructions for installation. To see the Argo-Events in action, follow the
-[getting started] guide. 
+## Getting Started
+Follow [setup](https://argoproj.github.io/argo-events/installation/) instructions for installation. To see the Argo-Events in action, follow the
+[getting started](https://argoproj.github.io/argo-events/getting_started/) guide. 
 Complete documentation is available at https://argoproj.github.io/argo-events/
 
 
