@@ -17,14 +17,16 @@ spec:
       schedule: "30 * * * *"
       # userPayload is a static string that will be send to the the sensor with each event payload
       # whatever you put here is blindly delivered to sensor.
-      userPayload: "{\"hello\": \"world\"}"
+      # access in resourceParameters or templateParameters via the path userPayload.hello
+      userPayload: {"hello": "world"}
 
     schedule-in-specific-timezone:
       # creates an event every 20 seconds
       interval: "20s"
       # userPayload is a static string that will be send to the the sensor with each event payload
       # whatever you put here is blindly delivered to sensor.
-      userPayload: "{\"hello\": \"world\"}"
+      # access in resourceParameters or templateParameters via the path userPayload.hello
+      userPayload: {"hello": "world"}
       # timezone
       # more info: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
       timezone: "America/New_York"
