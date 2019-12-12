@@ -3655,6 +3655,7 @@ VerifyCert decides whether the connection is secure or not
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> . </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code> on git
+commit <code>8d85191</code>. </em>
 
 </p>

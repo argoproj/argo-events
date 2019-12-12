@@ -983,7 +983,7 @@ its phase
 <td>
 
 <code>nodes</code></br> <em> <a href="#argoproj.io/v1alpha1.NodeStatus">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1/.NodeStatus
+map\[string\]github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus
 </a> </em>
 
 </td>
@@ -1445,6 +1445,7 @@ Namespace of the sensor
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> . </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code> on git
+commit <code>8d85191</code>. </em>
 
 </p>
