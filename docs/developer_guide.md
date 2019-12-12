@@ -85,5 +85,3 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
  | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
  | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
  
-### Implementation
- You can follow existing implementations [here](https://github.com/argoproj/argo-events/tree/master/gateways/core)
