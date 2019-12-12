@@ -104,6 +104,10 @@ required = [
   name = "gopkg.in/jcmturner/gokrb5.v5"
   version = "5.3.0"
 
+[[constraint]]
+  name = "github.com/cloudevents/sdk-go"
+  version = "v0.10.1"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"
