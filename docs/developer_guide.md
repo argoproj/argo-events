@@ -32,8 +32,6 @@ eval $(minikube docker-env)
 make all
 ```
 
-Follow [README](README.md#install) to install components.
-
 ### Changing Types
 If you're making a change to the `pkg/apis`  package, please ensure you re-run the K8 code-generator scripts found in the `/hack` folder. First, ensure you have the `generate-groups.sh` script at the path: `vendor/k8s.io/code-generator/`. Next run the following commands in order:
 ```
