@@ -36,7 +36,7 @@
     
     
       
-        <title>Calendar - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Trigger Parameterization - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#calendar" tabindex="1" class="md-skip">
+      <a href="#trigger-parameterization" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Calendar
+              Trigger Parameterization
             </span>
           
         </div>
@@ -304,11 +304,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
     
     <label class="md-nav__link" for="nav-4">
-      Setup
+      Concepts
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-4">
-        Setup
+        Concepts
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -319,8 +319,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../artifact/" title="Minio S3" class="md-nav__link">
-      Minio S3
+    <a href="../gateway/" title="Gateway" class="md-nav__link">
+      Gateway
     </a>
   </li>
 
@@ -331,8 +331,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../aws-sns/" title="AWS SNS" class="md-nav__link">
-      AWS SNS
+    <a href="../sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -343,8 +343,20 @@
 
 
   <li class="md-nav__item">
-    <a href="../aws-sqs/" title="AWS SQS" class="md-nav__link">
-      AWS SQS
+    <a href="../event_source/" title="Event Source" class="md-nav__link">
+      Event Source
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -364,11 +376,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        Calendar
+        Trigger Parameterization
       </label>
     
-    <a href="./" title="Calendar" class="md-nav__link md-nav__link--active">
-      Calendar
+    <a href="./" title="Trigger Parameterization" class="md-nav__link md-nav__link--active">
+      Trigger Parameterization
     </a>
     
       
@@ -382,8 +394,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setup" title="Setup" class="md-nav__link">
-    Setup
+  <a href="#template" title="Template" class="md-nav__link">
+    Template
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource" title="Resource" class="md-nav__link">
+    Resource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-structure" title="Parameter Structure" class="md-nav__link">
+    Parameter Structure
   </a>
   
 </li>
@@ -399,114 +425,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../file/" title="File" class="md-nav__link">
-      File
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gcp-pubsub/" title="GCP PubSub" class="md-nav__link">
-      GCP PubSub
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../github/" title="Github" class="md-nav__link">
-      Github
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gitlab/" title="Gitlab" class="md-nav__link">
-      Gitlab
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../resource/" title="Resource" class="md-nav__link">
-      Resource
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../slack/" title="Slack" class="md-nav__link">
-      Slack
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../storage-grid/" title="StorageGrid" class="md-nav__link">
-      StorageGrid
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../streams/" title="Streams" class="md-nav__link">
-      Streams
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../webhook/" title="Webhook" class="md-nav__link">
-      Webhook
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -518,56 +436,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../gateway/" title="Gateway" class="md-nav__link">
-      Gateway
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../sensor/" title="Sensor" class="md-nav__link">
-      Sensor
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../trigger/" title="Trigger" class="md-nav__link">
-      Trigger
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../parameterization/" title="Trigger Parameterization" class="md-nav__link">
-      Trigger Parameterization
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../communication/" title="Persisting Events" class="md-nav__link">
-      Persisting Events
+    <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
+      Developer Guide
     </a>
   </li>
 
@@ -641,8 +511,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setup" title="Setup" class="md-nav__link">
-    Setup
+  <a href="#template" title="Template" class="md-nav__link">
+    Template
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#resource" title="Resource" class="md-nav__link">
+    Resource
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameter-structure" title="Parameter Structure" class="md-nav__link">
+    Parameter Structure
   </a>
   
 </li>
@@ -663,23 +547,29 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/gateways/calendar.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/concepts/parameterization.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="calendar">Calendar<a class="headerlink" href="#calendar" title="Permanent link">&para;</a></h1>
-<p>The gateway helps schedule K8s resources on an interval or on a cron schedule. It is solution for triggering any standard or custom K8s
-resource instead of using CronJob.</p>
-<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+                <h1 id="trigger-parameterization">Trigger Parameterization<a class="headerlink" href="#trigger-parameterization" title="Permanent link">&para;</a></h1>
+<p>Payload of an event can be passed to any trigger. Argo Events offers parameterization at two levels,</p>
+<p>1) Template</p>
+<p>2) Resource</p>
+<h2 id="template">Template<a class="headerlink" href="#template" title="Permanent link">&para;</a></h2>
+<p>You can parameterize the template that refers the Argo Worflow / K8s artifact. </p>
+<h2 id="resource">Resource<a class="headerlink" href="#resource" title="Permanent link">&para;</a></h2>
+<p>Allows to parameterize the Argo workflow/K8s resource definition.</p>
+<p>You can find an example <a href="https://github.com/argoproj/argo-events/blob/master/examples/sensors/complete-trigger-parameterization.yaml">here.</a></p>
+<h2 id="parameter-structure">Parameter Structure<a class="headerlink" href="#parameter-structure" title="Permanent link">&para;</a></h2>
+<p>A <code>parameter</code> contains:</p>
 <ol>
-<li>
-<p>Create the <a href="https://github.com/argoproj/argo-events/tree/master/examples/event-sources/calendar.yaml">event Source</a>.</p>
+<li><code>src</code>:<ol>
+<li><code>event</code>: the name of the event dependency</li>
+<li><code>path</code>: a key within event payload to look for</li>
+<li><code>value</code>: default value if sensor can't find <code>path</code> in event payload</li>
+</ol>
 </li>
-<li>
-<p>Deploy the <a href="https://github.com/argoproj/argo-events/tree/master/examples/gateways/calendar.yaml">gateway</a>.</p>
-</li>
-<li>
-<p>Deploy the <a href="https://github.com/argoproj/argo-events/tree/master/examples/sensors/calendar.yaml">sensor</a>.</p>
-</li>
+<li><code>dest</code>: destination key within resource definition whose corresponding value needs to be replaced with value from event payload</li>
+<li><code>operation</code>: what to do with the existing value at <code>dest</code>, either <code>overwrite</code>, <code>prepend</code>, or <code>append</code></li>
 </ol>
                 
                   
@@ -701,7 +591,7 @@ resource instead of using CronJob.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../aws-sqs/" title="AWS SQS" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../trigger/" title="Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -710,19 +600,19 @@ resource instead of using CronJob.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                AWS SQS
+                Trigger
               </span>
             </div>
           </a>
         
         
-          <a href="../file/" title="File" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../developer_guide/" title="Developer Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                File
+                Developer Guide
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

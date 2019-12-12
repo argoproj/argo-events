@@ -36,7 +36,7 @@
     
     
       
-        <title>Gateway - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Developer Guide - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#gateway" tabindex="1" class="md-skip">
+      <a href="#developer-guide" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Gateway
+              Developer Guide
             </span>
           
         </div>
@@ -302,11 +302,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
     
     <label class="md-nav__link" for="nav-4">
-      Setup
+      Concepts
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-4">
-        Setup
+        Concepts
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -317,8 +317,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../gateways/artifact/" title="Minio S3" class="md-nav__link">
-      Minio S3
+    <a href="../concepts/gateway/" title="Gateway" class="md-nav__link">
+      Gateway
     </a>
   </li>
 
@@ -329,8 +329,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../gateways/aws-sns/" title="AWS SNS" class="md-nav__link">
-      AWS SNS
+    <a href="../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
     </a>
   </li>
 
@@ -341,8 +341,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../gateways/aws-sqs/" title="AWS SQS" class="md-nav__link">
-      AWS SQS
+    <a href="../concepts/event_source/" title="Event Source" class="md-nav__link">
+      Event Source
     </a>
   </li>
 
@@ -353,8 +353,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../gateways/calendar/" title="Calendar" class="md-nav__link">
-      Calendar
+    <a href="../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
     </a>
   </li>
 
@@ -365,104 +365,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../gateways/file/" title="File" class="md-nav__link">
-      File
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/gcp-pubsub/" title="GCP PubSub" class="md-nav__link">
-      GCP PubSub
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/github/" title="Github" class="md-nav__link">
-      Github
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/gitlab/" title="Gitlab" class="md-nav__link">
-      Gitlab
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/resource/" title="Resource" class="md-nav__link">
-      Resource
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/slack/" title="Slack" class="md-nav__link">
-      Slack
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/storage-grid/" title="StorageGrid" class="md-nav__link">
-      StorageGrid
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/streams/" title="Streams" class="md-nav__link">
-      Streams
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../gateways/webhook/" title="Webhook" class="md-nav__link">
-      Webhook
+    <a href="../concepts/parameterization/" title="Trigger Parameterization" class="md-nav__link">
+      Trigger Parameterization
     </a>
   </li>
 
@@ -487,11 +391,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        Gateway
+        Developer Guide
       </label>
     
-    <a href="./" title="Gateway" class="md-nav__link md-nav__link--active">
-      Gateway
+    <a href="./" title="Developer Guide" class="md-nav__link md-nav__link--active">
+      Developer Guide
     </a>
     
       
@@ -505,44 +409,70 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-gateway" title="What is a gateway?" class="md-nav__link">
-    What is a gateway?
+  <a href="#setup-your-dev-environment" title="Setup your DEV environment" class="md-nav__link">
+    Setup your DEV environment
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" title="Requirements" class="md-nav__link">
+    Requirements
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#components" title="Components" class="md-nav__link">
-    Components
+        
+          <li class="md-nav__item">
+  <a href="#installation-setup" title="Installation &amp; Setup" class="md-nav__link">
+    Installation &amp; Setup
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-get-the-project" title="1. Get the project" class="md-nav__link">
+    1. Get the project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#core-gateways" title="Core gateways" class="md-nav__link">
-    Core gateways
+        
+          <li class="md-nav__item">
+  <a href="#2-vendor-dependencies" title="2. Vendor dependencies" class="md-nav__link">
+    2. Vendor dependencies
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#community-gateways" title="Community gateways" class="md-nav__link">
-    Community gateways
+        
+          <li class="md-nav__item">
+  <a href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="3. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
+    3. Start Minikube and point Docker Client to Minikube's Docker Daemon
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#example" title="Example" class="md-nav__link">
-    Example
+        
+          <li class="md-nav__item">
+  <a href="#5-build-the-project" title="5. Build the project" class="md-nav__link">
+    5. Build the project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#managing-event-sources" title="Managing Event Sources" class="md-nav__link">
-    Managing Event Sources
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-types" title="Changing Types" class="md-nav__link">
+    Changing Types
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -568,13 +498,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#implementation" title="Implementation" class="md-nav__link">
-    Implementation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -588,54 +511,6 @@
   
 </nav>
     
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../sensor/" title="Sensor" class="md-nav__link">
-      Sensor
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../trigger/" title="Trigger" class="md-nav__link">
-      Trigger
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../parameterization/" title="Trigger Parameterization" class="md-nav__link">
-      Trigger Parameterization
-    </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../communication/" title="Persisting Events" class="md-nav__link">
-      Persisting Events
-    </a>
   </li>
 
     
@@ -708,44 +583,70 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-a-gateway" title="What is a gateway?" class="md-nav__link">
-    What is a gateway?
+  <a href="#setup-your-dev-environment" title="Setup your DEV environment" class="md-nav__link">
+    Setup your DEV environment
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#requirements" title="Requirements" class="md-nav__link">
+    Requirements
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#components" title="Components" class="md-nav__link">
-    Components
+        
+          <li class="md-nav__item">
+  <a href="#installation-setup" title="Installation &amp; Setup" class="md-nav__link">
+    Installation &amp; Setup
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-get-the-project" title="1. Get the project" class="md-nav__link">
+    1. Get the project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#core-gateways" title="Core gateways" class="md-nav__link">
-    Core gateways
+        
+          <li class="md-nav__item">
+  <a href="#2-vendor-dependencies" title="2. Vendor dependencies" class="md-nav__link">
+    2. Vendor dependencies
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#community-gateways" title="Community gateways" class="md-nav__link">
-    Community gateways
+        
+          <li class="md-nav__item">
+  <a href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="3. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
+    3. Start Minikube and point Docker Client to Minikube's Docker Daemon
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#example" title="Example" class="md-nav__link">
-    Example
+        
+          <li class="md-nav__item">
+  <a href="#5-build-the-project" title="5. Build the project" class="md-nav__link">
+    5. Build the project
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#managing-event-sources" title="Managing Event Sources" class="md-nav__link">
-    Managing Event Sources
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-types" title="Changing Types" class="md-nav__link">
+    Changing Types
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -771,13 +672,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#implementation" title="Implementation" class="md-nav__link">
-    Implementation
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -799,165 +693,47 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/gateway.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/developer_guide.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="gateway">Gateway<a class="headerlink" href="#gateway" title="Permanent link">&para;</a></h1>
-<h2 id="what-is-a-gateway">What is a gateway?<a class="headerlink" href="#what-is-a-gateway" title="Permanent link">&para;</a></h2>
-<p>A gateway consumes events from event sources, transforms them into the <a href="https://github.com/cloudevents/spec">cloudevents specification</a> compliant events and dispatches them to sensors.</p>
-<p><br/></p>
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/gateways.png?raw=true" alt="Gateway"/>
-</p>
-
-<p><br/></p>
-<h2 id="components">Components<a class="headerlink" href="#components" title="Permanent link">&para;</a></h2>
-<p>A gateway has two components:</p>
-<ol>
-<li>
-<p><b>gateway-client</b>: It creates one or more gRPC clients depending on event sources configurations, consumes events from server, transforms these events into cloudevents and dispatches them to sensors.</p>
-</li>
-<li>
-<p><b>gateway-server</b>: It is a gRPC server that consumes events from event sources and streams them to gateway client.</p>
-</li>
-</ol>
-<h2 id="core-gateways">Core gateways<a class="headerlink" href="#core-gateways" title="Permanent link">&para;</a></h2>
-<ol>
-<li>
-<p><strong>Calendar</strong>:
-    Events produced are based on either a <a href="https://crontab.guru/">cron</a> schedule or an <a href="https://golang.org/pkg/time/#ParseDuration">interval duration</a>. In addition, calendar gateway supports a <code>recurrence</code> field in which to specify special exclusion dates for which this gateway will not produce an event.</p>
-</li>
-<li>
-<p><strong>Webhooks</strong>:
-    Webhook gateway exposes REST API endpoints. The request received on these endpoints are treated as events. See Request Methods in RFC7231 to define the HTTP REST endpoint.</p>
-</li>
-<li>
-<p><strong>Kubernetes Resources</strong>:
-    Resource gateway supports watching Kubernetes resources. Users can specify <code>group</code>, <code>version</code>, <code>kind</code>, and filters including prefix of the object name, labels, annotations, and createdBy time.</p>
-</li>
-<li>
-<p><strong>Artifacts</strong>:
-    Artifact gateway supports S3 <code>bucket-notifications</code> via <a href="https://docs.minio.io/docs/minio-bucket-notification-guide">Minio</a>. Note that a supported notification target must be running, exposed.</p>
-</li>
-<li>
-<p><strong>Streams</strong>:
-    Stream gateways contain a generic specification for messages received on a queue and/or though messaging server. The following are the stream gateways offered out of box: </p>
-<ol>
-<li>
-<p><strong>NATS</strong>:
-<a href="https://nats.io/">Nats</a> is an open-sourced, lightweight, secure, and scalable messaging system for cloud native applications and microservices architecture. It is currently a hosted CNCF Project.</p>
-</li>
-<li>
-<p><strong>MQTT</strong>:
-<a href="http://mqtt.org/">MMQP</a> is a M2M "Internet of Things" connectivity protocol (ISO/IEC PRF 20922) designed to be extremely lightweight and ideal for mobile applications. Some broker implementations can be found <a href="https://github.com/mqtt/mqtt.github.io/wiki/brokers">here</a>.</p>
-</li>
-<li>
-<p><strong>Kafka</strong>:
-<a href="https://kafka.apache.org/">Apache Kafka</a> is a distributed streaming platform. We use Shopify's <a href="https://github.com/Shopify/sarama">sarama</a> client for consuming Kafka messages.</p>
-</li>
-<li>
-<p><strong>AMQP</strong>:
-<a href="https://www.amqp.org/">AMQP</a> is a open standard messaging protocol (ISO/IEC 19464). There are a variety of broker implementations including, but not limited to the following:</p>
+                <h1 id="developer-guide">Developer Guide<a class="headerlink" href="#developer-guide" title="Permanent link">&para;</a></h1>
+<h2 id="setup-your-dev-environment">Setup your DEV environment<a class="headerlink" href="#setup-your-dev-environment" title="Permanent link">&para;</a></h2>
+<p>Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for <code>Minikube</code> for local development, but if you have another cluster you can ignore the Minikube specific step 3.</p>
+<h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li><a href="http://activemq.apache.org/">Apache ActiveMQ</a></li>
-<li><a href="https://qpid.apache.org/">Apache Qpid</a></li>
-<li><a href="http://stormmq.com/">StormMQ</a></li>
-<li><a href="https://www.rabbitmq.com/">RabbitMQ</a></li>
+<li>Golang 1.11</li>
+<li>Docker</li>
+<li>dep</li>
 </ul>
-</li>
-</ol>
-</li>
-</ol>
-<p>You can find core gateways <a href="https://github.com/argoproj/argo-events/tree/master/gateways/core">here</a></p>
-<h2 id="community-gateways">Community gateways<a class="headerlink" href="#community-gateways" title="Permanent link">&para;</a></h2>
-<p>You can find gateways built by the community <a href="https://github.com/argoproj/argo-events/tree/master/gateways/community">here</a>. New gateway contributions are always welcome.</p>
-<h2 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h2>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Gateway</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="err">#</span> <span class="n">gateway</span> <span class="n">controller</span> <span class="k">with</span> <span class="n">instanceId</span> <span class="s2">&quot;argo-events&quot;</span> <span class="n">will</span> <span class="n">process</span> <span class="k">this</span> <span class="n">gateway</span>
-    <span class="n">gateways</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
-    <span class="err">#</span> <span class="n">gateway</span> <span class="n">controller</span> <span class="n">will</span> <span class="n">use</span> <span class="k">this</span> <span class="n">label</span> <span class="n">to</span> <span class="n">match</span> <span class="k">with</span> <span class="n">it</span><span class="err">&#39;</span><span class="n">s</span> <span class="n">own</span> <span class="n">version</span>
-    <span class="err">#</span> <span class="k">do</span> <span class="n">not</span> <span class="n">remove</span>
-    <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">version</span><span class="o">:</span> <span class="n">v0</span><span class="o">.</span><span class="mi">10</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">type</span><span class="o">:</span> <span class="s2">&quot;webhook&quot;</span>
-  <span class="n">eventSource</span><span class="o">:</span> <span class="s2">&quot;webhook-event-source&quot;</span>
-  <span class="n">processorPort</span><span class="o">:</span> <span class="s2">&quot;9330&quot;</span>
-  <span class="n">eventProtocol</span><span class="o">:</span>
-    <span class="n">type</span><span class="o">:</span> <span class="s2">&quot;HTTP&quot;</span>
-    <span class="n">http</span><span class="o">:</span>
-      <span class="n">port</span><span class="o">:</span> <span class="s2">&quot;9300&quot;</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">metadata</span><span class="o">:</span>
-      <span class="n">name</span><span class="o">:</span> <span class="s2">&quot;webhook-gateway-http&quot;</span>
-      <span class="n">labels</span><span class="o">:</span>
-        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="s2">&quot;webhook-gateway&quot;</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="s2">&quot;gateway-client&quot;</span>
-          <span class="n">image</span><span class="o">:</span> <span class="s2">&quot;argoproj/gateway-client&quot;</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="s2">&quot;Always&quot;</span>
-          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/gateway-client&quot;</span><span class="o">]</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="s2">&quot;webhook-events&quot;</span>
-          <span class="n">image</span><span class="o">:</span> <span class="s2">&quot;argoproj/webhook-gateway&quot;</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="s2">&quot;Always&quot;</span>
-          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/webhook-gateway&quot;</span><span class="o">]</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="s2">&quot;argo-events-sa&quot;</span>
-  <span class="n">service</span><span class="o">:</span>
-    <span class="n">metadata</span><span class="o">:</span>
-      <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">svc</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">selector</span><span class="o">:</span>
-        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="s2">&quot;webhook-gateway&quot;</span>
-      <span class="n">ports</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">port</span><span class="o">:</span> <span class="mi">12000</span>
-          <span class="n">targetPort</span><span class="o">:</span> <span class="mi">12000</span>
-      <span class="n">type</span><span class="o">:</span> <span class="n">LoadBalancer</span>
-  <span class="n">watchers</span><span class="o">:</span>
-    <span class="n">sensors</span><span class="o">:</span>
-      <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="s2">&quot;webhook-sensor&quot;</span>
+<h3 id="installation-setup">Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permanent link">&para;</a></h3>
+<h4 id="1-get-the-project">1. Get the project<a class="headerlink" href="#1-get-the-project" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span>go get github.com/argoproj/argo-events
+cd $GOPATH/src/github.com/argoproj/argo-events
 </pre></div>
 
 
-<p>The gateway <code>spec</code> has following fields:</p>
-<ol>
-<li>
-<p><code>type</code>: Type of the gateway. This is defined by the user.</p>
-</li>
-<li>
-<p><code>eventSource</code>: Refers to K8s configmap that holds the list of event sources. You can use <code>namespace/configmap-name</code> syntax to refer the configmap in a different namespace. </p>
-</li>
-<li>
-<p><code>processorPort</code>: This is a gateway server port. You can leave this to <code>9330</code> unless you really have to change it to a different port.</p>
-</li>
-<li>
-<p><code>eventProtocol</code>: Communication protocol between sensor and gateway. For more information, head over to <a href="../communication/">communication</a></p>
-</li>
-<li>
-<p><code>template</code>: Defines the specification for gateway pod.</p>
-</li>
-<li>
-<p><code>service</code>: Specification of a K8s service to expose the gateway pod.</p>
-</li>
-<li>
-<p><code>watchers</code>: List of sensors to which events must be dispatched.</p>
-</li>
-</ol>
-<h2 id="managing-event-sources">Managing Event Sources<a class="headerlink" href="#managing-event-sources" title="Permanent link">&para;</a></h2>
-<ul>
-<li>
-<p>The event sources configurations are managed using K8s configmap. Once the gateway resource is created with the configmap reference in it's spec, it starts watching the configmap.
-  The <code>gateway-client</code> sends each event source configuration to <code>gateway-server</code> over gRPC. The <code>gateway-server</code> then parses the configuration to start consuming events from 
-  external event producing entity.</p>
-</li>
-<li>
-<p>You can modify K8s configmap containing event sources configurations anytime and <code>gateway-client</code> will intelligently pick new/deleted configurations and send them over to <code>gateway-server</code> to either
-  start or stop the event sources.</p>
-</li>
-</ul>
+<h4 id="2-vendor-dependencies">2. Vendor dependencies<a class="headerlink" href="#2-vendor-dependencies" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span>dep ensure -vendor-only
+</pre></div>
+
+
+<h4 id="3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon">3. Start Minikube and point Docker Client to Minikube's Docker Daemon<a class="headerlink" href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span>minikube start
+eval $(minikube docker-env)
+</pre></div>
+
+
+<h4 id="5-build-the-project">5. Build the project<a class="headerlink" href="#5-build-the-project" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span>make all
+</pre></div>
+
+
+<h3 id="changing-types">Changing Types<a class="headerlink" href="#changing-types" title="Permanent link">&para;</a></h3>
+<p>If you're making a change to the <code>pkg/apis</code>  package, please ensure you re-run the K8 code-generator scripts found in the <code>/hack</code> folder. First, ensure you have the <code>generate-groups.sh</code> script at the path: <code>vendor/k8s.io/code-generator/</code>. Next run the following commands in order:</p>
+<div class="codehilite"><pre><span></span>$ make codegen
+</pre></div>
+
+
 <h2 id="how-to-write-a-custom-gateway">How to write a custom gateway?<a class="headerlink" href="#how-to-write-a-custom-gateway" title="Permanent link">&para;</a></h2>
 <p>To implement a custom gateway, you need to create a gRPC server and implement the service defined below.
 The framework code acts as a gRPC client consuming event stream from gateway server.</p>
@@ -1030,8 +806,6 @@ service<span class="w"> </span>Eventing<span class="w"> </span><span class="err"
 </tr>
 </tbody>
 </table>
-<h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
-<p>You can follow existing implementations <a href="https://github.com/argoproj/argo-events/tree/master/gateways/core">here</a></p>
                 
                   
                 
@@ -1052,7 +826,7 @@ service<span class="w"> </span>Eventing<span class="w"> </span><span class="err"
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../gateways/webhook/" title="Webhook" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../concepts/parameterization/" title="Trigger Parameterization" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1061,19 +835,19 @@ service<span class="w"> </span>Eventing<span class="w"> </span><span class="err"
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Webhook
+                Trigger Parameterization
               </span>
             </div>
           </a>
         
         
-          <a href="../sensor/" title="Sensor" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../controllers/" title="Controllers" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Sensor
+                Controllers
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
