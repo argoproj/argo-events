@@ -5,8 +5,9 @@ Trigger is the resource executed by sensor once the event dependencies are resol
 
 ## How to define a trigger?
 The framework provides support to fetch trigger resources from different sources.
+
 ### Inline
-Inlined artifacts are included directly within the sensor resource and decoded as a string. [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/artifact.yaml)
+Inlined artifacts are included directly within the sensor resource and decoded as a string. [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/minio.yaml)
    
 ### S3      
 Argo Events uses the [minio-go](https://github.com/minio/minio-go) client for access to any Amazon S3 compatible object store. [Example](https://github.com/argoproj/argo-events/tree/master/examples/sensors/context-filter-webhook.yaml)
@@ -24,7 +25,7 @@ Artifacts stored in Kubernetes configmap are accessed using the key. [Example](h
 Artifacts stored in either public or private Git repository. [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-source-git.yaml)
 
 ### Resource
-Artifacts defined as generic K8s resource template. This is specially useful if you use tools like Kustomize to generate the sensor spec. [Example](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-resource.yaml) 
+Artifacts defined as generic K8s resource template. This is specially useful if you use tools like Kustomize to generate the sensor spec. 
 
 ## What resource types are supported out of box?
 - [Argo Workflow](https://github.com/argoproj/argo)

@@ -13,4 +13,4 @@ A dependency is an event the sensor is expecting to happen. It is defined as "ga
 Also, you can use [globs](https://github.com/gobwas/glob#syntax) to catch a set of events (e.g. "gateway-name:*").
 
 ## Specification
-Complete specification is available [here]()
+Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md).

@@ -4,4 +4,4 @@ Event Source are configuration store for a gateway to select from. The configura
 external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.
 
 ## Specification
-Complete specification is available [here]().
+Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/event-source.md).
