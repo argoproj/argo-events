@@ -28,9 +28,9 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// resyncs the sensor object for status updates
-func (sensorCtx *sensorContext) syncSensor(ctx context.Context) cache.Controller {
-	sensorCtx.logger.Info("watching sensor updates")
+// resyncs the Sensor object for status updates
+func (sensorCtx *SensorContext) syncSensor(ctx context.Context) cache.Controller {
+	sensorCtx.Logger.Info("watching Sensor updates")
 	source := sensorCtx.newSensorWatch()
 	_, controller := cache.NewInformer(
 		source,
@@ -39,9 +39,9 @@ func (sensorCtx *sensorContext) syncSensor(ctx context.Context) cache.Controller
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if newSensor, ok := new.(*v1alpha1.Sensor); ok {
-					sensorCtx.notificationQueue <- &notification{
-						sensor:           newSensor,
-						notificationType: v1alpha1.ResourceUpdateNotification,
+					sensorCtx.NotificationQueue <- &Notification{
+						Sensor:           newSensor,
+						NotificationType: v1alpha1.ResourceUpdateNotification,
 					}
 				}
 			},
@@ -51,11 +51,11 @@ func (sensorCtx *sensorContext) syncSensor(ctx context.Context) cache.Controller
 	return controller
 }
 
-func (sensorCtx *sensorContext) newSensorWatch() *cache.ListWatch {
-	x := sensorCtx.sensorClient.ArgoprojV1alpha1().RESTClient()
+func (sensorCtx *SensorContext) newSensorWatch() *cache.ListWatch {
+	x := sensorCtx.SensorClient.ArgoprojV1alpha1().RESTClient()
 	resource := "sensors"
-	name := sensorCtx.sensor.Name
-	namespace := sensorCtx.sensor.Namespace
+	name := sensorCtx.Sensor.Name
+	namespace := sensorCtx.Sensor.Namespace
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {

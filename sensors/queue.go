@@ -23,95 +23,95 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-// processNotificationQueue processes event received on internal queue and updates the state of the node representing the event dependency
-func (sensorCtx *sensorContext) processNotificationQueue(notification *notification) {
+// processNotificationQueue processes Event received on internal queue and updates the state of the node representing the Event dependency
+func (sensorCtx *SensorContext) processNotificationQueue(notification *Notification) {
 	defer func() {
-		// persist updates to sensor resource
+		// persist updates to Sensor resource
 		labels := map[string]string{
-			common.LabelSensorName:           sensorCtx.sensor.Name,
-			snctrl.LabelPhase:                string(sensorCtx.sensor.Status.Phase),
-			snctrl.LabelControllerInstanceID: sensorCtx.controllerInstanceID,
+			common.LabelSensorName:           sensorCtx.Sensor.Name,
+			snctrl.LabelPhase:                string(sensorCtx.Sensor.Status.Phase),
+			snctrl.LabelControllerInstanceID: sensorCtx.ControllerInstanceID,
 			common.LabelOperation:            "persist_state_update",
 		}
 		eventType := common.StateChangeEventType
 
-		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.sensorClient, sensorCtx.sensor, sensorCtx.logger)
+		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.SensorClient, sensorCtx.Sensor, sensorCtx.Logger)
 		if err != nil {
-			sensorCtx.logger.WithError(err).Error("failed to persist sensor update, escalating...")
+			sensorCtx.Logger.WithError(err).Error("failed to persist Sensor update, escalating...")
 			eventType = common.EscalationEventType
 		}
 
-		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
-		sensorCtx.sensor = updatedSensor
+		// update Sensor ref. in case of failure to persist updates, this is a deep copy of old Sensor resource
+		sensorCtx.Sensor = updatedSensor
 
 		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(sensorCtx.kubeClient, "persist update", eventType, "sensor resource update", sensorCtx.sensor.Name,
-			sensorCtx.sensor.Namespace, sensorCtx.controllerInstanceID, sensor.Kind, labels); err != nil {
-			sensorCtx.logger.WithError(err).Error("failed to create K8s event to logger sensor resource persist operation")
+		if err := common.GenerateK8sEvent(sensorCtx.KubeClient, "persist update", eventType, "Sensor resource update", sensorCtx.Sensor.Name,
+			sensorCtx.Sensor.Namespace, sensorCtx.ControllerInstanceID, sensor.Kind, labels); err != nil {
+			sensorCtx.Logger.WithError(err).Error("failed to create K8s Event to Logger Sensor resource persist operation")
 			return
 		}
 
-		sensorCtx.logger.Info("successfully persisted sensor resource update and created K8s event")
+		sensorCtx.Logger.Info("successfully persisted Sensor resource update and created K8s Event")
 	}()
 
-	switch notification.notificationType {
+	switch notification.NotificationType {
 	case v1alpha1.ResourceUpdateNotification:
-		sensorCtx.logger.Info("sensor resource update")
-		// update sensor resource
-		sensorCtx.sensor = notification.sensor
+		sensorCtx.Logger.Info("Sensor resource update")
+		// update Sensor resource
+		sensorCtx.Sensor = notification.Sensor
 
 		// initialize new dependencies
-		for _, dependency := range sensorCtx.sensor.Spec.Dependencies {
-			if node := snctrl.GetNodeByName(sensorCtx.sensor, dependency.Name); node == nil {
-				snctrl.InitializeNode(sensorCtx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, sensorCtx.logger)
-				snctrl.MarkNodePhase(sensorCtx.sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.logger, "dependency is active")
+		for _, dependency := range sensorCtx.Sensor.Spec.Dependencies {
+			if node := snctrl.GetNodeByName(sensorCtx.Sensor, dependency.Name); node == nil {
+				snctrl.InitializeNode(sensorCtx.Sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, sensorCtx.Logger)
+				snctrl.MarkNodePhase(sensorCtx.Sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency is active")
 			}
 		}
 
 		// initialize new dependency groups
-		for _, group := range sensorCtx.sensor.Spec.DependencyGroups {
-			if node := snctrl.GetNodeByName(sensorCtx.sensor, group.Name); node == nil {
-				snctrl.InitializeNode(sensorCtx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, sensorCtx.logger)
-				snctrl.MarkNodePhase(sensorCtx.sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.logger, "dependency group is active")
+		for _, group := range sensorCtx.Sensor.Spec.DependencyGroups {
+			if node := snctrl.GetNodeByName(sensorCtx.Sensor, group.Name); node == nil {
+				snctrl.InitializeNode(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, sensorCtx.Logger)
+				snctrl.MarkNodePhase(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency group is active")
 			}
 		}
 
 		// initialize new triggers
-		for _, t := range sensorCtx.sensor.Spec.Triggers {
-			if node := snctrl.GetNodeByName(sensorCtx.sensor, t.Template.Name); node == nil {
-				snctrl.InitializeNode(sensorCtx.sensor, t.Template.Name, v1alpha1.NodeTypeTrigger, sensorCtx.logger)
+		for _, t := range sensorCtx.Sensor.Spec.Triggers {
+			if node := snctrl.GetNodeByName(sensorCtx.Sensor, t.Template.Name); node == nil {
+				snctrl.InitializeNode(sensorCtx.Sensor, t.Template.Name, v1alpha1.NodeTypeTrigger, sensorCtx.Logger)
 			}
 		}
 
 		sensorCtx.deleteStaleStatusNodes()
 
 	default:
-		sensorCtx.logger.WithField("notification-type", string(notification.notificationType)).Error("unknown notification type")
+		sensorCtx.Logger.WithField("Notification-type", string(notification.NotificationType)).Error("unknown Notification type")
 	}
 }
 
-func (sensorCtx *sensorContext) deleteStaleStatusNodes() {
+func (sensorCtx *SensorContext) deleteStaleStatusNodes() {
 	// delete old status nodes if any
 statusNodes:
-	for _, statusNode := range sensorCtx.sensor.Status.Nodes {
-		for _, dep := range sensorCtx.sensor.Spec.Dependencies {
+	for _, statusNode := range sensorCtx.Sensor.Status.Nodes {
+		for _, dep := range sensorCtx.Sensor.Spec.Dependencies {
 			if statusNode.Type == v1alpha1.NodeTypeEventDependency && dep.Name == statusNode.Name {
 				continue statusNodes
 			}
 		}
-		for _, depGroup := range sensorCtx.sensor.Spec.DependencyGroups {
+		for _, depGroup := range sensorCtx.Sensor.Spec.DependencyGroups {
 			if statusNode.Type == v1alpha1.NodeTypeDependencyGroup && depGroup.Name == statusNode.Name {
 				continue statusNodes
 			}
 		}
-		for _, trigger := range sensorCtx.sensor.Spec.Triggers {
+		for _, trigger := range sensorCtx.Sensor.Spec.Triggers {
 			if statusNode.Type == v1alpha1.NodeTypeTrigger && trigger.Template.Name == statusNode.Name {
 				continue statusNodes
 			}
 		}
 		// corresponding node not found in spec. deleting status node
-		sensorCtx.logger.WithField("status-node", statusNode.Name).Info("deleting old status node")
-		nodeId := sensorCtx.sensor.NodeID(statusNode.Name)
-		delete(sensorCtx.sensor.Status.Nodes, nodeId)
+		sensorCtx.Logger.WithField("status-node", statusNode.Name).Info("deleting old status node")
+		nodeId := sensorCtx.Sensor.NodeID(statusNode.Name)
+		delete(sensorCtx.Sensor.Status.Nodes, nodeId)
 	}
 }

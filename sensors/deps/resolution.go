@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensors
+package deps
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -22,21 +22,17 @@ import (
 	"github.com/gobwas/glob"
 )
 
-// resolveDependency resolves a dependency based on event and gateway name
-func (sensorCtx *sensorContext) resolveDependency(events *cloudevents.Event) *v1alpha1.EventDependency {
-	for _, dependency := range sensorCtx.sensor.Spec.Dependencies {
+// ResolveDependency resolves a dependency based on Event and gateway name
+func ResolveDependency(sensor *v1alpha1.Sensor, events *cloudevents.Event) *v1alpha1.EventDependency {
+	for _, dependency := range sensor.Spec.Dependencies {
 		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
 		if err != nil {
-			sensorCtx.logger.WithError(err).WithField("gateway-name", dependency.GatewayName).Error("invalid glob in gateway name")
 			continue
 		}
-
 		eventNameGlob, err := glob.Compile(dependency.EventName)
 		if err != nil {
-			sensorCtx.logger.WithError(err).Error("invalid glob in event name")
 			continue
 		}
-
 		if gatewayNameGlob.Match(events.Context.GetSource()) && eventNameGlob.Match(events.Context.GetSubject()) {
 			return &dependency
 		}

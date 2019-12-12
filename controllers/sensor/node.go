@@ -17,10 +17,10 @@ limitations under the License.
 package sensor
 
 import (
+	"github.com/cloudevents/sdk-go/pkg/cloudevents"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,10 +71,10 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *cloudevents.Event, logger *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
-		log.WithFields(
+		logger.WithFields(
 			map[string]interface{}{
 				common.LabelNodeType: string(node.Type),
 				common.LabelNodeName: node.Name,
@@ -94,7 +94,7 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 
 	if node.Phase == v1alpha1.NodePhaseComplete {
 		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
-		log.WithFields(
+		logger.WithFields(
 			map[string]interface{}{
 				common.LabelNodeType: string(node.Type),
 				common.LabelNodeName: node.Name,

@@ -25,20 +25,20 @@ import (
 )
 
 // WatchEventsFromGateways watches and handles events received from the gateway.
-func (sensorCtx *sensorContext) ListenEvents() error {
-	// start processing the update notification notificationQueue
+func (sensorCtx *SensorContext) ListenEvents() error {
+	// start processing the update Notification NotificationQueue
 	go func() {
-		for e := range sensorCtx.notificationQueue {
+		for e := range sensorCtx.NotificationQueue {
 			sensorCtx.processNotificationQueue(e)
 		}
 	}()
 
-	// sync sensor resource after updates
+	// sync Sensor resource after updates
 	go sensorCtx.syncSensor(context.Background())
 
 	port := common.SensorServerPort
-	if sensorCtx.sensor.Spec.Port != nil {
-		port = *sensorCtx.sensor.Spec.Port
+	if sensorCtx.Sensor.Spec.Port != nil {
+		port = *sensorCtx.Sensor.Spec.Port
 	}
 
 	t, err := cloudevents.NewHTTPTransport(
@@ -61,15 +61,15 @@ func (sensorCtx *sensorContext) ListenEvents() error {
 	return nil
 }
 
-// handleEvent handles a cloudevent, validates and sends it over internal event notificationQueue
-func (sensorCtx *sensorContext) handleEvent(ctx context.Context, event *cloudevents.Event) bool {
-	// validate whether the event is from gateway that this sensor is watching
+// handleEvent handles a cloudevent, validates and sends it over internal Event NotificationQueue
+func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudevents.Event) bool {
+	// validate whether the Event is from gateway that this Sensor is watching
 	if eventDependency := sensorCtx.resolveDependency(event); eventDependency != nil {
-		// send event on internal notificationQueue
-		sensorCtx.notificationQueue <- &notification{
-			event:            event,
-			eventDependency:  eventDependency,
-			notificationType: v1alpha1.EventNotification,
+		// send Event on internal NotificationQueue
+		sensorCtx.NotificationQueue <- &Notification{
+			Event:            event,
+			EventDependency:  eventDependency,
+			NotificationType: v1alpha1.EventNotification,
 		}
 		return true
 	}

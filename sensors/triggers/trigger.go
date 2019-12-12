@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensors
+package triggers
 
 import (
 	"encoding/json"
@@ -24,7 +24,6 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/common"
 	sn "github.com/argoproj/argo-events/controllers/sensor"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
@@ -35,8 +34,8 @@ import (
 )
 
 // canProcessTriggers evaluates whether triggers can be processed and executed
-func (sensorCtx *sensorContext) canProcessTriggers() (bool, error) {
-	if sensorCtx.sensor.Spec.ErrorOnFailedRound && sensorCtx.sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure {
+func canProcessTriggers(sensor *v1alpha1.Sensor) (bool, error) {
+	if sensor.Spec.ErrorOnFailedRound && sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure {
 		return false, fmt.Errorf("last trigger cycle was a failure and sensor policy is set to ErrorOnFailedRound, so won't process the triggers")
 	}
 
@@ -72,30 +71,6 @@ func (sensorCtx *sensorContext) canProcessTriggers() (bool, error) {
 	}
 
 	return false, nil
-}
-
-// canExecuteTrigger determines whether a trigger is executable based on condition set on trigger
-func (sensorCtx *sensorContext) canExecuteTrigger(trigger v1alpha1.Trigger) bool {
-	if trigger.Template.When == nil {
-		return true
-	}
-	if trigger.Template.When.Any != nil {
-		for _, group := range trigger.Template.When.Any {
-			if status := sn.GetNodeByName(sensorCtx.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
-				return true
-			}
-		}
-		return false
-	}
-	if trigger.Template.When.All != nil {
-		for _, group := range trigger.Template.When.All {
-			if status := sn.GetNodeByName(sensorCtx.sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
-				return false
-			}
-		}
-		return true
-	}
-	return true
 }
 
 // processTriggers checks if all event dependencies are complete and then starts executing triggers
@@ -195,7 +170,7 @@ func (sensorCtx *sensorContext) applyParamsTrigger(trigger *v1alpha1.Trigger) er
 	return nil
 }
 
-// applyParamsResource applies parameters to resource within trigger
+// applyResourceParameters applies parameters to resource within trigger
 func (sensorCtx *sensorContext) applyParamsResource(parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
 	if parameters != nil && len(parameters) > 0 {
 		jObj, err := obj.MarshalJSON()
@@ -216,9 +191,9 @@ func (sensorCtx *sensorContext) applyParamsResource(parameters []v1alpha1.Trigge
 }
 
 // executeTrigger executes the trigger
-func (sensorCtx *sensorContext) executeTrigger(trigger v1alpha1.Trigger) error {
+func executeTrigger(trigger v1alpha1.Trigger) error {
 	if trigger.Template != nil {
-		if err := sensorCtx.applyParamsTrigger(&trigger); err != nil {
+		if err := trigger.ApplyParamsTrigger(&trigger); err != nil {
 			return err
 		}
 		creds, err := store.GetCredentials(sensorCtx.kubeClient, sensorCtx.sensor.Namespace, trigger.Template.Source)
@@ -354,30 +329,4 @@ func (sensorCtx *sensorContext) createResourceObject(trigger *v1alpha1.Trigger, 
 	}
 
 	return nil
-}
-
-// helper method to extract the events from the event dependencies nodes associated with the resource params
-// returns a map of the events keyed by the event dependency name
-func (sensorCtx *sensorContext) extractEvents(params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
-	events := make(map[string]apicommon.Event)
-	for _, param := range params {
-		if param.Src != nil {
-			log := sensorCtx.logger.WithFields(
-				map[string]interface{}{
-					"param-src":  param.Src.Event,
-					"param-dest": param.Dest,
-				})
-			node := sn.GetNodeByName(sensorCtx.sensor, param.Src.Event)
-			if node == nil {
-				log.Warn("event dependency node does not exist, cannot apply parameter")
-				continue
-			}
-			if node.Event == nil {
-				log.Warn("event in event dependency does not exist, cannot apply parameter")
-				continue
-			}
-			events[param.Src.Event] = *node.Event
-		}
-	}
-	return events
 }

@@ -22,19 +22,19 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-// operateEventNotification operates on a event notification
-func (sensorCtx *sensorContext) operateEventNotification(notification *notification) error {
-	nodeName := notification.eventDependency.Name
+// operateEventNotification operates on a Event Notification
+func (sensorCtx *SensorContext) operateEventNotification(notification *Notification) error {
+	nodeName := notification.EventDependency.Name
 
-	logger := sensorCtx.logger.WithField(common.LabelEventSource, notification.event.Source())
-	logger.Info("received event notification")
+	logger := sensorCtx.Logger.WithField(common.LabelEventSource, notification.Event.Source())
+	logger.Info("received Event Notification")
 
 	// apply filters if any.
 	if err := sensorCtx.applyFilter(notification); err != nil {
-		snctrl.MarkNodePhase(sensorCtx.sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sensorCtx.logger, err.Error())
+		snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseError, nil, sensorCtx.Logger, err.Error())
 	}
 
-	snctrl.MarkNodePhase(sensorCtx.sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.event, sensorCtx.logger, "event is received")
+	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "Event is received")
 
 	// check if triggers can be processed and executed
 	canProcess, err := sensorCtx.canProcessTriggers()
