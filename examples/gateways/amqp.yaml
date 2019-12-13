@@ -32,12 +32,12 @@ spec:
         gateway-name: "amqp-gateway"
     spec:
       containers:
-        - name: "gateway-client"
+        - name: "gateway-client:v0.12-rc"
           image: "argoproj/gateway-client"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: amqp-events
-          image: "argoproj/amqp-gateway"
+          image: "argoproj/amqp-gateway:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/amqp-gateway"]
       serviceAccountName: "argo-events-sa"

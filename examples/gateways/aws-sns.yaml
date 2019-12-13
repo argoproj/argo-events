@@ -24,12 +24,12 @@ spec:
         gateway-name: "aws-sns-gateway"
     spec:
       containers:
-        - name: "gateway-client"
+        - name: "gateway-client:v0.12-rc"
           image: "argoproj/gateway-client"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "aws-sns-events"
-          image: "argoproj/aws-sns-gateway"
+          image: "argoproj/aws-sns-gateway:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/aws-sns-gateway"]
       serviceAccountName: "argo-events-sa"
