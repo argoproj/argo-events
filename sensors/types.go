@@ -50,7 +50,6 @@ type SensorContext struct {
 type Notification struct {
 	Event            *cloudevents.Event
 	EventDependency  *v1alpha1.EventDependency
-	Sensor           *v1alpha1.Sensor
 	NotificationType v1alpha1.NotificationType
 }
 

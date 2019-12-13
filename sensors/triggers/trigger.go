@@ -30,7 +30,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/dynamic"
 )
 
 // canProcessTriggers evaluates whether triggers can be processed and executed
@@ -213,69 +212,6 @@ func executeTrigger(trigger v1alpha1.Trigger) error {
 		}
 	}
 	return nil
-}
-
-// applyTriggerPolicy applies backoff and evaluates success/failure for a trigger
-func (sensorCtx *sensorContext) applyTriggerPolicy(trigger *v1alpha1.Trigger, resourceInterface dynamic.NamespaceableResourceInterface, name, namespace string) error {
-	err := wait.ExponentialBackoff(wait.Backoff{
-		Duration: trigger.Policy.Backoff.Duration,
-		Steps:    trigger.Policy.Backoff.Steps,
-		Factor:   trigger.Policy.Backoff.Factor,
-		Jitter:   trigger.Policy.Backoff.Jitter,
-	}, func() (bool, error) {
-		obj, err := resourceInterface.Namespace(namespace).Get(name, metav1.GetOptions{})
-		if err != nil {
-			sensorCtx.logger.WithError(err).WithField("resource-name", obj.GetName()).Error("failed to get triggered resource")
-			return false, nil
-		}
-
-		labels := obj.GetLabels()
-		if labels == nil {
-			sensorCtx.logger.Warn("triggered object does not have labels, won't apply the trigger policy")
-			return false, nil
-		}
-		sensorCtx.logger.WithField("labels", labels).Debug("object labels")
-
-		// check if success labels match with labels on object
-		if trigger.Policy.State.Success != nil {
-			success := true
-			for successKey, successValue := range trigger.Policy.State.Success {
-				if value, ok := labels[successKey]; ok {
-					if successValue != value {
-						success = false
-						break
-					}
-					continue
-				}
-				success = false
-			}
-			if success {
-				return true, nil
-			}
-		}
-
-		// check if failure labels match with labels on object
-		if trigger.Policy.State.Failure != nil {
-			failure := true
-			for failureKey, failureValue := range trigger.Policy.State.Failure {
-				if value, ok := labels[failureKey]; ok {
-					if failureValue != value {
-						failure = false
-						break
-					}
-					continue
-				}
-				failure = false
-			}
-			if failure {
-				return false, fmt.Errorf("trigger is in failed state")
-			}
-		}
-
-		return false, nil
-	})
-
-	return err
 }
 
 // createResourceObject creates K8s object for trigger

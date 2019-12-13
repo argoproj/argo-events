@@ -17,78 +17,63 @@ limitations under the License.
 package policy
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 )
 
+// ResourceLabels implements trigger policy based on the resource labels
 type ResourceLabels struct {
-	Trigger           *v1alpha1.Trigger
-	resourceInterface dynamic.NamespaceableResourceInterface
-	Name              string
-	namespace         string
+	Trigger *v1alpha1.Trigger
+	Client  dynamic.NamespaceableResourceInterface
+	Obj     *unstructured.Unstructured
 }
 
 func (rl *ResourceLabels) ApplyPolicy() error {
-	err := wait.ExponentialBackoff(wait.Backoff{
-		Duration: rl.Trigger.Policy.Backoff.Duration,
-		Steps:    rl.Trigger.Policy.Backoff.Steps,
-		Factor:   rl.Trigger.Policy.Backoff.Factor,
-		Jitter:   rl.Trigger.Policy.Backoff.Jitter,
-	}, func() (bool, error) {
-		obj, err := rl.resourceInterface.Namespace(rl.namespace).Get(rl.Name, metav1.GetOptions{})
+	if rl.Trigger.Policy.ResourceLabels.Labels != nil {
+		return nil
+	}
+
+	// check if success labels match with labels on object
+	completed := false
+
+	err := wait.ExponentialBackoff(rl.Trigger.Policy.Backoff, func() (bool, error) {
+		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {
-			sensorCtx.logger.WithError(err).WithField("resource-name", obj.GetName()).Error("failed to get triggered resource")
-			return false, nil
+			return false, err
 		}
 
 		labels := obj.GetLabels()
 		if labels == nil {
-			sensorCtx.logger.Warn("triggered object does not have labels, won't apply the trigger policy")
 			return false, nil
 		}
-		sensorCtx.logger.WithField("labels", labels).Debug("object labels")
 
-		// check if success labels match with labels on object
-		if trigger.Policy.State.Success != nil {
-			success := true
-			for successKey, successValue := range trigger.Policy.State.Success {
-				if value, ok := labels[successKey]; ok {
-					if successValue != value {
-						success = false
-						break
-					}
-					continue
+		completed = true
+
+		for key, value := range rl.Trigger.Policy.ResourceLabels.Labels {
+			if v, ok := labels[key]; ok {
+				if value != v {
+					completed = false
+					break
 				}
-				success = false
+				continue
 			}
-			if success {
-				return true, nil
-			}
+			completed = false
 		}
-
-		// check if failure labels match with labels on object
-		if trigger.Policy.State.Failure != nil {
-			failure := true
-			for failureKey, failureValue := range trigger.Policy.State.Failure {
-				if value, ok := labels[failureKey]; ok {
-					if failureValue != value {
-						failure = false
-						break
-					}
-					continue
-				}
-				failure = false
-			}
-			if failure {
-				return false, fmt.Errorf("trigger is in failed state")
-			}
+		if completed {
+			return true, nil
 		}
-
 		return false, nil
 	})
-
 	return err
+}
+
+func newResourceLabels(trigger *v1alpha1.Trigger, client dynamic.NamespaceableResourceInterface, obj *unstructured.Unstructured) *ResourceLabels {
+	return &ResourceLabels{
+		Trigger: trigger,
+		Client:  client,
+		Obj:     obj,
+	}
 }

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/common"
@@ -211,17 +212,17 @@ type Trigger struct {
 type TriggerTemplate struct {
 	// Name is a unique name of the action to take
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// When is the condition to execute the trigger
-	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,2,opt,name=when"`
+	// Switch is the condition to execute the trigger
+	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,3,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
 }
 
-// TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+// TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
-type TriggerCondition struct {
+type TriggerSwitch struct {
 	// +listType=any
 	// Any acts as a OR operator between dependencies
 	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
@@ -277,11 +278,18 @@ type TriggerParameterSource struct {
 // TriggerPolicy dictates the policy for the trigger retries
 type TriggerPolicy struct {
 	// Backoff before checking resource state
-	Backoff Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
-	// State refers to labels used to check the resource state
-	State *TriggerStateLabels `json:"state" protobuf:"bytes,2,opt,name=state"`
-	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
-	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,opt,name=errorOnBackoffTimeout"`
+	Backoff wait.Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
+	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
+	// the state of the resource
+	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,2,opt,name=errorOnBackoffTimeout"`
+	// ResourceLabels refers to the policy used to check the resource state using labels
+	ResourceLabels *ResourceLabelsPolicy `json:"resourceLabels" protobuf:"bytes,3,opt,name=resourceLabels"`
+}
+
+// ResourceLabels refers to the policy used to check the resource state using labels
+type ResourceLabelsPolicy struct {
+	// Labels required to identify whether a resource is in success state
+	Labels map[string]string `json:"labels" protobuf:"bytes,1,opt,name=labels"`
 }
 
 // Backoff for an operation
@@ -294,14 +302,6 @@ type Backoff struct {
 	Jitter float64 `json:"jitter" protobuf:"bytes,3,opt,name=jitter"`
 	// Exit with error after this many steps
 	Steps int `json:"steps" protobuf:"bytes,4,opt,name=steps"`
-}
-
-// TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.
-type TriggerStateLabels struct {
-	// Success defines labels required to identify a resource in success state
-	Success map[string]string `json:"success" protobuf:"bytes,1,opt,name=success"`
-	// Failure defines labels required to identify a resource in failed state
-	Failure map[string]string `json:"failure" protobuf:"bytes,2,opt,name=failure"`
 }
 
 // SensorResources holds the metadata of the resources created for the sensor

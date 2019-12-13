@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"context"
+	"github.com/argoproj/argo-events/sensors/dependencies"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -63,8 +64,9 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 
 // handleEvent handles a cloudevent, validates and sends it over internal Event NotificationQueue
 func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudevents.Event) bool {
+	// Resolve Dependency
 	// validate whether the Event is from gateway that this Sensor is watching
-	if eventDependency := sensorCtx.resolveDependency(event); eventDependency != nil {
+	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor, event); eventDependency != nil {
 		// send Event on internal NotificationQueue
 		sensorCtx.NotificationQueue <- &Notification{
 			Event:            event,
