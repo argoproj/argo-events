@@ -9,3 +9,4 @@
 - Support Trigger CRD to simplify Sensor definition
 - Support for HTTP, NATS, Kafka triggers
 - CloudEvents NATS support
+- KubeFlow integration
