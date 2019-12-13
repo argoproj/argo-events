@@ -3,7 +3,9 @@ kind: Kustomization
 
 resources:
   - ./argo-events-cluster-roles.yaml
+  - ./argo-events-role.yaml
   - ./argo-events-sa.yaml
+  - ./event-source-crd.yaml
   - ./gateway-controller-configmap.yaml
   - ./gateway-controller-deployment.yaml
   - ./gateway-crd.yaml
