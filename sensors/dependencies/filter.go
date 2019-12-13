@@ -25,9 +25,9 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 )
@@ -50,12 +50,12 @@ func ApplyFilter(notification *sensors.Notification) error {
 }
 
 // apply the filters to an Event
-func filterEvent(filter v1alpha1.EventDependencyFilter, event *cloudevents.Event) (bool, error) {
+func filterEvent(filter v1alpha1.EventDependencyFilter, event *apicommon.Event) (bool, error) {
 	dataFilter, err := filterData(filter.Data, event)
 	if err != nil {
 		return false, err
 	}
-	timeFilter, err := filterTime(filter.Time, event.Context.GetTime())
+	timeFilter, err := filterTime(filter.Time, event.Context.Time.Time)
 	if err != nil {
 		return false, err
 	}
@@ -114,7 +114,7 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func filterContext(expected *cloudevents.Event, actual *cloudevents.Event) bool {
+func filterContext(expected *apicommon.EventContext, actual *apicommon.Event) bool {
 	if expected == nil {
 		return true
 	}
@@ -122,46 +122,43 @@ func filterContext(expected *cloudevents.Event, actual *cloudevents.Event) bool 
 		return false
 	}
 	res := true
-	if expected.Type() != "" {
-		res = res && expected.Type() == actual.Type()
+	if expected.Type != "" {
+		res = res && expected.Type == actual.Context.Type
 	}
-	if expected.SpecVersion() != "" {
-		res = res && expected.SpecVersion() == actual.SpecVersion()
+	if expected.SpecVersion != "" {
+		res = res && expected.SpecVersion == actual.Context.SpecVersion
 	}
-	if expected.Source() != "" {
-		res = res && reflect.DeepEqual(expected.Source(), actual.Source())
+	if expected.Source != "" {
+		res = res && reflect.DeepEqual(expected.Source, actual.Context.Source)
 	}
-	if expected.DataContentType() != "" {
-		res = res && expected.DataContentType() == actual.DataContentType()
+	if expected.DataContentType != "" {
+		res = res && expected.DataContentType == actual.Context.DataContentType
 	}
 	return res
 }
 
 // applyDataFilter runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
-func filterData(data []v1alpha1.DataFilter, event *cloudevents.Event) (bool, error) {
+func filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error) {
 	if data == nil {
 		return true, nil
 	}
 	if event == nil {
 		return false, fmt.Errorf("nil Event")
 	}
-	payload, err := event.DataBytes()
-	if err != nil {
-		return false, err
-	}
+	payload := event.Data
 	if payload == nil || len(payload) == 0 {
 		return true, nil
 	}
-	if event.DataContentType() != MediaTypeJSON {
-		return false, fmt.Errorf("unsupported Event content type: %s", event.DataContentType())
+	if event.Context.DataContentType != MediaTypeJSON {
+		return false, fmt.Errorf("unsupported Event content type: %s", event.Context.DataContentType)
 	}
 	var js *json.RawMessage
 	if err := json.Unmarshal(payload, &js); err != nil {
 		return false, err
 	}
 	var jsData []byte
-	jsData, err = json.Marshal(js)
+	jsData, err := json.Marshal(js)
 	if err != nil {
 		return false, err
 	}

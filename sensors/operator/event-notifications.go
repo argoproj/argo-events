@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package operate
+package operator
 
 import (
 	"github.com/argoproj/argo-events/common"
@@ -44,36 +44,12 @@ func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (boo
 	return false, nil
 }
 
-// areAllSwitchesResolved determines whether all switches are resolved for a trigger
-func areAllSwitchesResolved(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) bool {
-	if trigger.Template.Switch == nil {
-		return true
-	}
-	if trigger.Template.Switch.Any != nil {
-		for _, group := range trigger.Template.Switch.Any {
-			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
-				return true
-			}
-		}
-		return false
-	}
-	if trigger.Template.Switch.All != nil {
-		for _, group := range trigger.Template.Switch.All {
-			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
-				return false
-			}
-		}
-		return true
-	}
-	return true
-}
-
-// OperateEventNotification operates on an event notification
-func OperateEventNotification(sensorCtx *sensors.SensorContext, notification *sensors.Notification) error {
+// OperateEventNotifications operates on an event notification
+func OperateEventNotifications(sensorCtx *sensors.SensorContext, notification *sensors.Notification) error {
 	nodeName := notification.EventDependency.Name
 	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "event is received")
 
-	logger := sensorCtx.Logger.WithField(common.LabelEventSource, notification.Event.Source())
+	logger := sensorCtx.Logger.WithField(common.LabelEventSource, notification.Event.Context.Source)
 	logger.Info("received an event notification")
 
 	// Apply filters
@@ -83,7 +59,7 @@ func OperateEventNotification(sensorCtx *sensors.SensorContext, notification *se
 		return err
 	}
 
-	// Apply Circuit if any or check if all dependecies are resolved
+	// Apply Circuit if any or check if all dependencies are resolved
 	logger.Infoln("applying circuit logic if any or checking if all dependencies are resolved")
 	ok, err := isEligibleForExecution(sensorCtx.Sensor, sensorCtx.Logger)
 	if err != nil {
@@ -105,8 +81,8 @@ func OperateEventNotification(sensorCtx *sensors.SensorContext, notification *se
 		if err := triggers.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
 			return err
 		}
-		if ok := areAllSwitchesResolved(sensorCtx.Sensor, &trigger); ok {
-			logger.Infoln("switches/group level when conditions were not resolved, won't ")
+		if ok := triggers.ApplySwitches(sensorCtx.Sensor, &trigger); ok {
+			logger.Infoln("switches/group level when conditions were not resolved, won't execute the trigger")
 			continue
 		}
 		uObj, err := triggers.FetchResource(sensorCtx.KubeClient, sensorCtx.Sensor, &trigger)
@@ -121,7 +97,7 @@ func OperateEventNotification(sensorCtx *sensors.SensorContext, notification *se
 			Version:  trigger.Template.Version,
 			Resource: trigger.Template.Resource,
 		})
-		newObj, err := triggers.Execute(sensorCtx.Sensor, &trigger, uObj, client)
+		newObj, err := triggers.Execute(sensorCtx.Sensor, uObj, client)
 		if err != nil {
 			return err
 		}

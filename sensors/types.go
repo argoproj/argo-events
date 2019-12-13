@@ -18,9 +18,9 @@ package sensors
 
 import (
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -48,8 +48,9 @@ type SensorContext struct {
 
 // Notification is servers as a Notification message that can be used to update Event dependency's state or the Sensor resource
 type Notification struct {
-	Event            *cloudevents.Event
+	Event            *apicommon.Event
 	EventDependency  *v1alpha1.EventDependency
+	Sensor           *v1alpha1.Sensor
 	NotificationType v1alpha1.NotificationType
 }
 

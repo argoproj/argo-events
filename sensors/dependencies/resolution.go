@@ -17,13 +17,13 @@ limitations under the License.
 package dependencies
 
 import (
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/gobwas/glob"
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name
-func ResolveDependency(sensor *v1alpha1.Sensor, events *cloudevents.Event) *v1alpha1.EventDependency {
+func ResolveDependency(sensor *v1alpha1.Sensor, events *apicommon.Event) *v1alpha1.EventDependency {
 	for _, dependency := range sensor.Spec.Dependencies {
 		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
 		if err != nil {
@@ -33,7 +33,7 @@ func ResolveDependency(sensor *v1alpha1.Sensor, events *cloudevents.Event) *v1al
 		if err != nil {
 			continue
 		}
-		if gatewayNameGlob.Match(events.Context.GetSource()) && eventNameGlob.Match(events.Context.GetSubject()) {
+		if gatewayNameGlob.Match(events.Context.Source) && eventNameGlob.Match(events.Context.Subject) {
 			return &dependency
 		}
 	}

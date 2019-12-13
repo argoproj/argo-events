@@ -21,21 +21,21 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-// applySwitches applies group level switches on the trigger
-func applySwitches(sensor *v1alpha1.Sensor, trigger v1alpha1.Trigger) bool {
-	if trigger.Template.When == nil {
+// ApplySwitches applies group level switches on the trigger
+func ApplySwitches(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) bool {
+	if trigger.Template.Switch == nil {
 		return true
 	}
-	if trigger.Template.When.Any != nil {
-		for _, group := range trigger.Template.When.Any {
+	if trigger.Template.Switch.Any != nil {
+		for _, group := range trigger.Template.Switch.Any {
 			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
 				return true
 			}
 		}
 		return false
 	}
-	if trigger.Template.When.All != nil {
-		for _, group := range trigger.Template.When.All {
+	if trigger.Template.Switch.All != nil {
+		for _, group := range trigger.Template.Switch.All {
 			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
 				return false
 			}

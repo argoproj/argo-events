@@ -18,11 +18,13 @@ package sensors
 
 import (
 	"context"
-	"github.com/argoproj/argo-events/sensors/dependencies"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/dependencies"
 	cloudevents "github.com/cloudevents/sdk-go"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // WatchEventsFromGateways watches and handles events received from the gateway.
@@ -30,7 +32,7 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 	// start processing the update Notification NotificationQueue
 	go func() {
 		for e := range sensorCtx.NotificationQueue {
-			sensorCtx.processNotificationQueue(e)
+			sensorCtx.processQueue(e)
 		}
 	}()
 
@@ -62,14 +64,38 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 	return nil
 }
 
+func cloudEventConverter(event *cloudevents.Event) (*apicommon.Event, error) {
+	data, err := event.DataBytes()
+	if err != nil {
+		return nil, err
+	}
+	return &apicommon.Event{
+		Context: apicommon.EventContext{
+			DataContentType: event.DataContentType(),
+			Source:          event.Source(),
+			SpecVersion:     event.SpecVersion(),
+			Type:            event.Type(),
+			Time:            metav1.MicroTime{Time: event.Time()},
+			ID:              event.ID(),
+			Subject:         event.Subject(),
+		},
+		Data: data,
+	}, nil
+}
+
 // handleEvent handles a cloudevent, validates and sends it over internal Event NotificationQueue
 func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudevents.Event) bool {
+	internalEvent, err := cloudEventConverter(event)
+	if err != nil {
+		sensorCtx.Logger.WithError(err).Errorln("failed to parse the cloud event payload")
+		return false
+	}
 	// Resolve Dependency
 	// validate whether the Event is from gateway that this Sensor is watching
-	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor, event); eventDependency != nil {
+	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor, internalEvent); eventDependency != nil {
 		// send Event on internal NotificationQueue
 		sensorCtx.NotificationQueue <- &Notification{
-			Event:            event,
+			Event:            internalEvent,
 			EventDependency:  eventDependency,
 			NotificationType: v1alpha1.EventNotification,
 		}

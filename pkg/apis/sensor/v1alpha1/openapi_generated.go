@@ -40,6 +40,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":               schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":        schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":             schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy":   schema_pkg_apis_sensor_v1alpha1_ResourceLabelsPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources":        schema_pkg_apis_sensor_v1alpha1_SensorResources(ref),
@@ -47,11 +48,10 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition":       schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource": schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerPolicy":          schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels":     schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch":          schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
 	}
@@ -220,7 +220,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are treated as regular expressions Nils this value is ignored",
+							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -293,21 +293,28 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
+					"gatewayName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "GatewayName is the name of the gateway from whom the event is received",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"eventName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventName is the name of the event",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"filters": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
-					"connected": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Connected tells if subscription is already setup in case of nats protocol.",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
 				},
-				Required: []string{"name"},
+				Required: []string{"name", "gatewayName", "eventName"},
 			},
 		},
 		Dependencies: []string{
@@ -337,7 +344,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 					},
 					"context": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Context filter constraints with escalation",
+							Description: "Context filter constraints",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventContext"),
 						},
 					},
@@ -613,6 +620,35 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_ResourceLabelsPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ResourceLabels refers to the policy used to check the resource state using labels",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Labels required to identify whether a resource is in success state",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"labels"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -787,10 +823,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"eventProtocol": {
+					"port": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EventProtocol is the protocol through which sensor receives events from gateway",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
+							Description: "Port on which sensor server should run.",
+							Type:        []string{"integer"},
+							Format:      "int32",
 						},
 					},
 					"circuit": {
@@ -826,11 +863,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "template", "eventProtocol"},
+				Required: []string{"dependencies", "triggers", "template"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 
@@ -1007,57 +1044,6 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_TriggerCondition(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "TriggerCondition describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"any": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "any",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "Any acts as a OR operator between dependencies",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"all": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "all",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "All acts as a AND operator between dependencies",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1139,44 +1125,48 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 					"backoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff before checking resource state",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"),
-						},
-					},
-					"state": {
-						SchemaProps: spec.SchemaProps{
-							Description: "State refers to labels used to check the resource state",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels"),
+							Ref:         ref("k8s.io/apimachinery/pkg/util/wait.Backoff"),
 						},
 					},
 					"errorOnBackoffTimeout": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.",
+							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},
+					"resourceLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceLabels refers to the policy used to check the resource state using labels",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy"),
+						},
+					},
 				},
-				Required: []string{"backoff", "state", "errorOnBackoffTimeout"},
+				Required: []string{"backoff", "errorOnBackoffTimeout", "resourceLabels"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerStateLabels"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy", "k8s.io/apimachinery/pkg/util/wait.Backoff"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.",
+				Description: "TriggerSwitch describes condition which must be satisfied in order to execute a trigger. Depending upon condition type, status of dependency groups is used to evaluate the result.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"success": {
+					"any": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "any",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Success defines labels required to identify a resource in success state",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Description: "Any acts as a OR operator between dependencies",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Type:   []string{"string"},
@@ -1186,12 +1176,16 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref common.ReferenceCall
 							},
 						},
 					},
-					"failure": {
+					"all": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "all",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Failure defines labels required to identify a resource in failed state",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Description: "All acts as a AND operator between dependencies",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Type:   []string{"string"},
@@ -1202,7 +1196,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerStateLabels(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"success", "failure"},
 			},
 		},
 	}
@@ -1222,10 +1215,10 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
-					"when": {
+					"switch": {
 						SchemaProps: spec.SchemaProps{
-							Description: "When is the condition to execute the trigger",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"),
+							Description: "Switch is the condition to execute the trigger",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
 						},
 					},
 					"source": {
@@ -1239,7 +1232,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerCondition"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
 	}
 }
 

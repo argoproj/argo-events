@@ -21,8 +21,8 @@ import (
 	"fmt"
 
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
@@ -69,7 +69,7 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger,
 }
 
 // apply the params to the resource json object
-func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]cloudevents.Event) ([]byte, error) {
+func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
 		v, err := resolveParamValue(param.Src, events)
@@ -107,15 +107,11 @@ func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]cloudevents.Event) (string, error) {
+func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
 	if event, ok := events[src.Event]; ok {
 		// only convert payload to json when path is set.
 		if src.Path == "" {
-			payload, err := event.DataBytes()
-			if err != nil {
-				return "", err
-			}
-			return string(payload), nil
+			return string(event.Data), nil
 		}
 		js, err := json.Marshal(&event)
 		if err != nil {
@@ -138,8 +134,8 @@ func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]c
 
 // helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func extractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]cloudevents.Event {
-	events := make(map[string]cloudevents.Event)
+func extractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
+	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
 			node := snctrl.GetNodeByName(sensor, param.Src.Event)

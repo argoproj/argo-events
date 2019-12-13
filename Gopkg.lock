@@ -14,7 +14,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "4f03f8e4ba168c636e1c218da7ab41a1c8c0d8cf"
+  revision = "9e26f4d54d131a91eafb08f6d03a84c0bda4853a"
 
 [[projects]]
   name = "github.com/BurntSushi/toml"
@@ -94,7 +94,7 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "a9e731c4f6966473703de493271d0f75ea359792"
+  revision = "18a2d30ffcef68a1d1bed6a4a9cd6b34bfac049a"
 
 [[projects]]
   name = "github.com/cloudevents/sdk-go"
@@ -469,12 +469,6 @@
   packages = ["."]
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
-
-[[projects]]
-  name = "github.com/kubernetes/apimachinery"
-  packages = ["pkg/apis/meta/v1/unstructured"]
-  revision = "79c2a76c473a20cdc4ce59cae4b72529b5d9d16b"
-  version = "v0.17.0"
 
 [[projects]]
   name = "github.com/mailru/easyjson"
@@ -901,7 +895,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "7093a17b0467e77fb41804b2754a44f54a8c9ca2"
+  revision = "7ebc6af015c1bdd4e9d0df35d2bdcd53d3815cee"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -1579,6 +1573,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ee9642d150328768edba751040c2018fc14494669715ddbce3cc96ad93eb0917"
+  inputs-digest = "9fd360a3e5ca030392ce986a4bbd30a91cdb34d2fc316fc4f427757726874dd3"
   solver-name = "gps-cdcl"
   solver-version = 1

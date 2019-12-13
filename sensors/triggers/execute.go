@@ -28,9 +28,6 @@ import (
 // FetchResource fetches the K8s resource
 func FetchResource(kubeClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) (*unstructured.Unstructured, error) {
 	if trigger.Template != nil {
-		if err := ApplyTemplateParameters(sensor, trigger); err != nil {
-			return nil, err
-		}
 		creds, err := store.GetCredentials(kubeClient, sensor.Namespace, trigger.Template.Source)
 		if err != nil {
 			return nil, err
@@ -48,7 +45,7 @@ func FetchResource(kubeClient kubernetes.Interface, sensor *v1alpha1.Sensor, tri
 	return nil, nil
 }
 
-func Execute(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, obj *unstructured.Unstructured, client dynamic.NamespaceableResourceInterface) (*unstructured.Unstructured, error) {
+func Execute(sensor *v1alpha1.Sensor, obj *unstructured.Unstructured, client dynamic.NamespaceableResourceInterface) (*unstructured.Unstructured, error) {
 	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {

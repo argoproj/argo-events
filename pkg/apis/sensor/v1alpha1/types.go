@@ -19,14 +19,13 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -102,6 +101,8 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
+	// EventProtocol is the protocol through which sensor receives events from gateway
+	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
 	// Port on which sensor server should run.
 	// +optional
 	Port *int `json:"port" protobuf:"bytes,4,name=port"`
@@ -142,8 +143,8 @@ type EventDependencyFilter struct {
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
-	// Context filter constraints with escalation
-	Context *common.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	// Context filter constraints
+	Context *apicommon.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 	// +listType=data
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,opt,name=data"`
