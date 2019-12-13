@@ -83,9 +83,7 @@ rules:
       - patch
       - delete
   - apiGroups:
-      - "apps/v1"
-      - "apps/v1beta2"
-      - "apps/v1beta1"
+      - "apps"
     resources:
       - deployments
     verbs:
