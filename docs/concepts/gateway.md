@@ -6,7 +6,7 @@ A gateway consumes events from outside entities, transforms them into the [cloud
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/release-0.12/docs/assets/gateway.png?raw=true" alt="Gateway"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/gateway.png?raw=true" alt="Gateway"/>
 </p>
 
 <br/>
