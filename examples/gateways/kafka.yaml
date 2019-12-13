@@ -25,11 +25,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "kafka-events"
-          image: "argoproj/kafka-gateway"
+          image: "argoproj/kafka-gateway:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/kafka-gateway"]
       serviceAccountName: "argo-events-sa"
