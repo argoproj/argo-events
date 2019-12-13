@@ -26,10 +26,10 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "minio-events"
-          image: "argoproj/artifact-gateway"
+          image: "argoproj/artifact-gateway:v0.12-rc"
           imagePullPolicy: "Always"
       serviceAccountName: "argo-events-sa"

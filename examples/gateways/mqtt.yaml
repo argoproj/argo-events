@@ -25,11 +25,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "mqtt-events"
-          image: "argoproj/mqtt-gateway"
+          image: "argoproj/mqtt-gateway:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/mqtt-gateway"]
       serviceAccountName: "argo-events-sa"
