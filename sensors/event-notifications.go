@@ -45,7 +45,7 @@ func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (boo
 }
 
 // OperateEventNotifications operates on an event notification
-func OperateEventNotifications(sensorCtx *SensorContext, notification *types.Notification) error {
+func (sensorCtx *SensorContext) operateEventNotification(notification *types.Notification) error {
 	nodeName := notification.EventDependency.Name
 	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "event is received")
 

@@ -36,7 +36,7 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 
 	switch notification.NotificationType {
 	case v1alpha1.EventNotification:
-		err := OperateEventNotifications(sensorCtx, notification)
+		err := sensorCtx.operateEventNotification(notification)
 		if err != nil {
 			sensorCtx.Logger.WithError(err).Errorln("failed to operate on the event notification")
 			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
@@ -59,7 +59,7 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 		}
 
 	case v1alpha1.ResourceUpdateNotification:
-		OperateResourceUpdateNotifications(sensorCtx, notification)
+		sensorCtx.operateResourceUpdateNotification(notification)
 
 	default:
 		sensorCtx.Logger.WithField("Notification-type", string(notification.NotificationType)).Error("unknown Notification type")
