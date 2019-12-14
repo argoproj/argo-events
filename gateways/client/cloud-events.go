@@ -86,7 +86,7 @@ func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Even
 	event := cloudevents.NewEvent()
 	event.SetSpecVersion(cloudevents.VersionV03)
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
-	event.SetType(fmt.Sprintf("argoproj.io.argo_events.%s", gatewayContext.gateway.Spec.Type))
+	event.SetType(string(gatewayContext.gateway.Spec.Type))
 	event.SetSource(gatewayContext.gateway.Name)
 	event.SetDataContentType("application/json")
 	event.SetSubject(gatewayEvent.Name)

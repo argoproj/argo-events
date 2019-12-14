@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package operator
+package sensors
 
 import (
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,7 +45,7 @@ func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (boo
 }
 
 // OperateEventNotifications operates on an event notification
-func OperateEventNotifications(sensorCtx *sensors.SensorContext, notification *sensors.Notification) error {
+func OperateEventNotifications(sensorCtx *SensorContext, notification *types.Notification) error {
 	nodeName := notification.EventDependency.Name
 	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "event is received")
 
@@ -88,6 +88,9 @@ func OperateEventNotifications(sensorCtx *sensors.SensorContext, notification *s
 		uObj, err := triggers.FetchResource(sensorCtx.KubeClient, sensorCtx.Sensor, &trigger)
 		if err != nil {
 			return err
+		}
+		if uObj == nil {
+			continue
 		}
 		if err := triggers.ApplyResourceParameters(sensorCtx.Sensor, &trigger, uObj); err != nil {
 			return err

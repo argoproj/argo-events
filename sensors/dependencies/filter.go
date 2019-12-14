@@ -19,7 +19,7 @@ package dependencies
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
+	"github.com/argoproj/argo-events/sensors/types"
 	"regexp"
 	"strconv"
 	"time"
@@ -27,7 +27,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 )
@@ -37,7 +36,7 @@ const (
 	MediaTypeJSON string = "application/json"
 )
 
-func ApplyFilter(notification *sensors.Notification) error {
+func ApplyFilter(notification *types.Notification) error {
 	// apply filters if any.
 	ok, err := filterEvent(notification.EventDependency.Filters, notification.Event)
 	if err != nil {
@@ -59,7 +58,7 @@ func filterEvent(filter v1alpha1.EventDependencyFilter, event *apicommon.Event) 
 	if err != nil {
 		return false, err
 	}
-	ctxFilter := filterContext(filter.Context, event)
+	ctxFilter := filterContext(filter.Context, &event.Context)
 
 	return timeFilter && ctxFilter && dataFilter, err
 }
@@ -114,7 +113,7 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func filterContext(expected *apicommon.EventContext, actual *apicommon.Event) bool {
+func filterContext(expected *apicommon.EventContext, actual *apicommon.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -123,16 +122,16 @@ func filterContext(expected *apicommon.EventContext, actual *apicommon.Event) bo
 	}
 	res := true
 	if expected.Type != "" {
-		res = res && expected.Type == actual.Context.Type
+		res = res && expected.Type == actual.Type
 	}
 	if expected.SpecVersion != "" {
-		res = res && expected.SpecVersion == actual.Context.SpecVersion
+		res = res && expected.SpecVersion == actual.SpecVersion
 	}
 	if expected.Source != "" {
-		res = res && reflect.DeepEqual(expected.Source, actual.Context.Source)
+		res = res && expected.Source == actual.Source
 	}
 	if expected.DataContentType != "" {
-		res = res && expected.DataContentType == actual.Context.DataContentType
+		res = res && expected.DataContentType == actual.DataContentType
 	}
 	return res
 }

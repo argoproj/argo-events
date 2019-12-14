@@ -19,11 +19,12 @@ package sensors
 import (
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/operator"
+	"github.com/argoproj/argo-events/sensors/types"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // processQueue processes events received on internal queue and updates the state of the node representing the event dependency
-func (sensorCtx *SensorContext) processQueue(notification *Notification) {
+func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 	defer func() {
 		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.SensorClient, sensorCtx.Sensor, sensorCtx.Logger)
 		if err != nil {
@@ -35,12 +36,30 @@ func (sensorCtx *SensorContext) processQueue(notification *Notification) {
 
 	switch notification.NotificationType {
 	case v1alpha1.EventNotification:
-		if err := operator.OperateEventNotifications(sensorCtx, notification); err != nil {
+		err := OperateEventNotifications(sensorCtx, notification)
+		if err != nil {
 			sensorCtx.Logger.WithError(err).Errorln("failed to operate on the event notification")
+			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+		} else {
+			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+		}
+
+		// increment completion counter
+		sensorCtx.Sensor.Status.TriggerCycleCount = sensorCtx.Sensor.Status.TriggerCycleCount + 1
+		// set completion time
+		sensorCtx.Sensor.Status.LastCycleTime = metav1.Now()
+
+		// Mark all dependency nodes as active
+		for _, dependency := range sensorCtx.Sensor.Spec.Dependencies {
+			snctrl.MarkNodePhase(sensorCtx.Sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency is re-activated")
+		}
+		// Mark all dependency groups as active
+		for _, group := range sensorCtx.Sensor.Spec.DependencyGroups {
+			snctrl.MarkNodePhase(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency group is re-activated")
 		}
 
 	case v1alpha1.ResourceUpdateNotification:
-		operator.OperateResourceUpdateNotifications(sensorCtx, notification)
+		OperateResourceUpdateNotifications(sensorCtx, notification)
 
 	default:
 		sensorCtx.Logger.WithField("Notification-type", string(notification.NotificationType)).Error("unknown Notification type")

@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"context"
+	"github.com/argoproj/argo-events/sensors/types"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -94,7 +95,7 @@ func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudeve
 	// validate whether the Event is from gateway that this Sensor is watching
 	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor, internalEvent); eventDependency != nil {
 		// send Event on internal NotificationQueue
-		sensorCtx.NotificationQueue <- &Notification{
+		sensorCtx.NotificationQueue <- &types.Notification{
 			Event:            internalEvent,
 			EventDependency:  eventDependency,
 			NotificationType: v1alpha1.EventNotification,

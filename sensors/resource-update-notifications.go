@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package operator
+package sensors
 
 import (
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors"
+	"github.com/argoproj/argo-events/sensors/types"
 )
 
 // OperateResourceUpdateNotification operates on the resource state notification update
-func OperateResourceUpdateNotifications(sensorCtx *sensors.SensorContext, notification *sensors.Notification) {
+func OperateResourceUpdateNotifications(sensorCtx *SensorContext, notification *types.Notification) {
 	sensorCtx.Logger.Info("Sensor resource update")
 	// update Sensor resource
 	sensorCtx.Sensor = notification.Sensor.DeepCopy()

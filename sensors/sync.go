@@ -19,6 +19,7 @@ package sensors
 import (
 	"context"
 	"fmt"
+	"github.com/argoproj/argo-events/sensors/types"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +40,7 @@ func (sensorCtx *SensorContext) syncSensor(ctx context.Context) cache.Controller
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if newSensor, ok := new.(*v1alpha1.Sensor); ok {
-					sensorCtx.NotificationQueue <- &Notification{
+					sensorCtx.NotificationQueue <- &types.Notification{
 						Sensor:           newSensor,
 						NotificationType: v1alpha1.ResourceUpdateNotification,
 					}

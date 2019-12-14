@@ -18,9 +18,9 @@ package sensors
 
 import (
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
+	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -29,7 +29,7 @@ import (
 // SensorContext contains execution context for Sensor
 type SensorContext struct {
 	// SensorClient is the client for Sensor
-	SensorClient clientset.Interface
+	SensorClient sensorclientset.Interface
 	// KubeClient is the kubernetes client
 	KubeClient kubernetes.Interface
 	// ClientPool manages a pool of dynamic clients.
@@ -39,30 +39,22 @@ type SensorContext struct {
 	// Logger for the Sensor
 	Logger *logrus.Logger
 	// NotificationQueue is internal NotificationQueue to manage incoming events
-	NotificationQueue chan *Notification
+	NotificationQueue chan *types.Notification
 	// ControllerInstanceID is the instance ID of Sensor controller processing this Sensor
 	ControllerInstanceID string
 	// Updated indicates update to Sensor resource
 	Updated bool
 }
 
-// Notification is servers as a Notification message that can be used to update Event dependency's state or the Sensor resource
-type Notification struct {
-	Event            *apicommon.Event
-	EventDependency  *v1alpha1.EventDependency
-	Sensor           *v1alpha1.Sensor
-	NotificationType v1alpha1.NotificationType
-}
-
-// NewSensorExecutionCtx returns a new Sensor execution context.
-func NewSensorExecutionCtx(sensorClient clientset.Interface, kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, controllerInstanceID string) *SensorContext {
+// NewSensorContext returns a new sensor execution context.
+func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, controllerInstanceID string) *SensorContext {
 	return &SensorContext{
 		SensorClient:         sensorClient,
 		KubeClient:           kubeClient,
 		DynamicClient:        dynamicClient,
 		Sensor:               sensor,
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
-		NotificationQueue:    make(chan *Notification),
+		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
 	}
 }

@@ -119,7 +119,7 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template.GroupVersionResource == nil {
 		return fmt.Errorf("must provide group, version and kind for the resource")
 	}
-	if template.When != nil && template.When.All != nil && template.When.Any != nil {
+	if template.Switch != nil && template.Switch.All != nil && template.Switch.Any != nil {
 		return fmt.Errorf("trigger condition can't have both any and all condition")
 	}
 	return nil
