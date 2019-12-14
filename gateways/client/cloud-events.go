@@ -83,8 +83,7 @@ func (gatewayContext *GatewayContext) DispatchEvent(gatewayEvent *gateways.Event
 // transformEvent transforms an event from gateway server into a CloudEvent
 // See https://github.com/cloudevents/spec for more info.
 func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*cloudevents.Event, error) {
-	event := cloudevents.NewEvent()
-	event.SetSpecVersion(cloudevents.VersionV03)
+	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
 	event.SetType(string(gatewayContext.gateway.Spec.Type))
 	event.SetSource(gatewayContext.gateway.Name)
