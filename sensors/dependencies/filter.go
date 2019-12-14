@@ -19,7 +19,6 @@ package dependencies
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/argoproj/argo-events/sensors/types"
 	"regexp"
 	"strconv"
 	"time"
@@ -27,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
 )

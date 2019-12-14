@@ -93,7 +93,7 @@ func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudeve
 	}
 	// Resolve Dependency
 	// validate whether the Event is from gateway that this Sensor is watching
-	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor, internalEvent); eventDependency != nil {
+	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor.Spec.Dependencies, internalEvent); eventDependency != nil {
 		// send Event on internal NotificationQueue
 		sensorCtx.NotificationQueue <- &types.Notification{
 			Event:            internalEvent,

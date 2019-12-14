@@ -23,8 +23,8 @@ import (
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name
-func ResolveDependency(sensor *v1alpha1.Sensor, events *apicommon.Event) *v1alpha1.EventDependency {
-	for _, dependency := range sensor.Spec.Dependencies {
+func ResolveDependency(dependencies []v1alpha1.EventDependency, events *apicommon.Event) *v1alpha1.EventDependency {
+	for _, dependency := range dependencies {
 		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
 		if err != nil {
 			continue
