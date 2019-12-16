@@ -32,7 +32,7 @@ type ResourceLabels struct {
 }
 
 func (rl *ResourceLabels) ApplyPolicy() error {
-	if rl.Trigger.Policy.ResourceLabels.Labels != nil {
+	if rl.Trigger.Policy.ResourceLabels.Labels == nil {
 		return nil
 	}
 
@@ -62,11 +62,13 @@ func (rl *ResourceLabels) ApplyPolicy() error {
 			}
 			completed = false
 		}
+
 		if completed {
 			return true, nil
 		}
 		return false, nil
 	})
+
 	return err
 }
 
