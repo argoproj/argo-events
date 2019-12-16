@@ -111,6 +111,12 @@ type EventProtocol struct {
 type Http struct {
 	// Port on which server will run
 	Port string `json:"port" protobuf:"bytes,1,opt,name=port"`
+
+	// Labels to be set for the service generated
+	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,11,rep,name=labels"`
+
+	// Annotations to be set for the service generated
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,12,rep,name=annotations"`
 }
 
 // Nats contains the information required to connect to nats server and get subscriptions
