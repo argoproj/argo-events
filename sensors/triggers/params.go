@@ -31,21 +31,21 @@ import (
 )
 
 // ApplyTemplateParameters applies parameters to trigger template
-func ApplyTemplateParameters(sensor *v1alpha1.Sensor, template *v1alpha1.TriggerTemplate, parameters []v1alpha1.TriggerParameter) error {
-	if parameters != nil && len(parameters) > 0 {
-		templateBytes, err := json.Marshal(template)
+func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) error {
+	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
+		templateBytes, err := json.Marshal(trigger.Template)
 		if err != nil {
 			return err
 		}
-		tObj, err := applyParams(templateBytes, parameters, extractEvents(sensor, parameters))
+		tObj, err := applyParams(templateBytes, trigger.TemplateParameters, extractEvents(sensor, trigger.TemplateParameters))
 		if err != nil {
 			return err
 		}
-		resultTmpl := &v1alpha1.TriggerTemplate{}
-		if err = json.Unmarshal(tObj, resultTmpl); err != nil {
+		template := &v1alpha1.TriggerTemplate{}
+		if err = json.Unmarshal(tObj, template); err != nil {
 			return err
 		}
-		template = resultTmpl
+		trigger.Template = template
 	}
 	return nil
 }

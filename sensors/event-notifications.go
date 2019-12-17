@@ -92,13 +92,13 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		if uObj == nil {
 			continue
 		}
-		if err := triggers.ApplyResourceParameters(sensorCtx.Sensor, &trigger, uObj); err != nil {
+		if err := triggers.ApplyResourceParameters(sensorCtx.Sensor, trigger.ResourceParameters, uObj); err != nil {
 			return err
 		}
 		client := sensorCtx.DynamicClient.Resource(schema.GroupVersionResource{
-			Group:    trigger.Template.Group,
-			Version:  trigger.Template.Version,
-			Resource: trigger.Template.Resource,
+			Group:    trigger.Template.GroupVersionResource.Group,
+			Version:  trigger.Template.GroupVersionResource.Version,
+			Resource: trigger.Template.GroupVersionResource.Resource,
 		})
 		newObj, err := triggers.Execute(sensorCtx.Sensor, uObj, client)
 		if err != nil {

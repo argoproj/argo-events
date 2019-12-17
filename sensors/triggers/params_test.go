@@ -326,3 +326,41 @@ func TestApplyResourceParameters(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }
+
+func TestApplyTemplateParameters(t *testing.T) {
+	obj := sensorObj.DeepCopy()
+	event := apicommon.Event{
+		Context: apicommon.EventContext{
+			DataContentType: common.MediaTypeJSON,
+			Subject:         "example-1",
+			SpecVersion:     "0.3",
+			Source:          "webhook-gateway",
+			Type:            "webhook",
+			ID:              "1",
+			Time:            metav1.MicroTime{Time: time.Now()},
+		},
+		Data: []byte("{\"group\": \"fake\" }"),
+	}
+	id := obj.NodeID("fake-dependency")
+	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
+		id: {
+			Event: &event,
+			ID:    id,
+			Name:  "fake-dependency",
+			Type:  v1alpha1.NodeTypeEventDependency,
+		},
+	}
+	obj.Spec.Triggers[0].TemplateParameters = []v1alpha1.TriggerParameter{
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				Event:   "fake-dependency",
+				DataKey: "group",
+			},
+			Operation: v1alpha1.TriggerParameterOpOverwrite,
+			Dest:      "groupVersionResource.group",
+		},
+	}
+	err := ApplyTemplateParameters(obj, &obj.Spec.Triggers[0])
+	assert.Nil(t, err)
+	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.GroupVersionResource.Group)
+}

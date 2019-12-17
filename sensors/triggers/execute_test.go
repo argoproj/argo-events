@@ -86,9 +86,9 @@ func TestExecute(t *testing.T) {
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	trigger := sensorObj.Spec.Triggers[0]
 	namespacableClient := client.Resource(schema.GroupVersionResource{
-		Resource: trigger.Template.Resource,
-		Version:  trigger.Template.Version,
-		Group:    trigger.Template.Group,
+		Resource: trigger.Template.GroupVersionResource.Resource,
+		Version:  trigger.Template.GroupVersionResource.Version,
+		Group:    trigger.Template.GroupVersionResource.Group,
 	})
 	uObj, err := Execute(sensorObj, deployment, namespacableClient)
 	assert.Nil(t, err)
