@@ -31,12 +31,10 @@ import (
 
 // generateServiceSpec returns a K8s service spec for the sensor
 func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
-	return &corev1.Service{
+	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				common.LabelSensorName:    ctx.sensor.Name,
-				LabelControllerInstanceID: ctx.controller.Config.InstanceID,
-			},
+			Labels: ctx.sensor.Spec.EventProtocol.Http.Labels,
+			Annotations: ctx.sensor.Spec.EventProtocol.Http.Annotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -51,6 +49,16 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 			},
 		},
 	}
+
+	// Non-overrideable labels required by sensor service
+	if serviceSpec.ObjectMeta.Labels == nil {
+		serviceSpec.ObjectMeta.Labels = map[string]string{}
+	}
+
+	serviceSpec.ObjectMeta.Labels[common.LabelSensorName] = ctx.sensor.Name
+	serviceSpec.ObjectMeta.Labels[LabelControllerInstanceID] = ctx.controller.Config.InstanceID
+
+	return serviceSpec
 }
 
 // serviceBuilder builds a new service that exposes sensor.

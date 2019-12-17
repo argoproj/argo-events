@@ -171,7 +171,7 @@ func (in *GatewaySpec) DeepCopyInto(out *GatewaySpec) {
 	if in.EventProtocol != nil {
 		in, out := &in.EventProtocol, &out.EventProtocol
 		*out = new(common.EventProtocol)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	return
 }

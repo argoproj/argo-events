@@ -84,6 +84,26 @@ func TestResource_BuildService(t *testing.T) {
 	assert.NotEmpty(t, service.Annotations[common.AnnotationResourceSpecHash])
 }
 
+func TestResource_BuildServiceWithLabelsAnnotations(t *testing.T) {
+	controller := getController()
+	sensorCopy := sensorObj.DeepCopy()
+
+	sensorCopy.Spec.EventProtocol.Http.Labels = map[string]string{}
+	sensorCopy.Spec.EventProtocol.Http.Labels["test-label"] = "label1"
+	sensorCopy.Spec.EventProtocol.Http.Annotations = map[string]string{}
+	sensorCopy.Spec.EventProtocol.Http.Annotations["test-annotation"] = "annotation1"
+
+	opctx := newSensorContext(sensorCopy, controller)
+	service, err := opctx.serviceBuilder()
+	assert.Nil(t, err)
+	assert.NotNil(t, service)
+	assert.NotEmpty(t, service.Annotations[common.AnnotationResourceSpecHash])
+	assert.NotNil(t, service.ObjectMeta.Labels)
+	assert.NotNil(t, service.ObjectMeta.Annotations)
+	assert.Equal(t, service.ObjectMeta.Labels["test-label"], "label1")
+	assert.Equal(t, service.ObjectMeta.Annotations["test-annotation"], "annotation1")
+}
+
 func TestResource_BuildDeployment(t *testing.T) {
 	controller := getController()
 	opctx := newSensorContext(sensorObj.DeepCopy(), controller)
