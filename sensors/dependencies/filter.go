@@ -31,11 +31,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-// various supported media types
-const (
-	MediaTypeJSON string = "application/json"
-)
-
 func ApplyFilter(notification *types.Notification) error {
 	// apply filters if any.
 	ok, err := filterEvent(notification.EventDependency.Filters, notification.Event)
@@ -148,9 +143,6 @@ func filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error
 	payload := event.Data
 	if payload == nil || len(payload) == 0 {
 		return true, nil
-	}
-	if event.Context.DataContentType != MediaTypeJSON {
-		return false, fmt.Errorf("unsupported Event content type: %s", event.Context.DataContentType)
 	}
 	var js *json.RawMessage
 	if err := json.Unmarshal(payload, &js); err != nil {

@@ -93,6 +93,14 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/tidwall/gjson"
+  version = "v1.3.5"
+
+[[constraint]]
+  name = "github.com/tidwall/sjson"
+  version = "v1.3.5"
+
+[[constraint]]
   name = "github.com/gorilla/mux"
   version = "v1.7.3"
 

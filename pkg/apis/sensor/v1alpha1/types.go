@@ -269,7 +269,8 @@ type TriggerParameterSource struct {
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-	Path string `json:"path" protobuf:"bytes,2,opt,name=path"`
+	ContextKey string `json:"contextKey,omitempty" protobuf:"bytes,2,opt,name=contextKey"`
+	DataKey    string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the path is invalid.
 	// If the path is invalid and this is not defined, this param source will produce an error.

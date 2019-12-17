@@ -115,3 +115,10 @@ const (
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
 )
+
+// various supported media types
+const (
+	MediaTypeJSON string = "application/json"
+	MediaTypeXML  string = "application/xml"
+	MediaTypeYAML string = "application/yaml"
+)

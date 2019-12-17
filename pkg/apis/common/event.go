@@ -42,7 +42,7 @@ const (
 // Adheres to the CloudEvents v0.3 specification
 type Event struct {
 	Context EventContext `json:"context" protobuf:"bytes,1,opt,name=context"`
-	Data    []byte       `json:"payload" protobuf:"bytes,2,opt,name=data"`
+	Data    []byte       `json:"data" protobuf:"bytes,2,opt,name=data"`
 }
 
 // EventContext contains metadata that provides circumstantial information about the occurrence.
@@ -87,31 +87,22 @@ type Http struct {
 type Nats struct {
 	// URL is nats server/service URL
 	URL string `json:"url" protobuf:"bytes,1,opt,name=url"`
-
 	// Subscribe starting with most recently published value. Refer https://github.com/nats-io/go-nats-streaming
 	StartWithLastReceived bool `json:"startWithLastReceived,omitempty" protobuf:"bytes,2,opt,name=startWithLastReceived"`
-
 	// Receive all stored values in order.
 	DeliverAllAvailable bool `json:"deliverAllAvailable,omitempty" protobuf:"bytes,3,opt,name=deliverAllAvailable"`
-
 	// Receive messages starting at a specific sequence number
 	StartAtSequence string `json:"startAtSequence,omitempty" protobuf:"bytes,4,opt,name=startAtSequence"`
-
 	// Subscribe starting at a specific time
 	StartAtTime string `json:"startAtTime,omitempty" protobuf:"bytes,5,opt,name=startAtTime"`
-
 	// Subscribe starting a specific amount of time in the past (e.g. 30 seconds ago)
 	StartAtTimeDelta string `json:"startAtTimeDelta,omitempty" protobuf:"bytes,6,opt,name=startAtTimeDelta"`
-
 	// Durable subscriptions allow clients to assign a durable name to a subscription when it is created
 	Durable bool `json:"durable,omitempty" protobuf:"bytes,7,opt,name=durable"`
-
 	// The NATS Streaming cluster ID
 	ClusterId string `json:"clusterId,omitempty" protobuf:"bytes,8,opt,name=clusterId"`
-
 	// The NATS Streaming cluster ID
 	ClientId string `json:"clientId,omitempty" protobuf:"bytes,9,opt,name=clientId"`
-
 	// Type of the connection. either standard or streaming
 	Type NatsType `json:"type" protobuf:"bytes,10,opt,name=type"`
 }
