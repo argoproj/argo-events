@@ -19,6 +19,7 @@ package aws_sns
 import (
 	"io/ioutil"
 	"net/http"
+	"regexp"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -143,7 +144,14 @@ func (router *Router) PostActivate() error {
 	formattedUrl := common.FormattedURL(snsEventSource.Webhook.URL, snsEventSource.Webhook.Endpoint)
 	if _, err := router.session.Subscribe(&snslib.SubscribeInput{
 		Endpoint: &formattedUrl,
-		Protocol: &snsProtocol,
+		Protocol: func(endpoint string) *string {
+			Protocol := "http"
+			if matched, _ := regexp.MatchString(`https://.*`, endpoint); matched {
+				Protocol = "https"
+				return &Protocol
+			}
+			return &Protocol
+		}(formattedUrl),
 		TopicArn: &snsEventSource.TopicArn,
 	}); err != nil {
 		return err
