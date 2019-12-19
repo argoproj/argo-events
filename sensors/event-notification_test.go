@@ -17,7 +17,6 @@ limitations under the License.
 package sensors
 
 import (
-	"fmt"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
@@ -276,7 +275,7 @@ func TestOperateEventNotification(t *testing.T) {
 	}
 
 	// Apply filters that fail
-	obj.Spec.Dependencies[0].Filters = v1alpha1.EventDependencyFilter{
+	obj.Spec.Dependencies[0].Filters = &v1alpha1.EventDependencyFilter{
 		Name: "data-filter",
 		Data: []v1alpha1.DataFilter{
 			{
@@ -296,28 +295,5 @@ func TestOperateEventNotification(t *testing.T) {
 		NotificationType: v1alpha1.EventNotification,
 	})
 	assert.NotNil(t, err)
-
 	assert.Equal(t, v1alpha1.NodePhaseError, obj.Status.Nodes[dep1].Phase)
-	obj.Spec.Dependencies[0].Filters = nil
-
-	// If notification is received for unknown dep, reject it
-	err = sensorCtx.operateEventNotification(&types.Notification{
-		Event: &apicommon.Event{
-			Context: apicommon.EventContext{
-				DataContentType: "application/json",
-				Subject:         "example",
-				SpecVersion:     "0.3",
-				Source:          "webhook-gateway",
-				Type:            "webhook",
-				ID:              "1",
-				Time:            metav1.MicroTime{Time: time.Now()},
-			},
-			Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
-		},
-		EventDependency:  &obj.Spec.Dependencies[0],
-		Sensor:           obj,
-		NotificationType: v1alpha1.EventNotification,
-	})
-	fmt.Println(err.Error())
-	assert.NotNil(t, err)
 }

@@ -195,7 +195,7 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 }
 
 // validateEventFilter for a sensor
-func validateEventFilter(filter v1alpha1.EventDependencyFilter) error {
+func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
 	// validate time filter
 	if filter.Time != nil {
 		if err := validateEventTimeFilter(filter.Time); err != nil {

@@ -32,7 +32,9 @@ import (
 )
 
 func ApplyFilter(notification *types.Notification) error {
-	// apply filters if any.
+	if notification.EventDependency.Filters == nil {
+		return nil
+	}
 	ok, err := filterEvent(notification.EventDependency.Filters, notification.Event)
 	if err != nil {
 		return err
@@ -44,7 +46,7 @@ func ApplyFilter(notification *types.Notification) error {
 }
 
 // apply the filters to an Event
-func filterEvent(filter v1alpha1.EventDependencyFilter, event *apicommon.Event) (bool, error) {
+func filterEvent(filter *v1alpha1.EventDependencyFilter, event *apicommon.Event) (bool, error) {
 	dataFilter, err := filterData(filter.Data, event)
 	if err != nil {
 		return false, err
