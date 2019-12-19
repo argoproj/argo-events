@@ -74,7 +74,7 @@ func TestDefaultServiceName(t *testing.T) {
 
 func TestDefaultNatsQueueName(t *testing.T) {
 	convey.Convey("Given a nats queue, get the default name", t, func() {
-		convey.So(DefaultNatsQueueName("default"), convey.ShouldEqual, "default-queue")
+		convey.So(DefaultNatsQueueName("sensor", "default"), convey.ShouldEqual, "sensor-default-queue")
 	})
 }
 

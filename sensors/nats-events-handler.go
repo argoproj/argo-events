@@ -145,7 +145,7 @@ func (sec *sensorExecutionCtx) NatsEventProtocol() {
 
 // getNatsStandardSubscription returns a standard nats subscription
 func (sec *sensorExecutionCtx) getNatsStandardSubscription(eventSource string) (*nats.Subscription, error) {
-	return sec.nconn.standard.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *nats.Msg) {
+	return sec.nconn.standard.QueueSubscribe(eventSource, common.DefaultNatsQueueName(sec.sensor.Name, eventSource), func(msg *nats.Msg) {
 		sec.processNatsMessage(msg.Data, eventSource)
 	})
 }
@@ -156,7 +156,7 @@ func (sec *sensorExecutionCtx) getNatsStreamingSubscription(eventSource string) 
 	if err != nil {
 		return nil, err
 	}
-	return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(eventSource), func(msg *snats.Msg) {
+	return sec.nconn.stream.QueueSubscribe(eventSource, common.DefaultNatsQueueName(sec.sensor.Name, eventSource), func(msg *snats.Msg) {
 		sec.processNatsMessage(msg.Data, eventSource)
 	}, subscriptionOption)
 }

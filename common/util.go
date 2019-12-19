@@ -51,8 +51,8 @@ func DefaultEventSourceName(gatewayName string, configurationName string) string
 }
 
 // DefaultNatsQueueName returns a queue name for nats subject
-func DefaultNatsQueueName(subject string) string {
-	return fmt.Sprintf("%s-%s", subject, "queue")
+func DefaultNatsQueueName(sensor, subject string) string {
+	return fmt.Sprintf("%s-%s-%s", sensor, subject, "queue")
 }
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
