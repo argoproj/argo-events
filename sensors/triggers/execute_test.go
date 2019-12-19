@@ -57,9 +57,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 			"kind":       kind,
 			"metadata": map[string]interface{}{
 				"namespace": namespace,
-				"Name":      name,
+				"name":      name,
 				"labels": map[string]interface{}{
-					"Name": name,
+					"name": name,
 				},
 			},
 		},

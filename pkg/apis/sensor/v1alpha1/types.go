@@ -124,8 +124,8 @@ type EventDependency struct {
 	GatewayName string `json:"gatewayName" protobuf:"bytes,2,name=gatewayName"`
 	// EventName is the name of the event
 	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
-	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
+	// Filters and rules governing toleration of success and constraints on the context and data of an event
+	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
 }
 
 // DependencyGroup is the group of dependencies

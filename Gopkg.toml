@@ -98,7 +98,7 @@ required = [
 
 [[constraint]]
   name = "github.com/tidwall/sjson"
-  version = "v1.3.5"
+  version = "v1.0.4"
 
 [[constraint]]
   name = "github.com/gorilla/mux"

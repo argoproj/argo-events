@@ -35,7 +35,7 @@ func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (boo
 	if sensor.Spec.ErrorOnFailedRound && sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure {
 		return false, errors.Errorf("last trigger cycle was a failure and sensor policy is set to ErrorOnFailedRound, so won't process the triggers")
 	}
-	if sensor.Spec.DependencyGroups != nil {
+	if sensor.Spec.Circuit != "" && sensor.Spec.DependencyGroups != nil {
 		return dependencies.ResolveCircuit(sensor, logger)
 	}
 	if ok := sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency); ok {
@@ -81,7 +81,7 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		if err := triggers.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
 			return err
 		}
-		if ok := triggers.ApplySwitches(sensorCtx.Sensor, &trigger); ok {
+		if ok := triggers.ApplySwitches(sensorCtx.Sensor, &trigger); !ok {
 			logger.Infoln("switches/group level when conditions were not resolved, won't execute the trigger")
 			continue
 		}
@@ -104,8 +104,12 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		if err != nil {
 			return err
 		}
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("trigger successfully created")
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("applying trigger policy")
 		p := policy.GetPolicy(&trigger, client, newObj)
 		if p == nil {
+			logger.WithField("trigger-name", trigger.Template.Name).Infoln("no trigger policy found, continue...")
 			continue
 		}
 		err = p.ApplyPolicy()
