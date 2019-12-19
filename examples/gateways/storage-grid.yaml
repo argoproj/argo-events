@@ -5,12 +5,13 @@ metadata:
   labels:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
-    # gateway controller will use this label to match with it's own version
-    # do not remove
-    argo-events-gateway-version: v0.10
 spec:
+  replica: 1
   type: "storage-grid"
-  eventSource: "storage-grid-event-source"
+  eventSourceRef:
+    name: "storage-grid-event-source"
+    # optional, if event source is deployed in a different namespace than the gateway
+    # namespace: "other-namespace"
   processorPort: "9330"
   eventProtocol:
     type: "HTTP"
@@ -24,11 +25,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "storage-grid-events"
-          image: "argoproj/storage-grid-gateway"
+          image: "argoproj/storage-grid-gateway:v0.12-rc"
           imagePullPolicy: "Always"
       serviceAccountName: "argo-events-sa"
   service:
@@ -43,4 +44,4 @@ spec:
       type: LoadBalancer
   watchers:
     sensors:
-    - name: "storage-grid-watcher-sensor"
+      - name: "storage-grid-watcher-sensor"

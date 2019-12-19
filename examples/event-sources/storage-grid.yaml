@@ -1,38 +1,34 @@
-# This configmap contains the event sources configurations for StorageGrid gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: storage-grid-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  example: |-
-    # hook contains configuration for the HTTP server running in the gateway.
-    # StorageGrid will send events to following port and endpoint
-    hook:
-      # port to run HTTP server on
-      port: "8080"
-      # endpoint to listen events on
-      endpoint: "/"
-    # List of supported events can be derived from AWS S3 events https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#supported-notification-event-types
-    # Remove S3 prefix from event type to make it a StorageGrid event.
-    events:
-      - "ObjectCreated:Put"
+spec:
+  type: "storage-grid"
+  storageGrid:
+    example-insecure:
+      # hook contains configuration for the HTTP server running in the gateway.
+      # StorageGrid will send events to following port and endpoint
+      webhook:
+        # port to run HTTP server on
+        port: "8080"
+        # endpoint to listen events on
+        endpoint: "/"
+      # List of supported events can be derived from AWS S3 events https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#supported-notification-event-types
+      # Remove S3 prefix from event type to make it a StorageGrid event.
+      events:
+        - "ObjectCreated:Put"
 
-  example-secure: |-
-    hook:
-      # port to run HTTP server on
-      port: "8090"
-      # endpoint to listen events on
-      endpoint: "/"
-      # path to file that is mounted in gateway pod which contains certs
-      serverCertPath: "some path in pod"
-      # path to file that is mounted in gateway pod which contains private key
-      serverKeyPath: "some path in pod"
-    # for events object PUT, POST, COPY and object removal
-    events:
-      - "ObjectCreated:*"
-      - "ObjectRemoved:Delete"
+    example-secure:
+      webhook:
+        # port to run HTTP server on
+        port: "8090"
+        # endpoint to listen events on
+        endpoint: "/"
+        # path to file that is mounted in gateway pod which contains certs
+        serverCertPath: "some path in pod"
+        # path to file that is mounted in gateway pod which contains private key
+        serverKeyPath: "some path in pod"
+      # for events object PUT, POST, COPY and object removal
+      events:
+        - "ObjectCreated:*"
+        - "ObjectRemoved:Delete"

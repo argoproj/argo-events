@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"hash/fnv"
 	"net/http"
+	"strings"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
@@ -35,14 +35,9 @@ func DefaultConfigMapName(controllerName string) string {
 	return fmt.Sprintf("%s-configmap", controllerName)
 }
 
-// DefaultServiceName returns a formulated name for a service
-func DefaultServiceName(serviceName string) string {
-	return fmt.Sprintf("%s-svc", serviceName)
-}
-
 // ServiceDNSName returns a formulated dns name for a service
 func ServiceDNSName(serviceName, namespace string) string {
-	return fmt.Sprintf("%s-svc.%s.svc.cluster.local", serviceName, namespace)
+	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 }
 
 // DefaultEventSourceName returns a formulated name for a gateway configuration
@@ -111,12 +106,19 @@ func GetObjectHash(obj metav1.Object) (string, error) {
 	return Hasher(string(b)), nil
 }
 
-func CheckEventSourceVersion(cm *corev1.ConfigMap) error {
-	if cm.Labels == nil {
-		return fmt.Errorf("labels can't be empty. event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
+// FormatEndpoint returns a formatted api endpoint
+func FormatEndpoint(endpoint string) string {
+	if !strings.HasPrefix(endpoint, "/") {
+		return fmt.Sprintf("/%s", endpoint)
 	}
-	if _, ok := cm.Labels[LabelArgoEventsEventSourceVersion]; !ok {
-		return fmt.Errorf("event source must be specified in as %s label", LabelArgoEventsEventSourceVersion)
-	}
-	return nil
+	return endpoint
+}
+
+// FormattedURL returns a formatted url
+func FormattedURL(url, endpoint string) string {
+	return fmt.Sprintf("%s%s", url, FormatEndpoint(endpoint))
+}
+
+func ErrEventSourceTypeMismatch(eventSourceType string) string {
+	return fmt.Sprintf("event source is not type of %s", eventSourceType)
 }

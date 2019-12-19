@@ -17,343 +17,207 @@ limitations under the License.
 package gateway
 
 import (
-	"github.com/sirupsen/logrus"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// the context of an operation on a gateway-controller.
-// the gateway-controller-controller creates this context each time it picks a Gateway off its queue.
-type gwOperationCtx struct {
-	// gw is the gateway-controller object
-	gw *v1alpha1.Gateway
-	// updated indicates whether the gateway-controller object was updated and needs to be persisted back to k8
+// the context of an operation in the controller.
+// the controller creates this context each time it picks a Gateway off its queue.
+type gatewayContext struct {
+	// gateway is the controller object
+	gateway *v1alpha1.Gateway
+	// updated indicates whether the controller object was updated and needs to be persisted back to k8
 	updated bool
-	// log is the logger for a gateway
-	log *logrus.Logger
-	// reference to the gateway-controller-controller
-	controller *GatewayController
-	// gwrctx is the context to handle child resource
-	gwrctx gwResourceCtx
+	// logger is the logger for a gateway
+	logger *logrus.Logger
+	// reference to the controller
+	controller *Controller
 }
 
-// newGatewayOperationCtx creates and initializes a new gOperationCtx object
-func newGatewayOperationCtx(gw *v1alpha1.Gateway, controller *GatewayController) *gwOperationCtx {
-	gw = gw.DeepCopy()
-	return &gwOperationCtx{
-		gw:      gw,
+// newGatewayContext creates and initializes a new gatewayContext object
+func newGatewayContext(gatewayObj *v1alpha1.Gateway, controller *Controller) *gatewayContext {
+	gatewayObj = gatewayObj.DeepCopy()
+	return &gatewayContext{
+		gateway: gatewayObj,
 		updated: false,
-		log: common.NewArgoEventsLogger().WithFields(
+		logger: common.NewArgoEventsLogger().WithFields(
 			map[string]interface{}{
-				common.LabelGatewayName: gw.Name,
-				common.LabelNamespace:   gw.Namespace,
+				common.LabelResourceName: gatewayObj.Name,
+				common.LabelNamespace:    gatewayObj.Namespace,
 			}).Logger,
 		controller: controller,
-		gwrctx:     NewGatewayResourceContext(gw, controller),
 	}
 }
 
 // operate checks the status of gateway resource and takes action based on it.
-func (goc *gwOperationCtx) operate() error {
-	defer func() {
-		if goc.updated {
-			var err error
-			eventType := common.StateChangeEventType
-			labels := map[string]string{
-				common.LabelGatewayName:                    goc.gw.Name,
-				common.LabelGatewayKeyPhase:                string(goc.gw.Status.Phase),
-				common.LabelKeyGatewayControllerInstanceID: goc.controller.Config.InstanceID,
-				common.LabelOperation:                      "persist_gateway_state",
-			}
-			goc.gw, err = PersistUpdates(goc.controller.gatewayClientset, goc.gw, goc.log)
-			if err != nil {
-				goc.log.WithError(err).Error("failed to persist gateway update, escalating...")
-				// escalate
-				eventType = common.EscalationEventType
-			}
+func (ctx *gatewayContext) operate() error {
+	defer ctx.updateGatewayState()
 
-			labels[common.LabelEventType] = string(eventType)
-			if err := common.GenerateK8sEvent(goc.controller.kubeClientset,
-				"persist update",
-				eventType,
-				"gateway state update",
-				goc.gw.Name,
-				goc.gw.Namespace,
-				goc.controller.Config.InstanceID,
-				gateway.Kind,
-				labels,
-			); err != nil {
-				goc.log.WithError(err).Error("failed to create K8s event to log gateway state persist operation")
-				return
-			}
-			goc.log.Info("successfully persisted gateway resource update and created K8s event")
-		}
-		goc.updated = false
-	}()
+	ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Infoln("operating on the gateway...")
 
-	goc.log.WithField(common.LabelPhase, string(goc.gw.Status.Phase)).Info("operating on the gateway")
+	if err := Validate(ctx.gateway); err != nil {
+		ctx.logger.WithError(err).Infoln("invalid gateway object")
+		return err
+	}
 
 	// check the state of a gateway and take actions accordingly
-	switch goc.gw.Status.Phase {
+	switch ctx.gateway.Status.Phase {
 	case v1alpha1.NodePhaseNew:
-		err := goc.createGatewayResources()
-		if err != nil {
+		if err := ctx.createGatewayResources(); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to create resources for the gateway")
+			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
+		ctx.logger.Infoln("marking gateway as active")
+		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
+
+		// Gateway is already running
+	case v1alpha1.NodePhaseRunning:
+		ctx.logger.Infoln("gateway is running")
+		err := ctx.updateGatewayResources()
+		if err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
+			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
+			return err
+		}
+		ctx.updated = true
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:
-		goc.log.Error("gateway is in error state. please check escalated K8 event for the error")
-		err := goc.updateGatewayResources()
+		ctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
+		err := ctx.updateGatewayResources()
 		if err != nil {
+			ctx.logger.WithError(err).Errorln("failed to update resources for the gateway")
 			return err
 		}
-
-	// Gateway is already running, do nothing
-	case v1alpha1.NodePhaseRunning:
-		goc.log.Info("gateway is running")
-		err := goc.updateGatewayResources()
-		if err != nil {
-			return err
-		}
+		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is now active")
 
 	default:
-		goc.log.WithField(common.LabelPhase, string(goc.gw.Status.Phase)).Panic("unknown gateway phase.")
+		ctx.logger.WithField(common.LabelPhase, string(ctx.gateway.Status.Phase)).Errorln("unknown gateway phase")
 	}
 	return nil
 }
 
-func (goc *gwOperationCtx) createGatewayResources() error {
-	err := Validate(goc.gw)
-	if err != nil {
-		goc.log.WithError(err).Error("gateway validation failed")
-		err = errors.Wrap(err, "failed to validate gateway")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		return err
-	}
-	// Gateway pod has two components,
-	// 1) Gateway Server   - Listen events from event source and dispatches the event to gateway client
-	// 2) Gateway Client   - Listens for events from gateway server, convert them into cloudevents specification
-	//                          compliant events and dispatch them to watchers.
-	pod, err := goc.createGatewayPod()
-	if err != nil {
-		err = errors.Wrap(err, "failed to create gateway pod")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		return err
-	}
-	goc.log.WithField(common.LabelPodName, pod.Name).Info("gateway pod is created")
+// updateGatewayState updates the gateway state
+func (ctx *gatewayContext) updateGatewayState() {
+	if ctx.updated {
+		var err error
+		eventType := common.StateChangeEventType
+		labels := map[string]string{
+			common.LabelResourceName:  ctx.gateway.Name,
+			LabelPhase:                string(ctx.gateway.Status.Phase),
+			LabelControllerInstanceID: ctx.controller.Config.InstanceID,
+			common.LabelOperation:     "persist_gateway_state",
+		}
 
-	// expose gateway if service is configured
-	if goc.gw.Spec.Service != nil {
-		svc, err := goc.createGatewayService()
+		ctx.gateway, err = PersistUpdates(ctx.controller.gatewayClient, ctx.gateway, ctx.logger)
 		if err != nil {
-			err = errors.Wrap(err, "failed to create gateway service")
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-			return err
+			ctx.logger.WithError(err).Errorln("failed to persist gateway update, escalating...")
+			eventType = common.EscalationEventType
 		}
-		goc.log.WithField(common.LabelServiceName, svc.Name).Info("gateway service is created")
-	}
 
-	goc.log.Info("marking gateway as active")
-	goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
-	return nil
+		labels[common.LabelEventType] = string(eventType)
+		if err := common.GenerateK8sEvent(ctx.controller.k8sClient,
+			"persist update",
+			eventType,
+			"gateway state update",
+			ctx.gateway.Name,
+			ctx.gateway.Namespace,
+			ctx.controller.Config.InstanceID,
+			gateway.Kind,
+			labels,
+		); err != nil {
+			ctx.logger.WithError(err).Errorln("failed to create K8s event to logger gateway state persist operation")
+			return
+		}
+		ctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
+	}
+	ctx.updated = false
 }
 
-func (goc *gwOperationCtx) createGatewayPod() (*corev1.Pod, error) {
-	pod, err := goc.gwrctx.newGatewayPod()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to initialize pod for gateway")
-		return nil, err
-	}
-	pod, err = goc.gwrctx.createGatewayPod(pod)
-	if err != nil {
-		goc.log.WithError(err).Error("failed to create pod for gateway")
-		return nil, err
-	}
-	return pod, nil
-}
-
-func (goc *gwOperationCtx) createGatewayService() (*corev1.Service, error) {
-	svc, err := goc.gwrctx.newGatewayService()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to initialize service for gateway")
-		return nil, err
-	}
-	svc, err = goc.gwrctx.createGatewayService(svc)
-	if err != nil {
-		goc.log.WithError(err).Error("failed to create service for gateway")
-		return nil, err
-	}
-	return svc, nil
-}
-
-func (goc *gwOperationCtx) updateGatewayResources() error {
-	err := Validate(goc.gw)
-	if err != nil {
-		goc.log.WithError(err).Error("gateway validation failed")
-		err = errors.Wrap(err, "failed to validate gateway")
-		if goc.gw.Status.Phase != v1alpha1.NodePhaseError {
-			goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		}
-		return err
-	}
-
-	_, podChanged, err := goc.updateGatewayPod()
-	if err != nil {
-		err = errors.Wrap(err, "failed to update gateway pod")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		return err
-	}
-
-	_, svcChanged, err := goc.updateGatewayService()
-	if err != nil {
-		err = errors.Wrap(err, "failed to update gateway service")
-		goc.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
-		return err
-	}
-
-	if goc.gw.Status.Phase != v1alpha1.NodePhaseRunning && (podChanged || svcChanged) {
-		goc.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
-	}
-
-	return nil
-}
-
-func (goc *gwOperationCtx) updateGatewayPod() (*corev1.Pod, bool, error) {
-	// Check if gateway spec has changed for pod.
-	existingPod, err := goc.gwrctx.getGatewayPod()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to get pod for gateway")
-		return nil, false, err
-	}
-
-	// create a new pod spec
-	newPod, err := goc.gwrctx.newGatewayPod()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to initialize pod for gateway")
-		return nil, false, err
-	}
-
-	// check if pod spec remained unchanged
-	if existingPod != nil {
-		if existingPod.Annotations != nil && existingPod.Annotations[common.AnnotationGatewayResourceSpecHashName] == newPod.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.WithField(common.LabelPodName, existingPod.Name).Debug("gateway pod spec unchanged")
-			return nil, false, nil
-		}
-
-		// By now we are sure that the spec changed, so lets go ahead and delete the exisitng gateway pod.
-		goc.log.WithField(common.LabelPodName, existingPod.Name).Info("gateway pod spec changed")
-
-		err := goc.gwrctx.deleteGatewayPod(existingPod)
-		if err != nil {
-			goc.log.WithError(err).Error("failed to delete pod for gateway")
-			return nil, false, err
-		}
-
-		goc.log.WithField(common.LabelPodName, existingPod.Name).Info("gateway pod is deleted")
-	}
-
-	// Create new pod for updated gateway spec.
-	createdPod, err := goc.gwrctx.createGatewayPod(newPod)
-	if err != nil {
-		goc.log.WithError(err).Error("failed to create pod for gateway")
-		return nil, false, err
-	}
-	goc.log.WithError(err).WithField(common.LabelPodName, newPod.Name).Info("gateway pod is created")
-
-	return createdPod, true, nil
-}
-
-func (goc *gwOperationCtx) updateGatewayService() (*corev1.Service, bool, error) {
-	// Check if gateway spec has changed for service.
-	existingSvc, err := goc.gwrctx.getGatewayService()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to get service for gateway")
-		return nil, false, err
-	}
-
-	// create a new service spec
-	newSvc, err := goc.gwrctx.newGatewayService()
-	if err != nil {
-		goc.log.WithError(err).Error("failed to initialize service for gateway")
-		return nil, false, err
-	}
-
-	if existingSvc != nil {
-		// updated spec doesn't have service defined, delete existing service.
-		if newSvc == nil {
-			if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
-				return nil, false, err
-			}
-			return nil, true, nil
-		}
-
-		// check if service spec remained unchanged
-		if existingSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] == newSvc.Annotations[common.AnnotationGatewayResourceSpecHashName] {
-			goc.log.WithField(common.LabelServiceName, existingSvc.Name).Debug("gateway service spec unchanged")
-			return nil, false, nil
-		}
-
-		// service spec changed, delete existing service and create new one
-		goc.log.WithField(common.LabelServiceName, existingSvc.Name).Info("gateway service spec changed")
-
-		if err := goc.gwrctx.deleteGatewayService(existingSvc); err != nil {
-			return nil, false, err
-		}
-	} else if newSvc == nil {
-		// gateway service doesn't exist originally
-		return nil, false, nil
-	}
-
-	// change createGatewayService to take a service spec
-	createdSvc, err := goc.gwrctx.createGatewayService(newSvc)
-	if err != nil {
-		goc.log.WithError(err).Error("failed to create service for gateway")
-		return nil, false, err
-	}
-	goc.log.WithField(common.LabelServiceName, createdSvc.Name).Info("gateway service is created")
-
-	return createdSvc, true, nil
-}
-
-// mark the overall gateway phase
-func (goc *gwOperationCtx) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
-	justCompleted := goc.gw.Status.Phase != phase
+// mark the gateway phase
+func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message string) {
+	justCompleted := ctx.gateway.Status.Phase != phase
 	if justCompleted {
-		goc.log.WithFields(
+		ctx.logger.WithFields(
 			map[string]interface{}{
-				"old": string(goc.gw.Status.Phase),
+				"old": string(ctx.gateway.Status.Phase),
 				"new": string(phase),
 			},
-		).Info("phase changed")
+		).Infoln("phase changed")
 
-		goc.gw.Status.Phase = phase
-		if goc.gw.ObjectMeta.Labels == nil {
-			goc.gw.ObjectMeta.Labels = make(map[string]string)
+		ctx.gateway.Status.Phase = phase
+		if ctx.gateway.ObjectMeta.Labels == nil {
+			ctx.gateway.ObjectMeta.Labels = make(map[string]string)
 		}
-		if goc.gw.Annotations == nil {
-			goc.gw.Annotations = make(map[string]string)
+		if ctx.gateway.Annotations == nil {
+			ctx.gateway.Annotations = make(map[string]string)
 		}
-		goc.gw.ObjectMeta.Labels[common.LabelGatewayKeyPhase] = string(phase)
+
+		ctx.gateway.ObjectMeta.Labels[LabelPhase] = string(phase)
 		// add annotations so a resource sensor can watch this gateway.
-		goc.gw.Annotations[common.LabelGatewayKeyPhase] = string(phase)
+		ctx.gateway.Annotations[LabelPhase] = string(phase)
 	}
-	if goc.gw.Status.StartedAt.IsZero() {
-		goc.gw.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
+
+	if ctx.gateway.Status.StartedAt.IsZero() {
+		ctx.gateway.Status.StartedAt = metav1.Time{Time: time.Now().UTC()}
 	}
-	goc.log.WithFields(
+
+	ctx.logger.WithFields(
 		map[string]interface{}{
-			"old": string(goc.gw.Status.Message),
+			"old": ctx.gateway.Status.Message,
 			"new": message,
 		},
-	).Info("message")
-	goc.gw.Status.Message = message
-	goc.updated = true
+	).Infoln("phase change message")
+
+	ctx.gateway.Status.Message = message
+	ctx.updated = true
+}
+
+// PersistUpdates of the gateway resource
+func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus.Logger) (*v1alpha1.Gateway, error) {
+	gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.ObjectMeta.Namespace)
+
+	// in case persist update fails
+	oldgw := gw.DeepCopy()
+
+	gw, err := gatewayClient.Update(gw)
+	if err != nil {
+		log.WithError(err).Warn("error updating gateway")
+		if errors.IsConflict(err) {
+			return oldgw, err
+		}
+		log.Info("re-applying updates on latest version and retrying update")
+		err = ReapplyUpdates(client, gw)
+		if err != nil {
+			log.WithError(err).Error("failed to re-apply update")
+			return oldgw, err
+		}
+	}
+	log.WithField(common.LabelPhase, string(gw.Status.Phase)).Info("gateway state updated successfully")
+	return gw, nil
+}
+
+// ReapplyUpdates to gateway resource
+func ReapplyUpdates(client gwclient.Interface, gw *v1alpha1.Gateway) error {
+	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.Namespace)
+		g, err := gatewayClient.Update(gw)
+		if err != nil {
+			if !common.IsRetryableKubeAPIError(err) {
+				return false, err
+			}
+			return false, nil
+		}
+		gw = g
+		return true, nil
+	})
 }

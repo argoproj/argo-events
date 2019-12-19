@@ -20,7 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// S3Artifact contains information about an artifact in S3
+// S3Artifact contains information about an S3 connection and bucket
 type S3Artifact struct {
 	Endpoint  string                    `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
 	Bucket    *S3Bucket                 `json:"bucket" protobuf:"bytes,2,opt,name=bucket"`

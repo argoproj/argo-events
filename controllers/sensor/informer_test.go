@@ -17,29 +17,17 @@ limitations under the License.
 package sensor
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/selection"
 )
 
-func TestInformer(t *testing.T) {
-	convey.Convey("Given a sensor controller", t, func() {
-		controller := getSensorController()
-		convey.Convey("Instance ID required key must match", func() {
-			req := controller.instanceIDReq()
-			convey.So(req.Key(), convey.ShouldEqual, common.LabelKeySensorControllerInstanceID)
-			convey.So(req.Operator(), convey.ShouldEqual, selection.Equals)
-			convey.So(req.Values().Has("argo-events"), convey.ShouldBeTrue)
-		})
-	})
-
-	convey.Convey("Given a sensor controller", t, func() {
-		controller := getSensorController()
-		convey.Convey("Get a new informer and make sure its not nil", func() {
-			i := controller.newSensorInformer()
-			convey.So(i, convey.ShouldNotBeNil)
-		})
-	})
+func TestInformer_InstanceIDReq(t *testing.T) {
+	controller := getController()
+	req, err := controller.instanceIDReq()
+	assert.Nil(t, err)
+	assert.Equal(t, req.Key(), LabelControllerInstanceID)
+	assert.Equal(t, req.Operator(), selection.Equals)
+	assert.Equal(t, req.Values().Has("argo-events"), true)
 }

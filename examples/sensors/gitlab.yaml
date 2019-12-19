@@ -5,15 +5,12 @@ metadata:
   labels:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor"
+          image: "argoproj/sensor:v0.12-rc"
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   eventProtocol:
@@ -27,9 +24,9 @@ spec:
         name: gitlab-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -49,7 +46,7 @@ spec:
                 container:
                   image: docker/whalesay:latest
                   command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
+                  args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
             event: "gitlab-gateway:example"

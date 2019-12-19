@@ -1,74 +1,70 @@
-# This configmap contains the event sources configurations for Github gateway
-# More info: https://developer.github.com/v3/repos/hooks/#create-a-hook
-
----
-apiVersion: v1
-kind: ConfigMap
+# Info on GitHub Webhook: https://developer.github.com/v3/repos/hooks/#create-a-hook
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: github-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  example: |-
-    # owner of the repo
-    owner: "argoproj"
-    # repository name
-    repository: "argo-events"
-    # Github will send events to following port and endpoint
-    hook:
-     # endpoint to listen to events on
-     endpoint: "/push"
-     # port to run internal HTTP server on
-     port: "12000"
-     # url the gateway will use to register at Github.
-     # This url must be reachable from outside the cluster.
-     # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-     url: "http://myfakeurl.fake"
-    # type of events to listen to.
-    # following listens to everything, hence *
-    # You can find more info on https://developer.github.com/v3/activity/events/types/
-    events:
-    - "*"
-    # apiToken refers to K8s secret that stores the github api token
-    apiToken:
-      # Name of the K8s secret that contains the access token
-      name: github-access
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
-      key: token
-    # webHookSecret refers to K8s secret that stores the github hook secret
-    webHookSecret:
-      # Name of the K8s secret that contains the hook secret
-      name: github-access
-      # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
-      key: secret
-    # type of the connection between gateway and Github
-    insecure: false
-    # Determines if notifications are sent when the webhook is triggered
-    active: true
-    # The media type used to serialize the payloads
-    contentType: "json"
+spec:
+  type: "github"
+  github:
+    example:
+      # owner of the repo
+      owner: "argoproj"
+      # repository name
+      repository: "argo-events"
+      # Github will send events to following port and endpoint
+      webhook:
+        # endpoint to listen to events on
+        endpoint: "/push"
+        # port to run internal HTTP server on
+        port: "12000"
+        # url the gateway will use to register at Github.
+        # This url must be reachable from outside the cluster.
+        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
+        url: "http://myfakeurl.fake"
+      # type of events to listen to.
+      # following listens to everything, hence *
+      # You can find more info on https://developer.github.com/v3/activity/events/types/
+      events:
+        - "*"
+      # apiToken refers to K8s secret that stores the github api token
+      apiToken:
+        # Name of the K8s secret that contains the access token
+        name: github-access
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
+        key: token
+      # webHookSecret refers to K8s secret that stores the github hook secret
+      webHookSecret:
+        # Name of the K8s secret that contains the hook secret
+        name: github-access
+        # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
+        key: secret
+      # type of the connection between gateway and Github
+      insecure: false
+      # Determines if notifications are sent when the webhook is triggered
+      active: true
+      # The media type used to serialize the payloads
+      contentType: "json"
 
-  example-with-secure-connection: |-
-    owner: "argoproj"
-    repository: "argo"
-    hook:
-     endpoint: "/push"
-     port: "13000"
-     url: "http://myargofakeurl.fake"
-     # path to file that is mounted in gateway pod which contains certs
-     serverCertPath: "some path in pod"
-     # path to file that is mounted in gateway pod which contains private key
-     serverKeyPath: "some path in pod"
-    events:
-    - "push"
-    - "delete"
-    apiToken:
-      name: github-access
-      key: token
-    webHookSecret:
-      name: github-access
-      key: secret
-    insecure: true
-    active: true
-    contentType: "json"
+    example-with-secure-connection:
+      owner: "argoproj"
+      repository: "argo"
+      webhook:
+        endpoint: "/push"
+        port: "13000"
+        url: "http://myargofakeurl.fake"
+        # path to file that is mounted in gateway pod which contains certs
+        serverCertPath: "some path in pod"
+        # path to file that is mounted in gateway pod which contains private key
+        serverKeyPath: "some path in pod"
+      events:
+        - "push"
+        - "delete"
+      apiToken:
+        name: github-access
+        key: token
+      webHookSecret:
+        name: github-access
+        key: secret
+      insecure: true
+      active: true
+      contentType: "json"

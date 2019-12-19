@@ -1,41 +1,25 @@
-# This configmap contains the event sources configurations for Webhook gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: webhook-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
+spec:
+  type: "webhook"
+  webhook:
+    # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
+    example:
+      # port to run HTTP server on
+      port: "12000"
+      # endpoint to listen to
+      endpoint: "/example"
+      # HTTP request method to allow. In this case, only POST requests are accepted
+      method: "POST"
 
-  example: |-
-    # port to run HTTP server on
-    port: "12000"
-    # endpoint to listen to
-    endpoint: "/example"
-    # HTTP request method to allow. In this case, only POST requests are accepted
-    method: "POST"
-
-  example-secure: |-
-    port: "13000"
-    endpoint: "/secure"
-    method: "POST"
-    # path to file that is mounted in gateway pod which contains certs
-    serverCertPath: "/bin/webhook-secure/crt"
-    # path to file that is mounted in gateway pod which contains private key
-    serverKeyPath: "/bin/webhook-secure/key"
-
-  # example 3 and 4 shows how you can add multiple endpoints on same HTTP server
-
-  example-3: |-
-    port: "14000"
-    endpoint: "/example3"
-    method: "PUT"
-
-  example-4: |-
-    port: "14000"
-    endpoint: "/example4"
-    method: "POST"
+# Uncomment to use secure webhook
+#    example-secure:
+#      port: "13000"
+#      endpoint: "/secure"
+#      method: "POST"
+#      # path to file that is mounted in gateway pod which contains certs
+#      serverCertPath: "/bin/webhook-secure/crt"
+#      # path to file that is mounted in gateway pod which contains private key
+#      serverKeyPath: "/bin/webhook-secure/key"

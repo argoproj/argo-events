@@ -5,15 +5,13 @@ metadata:
   labels:
     # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.10
 spec:
+  version: "v0.11"
   template:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor"
+          image: "argoproj/sensor:v0.12-rc"
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   eventProtocol:
@@ -21,15 +19,15 @@ spec:
     http:
       port: "9300"
   dependencies:
-    - name: "aws-sqs-gateway:example-1"
+    - name: "aws-sqs-gateway:example"
   triggers:
     - template:
         name: sqs-workflow
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -52,5 +50,5 @@ spec:
                   args: ["{{inputs.parameters.message}}"]
       resourceParameters:
         - src:
-            event: "aws-sqs-gateway:example-1"
+            event: "aws-sqs-gateway:example"
           dest: spec.arguments.parameters.0.value

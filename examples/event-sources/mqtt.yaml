@@ -1,34 +1,30 @@
-# This configmap contains the event sources configurations for MQTT gateway
-
----
-apiVersion: v1
-kind: ConfigMap
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
 metadata:
   name: mqtt-event-source
-  labels:
-    # do not remove
-    argo-events-event-source-version: v0.10
-data:
-  # no retries if connection to mqtt service is not successful
-  example-without-retry: |-
-    # url of your mqtt service
-    url: tcp://mqtt.argo-events:1883
-    # topic name
-    topic: foo
-    # client id
-    clientId: 1234
+spec:
+  type: "mqtt"
+  mqtt:
+    # no retries if connection to mqtt service is not successful
+    example-without-retry:
+      # url of your mqtt service
+      url: "tcp://mqtt.argo-events:1883"
+      # topic name
+      topic: "foo"
+      # client id
+      clientId: 1234
 
-  # retry after each backoff to set up a successful connection
-  example-with-retry: |-
-    url: tcp://mqtt.argo-events:1883
-    topic: bar
-    # client id
-    clientId: 2345
-    backoff:
-      # duration in nanoseconds. following value is 10 seconds
-      duration: 10000000000
-      # how many backoffs
-      steps: 5
-      # factor to increase on each step.
-      # setting factor > 1 makes backoff exponential.
-      factor: 2
+    # retry after each backoff to set up a successful connection
+    example-with-retry:
+      url: "tcp://mqtt.argo-events:1883"
+      topic: "bar"
+      # client id
+      clientId: 2345
+      backoff:
+        # duration in nanoseconds. following value is 10 seconds
+        duration: 10000000000
+        # how many backoffs
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes backoff exponential.
+        factor: 2

@@ -1,169 +1,248 @@
+/*
+Copyright 2018 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package gateway
 
 import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+	"github.com/pkg/errors"
+	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/selection"
 )
 
-type gwResourceCtx struct {
-	// gw is the gateway-controller object
-	gw *v1alpha1.Gateway
-	// reference to the gateway-controller-controller
-	controller *GatewayController
-
-	controllerscommon.ChildResourceContext
+// buildServiceResource builds a new service that exposes gateway.
+func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
+	if ctx.gateway.Spec.Service == nil {
+		return nil, nil
+	}
+	service := ctx.gateway.Spec.Service.DeepCopy()
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, service, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+	return service, nil
 }
 
-// NewGatewayResourceContext returns new gwResourceCtx
-func NewGatewayResourceContext(gw *v1alpha1.Gateway, controller *GatewayController) gwResourceCtx {
-	return gwResourceCtx{
-		gw:         gw,
-		controller: controller,
-		ChildResourceContext: controllerscommon.ChildResourceContext{
-			SchemaGroupVersionKind:            v1alpha1.SchemaGroupVersionKind,
-			LabelOwnerName:                    common.LabelGatewayName,
-			LabelKeyOwnerControllerInstanceID: common.LabelKeyGatewayControllerInstanceID,
-			AnnotationOwnerResourceHashName:   common.AnnotationGatewayResourceSpecHashName,
-			InstanceID:                        controller.Config.InstanceID,
+// buildDeploymentResource builds a deployment resource for the gateway
+func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
+	if ctx.gateway.Spec.Template == nil {
+		return nil, errors.New("gateway template can't be empty")
+	}
+
+	podTemplate := ctx.gateway.Spec.Template.DeepCopy()
+
+	replica := int32(ctx.gateway.Spec.Replica)
+	if replica == 0 {
+		replica = 1
+	}
+
+	deployment := &appv1.Deployment{
+		ObjectMeta: podTemplate.ObjectMeta,
+		Spec: appv1.DeploymentSpec{
+			Replicas: &replica,
+			Template: *podTemplate,
 		},
 	}
-}
 
-// gatewayResourceLabelSelector returns label selector of the gateway of the context
-func (grc *gwResourceCtx) gatewayResourceLabelSelector() (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelGatewayName, selection.Equals, []string{grc.gw.Name})
-	if err != nil {
-		return nil, err
+	if deployment.Spec.Template.Labels == nil {
+		deployment.Spec.Template.Labels = map[string]string{}
 	}
-	return labels.NewSelector().Add(*req), nil
-}
+	deployment.Spec.Template.Labels[common.LabelObjectName] = ctx.gateway.Name
 
-// createGatewayService creates a given service
-func (grc *gwResourceCtx) createGatewayService(svc *corev1.Service) (*corev1.Service, error) {
-	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Create(svc)
-}
+	if deployment.Spec.Selector == nil {
+		deployment.Spec.Selector = &metav1.LabelSelector{
+			MatchLabels: map[string]string{},
+		}
+	}
+	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = ctx.gateway.Name
 
-// deleteGatewayService deletes a given service
-func (grc *gwResourceCtx) deleteGatewayService(svc *corev1.Service) error {
-	return grc.controller.kubeClientset.CoreV1().Services(grc.gw.Namespace).Delete(svc.Name, &metav1.DeleteOptions{})
-}
-
-// getGatewayService returns the service of gateway
-func (grc *gwResourceCtx) getGatewayService() (*corev1.Service, error) {
-	selector, err := grc.gatewayResourceLabelSelector()
-	if err != nil {
-		return nil, err
-	}
-	svcs, err := grc.controller.svcInformer.Lister().Services(grc.gw.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(svcs) == 0 {
-		return nil, nil
-	}
-	return svcs[0], nil
-}
-
-// newGatewayService returns a new service that exposes gateway.
-func (grc *gwResourceCtx) newGatewayService() (*corev1.Service, error) {
-	servicTemplateSpec := grc.gw.Spec.Service.DeepCopy()
-	if servicTemplateSpec == nil {
-		return nil, nil
-	}
-	service := &corev1.Service{
-		ObjectMeta: servicTemplateSpec.ObjectMeta,
-		Spec:       servicTemplateSpec.Spec,
-	}
-	if service.Namespace == "" {
-		service.Namespace = grc.gw.Namespace
-	}
-	if service.Name == "" {
-		service.Name = common.DefaultServiceName(grc.gw.Name)
-	}
-	err := grc.SetObjectMeta(grc.gw, service)
-	return service, err
-}
-
-// getGatewayPod returns the pod of gateway
-func (grc *gwResourceCtx) getGatewayPod() (*corev1.Pod, error) {
-	selector, err := grc.gatewayResourceLabelSelector()
-	if err != nil {
-		return nil, err
-	}
-	pods, err := grc.controller.podInformer.Lister().Pods(grc.gw.Namespace).List(selector)
-	if err != nil {
-		return nil, err
-	}
-	if len(pods) == 0 {
-		return nil, nil
-	}
-	return pods[0], nil
-}
-
-// createGatewayPod creates a given pod
-func (grc *gwResourceCtx) createGatewayPod(pod *corev1.Pod) (*corev1.Pod, error) {
-	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Create(pod)
-}
-
-// deleteGatewayPod deletes a given pod
-func (grc *gwResourceCtx) deleteGatewayPod(pod *corev1.Pod) error {
-	return grc.controller.kubeClientset.CoreV1().Pods(grc.gw.Namespace).Delete(pod.Name, &metav1.DeleteOptions{})
-}
-
-// newGatewayPod returns a new pod of gateway
-func (grc *gwResourceCtx) newGatewayPod() (*corev1.Pod, error) {
-	podTemplateSpec := grc.gw.Spec.Template.DeepCopy()
-	pod := &corev1.Pod{
-		ObjectMeta: podTemplateSpec.ObjectMeta,
-		Spec:       podTemplateSpec.Spec,
-	}
-	if pod.Namespace == "" {
-		pod.Namespace = grc.gw.Namespace
-	}
-	if pod.Name == "" {
-		pod.Name = grc.gw.Name
-	}
-	grc.setupContainersForGatewayPod(pod)
-	err := grc.SetObjectMeta(grc.gw, pod)
-	return pod, err
-}
-
-// containers required for gateway deployment
-func (grc *gwResourceCtx) setupContainersForGatewayPod(pod *corev1.Pod) {
-	// env variables
 	envVars := []corev1.EnvVar{
 		{
-			Name:  common.EnvVarGatewayNamespace,
-			Value: grc.gw.Namespace,
+			Name:  common.EnvVarNamespace,
+			Value: ctx.gateway.Namespace,
 		},
 		{
-			Name:  common.EnvVarGatewayEventSourceConfigMap,
-			Value: grc.gw.Spec.EventSource,
+			Name:  common.EnvVarEventSource,
+			Value: ctx.gateway.Spec.EventSourceRef.Name,
 		},
 		{
-			Name:  common.EnvVarGatewayName,
-			Value: grc.gw.Name,
+			Name:  common.EnvVarResourceName,
+			Value: ctx.gateway.Name,
 		},
 		{
-			Name:  common.EnvVarGatewayControllerInstanceID,
-			Value: grc.controller.Config.InstanceID,
-		},
-		{
-			Name:  common.EnvVarGatewayControllerName,
-			Value: common.LabelGatewayControllerName,
+			Name:  common.EnvVarControllerInstanceID,
+			Value: ctx.controller.Config.InstanceID,
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,
-			Value: grc.gw.Spec.ProcessorPort,
+			Value: ctx.gateway.Spec.ProcessorPort,
 		},
 	}
-	for i, container := range pod.Spec.Containers {
+
+	for i, container := range deployment.Spec.Template.Spec.Containers {
 		container.Env = append(container.Env, envVars...)
-		pod.Spec.Containers[i] = container
+		deployment.Spec.Template.Spec.Containers[i] = container
 	}
+
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, errors.Wrap(err, "failed to set the object metadata on the deployment object")
+	}
+
+	return deployment, nil
+}
+
+// createGatewayResources creates gateway deployment and service
+func (ctx *gatewayContext) createGatewayResources() error {
+	if ctx.gateway.Status.Resources == nil {
+		ctx.gateway.Status.Resources = &v1alpha1.GatewayResource{}
+	}
+
+	deployment, err := ctx.createGatewayDeployment()
+	if err != nil {
+		return err
+	}
+	ctx.gateway.Status.Resources.Deployment = &deployment.ObjectMeta
+	ctx.logger.WithField("name", deployment.Name).WithField("namespace", deployment.Namespace).Infoln("gateway deployment is created")
+
+	if ctx.gateway.Spec.Service != nil {
+		service, err := ctx.createGatewayService()
+		if err != nil {
+			return err
+		}
+		ctx.gateway.Status.Resources.Service = &service.ObjectMeta
+		ctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is created")
+	}
+
+	return nil
+}
+
+// createGatewayDeployment creates a deployment for the gateway
+func (ctx *gatewayContext) createGatewayDeployment() (*appv1.Deployment, error) {
+	deployment, err := ctx.buildDeploymentResource()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+}
+
+// createGatewayService creates a service for the gateway
+func (ctx *gatewayContext) createGatewayService() (*corev1.Service, error) {
+	svc, err := ctx.buildServiceResource()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.controller.k8sClient.CoreV1().Services(svc.Namespace).Create(svc)
+}
+
+// updateGatewayResources updates gateway deployment and service
+func (ctx *gatewayContext) updateGatewayResources() error {
+	deployment, err := ctx.updateGatewayDeployment()
+	if err != nil {
+		return err
+	}
+	if deployment != nil {
+		ctx.gateway.Status.Resources.Deployment = &deployment.ObjectMeta
+		ctx.logger.WithField("name", deployment.Name).WithField("namespace", deployment.Namespace).Infoln("gateway deployment is updated")
+	}
+
+	service, err := ctx.updateGatewayService()
+	if err != nil {
+		return err
+	}
+	if service != nil {
+		ctx.gateway.Status.Resources.Service = &service.ObjectMeta
+		ctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is updated")
+		return nil
+	}
+	ctx.gateway.Status.Resources.Service = nil
+	return nil
+}
+
+// updateGatewayDeployment updates the gateway deployment
+func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) {
+	newDeployment, err := ctx.buildDeploymentResource()
+	if err != nil {
+		return nil, err
+	}
+
+	currentMetadata := ctx.gateway.Status.Resources.Deployment
+	if currentMetadata == nil {
+		return nil, errors.New("deployment metadata is expected to be set in gateway object")
+	}
+
+	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	if err != nil {
+		if apierr.IsNotFound(err) {
+			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+		}
+		return nil, err
+	}
+
+	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+	}
+
+	return nil, nil
+}
+
+// updateGatewayService updates the gateway service
+func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
+	newService, err := ctx.buildServiceResource()
+	if err != nil {
+		return nil, err
+	}
+	if newService == nil && ctx.gateway.Status.Resources.Service != nil {
+		if err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Status.Resources.Service.Namespace).Delete(ctx.gateway.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		return nil, nil
+	}
+
+	if newService == nil {
+		return nil, nil
+	}
+
+	if ctx.gateway.Status.Resources.Service == nil {
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+	}
+
+	currentMetadata := ctx.gateway.Status.Resources.Service
+	currentService, err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	if err != nil {
+		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+	}
+
+	if currentMetadata == nil {
+		return nil, errors.New("service metadata is expected to be set in gateway object")
+	}
+
+	if currentService.Annotations != nil && currentService.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
+		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+			return nil, err
+		}
+		if ctx.gateway.Spec.Service != nil {
+			return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+		}
+	}
+
+	return currentService, nil
 }

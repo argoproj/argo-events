@@ -11,9 +11,9 @@ package gateways;
 */
 service Eventing {
     // StartEventSource starts an event source and returns stream of events.
-    rpc StartEventSource(EventSource) returns (stream Event);
+    rpc StartEventSource (EventSource) returns (stream Event);
     // ValidateEventSource validates an event source.
-    rpc ValidateEventSource(EventSource) returns (ValidEventSource);
+    rpc ValidateEventSource (EventSource) returns (ValidEventSource);
 }
 
 /**
@@ -25,9 +25,9 @@ message EventSource {
     // The event source name.
     string name = 2;
     // The event source configuration value.
-    string data = 3;
-    // Version of the event source
-    string version = 4;
+    bytes value = 3;
+    // Type of the event source
+    string type = 4;
 }
 
 /**

@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: minio-gateway-nats-streaming
+  labels:
+    # gateway controller with instanceId "argo-events" will process this gateway
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+spec:
+  replica: 1
+  type: "minio"
+  eventSourceRef:
+    name: "minio-event-source"
+    # optional, if event source is deployed in a different namespace than the gateway
+    # namespace: "other-namespace"
+  processorPort: "9330"
+  eventProtocol:
+    type: "NATS"
+    nats:
+      url: "nats://example-nats.argo-events:4222"
+      clusterId: "example-stan"
+      clientId: "myclient"
+      type: "Streaming"
+  template:
+    metadata:
+      name: "minio-gateway-nats-streaming"
+      labels:
+        gateway-name: "minio-gateway-nats-streaming"
+    spec:
+      containers:
+        - name: "gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
+          imagePullPolicy: "Always"
+          command: ["/bin/gateway-client"]
+        - name: "minio-events"
+          image: "argoproj/artifact-gateway:v0.12-rc"
+          imagePullPolicy: "Always"
+      serviceAccountName: "argo-events-sa"

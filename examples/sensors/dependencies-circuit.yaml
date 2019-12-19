@@ -4,30 +4,27 @@ metadata:
   name: webhook-sensor-http-boolean-op
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
-    # sensor controller will use this label to match with it's own version
-    # do not remove
-    argo-events-sensor-version: v0.10
 spec:
   template:
     spec:
       containers:
         - name: "sensor"
-          image: "argoproj/sensor"
+          image: "argoproj/sensor:v0.12-rc"
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   # defines list of all events sensor will accept
   dependencies:
-    - name: "webhook-gateway-http:foo"
-    - name: "webhook-gateway-http:index"
+    - name: "webhook-gateway:example"
+    - name: "webhook-gateway:example-secure"
   # divides event dependencies into groups
   dependencyGroups:
     - name: "group_1"
       dependencies:
-        - "webhook-gateway-http:foo"
+        - "webhook-gateway:example"
     - name: "group_2"
       dependencies:
-        - "webhook-gateway-http:index"
-  # either "webhook-gateway-http:foo" or "webhook-gateway-http:index" happens
+        - "webhook-gateway:example-secure"
+  # either "webhook-gateway:example" or "webhook-gateway-http:index" happens
   circuit: "group_1 || group_2"
   eventProtocol:
     type: "HTTP"
@@ -41,9 +38,9 @@ spec:
         name: webhook-workflow-trigger
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
@@ -65,9 +62,9 @@ spec:
         name: webhook-workflow-trigger-2
         group: argoproj.io
         version: v1alpha1
-        kind: Workflow
+        resource: workflows
         source:
-          inline: |
+          resource:
             apiVersion: argoproj.io/v1alpha1
             kind: Workflow
             metadata:
