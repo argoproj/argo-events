@@ -34,6 +34,9 @@ func TestValidateSensor(t *testing.T) {
 		assert.Nil(t, err)
 		var sensor *v1alpha1.Sensor
 		err = yaml.Unmarshal([]byte(content), &sensor)
+		if err != nil {
+			fmt.Println(file.Name())
+		}
 		assert.Nil(t, err)
 		err = ValidateSensor(sensor)
 		assert.Nil(t, err)

@@ -80,9 +80,9 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	}
 
 	namespacableClient := client.Resource(schema.GroupVersionResource{
-		Resource: trigger.Template.Resource,
-		Version:  trigger.Template.Version,
-		Group:    trigger.Template.Group,
+		Resource: trigger.Template.GroupVersionResource.Resource,
+		Version:  trigger.Template.GroupVersionResource.Version,
+		Group:    trigger.Template.GroupVersionResource.Group,
 	})
 
 	tests := []struct {

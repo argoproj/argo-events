@@ -300,7 +300,7 @@ func TestFilterEvent(t *testing.T) {
 		Data: []byte("{\"k\": \"v\"}"),
 	}
 
-	valid, err := filterEvent(filter, event)
+	valid, err := filterEvent(&filter, event)
 	assert.Nil(t, err)
 	assert.Equal(t, valid, true)
 }

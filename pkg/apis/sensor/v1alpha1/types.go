@@ -216,7 +216,7 @@ type TriggerTemplate struct {
 	// Switch is the condition to execute the trigger
 	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	GroupVersionResource *metav1.GroupVersionResource `json:"groupVersionResource" protobuf:"bytes,3,opt,name=groupVersionResource"`
+	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,3,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
 }

@@ -357,7 +357,7 @@ func TestApplyTemplateParameters(t *testing.T) {
 				DataKey: "group",
 			},
 			Operation: v1alpha1.TriggerParameterOpOverwrite,
-			Dest:      "groupVersionResource.group",
+			Dest:      "group",
 		},
 	}
 	err := ApplyTemplateParameters(obj, &obj.Spec.Triggers[0])
