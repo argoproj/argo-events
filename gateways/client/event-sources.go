@@ -215,7 +215,7 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 					}
 					return
 				}
-				err = gatewayContext.DispatchEvent(event)
+				err = gatewayContext.dispatchEvent(event)
 				if err != nil {
 					// escalate error through a K8s event
 					labels := map[string]string{

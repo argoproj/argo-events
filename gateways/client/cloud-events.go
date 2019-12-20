@@ -27,8 +27,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// DispatchEvent dispatches event to gateway transformer for further processing
-func (gatewayContext *GatewayContext) DispatchEvent(gatewayEvent *gateways.Event) error {
+// dispatchEvent dispatches event to gateway transformer for further processing
+func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 	logger.Infoln("dispatching event to subscribers")
 
