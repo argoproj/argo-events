@@ -20,7 +20,7 @@ spec:
       topic: "bar"
       # client id
       clientId: 2345
-      backoff:
+      connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000
         # how many backoffs
@@ -28,3 +28,4 @@ spec:
         # factor to increase on each step.
         # setting factor > 1 makes backoff exponential.
         factor: 2
+        jitter: 0.2
