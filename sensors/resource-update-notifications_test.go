@@ -17,11 +17,12 @@ limitations under the License.
 package sensors
 
 import (
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestOperateResourceUpdateNotification(t *testing.T) {
@@ -78,7 +79,14 @@ func TestOperateResourceUpdateNotification(t *testing.T) {
 		{
 			name: "a dependency is added",
 			updateFunc: func() {
-				obj.Spec.Dependencies = append()
+				obj.Spec.Dependencies = append(obj.Spec.Dependencies, v1alpha1.EventDependency{
+					Name:        "dep2",
+					GatewayName: "webhook-gateway",
+					EventName:   "example-2",
+				})
+			},
+			testFunc: func() {
+				assert.NotEmpty(t, sensorCtx.Sensor.Status.Nodes[dep2])
 			},
 		},
 	}

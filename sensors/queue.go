@@ -36,12 +36,17 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 
 	switch notification.NotificationType {
 	case v1alpha1.EventNotification:
+		if sensorCtx.Sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure && sensorCtx.Sensor.Spec.ErrorOnFailedRound {
+			sensorCtx.Logger.Errorln("sensor policy is error on failed trigger, won't activate the dependencies")
+			return
+		}
+
 		err := sensorCtx.operateEventNotification(notification)
 		if err != nil {
 			sensorCtx.Logger.WithError(err).Errorln("failed to operate on the event notification")
 			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
 		} else {
-			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+			sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleSuccess
 		}
 
 		// increment completion counter
