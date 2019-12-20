@@ -25,11 +25,11 @@ spec:
     spec:
       containers:
         - name: "gateway-client"
-          image: "argoproj/gateway-client"
+          image: "argoproj/gateway-client:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/gateway-client"]
         - name: "resource-events"
-          image: "argoproj/resource-gateway"
+          image: "argoproj/resource-gateway:v0.12-rc"
           imagePullPolicy: "Always"
           command: ["/bin/resource-gateway"]
       serviceAccountName: "argo-events-sa"
