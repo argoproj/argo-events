@@ -93,6 +93,14 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/tidwall/gjson"
+  version = "v1.3.5"
+
+[[constraint]]
+  name = "github.com/tidwall/sjson"
+  version = "v1.0.4"
+
+[[constraint]]
   name = "github.com/gorilla/mux"
   version = "v1.7.3"
 
@@ -103,6 +111,10 @@ required = [
 [[constraint]]
   name = "gopkg.in/jcmturner/gokrb5.v5"
   version = "5.3.0"
+
+[[constraint]]
+  name = "github.com/cloudevents/sdk-go"
+  version = "v0.10.1"
 
 [[override]]
   branch = "release-1.15"

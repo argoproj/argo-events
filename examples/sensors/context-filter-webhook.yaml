@@ -17,9 +17,9 @@ spec:
     - name: "webhook-gateway:example"
       filters:
         context:
-          source:
-            host: xyz.com
-          contentType: application/json
+          source: "webhook-gateway"
+          subject: "example"
+          dataContentType: application/json
   eventProtocol:
     type: "HTTP"
     http:

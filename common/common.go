@@ -78,6 +78,8 @@ const (
 	SensorNamespace = "SENSOR_NAMESPACE"
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
+	// Port for the sensor server to listen events on
+	SensorServerPort = 12000
 )
 
 // Gateway constants
@@ -98,13 +100,6 @@ const (
 	AnnotationResourceSpecHash = "resource-spec-hash"
 )
 
-// CloudEvents constants
-const (
-	// CloudEventsVersion is the version of the CloudEvents spec targeted+
-	// by this library.
-	CloudEventsVersion = "0.1"
-)
-
 var (
 	ErrNilEventSource = errors.New("event source can't be nil")
 )
@@ -119,4 +114,11 @@ const (
 	LabelOwnerName = "owner-name"
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
+)
+
+// various supported media types
+const (
+	MediaTypeJSON string = "application/json"
+	MediaTypeXML  string = "application/xml"
+	MediaTypeYAML string = "application/yaml"
 )

@@ -63,7 +63,7 @@ func TestSensorState(t *testing.T) {
 			name: "mark node state to active",
 			testFunc: func(t *testing.T) {
 				status := MarkNodePhase(fakeSensor, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
-					Payload: []byte("test payload"),
+					Data: []byte("test payload"),
 				}, logger)
 				assert.Equal(t, status.Phase, v1alpha1.NodePhaseActive)
 			},

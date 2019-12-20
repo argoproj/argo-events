@@ -19,13 +19,13 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -103,6 +103,9 @@ type SensorSpec struct {
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
 	// EventProtocol is the protocol through which sensor receives events from gateway
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
+	// Port on which sensor server should run.
+	// +optional
+	Port *int `json:"port" protobuf:"bytes,4,name=port"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,rep,name=circuit"`
 	// +listType=dependencyGroups
@@ -117,10 +120,12 @@ type SensorSpec struct {
 type EventDependency struct {
 	// Name is a unique name of this dependency
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Filters and rules governing tolerations of success and constraints on the context and data of an event
-	Filters EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,2,opt,name=filters"`
-	// Connected tells if subscription is already setup in case of nats protocol.
-	Connected bool `json:"connected,omitempty" protobuf:"bytes,3,opt,name=connected"`
+	// GatewayName is the name of the gateway from whom the event is received
+	GatewayName string `json:"gatewayName" protobuf:"bytes,2,name=gatewayName"`
+	// EventName is the name of the event
+	EventName string `json:"eventName" protobuf:"bytes,3,name=eventName"`
+	// Filters and rules governing toleration of success and constraints on the context and data of an event
+	Filters *EventDependencyFilter `json:"filters,omitempty" protobuf:"bytes,4,opt,name=filters"`
 }
 
 // DependencyGroup is the group of dependencies
@@ -138,8 +143,8 @@ type EventDependencyFilter struct {
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
-	// Context filter constraints with escalation
-	Context *common.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	// Context filter constraints
+	Context *apicommon.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 	// +listType=data
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,opt,name=data"`
@@ -208,17 +213,17 @@ type Trigger struct {
 type TriggerTemplate struct {
 	// Name is a unique name of the action to take
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// When is the condition to execute the trigger
-	When *TriggerCondition `json:"when,omitempty" protobuf:"bytes,2,opt,name=when"`
+	// Switch is the condition to execute the trigger
+	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,3,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
 }
 
-// TriggerCondition describes condition which must be satisfied in order to execute a trigger.
+// TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
 // Depending upon condition type, status of dependency groups is used to evaluate the result.
-type TriggerCondition struct {
+type TriggerSwitch struct {
 	// +listType=any
 	// Any acts as a OR operator between dependencies
 	Any []string `json:"any,omitempty" protobuf:"bytes,1,rep,name=any"`
@@ -264,7 +269,8 @@ type TriggerParameterSource struct {
 	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-	Path string `json:"path" protobuf:"bytes,2,opt,name=path"`
+	ContextKey string `json:"contextKey,omitempty" protobuf:"bytes,2,opt,name=contextKey"`
+	DataKey    string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the path is invalid.
 	// If the path is invalid and this is not defined, this param source will produce an error.
@@ -274,11 +280,18 @@ type TriggerParameterSource struct {
 // TriggerPolicy dictates the policy for the trigger retries
 type TriggerPolicy struct {
 	// Backoff before checking resource state
-	Backoff Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
-	// State refers to labels used to check the resource state
-	State *TriggerStateLabels `json:"state" protobuf:"bytes,2,opt,name=state"`
-	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.
-	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,opt,name=errorOnBackoffTimeout"`
+	Backoff wait.Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
+	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
+	// the state of the resource
+	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,2,opt,name=errorOnBackoffTimeout"`
+	// ResourceLabels refers to the policy used to check the resource state using labels
+	ResourceLabels *ResourceLabelsPolicy `json:"resourceLabels" protobuf:"bytes,3,opt,name=resourceLabels"`
+}
+
+// ResourceLabels refers to the policy used to check the resource state using labels
+type ResourceLabelsPolicy struct {
+	// Labels required to identify whether a resource is in success state
+	Labels map[string]string `json:"labels" protobuf:"bytes,1,opt,name=labels"`
 }
 
 // Backoff for an operation
@@ -291,14 +304,6 @@ type Backoff struct {
 	Jitter float64 `json:"jitter" protobuf:"bytes,3,opt,name=jitter"`
 	// Exit with error after this many steps
 	Steps int `json:"steps" protobuf:"bytes,4,opt,name=steps"`
-}
-
-// TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.
-type TriggerStateLabels struct {
-	// Success defines labels required to identify a resource in success state
-	Success map[string]string `json:"success" protobuf:"bytes,1,opt,name=success"`
-	// Failure defines labels required to identify a resource in failed state
-	Failure map[string]string `json:"failure" protobuf:"bytes,2,opt,name=failure"`
 }
 
 // SensorResources holds the metadata of the resources created for the sensor

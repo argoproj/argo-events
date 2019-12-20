@@ -38,14 +38,14 @@ func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatu
 }
 
 // create a new node
-func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, log *logrus.Logger, messages ...string) *v1alpha1.NodeStatus {
+func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, logger *logrus.Logger, messages ...string) *v1alpha1.NodeStatus {
 	if sensor.Status.Nodes == nil {
 		sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 	nodeID := sensor.NodeID(nodeName)
 	oldNode, ok := sensor.Status.Nodes[nodeID]
 	if ok {
-		log.WithField(common.LabelNodeName, nodeName).Infoln("node already initialized")
+		logger.WithField(common.LabelNodeName, nodeName).Infoln("node already initialized")
 		return &oldNode
 	}
 	node := v1alpha1.NodeStatus{
@@ -60,7 +60,7 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 		node.Message = messages[0]
 	}
 	sensor.Status.Nodes[nodeID] = node
-	log.WithFields(
+	logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeType: string(node.Type),
 			common.LabelNodeName: node.DisplayName,
@@ -71,10 +71,10 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, log *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, logger *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
 	if node.Phase != phase {
-		log.WithFields(
+		logger.WithFields(
 			map[string]interface{}{
 				common.LabelNodeType: string(node.Type),
 				common.LabelNodeName: node.Name,
@@ -94,7 +94,7 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 
 	if node.Phase == v1alpha1.NodePhaseComplete {
 		node.CompletedAt = metav1.MicroTime{Time: time.Now().UTC()}
-		log.WithFields(
+		logger.WithFields(
 			map[string]interface{}{
 				common.LabelNodeType: string(node.Type),
 				common.LabelNodeName: node.Name,
