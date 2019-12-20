@@ -103,4 +103,13 @@ func TestProcessQueue(t *testing.T) {
 
 	assert.Equal(t, sensorCtx.Sensor.Status.TriggerCycleStatus, v1alpha1.TriggerCycleSuccess)
 	assert.Equal(t, int32(1), sensorCtx.Sensor.Status.TriggerCycleCount)
+
+	sensorCtx.Sensor.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
+	sensorCtx.Sensor.Spec.ErrorOnFailedRound = true
+	sensorCtx.processQueue(&types.Notification{
+		Event:            event,
+		EventDependency:  &obj.Spec.Dependencies[0],
+		NotificationType: v1alpha1.EventNotification,
+	})
+	assert.Equal(t, int32(1), sensorCtx.Sensor.Status.TriggerCycleCount)
 }
