@@ -22,8 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"github.com/go-openapi/spec"
-	"k8s.io/kube-openapi/pkg/common"
+	spec "github.com/go-openapi/spec"
+	common "k8s.io/kube-openapi/pkg/common"
 )
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
@@ -309,7 +309,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					},
 					"filters": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Filters and rules governing tolerations of success and constraints on the context and data of an event",
+							Description: "Filters and rules governing toleration of success and constraints on the context and data of an event",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter"),
 						},
 					},
@@ -823,6 +823,12 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
+					"eventProtocol": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventProtocol is the protocol through which sensor receives events from gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
+						},
+					},
 					"port": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Port on which sensor server should run.",
@@ -863,11 +869,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "template"},
+				Required: []string{"dependencies", "triggers", "template", "eventProtocol"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 
@@ -1094,11 +1100,17 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"path": {
+					"contextKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
 							Type:        []string{"string"},
 							Format:      "",
+						},
+					},
+					"dataKey": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"value": {
@@ -1109,7 +1121,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"event", "path"},
+				Required: []string{"event"},
 			},
 		},
 	}
