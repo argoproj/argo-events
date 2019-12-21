@@ -39,7 +39,6 @@ install:
 script:
   - make all
   - make test coverage
-  - $GOPATH/bin/goveralls -coverprofile=profile.cov -service=travis-ci
 
 deploy:
   provider: releases

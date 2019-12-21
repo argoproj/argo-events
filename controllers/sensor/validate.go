@@ -117,9 +117,9 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 		return fmt.Errorf("trigger '%s' does not contain an absolute action", template.Name)
 	}
 	if template.GroupVersionResource == nil {
-		return fmt.Errorf("must provide group, version and kind for the resource")
+		return fmt.Errorf("must provide group, version and resource for the resource")
 	}
-	if template.When != nil && template.When.All != nil && template.When.Any != nil {
+	if template.Switch != nil && template.Switch.All != nil && template.Switch.Any != nil {
 		return fmt.Errorf("trigger condition can't have both any and all condition")
 	}
 	return nil
@@ -195,8 +195,10 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 }
 
 // validateEventFilter for a sensor
-func validateEventFilter(filter v1alpha1.EventDependencyFilter) error {
-	// validate time filter
+func validateEventFilter(filter *v1alpha1.EventDependencyFilter) error {
+	if filter == nil {
+		return nil
+	}
 	if filter.Time != nil {
 		if err := validateEventTimeFilter(filter.Time); err != nil {
 			return err

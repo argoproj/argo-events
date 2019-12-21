@@ -14,31 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensor
+package dependencies
 
 import (
-	"fmt"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"testing"
+	"github.com/gobwas/glob"
 )
 
-func TestValidateSensor(t *testing.T) {
-	dir := "../../examples/sensors"
-	files, err := ioutil.ReadDir(dir)
-	assert.Nil(t, err)
-	for _, file := range files {
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
-		assert.Nil(t, err)
-		var sensor *v1alpha1.Sensor
-		err = yaml.Unmarshal([]byte(content), &sensor)
+// ResolveDependency resolves a dependency based on Event and gateway name
+func ResolveDependency(dependencies []v1alpha1.EventDependency, events *apicommon.Event) *v1alpha1.EventDependency {
+	for _, dependency := range dependencies {
+		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
 		if err != nil {
-			fmt.Println(file.Name())
+			continue
 		}
-		assert.Nil(t, err)
-		err = ValidateSensor(sensor)
-		assert.Nil(t, err)
+		eventNameGlob, err := glob.Compile(dependency.EventName)
+		if err != nil {
+			continue
+		}
+		if gatewayNameGlob.Match(events.Context.Source) && eventNameGlob.Match(events.Context.Subject) {
+			return &dependency
+		}
 	}
+	return nil
 }
