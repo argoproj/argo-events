@@ -14,31 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sensor
+package policy
 
 import (
-	"fmt"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/ghodss/yaml"
-	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"testing"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/dynamic"
 )
 
-func TestValidateSensor(t *testing.T) {
-	dir := "../../examples/sensors"
-	files, err := ioutil.ReadDir(dir)
-	assert.Nil(t, err)
-	for _, file := range files {
-		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
-		assert.Nil(t, err)
-		var sensor *v1alpha1.Sensor
-		err = yaml.Unmarshal([]byte(content), &sensor)
-		if err != nil {
-			fmt.Println(file.Name())
-		}
-		assert.Nil(t, err)
-		err = ValidateSensor(sensor)
-		assert.Nil(t, err)
+// Policy to determine how to determine the state of the triggered resource
+type Policy interface {
+	ApplyPolicy() error
+}
+
+func GetPolicy(trigger *v1alpha1.Trigger, client dynamic.NamespaceableResourceInterface, obj *unstructured.Unstructured) Policy {
+	if trigger.Policy == nil {
+		return nil
 	}
+	if trigger.ResourceParameters != nil {
+		return newResourceLabels(trigger, client, obj)
+	}
+	return nil
 }

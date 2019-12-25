@@ -119,10 +119,6 @@ Kubernetes meta/v1/unstructured.Unstructured
 <h3 id="argoproj.io/v1alpha1.Backoff">Backoff
 </h3>
 <p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
-</p>
-<p>
 <p>Backoff for an operation</p>
 </p>
 <table>
@@ -365,6 +361,28 @@ string
 </tr>
 <tr>
 <td>
+<code>gatewayName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>GatewayName is the name of the gateway from whom the event is received</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>eventName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>EventName is the name of the event</p>
+</td>
+</tr>
+<tr>
+<td>
 <code>filters</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.EventDependencyFilter">
@@ -373,18 +391,7 @@ EventDependencyFilter
 </em>
 </td>
 <td>
-<p>Filters and rules governing tolerations of success and constraints on the context and data of an event</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>connected</code></br>
-<em>
-bool
-</em>
-</td>
-<td>
-<p>Connected tells if subscription is already setup in case of nats protocol.</p>
+<p>Filters and rules governing toleration of success and constraints on the context and data of an event</p>
 </td>
 </tr>
 </tbody>
@@ -438,7 +445,7 @@ Argo Events common.EventContext
 </em>
 </td>
 <td>
-<p>Context filter constraints with escalation</p>
+<p>Context filter constraints</p>
 </td>
 </tr>
 <tr>
@@ -875,6 +882,36 @@ Argo Events common.Event
 <p>
 <p>NotificationType represent a type of notifications that are handled by a sensor</p>
 </p>
+<h3 id="argoproj.io/v1alpha1.ResourceLabelsPolicy">ResourceLabelsPolicy
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
+</p>
+<p>
+<p>ResourceLabels refers to the policy used to check the resource state using labels</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>labels</code></br>
+<em>
+map[string]string
+</em>
+</td>
+<td>
+<p>Labels required to identify whether a resource is in success state</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.Sensor">Sensor
 </h3>
 <p>
@@ -963,6 +1000,18 @@ Argo Events common.EventProtocol
 </td>
 <td>
 <p>EventProtocol is the protocol through which sensor receives events from gateway</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>port</code></br>
+<em>
+int
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Port on which sensor server should run.</p>
 </td>
 </tr>
 <tr>
@@ -1129,6 +1178,18 @@ Argo Events common.EventProtocol
 </td>
 <td>
 <p>EventProtocol is the protocol through which sensor receives events from gateway</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>port</code></br>
+<em>
+int
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Port on which sensor server should run.</p>
 </td>
 </tr>
 <tr>
@@ -1421,48 +1482,6 @@ TriggerPolicy
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TriggerCondition">TriggerCondition
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
-</p>
-<p>
-<p>TriggerCondition describes condition which must be satisfied in order to execute a trigger.
-Depending upon condition type, status of dependency groups is used to evaluate the result.</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>any</code></br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>Any acts as a OR operator between dependencies</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>all</code></br>
-<em>
-[]string
-</em>
-</td>
-<td>
-<p>All acts as a AND operator between dependencies</p>
-</td>
-</tr>
-</tbody>
-</table>
 <h3 id="argoproj.io/v1alpha1.TriggerCycleState">TriggerCycleState
 (<code>string</code> alias)</p></h3>
 <p>
@@ -1572,7 +1591,7 @@ string
 </tr>
 <tr>
 <td>
-<code>path</code></br>
+<code>contextKey</code></br>
 <em>
 string
 </em>
@@ -1582,6 +1601,16 @@ string
 Path is a series of keys separated by a dot. A key may contain wildcard characters &lsquo;*&rsquo; and &lsquo;?&rsquo;.
 To access an array value use the index as the key. The dot and wildcard characters can be escaped with &lsquo;\&rsquo;.
 See <a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson#path-syntax</a> for more information on how to use this.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dataKey</code></br>
+<em>
+string
+</em>
+</td>
+<td>
 </td>
 </tr>
 <tr>
@@ -1620,26 +1649,11 @@ If the path is invalid and this is not defined, this param source will produce a
 <td>
 <code>backoff</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.Backoff">
-Backoff
-</a>
+k8s.io/apimachinery/pkg/util/wait.Backoff
 </em>
 </td>
 <td>
 <p>Backoff before checking resource state</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>state</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.TriggerStateLabels">
-TriggerStateLabels
-</a>
-</em>
-</td>
-<td>
-<p>State refers to labels used to check the resource state</p>
 </td>
 </tr>
 <tr>
@@ -1650,19 +1664,34 @@ bool
 </em>
 </td>
 <td>
-<p>ErrorOnBackoffTimeout determines whether sensor should transition to error state if the backoff times out and yet the resource neither transitioned into success or failure.</p>
+<p>ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
+the state of the resource</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resourceLabels</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.ResourceLabelsPolicy">
+ResourceLabelsPolicy
+</a>
+</em>
+</td>
+<td>
+<p>ResourceLabels refers to the policy used to check the resource state using labels</p>
 </td>
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.TriggerStateLabels">TriggerStateLabels
+<h3 id="argoproj.io/v1alpha1.TriggerSwitch">TriggerSwitch
 </h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
 </p>
 <p>
-<p>TriggerStateLabels defines the labels used to decide if a resource is in success or failure state.</p>
+<p>TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
+Depending upon condition type, status of dependency groups is used to evaluate the result.</p>
 </p>
 <table>
 <thead>
@@ -1674,24 +1703,24 @@ bool
 <tbody>
 <tr>
 <td>
-<code>success</code></br>
+<code>any</code></br>
 <em>
-map[string]string
+[]string
 </em>
 </td>
 <td>
-<p>Success defines labels required to identify a resource in success state</p>
+<p>Any acts as a OR operator between dependencies</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>failure</code></br>
+<code>all</code></br>
 <em>
-map[string]string
+[]string
 </em>
 </td>
 <td>
-<p>Failure defines labels required to identify a resource in failed state</p>
+<p>All acts as a AND operator between dependencies</p>
 </td>
 </tr>
 </tbody>
@@ -1726,15 +1755,15 @@ string
 </tr>
 <tr>
 <td>
-<code>when</code></br>
+<code>switch</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.TriggerCondition">
-TriggerCondition
+<a href="#argoproj.io/v1alpha1.TriggerSwitch">
+TriggerSwitch
 </a>
 </em>
 </td>
 <td>
-<p>When is the condition to execute the trigger</p>
+<p>Switch is the condition to execute the trigger</p>
 </td>
 </tr>
 <tr>
@@ -1812,5 +1841,5 @@ bool
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>8d85191</code>.
+on git commit <code>c580a25</code>.
 </em></p>
