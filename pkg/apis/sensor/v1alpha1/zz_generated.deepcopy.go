@@ -451,7 +451,7 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 	if in.EventProtocol != nil {
 		in, out := &in.EventProtocol, &out.EventProtocol
 		*out = new(common.EventProtocol)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Port != nil {
 		in, out := &in.Port, &out.Port
