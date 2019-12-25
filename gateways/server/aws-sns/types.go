@@ -31,10 +31,6 @@ const (
 	messageTypeNotification             = "Notification"
 )
 
-var (
-	snsProtocol = "http"
-)
-
 // EventListener implements Eventing for aws sns event source
 type EventListener struct {
 	// Logger to log stuff
