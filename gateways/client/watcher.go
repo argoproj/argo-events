@@ -104,10 +104,8 @@ func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
 					gatewayContext.logger.Info("detected gateway update. updating gateway watchers")
-					gatewayContext.statusCh <- EventSourceStatus{
-						Phase:   v1alpha1.NodePhaseResourceUpdate,
-						Gateway: g,
-						Message: "gateway_resource_update",
+					gatewayContext.statusCh <- notification{
+						gatewayNotification: &resourceUpdate{gateway: g},
 					}
 				}
 			},

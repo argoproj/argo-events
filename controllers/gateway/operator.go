@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -110,35 +109,12 @@ func (ctx *gatewayContext) operate() error {
 func (ctx *gatewayContext) updateGatewayState() {
 	if ctx.updated {
 		var err error
-		eventType := common.StateChangeEventType
-		labels := map[string]string{
-			common.LabelResourceName:  ctx.gateway.Name,
-			LabelPhase:                string(ctx.gateway.Status.Phase),
-			LabelControllerInstanceID: ctx.controller.Config.InstanceID,
-			common.LabelOperation:     "persist_gateway_state",
-		}
-
 		ctx.gateway, err = PersistUpdates(ctx.controller.gatewayClient, ctx.gateway, ctx.logger)
 		if err != nil {
-			ctx.logger.WithError(err).Errorln("failed to persist gateway update, escalating...")
-			eventType = common.EscalationEventType
+			ctx.logger.WithError(err).Errorln("failed to persist gateway update")
+		} else {
+			ctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
 		}
-
-		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(ctx.controller.k8sClient,
-			"persist update",
-			eventType,
-			"gateway state update",
-			ctx.gateway.Name,
-			ctx.gateway.Namespace,
-			ctx.controller.Config.InstanceID,
-			gateway.Kind,
-			labels,
-		); err != nil {
-			ctx.logger.WithError(err).Errorln("failed to create K8s event to logger gateway state persist operation")
-			return
-		}
-		ctx.logger.Infoln("successfully persisted gateway resource update and created K8s event")
 	}
 	ctx.updated = false
 }

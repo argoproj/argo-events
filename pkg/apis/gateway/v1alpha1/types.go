@@ -67,11 +67,10 @@ type GatewaySpec struct {
 	// Service is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
 	Service *corev1.Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
-	// Watchers are components which are interested listening to notifications from this gateway
-	// These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
-	// In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
-	// specifying watchers would be unnecessary.
-	Watchers *NotificationWatchers `json:"watchers,omitempty" protobuf:"bytes,5,opt,name=watchers"`
+	// Subscribers are HTTP endpoints to send events to.
+	// +listType=subscribers
+	// +optional
+	Subscribers []string `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
@@ -133,37 +132,4 @@ type NodeStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 	// UpdateTime is the time when node(gateway configuration) was updated
 	UpdateTime metav1.MicroTime `json:"updateTime,omitempty" protobuf:"bytes,9,opt,name=updateTime"`
-}
-
-// NotificationWatchers are components which are interested listening to notifications from this gateway
-type NotificationWatchers struct {
-	// +listType=gateways
-	// Gateways is the list of gateways interested in listening to notifications from this gateway
-	Gateways []GatewayNotificationWatcher `json:"gateways,omitempty" protobuf:"bytes,1,opt,name=gateways"`
-	// +listType=sensors
-	// Sensors is the list of sensors interested in listening to notifications from this gateway
-	Sensors []SensorNotificationWatcher `json:"sensors,omitempty" protobuf:"bytes,2,rep,name=sensors"`
-}
-
-// GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway
-type GatewayNotificationWatcher struct {
-	// Name is the gateway name
-	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Port is http server port on which gateway is running
-	Port string `json:"port" protobuf:"bytes,2,name=port"`
-	// Endpoint is REST API endpoint to post event to.
-	// Events are sent using HTTP POST method to this endpoint.
-	Endpoint string `json:"endpoint" protobuf:"bytes,3,name=endpoint"`
-	// Namespace of the gateway
-	// +Optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
-}
-
-// SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway
-type SensorNotificationWatcher struct {
-	// Name is the name of the sensor
-	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Namespace of the sensor
-	// +Optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,2,opt,name=namespace"`
 }

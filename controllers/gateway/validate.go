@@ -17,7 +17,6 @@ limitations under the License.
 package gateway
 
 import (
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/pkg/errors"
 )
@@ -33,34 +32,8 @@ func Validate(gatewayObj *v1alpha1.Gateway) error {
 	if gatewayObj.Spec.EventSourceRef == nil {
 		return errors.New("event source for the gateway is not specified")
 	}
-
 	if gatewayObj.Spec.ProcessorPort == "" {
 		return errors.New("gateway processor port is not specified")
-	}
-
-	switch gatewayObj.Spec.EventProtocol.Type {
-	case apicommon.HTTP:
-		if gatewayObj.Spec.Watchers == nil || (gatewayObj.Spec.Watchers.Gateways == nil && gatewayObj.Spec.Watchers.Sensors == nil) {
-			return errors.New("no associated watchers with gateway")
-		}
-		if gatewayObj.Spec.EventProtocol.Http.Port == "" {
-			return errors.New("http server port is not defined")
-		}
-	case apicommon.NATS:
-		if gatewayObj.Spec.EventProtocol.Nats.URL == "" {
-			return errors.New("nats url is not defined")
-		}
-		if gatewayObj.Spec.EventProtocol.Nats.Type == "" {
-			return errors.New("nats service type is not defined")
-		}
-		if gatewayObj.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gatewayObj.Spec.EventProtocol.Nats.ClientId == "" {
-			return errors.New("client id must be specified when using nats streaming")
-		}
-		if gatewayObj.Spec.EventProtocol.Nats.Type == apicommon.Streaming && gatewayObj.Spec.EventProtocol.Nats.ClusterId == "" {
-			return errors.New("cluster id must be specified when using nats streaming")
-		}
-	default:
-		return errors.New("unknown gateway type")
 	}
 	return nil
 }

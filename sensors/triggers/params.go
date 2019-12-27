@@ -179,7 +179,7 @@ func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 }
 
 // helper method to extract the events from the event dependencies nodes associated with the resource params
-// returns a map of the events keyed by the event dependency Name
+// returns a map of the events keyed by the event dependency name
 func extractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
