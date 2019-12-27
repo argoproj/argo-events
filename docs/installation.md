@@ -47,20 +47,24 @@ Make sure you have helm client installed and Tiller server is running. To instal
 5. Install the gateway custom resource definition
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-crd.yaml
-            
-6. Create the confimap for sensor controller
+
+6. Install the event source custom resource definition            
+
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/event-source-crd.yaml
+
+7. Create the confimap for sensor controller
     
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-configmap.yaml
     
-7. Create the configmap for gateway controller
+8. Create the configmap for gateway controller
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml
     
-8. Deploy the sensor controller
+9. Deploy the sensor controller
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-deployment.yaml
     
-9. Deploy the gateway controller
+10. Deploy the gateway controller
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
 
