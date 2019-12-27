@@ -21,7 +21,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -167,43 +166,18 @@ func (ctx *sensorContext) updateSensorResources() error {
 
 // updateSensorState updates the sensor resource state
 func (ctx *sensorContext) updateSensorState() {
+	defer func() {
+		ctx.updated = false
+	}()
 	if ctx.updated {
-		// persist updates to sensor resource
-		labels := map[string]string{
-			common.LabelSensorName:    ctx.sensor.Name,
-			LabelPhase:                string(ctx.sensor.Status.Phase),
-			LabelControllerInstanceID: ctx.controller.Config.InstanceID,
-			common.LabelOperation:     "persist_state_update",
-		}
-		eventType := common.StateChangeEventType
-
 		updatedSensor, err := PersistUpdates(ctx.controller.sensorClient, ctx.sensor, ctx.logger)
 		if err != nil {
 			ctx.logger.WithError(err).Errorln("failed to persist sensor update")
-
-			// escalate failure
-			eventType = common.EscalationEventType
-		}
-
-		// update sensor ref. in case of failure to persist updates, this is a deep copy of old sensor resource
-		ctx.sensor = updatedSensor
-
-		labels[common.LabelEventType] = string(eventType)
-		if err := common.GenerateK8sEvent(ctx.controller.k8sClient,
-			"persist update",
-			eventType,
-			"sensor state update",
-			ctx.sensor.Name,
-			ctx.sensor.Namespace,
-			ctx.controller.Config.InstanceID,
-			sensor.Kind,
-			labels); err != nil {
-			ctx.logger.WithError(err).Error("failed to create K8s event to logger sensor state persist operation")
 			return
 		}
-		ctx.logger.Info("successfully persisted sensor resource update and created K8s event")
+		ctx.sensor = updatedSensor
+		ctx.logger.Info("successfully persisted sensor resource update")
 	}
-	ctx.updated = false
 }
 
 // mark the overall sensor phase
