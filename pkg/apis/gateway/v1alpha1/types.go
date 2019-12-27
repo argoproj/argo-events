@@ -27,12 +27,11 @@ type NodePhase string
 
 // possible types of node phases
 const (
-	NodePhaseRunning        NodePhase = "Running"        // the node is running
-	NodePhaseError          NodePhase = "Error"          // the node has encountered an error in processing
-	NodePhaseNew            NodePhase = ""               // the node is new
-	NodePhaseCompleted      NodePhase = "Completed"      // node has completed running
-	NodePhaseRemove         NodePhase = "Remove"         // stale node
-	NodePhaseResourceUpdate NodePhase = "ResourceUpdate" // resource is updated
+	NodePhaseRunning   NodePhase = "Running"   // the node is running
+	NodePhaseError     NodePhase = "Error"     // the node has encountered an error in processing
+	NodePhaseNew       NodePhase = ""          // the node is new
+	NodePhaseCompleted NodePhase = "Completed" // node has completed running
+	NodePhaseRemove    NodePhase = "Remove"    // stale node
 )
 
 // Gateway is the definition of a gateway resource

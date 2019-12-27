@@ -92,7 +92,7 @@ func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName str
 		gatewayContext.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 
-	gatewayContext.logger.WithField(common.LabelNodeName, nodeName).Infoln("node")
+	gatewayContext.logger.WithField(common.LabelNodeName, nodeName).Infoln("initializing the node")
 
 	node, ok := gatewayContext.gateway.Status.Nodes[nodeID]
 	if !ok {
@@ -120,6 +120,10 @@ func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName str
 
 // UpdateGatewayState updates the gateway resource or the event source node status
 func (gatewayContext *GatewayContext) UpdateGatewayState(notification *notification) {
+	defer func() {
+		gatewayContext.updated = false
+	}()
+
 	logger := gatewayContext.logger
 
 	if notification.gatewayNotification != nil {
@@ -149,15 +153,11 @@ func (gatewayContext *GatewayContext) UpdateGatewayState(notification *notificat
 	}
 
 	if gatewayContext.updated {
-		oldGateway := gatewayContext.gateway.DeepCopy()
 		updatedGw, err := gtw.PersistUpdates(gatewayContext.gatewayClient, gatewayContext.gateway, gatewayContext.logger)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to persist gateway resource updates, reverting to old state")
-			// in case of failure to persist updates, this is a deep copy of old gateway resource
-			gatewayContext.gateway = oldGateway
-		} else {
-			gatewayContext.gateway = updatedGw
+			return
 		}
+		gatewayContext.gateway = updatedGw
 	}
-	gatewayContext.updated = false
 }

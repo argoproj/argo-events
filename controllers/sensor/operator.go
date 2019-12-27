@@ -278,14 +278,12 @@ func (ctx *sensorContext) markDependencyNodesActive() {
 // PersistUpdates persists the updates to the Sensor resource
 func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor, log *logrus.Logger) (*v1alpha1.Sensor, error) {
 	sensorClient := client.ArgoprojV1alpha1().Sensors(sensorObj.ObjectMeta.Namespace)
-	// in case persist update fails
-	oldsensor := sensorObj.DeepCopy()
 
-	sensorObj, err := sensorClient.Update(sensorObj)
+	updatedSensor, err := sensorClient.Update(sensorObj)
 	if err != nil {
 		if errors.IsConflict(err) {
 			log.WithError(err).Error("error updating sensor")
-			return oldsensor, err
+			return nil, err
 		}
 
 		log.Infoln(err)
@@ -293,11 +291,11 @@ func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor
 		err = ReapplyUpdate(client, sensorObj)
 		if err != nil {
 			log.WithError(err).Error("failed to re-apply update")
-			return oldsensor, err
+			return nil, err
 		}
 	}
 	log.WithField(common.LabelPhase, string(sensorObj.Status.Phase)).Info("sensor state updated successfully")
-	return sensorObj, nil
+	return updatedSensor, nil
 }
 
 // Reapply the update to sensor
