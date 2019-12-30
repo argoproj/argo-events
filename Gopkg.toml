@@ -116,6 +116,10 @@ required = [
   name = "github.com/cloudevents/sdk-go"
   version = "v0.10.1"
 
+[[constraint]]
+  name = "github.com/Azure/azure-event-hubs-go"
+  version = "v3.0.0"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"
