@@ -84,14 +84,7 @@ var gatewayObj = &v1alpha1.Gateway{
 				Port: "9330",
 			},
 		},
-		Watchers: &v1alpha1.NotificationWatchers{
-			Sensors: []v1alpha1.SensorNotificationWatcher{
-				{
-					Name:      "fake-sensor",
-					Namespace: common.DefaultControllerNamespace,
-				},
-			},
-		},
+		Subscribers: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
 	},
 }
 

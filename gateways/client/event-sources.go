@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/gateway"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
@@ -140,11 +139,13 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 			// conn should be in READY state
 			if eventSource.conn.GetState() != connectivity.Ready {
 				logger.Errorln("connection is not in ready state.")
-				gatewayContext.statusCh <- EventSourceStatus{
-					Phase:   v1alpha1.NodePhaseError,
-					Id:      eventSource.source.Id,
-					Message: "connection_is_not_in_ready_state",
-					Name:    eventSource.source.Name,
+				gatewayContext.statusCh <- notification{
+					eventSourceNotification: &eventSourceUpdate{
+						phase:   v1alpha1.NodePhaseError,
+						id:      eventSource.source.Id,
+						message: "connection is not in the ready state",
+						name:    eventSource.source.Name,
+					},
 				}
 				return
 			}
@@ -159,11 +160,13 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 				if err := eventSource.conn.Close(); err != nil {
 					logger.WithError(err).Errorln("failed to close client connection")
 				}
-				gatewayContext.statusCh <- EventSourceStatus{
-					Phase:   v1alpha1.NodePhaseError,
-					Id:      eventSource.source.Id,
-					Message: "event_source_is_not_valid",
-					Name:    eventSource.source.Name,
+				gatewayContext.statusCh <- notification{
+					eventSourceNotification: &eventSourceUpdate{
+						phase:   v1alpha1.NodePhaseError,
+						id:      eventSource.source.Id,
+						message: "event_source_is_not_valid",
+						name:    eventSource.source.Name,
+					},
 				}
 				return
 			}
@@ -171,22 +174,26 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 			logger.Infoln("event source is valid")
 
 			// mark event source as running
-			gatewayContext.statusCh <- EventSourceStatus{
-				Phase:   v1alpha1.NodePhaseRunning,
-				Message: "event_source_is_running",
-				Id:      eventSource.source.Id,
-				Name:    eventSource.source.Name,
+			gatewayContext.statusCh <- notification{
+				eventSourceNotification: &eventSourceUpdate{
+					phase:   v1alpha1.NodePhaseRunning,
+					message: "event source is running",
+					id:      eventSource.source.Id,
+					name:    eventSource.source.Name,
+				},
 			}
 
 			// listen to events from gateway server
 			eventStream, err := eventSource.client.StartEventSource(eventSource.ctx, eventSource.source)
 			if err != nil {
 				logger.WithError(err).Errorln("error occurred while starting event source")
-				gatewayContext.statusCh <- EventSourceStatus{
-					Phase:   v1alpha1.NodePhaseError,
-					Message: "failed_to_receive_event_stream",
-					Name:    eventSource.source.Name,
-					Id:      eventSource.source.Id,
+				gatewayContext.statusCh <- notification{
+					eventSourceNotification: &eventSourceUpdate{
+						phase:   v1alpha1.NodePhaseError,
+						message: "failed to receive event stream",
+						name:    eventSource.source.Name,
+						id:      eventSource.source.Id,
+					},
 				}
 				return
 			}
@@ -197,37 +204,30 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 				if err != nil {
 					if err == io.EOF {
 						logger.Infoln("event source has stopped")
-						gatewayContext.statusCh <- EventSourceStatus{
-							Phase:   v1alpha1.NodePhaseCompleted,
-							Message: "event_source_has_been_stopped",
-							Name:    eventSource.source.Name,
-							Id:      eventSource.source.Id,
+						gatewayContext.statusCh <- notification{
+							eventSourceNotification: &eventSourceUpdate{
+								phase:   v1alpha1.NodePhaseCompleted,
+								message: "event source has been stopped",
+								name:    eventSource.source.Name,
+								id:      eventSource.source.Id,
+							},
 						}
 						return
 					}
 
 					logger.WithError(err).Errorln("failed to receive event from stream")
-					gatewayContext.statusCh <- EventSourceStatus{
-						Phase:   v1alpha1.NodePhaseError,
-						Message: "failed_to_receive_event_from_event_source_stream",
-						Name:    eventSource.source.Name,
-						Id:      eventSource.source.Id,
+					gatewayContext.statusCh <- notification{
+						eventSourceNotification: &eventSourceUpdate{
+							phase:   v1alpha1.NodePhaseError,
+							message: "failed to receive event from the event source stream",
+							name:    eventSource.source.Name,
+							id:      eventSource.source.Id,
+						},
 					}
 					return
 				}
 				err = gatewayContext.dispatchEvent(event)
 				if err != nil {
-					// escalate error through a K8s event
-					labels := map[string]string{
-						common.LabelEventType:       string(common.EscalationEventType),
-						common.LabelEventSourceName: eventSource.source.Name,
-						common.LabelResourceName:    gatewayContext.name,
-						common.LabelEventSourceID:   eventSource.source.Id,
-						common.LabelOperation:       "dispatch_event_to_watchers",
-					}
-					if err := common.GenerateK8sEvent(gatewayContext.k8sClient, fmt.Sprintf("failed to dispatch event to watchers"), common.EscalationEventType, "event dispatch failed", gatewayContext.name, gatewayContext.namespace, gatewayContext.controllerInstanceID, gateway.Kind, labels); err != nil {
-						logger.WithError(err).Errorln("failed to create K8s event to escalate event dispatch failure")
-					}
 					logger.WithError(err).Errorln("failed to dispatch event to watchers")
 				}
 			}
@@ -247,11 +247,13 @@ func (gatewayContext *GatewayContext) deactivateEventSources(eventSourceNames []
 
 		logger.WithField(common.LabelEventSource, eventSource.source.Name).Infoln("stopping the event source")
 		delete(gatewayContext.eventSourceContexts, eventSourceName)
-		gatewayContext.statusCh <- EventSourceStatus{
-			Phase:   v1alpha1.NodePhaseRemove,
-			Id:      eventSource.source.Id,
-			Message: "event_source_is_removed",
-			Name:    eventSource.source.Name,
+		gatewayContext.statusCh <- notification{
+			eventSourceNotification: &eventSourceUpdate{
+				phase:   v1alpha1.NodePhaseRemove,
+				id:      eventSource.source.Id,
+				message: "event source is removed",
+				name:    eventSource.source.Name,
+			},
 		}
 		eventSource.cancel()
 		if err := eventSource.conn.Close(); err != nil {

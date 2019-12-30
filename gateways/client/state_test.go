@@ -17,9 +17,10 @@ limitations under the License.
 package main
 
 import (
+	"testing"
+
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/smartystreets/goconvey/convey"
-	"testing"
 )
 
 func TestGatewayState(t *testing.T) {
@@ -32,52 +33,50 @@ func TestGatewayState(t *testing.T) {
 		})
 
 		convey.Convey("Update gateway resource test-node node state to running", func() {
-			gc.UpdateGatewayState(&EventSourceStatus{
-				Phase:   v1alpha1.NodePhaseRunning,
-				Name:    "test-node",
-				Message: "node is marked as running",
-				Id:      "test-node",
+			gc.UpdateGatewayState(&notification{
+				eventSourceNotification: &eventSourceUpdate{
+					phase:   v1alpha1.NodePhaseRunning,
+					name:    "test-node",
+					message: "node is marked as running",
+					id:      "test-node",
+				},
 			})
 			convey.So(len(gc.gateway.Status.Nodes), convey.ShouldEqual, 1)
 			convey.So(gc.gateway.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseRunning)
 		})
 
 		updatedGw := gc.gateway
-		updatedGw.Spec.Watchers = &v1alpha1.NotificationWatchers{
-			Sensors: []v1alpha1.SensorNotificationWatcher{
-				{
-					Name: "sensor-1",
-				},
-			},
-		}
+		updatedGw.Spec.Subscribers = []string{"sensor-1"}
 
 		convey.Convey("Update gateway watchers", func() {
-			gc.UpdateGatewayState(&EventSourceStatus{
-				Phase:   v1alpha1.NodePhaseResourceUpdate,
-				Name:    "test-node",
-				Message: "gateway resource is updated",
-				Id:      "test-node",
-				Gateway: updatedGw,
+			gc.UpdateGatewayState(&notification{
+				gatewayNotification: &resourceUpdate{
+					gateway: updatedGw,
+				},
 			})
-			convey.So(len(gc.gateway.Spec.Watchers.Sensors), convey.ShouldEqual, 1)
+			convey.So(len(gc.gateway.Spec.Subscribers), convey.ShouldEqual, 1)
 		})
 
 		convey.Convey("Update gateway resource test-node node state to completed", func() {
-			gc.UpdateGatewayState(&EventSourceStatus{
-				Phase:   v1alpha1.NodePhaseCompleted,
-				Name:    "test-node",
-				Message: "node is marked completed",
-				Id:      "test-node",
+			gc.UpdateGatewayState(&notification{
+				eventSourceNotification: &eventSourceUpdate{
+					phase:   v1alpha1.NodePhaseCompleted,
+					name:    "test-node",
+					message: "node is marked completed",
+					id:      "test-node",
+				},
 			})
 			convey.So(gc.gateway.Status.Nodes["test-node"].Phase, convey.ShouldEqual, v1alpha1.NodePhaseCompleted)
 		})
 
 		convey.Convey("Remove gateway resource test-node node", func() {
-			gc.UpdateGatewayState(&EventSourceStatus{
-				Phase:   v1alpha1.NodePhaseRemove,
-				Name:    "test-node",
-				Message: "node is removed",
-				Id:      "test-node",
+			gc.UpdateGatewayState(&notification{
+				eventSourceNotification: &eventSourceUpdate{
+					phase:   v1alpha1.NodePhaseRemove,
+					name:    "test-node",
+					message: "node is removed",
+					id:      "test-node",
+				},
 			})
 			convey.So(len(gc.gateway.Status.Nodes), convey.ShouldEqual, 0)
 		})
@@ -87,12 +86,13 @@ func TestGatewayState(t *testing.T) {
 func TestMarkGatewayNodePhase(t *testing.T) {
 	convey.Convey("Given a node status, mark node state", t, func() {
 		gc := getGatewayContext()
-		nodeStatus := &EventSourceStatus{
-			Name:    "fake",
-			Id:      "1234",
-			Message: "running",
-			Phase:   v1alpha1.NodePhaseRunning,
-			Gateway: gc.gateway,
+		n := &notification{
+			eventSourceNotification: &eventSourceUpdate{
+				name:    "fake",
+				id:      "1234",
+				message: "running",
+				phase:   v1alpha1.NodePhaseRunning,
+			},
 		}
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"1234": v1alpha1.NodeStatus{
@@ -103,9 +103,9 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 			},
 		}
 
-		resultStatus := gc.markGatewayNodePhase(nodeStatus)
+		resultStatus := gc.markNodePhase(n.eventSourceNotification)
 		convey.So(resultStatus, convey.ShouldNotBeNil)
-		convey.So(resultStatus.Name, convey.ShouldEqual, nodeStatus.Name)
+		convey.So(resultStatus.Name, convey.ShouldEqual, n.eventSourceNotification.name)
 
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
 			"4567": v1alpha1.NodeStatus{
@@ -116,7 +116,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 			},
 		}
 
-		resultStatus = gc.markGatewayNodePhase(nodeStatus)
+		resultStatus = gc.markNodePhase(n.eventSourceNotification)
 		convey.So(resultStatus, convey.ShouldBeNil)
 	})
 }

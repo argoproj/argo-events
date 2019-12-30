@@ -28,16 +28,13 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef":             schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":                    schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":                schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher": schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource":            schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":                schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":              schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":                 schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers":       schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref),
-		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher":  schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef":  schema_pkg_apis_gateway_v1alpha1_EventSourceRef(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Gateway":         schema_pkg_apis_gateway_v1alpha1_Gateway(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayList":     schema_pkg_apis_gateway_v1alpha1_GatewayList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource": schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":     schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":   schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":      schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 	}
 }
 
@@ -166,48 +163,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayList(ref common.ReferenceCallback) 
 	}
 }
 
-func schema_pkg_apis_gateway_v1alpha1_GatewayNotificationWatcher(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is the gateway name",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"port": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Port is http server port on which gateway is running",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"endpoint": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Endpoint is REST API endpoint to post event to. Events are sent using HTTP POST method to this endpoint.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace of the gateway",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"name", "port", "endpoint"},
-			},
-		},
-	}
-}
-
 func schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -268,10 +223,23 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/api/core/v1.Service"),
 						},
 					},
-					"watchers": {
+					"subscribers": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "subscribers",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Watchers are components which are interested listening to notifications from this gateway These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications. In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case specifying watchers would be unnecessary.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers"),
+							Description: "Subscribers are HTTP endpoints to send events to.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 					"processorPort": {
@@ -299,7 +267,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NotificationWatchers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
 	}
 }
 
@@ -413,84 +381,5 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
-	}
-}
-
-func schema_pkg_apis_gateway_v1alpha1_NotificationWatchers(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "NotificationWatchers are components which are interested listening to notifications from this gateway",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"gateways": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "gateways",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "Gateways is the list of gateways interested in listening to notifications from this gateway",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher"),
-									},
-								},
-							},
-						},
-					},
-					"sensors": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "sensors",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "Sensors is the list of sensors interested in listening to notifications from this gateway",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher"),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayNotificationWatcher", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.SensorNotificationWatcher"},
-	}
-}
-
-func schema_pkg_apis_gateway_v1alpha1_SensorNotificationWatcher(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Name is the name of the sensor",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace of the sensor",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"name"},
-			},
-		},
 	}
 }

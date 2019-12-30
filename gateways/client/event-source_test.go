@@ -41,16 +41,14 @@ func getGatewayContext() *GatewayContext {
 	return &GatewayContext{
 		logger:     common.NewArgoEventsLogger(),
 		serverPort: "20000",
-		statusCh:   make(chan EventSourceStatus),
+		statusCh:   make(chan notification),
 		gateway: &v1alpha1.Gateway{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "fake-gateway",
 				Namespace: "fake-namespace",
 			},
 			Spec: v1alpha1.GatewaySpec{
-				Watchers: &v1alpha1.NotificationWatchers{
-					Sensors: []v1alpha1.SensorNotificationWatcher{},
-				},
+				Subscribers: []string{},
 				EventProtocol: &apicommon.EventProtocol{
 					Type: apicommon.HTTP,
 					Http: apicommon.Http{
@@ -175,10 +173,8 @@ func TestSyncEventSources(t *testing.T) {
 	go func() {
 		for {
 			select {
-			case status := <-gatewayContext.statusCh:
-				fmt.Println(status.Message)
+			case <-gatewayContext.statusCh:
 			case <-stopStatus:
-				fmt.Println("returning from status")
 				return
 			}
 		}

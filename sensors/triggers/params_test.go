@@ -47,7 +47,7 @@ func TestExtractEvents(t *testing.T) {
 						SpecVersion:     "0.3",
 						Subject:         "example-1",
 					},
-					Data: []byte("{\"Name\": \"fake\"}"),
+					Data: []byte("{\"name\": \"fake\"}"),
 				},
 			},
 		},
@@ -56,7 +56,7 @@ func TestExtractEvents(t *testing.T) {
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
-				DataKey: "Name",
+				DataKey: "name",
 			},
 		},
 	})
@@ -68,7 +68,7 @@ func TestExtractEvents(t *testing.T) {
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
-				DataKey: "Name",
+				DataKey: "name",
 			},
 		},
 	})
@@ -86,7 +86,7 @@ func TestResolveParamValue(t *testing.T) {
 			ID:              "1",
 			Time:            metav1.MicroTime{Time: time.Now()},
 		},
-		Data: []byte("{\"Name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
 	eventBody, err := json.Marshal(event)
 	assert.Nil(t, err)
@@ -103,10 +103,10 @@ func TestResolveParamValue(t *testing.T) {
 		result string
 	}{
 		{
-			name: "get first Name",
+			name: "get first name",
 			source: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
-				DataKey: "Name.first",
+				DataKey: "name.first",
 			},
 			result: "fake",
 		},
@@ -138,7 +138,7 @@ func TestResolveParamValue(t *testing.T) {
 			source: &v1alpha1.TriggerParameterSource{
 				Event:      "fake-dependency",
 				ContextKey: "subject",
-				DataKey:    "Name.first",
+				DataKey:    "name.first",
 			},
 			result: "fake",
 		},
