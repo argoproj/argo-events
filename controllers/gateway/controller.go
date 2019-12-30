@@ -19,7 +19,6 @@ package gateway
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	base "github.com/argoproj/argo-events"
@@ -116,21 +115,7 @@ func (c *Controller) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		if err := common.GenerateK8sEvent(c.k8sClient,
-			fmt.Sprintf("controller failed to operate on gateway %s", gw.Name),
-			common.StateChangeEventType,
-			"controller operation failed",
-			gw.Name,
-			gw.Namespace,
-			c.Config.InstanceID,
-			gw.Kind,
-			map[string]string{
-				common.LabelResourceName: gw.Name,
-				common.LabelEventType:    string(common.EscalationEventType),
-			},
-		); err != nil {
-			ctx.logger.WithError(err).Errorln("failed to create K8s event to escalate controller operation failure")
-		}
+		ctx.logger.WithField("gateway", gw.Name).WithError(err).Errorln("failed to operate on the gateway object")
 	}
 
 	err = c.handleErr(err, key)

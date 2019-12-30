@@ -27,6 +27,36 @@ import (
 	"github.com/google/uuid"
 )
 
+// updateSubscriberClients updates the active clients for event subscribers
+func (gatewayContext *GatewayContext) updateSubscriberClients() {
+	if gatewayContext.subscriberClients == nil {
+		gatewayContext.subscriberClients = make(map[string]cloudevents.Client)
+	}
+	if len(gatewayContext.gateway.Spec.Subscribers) == 0 {
+		return
+	}
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers {
+		if _, ok := gatewayContext.subscriberClients[subscriber]; !ok {
+			t, err := cloudevents.NewHTTPTransport(
+				cloudevents.WithTarget(subscriber),
+				cloudevents.WithEncoding(cloudevents.HTTPBinaryV02),
+			)
+			if err != nil {
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
+				continue
+			}
+
+			client, err := cloudevents.NewClient(t)
+			if err != nil {
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
+				continue
+			}
+			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
+			gatewayContext.subscriberClients[subscriber] = client
+		}
+	}
+}
+
 // dispatchEvent dispatches event to gateway transformer for further processing
 func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
@@ -39,33 +69,16 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 
 	completeSuccess := true
 
-	for _, sensor := range gatewayContext.gateway.Spec.Watchers.Sensors {
-		namespace := gatewayContext.namespace
-		if sensor.Namespace != "" {
-			namespace = sensor.Namespace
-		}
-
-		target := fmt.Sprintf("http://%s:%s%s", common.ServiceDNSName(sensor.Name, namespace), gatewayContext.gateway.Spec.EventProtocol.Http.Port, common.SensorServiceEndpoint)
-
-		t, err := cloudevents.NewHTTPTransport(
-			cloudevents.WithTarget(target),
-			cloudevents.WithEncoding(cloudevents.HTTPBinaryV02),
-		)
-		if err != nil {
-			logger.WithError(err).WithField("target", target).Warnln("failed to create a transport")
-			completeSuccess = false
-			continue
-		}
-
-		client, err := cloudevents.NewClient(t)
-		if err != nil {
-			logger.WithError(err).WithField("target", target).Warnln("failed to create a client")
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers {
+		client, ok := gatewayContext.subscriberClients[subscriber]
+		if !ok {
+			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
 			continue
 		}
 
 		if _, _, err := client.Send(context.Background(), *cloudEvent); err != nil {
-			logger.WithError(err).WithField("target", target).Warnln("failed to send the event")
+			logger.WithError(err).WithField("target", subscriber).Warnln("failed to send the event")
 			completeSuccess = false
 			continue
 		}

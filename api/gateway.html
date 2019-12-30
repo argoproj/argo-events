@@ -159,18 +159,14 @@ Refer <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.
 </tr>
 <tr>
 <td>
-<code>watchers</code></br>
+<code>subscribers</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.NotificationWatchers">
-NotificationWatchers
-</a>
+[]string
 </em>
 </td>
 <td>
-<p>Watchers are components which are interested listening to notifications from this gateway
-These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
-In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
-specifying watchers would be unnecessary.</p>
+<em>(Optional)</em>
+<p>Subscribers are HTTP endpoints to send events to.</p>
 </td>
 </tr>
 <tr>
@@ -207,70 +203,6 @@ int
 </td>
 </tr>
 </table>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.GatewayNotificationWatcher">GatewayNotificationWatcher
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NotificationWatchers">NotificationWatchers</a>)
-</p>
-<p>
-<p>GatewayNotificationWatcher is the gateway interested in listening to notifications from this gateway</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Name is the gateway name</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>port</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Port is http server port on which gateway is running</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>endpoint</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Endpoint is REST API endpoint to post event to.
-Events are sent using HTTP POST method to this endpoint.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>namespace</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Namespace of the gateway</p>
 </td>
 </tr>
 </tbody>
@@ -392,18 +324,14 @@ Refer <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.
 </tr>
 <tr>
 <td>
-<code>watchers</code></br>
+<code>subscribers</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.NotificationWatchers">
-NotificationWatchers
-</a>
+[]string
 </em>
 </td>
 <td>
-<p>Watchers are components which are interested listening to notifications from this gateway
-These only need to be specified when gateway dispatch mechanism is through HTTP POST notifications.
-In future, support for NATS, KAFKA will be added as a means to dispatch notifications in which case
-specifying watchers would be unnecessary.</p>
+<em>(Optional)</em>
+<p>Subscribers are HTTP endpoints to send events to.</p>
 </td>
 </tr>
 <tr>
@@ -638,94 +566,8 @@ Kubernetes meta/v1.MicroTime
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.NotificationWatchers">NotificationWatchers
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
-</p>
-<p>
-<p>NotificationWatchers are components which are interested listening to notifications from this gateway</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>gateways</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.GatewayNotificationWatcher">
-[]GatewayNotificationWatcher
-</a>
-</em>
-</td>
-<td>
-<p>Gateways is the list of gateways interested in listening to notifications from this gateway</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>sensors</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.SensorNotificationWatcher">
-[]SensorNotificationWatcher
-</a>
-</em>
-</td>
-<td>
-<p>Sensors is the list of sensors interested in listening to notifications from this gateway</p>
-</td>
-</tr>
-</tbody>
-</table>
-<h3 id="argoproj.io/v1alpha1.SensorNotificationWatcher">SensorNotificationWatcher
-</h3>
-<p>
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.NotificationWatchers">NotificationWatchers</a>)
-</p>
-<p>
-<p>SensorNotificationWatcher is the sensor interested in listening to notifications from this gateway</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>name</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Name is the name of the sensor</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>namespace</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>Namespace of the sensor</p>
-</td>
-</tr>
-</tbody>
-</table>
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>c580a25</code>.
+on git commit <code>78e79e0</code>.
 </em></p>

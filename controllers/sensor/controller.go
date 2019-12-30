@@ -19,12 +19,10 @@ package sensor
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -117,22 +115,7 @@ func (controller *Controller) processNextItem() bool {
 
 	err = ctx.operate()
 	if err != nil {
-		if err := common.GenerateK8sEvent(controller.k8sClient,
-			fmt.Sprintf("failed to operate on sensor %s", s.Name),
-			common.EscalationEventType,
-			"sensor operation failed",
-			s.Name,
-			s.Namespace,
-			controller.Config.InstanceID,
-			sensor.Kind,
-			map[string]string{
-				common.LabelSensorName: s.Name,
-				common.LabelEventType:  string(common.EscalationEventType),
-				common.LabelOperation:  "controller_operation",
-			},
-		); err != nil {
-			ctx.logger.WithError(err).Errorln("failed to create K8s event to escalate sensor operation failure")
-		}
+		ctx.logger.WithError(err).WithField("sensor", s.Name).Errorln("failed to operate on the sensor object")
 	}
 
 	err = controller.handleErr(err, key)

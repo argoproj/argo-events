@@ -18,17 +18,14 @@ package main
 
 import (
 	"context"
-	"fmt"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
-	"github.com/nats-io/go-nats"
-	snats "github.com/nats-io/go-nats-streaming"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,13 +59,9 @@ type GatewayContext struct {
 	// controllerInstanceId is instance ID of the gateway controller
 	controllerInstanceID string
 	// statusCh is used to communicate the status of an event source
-	statusCh chan EventSourceStatus
-	// natsConn is the standard nats connection used to publish events to cluster. Only used if dispatch protocol is NATS
-	natsConn *nats.Conn
-	// natsStreamingConn is the nats connection used for streaming.
-	natsStreamingConn snats.Conn
-	// sensorHttpPort is the http server running in sensor that listens to event. Only used if dispatch protocol is HTTP
-	sensorHttpPort string
+	statusCh chan notification
+	// subscriberClients holds the active clients for subscribers
+	subscriberClients map[string]cloudevents.Client
 }
 
 // EventSourceContext contains information of a event source for gateway to run.
@@ -134,25 +127,9 @@ func NewGatewayContext() *GatewayContext {
 		gateway:              gateway,
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,
-		statusCh:             make(chan EventSourceStatus),
+		statusCh:             make(chan notification),
+		subscriberClients:    make(map[string]cloudevents.Client),
 	}
 
-	switch gateway.Spec.EventProtocol.Type {
-	case pc.HTTP:
-		gatewayConfig.sensorHttpPort = gateway.Spec.EventProtocol.Http.Port
-	case pc.NATS:
-		if gatewayConfig.natsConn, err = nats.Connect(gateway.Spec.EventProtocol.Nats.URL); err != nil {
-			panic(fmt.Errorf("failed to obtain NATS standard connection. err: %+v", err))
-		}
-		gatewayConfig.logger.WithField(common.LabelURL, gateway.Spec.EventProtocol.Nats.URL).Infoln("connected to nats service")
-
-		if gatewayConfig.gateway.Spec.EventProtocol.Nats.Type == pc.Streaming {
-			gatewayConfig.natsStreamingConn, err = snats.Connect(gatewayConfig.gateway.Spec.EventProtocol.Nats.ClusterId, gatewayConfig.gateway.Spec.EventProtocol.Nats.ClientId, snats.NatsConn(gatewayConfig.natsConn))
-			if err != nil {
-				panic(fmt.Errorf("failed to obtain NATS streaming connection. err: %+v", err))
-			}
-			gatewayConfig.logger.WithField(common.LabelURL, gateway.Spec.EventProtocol.Nats.URL).Infoln("nats streaming connection successful")
-		}
-	}
 	return gatewayConfig
 }
