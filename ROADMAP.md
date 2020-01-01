@@ -1,9 +1,9 @@
 # Roadmap
 
 - Microsoft Azure Blob Gateway
-- Microsoft Teams Gateway
-- Docker Events Gateway
-- Aliyun OSS Events Gateway
+- Emitter Gateway
+- NSQ Gateway
+- Redis PubSub Gateway
 - Stripe Webhook Gateway
 - Support Subscription CRD as communication channel between Gateway and Sensor
 - Argo Workflow specific operations with argo cli as trigger
