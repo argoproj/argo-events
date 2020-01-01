@@ -21,10 +21,6 @@ required = [
   branch = "master"
 
 [[constraint]]
-  name = "github.com/nats-io/go-nats-streaming"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/aws/aws-sdk-go"
   branch = "master"
 
@@ -115,10 +111,6 @@ required = [
 [[constraint]]
   name = "github.com/cloudevents/sdk-go"
   version = "v0.10.1"
-
-[[constraint]]
-  name = "github.com/Azure/azure-event-hubs-go"
-  version = "v3.0.0"
 
 [[override]]
   branch = "release-1.15"

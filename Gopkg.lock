@@ -19,6 +19,66 @@
   revision = "6782d5b2dfb77806bf1721667ced46bbabe746e4"
 
 [[projects]]
+  digest = "1:487dc37a77bbba996bf4ddae0bff1c69fde98027d507e75eca317ca7c94483c3"
+  name = "github.com/Azure/azure-amqp-common-go"
+  packages = [
+    ".",
+    "aad",
+    "auth",
+    "cbs",
+    "conn",
+    "internal",
+    "internal/tracing",
+    "log",
+    "persist",
+    "rpc",
+    "sas",
+    "uuid",
+  ]
+  pruneopts = "UT"
+  revision = "b5ea4829bce0d96bc7b4d11bfc8ccd2afdf0ec4a"
+  version = "v1.1.4"
+
+[[projects]]
+  digest = "1:803daea4c2d827e111c71bc7943d77ab1313e5eb73e65e4fabd113a20ced7080"
+  name = "github.com/Azure/azure-event-hubs-go"
+  packages = [
+    ".",
+    "atom",
+  ]
+  pruneopts = "UT"
+  revision = "d3d1b70a113ea8a9f2d7443ff7d99ab40f9b6eca"
+  version = "v1.3.1"
+
+[[projects]]
+  digest = "1:bf9db155cd2bfe3b1a677f68582efb8254b9a43bd5945fbdffa7dea2ace7ce17"
+  name = "github.com/Azure/azure-sdk-for-go"
+  packages = [
+    "services/eventhub/mgmt/2017-04-01/eventhub",
+    "version",
+  ]
+  pruneopts = "UT"
+  revision = "781d9fb592a1818cb7fb8e0855ea9c00b095a9e9"
+  version = "v37.2.0"
+
+[[projects]]
+  digest = "1:142583bbbf0daddbe24bf9142ce0920f7a7901cd0ee8ea0af7067b507f258240"
+  name = "github.com/Azure/go-autorest"
+  packages = [
+    "autorest",
+    "autorest/adal",
+    "autorest/azure",
+    "autorest/date",
+    "autorest/to",
+    "autorest/validation",
+    "logger",
+    "tracing",
+  ]
+  pruneopts = "UT"
+  revision = "21d4b01533b1005be0d020da67a6d3f8ebdf0141"
+  version = "v13.3.1"
+
+[[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
@@ -152,6 +212,14 @@
   pruneopts = "UT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
+
+[[projects]]
+  digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
@@ -517,6 +585,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "8a9cab3a62b1b693e7dfa590a215dc6217552803"
+
+[[projects]]
+  digest = "1:b6bbd2f9e0724bd81890c8644259f920c6d61c08453978faff0bebd25f3e7d3e"
+  name = "github.com/jpillora/backoff"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8eab2debe79d12b7bd3d10653910df25fa9552ba"
+  version = "1.0.0"
 
 [[projects]]
   digest = "1:7cd2924a44ecf80a319cfa2378529fabd348d011b739fb4eccc565f65e3296c4"
@@ -913,7 +989,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4e002f13ea112141a154d0c97220dce347717b3cfb552ecfb95e7db8a0b2f5ee"
+  digest = "1:c313673d8f79145275335a6d79081ae3030da6be19cbcc87629069d8dd418a8f"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
@@ -932,6 +1008,8 @@
     "openpgp/packet",
     "openpgp/s2k",
     "pbkdf2",
+    "pkcs12",
+    "pkcs12/internal/rc2",
     "poly1305",
     "ssh",
     "ssh/agent",
@@ -1802,6 +1880,17 @@
   revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
 
 [[projects]]
+  digest = "1:caa7785e6f87eb44fe0688b7eaea489a7f904ed8cbb09eb2d963bd5cde592601"
+  name = "pack.ag/amqp"
+  packages = [
+    ".",
+    "internal/testconn",
+  ]
+  pruneopts = "UT"
+  revision = "86a6a1998f1d2bf63262718644c1ef3a77fa8d28"
+  version = "v0.12.5"
+
+[[projects]]
   digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
   name = "sigs.k8s.io/yaml"
   packages = ["."]
@@ -1814,6 +1903,7 @@
   analyzer-version = 1
   input-imports = [
     "cloud.google.com/go/pubsub",
+    "github.com/Azure/azure-event-hubs-go",
     "github.com/Knetic/govaluate",
     "github.com/Shopify/sarama",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
