@@ -23,9 +23,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -121,4 +124,17 @@ func FormattedURL(url, endpoint string) string {
 
 func ErrEventSourceTypeMismatch(eventSourceType string) string {
 	return fmt.Sprintf("event source is not type of %s", eventSourceType)
+}
+
+// GetSecrets retrieves the secret value from the secret in namespace with name and key
+func GetSecrets(client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
+	secret, err := client.CoreV1().Secrets(namespace).Get(selector.Name, metav1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+	val, ok := secret.Data[selector.Key]
+	if !ok {
+		return "", errors.Errorf("secret '%s' does not have the key '%s'", selector.Name, selector.Key)
+	}
+	return string(val), nil
 }

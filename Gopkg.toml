@@ -21,10 +21,6 @@ required = [
   branch = "master"
 
 [[constraint]]
-  name = "github.com/nats-io/go-nats-streaming"
-  branch = "master"
-
-[[constraint]]
   name = "github.com/aws/aws-sdk-go"
   branch = "master"
 
