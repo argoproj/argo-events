@@ -352,6 +352,14 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.Webhook {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	case apicommon.AzureEventsHub:
+		for key, value := range eventSource.Spec.AzureEventsHub {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
+	case apicommon.StripeEvent:
+		for key, value := range eventSource.Spec.Stripe {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
 	}
 
 	return eventSourceContexts

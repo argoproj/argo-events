@@ -39,4 +39,5 @@ var (
 	SlackEvent       EventSourceType = "slack"
 	StorageGridEvent EventSourceType = "storagegrid"
 	AzureEventsHub   EventSourceType = "azureEventsHub"
+	StripeEvent      EventSourceType = "stripe"
 )
