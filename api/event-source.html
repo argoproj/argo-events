@@ -86,6 +86,86 @@ github.com/argoproj/argo-events/common.Backoff
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+</p>
+<p>
+<p>AzureEventsHubEventSource describes the event source for azure events hub
+More info at <a href="https://docs.microsoft.com/en-us/azure/event-hubs/">https://docs.microsoft.com/en-us/azure/event-hubs/</a></p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>fqdn</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>FQDN of the EventHubs namespace you created
+More info at <a href="https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string">https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string</a></p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sharedAccessKeyName</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>SharedAccessKeyName is the name you chose for your application&rsquo;s SAS keys</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>sharedAccessKey</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>SharedAccessKey is the the generated value of the key</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>hubName</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Event Hub path/name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>namespace</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.CalendarEventSource">CalendarEventSource
 </h3>
 <p>
@@ -452,6 +532,19 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Storag
 </td>
 <td>
 <p>StorageGrid event sources</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>azureEventsHub</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">
+map[string]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource
+</a>
+</em>
+</td>
+<td>
+<p>AzureEventsHub event sources</p>
 </td>
 </tr>
 <tr>
@@ -1751,5 +1844,5 @@ string
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>78e79e0</code>.
+on git commit <code>ee4e2ae</code>.
 </em></p>

@@ -35,8 +35,6 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
-	// Namespace where gateway is deployed
-	Namespace string
 }
 
 // StartEventSource starts an event source

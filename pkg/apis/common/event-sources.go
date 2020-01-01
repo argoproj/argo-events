@@ -38,4 +38,5 @@ var (
 	HDFSEvent        EventSourceType = "hdfs"
 	SlackEvent       EventSourceType = "slack"
 	StorageGridEvent EventSourceType = "storagegrid"
+	AzureEventsHub   EventSourceType = "azureEventsHub"
 )

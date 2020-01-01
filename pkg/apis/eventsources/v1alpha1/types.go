@@ -82,6 +82,8 @@ type EventSourceSpec struct {
 	Slack map[string]SlackEventSource `json:"slack,omitempty" protobuf:"bytes,16,opt,name=slack"`
 	// StorageGrid event sources
 	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,17,opt,name=storageGrid"`
+	// AzureEventsHub event sources
+	AzureEventsHub map[string]AzureEventsHubEventSource `json:"azureEventsHub,omitempty" protobuf:"bytes,18,opt,name=azureEventsHub"`
 	// Type of the event source
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
 }
@@ -379,6 +381,22 @@ type StorageGridEventSource struct {
 type StorageGridFilter struct {
 	Prefix string `json:"prefix"`
 	Suffix string `json:"suffix"`
+}
+
+// AzureEventsHubEventSource describes the event source for azure events hub
+// More info at https://docs.microsoft.com/en-us/azure/event-hubs/
+type AzureEventsHubEventSource struct {
+	// FQDN of the EventHubs namespace you created
+	// More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
+	FQDN string `json:"fqdn" protobuf:"bytes,1,name=fqdn"`
+	// SharedAccessKeyName is the name you chose for your application's SAS keys
+	SharedAccessKeyName *corev1.SecretKeySelector `json:"sharedAccessKeyName" protobuf:"bytes,2,name=sharedAccessKeyName"`
+	// SharedAccessKey is the the generated value of the key
+	SharedAccessKey *corev1.SecretKeySelector `json:"sharedAccessKey" protobuf:"bytes,3,name=sharedAccessKey"`
+	// Event Hub path/name
+	HubName string `json:"hubName" protobuf:"bytes,4,name=hubName"`
+	// Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
+	Namespace string `json:"namespace" protobuf:"bytes,5,name=namespace"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

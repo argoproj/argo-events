@@ -21,7 +21,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways/server"
-	aws_sqs "github.com/argoproj/argo-events/gateways/server/aws-sqs"
+	azure_events_hub "github.com/argoproj/argo-events/gateways/server/azure-events-hub"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 
-	server.StartGateway(&aws_sqs.EventListener{
+	server.StartGateway(&azure_events_hub.EventListener{
 		Logger:    common.NewArgoEventsLogger(),
 		K8sClient: clientset,
 	})
