@@ -84,8 +84,10 @@ type EventSourceSpec struct {
 	StorageGrid map[string]StorageGridEventSource `json:"storageGrid,omitempty" protobuf:"bytes,17,opt,name=storageGrid"`
 	// AzureEventsHub event sources
 	AzureEventsHub map[string]AzureEventsHubEventSource `json:"azureEventsHub,omitempty" protobuf:"bytes,18,opt,name=azureEventsHub"`
+	// Stripe event sources
+	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,19,opt,name=stripe"`
 	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,19,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,20,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -397,6 +399,27 @@ type AzureEventsHubEventSource struct {
 	HubName string `json:"hubName" protobuf:"bytes,4,name=hubName"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
 	Namespace string `json:"namespace" protobuf:"bytes,5,name=namespace"`
+}
+
+// StripeEventSource describes the event source for stripe webhook notifications
+// More info at https://stripe.com/docs/webhooks
+type StripeEventSource struct {
+	// Webhook holds configuration for a REST endpoint
+	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	// CreateWebhook if specified creates a new webhook programmatically.
+	// +optional
+	CreateWebhook bool `json:"createWebhook,omitempty" protobuf:"bytes,2,opt,name=createWebhook"`
+	// APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.
+	// +optional
+	APIKey *corev1.SecretKeySelector `json:"apiKey,omitempty" protobuf:"bytes,3,opt,name=apiKey"`
+	// Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	// EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
+	// More info at https://stripe.com/docs/api/events/list
+	// +optional
+	// +listType=string
+	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,5,rep,name=eventFilter"`
 }
 
 // EventSourceStatus holds the status of the event-source resource
