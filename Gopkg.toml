@@ -112,6 +112,10 @@ required = [
   name = "github.com/cloudevents/sdk-go"
   version = "v0.10.1"
 
+[[constraint]]
+  name = "github.com/emitter-io/go"
+  version = "v2.0.5"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"
