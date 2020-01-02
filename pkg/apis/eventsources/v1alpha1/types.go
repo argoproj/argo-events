@@ -86,8 +86,10 @@ type EventSourceSpec struct {
 	AzureEventsHub map[string]AzureEventsHubEventSource `json:"azureEventsHub,omitempty" protobuf:"bytes,18,opt,name=azureEventsHub"`
 	// Stripe event sources
 	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,19,opt,name=stripe"`
+	// Emitter event source
+	Emitter map[string]EmitterEventSource `json:"emitter,omitempty" protobuf:"bytes,20,opt,name=emitter"`
 	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,20,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,21,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -420,6 +422,25 @@ type StripeEventSource struct {
 	// +optional
 	// +listType=string
 	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,5,rep,name=eventFilter"`
+}
+
+// EmitterEventSource describes the event source for emitter
+// More info at https://emitter.io/develop/getting-started/
+type EmitterEventSource struct {
+	// Broker URI to connect to.
+	Broker string `json:"broker" protobuf:"bytes,1,name=broker"`
+	// ChannelKey refers to the channel key
+	ChannelKey *corev1.SecretKeySelector `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
+	// ChannelName refers to the channel name
+	ChannelName string `json:"channelName" protobuf:"bytes,3,name=channelName"`
+	// Namespace to use to retrieve the channel key and optional username/password
+	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
+	// Username to use to connect to broker
+	// +optional
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
+	// Password to use to connect to broker
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,6,opt,name=password"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

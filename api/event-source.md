@@ -512,6 +512,189 @@ triggered
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.EmitterEventSource">
+
+EmitterEventSource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EmitterEventSource describes the event source for emitter More info at
+<a href="https://emitter.io/develop/getting-started/">https://emitter.io/develop/getting-started/</a>
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>broker</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Broker URI to connect to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channelKey</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+ChannelKey refers to the channel key
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channelName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ChannelName refers to the channel name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Namespace to use to retrieve the channel key and optional
+username/password
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>username</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Username to use to connect to broker
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Password to use to connect to broker
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EventSource">
 
 EventSource
@@ -1088,6 +1271,29 @@ map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Stri
 <p>
 
 Stripe event sources
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>emitter</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Emitter event source
 
 </p>
 
@@ -3859,6 +4065,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>6ce129b</code>. </em>
+commit <code>9d4a5c5</code>. </em>
 
 </p>
