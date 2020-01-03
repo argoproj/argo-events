@@ -1,0 +1,15 @@
+---
+# This configmap contains the event sources configurations for Pulsar gateway
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: pulsar-event-source
+spec:
+  type: "pulsar"
+  spec:
+    example: |-
+      pulsarConfigUrl: pulsar://pulsar-1578041596-broker:6650
+      pulsarConfigTopic: non-persistent://public/default/mytopic
+      pulsarConfigSubscriptionName: mysubscription
+      pulsarConfigSubscriptionType: Exclusive
+      pulsarConfigConnectionTimeout: 60s

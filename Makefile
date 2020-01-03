@@ -35,9 +35,9 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux minio-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux slack-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux minio-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux slack-linux pulsar-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image minio-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image slack-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image minio-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image slack-image pulsar-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
 
@@ -272,6 +272,16 @@ slack-linux:
 slack-image: slack-linux
 	docker build -t $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) -f ./gateways/server/slack/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) ; fi
+
+pulsar:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/pulsar-gateway ./gateways/server/pulsar/cmd
+
+pulsar-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make pulsar
+
+pulsar-image: pulsar-linux
+	docker build -t $(IMAGE_PREFIX)pulsar-gateway:$(IMAGE_TAG) -f ./gateways/server/pulsar/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)pulsar-gateway:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v

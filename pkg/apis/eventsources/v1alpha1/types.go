@@ -88,6 +88,8 @@ type EventSourceSpec struct {
 	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,19,opt,name=stripe"`
 	// Type of the event source
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,20,name=type"`
+	// Pulsar event sources
+	Pulsar map[string]PulsarEventSource `json:"pulsar,omitempty" protobuf:"bytes,21,opt,name=pulsar"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -420,6 +422,25 @@ type StripeEventSource struct {
 	// +optional
 	// +listType=string
 	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,5,rep,name=eventFilter"`
+}
+
+// PulsarEventSource refers to event source for Apache Pulsar related events
+type PulsarEventSource struct {
+	// Pulsar Client Configuration. For more info,
+	// see the Client and Consumer options here: http://pulsar.apache.org/docs/en/client-libraries-go/
+
+	// Service URL, e.g. "pulsar://pulsar-service:6650"
+	PulsarConfigUrl string `json:"pulsarConfigUrl" protobuf:"bytes,1,name=pulsarConfigUrl"`
+	// Connection Timeout string, converts to time.Duration, e.g. 60s - optional, defaults to 30s if omitted
+	PulsarConfigConnectionTimeout string `json:"pulsarConfigConnectionTimeout,omitempty" protobuf:"bytes,2,opt,name=pulsarConfigConnectionTimeout"`
+	// Operation Timeout string, converts to time.Duration, e.g. 60s - optional, defaults to 30s if omitted
+	PulsarConfigOperationTimeout string `json:"pulsarConfigOperationTimeout,omitempty" protobuf:"bytes,3,opt,name=pulsarConfigOperationTimeout"`
+	// Topic to use and its type (persistent or non-persistent), e.g. "non-persistent://public/default/mytopic"
+	PulsarConfigTopic string `json:"pulsarConfigTopic" protobuf:"bytes,4,name=pulsarConfigTopic"`
+	// Subscription Name, e.g. "mysubscription"
+	PulsarConfigSubscriptionName string `json:"pulsarConfigSubscriptionName" protobuf:"bytes,5,name=pulsarConfigSubscriptionName"`
+	// Subscription Type, e.g. "Shared" - optional, defaults to "Exclusive" if omitted
+	PulsarConfigSubscriptionType string `json:"pulsarConfigSubscriptionType,omitempty" protobuf:"bytes,6,opt,name=pulsarConfigSubscriptionType"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

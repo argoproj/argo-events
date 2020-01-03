@@ -40,4 +40,5 @@ var (
 	StorageGridEvent EventSourceType = "storagegrid"
 	AzureEventsHub   EventSourceType = "azureEventsHub"
 	StripeEvent      EventSourceType = "stripe"
+	PulsarEvent      EventSourceType = "pulsar"
 )

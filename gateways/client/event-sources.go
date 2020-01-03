@@ -360,6 +360,10 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.Stripe {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	case apicommon.PulsarEvent:
+		for key, value := range eventSource.Spec.Pulsar {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
 	}
 
 	return eventSourceContexts

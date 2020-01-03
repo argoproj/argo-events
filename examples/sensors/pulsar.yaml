@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: pulsar-sensor
+  labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  version: "v0.12-rc"
+  template:
+    spec:
+      containers:
+        - name: "sensor"
+          image: "argoproj/sensor:v0.12-rc"
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  eventProtocol:
+    type: "HTTP"
+    http:
+      port: "9300"
+  dependencies:
+    - name: "pulsar-gateway:example"
+  triggers:
+    - template:
+        name: pulsar-example-workflow
+        group: argoproj.io
+        version: v1alpha1
+        resource: workflows
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: pulsar-example-workflow-
+            spec:
+              entrypoint: whalesay
+              arguments:
+                parameters:
+                - name: message
+                  # this is the value that should be overridden
+                  value: hello world
+              templates:
+              - name: whalesay
+                inputs:
+                  parameters:
+                  - name: message
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["{{inputs.parameters.message}}"]
+      resourceParameters:
+        - src:
+            event: "aws-sqs-gateway:example"
+          dest: spec.arguments.parameters.0.value
