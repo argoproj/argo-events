@@ -291,6 +291,14 @@
   version = "v1.12.0"
 
 [[projects]]
+  digest = "1:e0a2bdebd205a7149258c58dd45c419ee8f14a1c24e0b1cf588c8f5e8b02e110"
+  name = "github.com/emitter-io/go"
+  packages = ["v2"]
+  pruneopts = "UT"
+  revision = "540049cd23809e2f1f59d48fdc958ef2d0351a4b"
+  version = "v2.0.5"
+
+[[projects]]
   digest = "1:2b5f431fa18891a2ac0e02353c83fb3bf458fced6ccecd664b429054e0c4ce3b"
   name = "github.com/evanphx/json-patch"
   packages = ["."]
@@ -873,6 +881,18 @@
   pruneopts = "UT"
   revision = "221dbe5ed46703ee255b1da0dec05086f5035f62"
   version = "v1.4.0"
+
+[[projects]]
+  digest = "1:dbb7c6ac097421a8adc55b999e8f4aa32f2ca1eaf5319905dbacf05382c56182"
+  name = "github.com/stripe/stripe-go"
+  packages = [
+    ".",
+    "form",
+    "webhookendpoint",
+  ]
+  pruneopts = "UT"
+  revision = "4b9972655783ea495b1e9607bb196ba3cadf883c"
+  version = "v68.4.0"
 
 [[projects]]
   digest = "1:719b772d0c56bbf1acd3a748f88b9d02ff6da543994b5d7e1adf052eb5b693a1"
@@ -1915,6 +1935,7 @@
     "github.com/cloudevents/sdk-go",
     "github.com/colinmarc/hdfs",
     "github.com/eclipse/paho.mqtt.golang",
+    "github.com/emitter-io/go/v2",
     "github.com/fsnotify/fsnotify",
     "github.com/ghodss/yaml",
     "github.com/go-openapi/spec",
@@ -1938,6 +1959,8 @@
     "github.com/smartystreets/goconvey/convey",
     "github.com/streadway/amqp",
     "github.com/stretchr/testify/assert",
+    "github.com/stripe/stripe-go",
+    "github.com/stripe/stripe-go/webhookendpoint",
     "github.com/tidwall/gjson",
     "github.com/tidwall/sjson",
     "github.com/xanzy/go-gitlab",

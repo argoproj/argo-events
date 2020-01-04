@@ -31,6 +31,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource":           schema_pkg_apis_eventsources_v1alpha1_AMQPEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource": schema_pkg_apis_eventsources_v1alpha1_AzureEventsHubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource":       schema_pkg_apis_eventsources_v1alpha1_CalendarEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource":        schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EventSource":               schema_pkg_apis_eventsources_v1alpha1_EventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EventSourceList":           schema_pkg_apis_eventsources_v1alpha1_EventSourceList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EventSourceSpec":           schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref),
@@ -211,6 +212,61 @@ func schema_pkg_apis_eventsources_v1alpha1_CalendarEventSource(ref common.Refere
 				Required: []string{"schedule", "interval"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EmitterEventSource describes the event source for emitter More info at https://emitter.io/develop/getting-started/",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"broker": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Broker URI to connect to.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"channelKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ChannelKey refers to the channel key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"channelName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ChannelName refers to the channel name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace to use to retrieve the channel key and optional username/password",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username to use to connect to broker",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password to use to connect to broker",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+				},
+				Required: []string{"broker", "channelKey", "channelName", "namespace"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -584,6 +640,20 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 							},
 						},
 					},
+					"emitter": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Emitter event source",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource"),
+									},
+								},
+							},
+						},
+					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of the event source",
@@ -596,7 +666,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
+			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
 	}
 }
 

@@ -1115,6 +1115,6 @@ UpdateTime is the time when node(gateway configuration) was updated
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>ee4e2ae</code>. </em>
+commit <code>9d4a5c5</code>. </em>
 
 </p>
