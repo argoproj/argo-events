@@ -18,7 +18,6 @@ package redis
 
 import (
 	"encoding/json"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -78,6 +77,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	logger.Infoln("setting up a redis client")
+
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisEventSource.HostAddress,
 		Password: password,

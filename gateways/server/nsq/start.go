@@ -65,16 +65,23 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	// Instantiate a consumer that will subscribe to the provided channel.
+	logger.Infoln("creating a NSQ consumer")
+	var consumer *nsq.Consumer
 	config := nsq.NewConfig()
-	consumer, err := nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config)
-	if err != nil {
+	if err := server.Connect(common.GetConnectionBackoff(nsqEventSource.ConnectionBackoff), func() error {
+		var err error
+		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		errorCh <- errors.Wrapf(err, "failed to create a new consumer for topic %s and channel %s", nsqEventSource.Topic, nsqEventSource.Channel)
 		return
 	}
 
 	consumer.AddHandler(&messageHandler{dataCh: dataCh})
 
-	err = consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress)
+	err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress)
 	if err != nil {
 		errorCh <- errors.Wrapf(err, "lookup failed for host %s", nsqEventSource.HostAddress)
 		return

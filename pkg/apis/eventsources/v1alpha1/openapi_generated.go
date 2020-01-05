@@ -264,12 +264,18 @@ func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.Referen
 							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
+					"connectionBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Backoff holds parameters applied to connection.",
+							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+						},
+					},
 				},
 				Required: []string{"broker", "channelKey", "channelName", "namespace"},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/common.Backoff", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1216,10 +1222,18 @@ func schema_pkg_apis_eventsources_v1alpha1_NSQEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"connectionBackoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Backoff holds parameters applied to connection.",
+							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+						},
+					},
 				},
 				Required: []string{"hostAddress", "topic", "channel"},
 			},
 		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/common.Backoff"},
 	}
 }
 
