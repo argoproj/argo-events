@@ -116,6 +116,10 @@ required = [
   name = "github.com/emitter-io/go"
   version = "v2.0.5"
 
+[[constraint]]
+  name = "github.com/go-redis/redis"
+  version = "v6.15.6"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"

@@ -293,6 +293,20 @@
   version = "v0.19.6"
 
 [[projects]]
+  name = "github.com/go-redis/redis"
+  packages = [
+    ".",
+    "internal",
+    "internal/consistenthash",
+    "internal/hashtag",
+    "internal/pool",
+    "internal/proto",
+    "internal/util"
+  ]
+  revision = "7f69d5e32072d151eb6936cbe2306413e8117488"
+  version = "v6.15.6"
+
+[[projects]]
   name = "github.com/gobwas/glob"
   packages = [
     ".",
@@ -531,8 +545,8 @@
     "zstd",
     "zstd/internal/xxhash"
   ]
-  revision = "17b3d80415252d99aa09c6717fea5f1f60a01ea5"
-  version = "v1.9.5"
+  revision = "74ace0271af162121567968357b8e8738409674c"
+  version = "v1.9.6"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -1657,6 +1671,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8bce7f5d60c53de421109eee726ba845810f7a365b349fe517d1228e7b09f962"
+  inputs-digest = "661e7f0df8dfc9e0d375fb826652c2c6951beb3552cf67437081e515d7bd180c"
   solver-name = "gps-cdcl"
   solver-version = 1

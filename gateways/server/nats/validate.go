@@ -36,8 +36,8 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	var natsGridEventSource *v1alpha1.NATSEventsSource
-	if err := yaml.Unmarshal(eventSource.Value, &natsGridEventSource); err != nil {
+	var natsEventSource *v1alpha1.NATSEventsSource
+	if err := yaml.Unmarshal(eventSource.Value, &natsEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -45,7 +45,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 		}, nil
 	}
 
-	if err := validate(natsGridEventSource); err != nil {
+	if err := validate(natsEventSource); err != nil {
 		listener.Logger.WithError(err).Error("failed to validate nats event source")
 		return &gateways.ValidEventSource{
 			IsValid: false,
@@ -60,7 +60,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 
 func validate(eventSource *v1alpha1.NATSEventsSource) error {
 	if eventSource == nil {
-		return errors.New("configuration must be non empty")
+		return common.ErrNilEventSource
 	}
 	if eventSource.URL == "" {
 		return errors.New("url must be specified")
