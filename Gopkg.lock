@@ -545,8 +545,8 @@
     "zstd",
     "zstd/internal/xxhash"
   ]
-  revision = "74ace0271af162121567968357b8e8738409674c"
-  version = "v1.9.6"
+  revision = "f61bac3a179b270c811148ce2a1f819dfc82825f"
+  version = "v1.9.7"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -634,6 +634,12 @@
     "slackutilsx"
   ]
   revision = "d06c2a2b3249b44a9c5dee8485f5a87497beb9ea"
+
+[[projects]]
+  name = "github.com/nsqio/go-nsq"
+  packages = ["."]
+  revision = "d7acddb4babdf3329ad415cc02b605a239011b4b"
+  version = "v1.0.8"
 
 [[projects]]
   name = "github.com/pierrec/lz4"
@@ -1671,6 +1677,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "661e7f0df8dfc9e0d375fb826652c2c6951beb3552cf67437081e515d7bd180c"
+  inputs-digest = "54e54c0f2963ce57907f83f7e2ce0a8a27b3a12e48710d4f79e53c44e8cbdd4c"
   solver-name = "gps-cdcl"
   solver-version = 1

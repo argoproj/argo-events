@@ -44,6 +44,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource":          schema_pkg_apis_eventsources_v1alpha1_KafkaEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource":           schema_pkg_apis_eventsources_v1alpha1_MQTTEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource":          schema_pkg_apis_eventsources_v1alpha1_NATSEventsSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource":            schema_pkg_apis_eventsources_v1alpha1_NSQEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource":         schema_pkg_apis_eventsources_v1alpha1_PubSubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource":          schema_pkg_apis_eventsources_v1alpha1_RedisEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource":       schema_pkg_apis_eventsources_v1alpha1_ResourceEventSource(ref),
@@ -670,6 +671,20 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 							},
 						},
 					},
+					"nsq": {
+						SchemaProps: spec.SchemaProps{
+							Description: "NSQ event source",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource"),
+									},
+								},
+							},
+						},
+					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of the event source",
@@ -682,7 +697,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
+			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
 	}
 }
 
@@ -1170,6 +1185,41 @@ func schema_pkg_apis_eventsources_v1alpha1_NATSEventsSource(ref common.Reference
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/common.Backoff"},
+	}
+}
+
+func schema_pkg_apis_eventsources_v1alpha1_NSQEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "NSQEventSource describes the event source for NSQ PubSub More info at https://godoc.org/github.com/nsqio/go-nsq",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"hostAddress": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HostAddress is the address of the host for NSQ lookup",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"topic": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Topic to subscribe to.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"channel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Channel used for subscription",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"hostAddress", "topic", "channel"},
+			},
+		},
 	}
 }
 

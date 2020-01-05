@@ -90,8 +90,10 @@ type EventSourceSpec struct {
 	Emitter map[string]EmitterEventSource `json:"emitter,omitempty" protobuf:"bytes,20,opt,name=emitter"`
 	// Redis event source
 	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,21,opt,name=redis"`
+	// NSQ event source
+	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,22,opt,name=nsq"`
 	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,21,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,22,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -462,6 +464,17 @@ type RedisEventSource struct {
 	// Channels to subscribe to listen events.
 	// +listType=string
 	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`
+}
+
+// NSQEventSource describes the event source for NSQ PubSub
+// More info at https://godoc.org/github.com/nsqio/go-nsq
+type NSQEventSource struct {
+	// HostAddress is the address of the host for NSQ lookup
+	HostAddress string `json:"hostAddress" protobuf:"bytes,1,name=hostAddress"`
+	// Topic to subscribe to.
+	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
+	// Channel used for subscription
+	Channel string `json:"channel" protobuf:"bytes,3,name=channel"`
 }
 
 // EventSourceStatus holds the status of the event-source resource
