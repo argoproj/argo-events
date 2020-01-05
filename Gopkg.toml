@@ -120,6 +120,10 @@ required = [
   name = "github.com/go-redis/redis"
   version = "v6.15.6"
 
+[[constraint]]
+  name = "github.com/nsqio/go-nsq"
+  version = "v1.0.8"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"

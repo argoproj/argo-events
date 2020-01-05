@@ -42,4 +42,5 @@ var (
 	StripeEvent      EventSourceType = "stripe"
 	EmitterEvent     EventSourceType = "emitter"
 	RedisEvent       EventSourceType = "redis"
+	NSQEvent         EventSourceType = "nsq"
 )
