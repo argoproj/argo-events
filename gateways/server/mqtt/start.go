@@ -24,7 +24,6 @@ import (
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // EventListener implements Eventing for mqtt event source
@@ -78,12 +77,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	var client mqttlib.Client
 
 	logger.Infoln("connecting to mqtt broker...")
-	if err := server.Connect(&wait.Backoff{
-		Factor:   mqttEventSource.ConnectionBackoff.Factor,
-		Duration: mqttEventSource.ConnectionBackoff.Duration,
-		Jitter:   mqttEventSource.ConnectionBackoff.Jitter,
-		Steps:    mqttEventSource.ConnectionBackoff.Steps,
-	}, func() error {
+	if err := server.Connect(common.GetConnectionBackoff(mqttEventSource.ConnectionBackoff), func() error {
 		client = mqttlib.NewClient(opts)
 		if token := client.Connect(); token.Wait() && token.Error() != nil {
 			return token.Error()

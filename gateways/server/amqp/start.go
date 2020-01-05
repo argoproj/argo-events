@@ -25,7 +25,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	amqplib "github.com/streadway/amqp"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // EventListener implements Eventing for amqp event source
@@ -63,12 +62,8 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	var conn *amqplib.Connection
 
 	logger.Infoln("dialing connection...")
-	if err := server.Connect(&wait.Backoff{
-		Steps:    amqpEventSource.ConnectionBackoff.Steps,
-		Factor:   amqpEventSource.ConnectionBackoff.Factor,
-		Duration: amqpEventSource.ConnectionBackoff.Duration,
-		Jitter:   amqpEventSource.ConnectionBackoff.Jitter,
-	}, func() error {
+	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
+	if err := server.Connect(backoff, func() error {
 		var err error
 		conn, err = amqplib.Dial(amqpEventSource.URL)
 		if err != nil {

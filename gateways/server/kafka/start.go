@@ -27,7 +27,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // EventListener implements Eventing kafka event source
@@ -73,12 +72,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	var consumer sarama.Consumer
 
 	logger.Infoln("connecting to Kafka cluster...")
-	if err := server.Connect(&wait.Backoff{
-		Steps:    kafkaEventSource.ConnectionBackoff.Steps,
-		Jitter:   kafkaEventSource.ConnectionBackoff.Jitter,
-		Duration: kafkaEventSource.ConnectionBackoff.Duration,
-		Factor:   kafkaEventSource.ConnectionBackoff.Factor,
-	}, func() error {
+	if err := server.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
 		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
 		if err != nil {

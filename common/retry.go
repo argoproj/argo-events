@@ -47,3 +47,29 @@ func IsRetryableKubeAPIError(err error) bool {
 	}
 	return true
 }
+
+// GetConnectionBackoff returns a connection backoff option
+func GetConnectionBackoff(backoff *Backoff) *wait.Backoff {
+	result := wait.Backoff{
+		Duration: DefaultRetry.Duration,
+		Factor:   DefaultRetry.Factor,
+		Jitter:   DefaultRetry.Jitter,
+		Steps:    DefaultRetry.Steps,
+	}
+	if backoff == nil {
+		return &result
+	}
+	if &backoff.Duration != nil {
+		result.Duration = backoff.Duration
+	}
+	if backoff.Factor != 0 {
+		result.Factor = backoff.Factor
+	}
+	if backoff.Jitter != 0 {
+		result.Jitter = backoff.Jitter
+	}
+	if backoff.Steps != 0 {
+		result.Steps = backoff.Steps
+	}
+	return &result
+}
