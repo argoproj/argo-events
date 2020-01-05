@@ -368,6 +368,10 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.Redis {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	case apicommon.NSQEvent:
+		for key, value := range eventSource.Spec.NSQ {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
 	}
 
 	return eventSourceContexts
