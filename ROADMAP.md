@@ -5,9 +5,7 @@
 - NSQ Gateway
 - Redis PubSub Gateway
 - Stripe Webhook Gateway
-- Support Subscription CRD as communication channel between Gateway and Sensor
 - Argo Workflow specific operations with argo cli as trigger
-- Support Trigger CRD to simplify Sensor definition
-- Support for HTTP, NATS, Kafka triggers and new execution policies
-- CloudEvents NATS support
-- KubeFlow integration
+- Support OpenFaas, Kubeless, AWS Lambda, Google Cloud Functions, IBM OpenWhisk as triggers
+- Support Twilio messages, Email and Slack messages as triggers
+- Support for HTTP, NATS, Kafka triggers
