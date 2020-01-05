@@ -70,6 +70,15 @@ const (
 	TriggerCycleFailure TriggerCycleState = "Failure" // one or more triggers failed
 )
 
+// KubernetesResourceOperation refers to the type of operation performed on the K8s resource
+type KubernetesResourceOperation string
+
+// possible values for KubernetesResourceOperation
+const (
+	Create KubernetesResourceOperation = "Create" // creates the resource
+	Update KubernetesResourceOperation = "Update" // updates the resource
+)
+
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
@@ -219,6 +228,10 @@ type TriggerTemplate struct {
 	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,3,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
+	// Operation refers to the type of operation performed on the trigger resource.
+	// Default value is Create.
+	// +optional
+	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,5,opt,name=operation"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.

@@ -100,7 +100,10 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 			Version:  trigger.Template.GroupVersionResource.Version,
 			Resource: trigger.Template.GroupVersionResource.Resource,
 		})
-		newObj, err := triggers.Execute(sensorCtx.Sensor, uObj, client)
+		if trigger.Template.Operation == "" {
+			trigger.Template.Operation = v1alpha1.Create
+		}
+		newObj, err := triggers.Execute(sensorCtx.Sensor, uObj, client, trigger.Template.Operation)
 		if err != nil {
 			return err
 		}

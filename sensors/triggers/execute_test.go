@@ -90,7 +90,7 @@ func TestExecute(t *testing.T) {
 		Version:  trigger.Template.GroupVersionResource.Version,
 		Group:    trigger.Template.GroupVersionResource.Group,
 	})
-	uObj, err := Execute(sensorObj, deployment, namespacableClient)
+	uObj, err := Execute(sensorObj, deployment, namespacableClient, v1alpha1.Create)
 	assert.Nil(t, err)
 	assert.NotNil(t, uObj)
 	assert.Equal(t, uObj.GetName(), deployment.GetName())

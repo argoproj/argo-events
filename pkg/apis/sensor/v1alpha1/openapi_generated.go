@@ -1240,6 +1240,13 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
 						},
 					},
+					"operation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Operation refers to the type of operation performed on the trigger resource. Default value is Create.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"name", "source"},
 			},
