@@ -24,7 +24,6 @@ import (
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // EventListener implements Eventing for nats event source
@@ -70,12 +69,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	var conn *natslib.Conn
 
 	logger.Infoln("connecting to nats cluster...")
-	if err := server.Connect(&wait.Backoff{
-		Steps:    natsEventSource.ConnectionBackoff.Steps,
-		Jitter:   natsEventSource.ConnectionBackoff.Jitter,
-		Duration: natsEventSource.ConnectionBackoff.Duration,
-		Factor:   natsEventSource.ConnectionBackoff.Factor,
-	}, func() error {
+	if err := server.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
 		var err error
 		if conn, err = natslib.Connect(natsEventSource.URL); err != nil {
 			return err

@@ -92,8 +92,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("creating a client")
 	client := emitter.NewClient(options...)
 
-	if err := client.Connect(); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to create client for channel %s", emitterEventSource.ChannelName)
+	if err := server.Connect(common.GetConnectionBackoff(emitterEventSource.ConnectionBackoff), func() error {
+		if err := client.Connect(); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		errorCh <- errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
 		return
 	}
 

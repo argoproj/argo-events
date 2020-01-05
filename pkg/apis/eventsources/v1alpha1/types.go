@@ -445,6 +445,9 @@ type EmitterEventSource struct {
 	// Password to use to connect to broker
 	// +optional
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,6,opt,name=password"`
+	// Backoff holds parameters applied to connection.
+	// +optional
+	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -475,6 +478,9 @@ type NSQEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
 	// Channel used for subscription
 	Channel string `json:"channel" protobuf:"bytes,3,name=channel"`
+	// Backoff holds parameters applied to connection.
+	// +optional
+	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 }
 
 // EventSourceStatus holds the status of the event-source resource
