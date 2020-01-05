@@ -41,4 +41,5 @@ var (
 	AzureEventsHub   EventSourceType = "azureEventsHub"
 	StripeEvent      EventSourceType = "stripe"
 	EmitterEvent     EventSourceType = "emitter"
+	RedisEvent       EventSourceType = "redis"
 )

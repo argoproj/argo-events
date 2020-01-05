@@ -364,6 +364,10 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.Emitter {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	case apicommon.RedisEvent:
+		for key, value := range eventSource.Spec.Redis {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
 	}
 
 	return eventSourceContexts
