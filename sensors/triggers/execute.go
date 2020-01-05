@@ -19,6 +19,7 @@ package triggers
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/store"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
@@ -45,7 +46,7 @@ func FetchResource(kubeClient kubernetes.Interface, sensor *v1alpha1.Sensor, tri
 	return nil, nil
 }
 
-func Execute(sensor *v1alpha1.Sensor, obj *unstructured.Unstructured, client dynamic.NamespaceableResourceInterface) (*unstructured.Unstructured, error) {
+func Execute(sensor *v1alpha1.Sensor, obj *unstructured.Unstructured, client dynamic.NamespaceableResourceInterface, op v1alpha1.KubernetesResourceOperation) (*unstructured.Unstructured, error) {
 	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {
@@ -53,5 +54,12 @@ func Execute(sensor *v1alpha1.Sensor, obj *unstructured.Unstructured, client dyn
 	}
 	obj.SetNamespace(namespace)
 
-	return client.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+	switch op {
+	case v1alpha1.Create:
+		return client.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+	case v1alpha1.Update:
+		return client.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+	default:
+		return nil, errors.Errorf("unknown operation type %s", string(op))
+	}
 }
