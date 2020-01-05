@@ -88,6 +88,8 @@ type EventSourceSpec struct {
 	Stripe map[string]StripeEventSource `json:"stripe,omitempty" protobuf:"bytes,19,opt,name=stripe"`
 	// Emitter event source
 	Emitter map[string]EmitterEventSource `json:"emitter,omitempty" protobuf:"bytes,20,opt,name=emitter"`
+	// Redis event source
+	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,21,opt,name=redis"`
 	// Type of the event source
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,21,name=type"`
 }
@@ -441,6 +443,25 @@ type EmitterEventSource struct {
 	// Password to use to connect to broker
 	// +optional
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,6,opt,name=password"`
+}
+
+// RedisEventSource describes an event source for the Redis PubSub.
+// More info at https://godoc.org/github.com/go-redis/redis#example-PubSub
+type RedisEventSource struct {
+	// HostAddress refers to the address of the Redis host/server
+	HostAddress string `json:"hostAddress" protobuf:"bytes,1,name=hostAddress"`
+	// Password required for authentication if any.
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
+	// Namespace to use to retrieve the password from. It should only be specified if password is declared
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// DB to use. If not specified, default DB 0 will be used.
+	// +optional
+	DB int `json:"db,omitempty" protobuf:"bytes,4,opt,name=db"`
+	// Channels to subscribe to listen events.
+	// +listType=string
+	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`
 }
 
 // EventSourceStatus holds the status of the event-source resource
