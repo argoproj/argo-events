@@ -240,6 +240,9 @@ type TriggerTemplate struct {
 	// ArgoWorkflow refers to the trigger type of Argo Workflow.
 	// +optional
 	ArgoWorkflow *ArgoWorkflowTrigger `json:"argoWorkflow,omitempty" protobuf:"bytes,4,opt,name=argoWorkflow"`
+	// HTTP refers to the trigger of type HTTP request
+	// +optional
+	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,4,opt,name=http"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -281,6 +284,26 @@ type ArgoWorkflowTrigger struct {
 	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,name=groupVersionResource"`
+}
+
+// HTTPTrigger is the trigger for the HTTP request
+type HTTPTrigger struct {
+	// ServerURL refers to the URL to send HTTP request to.
+	ServerURL string `json:"serverUrl" protobuf:"bytes,1,name=serverURL"`
+	// PayloadParameters is the list of parameters extracted from an event to construct the HTTP request payload.
+	// +listType=payloadParameters
+	PayloadParameters []TriggerParameter `json:"resourceParameters" protobuf:"bytes,2,rep,name=resourceParameters"`
+	// TLS configuration for the HTTP client
+	// +optional
+	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
+}
+
+// HTTPTriggerTLS refers to TLS configuration for the HTTP client
+type HTTPTriggerTLS struct {
+	// ServerCertPath refers the file that contains the cert.
+	ServerCertPath string `json:"serverCertPath" protobuf:"bytes,1,name=serverCertPath"`
+	// ServerKeyPath refers the file that contains private key
+	ServerKeyPath string `json:"serverKeyPath" protobuf:"bytes,2,name=serverKeyPath"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination
