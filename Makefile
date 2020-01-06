@@ -290,6 +290,7 @@ clientgen:
 .PHONY: openapigen
 openapi-gen:
 	./hack/update-openapigen.sh
+	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
 
 .PHONY: codegen
 codegen: clientgen openapigen
