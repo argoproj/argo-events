@@ -31,7 +31,7 @@ func GetPolicy(trigger *v1alpha1.Trigger, client dynamic.NamespaceableResourceIn
 	if trigger.Policy == nil {
 		return nil
 	}
-	if trigger.ResourceParameters != nil {
+	if trigger.Policy.ResourceLabels != nil {
 		return newResourceLabels(trigger, client, obj)
 	}
 	return nil

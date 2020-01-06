@@ -23,6 +23,8 @@ import (
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
+	triggercommon "github.com/argoproj/argo-events/sensors/triggers/common"
+	standard_k8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -78,21 +80,21 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 	// 4. Apply resource level parameters
 	// 5. If any policy is set, apply it
 	for _, trigger := range sensorCtx.Sensor.Spec.Triggers {
-		if err := triggers.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
+		if err := triggercommon.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
 			return err
 		}
 		if ok := triggers.ApplySwitches(sensorCtx.Sensor, &trigger); !ok {
 			logger.Infoln("switches/group level when conditions were not resolved, won't execute the trigger")
 			continue
 		}
-		uObj, err := triggers.FetchResource(sensorCtx.KubeClient, sensorCtx.Sensor, &trigger)
+		uObj, err := standard_k8s.FetchResource(sensorCtx.KubeClient, sensorCtx.Sensor, &trigger)
 		if err != nil {
 			return err
 		}
 		if uObj == nil {
 			continue
 		}
-		if err := triggers.ApplyResourceParameters(sensorCtx.Sensor, trigger.ResourceParameters, uObj); err != nil {
+		if err := triggercommon.ApplyResourceParameters(sensorCtx.Sensor, trigger.ResourceParameters, uObj); err != nil {
 			return err
 		}
 		client := sensorCtx.DynamicClient.Resource(schema.GroupVersionResource{
@@ -103,7 +105,7 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		if trigger.Template.Operation == "" {
 			trigger.Template.Operation = v1alpha1.Create
 		}
-		newObj, err := triggers.Execute(sensorCtx.Sensor, uObj, client, trigger.Template.Operation)
+		newObj, err := standard_k8s.Execute(sensorCtx.Sensor, uObj, client, trigger.Template.Operation)
 		if err != nil {
 			return err
 		}

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package triggers
+package common
 
 import (
 	"encoding/json"
@@ -52,7 +52,7 @@ func TestExtractEvents(t *testing.T) {
 			},
 		},
 	}
-	events := extractEvents(obj, []v1alpha1.TriggerParameter{
+	events := ExtractEvents(obj, []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
@@ -64,7 +64,7 @@ func TestExtractEvents(t *testing.T) {
 	assert.Equal(t, events["fake-dependency"].Context.Subject, "example-1")
 
 	delete(obj.Status.Nodes, id)
-	events = extractEvents(obj, []v1alpha1.TriggerParameter{
+	events = ExtractEvents(obj, []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
@@ -275,7 +275,7 @@ func TestApplyParams(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := applyParams(test.jsonObj, test.params, events)
+			result, err := ApplyParams(test.jsonObj, test.params, events)
 			assert.Nil(t, err)
 			assert.Equal(t, string(test.result), string(result))
 		})

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package triggers
+package common
 
 import (
 	"encoding/json"
@@ -37,7 +37,7 @@ func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger)
 		if err != nil {
 			return err
 		}
-		tObj, err := applyParams(templateBytes, trigger.TemplateParameters, extractEvents(sensor, trigger.TemplateParameters))
+		tObj, err := ApplyParams(templateBytes, trigger.TemplateParameters, ExtractEvents(sensor, trigger.TemplateParameters))
 		if err != nil {
 			return err
 		}
@@ -57,7 +57,7 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 		if err != nil {
 			return err
 		}
-		jUpdatedObj, err := applyParams(jObj, parameters, extractEvents(sensor, parameters))
+		jUpdatedObj, err := ApplyParams(jObj, parameters, ExtractEvents(sensor, parameters))
 		if err != nil {
 			return err
 		}
@@ -69,8 +69,8 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 	return nil
 }
 
-// apply the params to the resource json object
-func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
+// ApplyParams applies the params to the resource json object
+func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
 		v, err := resolveParamValue(param.Src, events)
@@ -178,9 +178,9 @@ func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.Event)
 }
 
-// helper method to extract the events from the event dependencies nodes associated with the resource params
+// ExtractEvents is a helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func extractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
+func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {

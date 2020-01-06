@@ -79,6 +79,18 @@ const (
 	Update KubernetesResourceOperation = "Update" // updates the resource
 )
 
+// ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
+type ArgoWorkflowOperation string
+
+// possible values for ArgoWorkflowOperation
+const (
+	Submit   ArgoWorkflowOperation = "Submit"   // submit a workflow
+	Suspend  ArgoWorkflowOperation = "Suspend"  // suspends a workflow
+	Resubmit ArgoWorkflowOperation = "Resubmit" // resubmit a workflow
+	Retry    ArgoWorkflowOperation = "Retry"    // retry a workflow
+	Resume   ArgoWorkflowOperation = "Resume"   // resume a workflow
+)
+
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
@@ -211,27 +223,23 @@ type Trigger struct {
 	// +listType=templateParameters
 	// TemplateParameters is the list of resource parameters to pass to the template object
 	TemplateParameters []TriggerParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
-	// +listType=resourceParameters
-	// ResourceParameters is the list of resource parameters to pass to resolved resource object in template object
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
 	// Policy to configure backoff and execution criteria for the trigger
 	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,4,opt,name=policy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
 type TriggerTemplate struct {
-	// Name is a unique name of the action to take
+	// Name is a unique name of the action to take.
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
-	// Switch is the condition to execute the trigger
-	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
-	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,3,opt,name=groupVersionResource"`
-	// Source of the K8 resource file(s)
-	Source *ArtifactLocation `json:"source" protobuf:"bytes,4,opt,name=source"`
-	// Operation refers to the type of operation performed on the trigger resource.
-	// Default value is Create.
+	// Switch is the condition to execute the trigger.
 	// +optional
-	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,5,opt,name=operation"`
+	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
+	// K8sTrigger refers to the trigger type of standard Kubernetes resource.
+	// +optional
+	K8s *StandardK8sTrigger `json:"k8s,omitempty" protobuf:"bytes,3,opt,name=k8s"`
+	// ArgoWorkflow refers to the trigger type of Argo Workflow.
+	// +optional
+	ArgoWorkflow *ArgoWorkflowTrigger `json:"argoWorkflow,omitempty" protobuf:"bytes,4,opt,name=argoWorkflow"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -243,6 +251,34 @@ type TriggerSwitch struct {
 	// +listType=all
 	// All acts as a AND operator between dependencies
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
+}
+
+// StandardK8sTrigger is the standard Kubernetes resource trigger
+type StandardK8sTrigger struct {
+	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,opt,name=groupVersionResource"`
+	// Source of the K8 resource file(s)
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,2,opt,name=source"`
+	// Operation refers to the type of operation performed on the k8s resource.
+	// Default value is Create.
+	// +optional
+	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation"`
+	// ResourceParameters is the list of resource parameters to pass to resolved K8s object
+	// +listType=triggerParameters
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,4,rep,name=resourceParameters"`
+}
+
+// ArgoWorkflowTrigger is the trigger for the Argo Workflow
+type ArgoWorkflowTrigger struct {
+	// Source of the K8 resource file(s)
+	Source *ArtifactLocation `json:"source" protobuf:"bytes,1,opt,name=source"`
+	// Operation refers to the type of operation performed on the argo workflow resource.
+	// Default value is Submit.
+	// +optional
+	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
+	// ResourceParameters is the list of resource parameters to pass to resolved Argo Workflow object
+	// +listType=triggerParameters
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

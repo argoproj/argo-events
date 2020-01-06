@@ -1,0 +1,182 @@
+/*
+Copyright 2020 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package argo_workflow
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	triggercommon "github.com/argoproj/argo-events/sensors/triggers/common"
+	"github.com/argoproj/argo-events/store"
+	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
+	wfclient "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/kubernetes"
+	"os"
+	"os/exec"
+)
+
+// ArgoWorkflowTrigger implements Trigger interface for Argo workflow
+type ArgoWorkflowTrigger struct {
+	// K8sClient is Kubernetes client
+	K8sClient kubernetes.Interface
+	// ArgoClient is Argo Workflow client
+	ArgoClient wfclient.ArgoprojV1alpha1Interface
+	// Sensor object
+	Sensor *v1alpha1.Sensor
+	// Trigger definition
+	Trigger *v1alpha1.Trigger
+	// logger to log stuff
+	Logger *logrus.Logger
+}
+
+// NewArgoWorkflowTrigger returns a new Argo workflow trigger
+func NewArgoWorkflowTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *ArgoWorkflowTrigger {
+	return &ArgoWorkflowTrigger{
+		Sensor:  sensor,
+		Trigger: trigger,
+		Logger:  logger,
+	}
+}
+
+// FetchResource fetches the trigger resource from external source
+func (argoWorkflowTrigger *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
+	trigger := argoWorkflowTrigger.Trigger
+	if trigger.Template.K8s.Source == nil {
+		return nil, errors.Errorf("trigger source for k8s is empty")
+	}
+	creds, err := store.GetCredentials(argoWorkflowTrigger.K8sClient, argoWorkflowTrigger.Sensor.Namespace, trigger.Template.K8s.Source)
+	if err != nil {
+		return nil, err
+	}
+	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, creds, argoWorkflowTrigger.K8sClient)
+	if err != nil {
+		return nil, err
+	}
+	uObj, err := store.FetchArtifact(reader, trigger.Template.K8s.GroupVersionResource)
+	if err != nil {
+		return nil, err
+	}
+	return uObj, nil
+}
+
+// ApplyResourceParameters applies parameters to the trigger resource
+func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, resource interface{}) error {
+	obj, ok := resource.(*unstructured.Unstructured)
+	if !ok {
+		return errors.New("failed to interpret the trigger resource")
+	}
+	if parameters != nil && len(parameters) > 0 {
+		jObj, err := obj.MarshalJSON()
+		if err != nil {
+			return err
+		}
+		jUpdatedObj, err := triggercommon.ApplyParams(jObj, parameters, triggercommon.ExtractEvents(sensor, parameters))
+		if err != nil {
+			return err
+		}
+		err = obj.UnmarshalJSON(jUpdatedObj)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Execute executes the trigger
+func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error) {
+	trigger := argoWorkflowTrigger.Trigger
+
+	obj, ok := resource.(*unstructured.Unstructured)
+	if !ok {
+		return nil, errors.New("failed to interpret the trigger resource")
+	}
+
+	jObj, err := obj.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	var workflow *wf_v1alpha1.Workflow
+	if err := json.Unmarshal(jObj, &workflow); err != nil {
+		return nil, errors.Wrap(err, "internal un-marshalling of the trigger resource failed")
+	}
+
+	workflowYaml, err := yaml.Marshal(workflow)
+	if err != nil {
+		return nil, errors.Wrap(err, "internal marshalling to YAML of the trigger resource failed")
+	}
+
+	namespace := obj.GetNamespace()
+	// Defaults to sensor's namespace
+	if namespace == "" {
+		namespace = argoWorkflowTrigger.Sensor.Namespace
+	}
+	obj.SetNamespace(namespace)
+
+	if workflow.Name == "" && workflow.GenerateName == "" {
+		return nil, errors.New("workflow is malformed. neither name nor generateName is specified")
+	}
+
+	name := workflow.Name
+	if name == "" && workflow.GenerateName != "" {
+		name = workflow.GenerateName
+	}
+
+	op := v1alpha1.Submit
+	if trigger.Template.ArgoWorkflow.Operation != "" {
+		op = trigger.Template.ArgoWorkflow.Operation
+	}
+
+	var cmd *exec.Cmd
+
+	switch op {
+	case v1alpha1.Submit:
+		file, err := ioutil.TempFile("/bin", workflow.Name)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", name)
+		}
+		defer os.Remove(file.Name())
+
+		if _, err := file.Write(workflowYaml); err != nil {
+			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file", name, file.Name())
+		}
+		cmd = exec.Command("argo", "-n", namespace, "submit", fmt.Sprintf("%s/%s", "/bin", file.Name()))
+	case v1alpha1.Resubmit:
+		cmd = exec.Command("argo", "-n", namespace, "resubmit", name)
+	case v1alpha1.Resume:
+		cmd = exec.Command("argo", "-n", namespace, "resume", name)
+	case v1alpha1.Retry:
+		cmd = exec.Command("argo", "-n", namespace, "retry", name)
+	case v1alpha1.Suspend:
+		cmd = exec.Command("argo", "-n", namespace, "suspend", name)
+	default:
+		return nil, errors.Errorf("unknown operation type %s", string(op))
+	}
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return nil, errors.Wrapf(err, "failed to execute submit command for workflow %s", name)
+	}
+
+	return argoWorkflowTrigger.ArgoClient.Workflows(namespace).Get(name, metav1.GetOptions{})
+}
