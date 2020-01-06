@@ -19,7 +19,7 @@ package standard_k8s
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
-	triggercommon "github.com/argoproj/argo-events/sensors/triggers/common"
+	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/argoproj/argo-events/store"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -80,26 +80,13 @@ func (k8sTrigger *StandardK8sTrigger) FetchResource() (interface{}, error) {
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, resource interface{}) error {
+func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) error {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")
 	}
-	if parameters != nil && len(parameters) > 0 {
-		jObj, err := obj.MarshalJSON()
-		if err != nil {
-			return err
-		}
-		jUpdatedObj, err := triggercommon.ApplyParams(jObj, parameters, triggercommon.ExtractEvents(sensor, parameters))
-		if err != nil {
-			return err
-		}
-		err = obj.UnmarshalJSON(jUpdatedObj)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+
+	return triggers.ApplyResourceParameters(sensor, k8sTrigger.Trigger.Template.K8s.ResourceParameters, obj)
 }
 
 // Execute executes the trigger

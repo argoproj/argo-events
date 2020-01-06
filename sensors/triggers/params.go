@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package triggers
 
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"

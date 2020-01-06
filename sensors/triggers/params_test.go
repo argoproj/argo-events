@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package triggers
 
 import (
 	"encoding/json"
@@ -299,7 +299,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
-	obj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
 	id := obj.NodeID("fake-dependency")
@@ -311,7 +311,7 @@ func TestApplyResourceParameters(t *testing.T) {
 			Type:  v1alpha1.NodeTypeEventDependency,
 		},
 	}
-	obj.Spec.Triggers[0].ResourceParameters = []v1alpha1.TriggerParameter{
+	obj.Spec.Triggers[0].Template.K8s.ResourceParameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				Event:   "fake-dependency",
@@ -322,7 +322,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].ResourceParameters, deployment)
+	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.ResourceParameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }
@@ -362,5 +362,5 @@ func TestApplyTemplateParameters(t *testing.T) {
 	}
 	err := ApplyTemplateParameters(obj, &obj.Spec.Triggers[0])
 	assert.Nil(t, err)
-	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.GroupVersionResource.Group)
+	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.K8s.GroupVersionResource.Group)
 }

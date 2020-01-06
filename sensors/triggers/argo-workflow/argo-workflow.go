@@ -18,20 +18,23 @@ package argo_workflow
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	triggercommon "github.com/argoproj/argo-events/sensors/triggers/common"
-	"github.com/argoproj/argo-events/store"
+	"github.com/argoproj/argo-events/sensors/policy"
+	"github.com/argoproj/argo-events/sensors/triggers"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
-	wfclient "github.com/argoproj/argo/pkg/client/clientset/versioned/typed/workflow/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"os"
-	"os/exec"
 )
 
 // ArgoWorkflowTrigger implements Trigger interface for Argo workflow
@@ -39,66 +42,41 @@ type ArgoWorkflowTrigger struct {
 	// K8sClient is Kubernetes client
 	K8sClient kubernetes.Interface
 	// ArgoClient is Argo Workflow client
-	ArgoClient wfclient.ArgoprojV1alpha1Interface
+	DynamicClient dynamic.Interface
 	// Sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger definition
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
 	Logger *logrus.Logger
+
+	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
 // NewArgoWorkflowTrigger returns a new Argo workflow trigger
-func NewArgoWorkflowTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *ArgoWorkflowTrigger {
+func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *ArgoWorkflowTrigger {
 	return &ArgoWorkflowTrigger{
-		Sensor:  sensor,
-		Trigger: trigger,
-		Logger:  logger,
+		K8sClient:     k8sClient,
+		DynamicClient: dynamicClient,
+		Sensor:        sensor,
+		Trigger:       trigger,
+		Logger:        logger,
 	}
 }
 
 // FetchResource fetches the trigger resource from external source
 func (argoWorkflowTrigger *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
 	trigger := argoWorkflowTrigger.Trigger
-	if trigger.Template.K8s.Source == nil {
-		return nil, errors.Errorf("trigger source for k8s is empty")
-	}
-	creds, err := store.GetCredentials(argoWorkflowTrigger.K8sClient, argoWorkflowTrigger.Sensor.Namespace, trigger.Template.K8s.Source)
-	if err != nil {
-		return nil, err
-	}
-	reader, err := store.GetArtifactReader(trigger.Template.K8s.Source, creds, argoWorkflowTrigger.K8sClient)
-	if err != nil {
-		return nil, err
-	}
-	uObj, err := store.FetchArtifact(reader, trigger.Template.K8s.GroupVersionResource)
-	if err != nil {
-		return nil, err
-	}
-	return uObj, nil
+	return triggers.FetchKubernetesResource(argoWorkflowTrigger.K8sClient, trigger.Template.ArgoWorkflow.Source, argoWorkflowTrigger.Sensor.Namespace, trigger.Template.ArgoWorkflow.GroupVersionResource)
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, resource interface{}) error {
+func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) error {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")
 	}
-	if parameters != nil && len(parameters) > 0 {
-		jObj, err := obj.MarshalJSON()
-		if err != nil {
-			return err
-		}
-		jUpdatedObj, err := triggercommon.ApplyParams(jObj, parameters, triggercommon.ExtractEvents(sensor, parameters))
-		if err != nil {
-			return err
-		}
-		err = obj.UnmarshalJSON(jUpdatedObj)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return triggers.ApplyResourceParameters(sensor, argoWorkflowTrigger.Trigger.Template.K8s.ResourceParameters, obj)
 }
 
 // Execute executes the trigger
@@ -118,11 +96,6 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 	var workflow *wf_v1alpha1.Workflow
 	if err := json.Unmarshal(jObj, &workflow); err != nil {
 		return nil, errors.Wrap(err, "internal un-marshalling of the trigger resource failed")
-	}
-
-	workflowYaml, err := yaml.Marshal(workflow)
-	if err != nil {
-		return nil, errors.Wrap(err, "internal marshalling to YAML of the trigger resource failed")
 	}
 
 	namespace := obj.GetNamespace()
@@ -156,6 +129,11 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 		}
 		defer os.Remove(file.Name())
 
+		workflowYaml, err := yaml.Marshal(workflow)
+		if err != nil {
+			return nil, errors.Wrap(err, "internal marshalling to YAML of the trigger resource failed")
+		}
+
 		if _, err := file.Write(workflowYaml); err != nil {
 			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file", name, file.Name())
 		}
@@ -175,8 +153,44 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(err, "failed to execute submit command for workflow %s", name)
+		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
 	}
 
-	return argoWorkflowTrigger.ArgoClient.Workflows(namespace).Get(name, metav1.GetOptions{})
+	argoWorkflowTrigger.namespableDynamicClient = argoWorkflowTrigger.DynamicClient.Resource(schema.GroupVersionResource{
+		Group:    workflow.GroupVersionKind().Group,
+		Version:  workflow.GroupVersionKind().Version,
+		Resource: "workflows",
+	})
+
+	return argoWorkflowTrigger.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
+}
+
+// ApplyPolicy applies the policy on the trigger
+func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
+	trigger := argoWorkflowTrigger.Trigger
+
+	obj, ok := resource.(*unstructured.Unstructured)
+	if !ok {
+		return errors.New("failed to interpret the trigger resource")
+	}
+
+	p := policy.GetPolicy(trigger, argoWorkflowTrigger.namespableDynamicClient, obj)
+	if p == nil {
+		return nil
+	}
+
+	err := p.ApplyPolicy()
+	if err != nil {
+		switch err {
+		case wait.ErrWaitTimeout:
+			if trigger.Policy.ErrorOnBackoffTimeout {
+				return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
+			}
+			return nil
+		default:
+			return err
+		}
+	}
+
+	return nil
 }

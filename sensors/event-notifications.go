@@ -21,15 +21,10 @@ import (
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
-	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
-	triggercommon "github.com/argoproj/argo-events/sensors/triggers/common"
-	standard_k8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // isEligibleForExecution determines whether the dependencies are met and triggers are eligible for execution
@@ -72,63 +67,58 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		return nil
 	}
 
-	logger.Infoln("starting to execute triggers")
+	logger.Infoln("executing triggers")
 	// Iterate over each trigger,
 	// 1. Apply template level parameters
 	// 2. Check if switches are resolved
 	// 3. Fetch the resource
 	// 4. Apply resource level parameters
-	// 5. If any policy is set, apply it
+	// 5. Execute the trigger
+	// 6. If any policy is set, apply it
 	for _, trigger := range sensorCtx.Sensor.Spec.Triggers {
-		if err := triggercommon.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
+		if err := triggers.ApplyTemplateParameters(sensorCtx.Sensor, &trigger); err != nil {
 			return err
 		}
 		if ok := triggers.ApplySwitches(sensorCtx.Sensor, &trigger); !ok {
 			logger.Infoln("switches/group level when conditions were not resolved, won't execute the trigger")
 			continue
 		}
-		uObj, err := standard_k8s.FetchResource(sensorCtx.KubeClient, sensorCtx.Sensor, &trigger)
-		if err != nil {
-			return err
-		}
-		if uObj == nil {
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("resolving the trigger implementation")
+		triggerImpl := sensorCtx.GetTrigger(&trigger)
+		if triggerImpl == nil {
+			logger.WithField("trigger-name", trigger.Template.Name).Errorln("failed to get the specific trigger implementation. continuing to next trigger if any")
 			continue
 		}
-		if err := triggercommon.ApplyResourceParameters(sensorCtx.Sensor, trigger.ResourceParameters, uObj); err != nil {
-			return err
-		}
-		client := sensorCtx.DynamicClient.Resource(schema.GroupVersionResource{
-			Group:    trigger.Template.GroupVersionResource.Group,
-			Version:  trigger.Template.GroupVersionResource.Version,
-			Resource: trigger.Template.GroupVersionResource.Resource,
-		})
-		if trigger.Template.Operation == "" {
-			trigger.Template.Operation = v1alpha1.Create
-		}
-		newObj, err := standard_k8s.Execute(sensorCtx.Sensor, uObj, client, trigger.Template.Operation)
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("fetching trigger resource if any")
+		obj, err := triggerImpl.FetchResource()
 		if err != nil {
 			return err
 		}
-		logger.WithField("trigger-name", trigger.Template.Name).Infoln("trigger successfully created")
+		if obj == nil {
+			logger.WithField("trigger-name", trigger.Template.Name).Warnln("trigger resource is empty")
+			continue
+		}
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("applying resource parameters if any")
+		if err := triggerImpl.ApplyResourceParameters(sensorCtx.Sensor, obj); err != nil {
+			return err
+		}
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("executing the trigger resource")
+		newObj, err := triggerImpl.Execute(obj)
+		if err != nil {
+			return err
+		}
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("trigger resource successfully executed")
 
 		logger.WithField("trigger-name", trigger.Template.Name).Infoln("applying trigger policy")
-		p := policy.GetPolicy(&trigger, client, newObj)
-		if p == nil {
-			logger.WithField("trigger-name", trigger.Template.Name).Infoln("no trigger policy found, continue...")
-			continue
+		if err := triggerImpl.ApplyPolicy(newObj); err != nil {
+			return err
 		}
-		err = p.ApplyPolicy()
-		if err != nil {
-			switch err {
-			case wait.ErrWaitTimeout:
-				if trigger.Policy.ErrorOnBackoffTimeout {
-					return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
-				}
-				continue
-			default:
-				return err
-			}
-		}
+
+		logger.WithField("trigger-name", trigger.Template.Name).Infoln("successfully processed the trigger")
 	}
 	return nil
 }

@@ -29,6 +29,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":    schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff":                schema_pkg_apis_sensor_v1alpha1_Backoff(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":      schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
@@ -47,6 +48,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources":        schema_pkg_apis_sensor_v1alpha1_SensorResources(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
@@ -55,6 +57,53 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch":          schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ArgoWorkflowTrigger is the trigger for the Argo Workflow",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source of the K8 resource file(s)",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
+						},
+					},
+					"operation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Operation refers to the type of operation performed on the argo workflow resource. Default value is Submit.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"resourceParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceParameters is the list of resource parameters to pass to resolved Argo Workflow object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"source"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -960,6 +1009,53 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StandardK8sTrigger is the standard Kubernetes resource trigger",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source of the K8 resource file(s)",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
+						},
+					},
+					"operation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Operation refers to the type of operation performed on the k8s resource. Default value is Create.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"resourceParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceParameters is the list of resource parameters to pass to resolved K8s object",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"source"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1008,24 +1104,6 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						},
 						SchemaProps: spec.SchemaProps{
 							Description: "TemplateParameters is the list of resource parameters to pass to the template object",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
-									},
-								},
-							},
-						},
-					},
-					"resourceParameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "resourceParameters",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of resource parameters to pass to resolved resource object in template object",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1223,36 +1301,35 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 				Properties: map[string]spec.Schema{
 					"name": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Name is a unique name of the action to take",
+							Description: "Name is a unique name of the action to take.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"switch": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Switch is the condition to execute the trigger",
+							Description: "Switch is the condition to execute the trigger.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"),
 						},
 					},
-					"source": {
+					"k8s": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Source of the K8 resource file(s)",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
+							Description: "K8sTrigger refers to the trigger type of standard Kubernetes resource.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger"),
 						},
 					},
-					"operation": {
+					"argoWorkflow": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Operation refers to the type of operation performed on the trigger resource. Default value is Create.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "ArgoWorkflow refers to the trigger type of Argo Workflow.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger"),
 						},
 					},
 				},
-				Required: []string{"name", "source"},
+				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
 	}
 }
 

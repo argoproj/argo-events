@@ -17,6 +17,7 @@ limitations under the License.
 package standard_k8s
 
 import (
+	"github.com/argoproj/argo-events/common"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -24,7 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -39,10 +39,12 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					GroupVersionResource: &metav1.GroupVersionResource{
-						Group:    "apps",
-						Version:  "v1",
-						Resource: "deployments",
+					K8s: &v1alpha1.StandardK8sTrigger{
+						GroupVersionResource: &metav1.GroupVersionResource{
+							Group:    "apps",
+							Version:  "v1",
+							Resource: "deployments",
+						},
 					},
 				},
 			},
@@ -68,30 +70,35 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestFetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	sensorObj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
-	uObj, err := FetchResource(fake.NewSimpleClientset(), sensorObj, &sensorObj.Spec.Triggers[0])
+	runtimeScheme := runtime.NewScheme()
+	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	resource, err := impl.FetchResource()
 	assert.Nil(t, err)
-	assert.NotNil(t, uObj)
+	assert.NotNil(t, resource)
+
+	uObj, ok := resource.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
 }
 
 func TestExecute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	sensorObj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-	trigger := sensorObj.Spec.Triggers[0]
-	namespacableClient := client.Resource(schema.GroupVersionResource{
-		Resource: trigger.Template.GroupVersionResource.Resource,
-		Version:  trigger.Template.GroupVersionResource.Version,
-		Group:    trigger.Template.GroupVersionResource.Group,
-	})
-	uObj, err := Execute(sensorObj, deployment, namespacableClient, v1alpha1.Create)
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+
+	resource, err := impl.Execute(deployment)
 	assert.Nil(t, err)
-	assert.NotNil(t, uObj)
-	assert.Equal(t, uObj.GetName(), deployment.GetName())
+	assert.NotNil(t, resource)
+
+	uObj, ok := resource.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, deployment.GetName(), uObj.GetName())
 }

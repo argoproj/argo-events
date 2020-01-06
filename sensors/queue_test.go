@@ -90,7 +90,7 @@ func TestProcessQueue(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
-	obj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
 

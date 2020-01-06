@@ -18,13 +18,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {

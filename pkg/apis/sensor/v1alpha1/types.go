@@ -256,7 +256,7 @@ type TriggerSwitch struct {
 // StandardK8sTrigger is the standard Kubernetes resource trigger
 type StandardK8sTrigger struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,opt,name=groupVersionResource"`
+	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,2,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
@@ -279,6 +279,8 @@ type ArgoWorkflowTrigger struct {
 	// ResourceParameters is the list of resource parameters to pass to resolved Argo Workflow object
 	// +listType=triggerParameters
 	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
+	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,name=groupVersionResource"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

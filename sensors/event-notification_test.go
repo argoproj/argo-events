@@ -65,10 +65,12 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					GroupVersionResource: &metav1.GroupVersionResource{
-						Group:    "apps",
-						Version:  "v1",
-						Resource: "deployments",
+					K8s: &v1alpha1.StandardK8sTrigger{
+						GroupVersionResource: &metav1.GroupVersionResource{
+							Group:    "apps",
+							Version:  "v1",
+							Resource: "deployments",
+						},
 					},
 				},
 			},
@@ -238,7 +240,7 @@ func TestOperateEventNotification(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
-	obj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
 
