@@ -18,6 +18,7 @@ package sensor
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"strings"
 	"time"
 
@@ -113,27 +114,76 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template.Name == "" {
 		return fmt.Errorf("trigger must define a name")
 	}
-	if template.Source == nil {
-		return fmt.Errorf("trigger '%s' does not contain an absolute action", template.Name)
-	}
-	if template.GroupVersionResource == nil {
-		return fmt.Errorf("must provide group, version and resource for the resource")
-	}
 	if template.Switch != nil && template.Switch.All != nil && template.Switch.Any != nil {
 		return fmt.Errorf("trigger condition can't have both any and all condition")
+	}
+	if template.K8s != nil {
+		if err := validateK8sTrigger(template.K8s); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	if template.ArgoWorkflow != nil {
+		if err := validateArgoWorkflowTrigger(template.ArgoWorkflow); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	return nil
+}
+
+// validateK8sTrigger validates a kubernetes trigger
+func validateK8sTrigger(trigger *v1alpha1.StandardK8sTrigger) error {
+	if trigger == nil {
+		return errors.New("k8s trigger for can't be nil")
+	}
+	if trigger.Source == nil {
+		return errors.New("k8s trigger for does not contain an absolute action")
+	}
+	if trigger.GroupVersionResource == nil {
+		return errors.New("must provide group, version and resource for the resource")
+	}
+	switch trigger.Operation {
+	case v1alpha1.Create, v1alpha1.Update:
+	default:
+		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
+	}
+	if trigger.ResourceParameters != nil {
+		for i, parameter := range trigger.ResourceParameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+// validateArgoWorkflowTrigger validates an Argo workflow trigger
+func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
+	if trigger == nil {
+		return errors.New("k8s trigger for can't be nil")
+	}
+	if trigger.Source == nil {
+		return errors.New("k8s trigger for does not contain an absolute action")
+	}
+	if trigger.GroupVersionResource == nil {
+		return errors.New("must provide group, version and resource for the resource")
+	}
+	switch trigger.Operation {
+	case v1alpha1.Submit, v1alpha1.Suspend, v1alpha1.Retry, v1alpha1.Resume, v1alpha1.Resubmit:
+	default:
+		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
+	}
+	if trigger.ResourceParameters != nil {
+		for i, parameter := range trigger.ResourceParameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
 	}
 	return nil
 }
 
 // validateTriggerParameters validates resource and template parameters if any
 func validateTriggerParameters(trigger *v1alpha1.Trigger) error {
-	if trigger.ResourceParameters != nil {
-		for i, parameter := range trigger.ResourceParameters {
-			if err := validateTriggerParameter(&parameter); err != nil {
-				return fmt.Errorf("resource parameter index: %d. err: %+v", i, err)
-			}
-		}
-	}
 	if trigger.TemplateParameters != nil {
 		for i, parameter := range trigger.TemplateParameters {
 			if err := validateTriggerParameter(&parameter); err != nil {

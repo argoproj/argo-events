@@ -135,7 +135,7 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 		}
 
 		if _, err := file.Write(workflowYaml); err != nil {
-			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file", name, file.Name())
+			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file %s", name, file.Name())
 		}
 		cmd = exec.Command("argo", "-n", namespace, "submit", fmt.Sprintf("%s/%s", "/bin", file.Name()))
 	case v1alpha1.Resubmit:

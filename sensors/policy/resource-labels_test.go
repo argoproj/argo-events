@@ -54,13 +54,15 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
-			GroupVersionResource: &metav1.GroupVersionResource{
-				Group:    "apps",
-				Resource: "deployments",
-				Version:  "v1",
-			},
-			Source: &v1alpha1.ArtifactLocation{
-				Resource: uObj,
+			K8s: &v1alpha1.StandardK8sTrigger{
+				GroupVersionResource: &metav1.GroupVersionResource{
+					Group:    "apps",
+					Resource: "deployments",
+					Version:  "v1",
+				},
+				Source: &v1alpha1.ArtifactLocation{
+					Resource: uObj,
+				},
 			},
 		},
 		Policy: &v1alpha1.TriggerPolicy{
@@ -80,9 +82,9 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	}
 
 	namespacableClient := client.Resource(schema.GroupVersionResource{
-		Resource: trigger.Template.GroupVersionResource.Resource,
-		Version:  trigger.Template.GroupVersionResource.Version,
-		Group:    trigger.Template.GroupVersionResource.Group,
+		Resource: trigger.Template.K8s.GroupVersionResource.Resource,
+		Version:  trigger.Template.K8s.GroupVersionResource.Version,
+		Group:    trigger.Template.K8s.GroupVersionResource.Group,
 	})
 
 	tests := []struct {
