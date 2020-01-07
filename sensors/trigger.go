@@ -18,6 +18,7 @@ package sensors
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
+	"github.com/argoproj/argo-events/sensors/triggers/openfass"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
 
@@ -40,6 +41,9 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	}
 	if trigger.Template.ArgoWorkflow != nil {
 		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+	}
+	if trigger.Template.OpenFaas != nil {
+		return openfass.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
 	return nil
 }

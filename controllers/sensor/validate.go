@@ -19,6 +19,7 @@ package sensor
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"net/http"
 	"strings"
 	"time"
 
@@ -130,6 +131,16 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.HTTP != nil {
+		if err := validateHTTPTrigger(template.HTTP); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	if template.OpenFaas != nil {
+		if err := validateOpenFaasTrigger(template.OpenFaas); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	return nil
 }
 
@@ -181,6 +192,40 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
 			}
 		}
+	}
+	return nil
+}
+
+func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
+	if trigger == nil {
+		return errors.New("openfaas trigger for can't be nil")
+	}
+	if trigger.ServerURL == "" {
+		return errors.New("server URL is not specified")
+	}
+	if trigger.Method != "" {
+		switch trigger.Method {
+		case http.MethodGet, http.MethodDelete, http.MethodPatch, http.MethodPost, http.MethodPut:
+		default:
+			return errors.New("only GET, DELETE, PATCH, POST and PUT methods are supported")
+		}
+	}
+	return nil
+}
+
+// validateOpenFaasTrigger validates the OpenFaas trigger
+func validateOpenFaasTrigger(trigger *v1alpha1.OpenFaasTrigger) error {
+	if trigger == nil {
+		return errors.New("openfaas trigger for can't be nil")
+	}
+	if trigger.FunctionName == "" {
+		return errors.New("function name is not specified")
+	}
+	if trigger.GatewayURL == "" {
+		return errors.New("gateway URL is not specified")
+	}
+	if trigger.Password != nil && trigger.Namespace == "" {
+		return errors.New("namespace can't be empty when password secret selector is specified")
 	}
 	return nil
 }

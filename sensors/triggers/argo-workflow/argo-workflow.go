@@ -65,26 +65,26 @@ func NewArgoWorkflowTrigger(k8sClient kubernetes.Interface, dynamicClient dynami
 }
 
 // FetchResource fetches the trigger resource from external source
-func (argoWorkflowTrigger *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
-	trigger := argoWorkflowTrigger.Trigger
-	return triggers.FetchKubernetesResource(argoWorkflowTrigger.K8sClient, trigger.Template.ArgoWorkflow.Source, argoWorkflowTrigger.Sensor.Namespace, trigger.Template.ArgoWorkflow.GroupVersionResource)
+func (t *ArgoWorkflowTrigger) FetchResource() (interface{}, error) {
+	trigger := t.Trigger
+	return triggers.FetchKubernetesResource(t.K8sClient, trigger.Template.ArgoWorkflow.Source, t.Sensor.Namespace, trigger.Template.ArgoWorkflow.GroupVersionResource)
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, argoWorkflowTrigger.Trigger.Template.K8s.ResourceParameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.K8s.ResourceParameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil
 }
 
 // Execute executes the trigger
-func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error) {
-	trigger := argoWorkflowTrigger.Trigger
+func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error) {
+	trigger := t.Trigger
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
@@ -104,7 +104,7 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 	namespace := obj.GetNamespace()
 	// Defaults to sensor's namespace
 	if namespace == "" {
-		namespace = argoWorkflowTrigger.Sensor.Namespace
+		namespace = t.Sensor.Namespace
 	}
 	obj.SetNamespace(namespace)
 
@@ -159,25 +159,25 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) Execute(resource interface{}) (i
 		return nil, errors.Wrapf(err, "failed to execute %s command for workflow %s", string(op), name)
 	}
 
-	argoWorkflowTrigger.namespableDynamicClient = argoWorkflowTrigger.DynamicClient.Resource(schema.GroupVersionResource{
+	t.namespableDynamicClient = t.DynamicClient.Resource(schema.GroupVersionResource{
 		Group:    workflow.GroupVersionKind().Group,
 		Version:  workflow.GroupVersionKind().Version,
 		Resource: "workflows",
 	})
 
-	return argoWorkflowTrigger.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
+	return t.namespableDynamicClient.Namespace(namespace).Get(name, metav1.GetOptions{})
 }
 
 // ApplyPolicy applies the policy on the trigger
-func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
-	trigger := argoWorkflowTrigger.Trigger
+func (t *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
+	trigger := t.Trigger
 
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.NewResourceLabels(trigger, argoWorkflowTrigger.namespableDynamicClient, obj)
+	p := policy.NewResourceLabels(trigger, t.namespableDynamicClient, obj)
 	if p == nil {
 		return nil
 	}
