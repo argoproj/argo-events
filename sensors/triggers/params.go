@@ -74,7 +74,7 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
-		v, err := resolveParamValue(param.Src, events)
+		v, err := ResolveParamValue(param.Src, events)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +138,7 @@ func renderEventDataAsJSON(event *apicommon.Event) ([]byte, error) {
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
 	var err error
 	var value []byte
 	var key string

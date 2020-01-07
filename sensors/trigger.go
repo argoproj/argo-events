@@ -26,7 +26,7 @@ type Trigger interface {
 	// FetchResource fetches the trigger resource from external source
 	FetchResource() (interface{}, error)
 	// ApplyResourceParameters applies parameters to the trigger resource
-	ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) error
+	ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error)
 	// Execute executes the trigger
 	Execute(resource interface{}) (interface{}, error)
 	// ApplyPolicy applies the policy on the trigger

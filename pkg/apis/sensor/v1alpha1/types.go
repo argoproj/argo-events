@@ -290,20 +290,35 @@ type ArgoWorkflowTrigger struct {
 type HTTPTrigger struct {
 	// ServerURL refers to the URL to send HTTP request to.
 	ServerURL string `json:"serverUrl" protobuf:"bytes,1,name=serverURL"`
-	// PayloadParameters is the list of parameters extracted from an event to construct the HTTP request payload.
+	// PayloadParameters is the list of key-value extracted from an event payload to construct the HTTP request payload.
 	// +listType=payloadParameters
 	PayloadParameters []TriggerParameter `json:"resourceParameters" protobuf:"bytes,2,rep,name=resourceParameters"`
-	// TLS configuration for the HTTP client
+	// TLS configuration for the HTTP client.
 	// +optional
 	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
+	// Method refers to the type of the HTTP request.
+	// Refer https://golang.org/src/net/http/method.go for more info.
+	// Default value is POST.
+	// +optional
+	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
+	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	// the HTTP trigger resource.
+	// +listType=triggerParameters
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,5,rep,name=resourceParameters"`
+	// Timeout refers to the HTTP request timeout in seconds.
+	// Default value is 10 seconds
+	// +optional
+	Timeout int `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
 }
 
 // HTTPTriggerTLS refers to TLS configuration for the HTTP client
 type HTTPTriggerTLS struct {
-	// ServerCertPath refers the file that contains the cert.
-	ServerCertPath string `json:"serverCertPath" protobuf:"bytes,1,name=serverCertPath"`
-	// ServerKeyPath refers the file that contains private key
-	ServerKeyPath string `json:"serverKeyPath" protobuf:"bytes,2,name=serverKeyPath"`
+	// CACertPath refers the file path that contains the CA cert.
+	CACertPath string `json:"caCertPath" protobuf:"bytes,1,name=caCertPath"`
+	// ClientCertPath refers the file path that contains client cert.
+	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,name=clientCertPath"`
+	// ClientKeyPath refers the file path that contains client key.
+	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination
@@ -339,15 +354,19 @@ type TriggerParameter struct {
 type TriggerParameterSource struct {
 	// Event is the name of the event for which to retrieve this event
 	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
-	// Path is the JSONPath of the event's (JSON decoded) data key
-	// Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+	// ContextKey is the JSONPath of the event's (JSON decoded) context key
+	// ContextKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	ContextKey string `json:"contextKey,omitempty" protobuf:"bytes,2,opt,name=contextKey"`
-	DataKey    string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
+	// DataKey is the JSONPath of the event's (JSON decoded) data key
+	// DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
+	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
+	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
+	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
 	// Value is the default literal value to use for this parameter source
-	// This is only used if the path is invalid.
-	// If the path is invalid and this is not defined, this param source will produce an error.
+	// This is only used if the DataKey is invalid.
+	// If the DataKey is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
 }
 
