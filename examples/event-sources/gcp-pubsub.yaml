@@ -4,7 +4,7 @@ metadata:
   name: gcp-pubsub-event-source
 spec:
   type: "pubsub"
-  pubsub:
+  pubSub:
     example-event-source:
       # id of your project
       projectID: "my-fake-project-id"
