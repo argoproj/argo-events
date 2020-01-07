@@ -66,17 +66,17 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 			},
 		},
 		Policy: &v1alpha1.TriggerPolicy{
-			ErrorOnBackoffTimeout: true,
-			ResourceLabels: &v1alpha1.ResourceLabelsPolicy{
+			K8s: &v1alpha1.K8sTrigger{
+				ErrorOnBackoffTimeout: true,
 				Labels: map[string]string{
 					"complete": "true",
 				},
-			},
-			Backoff: wait.Backoff{
-				Steps:    2,
-				Duration: time.Second * 1,
-				Factor:   2,
-				Jitter:   0.5,
+				Backoff: wait.Backoff{
+					Steps:    2,
+					Duration: time.Second * 1,
+					Factor:   2,
+					Jitter:   0.5,
+				},
 			},
 		},
 	}

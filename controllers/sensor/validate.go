@@ -41,40 +41,40 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		return err
 	}
 	if s.Spec.Template == nil {
-		return fmt.Errorf("sensor pod template not defined")
+		return errors.Errorf("sensor pod template not defined")
 	}
 	if len(s.Spec.Template.Spec.Containers) > 1 {
-		return fmt.Errorf("sensor pod specification can't have more than one container")
+		return errors.Errorf("sensor pod specification can't have more than one container")
 	}
 	switch s.Spec.EventProtocol.Type {
 	case pc.HTTP:
 		if s.Spec.EventProtocol.Http.Port == "" {
-			return fmt.Errorf("http server port is not defined")
+			return errors.Errorf("http server port is not defined")
 		}
 	case pc.NATS:
 		if s.Spec.EventProtocol.Nats.URL == "" {
-			return fmt.Errorf("nats url is not defined")
+			return errors.Errorf("nats url is not defined")
 		}
 		if s.Spec.EventProtocol.Nats.Type == "" {
-			return fmt.Errorf("nats type is not defined. either Standard or Streaming type should be defined")
+			return errors.Errorf("nats type is not defined. either Standard or Streaming type should be defined")
 		}
 		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClientId == "" {
-			return fmt.Errorf("client id must be specified when using nats streaming")
+			return errors.Errorf("client id must be specified when using nats streaming")
 		}
 		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClusterId == "" {
-			return fmt.Errorf("cluster id must be specified when using nats streaming")
+			return errors.Errorf("cluster id must be specified when using nats streaming")
 		}
 	default:
-		return fmt.Errorf("unknown gateway type")
+		return errors.Errorf("unknown gateway type")
 	}
 
 	if s.Spec.DependencyGroups != nil {
 		if s.Spec.Circuit == "" {
-			return fmt.Errorf("no circuit expression provided to resolve dependency groups")
+			return errors.Errorf("no circuit expression provided to resolve dependency groups")
 		}
 		expression, err := govaluate.NewEvaluableExpression(s.Spec.Circuit)
 		if err != nil {
-			return fmt.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
+			return errors.Errorf("circuit expression can't be created for dependency groups. err: %+v", err)
 		}
 
 		groups := make(map[string]interface{}, len(s.Spec.DependencyGroups))
@@ -82,7 +82,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 			groups[group.Name] = false
 		}
 		if _, err = expression.Evaluate(groups); err != nil {
-			return fmt.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
+			return errors.Errorf("circuit expression can't be evaluated for dependency groups. err: %+v", err)
 		}
 	}
 
@@ -92,11 +92,14 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 // validateTriggers validates triggers
 func validateTriggers(triggers []v1alpha1.Trigger) error {
 	if len(triggers) < 1 {
-		return fmt.Errorf("no triggers found")
+		return errors.Errorf("no triggers found")
 	}
 
 	for _, trigger := range triggers {
 		if err := validateTriggerTemplate(trigger.Template); err != nil {
+			return err
+		}
+		if err := validateTriggerPolicy(&trigger); err != nil {
 			return err
 		}
 		if err := validateTriggerParameters(&trigger); err != nil {
@@ -109,17 +112,17 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 // validateTriggerTemplate validates trigger template
 func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	if template == nil {
-		return fmt.Errorf("trigger template can't be nil")
+		return errors.Errorf("trigger template can't be nil")
 	}
 	if template.Name == "" {
-		return fmt.Errorf("trigger must define a name")
+		return errors.Errorf("trigger must define a name")
 	}
 	if template.Switch != nil && template.Switch.All != nil && template.Switch.Any != nil {
-		return fmt.Errorf("trigger condition can't have both any and all condition")
+		return errors.Errorf("trigger condition can't have both any and all condition")
 	}
 	if template.K8s != nil {
 		if err := validateK8sTrigger(template.K8s); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
+			return errors.Wrapf(err, "trigger for template %s is invalid", template.Name)
 		}
 	}
 	if template.ArgoWorkflow != nil {
@@ -187,7 +190,7 @@ func validateTriggerParameters(trigger *v1alpha1.Trigger) error {
 	if trigger.TemplateParameters != nil {
 		for i, parameter := range trigger.TemplateParameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
-				return fmt.Errorf("template parameter index: %d. err: %+v", i, err)
+				return errors.Errorf("template parameter index: %d. err: %+v", i, err)
 			}
 		}
 	}
@@ -197,13 +200,13 @@ func validateTriggerParameters(trigger *v1alpha1.Trigger) error {
 // validateTriggerParameter validates a trigger parameter
 func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	if parameter.Src == nil {
-		return fmt.Errorf("parameter source can't be empty")
+		return errors.Errorf("parameter source can't be empty")
 	}
 	if parameter.Src.Event == "" {
-		return fmt.Errorf("parameter source event can't be empty")
+		return errors.Errorf("parameter source event can't be empty")
 	}
 	if parameter.Dest == "" {
-		return fmt.Errorf("parameter destination can't be empty")
+		return errors.Errorf("parameter destination can't be empty")
 	}
 
 	switch op := parameter.Operation; op {
@@ -212,7 +215,7 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	case v1alpha1.TriggerParameterOpPrepend:
 	case v1alpha1.TriggerParameterOpNone:
 	default:
-		return fmt.Errorf("parameter operation %+v is invalid", op)
+		return errors.Errorf("parameter operation %+v is invalid", op)
 	}
 
 	return nil
@@ -221,20 +224,20 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 // perform a check to see that each event dependency is in correct format and has valid filters set if any
 func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 	if len(eventDependencies) < 1 {
-		return fmt.Errorf("no event dependencies found")
+		return errors.Errorf("no event dependencies found")
 	}
 	for _, ed := range eventDependencies {
 		if ed.Name == "" {
-			return fmt.Errorf("event dependency must define a name")
+			return errors.Errorf("event dependency must define a name")
 		}
 
 		parts := strings.Split(ed.Name, ":")
 		if len(parts) != 2 {
-			return fmt.Errorf("event dependency must have format gateway-name:event-source-name")
+			return errors.Errorf("event dependency must have format gateway-name:event-source-name")
 		}
 
 		if parts[0] == "" || parts[1] == "" {
-			return fmt.Errorf("both gateway name and event source name in dependency must be non-empty")
+			return errors.Errorf("both gateway name and event source name in dependency must be non-empty")
 		}
 
 		if err := validateEventFilter(ed.Filters); err != nil {
@@ -272,7 +275,7 @@ func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 			return err
 		}
 		if stopTime.Before(startTime) || startTime.Equal(stopTime) {
-			return fmt.Errorf("invalid event time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
+			return errors.Errorf("invalid event time filter: stop '%s' is before or equal to start '%s", tFilter.Stop, tFilter.Start)
 		}
 	}
 	if tFilter.Stop != "" {
@@ -282,8 +285,50 @@ func validateEventTimeFilter(tFilter *v1alpha1.TimeFilter) error {
 		}
 		stopTime = stopTime.UTC()
 		if stopTime.Before(currentT.UTC()) {
-			return fmt.Errorf("invalid event time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
+			return errors.Errorf("invalid event time filter: stop '%s' is before the current time '%s'", tFilter.Stop, currentT)
 		}
+	}
+	return nil
+}
+
+// validateTriggerPolicy validates a trigger policy
+func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
+	if trigger.Policy == nil {
+		return nil
+	}
+	if trigger.Template.K8s != nil {
+		return validateK8sTriggerPolicy(trigger.Policy.K8s)
+	}
+	if trigger.Template.ArgoWorkflow != nil {
+		return validateK8sTriggerPolicy(trigger.Policy.K8s)
+	}
+	if trigger.Template.HTTP != nil {
+		return validateHTTPTriggerPolicy(trigger.Policy.HTTP)
+	}
+	return nil
+}
+
+// validateK8sTriggerPolicy validates a k8s trigger policy
+func validateK8sTriggerPolicy(policy *v1alpha1.K8sTrigger) error {
+	if policy == nil {
+		return nil
+	}
+	if policy.Labels == nil {
+		return errors.New("resource labels are not specified")
+	}
+	if &policy.Backoff == nil {
+		return errors.New("backoff is not specified")
+	}
+	return nil
+}
+
+// validateHTTPTriggerPolicy  validates a http trigger policy
+func validateHTTPTriggerPolicy(policy *v1alpha1.HTTPTriggerPolicy) error {
+	if policy == nil {
+		return nil
+	}
+	if policy.AllowedStatuses == nil {
+		return errors.New("list of allowed response status is not specified")
 	}
 	return nil
 }

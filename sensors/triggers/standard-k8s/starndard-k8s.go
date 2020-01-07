@@ -137,7 +137,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.GetPolicy(trigger, k8sTrigger.namespableDynamicClient, obj)
+	p := policy.NewResourceLabels(trigger, k8sTrigger.namespableDynamicClient, obj)
 	if p == nil {
 		return nil
 	}
@@ -146,7 +146,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
 	if err != nil {
 		switch err {
 		case wait.ErrWaitTimeout:
-			if trigger.Policy.ErrorOnBackoffTimeout {
+			if trigger.Policy.K8s.ErrorOnBackoffTimeout {
 				return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 			}
 			return nil

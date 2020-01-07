@@ -177,7 +177,7 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.GetPolicy(trigger, argoWorkflowTrigger.namespableDynamicClient, obj)
+	p := policy.NewResourceLabels(trigger, argoWorkflowTrigger.namespableDynamicClient, obj)
 	if p == nil {
 		return nil
 	}
@@ -186,7 +186,7 @@ func (argoWorkflowTrigger *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}
 	if err != nil {
 		switch err {
 		case wait.ErrWaitTimeout:
-			if trigger.Policy.ErrorOnBackoffTimeout {
+			if trigger.Policy.K8s.ErrorOnBackoffTimeout {
 				return errors.Errorf("failed to determine status of the triggered resource. setting trigger state as failed")
 			}
 			return nil

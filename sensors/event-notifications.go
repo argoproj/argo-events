@@ -102,12 +102,13 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 		}
 
 		logger.WithField("trigger-name", trigger.Template.Name).Infoln("applying resource parameters if any")
-		if err := triggerImpl.ApplyResourceParameters(sensorCtx.Sensor, obj); err != nil {
+		updatedObj, err := triggerImpl.ApplyResourceParameters(sensorCtx.Sensor, obj)
+		if err != nil {
 			return err
 		}
 
 		logger.WithField("trigger-name", trigger.Template.Name).Infoln("executing the trigger resource")
-		newObj, err := triggerImpl.Execute(obj)
+		newObj, err := triggerImpl.Execute(updatedObj)
 		if err != nil {
 			return err
 		}

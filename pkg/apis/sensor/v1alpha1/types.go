@@ -19,13 +19,13 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -372,19 +372,28 @@ type TriggerParameterSource struct {
 
 // TriggerPolicy dictates the policy for the trigger retries
 type TriggerPolicy struct {
-	// Backoff before checking resource state
-	Backoff wait.Backoff `json:"backoff" protobuf:"bytes,1,opt,name=backoff"`
-	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
-	// the state of the resource
-	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,2,opt,name=errorOnBackoffTimeout"`
-	// ResourceLabels refers to the policy used to check the resource state using labels
-	ResourceLabels *ResourceLabelsPolicy `json:"resourceLabels" protobuf:"bytes,3,opt,name=resourceLabels"`
+	// K8sTrigger refers to the policy used to check the state of K8s based triggers using using labels
+	K8s *K8sTrigger `json:"k8s,omitempty" protobuf:"bytes,1,opt,name=k8s"`
+	// HTTP refers to the policy used to check the state of HTTP trigger using response status
+	HTTP *HTTPTriggerPolicy `json:"http,omitempty" protobuf:"bytes,2,opt,name=http"`
 }
 
-// ResourceLabels refers to the policy used to check the resource state using labels
-type ResourceLabelsPolicy struct {
+// K8sTrigger refers to the policy used to check the state of K8s based triggers using using labels
+type K8sTrigger struct {
 	// Labels required to identify whether a resource is in success state
-	Labels map[string]string `json:"labels" protobuf:"bytes,1,opt,name=labels"`
+	Labels map[string]string `json:"labels" protobuf:"bytes,1,name=labels"`
+	// Backoff before checking resource state
+	Backoff wait.Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
+	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
+	// the state of the resource
+	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,name=errorOnBackoffTimeout"`
+}
+
+// HTTPTriggerPolicy refers to the policy used to check the state of HTTP trigger using response status
+type HTTPTriggerPolicy struct {
+	// AllowedStatuses refers to the list of http response status. If the response status of the HTTP trigger is within the list,
+	// the trigger will marked as successful else it will result in trigger failure.
+	AllowedStatuses []string `json:"allowedStatuses" protobuf:"bytes,1,name=labels"`
 }
 
 // Backoff for an operation
