@@ -172,6 +172,10 @@ func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error)
 func (t *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
 	trigger := t.Trigger
 
+	if trigger.Policy == nil || trigger.Policy.K8s == nil {
+		return nil
+	}
+
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")

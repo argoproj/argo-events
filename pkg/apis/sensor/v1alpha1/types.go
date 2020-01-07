@@ -234,15 +234,20 @@ type TriggerTemplate struct {
 	// Switch is the condition to execute the trigger.
 	// +optional
 	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
-	// K8sTrigger refers to the trigger type of standard Kubernetes resource.
+	// StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.
 	// +optional
 	K8s *StandardK8sTrigger `json:"k8s,omitempty" protobuf:"bytes,3,opt,name=k8s"`
-	// ArgoWorkflow refers to the trigger type of Argo Workflow.
+	// ArgoWorkflow refers to the trigger that can perform various operations on an Argo workflow.
 	// +optional
 	ArgoWorkflow *ArgoWorkflowTrigger `json:"argoWorkflow,omitempty" protobuf:"bytes,4,opt,name=argoWorkflow"`
-	// HTTP refers to the trigger of type HTTP request
+	// HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.
 	// +optional
 	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,4,opt,name=http"`
+	// OpenFaas refers to the trigger designed to invoke openfaas functions with with on-the-fly constructable payload.
+	// +optional
+	OpenFaas *OpenFaasTrigger `json:"openFaas,omitempty" protobuf:"bytes,5,opt,name=openFaas"`
+	// AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
+	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -289,10 +294,10 @@ type ArgoWorkflowTrigger struct {
 // HTTPTrigger is the trigger for the HTTP request
 type HTTPTrigger struct {
 	// ServerURL refers to the URL to send HTTP request to.
-	ServerURL string `json:"serverUrl" protobuf:"bytes,1,name=serverURL"`
+	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
 	// PayloadParameters is the list of key-value extracted from an event payload to construct the HTTP request payload.
 	// +listType=payloadParameters
-	PayloadParameters []TriggerParameter `json:"resourceParameters" protobuf:"bytes,2,rep,name=resourceParameters"`
+	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,2,rep,name=payloadParameters"`
 	// TLS configuration for the HTTP client.
 	// +optional
 	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
@@ -319,6 +324,54 @@ type HTTPTriggerTLS struct {
 	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,name=clientCertPath"`
 	// ClientKeyPath refers the file path that contains client key.
 	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
+}
+
+// OpenFaasTrigger refers to the trigger type of OpenFass
+type OpenFaasTrigger struct {
+	// GatewayURL refers to the OpenFaas Gateway URL.
+	GatewayURL string `json:"gatewayURL" protobuf:"bytes,1,name=gatewayURL"`
+	// PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	// +optional
+	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,2,rep,name=payloadParameters"`
+	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	// the HTTP trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+	// Password refers to the Kubernetes secret that holds the password required to log into the gateway.
+	// +optional
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
+	// Namespace to read the password secret from.
+	// This is required if the password secret selector is specified.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
+	// FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes
+	FunctionName string `json:"functionName" protobuf:"bytes,6,name=functionName"`
+}
+
+// AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
+type AWSLambdaTrigger struct {
+	// FunctionName refers to the name of the function to invoke.
+	FunctionName string `json:"functionName" protobuf:"bytes,1,name=functionName"`
+	// AccessKey refers K8 secret containing aws access key
+	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,2,opt,name=accessKey"`
+	// SecretKey refers K8 secret containing aws secret key
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
+	// Namespace refers to Kubernetes namespace to read access related secret from.
+	// Must be defined if either accesskey or secretkey secret selector is specified.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	// Region is AWS region
+	Region string `json:"region" protobuf:"bytes,5,name=region"`
+	// PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,6,rep,name=payloadParameters"`
+	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,7,rep,name=resourceParameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination
@@ -372,14 +425,14 @@ type TriggerParameterSource struct {
 
 // TriggerPolicy dictates the policy for the trigger retries
 type TriggerPolicy struct {
-	// K8sTrigger refers to the policy used to check the state of K8s based triggers using using labels
-	K8s *K8sTrigger `json:"k8s,omitempty" protobuf:"bytes,1,opt,name=k8s"`
-	// HTTP refers to the policy used to check the state of HTTP trigger using response status
-	HTTP *HTTPTriggerPolicy `json:"http,omitempty" protobuf:"bytes,2,opt,name=http"`
+	// K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+	K8s *K8sResourcePolicy `json:"k8s,omitempty" protobuf:"bytes,1,opt,name=k8s"`
+	// Status refers to the policy used to check the state of the trigger using response status
+	Status *StatusPolicy `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 }
 
-// K8sTrigger refers to the policy used to check the state of K8s based triggers using using labels
-type K8sTrigger struct {
+// K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+type K8sResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels" protobuf:"bytes,1,name=labels"`
 	// Backoff before checking resource state
@@ -389,11 +442,12 @@ type K8sTrigger struct {
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,name=errorOnBackoffTimeout"`
 }
 
-// HTTPTriggerPolicy refers to the policy used to check the state of HTTP trigger using response status
-type HTTPTriggerPolicy struct {
-	// AllowedStatuses refers to the list of http response status. If the response status of the HTTP trigger is within the list,
+// StatusPolicy refers to the policy used to check the state of the trigger using response status
+type StatusPolicy struct {
+	// AllowedStatuses refers to the list of response status. If the response status of the the trigger is within the list,
 	// the trigger will marked as successful else it will result in trigger failure.
-	AllowedStatuses []string `json:"allowedStatuses" protobuf:"bytes,1,name=labels"`
+	// +listType=allowedStatuses
+	AllowedStatuses []int `json:"allowedStatuses" protobuf:"bytes,1,name=allowedStatuses"`
 }
 
 // Backoff for an operation

@@ -27,6 +27,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -149,7 +150,7 @@ func (t *Trigger) Execute(resource interface{}) (interface{}, error) {
 
 // ApplyPolicy applies policy on the trigger
 func (t *Trigger) ApplyPolicy(resource interface{}) error {
-	if t.Trigger.Policy.HTTP.AllowedStatuses == nil {
+	if t.Trigger.Policy.Status.AllowedStatuses == nil {
 		return nil
 	}
 
@@ -158,7 +159,12 @@ func (t *Trigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger execution response")
 	}
 
-	p := policy.NewHTTPTriggerPolicy(response, t.Trigger.Policy.HTTP.AllowedStatuses)
+	status, err := strconv.Atoi(response.Status)
+	if err != nil {
+		return errors.Wrap(err, "failed to parse the response status")
+	}
+
+	p := policy.NewStatusPolicy(status, t.Trigger.Policy.Status.AllowedStatuses)
 
 	return p.ApplyPolicy()
 }

@@ -14,7 +14,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "5dc25acbe8302402c7d201d5ad6f1ada6a5a63d1"
+  revision = "b9ee5c702d0ffe94a091bf06a2267242aa0ecae6"
 
 [[projects]]
   name = "github.com/Azure/azure-amqp-common-go"
@@ -50,8 +50,8 @@
     "services/eventhub/mgmt/2017-04-01/eventhub",
     "version"
   ]
-  revision = "781d9fb592a1818cb7fb8e0855ea9c00b095a9e9"
-  version = "v37.2.0"
+  revision = "2e62f976f4de2713ef1b8bb3254bebb81b95b638"
+  version = "v38.0.0"
 
 [[projects]]
   name = "github.com/Azure/go-autorest"
@@ -135,18 +135,22 @@
     "internal/sdkrand",
     "internal/sdkuri",
     "internal/shareddefaults",
+    "internal/strings",
     "private/protocol",
     "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
+    "private/protocol/restjson",
     "private/protocol/xml/xmlutil",
+    "service/lambda",
     "service/sns",
     "service/sqs",
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "6a08738f08ba97b8eac975590af91e8b7eff8cb1"
+  revision = "7eff85148854c81bb9a6884138ed76aae359ce9b"
 
 [[projects]]
   name = "github.com/cloudevents/sdk-go"
@@ -743,8 +747,8 @@
     "form",
     "webhookendpoint"
   ]
-  revision = "a99dcae497cb1365f011a96206da3af0b7e61e92"
-  version = "v68.5.0"
+  revision = "0ec0d5d0e19ef87c579c6feb6fe6d8c392b7f180"
+  version = "v68.7.0"
 
 [[projects]]
   name = "github.com/tidwall/gjson"
@@ -914,7 +918,7 @@
     "jws",
     "jwt"
   ]
-  revision = "858c2ad4c8b6c5d10852cb89079f6ca1c7309787"
+  revision = "bf48bf16ab8d622ce64ec6ce98d2c98f916b6303"
 
 [[projects]]
   branch = "master"
@@ -933,7 +937,7 @@
     "unix",
     "windows"
   ]
-  revision = "b016eb3dc98ea7f69ed55e8216b87187067ae621"
+  revision = "548cf772de5052aa878ccb47cdeb7d262b75c8ec"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -988,7 +992,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "7be0a674c9fc78b6627a534052066b112b66be5d"
+  revision = "11e9d9cc0042e6bd10337d4d2c3e5d9295508e7d"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -1677,6 +1681,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "54e54c0f2963ce57907f83f7e2ce0a8a27b3a12e48710d4f79e53c44e8cbdd4c"
+  inputs-digest = "9c4325948a2641d3a40a316f51925b68416cee492b980783d55e4779595bf267"
   solver-name = "gps-cdcl"
   solver-version = 1

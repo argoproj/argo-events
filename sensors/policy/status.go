@@ -17,32 +17,30 @@ limitations under the License.
 package policy
 
 import (
-	"net/http"
-
 	"github.com/pkg/errors"
 )
 
-// HTTPTriggerPolicy implements the policy for a HTTP trigger
-type HTTPTriggerPolicy struct {
-	// Response of the http request upon which the policy must be applied
-	Response *http.Response
+// StatusPolicy implements the policy for a HTTP trigger
+type StatusPolicy struct {
+	// Status represents the status of a generic operation
+	Status int
 	// Statuses refers to list of response status allowed
-	Statuses []string
+	Statuses []int
 }
 
-// NewHTTPTriggerPolicy returns a new HTTP trigger policy
-func NewHTTPTriggerPolicy(response *http.Response, statuses []string) *HTTPTriggerPolicy {
-	return &HTTPTriggerPolicy{
-		Response: response,
+// NewStatusPolicy returns a new HTTP trigger policy
+func NewStatusPolicy(status int, statuses []int) *StatusPolicy {
+	return &StatusPolicy{
+		Status:   status,
 		Statuses: statuses,
 	}
 }
 
-func (hp *HTTPTriggerPolicy) ApplyPolicy() error {
+func (hp *StatusPolicy) ApplyPolicy() error {
 	for _, status := range hp.Statuses {
-		if hp.Response.Status == status {
+		if hp.Status == status {
 			return nil
 		}
 	}
-	return errors.Errorf("policy application resulted in failure. http response status %s is not allowed", hp.Response.Status)
+	return errors.Errorf("policy application resulted in failure. http response status %d is not allowed", hp.Status)
 }

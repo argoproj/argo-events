@@ -141,6 +141,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.AWSLambda != nil {
+		if err := validateAWSLambdaTrigger(template.AWSLambda); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	return nil
 }
 
@@ -196,6 +201,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	return nil
 }
 
+// validateHTTPTrigger validates the HTTP trigger
 func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 	if trigger == nil {
 		return errors.New("openfaas trigger for can't be nil")
@@ -226,6 +232,29 @@ func validateOpenFaasTrigger(trigger *v1alpha1.OpenFaasTrigger) error {
 	}
 	if trigger.Password != nil && trigger.Namespace == "" {
 		return errors.New("namespace can't be empty when password secret selector is specified")
+	}
+	return nil
+}
+
+// validateAWSLambdaTrigger validates the AWS Lambda trigger
+func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
+	if trigger == nil {
+		return errors.New("openfaas trigger for can't be nil")
+	}
+	if trigger.FunctionName == "" {
+		return errors.New("function name is not specified")
+	}
+	if trigger.Region == "" {
+		return errors.New("region in not specified")
+	}
+	if trigger.AccessKey == nil || trigger.SecretKey == nil {
+		return errors.New("either accesskey or secretkey secret selector is not specified")
+	}
+	if trigger.Namespace == "" {
+		return errors.New("namespace to retrieve the accesskey or secretkey secret selector is not specified")
+	}
+	if trigger.PayloadParameters == nil {
+		return errors.New("payload parameters are not specified")
 	}
 	return nil
 }
@@ -348,13 +377,16 @@ func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
 		return validateK8sTriggerPolicy(trigger.Policy.K8s)
 	}
 	if trigger.Template.HTTP != nil {
-		return validateHTTPTriggerPolicy(trigger.Policy.HTTP)
+		return validateStatusPolicy(trigger.Policy.Status)
+	}
+	if trigger.Template.AWSLambda != nil {
+		return validateStatusPolicy(trigger.Policy.Status)
 	}
 	return nil
 }
 
 // validateK8sTriggerPolicy validates a k8s trigger policy
-func validateK8sTriggerPolicy(policy *v1alpha1.K8sTriggerPolicy) error {
+func validateK8sTriggerPolicy(policy *v1alpha1.K8sResourcePolicy) error {
 	if policy == nil {
 		return nil
 	}
@@ -367,8 +399,8 @@ func validateK8sTriggerPolicy(policy *v1alpha1.K8sTriggerPolicy) error {
 	return nil
 }
 
-// validateHTTPTriggerPolicy  validates a http trigger policy
-func validateHTTPTriggerPolicy(policy *v1alpha1.HTTPTriggerPolicy) error {
+// validateStatusPolicy  validates a http trigger policy
+func validateStatusPolicy(policy *v1alpha1.StatusPolicy) error {
 	if policy == nil {
 		return nil
 	}

@@ -29,6 +29,7 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger":       schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":    schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff":                schema_pkg_apis_sensor_v1alpha1_Backoff(ref),
@@ -41,14 +42,18 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact":            schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitCreds":               schema_pkg_apis_sensor_v1alpha1_GitCreds(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":        schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger":            schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTriggerTLS":         schema_pkg_apis_sensor_v1alpha1_HTTPTriggerTLS(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy":      schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":             schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy":   schema_pkg_apis_sensor_v1alpha1_ResourceLabelsPolicy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger":        schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources":        schema_pkg_apis_sensor_v1alpha1_SensorResources(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
@@ -57,6 +62,91 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch":          schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate":        schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact":            schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref),
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"functionName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FunctionName refers to the name of the function to invoke.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"accessKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AccessKey refers K8 secret containing aws access key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"secretKey": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecretKey refers K8 secret containing aws secret key",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace refers to Kubernetes namespace to read access related secret from. Must be defined if either accesskey or secretkey secret selector is specified.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"region": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Region is AWS region",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"payloadParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "payloadParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"resourceParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"functionName", "region", "payloadParameters"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -594,6 +684,164 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "HTTPTrigger is the trigger for the HTTP request",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"serverURL": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServerURL refers to the URL to send HTTP request to.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"payloadParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "payloadParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the HTTP request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the HTTP client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTriggerTLS"),
+						},
+					},
+					"method": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Method refers to the type of the HTTP request. Refer https://golang.org/src/net/http/method.go for more info. Default value is POST.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"resourceParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"timeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Timeout refers to the HTTP request timeout in seconds. Default value is 10 seconds",
+							Type:        []string{"integer"},
+							Format:      "int32",
+						},
+					},
+				},
+				Required: []string{"serverURL", "payloadParameters"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTriggerTLS", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_HTTPTriggerTLS(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "HTTPTriggerTLS refers to TLS configuration for the HTTP client",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"caCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CACertPath refers the file path that contains the CA cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientCertPath refers the file path that contains client cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientKeyPath refers the file path that contains client key.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Labels required to identify whether a resource is in success state",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"backoff": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Backoff before checking resource state",
+							Ref:         ref("k8s.io/apimachinery/pkg/util/wait.Backoff"),
+						},
+					},
+					"errorOnBackoffTimeout": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"labels", "backoff", "errorOnBackoffTimeout"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/util/wait.Backoff"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -670,32 +918,82 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_ResourceLabelsPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ResourceLabels refers to the policy used to check the resource state using labels",
+				Description: "OpenFaasTrigger refers to the trigger type of OpenFass",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"labels": {
+					"gatewayURL": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Labels required to identify whether a resource is in success state",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Description: "GatewayURL refers to the OpenFaas Gateway URL.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"payloadParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "payloadParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
 									},
 								},
 							},
 						},
 					},
+					"resourceParameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password refers to the Kubernetes secret that holds the password required to log into the gateway.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace to read the password secret from. This is required if the password secret selector is specified.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"functionName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"labels"},
+				Required: []string{"gatewayURL", "functionName"},
 			},
 		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1056,6 +1354,39 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCall
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StatusPolicy refers to the policy used to check the state of the trigger using response status",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"allowedStatuses": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "allowedStatuses",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "AllowedStatuses refers to the list of response status. If the response status of the the trigger is within the list, the trigger will marked as successful else it will result in trigger failure.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"allowedStatuses"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1181,20 +1512,21 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 					},
 					"contextKey": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Path is the JSONPath of the event's (JSON decoded) data key Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Description: "ContextKey is the JSONPath of the event's (JSON decoded) context key ContextKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"dataKey": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "DataKey is the JSONPath of the event's (JSON decoded) data key DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the default literal value to use for this parameter source This is only used if the path is invalid. If the path is invalid and this is not defined, this param source will produce an error.",
+							Description: "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1213,31 +1545,23 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 				Description: "TriggerPolicy dictates the policy for the trigger retries",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"backoff": {
+					"k8s": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Backoff before checking resource state",
-							Ref:         ref("k8s.io/apimachinery/pkg/util/wait.Backoff"),
+							Description: "K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy"),
 						},
 					},
-					"errorOnBackoffTimeout": {
+					"status": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"resourceLabels": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ResourceLabels refers to the policy used to check the resource state using labels",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy"),
+							Description: "Status refers to the policy used to check the state of the trigger using response status",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy"),
 						},
 					},
 				},
-				Required: []string{"backoff", "errorOnBackoffTimeout", "resourceLabels"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceLabelsPolicy", "k8s.io/apimachinery/pkg/util/wait.Backoff"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy"},
 	}
 }
 
@@ -1314,14 +1638,32 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"k8s": {
 						SchemaProps: spec.SchemaProps{
-							Description: "K8sTrigger refers to the trigger type of standard Kubernetes resource.",
+							Description: "StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger"),
 						},
 					},
 					"argoWorkflow": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ArgoWorkflow refers to the trigger type of Argo Workflow.",
+							Description: "ArgoWorkflow refers to the trigger that can perform various operations on an Argo workflow.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger"),
+						},
+					},
+					"http": {
+						SchemaProps: spec.SchemaProps{
+							Description: "HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger"),
+						},
+					},
+					"openFaas": {
+						SchemaProps: spec.SchemaProps{
+							Description: "OpenFaas refers to the trigger designed to invoke openfaas functions with with on-the-fly constructable payload.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger"),
+						},
+					},
+					"awsLambda": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger"),
 						},
 					},
 				},
@@ -1329,7 +1671,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
 	}
 }
 

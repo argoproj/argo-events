@@ -132,6 +132,10 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
 	trigger := k8sTrigger.Trigger
 
+	if trigger.Policy == nil || trigger.Policy.K8s == nil {
+		return nil
+	}
+
 	obj, ok := resource.(*unstructured.Unstructured)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")
