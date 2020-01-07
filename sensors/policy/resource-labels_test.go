@@ -66,7 +66,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 			},
 		},
 		Policy: &v1alpha1.TriggerPolicy{
-			K8s: &v1alpha1.K8sTrigger{
+			K8s: &v1alpha1.K8sTriggerPolicy{
 				ErrorOnBackoffTimeout: true,
 				Labels: map[string]string{
 					"complete": "true",

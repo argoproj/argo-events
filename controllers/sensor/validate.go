@@ -309,7 +309,7 @@ func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
 }
 
 // validateK8sTriggerPolicy validates a k8s trigger policy
-func validateK8sTriggerPolicy(policy *v1alpha1.K8sTrigger) error {
+func validateK8sTriggerPolicy(policy *v1alpha1.K8sTriggerPolicy) error {
 	if policy == nil {
 		return nil
 	}
