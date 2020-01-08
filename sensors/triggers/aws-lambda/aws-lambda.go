@@ -60,7 +60,7 @@ func (t *AWSLambdaTrigger) FetchResource() (interface{}, error) {
 func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
+		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
 	}
 	parameters := t.Trigger.Template.AWSLambda.ResourceParameters
 	if parameters != nil && len(parameters) > 0 {
