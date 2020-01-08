@@ -5,17 +5,7 @@ metadata:
 spec:
   type: "kafka"
   kafka:
-    # no retries if connection to kafka service is not successful
-    example-without-retry:
-      # url of the service
-      url: "kafka.argo-events:9092"
-      # name of the topic
-      topic: "topic-1"
-      # partition number
-      partition: "0"
-
-    # retry after each backoff to set up a successful connection
-    example-with-retry:
+    example:
       url: "kafka.argo-events:9092"
       topic: "topic-2"
       partition: "1"
