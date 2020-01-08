@@ -405,8 +405,9 @@ type TriggerParameter struct {
 
 // TriggerParameterSource defines the source for a parameter from a event event
 type TriggerParameterSource struct {
-	// Event is the name of the event for which to retrieve this event
-	Event string `json:"event" protobuf:"bytes,1,opt,name=event"`
+	// DependencyName refers to the name of the dependency. The event which is stored for this dependency is used as payload
+	// for the parameterization. Make sure to refer to one of the dependencies you have defined under Dependencies list.
+	DependencyName string `json:"event" protobuf:"bytes,1,opt,name=event"`
 	// ContextKey is the JSONPath of the event's (JSON decoded) context key
 	// ContextKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.

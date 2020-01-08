@@ -19,7 +19,6 @@ package triggers
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -33,7 +32,7 @@ import (
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
-	payload := make(map[string][]byte)
+	jsonStr := "{}"
 
 	events := ExtractEvents(sensor, parameters)
 	if events == nil {
@@ -45,10 +44,13 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 		if err != nil {
 			return nil, err
 		}
-		payload[parameter.Dest] = []byte(value)
+		jsonStr, err = sjson.Set(jsonStr, parameter.Dest, value)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to construct the JSON payload")
+		}
 	}
 
-	return json.Marshal(payload)
+	return []byte(jsonStr), nil
 }
 
 // ApplyTemplateParameters applies parameters to trigger template
@@ -162,7 +164,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 	var err error
 	var value []byte
 	var key string
-	if event, ok := events[src.Event]; ok {
+	if event, ok := events[src.DependencyName]; ok {
 		// If context or data keys are not set, return the event payload as is
 		if src.ContextKey == "" && src.DataKey == "" {
 			value, err = json.Marshal(&event)
@@ -179,7 +181,7 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 		}
 	}
 	if err != nil && src.Value != nil {
-		fmt.Printf("failed to parse the event data, using default value. err: %+v", err)
+		fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
 		return *src.Value, nil
 	}
 	// Get the value corresponding to specified key within JSON object
@@ -189,14 +191,14 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 			if res.Exists() {
 				return res.String(), nil
 			}
-			fmt.Printf("key %s does not exist to in the event object", key)
+			fmt.Printf("key %s does not exist to in the event object\n", key)
 		}
 		if src.Value != nil {
 			return *src.Value, nil
 		}
 		return string(value), nil
 	}
-	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.Event)
+	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
 }
 
 // ExtractEvents is a helper method to extract the events from the event dependencies nodes associated with the resource params
@@ -205,14 +207,14 @@ func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) 
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
-			node := snctrl.GetNodeByName(sensor, param.Src.Event)
+			node := snctrl.GetNodeByName(sensor, param.Src.DependencyName)
 			if node == nil {
 				continue
 			}
 			if node.Event == nil {
 				continue
 			}
-			events[param.Src.Event] = *node.Event
+			events[param.Src.DependencyName] = *node.Event
 		}
 	}
 	return events

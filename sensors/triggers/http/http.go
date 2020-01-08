@@ -54,18 +54,26 @@ func NewHTTPTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *
 // FetchResource fetches the trigger. As the HTTP trigger simply executes a http request, there
 // is no need to fetch any resource from external source
 func (t *HTTPTrigger) FetchResource() (interface{}, error) {
+	if t.Trigger.Template.HTTP.Method == "" {
+		t.Trigger.Template.HTTP.Method = http.MethodPost
+	}
 	return t.Trigger.Template.HTTP, nil
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
 func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
-	resourceBytes, err := json.Marshal(resource)
+	fetchedResource, ok := resource.(*v1alpha1.HTTPTrigger)
+	if !ok {
+		return nil, errors.New("failed to interpret the fetched trigger resource")
+	}
+
+	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
 	}
-	parameters := t.Trigger.Template.HTTP.ResourceParameters
+	parameters := fetchedResource.ResourceParameters
 	if parameters != nil && len(parameters) > 0 {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.HTTP.ResourceParameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
 		}

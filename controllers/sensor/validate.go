@@ -276,7 +276,7 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 	if parameter.Src == nil {
 		return errors.Errorf("parameter source can't be empty")
 	}
-	if parameter.Src.Event == "" {
+	if parameter.Src.DependencyName == "" {
 		return errors.Errorf("parameter source event can't be empty")
 	}
 	if parameter.Dest == "" {
