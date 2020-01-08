@@ -65,13 +65,13 @@ func (t *OpenFaasTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resou
 	}
 	parameters := t.Trigger.Template.OpenFaas.ResourceParameters
 	if parameters != nil && len(parameters) > 0 {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.HTTP.ResourceParameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.OpenFaas.ResourceParameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
 		}
 		var ht *v1alpha1.OpenFaasTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
-			return nil, errors.Wrap(err, "failed to unmarshal the updated openfaas trigger resource after applying resource parameters")
+			return nil, errors.Wrap(err, "failed to unmarshal the updated OpenFaas trigger resource after applying resource parameters")
 		}
 		return ht, nil
 	}
