@@ -1,1 +1,59 @@
+/*
+Copyright 2020 BlackRock, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package http
+
+import (
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
+)
+
+var sensorObj = &v1alpha1.Sensor{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-sensor",
+		Namespace: "fake",
+	},
+	Spec: v1alpha1.SensorSpec{
+		Triggers: []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					HTTP: &v1alpha1.HTTPTrigger{
+						ServerURL: "http://fake.com:12000",
+						Method:    "POST",
+						Timeout:   10,
+					},
+				},
+			},
+		},
+	},
+}
+
+func getFakeHTTPTrigger() *HTTPTrigger {
+	return NewHTTPTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), common.NewArgoEventsLogger())
+}
+
+func TestFetchResource(t *testing.T) {
+	trigger := getFakeHTTPTrigger()
+	obj, err := trigger.FetchResource()
+	assert.Nil(t, err)
+	assert.NotNil(t, obj)
+	trigger1, ok := obj.(*v1alpha1.HTTPTrigger)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, trigger.Trigger.Template.HTTP.ServerURL, trigger1.ServerURL)
+}

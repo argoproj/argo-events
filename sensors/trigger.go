@@ -19,6 +19,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
 	aws_lambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
+	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/openfass"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
@@ -45,6 +46,9 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	}
 	if trigger.Template.OpenFaas != nil {
 		return openfass.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+	}
+	if trigger.Template.HTTP != nil {
+		return http.NewHTTPTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
 	if trigger.Template.AWSLambda != nil {
 		return aws_lambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)

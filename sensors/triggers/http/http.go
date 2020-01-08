@@ -20,19 +20,20 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 // HTTPTrigger describes the trigger to invoke HTTP request
-type Trigger struct {
+type HTTPTrigger struct {
 	// Sensor object
 	Sensor *v1alpha1.Sensor
 	// Trigger reference
@@ -42,8 +43,8 @@ type Trigger struct {
 }
 
 // NewHTTPTrigger returns a new HTTP trigger
-func NewHTTPTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *Trigger {
-	return &Trigger{
+func NewHTTPTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *HTTPTrigger {
+	return &HTTPTrigger{
 		Sensor:  sensor,
 		Trigger: trigger,
 		Logger:  logger,
@@ -52,12 +53,12 @@ func NewHTTPTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *
 
 // FetchResource fetches the trigger. As the HTTP trigger simply executes a http request, there
 // is no need to fetch any resource from external source
-func (t *Trigger) FetchResource() (interface{}, error) {
+func (t *HTTPTrigger) FetchResource() (interface{}, error) {
 	return t.Trigger.Template.HTTP, nil
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
-func (t *Trigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
 	resourceBytes, err := json.Marshal(resource)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
@@ -78,7 +79,7 @@ func (t *Trigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource inte
 }
 
 // Execute executes the trigger
-func (t *Trigger) Execute(resource interface{}) (interface{}, error) {
+func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 	trigger, ok := resource.(*v1alpha1.HTTPTrigger)
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
@@ -88,25 +89,7 @@ func (t *Trigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload := make(map[string][]byte)
-
-	events := triggers.ExtractEvents(t.Sensor, trigger.PayloadParameters)
-	if events == nil {
-		return nil, errors.New("payload can't be constructed as there are not events to extract data from")
-	}
-
-	for _, parameter := range trigger.PayloadParameters {
-		value, err := triggers.ResolveParamValue(parameter.Src, events)
-		if err != nil {
-			return nil, err
-		}
-		payload[parameter.Dest] = []byte(value)
-	}
-
-	payloadBody, err := json.Marshal(payload)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal payload")
-	}
+	payload, err := triggers.ConstructPayload(t.Sensor, trigger.PayloadParameters)
 
 	client := http.Client{}
 
@@ -134,7 +117,7 @@ func (t *Trigger) Execute(resource interface{}) (interface{}, error) {
 		}
 	}
 
-	request, err := http.NewRequest(trigger.Method, trigger.ServerURL, bytes.NewReader(payloadBody))
+	request, err := http.NewRequest(trigger.Method, trigger.ServerURL, bytes.NewReader(payload))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to construct the http request")
 	}
@@ -149,7 +132,7 @@ func (t *Trigger) Execute(resource interface{}) (interface{}, error) {
 }
 
 // ApplyPolicy applies policy on the trigger
-func (t *Trigger) ApplyPolicy(resource interface{}) error {
+func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
 	if t.Trigger.Policy.Status.AllowedStatuses == nil {
 		return nil
 	}

@@ -31,6 +31,26 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
+func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
+	payload := make(map[string][]byte)
+
+	events := ExtractEvents(sensor, parameters)
+	if events == nil {
+		return nil, errors.New("payload can't be constructed as there are not events to extract data from")
+	}
+
+	for _, parameter := range parameters {
+		value, err := ResolveParamValue(parameter.Src, events)
+		if err != nil {
+			return nil, err
+		}
+		payload[parameter.Dest] = []byte(value)
+	}
+
+	return json.Marshal(payload)
+}
+
 // ApplyTemplateParameters applies parameters to trigger template
 func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) error {
 	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
