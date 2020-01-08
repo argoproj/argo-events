@@ -1234,7 +1234,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"phase": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Phase is the high-level summary of the sensor",
+							Description: "Phase is the high-level summary of the sensor.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1503,9 +1503,9 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 				Description: "TriggerParameterSource defines the source for a parameter from a event event",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"event": {
+					"dependencyName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Event is the name of the event for which to retrieve this event",
+							Description: "DependencyName refers to the name of the dependency. The event which is stored for this dependency is used as payload for the parameterization. Make sure to refer to one of the dependencies you have defined under Dependencies list.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1532,7 +1532,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"event"},
+				Required: []string{"dependencyName"},
 			},
 		},
 	}
