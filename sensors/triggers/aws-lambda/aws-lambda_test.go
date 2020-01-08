@@ -21,6 +21,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -130,4 +131,17 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "real-function", updatedObj.FunctionName)
 	assert.Equal(t, "region", updatedObj.Region)
+}
+
+func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
+	trigger := getAWSTrigger()
+	status := int64(200)
+	response := &lambda.InvokeOutput{
+		StatusCode: &status,
+	}
+	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
+		Status: &v1alpha1.StatusPolicy{AllowedStatuses: []int{200, 300}},
+	}
+	err := trigger.ApplyPolicy(response)
+	assert.Nil(t, err)
 }
