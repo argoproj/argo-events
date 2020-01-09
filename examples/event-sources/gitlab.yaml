@@ -31,7 +31,7 @@ spec:
       # Do SSL verification when triggering the hook
       enableSSLVerification: false
       # Gitlab Base url
-      gitlabBaseUrl: "YOUR_GITLAB_URL"
+      gitlabBaseURL: "YOUR_GITLAB_URL"
 
     example-secure:
       projectId: "2"
@@ -48,4 +48,4 @@ spec:
         key: accesskey
         name: gitlab-access
       enableSSLVerification: true
-      gitlabBaseUrl: "YOUR_GITLAB_URL"
+      gitlabBaseURL: "YOUR_GITLAB_URL"
