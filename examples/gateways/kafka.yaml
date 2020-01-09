@@ -7,32 +7,24 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: "kafka"
+  type: kafka
   eventSourceRef:
-    name: "kafka-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: kafka-event-source
   template:
     metadata:
-      name: "kafka-gateway"
+      name: kafka-gateway
       labels:
-        gateway-name: "kafka-gateway"
+        gateway-name: kafka-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "kafka-events"
-          image: "argoproj/kafka-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: kafka-events
+          image: argoproj/kafka-gateway:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/kafka-gateway"]
-      serviceAccountName: "argo-events-sa"
-  watchers:
-    sensors:
-      - name: "kafka-sensor"
+      serviceAccountName: argo-events-sa
+  subscribers:
+    - "http://kafka-sensor.argo-events.svc:9300/"

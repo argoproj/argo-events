@@ -71,7 +71,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource 
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
 	}
-	parameters := fetchedResource.ResourceParameters
+	parameters := fetchedResource.Parameters
 	if parameters != nil && len(parameters) > 0 {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
@@ -93,11 +93,11 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
 
-	if trigger.PayloadParameters == nil {
+	if trigger.Payload == nil {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload, err := triggers.ConstructPayload(t.Sensor, trigger.PayloadParameters)
+	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
 
 	client := http.Client{}
 

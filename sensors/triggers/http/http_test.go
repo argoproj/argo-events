@@ -87,7 +87,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 
 	defaultValue := "http://default.com"
 
-	trigger.Trigger.Template.HTTP.ResourceParameters = []v1alpha1.TriggerParameter{
+	trigger.Trigger.Template.HTTP.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",

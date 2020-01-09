@@ -55,12 +55,12 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 
 // ApplyTemplateParameters applies parameters to trigger template
 func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) error {
-	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
+	if trigger.Parameters != nil && len(trigger.Parameters) > 0 {
 		templateBytes, err := json.Marshal(trigger.Template)
 		if err != nil {
 			return err
 		}
-		tObj, err := ApplyParams(templateBytes, trigger.TemplateParameters, ExtractEvents(sensor, trigger.TemplateParameters))
+		tObj, err := ApplyParams(templateBytes, trigger.Parameters, ExtractEvents(sensor, trigger.Parameters))
 		if err != nil {
 			return err
 		}

@@ -85,7 +85,7 @@ func (k8sTrigger *StandardK8sTrigger) ApplyResourceParameters(sensor *v1alpha1.S
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, k8sTrigger.Trigger.Template.K8s.ResourceParameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(sensor, k8sTrigger.Trigger.Template.K8s.Parameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil

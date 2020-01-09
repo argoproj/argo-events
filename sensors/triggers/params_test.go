@@ -410,7 +410,7 @@ func TestApplyResourceParameters(t *testing.T) {
 			Type:  v1alpha1.NodeTypeEventDependency,
 		},
 	}
-	obj.Spec.Triggers[0].Template.K8s.ResourceParameters = []v1alpha1.TriggerParameter{
+	obj.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
@@ -421,7 +421,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.ResourceParameters, deployment)
+	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }
@@ -449,7 +449,7 @@ func TestApplyTemplateParameters(t *testing.T) {
 			Type:  v1alpha1.NodeTypeEventDependency,
 		},
 	}
-	obj.Spec.Triggers[0].TemplateParameters = []v1alpha1.TriggerParameter{
+	obj.Spec.Triggers[0].Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",

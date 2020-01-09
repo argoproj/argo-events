@@ -6,33 +6,24 @@ metadata:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
-  replica: 1
-  type: "nats"
+  type: nats
   eventSourceRef:
-    name: "nats-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: nats-event-source
   template:
     metadata:
-      name: "nats-gateway"
+      name: nats-gateway
       labels:
-        gateway-name: "nats-gateway"
+        gateway-name: nats-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "nats-events"
-          image: "argoproj/nats-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: nats-events
+          image: argoproj/nats-gateway:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/nats-gateway"]
-      serviceAccountName: "argo-events-sa"
+      serviceAccountName: argo-events-sa
   watchers:
-    sensors:
-      - name: "nats-sensor"
+    - "http://nats-sensor.argo-events.svc:9300/"

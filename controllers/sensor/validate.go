@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/Knetic/govaluate"
@@ -51,19 +50,6 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	case pc.HTTP:
 		if s.Spec.EventProtocol.Http.Port == "" {
 			return errors.Errorf("http server port is not defined")
-		}
-	case pc.NATS:
-		if s.Spec.EventProtocol.Nats.URL == "" {
-			return errors.Errorf("nats url is not defined")
-		}
-		if s.Spec.EventProtocol.Nats.Type == "" {
-			return errors.Errorf("nats type is not defined. either Standard or Streaming type should be defined")
-		}
-		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClientId == "" {
-			return errors.Errorf("client id must be specified when using nats streaming")
-		}
-		if s.Spec.EventProtocol.Nats.Type == pc.Streaming && s.Spec.EventProtocol.Nats.ClusterId == "" {
-			return errors.Errorf("cluster id must be specified when using nats streaming")
 		}
 	default:
 		return errors.Errorf("unknown gateway type")
@@ -165,8 +151,8 @@ func validateK8sTrigger(trigger *v1alpha1.StandardK8sTrigger) error {
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
-	if trigger.ResourceParameters != nil {
-		for i, parameter := range trigger.ResourceParameters {
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
 				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
 			}
@@ -191,8 +177,8 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	default:
 		return errors.Errorf("unknown operation type %s", string(trigger.Operation))
 	}
-	if trigger.ResourceParameters != nil {
-		for i, parameter := range trigger.ResourceParameters {
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
 				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
 			}
@@ -253,7 +239,7 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	if trigger.Namespace == "" {
 		return errors.New("namespace to retrieve the accesskey or secretkey secret selector is not specified")
 	}
-	if trigger.PayloadParameters == nil {
+	if trigger.Payload == nil {
 		return errors.New("payload parameters are not specified")
 	}
 	return nil
@@ -261,8 +247,8 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 
 // validateTriggerParameters validates resource and template parameters if any
 func validateTriggerParameters(trigger *v1alpha1.Trigger) error {
-	if trigger.TemplateParameters != nil {
-		for i, parameter := range trigger.TemplateParameters {
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
 				return errors.Errorf("template parameter index: %d. err: %+v", i, err)
 			}
@@ -298,23 +284,22 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 // perform a check to see that each event dependency is in correct format and has valid filters set if any
 func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 	if len(eventDependencies) < 1 {
-		return errors.Errorf("no event dependencies found")
+		return errors.New("no event dependencies found")
 	}
-	for _, ed := range eventDependencies {
-		if ed.Name == "" {
-			return errors.Errorf("event dependency must define a name")
+	for _, dep := range eventDependencies {
+		if dep.Name == "" {
+			return errors.New("event dependency must define a name")
 		}
 
-		parts := strings.Split(ed.Name, ":")
-		if len(parts) != 2 {
-			return errors.Errorf("event dependency must have format gateway-name:event-source-name")
+		if dep.GatewayName == "" {
+			return errors.New("event dependency must define the gateway name")
 		}
 
-		if parts[0] == "" || parts[1] == "" {
-			return errors.Errorf("both gateway name and event source name in dependency must be non-empty")
+		if dep.EventName == "" {
+			return errors.New("event dependency must define the event name")
 		}
 
-		if err := validateEventFilter(ed.Filters); err != nil {
+		if err := validateEventFilter(dep.Filters); err != nil {
 			return err
 		}
 	}

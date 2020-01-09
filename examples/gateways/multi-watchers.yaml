@@ -7,51 +7,36 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: "webhook"
+  type: webhook
   eventSourceRef:
-    name: "webhook-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: webhook-event-source
   template:
     metadata:
-      name: "webhook-gateway"
+      name: webhook-gateway
       labels:
-        gateway-name: "webhook-gateway"
+        gateway-name: webhook-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "webhook-events"
-          image: "argoproj/webhook-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: webhook-events
+          image: argoproj/webhook-gateway:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
-      serviceAccountName: "argo-events-sa"
+      serviceAccountName: argo-events-sa
   service:
     metadata:
       name: webhook-gateway-svc
     spec:
       selector:
-        gateway-name: "webhook-gateway-http"
+        gateway-name: webhook-gateway
       ports:
         - port: 12000
           targetPort: 12000
       type: LoadBalancer
-  watchers:
-    # requirement for adding gateway as watcher is there should be a http server running in watcher gateway
-    # and user must provide port and endpoint on which event should be dispatched.
-    # Adding gateways as watchers are particularly useful when you want to chain events.
-    gateways:
-      - name: "webhook-gateway"
-        port: "9070"
-        endpoint: "/notifications"
-    sensors:
-      - name: "webhook-sensor"
-      - name: "multi-signal-sensor"
-      - name: "webhook-time-filter-sensor"
+  subscribers:
+    - "http://webhook-sensor.argo-events.svc:9300/"
+    - "http://webhook-time-filter-sensor.argo-events.svc:9300/"
+    - "ANY_VALID_URL_ACCEPTING_HTTP_REQUESTS"

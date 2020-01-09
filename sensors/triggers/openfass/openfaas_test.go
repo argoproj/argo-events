@@ -93,7 +93,7 @@ func TestOpenFaasTrigger_ApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	trigger.Trigger.Template.OpenFaas.ResourceParameters = []v1alpha1.TriggerParameter{
+	trigger.Trigger.Template.OpenFaas.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",

@@ -58,18 +58,23 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					GroupVersionResource: &metav1.GroupVersionResource{
-						Group:    "k8s.io",
-						Version:  "",
-						Resource: "pods",
+					K8s: &v1alpha1.StandardK8sTrigger{
+						GroupVersionResource: &metav1.GroupVersionResource{
+							Group:    "k8s.io",
+							Version:  "",
+							Resource: "pods",
+						},
+						Operation: "create",
+						Source:    &v1alpha1.ArtifactLocation{},
 					},
-					Source: &v1alpha1.ArtifactLocation{},
 				},
 			},
 		},
 		Dependencies: []v1alpha1.EventDependency{
 			{
-				Name: "fake-gateway:fake-one",
+				Name:        "fake-dep",
+				GatewayName: "fake-gateway",
+				EventName:   "fake-one",
 			},
 		},
 	},

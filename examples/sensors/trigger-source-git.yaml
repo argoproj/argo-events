@@ -8,8 +8,8 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /git/argoproj
@@ -36,41 +36,47 @@ spec:
             secretName: git-known-hosts
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:example"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   triggers:
     - template:
         name: workflow-trigger-1
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          git:
-            url: "https://github.com/argoproj/argo.git"
-            cloneDirectory: "/git/argoproj"
-            creds:
-              username:
-                name: github-secret
-                key: username
-              password:
-                name: github-secret
-                key: password
-            namespace: argo-events
-            filePath: "examples/hello-world.yaml"
-            tag: "v2.2.1"
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            git:
+              url: "https://github.com/argoproj/argo.git"
+              cloneDirectory: "/git/argoproj"
+              creds:
+                username:
+                  name: github-secret
+                  key: username
+                password:
+                  name: github-secret
+                  key: password
+              namespace: argo-events
+              filePath: "examples/hello-world.yaml"
+              tag: "v2.4.0"
     - template:
         name: workflow-trigger-2
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          git:
-            url: "git@github.com:argoproj/argo.git"
-            cloneDirectory: "/git/argoproj1"
-            sshKeyPath: "/secret/key"
-            namespace: argo-events
-            filePath: "examples/hello-world.yaml"
-            branch: "master"
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            git:
+              url: "git@github.com:argoproj/argo.git"
+              cloneDirectory: "/git/argoproj1"
+              sshKeyPath: "/secret/key"
+              namespace: argo-events
+              filePath: "examples/hello-world.yaml"
+              branch: "master"

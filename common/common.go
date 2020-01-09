@@ -91,6 +91,8 @@ const (
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
+	// ProcessorPort is the default port for the gateway event processor server to run on.
+	ProcessorPort = "9300"
 )
 
 const (

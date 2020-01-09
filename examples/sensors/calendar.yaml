@@ -9,45 +9,49 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "calendar-gateway:example-with-interval"
+    - name: test-dep
+      gatewayName: calendar-gateway
+      eventName: example-with-interval
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   triggers:
     - template:
         name: calendar-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          resource:
-            apiVersion: argoproj.io/v1alpha1
-            kind: Workflow
-            metadata:
-              generateName: calendar-workflow-
-            spec:
-              entrypoint: whalesay
-              arguments:
-                parameters:
-                - name: message
-                  # this is the value that should be overridden
-                  value: hello world
-              templates:
-              - name: whalesay
-                inputs:
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: calendar-workflow-
+              spec:
+                entrypoint: whalesay
+                arguments:
                   parameters:
                   - name: message
-                container:
-                  image: docker/whalesay:latest
-                  command: [cowsay]
-                  args: ["{{inputs.parameters.message}}"]
-      resourceParameters:
-        - src:
-            event: "calendar-gateway:example-with-interval"
-          dest: spec.arguments.parameters.0.value
+                    # value will get overridden by the event payload
+                    value: hello world
+                templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+              dest: spec.arguments.parameters.0.value

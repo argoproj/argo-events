@@ -75,8 +75,8 @@ type KubernetesResourceOperation string
 
 // possible values for KubernetesResourceOperation
 const (
-	Create KubernetesResourceOperation = "Create" // creates the resource
-	Update KubernetesResourceOperation = "Update" // updates the resource
+	Create KubernetesResourceOperation = "create" // creates the resource
+	Update KubernetesResourceOperation = "update" // updates the resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
@@ -84,11 +84,11 @@ type ArgoWorkflowOperation string
 
 // possible values for ArgoWorkflowOperation
 const (
-	Submit   ArgoWorkflowOperation = "Submit"   // submit a workflow
-	Suspend  ArgoWorkflowOperation = "Suspend"  // suspends a workflow
-	Resubmit ArgoWorkflowOperation = "Resubmit" // resubmit a workflow
-	Retry    ArgoWorkflowOperation = "Retry"    // retry a workflow
-	Resume   ArgoWorkflowOperation = "Resume"   // resume a workflow
+	Submit   ArgoWorkflowOperation = "submit"   // submit a workflow
+	Suspend  ArgoWorkflowOperation = "suspend"  // suspends a workflow
+	Resubmit ArgoWorkflowOperation = "resubmit" // resubmit a workflow
+	Retry    ArgoWorkflowOperation = "retry"    // retry a workflow
+	Resume   ArgoWorkflowOperation = "resume"   // resume a workflow
 )
 
 // Sensor is the definition of a sensor resource
@@ -221,8 +221,8 @@ type Trigger struct {
 	// Template describes the trigger specification.
 	Template *TriggerTemplate `json:"template" protobuf:"bytes,1,name=template"`
 	// +listType=templateParameters
-	// TemplateParameters is the list of resource parameters to pass to the template object
-	TemplateParameters []TriggerParameter `json:"templateParameters,omitempty" protobuf:"bytes,2,rep,name=templateParameters"`
+	// Parameters is the list of parameters applied to the trigger template definition
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
 	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,4,opt,name=policy"`
 }
@@ -271,9 +271,9 @@ type StandardK8sTrigger struct {
 	// Default value is Create.
 	// +optional
 	Operation KubernetesResourceOperation `json:"operation,omitempty" protobuf:"bytes,3,opt,name=operation"`
-	// ResourceParameters is the list of resource parameters to pass to resolved K8s object
+	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
 	// +listType=triggerParameters
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,4,rep,name=resourceParameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
@@ -284,9 +284,9 @@ type ArgoWorkflowTrigger struct {
 	// Default value is Submit.
 	// +optional
 	Operation ArgoWorkflowOperation `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
-	// ResourceParameters is the list of resource parameters to pass to resolved Argo Workflow object
+	// Parameters is the list of parameters to pass to resolved Argo Workflow object
 	// +listType=triggerParameters
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
 	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,name=groupVersionResource"`
 }
@@ -295,9 +295,9 @@ type ArgoWorkflowTrigger struct {
 type HTTPTrigger struct {
 	// ServerURL refers to the URL to send HTTP request to.
 	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
-	// PayloadParameters is the list of key-value extracted from an event payload to construct the HTTP request payload.
+	// Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
 	// +listType=payloadParameters
-	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,2,rep,name=payloadParameters"`
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
 	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
@@ -306,10 +306,10 @@ type HTTPTrigger struct {
 	// Default value is POST.
 	// +optional
 	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
-	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
 	// +listType=triggerParameters
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,5,rep,name=resourceParameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
 	// Default value is 10 seconds
 	// +optional
@@ -330,15 +330,15 @@ type HTTPTriggerTLS struct {
 type OpenFaasTrigger struct {
 	// GatewayURL refers to the OpenFaas Gateway URL.
 	GatewayURL string `json:"gatewayURL" protobuf:"bytes,1,name=gatewayURL"`
-	// PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	// +listType=payloadParameters
 	// +optional
-	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,2,rep,name=payloadParameters"`
-	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
 	// +listType=triggerParameters
 	// +optional
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,3,rep,name=resourceParameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// Password refers to the Kubernetes secret that holds the password required to log into the gateway.
 	// +optional
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
@@ -364,14 +364,14 @@ type AWSLambdaTrigger struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,5,name=region"`
-	// PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	// +listType=payloadParameters
-	PayloadParameters []TriggerParameter `json:"payloadParameters" protobuf:"bytes,6,rep,name=payloadParameters"`
-	// ResourceParameters is the list of key-value extracted from event's payload that are applied to
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
 	// +listType=triggerParameters
 	// +optional
-	ResourceParameters []TriggerParameter `json:"resourceParameters,omitempty" protobuf:"bytes,7,rep,name=resourceParameters"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

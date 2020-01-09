@@ -6,33 +6,25 @@ metadata:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
-  replica: 1
-  type: "webhook"
+  type: webhook
   eventSourceRef:
-    name: "webhook-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: webhook-event-source
   template:
     metadata:
-      name: "webhook-gateway-http"
+      name: webhook-gateway
       labels:
-        gateway-name: "webhook-gateway-http"
+        gateway-name: webhook-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "webhook-events"
-          image: "argoproj/webhook-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: webhook-events
+          image: argoproj/webhook-gateway:v0.12-rc
+          imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
-          # there will be `cert` and `key` files available at this path
+          # `cert` and `key` files path
           volumeMounts:
             - name: secret-volume
               mountPath: /etc/secret-volume
@@ -41,17 +33,16 @@ spec:
         - name: secret-volume
           secret:
             secretName: cert-and-key-secret
-      serviceAccountName: "argo-events-sa"
+      serviceAccountName: argo-events-sa
   service:
     metadata:
       name: webhook-gateway-svc
     spec:
       selector:
-        gateway-name: "webhook-gateway-http"
+        gateway-name: webhook-gateway
       ports:
         - port: 12000
           targetPort: 12000
       type: LoadBalancer
-  watchers:
-    sensors:
-      - name: "trigger-source-git"
+  subscribers:
+    - "http://webhook-sensor.argo-events.svc:9300/"

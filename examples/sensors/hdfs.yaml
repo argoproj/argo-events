@@ -9,40 +9,44 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "hdfs-gateway:example"
+    - name: test-dep
+      gatewayName: hdfs-gateway
+      eventName: example
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   triggers:
     - template:
         name: hdfs-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          resource:
-            apiVersion: argoproj.io/v1alpha1
-            kind: Workflow
-            metadata:
-              generateName: hello-world-
-            spec:
-              entrypoint: whalesay
-              templates:
-                - name: whalesay
-                  container:
-                    args:
-                      - "hello "
-                    command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
-      resourceParameters:
-        - src:
-            event: "hdfs-gateway:example"
-            path: name
-          dest: spec.templates.0.container.args.1
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  - name: whalesay
+                    container:
+                      args:
+                        - "hello "
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep
+                path: name
+              dest: spec.templates.0.container.args.1

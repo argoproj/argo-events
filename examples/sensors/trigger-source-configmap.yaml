@@ -8,27 +8,29 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   dependencies:
-    - name: "minio-gateway:example-1"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
   triggers:
     - template:
         name: minio-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          configmap:
-            # name of the configmap
-            name: workflow-cm
-            # namespace of configmap
-            namespace: argo-events
-            # key within configmap containing workflow
-            key: wf
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            configmap:
+              name: workflow-cm
+              namespace: argo-events
+              # key within configmap whose corresponding value contains the workflow definition
+              key: wf

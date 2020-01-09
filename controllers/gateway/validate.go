@@ -32,8 +32,5 @@ func Validate(gatewayObj *v1alpha1.Gateway) error {
 	if gatewayObj.Spec.EventSourceRef == nil {
 		return errors.New("event source for the gateway is not specified")
 	}
-	if gatewayObj.Spec.ProcessorPort == "" {
-		return errors.New("gateway processor port is not specified")
-	}
 	return nil
 }

@@ -76,7 +76,7 @@ func (t *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, r
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.K8s.ResourceParameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.K8s.Parameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil

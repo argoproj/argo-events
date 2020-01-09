@@ -72,6 +72,11 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 	}
 	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = ctx.gateway.Name
 
+	processorPort := ctx.gateway.Spec.ProcessorPort
+	if processorPort == "" {
+		processorPort = common.ProcessorPort
+	}
+
 	envVars := []corev1.EnvVar{
 		{
 			Name:  common.EnvVarNamespace,
@@ -91,7 +96,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 		},
 		{
 			Name:  common.EnvVarGatewayServerPort,
-			Value: ctx.gateway.Spec.ProcessorPort,
+			Value: processorPort,
 		},
 	}
 

@@ -8,16 +8,18 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   dependencies:
-    - name: "webhook-gateway:example"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
       filters:
         time:
           start: "22:14:05"
@@ -25,23 +27,25 @@ spec:
   triggers:
     - template:
         name: hello-world-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          resource:
-            apiVersion: argoproj.io/v1alpha1
-            kind: Workflow
-            metadata:
-              generateName: time-filter-hello-world-
-            spec:
-              entrypoint: whalesay
-              templates:
-                -
-                  container:
-                    args:
-                      - "hello world"
-                    command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
-                  name: whalesay
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: time-filter-hello-world-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  -
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay

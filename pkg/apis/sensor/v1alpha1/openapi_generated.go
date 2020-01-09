@@ -105,14 +105,14 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 							Format:      "",
 						},
 					},
-					"payloadParameters": {
+					"payload": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "payloadParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.",
+							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -123,14 +123,14 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 							},
 						},
 					},
-					"resourceParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "triggerParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -142,7 +142,7 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 						},
 					},
 				},
-				Required: []string{"functionName", "region", "payloadParameters"},
+				Required: []string{"functionName", "region", "payload"},
 			},
 		},
 		Dependencies: []string{
@@ -170,14 +170,14 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 							Format:      "",
 						},
 					},
-					"resourceParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "triggerParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of resource parameters to pass to resolved Argo Workflow object",
+							Description: "Parameters is the list of parameters to pass to resolved Argo Workflow object",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -698,14 +698,14 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
-					"payloadParameters": {
+					"payload": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "payloadParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the HTTP request payload.",
+							Description: "Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -729,14 +729,14 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 							Format:      "",
 						},
 					},
-					"resourceParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "triggerParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -755,7 +755,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 						},
 					},
 				},
-				Required: []string{"serverURL", "payloadParameters"},
+				Required: []string{"serverURL", "payload"},
 			},
 		},
 		Dependencies: []string{
@@ -932,14 +932,14 @@ func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
-					"payloadParameters": {
+					"payload": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "payloadParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "PayloadParameters is the list of key-value extracted from an event payload to construct the request payload.",
+							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -950,14 +950,14 @@ func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallbac
 							},
 						},
 					},
-					"resourceParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "triggerParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1327,14 +1327,14 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCall
 							Format:      "",
 						},
 					},
-					"resourceParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "triggerParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "ResourceParameters is the list of resource parameters to pass to resolved K8s object",
+							Description: "Parameters is the list of parameters that is applied to resolved K8s trigger object.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1427,14 +1427,14 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerTemplate"),
 						},
 					},
-					"templateParameters": {
+					"parameters": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "templateParameters",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "TemplateParameters is the list of resource parameters to pass to the template object",
+							Description: "Parameters is the list of parameters applied to the trigger template definition",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{

@@ -9,24 +9,33 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /workflows/hello_world.yaml
+              name: workflow-file
+      volumes:
+        - name: workflow-file
+          configMap:
+            name: configmap-that-contains-the-workflow-definition
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "calendar-gateway:foo"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
   eventProtocol:
-    type: "HTTP"
+    type: HTTP
     http:
       port: "9300"
   triggers:
     - template:
         name: file-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        # The following requires that the sensor-controller be run with a
-        # volume mount that has the workflow yamls in it.
-        source:
-          file:
-            path: /workflows/hello_world.yaml
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            file:
+              path: /workflows/hello_world.yaml

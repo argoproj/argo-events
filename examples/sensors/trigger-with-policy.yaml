@@ -1,0 +1,114 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: trigger-backoff
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.12-rc
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  eventProtocol:
+    type: HTTP
+    http:
+      port: "9300"
+
+  # If set to true, marks sensor state as `error` if the previous trigger round fails.
+  # Once sensor state is set to `error`, no further triggers will be processed.
+  # Defaults to false
+  errorOnFailedRound: true
+
+  triggers:
+    - template:
+        name: trigger-1
+
+        # Policy to configure backoff and execution criteria for the trigger
+        # Because the sensor is able to trigger any K8s resource, it determines the resource state by looking at the resource's labels.
+        policy:
+          k8s:
+            # Backoff before checking the resource labels
+            backoff:
+              # Duration is the duration in nanoseconds
+              duration: 1000000000 # 1 second
+              # Duration is multiplied by factor each iteration
+              factor: 2
+              # The amount of jitter applied each iteration
+              jitter: 0.1
+              # Exit with error after these many steps
+              steps: 5
+            # labels set on the resource decide if the resource has transitioned into the success state.
+            labels:
+              workflows.argoproj.io/phase: Succeeded
+            # Determines whether trigger should be marked as failed if the backoff times out and sensor is still unable to decide the state of the trigger.
+            # defaults to false
+            errorOnBackoffTimeout: true
+
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                  - name: message
+                    # the value will get overridden by the event payload from test-dep
+                    value: hello world
+                templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}}"]
+          parameters:
+            - src:
+                dependencyName: test-dep
+              dest: spec.arguments.parameters.0.value
+
+    - template:
+        name: trigger-2
+        policy:
+          backoff:
+            duration: 1000000000 # 1 second
+            factor: 2
+            jitter: 0.1
+            steps: 5
+          state:
+            failure:
+              workflows.argoproj.io/phase: Failed
+          errorOnBackoffTimeout: false
+        group: argoproj.io
+        version: v1alpha1
+        kind: Workflow
+        source:
+          resource:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            metadata:
+              generateName: hello-world-
+            spec:
+              entrypoint: whalesay
+              templates:
+              - name: whalesay
+                container:
+                  image: docker/whalesay:latest
+                  command: [cowsay]
+                  args: ["hello world"]

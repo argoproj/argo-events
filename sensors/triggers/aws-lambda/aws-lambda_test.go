@@ -104,7 +104,7 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 	defaultValue := "default"
 	defaultRegion := "region"
 
-	trigger.Trigger.Template.AWSLambda.ResourceParameters = []v1alpha1.TriggerParameter{
+	trigger.Trigger.Template.AWSLambda.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",

@@ -63,9 +63,9 @@ func (t *OpenFaasTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resou
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the OpenFaas trigger resource")
 	}
-	parameters := t.Trigger.Template.OpenFaas.ResourceParameters
+	parameters := t.Trigger.Template.OpenFaas.Parameters
 	if parameters != nil && len(parameters) > 0 {
-		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.OpenFaas.ResourceParameters, triggers.ExtractEvents(sensor, parameters))
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.OpenFaas.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
 		}

@@ -1,8 +1,9 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: resource-sensor
+  name: multi-dependencies-sensor
   labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   template:
@@ -16,13 +17,17 @@ spec:
     type: HTTP
     http:
       port: "9300"
+  # waits for both test-dependency-webhook and test-dependency-calendar to resolve
   dependencies:
-    - name: test-dep
-      gatewayName: resource-gateway
+    - name: test-dependency-webhook
+      gatewayName: webhook-gateway
       eventName: example
+    - name: test-dependency-calendar
+      gatewayName: calendar-gateway
+      eventName: example-with-interval
   triggers:
     - template:
-        name: argo-workflow
+        name: multi-dependencies-workflow-trigger
         k8s:
           group: argoproj.io
           version: v1alpha1
@@ -33,13 +38,16 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: resource-workflow-
+                generateName: multi-signal-workflow-
               spec:
                 entrypoint: whalesay
                 arguments:
                   parameters:
-                  - name: message
-                    # the value will get overridden by the event payload from test-dep
+                  - name: message1
+                    # the value will get overridden by event payload from dependency test-dependency-webhook
+                    value: hello world
+                  - name: message2
+                    # the value will get overridden by event payload from dependency test-dependency-calendar
                     value: hello world
                 templates:
                 - name: whalesay
@@ -49,8 +57,13 @@ spec:
                   container:
                     image: docker/whalesay:latest
                     command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
+                    args:
+                      - "{{inputs.parameters.message1}}"
+                      - "{{inputs.parameters.message2}}"
           parameters:
             - src:
-                dependencyName: test-dep
+                dependencyName: test-dependency-webhook
               dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: test-dependency-calendar
+              dest: spec.arguments.parameters.1.value
