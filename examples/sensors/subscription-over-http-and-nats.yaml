@@ -20,7 +20,7 @@ spec:
     http:
       port: 9300
     nats:
-      serverURL: nats://test-nats.argo-events.svc:9000
+      serverURL: nats://test-nats.argo-events.svc:4222
       subject: webhook-sensor-subject
   triggers:
     - template:

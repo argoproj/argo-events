@@ -18,7 +18,7 @@ spec:
       eventName: example
   subscription:
     nats:
-      serverURL: nats://test-nats.argo-events.svc:9000
+      serverURL: nats://test-nats.argo-events.svc:4222
       subject: webhook-sensor-subject
   triggers:
     - template:

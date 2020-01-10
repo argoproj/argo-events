@@ -74,7 +74,7 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 
 // validateSubscription validates the sensor subscription
 func validateSubscription(subscription *v1alpha1.Subscription) error {
-	if subscription.HTTP == nil || subscription.NATS == nil {
+	if subscription.HTTP == nil && subscription.NATS == nil {
 		return errors.New("either HTTP or NATS subscription must be specified")
 	}
 	if subscription.NATS != nil {

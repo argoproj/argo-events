@@ -38,9 +38,9 @@ spec:
       type: LoadBalancer
   subscribers:
     http:
-      "http://webhook-sensor.argo-events.svc:9300/"
-      "http://webhook-time-filter-sensor.argo-events.svc:9300/"
+      - "http://webhook-sensor.argo-events.svc:9300/"
+      - "http://webhook-time-filter-sensor.argo-events.svc:9300/"
     nats:
       - name: webhook-sensor
-        serverURL: nats://test-nats.argo-events.svc:9000
+        serverURL: nats://test-nats.argo-events.svc:4222
         subject: webhook-sensor-subject

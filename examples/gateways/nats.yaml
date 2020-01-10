@@ -25,6 +25,6 @@ spec:
           imagePullPolicy: Always
           command: ["/bin/nats-gateway"]
       serviceAccountName: argo-events-sa
-  watchers:
+  subscribers:
     http:
       - "http://nats-sensor.argo-events.svc:9300/"
