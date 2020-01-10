@@ -26,4 +26,5 @@ spec:
           command: ["/bin/mqtt-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://mqtt-sensor.argo-events.svc:9300/"
+    http:
+      - "http://mqtt-sensor.argo-events.svc:9300/"

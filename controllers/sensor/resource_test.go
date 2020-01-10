@@ -47,7 +47,9 @@ var sensorObj = &v1alpha1.Sensor{
 				},
 			},
 		},
-		Port: 12000,
+		Subscription: &v1alpha1.Subscription{
+			HTTP: &v1alpha1.HTTPSubscription{Port: 12000},
+		},
 		Triggers: []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{

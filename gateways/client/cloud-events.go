@@ -24,19 +24,26 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventsnats "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/nats"
 	"github.com/google/uuid"
 )
 
 // updateSubscriberClients updates the active clients for event subscribers
 func (gatewayContext *GatewayContext) updateSubscriberClients() {
-	if gatewayContext.subscriberClients == nil {
-		gatewayContext.subscriberClients = make(map[string]cloudevents.Client)
-	}
-	if len(gatewayContext.gateway.Spec.Subscribers) == 0 {
+	if gatewayContext.gateway.Spec.Subscribers == nil {
 		return
 	}
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers {
-		if _, ok := gatewayContext.subscriberClients[subscriber]; !ok {
+
+	if gatewayContext.httpSubscribers == nil {
+		gatewayContext.httpSubscribers = make(map[string]cloudevents.Client)
+	}
+	if gatewayContext.natsSubscribers == nil {
+		gatewayContext.natsSubscribers = make(map[string]cloudevents.Client)
+	}
+
+	// http subscribers
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
+		if _, ok := gatewayContext.httpSubscribers[subscriber]; !ok {
 			t, err := cloudevents.NewHTTPTransport(
 				cloudevents.WithTarget(subscriber),
 			)
@@ -51,7 +58,26 @@ func (gatewayContext *GatewayContext) updateSubscriberClients() {
 				continue
 			}
 			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gatewayContext.subscriberClients[subscriber] = client
+			gatewayContext.httpSubscribers[subscriber] = client
+		}
+	}
+
+	// nats subscribers
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
+		if _, ok := gatewayContext.natsSubscribers[subscriber.Name]; !ok {
+			t, err := cloudeventsnats.New(subscriber.ServerURL, subscriber.Subject)
+			if err != nil {
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
+				continue
+			}
+
+			client, err := cloudevents.NewClient(t)
+			if err != nil {
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
+				continue
+			}
+			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
+			gatewayContext.natsSubscribers[subscriber.Name] = client
 		}
 	}
 }
@@ -61,6 +87,11 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 	logger.Infoln("dispatching event to subscribers")
 
+	if gatewayContext.gateway.Spec.Subscribers == nil {
+		logger.Warnln("no active subscribers to send event to.")
+		return nil
+	}
+
 	cloudEvent, err := gatewayContext.transformEvent(gatewayEvent)
 	if err != nil {
 		return err
@@ -68,8 +99,9 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 
 	completeSuccess := true
 
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers {
-		client, ok := gatewayContext.subscriberClients[subscriber]
+	// http subscribers
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
+		client, ok := gatewayContext.httpSubscribers[subscriber]
 		if !ok {
 			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
@@ -83,7 +115,23 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 		}
 	}
 
-	response := "dispatched event to all subscribers"
+	// http subscribers
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
+		client, ok := gatewayContext.httpSubscribers[subscriber.Name]
+		if !ok {
+			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
+			completeSuccess = false
+			continue
+		}
+
+		if _, _, err := client.Send(context.Background(), *cloudEvent); err != nil {
+			logger.WithError(err).WithField("target", subscriber).Warnln("failed to send the event")
+			completeSuccess = false
+			continue
+		}
+	}
+
+	response := "dispatched event"
 	if !completeSuccess {
 		response = fmt.Sprintf("%s.%s", response, " although some of the dispatch operations failed, check logs for more info")
 	}

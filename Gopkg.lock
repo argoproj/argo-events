@@ -14,7 +14,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "b9ee5c702d0ffe94a091bf06a2267242aa0ecae6"
+  revision = "4e7fb24f2973a4a8d59ff13c95859759b6506f95"
 
 [[projects]]
   name = "github.com/Azure/azure-amqp-common-go"
@@ -150,7 +150,7 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "7eff85148854c81bb9a6884138ed76aae359ce9b"
+  revision = "0ec921513a4536a315d4dd89416fc746b786ca2e"
 
 [[projects]]
   name = "github.com/cloudevents/sdk-go"
@@ -166,6 +166,7 @@
     "pkg/cloudevents/observability",
     "pkg/cloudevents/transport",
     "pkg/cloudevents/transport/http",
+    "pkg/cloudevents/transport/nats",
     "pkg/cloudevents/types"
   ]
   revision = "423680168ea46409121b5ef13ad563d4f0539fcb"
@@ -399,8 +400,8 @@
     "cmp/internal/function",
     "cmp/internal/value"
   ]
-  revision = "2d0692c2e9617365a95b295612ac0d4415ba4627"
-  version = "v0.3.1"
+  revision = "5a6f75716e1203a923a78c9efb94089d857df0f6"
+  version = "v0.4.0"
 
 [[projects]]
   name = "github.com/google/go-github"
@@ -462,8 +463,8 @@
 [[projects]]
   name = "github.com/hashicorp/go-uuid"
   packages = ["."]
-  revision = "4f571afc59f3043a65f8fe6bf46d887b10a01d43"
-  version = "v1.0.1"
+  revision = "6195a4f20692188e0a389def25559731d1e130f9"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/hashicorp/golang-lru"
@@ -616,6 +617,22 @@
   version = "v1.7.2"
 
 [[projects]]
+  name = "github.com/nats-io/jwt"
+  packages = ["."]
+  revision = "0c3fc7aed8bb2534e7bfdf0968a75890402d48cd"
+  version = "v0.3.2"
+
+[[projects]]
+  name = "github.com/nats-io/nats.go"
+  packages = [
+    ".",
+    "encoders/builtin",
+    "util"
+  ]
+  revision = "6063d679d23ae5b3edb4030d5e89a6e30ea53bc6"
+  version = "v1.9.1"
+
+[[projects]]
   name = "github.com/nats-io/nkeys"
   packages = ["."]
   revision = "f1930e19b436412202ab130a733187cc6f40ba7e"
@@ -732,7 +749,7 @@
   branch = "master"
   name = "github.com/streadway/amqp"
   packages = ["."]
-  revision = "edfb9018d2714e4ec54dbaba37dbfef2bdadf0e4"
+  revision = "1c71cc93ed716f9a6f4c2ae8955c25f9176d9f19"
 
 [[projects]]
   name = "github.com/stretchr/testify"
@@ -747,8 +764,8 @@
     "form",
     "webhookendpoint"
   ]
-  revision = "0ec0d5d0e19ef87c579c6feb6fe6d8c392b7f180"
-  version = "v68.7.0"
+  revision = "dde4d3804d7eb35c6ab8e6df576145707ce3a7fc"
+  version = "v68.8.0"
 
 [[projects]]
   name = "github.com/tidwall/gjson"
@@ -869,7 +886,7 @@
     "ssh/knownhosts",
     "ssh/terminal"
   ]
-  revision = "53104e6ec876ad4e22ad27cce588b01392043c1b"
+  revision = "61a87790db17894570dfb32dbaa0a4af9ce60cb4"
 
 [[projects]]
   branch = "master"
@@ -992,7 +1009,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "11e9d9cc0042e6bd10337d4d2c3e5d9295508e7d"
+  revision = "428f1ab0ca03a50bf8ac61408423f510675cd5a9"
 
 [[projects]]
   name = "google.golang.org/api"
@@ -1040,7 +1057,7 @@
     "googleapis/type/expr",
     "protobuf/field_mask"
   ]
-  revision = "f3c370f40bfba3cb25c5c2f823a1a8031b5ad724"
+  revision = "bd8f9a0ef82f9870cb10caef4f23c348069600cb"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -1661,7 +1678,7 @@
     "integer",
     "trace"
   ]
-  revision = "f07c713de88362aef7545072487d6118bd4a3d4a"
+  revision = "94aeca20bf0991bf33922a5938174b9147ab8ca7"
 
 [[projects]]
   name = "pack.ag/amqp"
@@ -1681,6 +1698,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9c4325948a2641d3a40a316f51925b68416cee492b980783d55e4779595bf267"
+  inputs-digest = "2ecf5da0be56f2ca3223247604469e558a525124583f8f890dcce27d95ef0cf4"
   solver-name = "gps-cdcl"
   solver-version = 1

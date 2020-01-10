@@ -26,4 +26,5 @@ spec:
           command: ["/bin/nats-gateway"]
       serviceAccountName: argo-events-sa
   watchers:
-    - "http://nats-sensor.argo-events.svc:9300/"
+    http:
+      - "http://nats-sensor.argo-events.svc:9300/"

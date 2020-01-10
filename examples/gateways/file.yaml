@@ -26,4 +26,5 @@ spec:
           command: ["/bin/file-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://file-sensor.argo-events.svc:9300/"
+    http:
+      - "http://file-sensor.argo-events.svc:9300/"

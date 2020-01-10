@@ -24,10 +24,9 @@ spec:
           source: webhook-gateway
           subject: example
           dataContentType: application/json
-  eventProtocol:
-    type: HTTP
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
         name: done-workflow

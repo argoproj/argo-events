@@ -18,17 +18,19 @@ package sensors
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
+	cloudeventsnats "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/nats"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// WatchEventsFromGateways watches and handles events received from the gateway.
+// ListenEvents watches and handles events received from the gateway.
 func (sensorCtx *SensorContext) ListenEvents() error {
 	// start processing the update Notification NotificationQueue
 	go func() {
@@ -40,9 +42,38 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 	// sync Sensor resource after updates
 	go sensorCtx.syncSensor(context.Background())
 
-	port := common.SensorServerPort
-	if sensorCtx.Sensor.Spec.Port != 0 {
-		port = sensorCtx.Sensor.Spec.Port
+	errCh := make(chan error)
+	httpCtx, httpCancel := context.WithCancel(context.Background())
+	natsCtx, natsCancel := context.WithCancel(context.Background())
+
+	// listen events over http
+	go func() {
+		if err := sensorCtx.listenEventsOverHTTP(httpCtx); err != nil {
+			errCh <- errors.Wrap(err, "failed to listen events over HTTP subscription")
+		}
+	}()
+
+	// listen events over nats
+	go func() {
+		if err := sensorCtx.listenEventsOverNATS(natsCtx); err != nil {
+			errCh <- errors.Wrap(err, "failed to listen events over NATS subscription")
+		}
+	}()
+
+	err := <-errCh
+	sensorCtx.Logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
+
+	httpCancel()
+	natsCancel()
+
+	return nil
+}
+
+// listenEventsOverHTTP listens to events over HTTP
+func (sensorCtx *SensorContext) listenEventsOverHTTP(ctx context.Context) error {
+	port := sensorCtx.Sensor.Spec.Subscription.HTTP.Port
+	if port != 0 {
+		port = common.SensorServerPort
 	}
 
 	t, err := cloudevents.NewHTTPTransport(
@@ -58,7 +89,27 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 		return err
 	}
 
-	if err := client.StartReceiver(context.Background(), sensorCtx.handleEvent); err != nil {
+	if err := client.StartReceiver(ctx, sensorCtx.handleEvent); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// listenEventsOverNATS listens to events over NATS
+func (sensorCtx *SensorContext) listenEventsOverNATS(ctx context.Context) error {
+	subscription := sensorCtx.Sensor.Spec.Subscription.NATS
+	t, err := cloudeventsnats.New(subscription.ServerURL, subscription.Subject)
+	if err != nil {
+		return err
+	}
+
+	client, err := cloudevents.NewClient(t)
+	if err != nil {
+		return err
+	}
+
+	if err := client.StartReceiver(ctx, sensorCtx.handleEvent); err != nil {
 		return err
 	}
 

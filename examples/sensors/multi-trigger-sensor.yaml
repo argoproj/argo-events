@@ -12,10 +12,9 @@ spec:
           image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
-  eventProtocol:
-    type: HTTP
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   dependencies:
     - name: test-dependency
       gatewayName: webhook-gateway

@@ -26,4 +26,5 @@ spec:
           command: ["/bin/resource-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://resource-sensor.argo-events.svc:9300/"
+    http:
+      - "http://resource-sensor.argo-events.svc:9300/"

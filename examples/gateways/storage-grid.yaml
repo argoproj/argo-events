@@ -35,4 +35,5 @@ spec:
           targetPort: 8080
       type: LoadBalancer
   subscribers:
-    - "http://storage-grid-watcher-sensor.argo-events.svc:9300/"
+    http:
+      - "http://storage-grid-watcher-sensor.argo-events.svc:9300/"

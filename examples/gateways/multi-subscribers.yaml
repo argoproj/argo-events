@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: webhook-gateway-multi-watchers
+  name: webhook-gateway-multi-subscribers
   labels:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
@@ -37,6 +37,10 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   subscribers:
-    - "http://webhook-sensor.argo-events.svc:9300/"
-    - "http://webhook-time-filter-sensor.argo-events.svc:9300/"
-    - "ANY_VALID_URL_ACCEPTING_HTTP_REQUESTS"
+    http:
+      "http://webhook-sensor.argo-events.svc:9300/"
+      "http://webhook-time-filter-sensor.argo-events.svc:9300/"
+    nats:
+      - name: webhook-sensor
+        serverURL: nats://test-nats.argo-events.svc:9000
+        subject: webhook-sensor-subject

@@ -1,9 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: kafka-sensor
+  name: webhook-sensor-over-nats
   labels:
-    # sensor controller with instanceId "argo-events" will process this sensor
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
   template:
@@ -13,16 +12,17 @@ spec:
           image: argoproj/sensor:v0.12-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
-  subscription:
-    http:
-      port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: kafka-gateway
-      eventName: example-with-retry
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    nats:
+      serverURL: nats://test-nats.argo-events.svc:9000
+      subject: webhook-sensor-subject
   triggers:
     - template:
-        name: kafka-workflow-trigger
+        name: webhook-workflow-trigger
         k8s:
           group: argoproj.io
           version: v1alpha1
@@ -33,23 +33,23 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: kafka-workflow-
+                generateName: webhook-
               spec:
                 entrypoint: whalesay
                 arguments:
                   parameters:
-                  - name: message
-                    # this is the value that should be overridden
-                    value: hello world
-                templates:
-                - name: whalesay
-                  inputs:
-                    parameters:
                     - name: message
-                  container:
-                    image: docker/whalesay:latest
-                    command: [cowsay]
-                    args: ["{{inputs.parameters.message}}"]
+                      # the value will get overridden by event payload from test-dep
+                      value: hello world
+                templates:
+                  - name: whalesay
+                    inputs:
+                      parameters:
+                        - name: message
+                    container:
+                      image: docker/whalesay:latest
+                      command: [cowsay]
+                      args: ["{{inputs.parameters.message}}"]
           parameters:
             - src:
                 dependencyName: test-dep

@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -54,7 +55,7 @@ func main() {
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	sensor, err := sensorClient.ArgoprojV1alpha1().Sensors(sensorNamespace).Get(sensorName, metav1.GetOptions{})
 	if err != nil {
-		panic(fmt.Errorf("failed to retrieve sensor. err: %+v", err))
+		panic(errors.Errorf("failed to retrieve sensor. err: %+v", err))
 	}
 
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)

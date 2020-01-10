@@ -26,4 +26,5 @@ spec:
           command: ["/bin/calendar-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://calendar-sensor.argo-events:9300/"
+    http:
+      - "http://calendar-sensor.argo-events:9300/"

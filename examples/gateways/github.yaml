@@ -36,4 +36,5 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   subscribers:
-    - "http://github-sensor.argo-events.svc:9300/"
+    http:
+      - "http://github-sensor.argo-events.svc:9300/"

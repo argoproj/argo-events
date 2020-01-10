@@ -27,4 +27,5 @@ spec:
           command: ["/bin/aws-sqs-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://aws-sqs-sensor.argo-events.svc:9300/"
+    http:
+      - "http://aws-sqs-sensor.argo-events.svc:9300/"

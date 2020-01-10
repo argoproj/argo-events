@@ -17,10 +17,9 @@ spec:
     - name: test-dep
       gatewayName: calendar-gateway
       eventName: example-with-interval
-  eventProtocol:
-    type: HTTP
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
         name: calendar-workflow-trigger

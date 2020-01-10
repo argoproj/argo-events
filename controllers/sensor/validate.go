@@ -45,6 +45,12 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if len(s.Spec.Template.Spec.Containers) > 1 {
 		return errors.Errorf("sensor pod specification can't have more than one container")
 	}
+	if s.Spec.Subscription == nil {
+		return errors.New("at least one subscription must be specified")
+	}
+	if err := validateSubscription(s.Spec.Subscription); err != nil {
+		return errors.Wrap(err, "subscription is invalid")
+	}
 	if s.Spec.DependencyGroups != nil {
 		if s.Spec.Circuit == "" {
 			return errors.Errorf("no circuit expression provided to resolve dependency groups")
@@ -63,6 +69,22 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 		}
 	}
 
+	return nil
+}
+
+// validateSubscription validates the sensor subscription
+func validateSubscription(subscription *v1alpha1.Subscription) error {
+	if subscription.HTTP == nil || subscription.NATS == nil {
+		return errors.New("either HTTP or NATS subscription must be specified")
+	}
+	if subscription.NATS != nil {
+		if subscription.NATS.ServerURL == "" {
+			return errors.New("NATS server url must be specified for the subscription")
+		}
+		if subscription.NATS.Subject == "" {
+			return errors.New("NATS subject must be specified for the subscription")
+		}
+	}
 	return nil
 }
 

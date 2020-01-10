@@ -18,7 +18,6 @@ package main
 
 import (
 	"context"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
@@ -26,6 +25,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,8 +60,10 @@ type GatewayContext struct {
 	controllerInstanceID string
 	// statusCh is used to communicate the status of an event source
 	statusCh chan notification
-	// subscriberClients holds the active clients for subscribers
-	subscriberClients map[string]cloudevents.Client
+	// httpSubscribers holds the active clients for HTTP subscribers
+	httpSubscribers map[string]cloudevents.Client
+	// natsSubscribers holds the active clients for NATS subscribers
+	natsSubscribers map[string]cloudevents.Client
 }
 
 // EventSourceContext contains information of a event source for gateway to run.
@@ -128,7 +130,8 @@ func NewGatewayContext() *GatewayContext {
 		controllerInstanceID: controllerInstanceID,
 		serverPort:           serverPort,
 		statusCh:             make(chan notification),
-		subscriberClients:    make(map[string]cloudevents.Client),
+		httpSubscribers:      make(map[string]cloudevents.Client),
+		natsSubscribers:      make(map[string]cloudevents.Client),
 	}
 
 	return gatewayConfig

@@ -37,4 +37,5 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   subscribers:
-    - "http://webhook-sensor.argo-events.svc:9300/"
+    http:
+      - "http://webhook-sensor.argo-events.svc:9300/"

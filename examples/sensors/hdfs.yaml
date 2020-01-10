@@ -17,10 +17,9 @@ spec:
     - name: test-dep
       gatewayName: hdfs-gateway
       eventName: example
-  eventProtocol:
-    type: HTTP
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
         name: hdfs-workflow-trigger

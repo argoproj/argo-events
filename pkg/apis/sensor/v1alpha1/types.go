@@ -19,8 +19,9 @@ package v1alpha1
 import (
 	"fmt"
 	"hash/fnv"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
@@ -122,9 +123,9 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
-	// Port on which sensor server should run.
-	// +optional
-	Port int `json:"port" protobuf:"bytes,4,name=port"`
+	// Subscription refers to the modes of events subscriptions for the sensor.
+	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
+	Subscription *Subscription `json:"subscription" protobuf:"bytes,4,name=subscription"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,rep,name=circuit"`
 	// +listType=dependencyGroups
@@ -137,6 +138,30 @@ type SensorSpec struct {
 	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,11,rep,name=serviceLabels"`
 	// ServiceAnnotations refers to annotations to be set for the service generated
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
+}
+
+// Subscription holds different modes of subscription available for sensor to consume events.
+type Subscription struct {
+	// HTTP refers to the HTTP subscription of events for the sensor.
+	// +optional
+	HTTP *HTTPSubscription `json:"http,omitempty" protobuf:"bytes,1,opt,name=http"`
+	// NATS refers to the NATS subscription of events for the sensor
+	// +optional
+	NATS *NATSSubscription `json:"nats,omitempty" protobuf:"bytes,2,opt,name=nats"`
+}
+
+// HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
+type HTTPSubscription struct {
+	// Port on which sensor server should run.
+	Port int `json:"port" protobuf:"bytes,1,name=port"`
+}
+
+// NATSSubscription holds the context of the NATS subscription of events for the sensor
+type NATSSubscription struct {
+	// ServerURL refers to NATS server url.
+	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	// Subject refers to NATS subject name.
+	Subject string `json:"subject" protobuf:"bytes,2,name=subject"`
 }
 
 // EventDependency describes a dependency

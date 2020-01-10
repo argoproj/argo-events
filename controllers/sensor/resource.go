@@ -30,9 +30,9 @@ import (
 
 // generateServiceSpec returns a K8s service spec for the sensor
 func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
-	port := ctx.sensor.Spec.Port
-	if port == 0 {
-		port = common.SensorServerPort
+	port := common.SensorServerPort
+	if ctx.sensor.Spec.Subscription.HTTP != nil {
+		port = ctx.sensor.Spec.Subscription.HTTP.Port
 	}
 
 	serviceSpec := &corev1.Service{

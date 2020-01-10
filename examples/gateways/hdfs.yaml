@@ -27,4 +27,5 @@ spec:
           command: ["/bin/hdfs-gateway"]
       serviceAccountName: argo-events-sa
   watchers:
-    - "http://hdfs-sensor.argo-events.svc:9300/"
+    http:
+      - "http://hdfs-sensor.argo-events.svc:9300/"

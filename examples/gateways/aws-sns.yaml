@@ -36,4 +36,5 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   subscribers:
-   - "https://aws-sns-sensor.argo-events.svc:9300/"
+    http:
+      - "https://aws-sns-sensor.argo-events.svc:9300/"

@@ -26,4 +26,5 @@ spec:
           command: ["/bin/amqp-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://amqp-sensor.argo-events.svc:9300/"
+    http:
+      - "http://amqp-sensor.argo-events.svc:9300/"

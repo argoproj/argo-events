@@ -66,16 +66,37 @@ type GatewaySpec struct {
 	// Service is the specifications of the service to expose the gateway
 	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
 	Service *corev1.Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
-	// Subscribers are HTTP endpoints to send events to.
+	// Subscribers holds the contexts of the subscribers/sinks to send events to.
 	// +listType=subscribers
 	// +optional
-	Subscribers []string `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
+	Subscribers *Subscribers `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)
 	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,7,opt,name=eventProtocol"`
 	// Replica is the gateway deployment replicas
 	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
+}
+
+type Subscribers struct {
+	// HTTP subscribers are HTTP endpoints to send events to.
+	// +listType=string
+	// +optional
+	HTTP []string `json:"http,omitempty" protobuf:"bytes,1,opt,name=http"`
+	// NATS refers to the subscribers over NATS protocol.
+	// +listType=NATSSubscriber
+	// +optional
+	NATS []NATSSubscriber `json:"nats,omitempty" protobuf:"bytes,2,opt,name=nats"`
+}
+
+// NATSSubscriber holds the context of subscriber over NATS.
+type NATSSubscriber struct {
+	// ServerURL refers to the NATS server URL.
+	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	// Subject refers to the NATS subject name.
+	Subject string `json:"subject" protobuf:"bytes,2,name=subject"`
+	// Name of the subscription. Must be unique.
+	Name string `json:"name" protobuf:"bytes,3,name=name"`
 }
 
 // EventSourceRef holds information about the EventSourceRef custom resource

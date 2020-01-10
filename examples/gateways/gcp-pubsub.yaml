@@ -34,4 +34,5 @@ spec:
             secretName: gcp-pubsub
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://gcp-pubsub-sensor.argo-events.svc:9300/"
+    http:
+      - "http://gcp-pubsub-sensor.argo-events.svc:9300/"

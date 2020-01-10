@@ -27,4 +27,5 @@ spec:
           command: ["/bin/kafka-gateway"]
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://kafka-sensor.argo-events.svc:9300/"
+    http:
+      - "http://kafka-sensor.argo-events.svc:9300/"

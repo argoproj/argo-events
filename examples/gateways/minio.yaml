@@ -25,4 +25,5 @@ spec:
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   subscribers:
-    - "http://minio-sensor.argo-events.svc:9300/"
+    http:
+      - "http://minio-sensor.argo-events.svc:9300/"

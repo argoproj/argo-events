@@ -25,10 +25,9 @@ spec:
             value:
               - argo-workflow-input
               - argo-workflow-input1
-  eventProtocol:
-    type: HTTP
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
         name: data-workflow

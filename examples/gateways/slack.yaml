@@ -36,4 +36,5 @@ spec:
           targetPort: 12000
       type: LoadBalancer
   subscribers:
-    - "http://slack-sensor.argo-events.svc:9300/"
+    http:
+      - "http://slack-sensor.argo-events.svc:9300/"
