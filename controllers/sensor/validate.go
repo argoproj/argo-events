@@ -24,7 +24,6 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/common"
-	pc "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -46,15 +45,6 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if len(s.Spec.Template.Spec.Containers) > 1 {
 		return errors.Errorf("sensor pod specification can't have more than one container")
 	}
-	switch s.Spec.EventProtocol.Type {
-	case pc.HTTP:
-		if s.Spec.EventProtocol.Http.Port == "" {
-			return errors.Errorf("http server port is not defined")
-		}
-	default:
-		return errors.Errorf("unknown gateway type")
-	}
-
 	if s.Spec.DependencyGroups != nil {
 		if s.Spec.Circuit == "" {
 			return errors.Errorf("no circuit expression provided to resolve dependency groups")

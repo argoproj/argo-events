@@ -65,28 +65,19 @@ func TestHandleEvent(t *testing.T) {
 	tests := []struct {
 		name       string
 		updateFunc func()
-		result     bool
+		result     error
 	}{
 		{
 			name:       "valid event is received",
 			updateFunc: func() {},
-			result:     true,
-		},
-		{
-			name: "unknown event is received",
-			updateFunc: func() {
-				event.SetSource("calendar-gateway")
-			},
-			result: false,
+			result:     nil,
 		},
 	}
-
-	ctx := context.Background()
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.updateFunc()
-			result := sensorCtx.handleEvent(ctx, &event)
+			result := sensorCtx.handleEvent(context.Background(), event)
 			assert.Equal(t, test.result, result)
 		})
 	}

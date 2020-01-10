@@ -122,11 +122,9 @@ type SensorSpec struct {
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
 	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
-	// EventProtocol is the protocol through which sensor receives events from gateway
-	EventProtocol *apicommon.EventProtocol `json:"eventProtocol" protobuf:"bytes,4,name=eventProtocol"`
 	// Port on which sensor server should run.
 	// +optional
-	Port *int `json:"port" protobuf:"bytes,4,name=port"`
+	Port int `json:"port" protobuf:"bytes,4,name=port"`
 	// Circuit is a boolean expression of dependency groups
 	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,rep,name=circuit"`
 	// +listType=dependencyGroups
@@ -135,6 +133,10 @@ type SensorSpec struct {
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
+	// ServiceLabels to be set for the service generated
+	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,11,rep,name=serviceLabels"`
+	// ServiceAnnotations refers to annotations to be set for the service generated
+	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
 }
 
 // EventDependency describes a dependency

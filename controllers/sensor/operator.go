@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -127,22 +126,19 @@ func (ctx *sensorContext) createSensorResources() error {
 	}
 	ctx.sensor.Status.Resources.Deployment = &deployment.ObjectMeta
 
-	if ctx.sensor.Spec.EventProtocol.Type == apicommon.HTTP {
-		ctx.logger.Infoln("generating service specification for the sensor")
-		service, err := ctx.serviceBuilder()
-		if err != nil {
-			return err
-		}
-
-		ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
-		service, err = ctx.createService(service)
-		if err != nil {
-			return err
-		}
-		ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+	ctx.logger.Infoln("generating service specification for the sensor")
+	service, err := ctx.serviceBuilder()
+	if err != nil {
 		return err
 	}
-	return nil
+
+	ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
+	service, err = ctx.createService(service)
+	if err != nil {
+		return err
+	}
+	ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+	return err
 }
 
 // updateSensorResources updates the sensor resources

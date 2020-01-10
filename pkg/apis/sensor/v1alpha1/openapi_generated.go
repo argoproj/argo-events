@@ -1171,12 +1171,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
-					"eventProtocol": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EventProtocol is the protocol through which sensor receives events from gateway",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
-						},
-					},
 					"port": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Port on which sensor server should run.",
@@ -1216,12 +1210,42 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"serviceLabels": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceLabels to be set for the service generated",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"serviceAnnotations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAnnotations refers to annotations to be set for the service generated",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"dependencies", "triggers", "template", "eventProtocol"},
+				Required: []string{"dependencies", "triggers", "template"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
 	}
 }
 

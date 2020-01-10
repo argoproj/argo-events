@@ -79,7 +79,7 @@ const (
 	// LabelSensorName is label for sensor name
 	LabelSensorName = "sensor-name"
 	// Port for the sensor server to listen events on
-	SensorServerPort = 12000
+	SensorServerPort = 9300
 )
 
 // Gateway constants
@@ -92,7 +92,7 @@ const (
 	// Server Connection Timeout, 10 seconds
 	ServerConnTimeout = 10
 	// ProcessorPort is the default port for the gateway event processor server to run on.
-	ProcessorPort = "9300"
+	GatewayProcessorPort = "9300"
 )
 
 const (

@@ -39,7 +39,6 @@ func (gatewayContext *GatewayContext) updateSubscriberClients() {
 		if _, ok := gatewayContext.subscriberClients[subscriber]; !ok {
 			t, err := cloudevents.NewHTTPTransport(
 				cloudevents.WithTarget(subscriber),
-				cloudevents.WithEncoding(cloudevents.HTTPBinaryV02),
 			)
 			if err != nil {
 				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")

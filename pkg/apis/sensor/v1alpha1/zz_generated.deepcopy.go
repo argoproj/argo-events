@@ -609,21 +609,25 @@ func (in *SensorSpec) DeepCopyInto(out *SensorSpec) {
 		*out = new(v1.PodTemplateSpec)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.EventProtocol != nil {
-		in, out := &in.EventProtocol, &out.EventProtocol
-		*out = new(common.EventProtocol)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.Port != nil {
-		in, out := &in.Port, &out.Port
-		*out = new(int)
-		**out = **in
-	}
 	if in.DependencyGroups != nil {
 		in, out := &in.DependencyGroups, &out.DependencyGroups
 		*out = make([]DependencyGroup, len(*in))
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
+	if in.ServiceLabels != nil {
+		in, out := &in.ServiceLabels, &out.ServiceLabels
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
+	if in.ServiceAnnotations != nil {
+		in, out := &in.ServiceAnnotations, &out.ServiceAnnotations
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
 		}
 	}
 	return

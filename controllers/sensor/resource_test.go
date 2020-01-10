@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -48,12 +47,7 @@ var sensorObj = &v1alpha1.Sensor{
 				},
 			},
 		},
-		EventProtocol: &apicommon.EventProtocol{
-			Http: apicommon.Http{
-				Port: "12000",
-			},
-			Type: apicommon.HTTP,
-		},
+		Port: 12000,
 		Triggers: []v1alpha1.Trigger{
 			{
 				Template: &v1alpha1.TriggerTemplate{
@@ -93,10 +87,10 @@ func TestResource_BuildServiceWithLabelsAnnotations(t *testing.T) {
 	controller := getController()
 	sensorCopy := sensorObj.DeepCopy()
 
-	sensorCopy.Spec.EventProtocol.Http.Labels = map[string]string{}
-	sensorCopy.Spec.EventProtocol.Http.Labels["test-label"] = "label1"
-	sensorCopy.Spec.EventProtocol.Http.Annotations = map[string]string{}
-	sensorCopy.Spec.EventProtocol.Http.Annotations["test-annotation"] = "annotation1"
+	sensorCopy.Spec.ServiceLabels = map[string]string{}
+	sensorCopy.Spec.ServiceLabels["test-label"] = "label1"
+	sensorCopy.Spec.ServiceAnnotations = map[string]string{}
+	sensorCopy.Spec.ServiceAnnotations["test-annotation"] = "annotation1"
 
 	opctx := newSensorContext(sensorCopy, controller)
 	service, err := opctx.serviceBuilder()
@@ -161,24 +155,6 @@ func TestResource_UpdateResources(t *testing.T) {
 				assert.Nil(t, err)
 				assert.NotNil(t, service)
 				assert.Equal(t, oldService.Annotations[common.AnnotationResourceSpecHash], service.Annotations[common.AnnotationResourceSpecHash])
-			},
-		},
-		{
-			name: "update event protocol to NATS and check the service deletion",
-			updateFunc: func() {
-				ctx.sensor.Spec.EventProtocol.Type = apicommon.NATS
-			},
-			testFunc: func(t *testing.T, oldResources *v1alpha1.SensorResources) {
-				oldDeployment := oldResources.Deployment
-				deployment, err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Status.Resources.Deployment.Namespace).Get(ctx.sensor.Status.Resources.Deployment.Name, metav1.GetOptions{})
-				assert.Nil(t, err)
-				assert.NotNil(t, deployment)
-				assert.Equal(t, oldDeployment.Annotations[common.AnnotationResourceSpecHash], deployment.Annotations[common.AnnotationResourceSpecHash])
-
-				oldService := oldResources.Service
-				service, err := ctx.controller.k8sClient.CoreV1().Services(oldService.Namespace).Get(oldService.Name, metav1.GetOptions{})
-				assert.NotNil(t, err)
-				assert.Nil(t, service)
 			},
 		},
 	}

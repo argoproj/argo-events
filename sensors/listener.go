@@ -18,13 +18,13 @@ package sensors
 
 import (
 	"context"
-	"github.com/argoproj/argo-events/sensors/types"
-
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
+	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -41,8 +41,8 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 	go sensorCtx.syncSensor(context.Background())
 
 	port := common.SensorServerPort
-	if sensorCtx.Sensor.Spec.Port != nil {
-		port = *sensorCtx.Sensor.Spec.Port
+	if sensorCtx.Sensor.Spec.Port != 0 {
+		port = sensorCtx.Sensor.Spec.Port
 	}
 
 	t, err := cloudevents.NewHTTPTransport(
@@ -85,12 +85,12 @@ func cloudEventConverter(event *cloudevents.Event) (*apicommon.Event, error) {
 }
 
 // handleEvent handles a cloudevent, validates and sends it over internal Event NotificationQueue
-func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudevents.Event) bool {
-	internalEvent, err := cloudEventConverter(event)
+func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event cloudevents.Event) error {
+	internalEvent, err := cloudEventConverter(&event)
 	if err != nil {
-		sensorCtx.Logger.WithError(err).Errorln("failed to parse the cloud event payload")
-		return false
+		return errors.Wrap(err, "failed to parse the cloud event payload")
 	}
+
 	// Resolve Dependency
 	// validate whether the Event is from gateway that this Sensor is watching
 	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor.Spec.Dependencies, internalEvent); eventDependency != nil {
@@ -100,7 +100,7 @@ func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event *cloudeve
 			EventDependency:  eventDependency,
 			NotificationType: v1alpha1.EventNotification,
 		}
-		return true
 	}
-	return false
+
+	return nil
 }

@@ -74,7 +74,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 
 	processorPort := ctx.gateway.Spec.ProcessorPort
 	if processorPort == "" {
-		processorPort = common.ProcessorPort
+		processorPort = common.GatewayProcessorPort
 	}
 
 	envVars := []corev1.EnvVar{
