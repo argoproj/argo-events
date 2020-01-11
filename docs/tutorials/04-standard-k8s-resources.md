@@ -1,9 +1,13 @@
 # Standard K8s Resources
 In the previous sections, you saw how to trigger the Argo workflows. In this tutorial, you 
-will see how to trigger standard Kubernetes resources like Pod, Deployment, etc.
+will see how to trigger Pod and Deployment.
+
+Similarly you can trigger any standard Kubernetes resources.
 
 Having the ability to trigger standard Kubernetes resources is quite powerful as it gives ability to
 set up pipelines for existing workloads.
+
+
 
 ## Prerequisites
 1. Make sure that `argo-events-sa` service account has necessary permissions to 
@@ -113,4 +117,3 @@ create the Kubernetes resource of your choice.
           \    \        __/             
             \____\______/   
   ```
-
