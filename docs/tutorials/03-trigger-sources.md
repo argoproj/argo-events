@@ -78,3 +78,33 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
    ```bash
    kubectl -n argo-events get wf
    ```
+
+## K8s Configmap
+K8s configmap can be treated as trigger sources if needed.
+
+1. Lets create a configmap called `trigger-store`.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
+   ```
+   
+2. Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
+   ```
+   
+3. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
+   
+   ```bash
+   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+   
+4. Now, you should see an Argo workflow being created.
+   
+   ```bash
+   kubectl -n argo-events get wf
+   ```
+   
+## File & URL
+File and URL trigger sources are pretty self explanatory. The example sensors are available under `examples/sensors` folder.
