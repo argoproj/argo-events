@@ -14,7 +14,7 @@
     "pubsub/apiv1",
     "pubsub/internal/distribution"
   ]
-  revision = "4e7fb24f2973a4a8d59ff13c95859759b6506f95"
+  revision = "fbf2f5121ef6008eb9b7e5c67aa0c9abfa7ac7fc"
 
 [[projects]]
   name = "github.com/Azure/azure-amqp-common-go"
@@ -150,7 +150,7 @@
     "service/sts",
     "service/sts/stsiface"
   ]
-  revision = "0ec921513a4536a315d4dd89416fc746b786ca2e"
+  revision = "0206d02e95bdde17c7ebdaa3844624ea77ffc5cb"
 
 [[projects]]
   name = "github.com/cloudevents/sdk-go"
@@ -1009,7 +1009,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "428f1ab0ca03a50bf8ac61408423f510675cd5a9"
+  revision = "a7a6caa82ab2c7a235db8f1e47d3a8f2e7a6c054"
 
 [[projects]]
   name = "google.golang.org/api"

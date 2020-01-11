@@ -63,6 +63,7 @@ func main() {
 	// wait for sensor http server to shutdown
 	sensorExecutionCtx := sensors.NewSensorContext(sensorClient, kubeClient, dynamicClient, sensor, controllerInstanceID)
 	if err := sensorExecutionCtx.ListenEvents(); err != nil {
-		panic(err)
+		sensorExecutionCtx.Logger.WithError(err).Errorln("failed to listen to events")
+		os.Exit(-1)
 	}
 }

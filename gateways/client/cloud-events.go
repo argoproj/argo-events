@@ -46,6 +46,7 @@ func (gatewayContext *GatewayContext) updateSubscriberClients() {
 		if _, ok := gatewayContext.httpSubscribers[subscriber]; !ok {
 			t, err := cloudevents.NewHTTPTransport(
 				cloudevents.WithTarget(subscriber),
+				cloudevents.WithEncoding(cloudevents.HTTPBinaryV03),
 			)
 			if err != nil {
 				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
@@ -145,6 +146,7 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
+	event.SetSpecVersion(cloudevents.VersionV03)
 	event.SetType(string(gatewayContext.gateway.Spec.Type))
 	event.SetSource(gatewayContext.gateway.Name)
 	event.SetDataContentType("application/json")

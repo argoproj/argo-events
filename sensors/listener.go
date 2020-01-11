@@ -18,6 +18,7 @@ package sensors
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 
 	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -47,18 +48,22 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 	natsCtx, natsCancel := context.WithCancel(context.Background())
 
 	// listen events over http
-	go func() {
-		if err := sensorCtx.listenEventsOverHTTP(httpCtx); err != nil {
-			errCh <- errors.Wrap(err, "failed to listen events over HTTP subscription")
-		}
-	}()
+	if sensorCtx.Sensor.Spec.Subscription.HTTP != nil {
+		go func() {
+			if err := sensorCtx.listenEventsOverHTTP(httpCtx); err != nil {
+				errCh <- errors.Wrap(err, "failed to listen events over HTTP subscription")
+			}
+		}()
+	}
 
 	// listen events over nats
-	go func() {
-		if err := sensorCtx.listenEventsOverNATS(natsCtx); err != nil {
-			errCh <- errors.Wrap(err, "failed to listen events over NATS subscription")
-		}
-	}()
+	if sensorCtx.Sensor.Spec.Subscription.NATS != nil {
+		go func() {
+			if err := sensorCtx.listenEventsOverNATS(natsCtx); err != nil {
+				errCh <- errors.Wrap(err, "failed to listen events over NATS subscription")
+			}
+		}()
+	}
 
 	err := <-errCh
 	sensorCtx.Logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
@@ -72,7 +77,7 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 // listenEventsOverHTTP listens to events over HTTP
 func (sensorCtx *SensorContext) listenEventsOverHTTP(ctx context.Context) error {
 	port := sensorCtx.Sensor.Spec.Subscription.HTTP.Port
-	if port != 0 {
+	if port == 0 {
 		port = common.SensorServerPort
 	}
 
@@ -88,6 +93,11 @@ func (sensorCtx *SensorContext) listenEventsOverHTTP(ctx context.Context) error 
 	if err != nil {
 		return err
 	}
+
+	sensorCtx.Logger.WithFields(logrus.Fields{
+		"port":     port,
+		"endpoint": "/",
+	}).Infoln("starting HTTP cloudevents receiver")
 
 	if err := client.StartReceiver(ctx, sensorCtx.handleEvent); err != nil {
 		return err
@@ -109,6 +119,11 @@ func (sensorCtx *SensorContext) listenEventsOverNATS(ctx context.Context) error 
 		return err
 	}
 
+	sensorCtx.Logger.WithFields(logrus.Fields{
+		"url":     subscription.ServerURL,
+		"subject": subscription.Subject,
+	}).Infoln("starting NATS cloudevents receiver")
+
 	if err := client.StartReceiver(ctx, sensorCtx.handleEvent); err != nil {
 		return err
 	}
@@ -123,13 +138,13 @@ func cloudEventConverter(event *cloudevents.Event) (*apicommon.Event, error) {
 	}
 	return &apicommon.Event{
 		Context: apicommon.EventContext{
-			DataContentType: event.DataContentType(),
-			Source:          event.Source(),
-			SpecVersion:     event.SpecVersion(),
-			Type:            event.Type(),
-			Time:            metav1.MicroTime{Time: event.Time()},
-			ID:              event.ID(),
-			Subject:         event.Subject(),
+			DataContentType: event.Context.GetDataContentType(),
+			Source:          event.Context.GetSource(),
+			SpecVersion:     event.Context.GetSpecVersion(),
+			Type:            event.Context.GetType(),
+			Time:            metav1.MicroTime{Time: event.Context.GetTime()},
+			ID:              event.Context.GetID(),
+			Subject:         event.Context.GetSubject(),
 		},
 		Data: data,
 	}, nil
@@ -141,6 +156,11 @@ func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event cloudeven
 	if err != nil {
 		return errors.Wrap(err, "failed to parse the cloud event payload")
 	}
+
+	sensorCtx.Logger.WithFields(logrus.Fields{
+		"source":  internalEvent.Context.Source,
+		"subject": internalEvent.Context.Subject,
+	}).Infoln("received event")
 
 	// Resolve Dependency
 	// validate whether the Event is from gateway that this Sensor is watching
