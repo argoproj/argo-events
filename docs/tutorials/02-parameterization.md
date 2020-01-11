@@ -227,3 +227,58 @@ a parameter comes handy.
             \    \        __/             
               \____\______/   
    ```
+
+## Trigger Template Parameterization
+The parameterization you saw above deals with the trigger resource, but sometimes
+you need to parameterize the trigger template itself. This comes handy when you have
+the trigger resource stored on some external source like S3, Git, etc. and you need
+to place the url of the source on the fly in trigger template.
+
+Imagine a scenario where you want to parameterize the parameters of trigger to 
+parameterize the trigger resource. What?...
+
+The sensor you have been using in this tutorial has one parameter defined in the
+trigger resource under `k8s` key. We will parameterize that `parameter` by
+applying a parameter at the trigger template level.
+
+
+1. Update the `Webhook Sensor` and add parameters at trigger level.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-05.yaml
+   ```  
+
+2. Send a HTTP request to the gateway.
+
+   ```bash
+   curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+
+3. Inspect the output of the Argo workflow that was created.
+
+   ```bash
+   argo logs name_of_the_workflow
+   ```
+
+   You will see the following output,
+
+   ```
+     ___________ 
+    < amazing!! >
+     ----------- 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/      
+   ```
+
+Great!! You have now learned how to apply parameters at trigger resource and template level.
+Keep in mind that you can apply default values and operations like prepend and append for 
+trigger template parameters as well.
