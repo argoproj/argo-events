@@ -45,3 +45,36 @@ The specification for the Git source is available [here](https://github.com/argo
    ```bash
    kubectl -n argo-events get wf
    ```
+
+## S3
+You can refer to the K8s resource stored on S3 complaint store as the trigger source.
+
+For this tutorial, lets set up a minio server which is S3 compliant store.
+
+1. Create a K8s secret called `artifacts-minio` that holds your minio access key and secret key.
+   The access key must be stored under `accesskey` key and secret key must be stored under
+   `secretkey`.
+
+2. Follow steps described [here](https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md#minio-standalone-server-deployment) to set up the minio server.
+
+3. Make sure a service is available to expose the minio server.
+
+4. Create a bucket called `workflows` and store a basic `hello world` Argo workflow with key name `hello-world.yaml`.
+
+5. Create the sensor with trigger source as S3.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
+   ```
+
+6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
+   
+   ```bash
+   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+   
+7. Now, you should see an Argo workflow being created.
+   
+   ```bash
+   kubectl -n argo-events get wf
+   ```

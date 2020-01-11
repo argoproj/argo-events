@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: metalgearsolid/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            s3:
+              bucket:
+                name: workflows
+                key: hello-world.yaml
+              endpoint: minio-service.argo-events:9000
+              insecure: true
+              accessKey:
+                key: accesskey
+                name: artifacts-minio
+              secretKey:
+                key: secretkey
+                name: artifacts-minio
