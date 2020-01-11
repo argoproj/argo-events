@@ -6,6 +6,9 @@ which is defined in the sensor object itself like `Inline` or `Resource`.
 In the previous sections, you have been dealing with the `Resource` trigger source. In this tutorial, we
 will explore other trigger sources.
 
+## Prerequisites
+1. The `Webhook` gateway is already set up.
+
 ## Git
 Git trigger source refers for K8s trigger refers to the K8s resource stored in Git. 
 
