@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor-with-groups
+  name: circuit-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -9,26 +9,30 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.12-rc
+          image: metalgearsolid/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
-  # defines list of all events sensor will accept
   dependencies:
-    - name: test-dep
+    - name: test-dep-webhook
       gatewayName: webhook-gateway
       eventName: example
-    - name: test-dep-secure
-      gatewayName: webhook-gateway
-      eventName: example-secure
+    - name: test-dep-minio
+      gatewayName: minio-gateway
+      eventName: example
+    - name: test-dep-calendar
+      gatewayName: calendar-gateway
+      eventName: example
 
   # group event dependencies
   dependencyGroups:
     - name: group_1
       dependencies:
-        - test-dep
+        - test-dep-webhook
+        - test-dep-calendar
     - name: group_2
       dependencies:
-        - test-dep-secure
+        - test-dep-minio
+        - test-dep-calendar
 
   # trigger when either group_1 or group_2 resolves
   circuit: "group_1 || group_2"
@@ -44,7 +48,7 @@ spec:
           # you can use `any` as well which is boolean equivalent of OR.
           all:
             - group_1
-        name: webhook-workflow-trigger
+        name: workflow-trigger-1
         k8s:
           group: argoproj.io
           version: v1alpha1
@@ -57,6 +61,7 @@ spec:
               metadata:
                 generateName: hello-world-
               spec:
+                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 templates:
                   - name: whalesay
@@ -66,11 +71,21 @@ spec:
                       command:
                         - cowsay
                       image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep-webhook
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: test-dep-calendar
+                dataKey: body.message
+              dest: spec.arguments.parameters.1.value
+
     - template:
         when:
           all:
             - group_2
-        name: webhook-workflow-trigger-2
+        name: workflow-trigger-2
         k8s:
           group: argoproj.io
           version: v1alpha1
@@ -83,6 +98,7 @@ spec:
               metadata:
                 generateName: hello-world-2-
               spec:
+                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 templates:
                   - name: whalesay
@@ -92,3 +108,12 @@ spec:
                       command:
                         - cowsay
                       image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep-minio
+                dataKey: body.message
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: test-dep-calendar
+                dataKey: body.message
+              dest: spec.arguments.parameters.1.value
