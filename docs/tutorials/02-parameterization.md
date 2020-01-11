@@ -72,9 +72,9 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
    argo logs name_of_the_workflow
    ```
    
-   You will see following output,
+   You will see the following output,
   
-   ```json
+   ```
     _________
    < webhook >
     ---------
@@ -95,3 +95,135 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
 We have successfully extracted the `type` key within the event context and parameterized
 the workflow to print the value of the `type`.
 
+### Event Data
+Now, it is time to use the event data and parameterize the Argo workflow trigger.
+We will extract the `message` from request payload and get the Argo workflow to 
+print the message.
+
+1. Update the `Webhook Sensor` and add the `dataKey` in the parameter at index 0.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-02.yaml
+   ```  
+
+2. Send a HTTP request to the gateway.
+
+   ```bash
+   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+
+3. Inspect the output of the Argo workflow that was created.
+
+   ```bash
+   argo logs name_of_the_workflow
+   ```
+
+   You will see the following output,
+   
+   ```
+     __________________________ 
+    < this is my first webhook >
+     -------------------------- 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/   
+   ```
+
+Yay!! The Argo workflow printed the message. You can add however many number of parameters
+to update the trigger resource on the fly.
+
+**_Note_**: If you define both the `contextKey` and `dataKey` within a parameter, then
+the `contextKey` takes the precedence.
+
+### Default Values
+Each parameter comes with an option to configure the default value. This is specially
+important when the `key` you defined in the parameter doesn't exist in the event.
+
+1. Update the `Webhook Sensor` and add the `value` in the parameter at index 0.
+   We will also update the `dataKey` to an unknown event key.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-03.yaml
+   ```  
+
+2. Send a HTTP request to the gateway.
+
+   ```bash
+   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+
+3. Inspect the output of the Argo workflow that was created.
+
+   ```bash
+   argo logs name_of_the_workflow
+   ```
+
+   You will see the following output,
+
+   ```
+    _______________________ 
+   < wow! a default value. >
+    ----------------------- 
+       \
+        \
+         \     
+                       ##        .            
+                 ## ## ##       ==            
+              ## ## ## ##      ===            
+          /""""""""""""""""___/ ===        
+     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+          \______ o          __/            
+           \    \        __/             
+             \____\______/   
+   ```
+
+### Operations
+Sometimes you need the ability to append or prepend a parameter value to 
+an existing value in trigger resource. This is where the `operation` field within
+a parameter comes handy.
+
+1. Update the `Webhook Sensor` and add the `operation` in the parameter at index 0.
+   We will prepend the message to an existing value.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-04.yaml
+   ```  
+
+2. Send a HTTP request to the gateway.
+
+   ```bash
+   curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+
+3. Inspect the output of the Argo workflow that was created.
+
+   ```bash
+   argo logs name_of_the_workflow
+   ```
+
+   You will see the following output,
+
+   ```   
+     __________________ 
+    < hey!!hello world >
+     ------------------ 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/   
+   ```
