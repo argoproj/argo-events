@@ -17,9 +17,11 @@ limitations under the License.
 package standard_k8s
 
 import (
-	"github.com/argoproj/argo-events/common"
 	"testing"
+	"time"
 
+	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -68,7 +70,7 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 	}
 }
 
-func TestFetchResource(t *testing.T) {
+func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
@@ -85,7 +87,65 @@ func TestFetchResource(t *testing.T) {
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
 }
 
-func TestExecute(t *testing.T) {
+func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
+	fakeSensor := sensorObj.DeepCopy()
+
+	event := apicommon.Event{
+		Context: apicommon.EventContext{
+			DataContentType: common.MediaTypeJSON,
+			Subject:         "example-1",
+			SpecVersion:     "0.3",
+			Source:          "webhook-gateway",
+			Type:            "webhook",
+			ID:              "1",
+			Time:            metav1.MicroTime{Time: time.Now()},
+		},
+		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
+	}
+
+	dep := fakeSensor.NodeID("dep-1")
+
+	fakeSensor.Status = v1alpha1.SensorStatus{
+		Nodes: map[string]v1alpha1.NodeStatus{
+			dep: {
+				ID:          dep,
+				Name:        dep,
+				DisplayName: dep,
+				Type:        v1alpha1.NodeTypeEventDependency,
+				Event:       &event,
+			},
+		},
+	}
+
+	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
+		Resource: deployment,
+	}
+
+	fakeSensor.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "dep-1",
+				DataKey:        "name.first",
+			},
+			Dest:      "metadata.name",
+			Operation: "prepend",
+		},
+	}
+
+	runtimeScheme := runtime.NewScheme()
+	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
+	impl := NewStandardK8sTrigger(fake.NewSimpleClientset(), client, fakeSensor, &fakeSensor.Spec.Triggers[0], common.NewArgoEventsLogger())
+
+	out, err := impl.ApplyResourceParameters(fakeSensor, deployment)
+	assert.Nil(t, err)
+
+	updatedObj, ok := out.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "faketest", updatedObj.GetName())
+}
+
+func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
