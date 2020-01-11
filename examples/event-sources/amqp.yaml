@@ -5,19 +5,8 @@ metadata:
 spec:
   type: amqp
   amqp:
-    # no retries if connection to amqp service is not successful
-    example-without-retry:
-      # url of the service
-      url: "amqp://amqp.argo-events:5672"
-      # name of the exchange
-      exchangeName: "name of the exchange"
-      # type of the exchange
-      exchangeType: "fanout"
-      # routing key for the exchange
-      routingKey: "routing key"
-
     # retry after each backoff to set up a successful connection
-    example-with-retry:
+    example:
       url: "amqp://amqp.argo-events:5672"
       exchangeName: "name of the exchange"
       exchangeType: "fanout"
