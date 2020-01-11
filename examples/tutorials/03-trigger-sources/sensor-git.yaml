@@ -1,0 +1,56 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: metalgearsolid/sensor:v0.12
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /git/argoproj
+              name: argoproj
+            - mountPath: /secret
+              name: sshkey
+            - mountPath: /etc/ssh
+              name: known-hosts
+      volumes:
+        - name: argoproj
+          emptyDir: {}
+        - name: sshkey
+          secret:
+            secretName: git-ssh
+        # The name of the key in the secret must be "ssh_known_hosts"
+        # Make sure you have your git provider added in the known hosts
+        # e.g. create the secret by running, kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
+        - name: known-hosts
+          secret:
+            secretName: git-known-hosts
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            git:
+              url: "git@github.com:argoproj/argo.git"
+              cloneDirectory: "/git/argoproj"
+              sshKeyPath: "/secret/key"
+              namespace: argo-events
+              filePath: "examples/hello-world.yaml"
+              branch: "master"
