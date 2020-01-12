@@ -17,9 +17,9 @@ A circuit is a boolean expression. To create a circuit, you just need to define 
 dependencies in groups and the sensor will apply the circuit logic on those groups.
 If the logic results in `true` value, the sensor will execute the triggers else it won't.
 
-Consider a scenario where you have a `Webhook`, `Calendar` and `Minio` gateway and you want
-to trigger an Argo workflow if the sensor receives events from `Webhook` and `Calendar` gateway,
-but, another workflow if it receives events from `Calendar` and `Minio` gateway.
+Consider a scenario where you have a `Webhook` and `Minio` gateway, and you want
+to trigger an Argo workflow if the sensor receives event from the `Webhook` gateway,
+but, another workflow if it receives event from the `Minio` gateway.
 
 1. Create the webhook event source and gateway. The gateway listens to HTTP requests
    on port `12000`
@@ -32,17 +32,7 @@ but, another workflow if it receives events from `Calendar` and `Minio` gateway.
    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
    ```
 
-2. Create the calendar event source and gateway. The gateway generated events on every 10 seconds.
-
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/calendar-event-source.yaml
-   ```
-
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/calendar-gateway.yaml
-   ```
-
-3. Create the minio event source and gateway. The gateway listens to events of type
+2. Create the minio event source and gateway. The gateway listens to events of type
    `PUT` and `DELETE` for objects in bucket `input`.
 
    ```bash
@@ -55,13 +45,22 @@ but, another workflow if it receives events from `Calendar` and `Minio` gateway.
 
 Make sure there are no errors in any of the gateways and all event sources are active.
 
-Lets create the sensor. If you take a closer look at the trigger templates, you will
-notice that it contains `switch` key with `all` condition, meaning, execute this trigger
-when every group defined in `all` is resolved. In the sensor definition, there
-is only one group under `all` in both trigger templates. So, as soon as the group is resolved, the
-corresponding trigger will be executed.
+3. Lets create the sensor. If you take a closer look at the trigger templates, you will
+   notice that it contains `switch` key with `all` condition, meaning, execute this trigger
+   when every group defined in `all` is resolved. In the sensor definition, there
+   is only one group under `all` in both trigger templates. So, as soon as the group is resolved, the
+   corresponding trigger will be executed.
 
    ```bash
    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/sensor-01.yaml
    ```  
+   
+4. Send a HTTP request to Webhook gateway,
 
+   ```bash
+   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+   ```
+
+5. You will notice an Argo worklfow with name `group-1-xxxx` is created with following output,
+
+   

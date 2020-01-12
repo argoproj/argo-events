@@ -7,12 +7,15 @@ spec:
   minio:
     example:
       bucket:
-        name: input
+        name: test
       endpoint: minio-service.argo-events:9000
       insecure: true
+      events:
+        - s3:ObjectCreated:Put
+        - s3:ObjectRemoved:Delete
       accessKey:
         key: accesskey
-        name: artifacts-minio
+        name: artifact-minio
       secretKey:
         key: secretkey
-        name: artifacts-minio
+        name: artifact-minio
