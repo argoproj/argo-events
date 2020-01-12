@@ -24,7 +24,7 @@ import (
 
 // OperateResourceUpdateNotification operates on the resource state notification update
 func (sensorCtx *SensorContext) operateResourceUpdateNotification(notification *types.Notification) {
-	sensorCtx.Logger.Info("Sensor resource update")
+	sensorCtx.Logger.Info("sensor resource update")
 	// update Sensor resource
 	sensorCtx.Sensor = notification.Sensor.DeepCopy()
 

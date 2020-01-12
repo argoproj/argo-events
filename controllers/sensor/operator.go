@@ -91,7 +91,6 @@ func (ctx *sensorContext) operate() error {
 			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
-		ctx.updated = true
 		ctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
@@ -289,6 +288,7 @@ func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor
 			log.WithError(err).Error("failed to re-apply update")
 			return nil, err
 		}
+		return sensorObj, nil
 	}
 	log.WithField(common.LabelPhase, string(sensorObj.Status.Phase)).Info("sensor state updated successfully")
 	return updatedSensor, nil

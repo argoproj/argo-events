@@ -194,12 +194,14 @@ func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) 
 	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
+			ctx.updated = true
 			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
 		}
 		return nil, err
 	}
 
 	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
+		ctx.updated = true
 		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
@@ -216,6 +218,7 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 		return nil, err
 	}
 	if newService == nil && ctx.gateway.Status.Resources.Service != nil {
+		ctx.updated = true
 		if err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Status.Resources.Service.Namespace).Delete(ctx.gateway.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
@@ -227,12 +230,14 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 	}
 
 	if ctx.gateway.Status.Resources.Service == nil {
+		ctx.updated = true
 		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 
 	currentMetadata := ctx.gateway.Status.Resources.Service
 	currentService, err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
+		ctx.updated = true
 		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
 
@@ -241,6 +246,7 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 	}
 
 	if currentService.Annotations != nil && currentService.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
+		ctx.updated = true
 		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
