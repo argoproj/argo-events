@@ -484,6 +484,8 @@ func (in *NodeStatus) DeepCopyInto(out *NodeStatus) {
 		*out = new(common.Event)
 		(*in).DeepCopyInto(*out)
 	}
+	in.UpdatedAt.DeepCopyInto(&out.UpdatedAt)
+	in.ResolvedAt.DeepCopyInto(&out.ResolvedAt)
 	return
 }
 

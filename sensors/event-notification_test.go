@@ -152,6 +152,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 		result             bool
 		circuit            string
 		updateFunc         func()
+		snapshot           []string
 	}{
 		{
 			name:     "if error on failed round and trigger cycle in failed state",
@@ -161,6 +162,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 				obj.Status.TriggerCycleStatus = v1alpha1.TriggerCycleFailure
 				obj.Spec.ErrorOnFailedRound = true
 			},
+			snapshot: nil,
 		},
 		{
 			name: "if only dep1 is complete",
@@ -171,6 +173,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   true,
+			snapshot: []string{"dep1"},
 		},
 		{
 			name: "if only dep2 is complete",
@@ -180,6 +183,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   true,
+			snapshot: []string{"dep2"},
 		},
 		{
 			name: "if all dependencies are complete",
@@ -189,6 +193,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   true,
+			snapshot: []string{"dep1", "dep2"},
 		},
 		{
 			name: "if no dependencies are complete",
@@ -198,6 +203,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   false,
+			snapshot: nil,
 		},
 		{
 			name: "if circuit is removed and no dependencies are complete",
@@ -211,6 +217,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   false,
+			snapshot: nil,
 		},
 		{
 			name: "if only dep1 is complete",
@@ -219,6 +226,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   false,
+			snapshot: nil,
 		},
 		{
 			name: "both dep1 and dep2 are complete",
@@ -228,18 +236,20 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 			hasError: false,
 			result:   true,
+			snapshot: []string{"dep1", "dep2"},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.updateFunc()
-			result, err := isEligibleForExecution(obj, logger)
+			result, snapshot, err := isEligibleForExecution(obj, logger)
 			if test.hasError {
 				assert.NotNil(t, err)
 				return
 			}
 			assert.Nil(t, err)
+			assert.ElementsMatch(t, test.snapshot, snapshot)
 			assert.Equal(t, test.result, result)
 		})
 	}
@@ -311,7 +321,7 @@ func TestOperateEventNotification(t *testing.T) {
 	})
 	assert.Nil(t, err)
 
-	assert.Equal(t, v1alpha1.NodePhaseComplete, obj.Status.Nodes[dep1].Phase)
+	assert.Equal(t, v1alpha1.NodePhaseActive, obj.Status.Nodes[dep1].Phase)
 
 	nsClient := dynamicClient.Resource(schema.GroupVersionResource{
 		Group:    "apps",

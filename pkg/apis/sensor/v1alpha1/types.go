@@ -544,6 +544,10 @@ type NodeStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 	// Event stores the last seen event for this node
 	Event *apicommon.Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
+	// UpdatedAt refers to the time at which the node was updated.
+	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,10,opt,name=updatedAt"`
+	// ResolvedAt refers to the time at which the node was resolved.
+	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
 }
 
 // ArtifactLocation describes the source location for an external minio

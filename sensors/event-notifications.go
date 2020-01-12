@@ -28,26 +28,31 @@ import (
 )
 
 // isEligibleForExecution determines whether the dependencies are met and triggers are eligible for execution
-func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (bool, error) {
+func isEligibleForExecution(sensor *v1alpha1.Sensor, logger *logrus.Logger) (bool, []string, error) {
 	if sensor.Spec.ErrorOnFailedRound && sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure {
-		return false, errors.Errorf("last trigger cycle was a failure and sensor policy is set to ErrorOnFailedRound, so won't process the triggers")
+		return false, nil, errors.Errorf("last trigger cycle was a failure and sensor policy is set to ErrorOnFailedRound, so won't process the triggers")
 	}
 	if sensor.Spec.Circuit != "" && sensor.Spec.DependencyGroups != nil {
 		return dependencies.ResolveCircuit(sensor, logger)
 	}
-	if ok := sensor.AreAllNodesSuccess(v1alpha1.NodeTypeEventDependency); ok {
-		return true, nil
+	if ok := snctrl.AreAllDependenciesResolved(sensor); ok {
+		var deps []string
+		for _, dep := range sensor.Spec.Dependencies {
+			deps = append(deps, dep.Name)
+		}
+		return true, deps, nil
 	}
-	return false, nil
+	return false, nil, nil
 }
 
 // OperateEventNotifications operates on an event notification
 func (sensorCtx *SensorContext) operateEventNotification(notification *types.Notification) error {
 	nodeName := notification.EventDependency.Name
-	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "event is received")
-
 	logger := sensorCtx.Logger.WithField(common.LabelEventSource, notification.Event.Context.Source)
 	logger.Info("received an event notification")
+
+	snctrl.MarkNodePhase(sensorCtx.Sensor, nodeName, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, notification.Event, sensorCtx.Logger, "event is received")
+	snctrl.MarkUpdatedAt(sensorCtx.Sensor, nodeName)
 
 	// Apply filters
 	logger.Infoln("applying filters on event notifications if any")
@@ -58,7 +63,7 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 
 	// Apply Circuit if any or check if all dependencies are resolved
 	logger.Infoln("applying circuit logic if any or checking if all dependencies are resolved")
-	ok, err := isEligibleForExecution(sensorCtx.Sensor, sensorCtx.Logger)
+	ok, snapshot, err := isEligibleForExecution(sensorCtx.Sensor, sensorCtx.Logger)
 	if err != nil {
 		return err
 	}
@@ -121,5 +126,18 @@ func (sensorCtx *SensorContext) operateEventNotification(notification *types.Not
 
 		logger.WithField("trigger-name", trigger.Template.Name).Infoln("successfully processed the trigger")
 	}
+
+	// process snapshot dependencies
+	for _, dependency := range snapshot {
+		// resolve dependencies
+		snctrl.MarkResolvedAt(sensorCtx.Sensor, dependency)
+		// Mark snapshot dependency nodes as active
+		snctrl.MarkNodePhase(sensorCtx.Sensor, dependency, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency is re-activated")
+	}
+	// Mark all dependency groups as active
+	for _, group := range sensorCtx.Sensor.Spec.DependencyGroups {
+		snctrl.MarkNodePhase(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency group is re-activated")
+	}
+
 	return nil
 }

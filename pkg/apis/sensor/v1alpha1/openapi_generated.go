@@ -961,6 +961,18 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Event"),
 						},
 					},
+					"updatedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "UpdatedAt refers to the time at which the node was updated.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
+						},
+					},
+					"resolvedAt": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ResolvedAt refers to the time at which the node was resolved.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"),
+						},
+					},
 				},
 				Required: []string{"id", "name", "displayName", "type", "phase"},
 			},

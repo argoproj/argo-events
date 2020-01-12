@@ -45,15 +45,6 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 		// set completion time
 		sensorCtx.Sensor.Status.LastCycleTime = metav1.Now()
 
-		// Mark all dependency nodes as active
-		for _, dependency := range sensorCtx.Sensor.Spec.Dependencies {
-			snctrl.MarkNodePhase(sensorCtx.Sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency is re-activated")
-		}
-		// Mark all dependency groups as active
-		for _, group := range sensorCtx.Sensor.Spec.DependencyGroups {
-			snctrl.MarkNodePhase(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency group is re-activated")
-		}
-
 		sensorCtx.Logger.Infoln("persisting the sensor state")
 		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.SensorClient, sensorCtx.Sensor, sensorCtx.Logger)
 		if err != nil {

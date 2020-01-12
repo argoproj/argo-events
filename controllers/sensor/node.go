@@ -105,3 +105,66 @@ func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.N
 	sensor.Status.Nodes[node.ID] = *node
 	return node
 }
+
+// AreAllDependenciesResolved checks whether all event dependencies are resolved
+func AreAllDependenciesResolved(sensor *v1alpha1.Sensor) bool {
+	for _, node := range sensor.Status.Nodes {
+		if node.Type == v1alpha1.NodeTypeEventDependency {
+			if resolved := IsDependencyResolved(sensor, node.Name); !resolved {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// IsDependencyResolved checks whether a dependency is resolved.
+func IsDependencyResolved(sensor *v1alpha1.Sensor, nodeName string) bool {
+	node := GetNodeByName(sensor, nodeName)
+	if node.Phase == v1alpha1.NodePhaseError {
+		return false
+	}
+	if node.Phase == v1alpha1.NodePhaseComplete {
+		return true
+	}
+	if &node.StartedAt == nil {
+		return false
+	}
+	if &node.UpdatedAt == nil {
+		return false
+	}
+	resolvedAt := node.ResolvedAt
+	if &resolvedAt == nil {
+		resolvedAt = node.StartedAt
+	}
+	if node.UpdatedAt.After(resolvedAt.Time) {
+		return true
+	}
+	return false
+}
+
+func MarkUpdatedAt(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatus {
+	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		return nil
+	}
+	if &node.UpdatedAt == nil {
+		return node
+	}
+	node.UpdatedAt.Time = time.Now().UTC()
+	sensor.Status.Nodes[node.ID] = *node
+	return node
+}
+
+func MarkResolvedAt(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatus {
+	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		return nil
+	}
+	if &node.ResolvedAt == nil {
+		return node
+	}
+	node.ResolvedAt.Time = time.Now().UTC()
+	sensor.Status.Nodes[node.ID] = *node
+	return node
+}

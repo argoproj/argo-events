@@ -93,6 +93,7 @@ func TestResolveCircuit(t *testing.T) {
 		name       string
 		result     bool
 		updateFunc func()
+		snapshot   []string
 	}{
 		{
 			name:   "apply false OR logic",
@@ -100,6 +101,7 @@ func TestResolveCircuit(t *testing.T) {
 			updateFunc: func() {
 				obj.Spec.Circuit = "group1 || group2 || group3"
 			},
+			snapshot: nil,
 		},
 		{
 			name:   "apply OR logic",
@@ -108,6 +110,7 @@ func TestResolveCircuit(t *testing.T) {
 				obj.Spec.Circuit = "group1 || group2 || group3"
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
+			snapshot: []string{"dep-1"},
 		},
 		{
 			name:   "apply false AND logic",
@@ -116,6 +119,7 @@ func TestResolveCircuit(t *testing.T) {
 				obj.Spec.Circuit = "group1 && (group2 || group3)"
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
+			snapshot: nil,
 		},
 		{
 			name:   "apply AND logic",
@@ -127,6 +131,7 @@ func TestResolveCircuit(t *testing.T) {
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[2].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[3].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
+			snapshot: []string{"dep-3", "dep-4", "dep-1", "dep-2"},
 		},
 		{
 			name:   "apply NOT logic",
@@ -136,6 +141,7 @@ func TestResolveCircuit(t *testing.T) {
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[1].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
 			},
+			snapshot: []string{"dep-3", "dep-4"},
 		},
 		{
 			name:   "group with multiple dependencies is complete",
@@ -147,14 +153,16 @@ func TestResolveCircuit(t *testing.T) {
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[2].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[3].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
+			snapshot: []string{"dep-3", "dep-4"},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.updateFunc()
-			ok, err := ResolveCircuit(obj, logger)
+			ok, snapshot, err := ResolveCircuit(obj, logger)
 			assert.Nil(t, err)
+			assert.ElementsMatch(t, test.snapshot, snapshot)
 			assert.Equal(t, test.result, ok)
 		})
 	}
