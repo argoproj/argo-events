@@ -38,7 +38,7 @@ spec:
   triggers:
     - template:
         # when is the switch that determines whether to execute the trigger or not
-        when:
+        switch:
           # all is boolean equivalent of AND.
           # you can use `any` as well which is boolean equivalent of OR.
           all:
@@ -70,9 +70,9 @@ spec:
             - src:
                 dependencyName: test-dep-webhook
                 dataKey: body.message
-              dest: spec.arguments.parameters.0.value
+              dest: spec.templates.0.container.args.0
     - template:
-        when:
+        switch:
           all:
             - group_2
         name: workflow-trigger-2
@@ -102,4 +102,4 @@ spec:
             - src:
                 dependencyName: test-dep-minio
                 dataKey: s3.bucket.name
-              dest: spec.arguments.parameters.0.value
+              dest: spec.templates.0.container.args.0

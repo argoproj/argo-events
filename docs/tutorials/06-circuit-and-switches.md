@@ -33,7 +33,7 @@ but, another workflow if it receives event from the `Minio` gateway.
    ```
 
 2. Create the minio event source and gateway. The gateway listens to events of type
-   `PUT` and `DELETE` for objects in bucket `input`.
+   `PUT` and `DELETE` for objects in bucket `test`.
 
    ```bash
    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
@@ -63,4 +63,41 @@ Make sure there are no errors in any of the gateways and all event sources are a
 
 5. You will notice an Argo worklfow with name `group-1-xxxx` is created with following output,
 
+   ```
+     __________________________ 
+    < this is my first webhook >
+     -------------------------- 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/   
+   ```
+
+4. Now, lets generate a Minio event so that we can run `group-2-xxxx` workflow. Drop a file
+   onto `test` bucket. The workflow that will get created will print the name of the bucket as
+   follow,
    
+   ```
+     ______ 
+    < test >
+     ------ 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/   
+   ```
+
