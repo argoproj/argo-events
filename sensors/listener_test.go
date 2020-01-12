@@ -60,6 +60,7 @@ func TestHandleEvent(t *testing.T) {
 	sensorCtx := &SensorContext{
 		Sensor:            obj,
 		NotificationQueue: queue,
+		Logger:            common.NewArgoEventsLogger(),
 	}
 
 	tests := []struct {

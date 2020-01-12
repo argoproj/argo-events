@@ -17,8 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"fmt"
-	"hash/fnv"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -544,6 +542,12 @@ type NodeStatus struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 	// Event stores the last seen event for this node
 	Event *apicommon.Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
+	// ResolvedAt is the time at which the node was resolved.
+	// This field is specific to event dependency node in order to store time at which the dependency was marked resolved.
+	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"btyes,10,opt,name=resolvedAt"`
+	// ResolvedAt is the time at which the node was updated.
+	// This field is specific to event dependency node in order to store time at which the dependency was updated with the event payload.
+	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,11,opt,name=updatedAt"`
 }
 
 // ArtifactLocation describes the source location for an external minio
@@ -636,50 +640,4 @@ type GitRemoteConfig struct {
 type GitCreds struct {
 	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
 	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
-}
-
-// HasLocation whether or not an minio has a location defined
-func (a *ArtifactLocation) HasLocation() bool {
-	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
-}
-
-// IsComplete determines if the node has reached an end state
-func (node NodeStatus) IsComplete() bool {
-	return node.Phase == NodePhaseComplete ||
-		node.Phase == NodePhaseError
-}
-
-// IsComplete determines if the sensor has reached an end state
-func (s *Sensor) IsComplete() bool {
-	if !(s.Status.Phase == NodePhaseComplete || s.Status.Phase == NodePhaseError) {
-		return false
-	}
-	for _, node := range s.Status.Nodes {
-		if !node.IsComplete() {
-			return false
-		}
-	}
-	return true
-}
-
-// AreAllNodesSuccess determines if all nodes of the given type have completed successfully
-func (s *Sensor) AreAllNodesSuccess(nodeType NodeType) bool {
-	for _, node := range s.Status.Nodes {
-		if node.Type == nodeType && node.Phase != NodePhaseComplete {
-			return false
-		}
-	}
-	return true
-}
-
-// NodeID creates a deterministic node ID based on a node name
-// we support 3 kinds of "nodes" - sensors, events, triggers
-// each should pass it's name field
-func (s *Sensor) NodeID(name string) string {
-	if name == s.ObjectMeta.Name {
-		return s.ObjectMeta.Name
-	}
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(name))
-	return fmt.Sprintf("%s-%v", s.ObjectMeta.Name, h.Sum32())
 }

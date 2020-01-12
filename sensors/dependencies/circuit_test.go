@@ -48,6 +48,11 @@ var sensorObj = v1alpha1.Sensor{
 				EventName:   "example-3",
 				GatewayName: "fake-gateway",
 			},
+			{
+				Name:        "dep-4",
+				EventName:   "example-4",
+				GatewayName: "fake-gateway",
+			},
 		},
 		DependencyGroups: []v1alpha1.DependencyGroup{
 			{
@@ -66,6 +71,7 @@ var sensorObj = v1alpha1.Sensor{
 				Name: "group3",
 				Dependencies: []string{
 					"dep-3",
+					"dep-4",
 				},
 			},
 		},
@@ -119,6 +125,7 @@ func TestResolveCircuit(t *testing.T) {
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[1].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[2].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
+				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[3].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
 		},
 		{
@@ -128,6 +135,17 @@ func TestResolveCircuit(t *testing.T) {
 				obj.Spec.Circuit = "!group1 && !group2"
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
 				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[1].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
+			},
+		},
+		{
+			name:   "group with multiple dependencies is complete",
+			result: true,
+			updateFunc: func() {
+				obj.Spec.Circuit = "(group1 && group2) || group3"
+				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[0].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
+				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[1].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseNew, nil, logger, "dependency is init")
+				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[2].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
+				snctrl.MarkNodePhase(obj, obj.Spec.Dependencies[3].Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "dependency is complete")
 			},
 		},
 	}

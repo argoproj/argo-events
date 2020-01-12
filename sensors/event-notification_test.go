@@ -17,12 +17,11 @@ limitations under the License.
 package sensors
 
 import (
-	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"testing"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
+	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
@@ -31,6 +30,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	dfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
 )
@@ -82,11 +82,21 @@ func TestIsEligibleForExecution(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 	group1 := obj.NodeID("group1")
 	dep1 := obj.NodeID("dep1")
+
+	group2 := obj.NodeID("group2")
+	dep2 := obj.NodeID("dep2")
+
 	obj.Spec.DependencyGroups = []v1alpha1.DependencyGroup{
 		{
 			Name: "group1",
 			Dependencies: []string{
 				"dep1",
+			},
+		},
+		{
+			Name: "group2",
+			Dependencies: []string{
+				"dep2",
 			},
 		},
 	}
@@ -96,6 +106,11 @@ func TestIsEligibleForExecution(t *testing.T) {
 			GatewayName: "webhook-gateway",
 			EventName:   "example-1",
 		},
+		{
+			Name:        "dep2",
+			GatewayName: "webhook-gateway",
+			EventName:   "example-2",
+		},
 	}
 	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
 		group1: {
@@ -104,13 +119,29 @@ func TestIsEligibleForExecution(t *testing.T) {
 			DisplayName: "group1",
 			Type:        v1alpha1.NodeTypeDependencyGroup,
 		},
+		group2: {
+			ID:          group2,
+			Name:        "group2",
+			DisplayName: "group2",
+			Type:        v1alpha1.NodeTypeDependencyGroup,
+		},
 		dep1: {
 			ID:          dep1,
 			Name:        "dep1",
 			DisplayName: "dep1",
 			Type:        v1alpha1.NodeTypeEventDependency,
 		},
+		dep2: {
+			ID:          dep2,
+			Name:        "dep2",
+			DisplayName: "dep2",
+			Type:        v1alpha1.NodeTypeEventDependency,
+		},
 	}
+
+	obj.Spec.Circuit = "group1 || group2"
+
+	logger := common.NewArgoEventsLogger()
 
 	tests := []struct {
 		name               string
@@ -132,12 +163,9 @@ func TestIsEligibleForExecution(t *testing.T) {
 			},
 		},
 		{
-			name: "if the circuit logic is complete",
+			name: "if only dep1 is complete",
 			updateFunc: func() {
-				obj.Spec.Circuit = "group1"
-				node := obj.Status.Nodes[dep1]
-				node.Phase = v1alpha1.NodePhaseComplete
-				obj.Status.Nodes[dep1] = node
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
 				obj.Status.TriggerCycleStatus = ""
 				obj.Spec.ErrorOnFailedRound = true
 			},
@@ -145,32 +173,63 @@ func TestIsEligibleForExecution(t *testing.T) {
 			result:   true,
 		},
 		{
+			name: "if only dep2 is complete",
+			updateFunc: func() {
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+			},
+			hasError: false,
+			result:   true,
+		},
+		{
 			name: "if all dependencies are complete",
 			updateFunc: func() {
-				obj.Spec.Circuit = ""
-				node := obj.Status.Nodes[dep1]
-				node.Phase = v1alpha1.NodePhaseComplete
-				obj.Status.Nodes[dep1] = node
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
 			},
-
 			hasError: false,
 			result:   true,
 		},
 		{
 			name: "if no dependencies are complete",
 			updateFunc: func() {
-				obj.Spec.Circuit = ""
-				node := obj.Status.Nodes[dep1]
-				node.Phase = v1alpha1.NodePhaseActive
-				obj.Status.Nodes[dep1] = node
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
 			},
-
 			hasError: false,
 			result:   false,
 		},
+		{
+			name: "if circuit is removed and no dependencies are complete",
+			updateFunc: func() {
+				delete(obj.Status.Nodes, group1)
+				delete(obj.Status.Nodes, group2)
+				obj.Spec.Circuit = ""
+				obj.Spec.DependencyGroups = nil
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+			},
+			hasError: false,
+			result:   false,
+		},
+		{
+			name: "if only dep1 is complete",
+			updateFunc: func() {
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+			},
+			hasError: false,
+			result:   false,
+		},
+		{
+			name: "both dep1 and dep2 are complete",
+			updateFunc: func() {
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+			},
+			hasError: false,
+			result:   true,
+		},
 	}
-
-	logger := common.NewArgoEventsLogger()
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
