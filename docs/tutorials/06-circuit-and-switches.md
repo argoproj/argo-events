@@ -1,21 +1,25 @@
-# Circuit and Switches
+# Circuit and Switch
 In previous sections, you have been dealing with just a single dependency. But, in many
 cases, you want to wait for multiple events to occur and then trigger a resource which means
 you need a mechanism to determine which triggers to execute based on set of different event dependencies.
-This mechanism is supported through `Circuit` and `Switches`.
+This mechanism is supported through `Circuit` and `Switch`.
 
 <b>Note</b>: Whenever you define multiple dependencies in a sensor, the sensor applies
 a `AND` operation, meaning, it will wait for all dependencies to resolve before it executes triggers.
-`Circuit` and `Switches` can modify that behavior. 
+`Circuit` and `Switch` can modify that behavior. 
 
 ## Prerequisite
-Minio server must be set up in the `argo-events` namespace and it should be available
+Minio server must be set up in the `argo-events` namespace with a bucket called `test` and it should be available
 at `minio-service.argo-events:9000`.
 
 ## Circuit
 A circuit is a boolean expression. To create a circuit, you just need to define event
 dependencies in groups and the sensor will apply the circuit logic on those groups.
 If the logic results in `true` value, the sensor will execute the triggers else it won't.
+
+## Switch
+A switch is condition that applies on group of circuit groups. Through switch, you can
+micro manage the triggers.
 
 Consider a scenario where you have a `Webhook` and `Minio` gateway, and you want
 to trigger an Argo workflow if the sensor receives event from the `Webhook` gateway,
@@ -52,7 +56,7 @@ Make sure there are no errors in any of the gateways and all event sources are a
    corresponding trigger will be executed.
 
    ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/sensor-01.yaml
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
    ```  
    
 4. Send a HTTP request to Webhook gateway,
@@ -101,3 +105,29 @@ Make sure there are no errors in any of the gateways and all event sources are a
               \____\______/   
    ```
 
+5. Great!! You have now learned how to use a `circuit` and `switch`. Lets update the sensor with a trigger
+   that waits for both groups to resolve. This is the normal sensor behavior if circuit is not defined.
+   
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
+   ```
+   Send a HTTP request and perform a file drop on Minio bucket as done above. You should following output,
+   
+   ```
+     _______________________________ 
+    < this is my first webhook test >
+     ------------------------------- 
+        \
+         \
+          \     
+                        ##        .            
+                  ## ## ##       ==            
+               ## ## ## ##      ===            
+           /""""""""""""""""___/ ===        
+      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+           \______ o          __/            
+            \    \        __/             
+              \____\______/   
+   ```
+   
+   
