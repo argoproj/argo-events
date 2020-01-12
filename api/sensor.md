@@ -36,6 +36,391 @@ Resource Types:
 
 </ul>
 
+<h3 id="argoproj.io/v1alpha1.AWSLambdaTrigger">
+
+AWSLambdaTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+AWSLambdaTrigger refers to specification of the trigger to invoke an AWS
+Lambda function
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>functionName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+FunctionName refers to the name of the function to invoke.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>accessKey</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+AccessKey refers K8 secret containing aws access key
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>secretKey</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SecretKey refers K8 secret containing aws secret key
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace refers to Kubernetes namespace to read access related secret
+from. Must be defined if either accesskey or secretkey secret selector
+is specified.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>region</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Region is AWS region
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.ArgoWorkflowOperation">
+
+ArgoWorkflowOperation (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+ArgoWorkflowOperation refers to the type of the operation performed on
+the Argo Workflow
+
+</p>
+
+</p>
+
+<h3 id="argoproj.io/v1alpha1.ArgoWorkflowTrigger">
+
+ArgoWorkflowTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+ArgoWorkflowTrigger is the trigger for the Argo Workflow
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>source</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ArtifactLocation"> ArtifactLocation </a>
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+Source of the K8 resource file(s)
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>operation</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ArgoWorkflowOperation">
+ArgoWorkflowOperation </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Operation refers to the type of operation performed on the argo workflow
+resource. Default value is Submit.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters to pass to resolved Argo Workflow
+object
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>GroupVersionResource</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
+Kubernetes meta/v1.GroupVersionResource </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+(Members of <code>GroupVersionResource</code> are embedded into this
+type.)
+
+</p>
+
+<p>
+
+The unambiguous kind of this object - used in order to retrieve the
+appropriate kubernetes api client for this resource
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.ArtifactLocation">
 
 ArtifactLocation
@@ -45,7 +430,8 @@ ArtifactLocation
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+<a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
+<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
 
 </p>
 
@@ -1464,6 +1850,377 @@ always use the first URL, while push will use all of them.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.HTTPSubscription">
+
+HTTPSubscription
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Subscription">Subscription</a>)
+
+</p>
+
+<p>
+
+<p>
+
+HTTPSubscription holds the context of the HTTP subscription of events
+for the sensor.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>port</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which sensor server should run.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.HTTPTrigger">
+
+HTTPTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+HTTPTrigger is the trigger for the HTTP request
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serverURL</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerURL refers to the URL to send HTTP request to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the HTTP request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em>
+<a href="#argoproj.io/v1alpha1.HTTPTriggerTLS"> HTTPTriggerTLS </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the HTTP client.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Method refers to the type of the HTTP request. Refer
+<a href="https://golang.org/src/net/http/method.go">https://golang.org/src/net/http/method.go</a>
+for more info. Default value is POST.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the HTTP trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>timeout</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Timeout refers to the HTTP request timeout in seconds. Default value is
+10 seconds
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.HTTPTriggerTLS">
+
+HTTPTriggerTLS
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+HTTPTriggerTLS refers to TLS configuration for the HTTP client
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.JSONType">
 
 JSONType (<code>string</code> alias)
@@ -1488,6 +2245,239 @@ JSONType contains the supported JSON types for data filtering
 </p>
 
 </p>
+
+<h3 id="argoproj.io/v1alpha1.K8sResourcePolicy">
+
+K8sResourcePolicy
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+K8sResourcePolicy refers to the policy used to check the state of K8s
+based triggers using using labels
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>labels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Labels required to identify whether a resource is in success state
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>backoff</code></br> <em> k8s.io/apimachinery/pkg/util/wait.Backoff
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+Backoff before checking resource state
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>errorOnBackoffTimeout</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+ErrorOnBackoffTimeout determines whether sensor should transition to
+error state if the trigger policy is unable to determine the state of
+the resource
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
+
+KubernetesResourceOperation (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+KubernetesResourceOperation refers to the type of operation performed on
+the K8s resource
+
+</p>
+
+</p>
+
+<h3 id="argoproj.io/v1alpha1.NATSSubscription">
+
+NATSSubscription
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Subscription">Subscription</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NATSSubscription holds the context of the NATS subscription of events
+for the sensor
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serverURL</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerURL refers to NATS server url.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Subject refers to NATS subject name.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 <h3 id="argoproj.io/v1alpha1.NodePhase">
 
@@ -1751,6 +2741,50 @@ Event stores the last seen event for this node
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>updatedAt</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
+Kubernetes meta/v1.MicroTime </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+UpdatedAt refers to the time at which the node was updated.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>resolvedAt</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#microtime-v1-meta">
+Kubernetes meta/v1.MicroTime </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+ResolvedAt refers to the time at which the node was resolved.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1799,16 +2833,16 @@ sensor
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.ResourceLabelsPolicy">
+<h3 id="argoproj.io/v1alpha1.OpenFaasTrigger">
 
-ResourceLabelsPolicy
+OpenFaasTrigger
 
 </h3>
 
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
 
 </p>
 
@@ -1816,8 +2850,7 @@ ResourceLabelsPolicy
 
 <p>
 
-ResourceLabels refers to the policy used to check the resource state
-using labels
+OpenFaasTrigger refers to the trigger type of OpenFass
 
 </p>
 
@@ -1851,7 +2884,7 @@ Description
 
 <td>
 
-<code>labels</code></br> <em> map\[string\]string </em>
+<code>gatewayURL</code></br> <em> string </em>
 
 </td>
 
@@ -1859,7 +2892,126 @@ Description
 
 <p>
 
-Labels required to identify whether a resource is in success state
+GatewayURL refers to the OpenFaas Gateway URL.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the HTTP trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Password refers to the Kubernetes secret that holds the password
+required to log into the gateway.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the password secret from. This is required if the
+password secret selector is specified.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>functionName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+FunctionName refers to the name of OpenFaas function that will be
+invoked once the trigger executes
 
 </p>
 
@@ -2016,8 +3168,8 @@ Template contains sensor pod specification. For more information, read
 
 <td>
 
-<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
-</em>
+<code>subscription</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Subscription"> Subscription </a> </em>
 
 </td>
 
@@ -2025,30 +3177,9 @@ Template contains sensor pod specification. For more information, read
 
 <p>
 
-EventProtocol is the protocol through which sensor receives events from
-gateway
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>port</code></br> <em> int </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Port on which sensor server should run.
+Subscription refers to the modes of events subscriptions for the sensor.
+At least one of the types of subscription must be defined in order for
+sensor to be meaningful.
 
 </p>
 
@@ -2114,6 +3245,47 @@ ErrorOnFailedRound if set to true, marks sensor state as
 <code>error</code> if the previous trigger round fails. Once sensor
 state is set to <code>error</code>, no further triggers will be
 processed.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serviceLabels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServiceLabels to be set for the service generated
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serviceAnnotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServiceAnnotations refers to annotations to be set for the service
+generated
 
 </p>
 
@@ -2361,8 +3533,8 @@ Template contains sensor pod specification. For more information, read
 
 <td>
 
-<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
-</em>
+<code>subscription</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Subscription"> Subscription </a> </em>
 
 </td>
 
@@ -2370,30 +3542,9 @@ Template contains sensor pod specification. For more information, read
 
 <p>
 
-EventProtocol is the protocol through which sensor receives events from
-gateway
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>port</code></br> <em> int </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Port on which sensor server should run.
+Subscription refers to the modes of events subscriptions for the sensor.
+At least one of the types of subscription must be defined in order for
+sensor to be meaningful.
 
 </p>
 
@@ -2466,6 +3617,47 @@ processed.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>serviceLabels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServiceLabels to be set for the service generated
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serviceAnnotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServiceAnnotations refers to annotations to be set for the service
+generated
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2529,7 +3721,7 @@ NodePhase </a> </em>
 
 <p>
 
-Phase is the high-level summary of the sensor
+Phase is the high-level summary of the sensor.
 
 </p>
 
@@ -2715,6 +3907,331 @@ Resources refers to metadata of the resources created for the sensor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
+
+StandardK8sTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+StandardK8sTrigger is the standard Kubernetes resource trigger
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>GroupVersionResource</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
+Kubernetes meta/v1.GroupVersionResource </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+(Members of <code>GroupVersionResource</code> are embedded into this
+type.)
+
+</p>
+
+<p>
+
+The unambiguous kind of this object - used in order to retrieve the
+appropriate kubernetes api client for this resource
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>source</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ArtifactLocation"> ArtifactLocation </a>
+</em>
+
+</td>
+
+<td>
+
+<p>
+
+Source of the K8 resource file(s)
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>operation</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KubernetesResourceOperation">
+KubernetesResourceOperation </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Operation refers to the type of operation performed on the k8s resource.
+Default value is Create.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved K8s
+trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.StatusPolicy">
+
+StatusPolicy
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+StatusPolicy refers to the policy used to check the state of the trigger
+using response status
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>allowedStatuses</code></br> <em> \[\]int </em>
+
+</td>
+
+<td>
+
+<p>
+
+AllowedStatuses refers to the list of response status. If the response
+status of the the trigger is within the list, the trigger will marked as
+successful else it will result in trigger failure.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Subscription">
+
+Subscription
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Subscription holds different modes of subscription available for sensor
+to consume events.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>http</code></br> <em>
+<a href="#argoproj.io/v1alpha1.HTTPSubscription"> HTTPSubscription </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+HTTP refers to the HTTP subscription of events for the sensor.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nats</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NATSSubscription"> NATSSubscription </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+NATS refers to the NATS subscription of events for the sensor
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.TimeFilter">
 
 TimeFilter
@@ -2884,7 +4401,7 @@ Template describes the trigger specification.
 
 <td>
 
-<code>templateParameters</code></br> <em>
+<code>parameters</code></br> <em>
 <a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
 </a> </em>
 
@@ -2894,31 +4411,8 @@ Template describes the trigger specification.
 
 <p>
 
-TemplateParameters is the list of resource parameters to pass to the
-template object
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>resourceParameters</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
-</a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-ResourceParameters is the list of resource parameters to pass to
-resolved resource object in template object
+Parameters is the list of parameters applied to the trigger template
+definition
 
 </p>
 
@@ -2985,6 +4479,11 @@ TriggerParameter
 <p>
 
 (<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AWSLambdaTrigger">AWSLambdaTrigger</a>,
+<a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
+<a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
+<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
 </p>
@@ -3175,7 +4674,7 @@ Description
 
 <td>
 
-<code>event</code></br> <em> string </em>
+<code>dependencyName</code></br> <em> string </em>
 
 </td>
 
@@ -3183,7 +4682,10 @@ Description
 
 <p>
 
-Event is the name of the event for which to retrieve this event
+DependencyName refers to the name of the dependency. The event which is
+stored for this dependency is used as payload for the parameterization.
+Make sure to refer to one of the dependencies you have defined under
+Dependencies list.
 
 </p>
 
@@ -3203,10 +4705,11 @@ Event is the name of the event for which to retrieve this event
 
 <p>
 
-Path is the JSONPath of the event’s (JSON decoded) data key Path is a
-series of keys separated by a dot. A key may contain wildcard characters
-‘\*’ and ‘?’. To access an array value use the index as the key. The dot
-and wildcard characters can be escaped with ‘\&rsquo;. See
+ContextKey is the JSONPath of the event’s (JSON decoded) context key
+ContextKey is a series of keys separated by a dot. A key may contain
+wildcard characters ‘\*’ and ‘?’. To access an array value use the index
+as the key. The dot and wildcard characters can be escaped with
+‘\&rsquo;. See
 <a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
 for more information on how to use this.
 
@@ -3226,6 +4729,17 @@ for more information on how to use this.
 
 <td>
 
+<p>
+
+DataKey is the JSONPath of the event’s (JSON decoded) data key DataKey
+is a series of keys separated by a dot. A key may contain wildcard
+characters ‘\*’ and ‘?’. To access an array value use the index as the
+key. The dot and wildcard characters can be escaped with ‘\&rsquo;. See
+<a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
+for more information on how to use this.
+
+</p>
+
 </td>
 
 </tr>
@@ -3243,8 +4757,8 @@ for more information on how to use this.
 <p>
 
 Value is the default literal value to use for this parameter source This
-is only used if the path is invalid. If the path is invalid and this is
-not defined, this param source will produce an error.
+is only used if the DataKey is invalid. If the DataKey is invalid and
+this is not defined, this param source will produce an error.
 
 </p>
 
@@ -3307,8 +4821,9 @@ Description
 
 <td>
 
-<code>backoff</code></br> <em> k8s.io/apimachinery/pkg/util/wait.Backoff
-</em>
+<code>k8s</code></br> <em>
+<a href="#argoproj.io/v1alpha1.K8sResourcePolicy"> K8sResourcePolicy
+</a> </em>
 
 </td>
 
@@ -3316,7 +4831,8 @@ Description
 
 <p>
 
-Backoff before checking resource state
+K8sResourcePolicy refers to the policy used to check the state of K8s
+based triggers using using labels
 
 </p>
 
@@ -3328,7 +4844,8 @@ Backoff before checking resource state
 
 <td>
 
-<code>errorOnBackoffTimeout</code></br> <em> bool </em>
+<code>status</code></br> <em>
+<a href="#argoproj.io/v1alpha1.StatusPolicy"> StatusPolicy </a> </em>
 
 </td>
 
@@ -3336,32 +4853,8 @@ Backoff before checking resource state
 
 <p>
 
-ErrorOnBackoffTimeout determines whether sensor should transition to
-error state if the trigger policy is unable to determine the state of
-the resource
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>resourceLabels</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ResourceLabelsPolicy">
-ResourceLabelsPolicy </a> </em>
-
-</td>
-
-<td>
-
-<p>
-
-ResourceLabels refers to the policy used to check the resource state
-using labels
+Status refers to the policy used to check the state of the trigger using
+response status
 
 </p>
 
@@ -3525,7 +5018,7 @@ Description
 
 <p>
 
-Name is a unique name of the action to take
+Name is a unique name of the action to take.
 
 </p>
 
@@ -3544,9 +5037,11 @@ Name is a unique name of the action to take
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Switch is the condition to execute the trigger
+Switch is the condition to execute the trigger.
 
 </p>
 
@@ -3558,25 +5053,20 @@ Switch is the condition to execute the trigger
 
 <td>
 
-<code>GroupVersionResource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#groupversionresource-v1-meta">
-Kubernetes meta/v1.GroupVersionResource </a> </em>
+<code>k8s</code></br> <em>
+<a href="#argoproj.io/v1alpha1.StandardK8sTrigger"> StandardK8sTrigger
+</a> </em>
 
 </td>
 
 <td>
 
-<p>
-
-(Members of <code>GroupVersionResource</code> are embedded into this
-type.)
-
-</p>
+<em>(Optional)</em>
 
 <p>
 
-The unambiguous kind of this object - used in order to retrieve the
-appropriate kubernetes api client for this resource
+StandardK8sTrigger refers to the trigger designed to create or update a
+generic Kubernetes resource.
 
 </p>
 
@@ -3588,8 +5078,82 @@ appropriate kubernetes api client for this resource
 
 <td>
 
-<code>source</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ArtifactLocation"> ArtifactLocation </a>
+<code>argoWorkflow</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger"> ArgoWorkflowTrigger
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ArgoWorkflow refers to the trigger that can perform various operations
+on an Argo workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>http</code></br> <em> <a href="#argoproj.io/v1alpha1.HTTPTrigger">
+HTTPTrigger </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+HTTP refers to the trigger designed to dispatch a HTTP request with
+on-the-fly constructable payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>openFaas</code></br> <em>
+<a href="#argoproj.io/v1alpha1.OpenFaasTrigger"> OpenFaasTrigger </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+OpenFaas refers to the trigger designed to invoke openfaas functions
+with with on-the-fly constructable payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>awsLambda</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AWSLambdaTrigger"> AWSLambdaTrigger </a>
 </em>
 
 </td>
@@ -3598,7 +5162,8 @@ appropriate kubernetes api client for this resource
 
 <p>
 
-Source of the K8 resource file(s)
+AWSLambda refers to the trigger designed to invoke AWS Lambda function
+with with on-the-fly constructable payload.
 
 </p>
 
@@ -3706,6 +5271,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9d4a5c5</code>. </em>
+commit <code>256ffc1</code>. </em>
 
 </p>
