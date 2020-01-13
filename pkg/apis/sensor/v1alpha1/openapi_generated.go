@@ -1448,14 +1448,14 @@ func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) 
 				Description: "StatusPolicy refers to the policy used to check the state of the trigger using response status",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"allowedStatuses": {
+					"allow": {
 						VendorExtensible: spec.VendorExtensible{
 							Extensions: spec.Extensions{
 								"x-kubernetes-list-type": "allowedStatuses",
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "AllowedStatuses refers to the list of response status. If the response status of the the trigger is within the list, the trigger will marked as successful else it will result in trigger failure.",
+							Description: "Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list, the trigger will marked as successful else it will result in trigger failure.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1468,7 +1468,7 @@ func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"allowedStatuses"},
+				Required: []string{"allow"},
 			},
 		},
 	}

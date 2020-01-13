@@ -401,7 +401,7 @@ func validateStatusPolicy(policy *v1alpha1.StatusPolicy) error {
 	if policy == nil {
 		return nil
 	}
-	if policy.AllowedStatuses == nil {
+	if policy.Allow == nil {
 		return errors.New("list of allowed response status is not specified")
 	}
 	return nil

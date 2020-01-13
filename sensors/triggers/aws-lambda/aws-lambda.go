@@ -133,6 +133,6 @@ func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger resource")
 	}
 
-	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.AllowedStatuses)
+	p := policy.NewStatusPolicy(int(*obj.StatusCode), t.Trigger.Policy.Status.Allow)
 	return p.ApplyPolicy()
 }

@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: minio-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: metalgearsolid/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: minio-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: http-trigger
+        http:
+          serverURL: http://http-server.argo-events.svc:8090/hi
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: s3.bucket.name
+              dest: bucket
+            - src:
+                dependencyName: test-dep
+                contextKey: type
+              dest: type
+          method: POST
+      policy:
+        status:
+          allowedStatuses:
+            - 200
+            - 300

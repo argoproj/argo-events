@@ -1,7 +1,5 @@
 # HTTP Trigger
 
-In this tutorial, you will explore the HTTP triggers. 
-
 Sometimes you face a situation where creating an Argo workflow on every event 
 is not an ideal solution. This is where the HTTP trigger can help you. With this type of trigger, you can
 connect any old/new API server with 20+ event sources supported by Argo Events or invoke serveless fucntions
@@ -10,7 +8,7 @@ without worrying about their respective event connector frameworks.
 ## Prerequisite
 Set up the `Minio` gateway and event source. The K8s manifests are available under `examples/tutorials/09-http-trigger`.
 
-## Connector for API servers
+## API servers Integration
 We will set up a basic go http server and connect it with the minio events.
 
 1. Set up a simple http server that prints the request payload.
@@ -48,7 +46,7 @@ We will set up a basic go http server and connect it with the minio events.
 **Note**: HTTP trigger must have a payload, otherwise it is pretty useless to send a request without event data.
 
 ## Payload Construction
-The http trigger payload has following structure,
+The http trigger payload has the following structure,
 
 ```yaml
 payload:
@@ -70,7 +68,7 @@ The `src` is the source of event. It contains,
   2. `dataKey`: to extract a particular key-value from event's data.
   3. `contextKey`: to extract a particular key-value from event' context.
 
-The `dest` is the `destination key` in the result payload.
+The `dest` is the destination key within the result payload.
 
 So, the above trigger payload will generate a request payload as,
 
@@ -89,10 +87,10 @@ generate complex event payloads, take a look at [this library](https://github.co
 
 The complete specification of HTTP trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#httptrigger).
 
-## Connector for Serverless functions
-HTTP trigger provide an easy integration point for 20+ event sources to existing serverless workloads.
+## Serverless Workloads Integration
+HTTP trigger provides an easy integration into 20+ event sources for the existing serverless workloads.
 
-In this section, we will look at how to invoke `Kubeless` functions.
+In this section, we will look at how to invoke a `Kubeless` function.
 
 ### Prerequisite
 Kubeless must be installed :). You can follow the installation [here](https://kubeless.io/docs/quick-start/).
@@ -115,3 +113,20 @@ Make sure to deploy the `test` function.
    ```
 
 Note: The output was taken from `Kubeless` deployed on GCP.
+
+## Policy
+To determine whether the request was successful or not, HTTP trigger provides a `Status` policy.
+The `Status` holds a list of response statuses that are considered valid.
+
+1. Lets update the sensor with acceptable response statuses as [`200`, `300`] and point the http trigger to an invalid server url.
+
+   ```bash
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/sensor-02.yaml
+   ```    
+
+2. Drop a file onto `test` bucket.
+
+3. Inspect the sensor logs, you will see the trigger resulted in failure.
+
+## Parameterize the Trigger
+In this section, we will see how to parameterize the http trigger

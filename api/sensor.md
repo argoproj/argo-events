@@ -4110,7 +4110,7 @@ Description
 
 <td>
 
-<code>allowedStatuses</code></br> <em> \[\]int </em>
+<code>allow</code></br> <em> \[\]int </em>
 
 </td>
 
@@ -4118,7 +4118,7 @@ Description
 
 <p>
 
-AllowedStatuses refers to the list of response status. If the response
+Allow refers to the list of allowed response statuses. If the response
 status of the the trigger is within the list, the trigger will marked as
 successful else it will result in trigger failure.
 
@@ -5271,6 +5271,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>256ffc1</code>. </em>
+commit <code>fbe4d6c</code>. </em>
 
 </p>

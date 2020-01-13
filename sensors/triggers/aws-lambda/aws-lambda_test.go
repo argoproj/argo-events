@@ -140,7 +140,7 @@ func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
 		StatusCode: &status,
 	}
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{AllowedStatuses: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
 	}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)

@@ -251,7 +251,7 @@ type Trigger struct {
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
-	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,4,opt,name=policy"`
+	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,3,opt,name=policy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -472,10 +472,10 @@ type K8sResourcePolicy struct {
 
 // StatusPolicy refers to the policy used to check the state of the trigger using response status
 type StatusPolicy struct {
-	// AllowedStatuses refers to the list of response status. If the response status of the the trigger is within the list,
+	// Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
 	// the trigger will marked as successful else it will result in trigger failure.
 	// +listType=allowedStatuses
-	AllowedStatuses []int `json:"allowedStatuses" protobuf:"bytes,1,name=allowedStatuses"`
+	Allow []int `json:"allow" protobuf:"bytes,1,name=allow"`
 }
 
 // Backoff for an operation

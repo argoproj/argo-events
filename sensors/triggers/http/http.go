@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -141,7 +140,7 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 
 // ApplyPolicy applies policy on the trigger
 func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
-	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.AllowedStatuses == nil {
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
 		return nil
 	}
 	response, ok := resource.(*http.Response)
@@ -149,12 +148,7 @@ func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger execution response")
 	}
 
-	status, err := strconv.Atoi(response.Status)
-	if err != nil {
-		return errors.Wrap(err, "failed to parse the response status")
-	}
-
-	p := policy.NewStatusPolicy(status, t.Trigger.Policy.Status.AllowedStatuses)
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
 
 	return p.ApplyPolicy()
 }
