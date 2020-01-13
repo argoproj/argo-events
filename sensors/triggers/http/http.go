@@ -141,10 +141,9 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 
 // ApplyPolicy applies policy on the trigger
 func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
-	if t.Trigger.Policy.Status.AllowedStatuses == nil {
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.AllowedStatuses == nil {
 		return nil
 	}
-
 	response, ok := resource.(*http.Response)
 	if !ok {
 		return errors.New("failed to interpret the trigger execution response")

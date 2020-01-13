@@ -141,7 +141,7 @@ Yay!! The Argo workflow printed the message. You can add however many number of 
 to update the trigger resource on the fly.
 
 **_Note_**: If you define both the `contextKey` and `dataKey` within a parameter, then
-the `contextKey` takes the precedence.
+the `dataKey` takes the precedence.
 
 ### Default Values
 Each parameter comes with an option to configure the default value. This is specially
