@@ -10,5 +10,8 @@ COPY assets/argo-linux-amd64 /usr/local/bin/argo
 RUN argo version
 RUN faas version
 
+RUN mkdir /.openfaas
+RUN chmod 777 /.openfaas
+
 COPY dist/sensor /bin/
 ENTRYPOINT [ "/bin/sensor" ]
