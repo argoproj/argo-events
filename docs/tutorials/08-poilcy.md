@@ -1,6 +1,6 @@
 # Policy
 
-When you have multiple triggers in a sensor, it is important to have a mechanism to determine whether a trigger was successful or not. This is where the policy comes into the picture.
+A policy for a trigger determines whether the trigger resulted in success or failure.
 
 Currently, Argo Events supports 2 types of policies:
 
