@@ -41,3 +41,6 @@ The `Status` holds a list of response statuses that are considered valid.
 
 ## Parameterization
 Similar to HTTP trigger, the Lambda trigger provides `parameters` at both trigger resource and trigger template level.
+
+## OpenFaas Trigger
+Similar to AWS lambda, you can trigger a OpenFaas function. The trigger specification is available [here](https://github.com/argoproj/argo-events/blob/worflow-triggers/api/sensor.md#openfaastrigger)
