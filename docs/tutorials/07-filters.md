@@ -6,15 +6,15 @@ apply constraints on the events in order to determine a validity.
 
 Argo Events offers 3 types of filters:
 
-1. Data Filters
-2. Context Filters
-3. Time Filters
+1. Data Filter
+2. Context Filter
+3. Time Filter
 
 ## Prerequisite
 Webhook gateway must be set up.
 
-## Data Filters
-Data filters as the name suggests are applied on the event data. A CloudEvent from Webhook gateway has
+## Data Filter
+Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook gateway has
 payload structure as,
 
   ```json
@@ -35,9 +35,9 @@ payload structure as,
   }
   ``` 
 
-Data Filters are applied on `data` within the payload. We will make a simple HTTP request
+Data Filter are applied on `data` within the payload. We will make a simple HTTP request
 to webhook gateway with request data as `{"message":"this is my first webhook"}` and apply
-data filters on `message`.
+data filter on `message`.
 
 A data filter has following fields,
 
@@ -52,10 +52,10 @@ data:
 **Note**: If data type is a `string`, then you can pass either an exact value or a regex.
 If data types is bool or float, then you need to pass the exact value.
 
-1. Lets create a webhook sensor with data filters.
+1. Lets create a webhook sensor with data filter.
 
    ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filters.yaml
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml
    ```
 
 2. Send a HTTP request to gateway
@@ -76,14 +76,14 @@ If data types is bool or float, then you need to pass the exact value.
 5. Watch for a workflow with name `data-workflow-xxxx`.
 
 ## Context Filter
-Similar to the data filters, you can apply filters on the context of the event.
+Similar to the data filter, you can apply a filter on the context of the event.
 
 Change the subscriber in the webhook gateway to point it to `context-filter` sensor's URL.
 
-1. Lets create a webhook sensor with context filters.
+1. Lets create a webhook sensor with context filter.
 
    ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filters.yaml
+   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml
    ```
 
 2. Send a HTTP request to gateway
@@ -95,8 +95,8 @@ Change the subscriber in the webhook gateway to point it to `context-filter` sen
 3. You will notice that the sensor logs prints the event is invalid as the sensor expects for
    either `custom-webhook` as the value of the `source`.
 
-## Time Filters
-Time filters are specially helpful when you need to make sure an event occurs between a 
+## Time Filter
+Time filter is specially helpful when you need to make sure an event occurs between a 
 certain time-frame. Time filter takes a `start` and `stop` time but you can also define just the
 `start` time, meaning, there is no `end time` constraint or just the `stop` time, meaning, there is
 no `start time` constraint. An example of time filter is available under `examples/sensors`.
