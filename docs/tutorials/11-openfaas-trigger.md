@@ -1,0 +1,1 @@
+# OpenFaas trigger
