@@ -21,7 +21,7 @@ spec:
       port: 9300
   triggers:
     - template:
-        name: webhook-workflow-trigger
+        name: http-trigger
         http:
           serverURL: http://http-server.argo-events.svc:8090/hello
           payload:

@@ -90,3 +90,28 @@ generate complex event payloads, take a look at [this library](https://github.co
 The complete specification of HTTP trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#httptrigger).
 
 ## Connector for Serverless functions
+HTTP trigger provide an easy integration point for 20+ event sources to existing serverless workloads.
+
+In this section, we will look at how to invoke `Kubeless` functions.
+
+### Prerequisite
+Kubeless must be installed :). You can follow the installation [here](https://kubeless.io/docs/quick-start/).
+Make sure to deploy the `test` function.
+
+### Invoke Function
+1. First, lets create an http trigger for kubeless function,
+
+   ```bash
+    kubeless trigger http create hello --function-name hello
+   ```
+2. Update the sensor and update the `serverURL` to point to your Kubeless function URL.
+
+3. Drop a file onto `test` bucket.
+
+4. You will see the `hello` function getting invoked with following output,
+
+   ```
+   {'event-time': None, 'extensions': {'request': <LocalRequest: POST http://<URL>:8080/>}, 'event-type': None, 'event-namespace': None, 'data': '{"type":"minio","bucket":"test"}', 'event-id': None}
+   ```
+
+Note: The output was taken from `Kubeless` deployed on GCP.
