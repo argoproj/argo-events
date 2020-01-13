@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: metalgearsolid/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: openfaas-trigger
+        openFaas:
+          gatewayURL: http://gateway.openfaas.svc.cluster.local:8080
+          functionName: gohash
+          password:
+            name: openfaas-password
+            key: pass
+          namespace: argo-events
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.name
+              dest: name
