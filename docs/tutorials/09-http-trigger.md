@@ -128,5 +128,10 @@ The `Status` holds a list of response statuses that are considered valid.
 
 3. Inspect the sensor logs, you will see the trigger resulted in failure.
 
-## Parameterize the Trigger
-In this section, we will see how to parameterize the http trigger
+   ```
+   ERRO[2020-01-13 21:27:04] failed to operate on the event notification   error="policy application resulted in failure. http response status 404 is not allowed"
+   ```
+
+## Parameterization
+You can either use `parameters` within http trigger or `parameter` under the template to parameterize
+the trigger on fly.
