@@ -12,7 +12,6 @@ spec:
       insecure: true
       events:
         - s3:ObjectCreated:Put
-        - s3:ObjectRemoved:Delete
       accessKey:
         key: accesskey
         name: artifact-minio

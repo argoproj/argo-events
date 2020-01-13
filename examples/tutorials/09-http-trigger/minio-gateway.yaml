@@ -25,4 +25,4 @@ spec:
       serviceAccountName: argo-events-sa
   subscribers:
     http:
-      - "http://circuit-sensor.argo-events.svc:9300/"
+      - "http://minio-sensor.argo-events.svc:9300/"
