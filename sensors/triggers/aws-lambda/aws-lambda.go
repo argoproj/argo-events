@@ -128,6 +128,10 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 
 // ApplyPolicy applies the policy on the trigger execution response
 func (t *AWSLambdaTrigger) ApplyPolicy(resource interface{}) error {
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
+		return nil
+	}
+
 	obj, ok := resource.(*lambda.InvokeOutput)
 	if !ok {
 		return errors.New("failed to interpret the trigger resource")

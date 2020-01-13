@@ -132,7 +132,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 func (k8sTrigger *StandardK8sTrigger) ApplyPolicy(resource interface{}) error {
 	trigger := k8sTrigger.Trigger
 
-	if trigger.Policy == nil || trigger.Policy.K8s == nil {
+	if trigger.Policy == nil || trigger.Policy.K8s == nil || trigger.Policy.K8s.Labels == nil {
 		return nil
 	}
 

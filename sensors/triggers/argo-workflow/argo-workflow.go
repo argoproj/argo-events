@@ -172,7 +172,7 @@ func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error)
 func (t *ArgoWorkflowTrigger) ApplyPolicy(resource interface{}) error {
 	trigger := t.Trigger
 
-	if trigger.Policy == nil || trigger.Policy.K8s == nil {
+	if trigger.Policy == nil || trigger.Policy.K8s == nil || trigger.Policy.K8s.Labels == nil {
 		return nil
 	}
 
