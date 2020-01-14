@@ -13,5 +13,8 @@ RUN faas version
 RUN mkdir /.openfaas
 RUN chmod 777 /.openfaas
 
+RUN mkdir /bin/workflows
+RUN chmod -R 777 /bin/workflows
+
 COPY dist/sensor /bin/
 ENTRYPOINT [ "/bin/sensor" ]

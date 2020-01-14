@@ -17,7 +17,6 @@ package argo_workflow
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -76,7 +75,7 @@ func (t *ArgoWorkflowTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, r
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource")
 	}
-	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.K8s.Parameters, obj); err != nil {
+	if err := triggers.ApplyResourceParameters(sensor, t.Trigger.Template.ArgoWorkflow.Parameters, obj); err != nil {
 		return nil, err
 	}
 	return obj, nil
@@ -126,7 +125,7 @@ func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error)
 
 	switch op {
 	case v1alpha1.Submit:
-		file, err := ioutil.TempFile("/bin", workflow.Name)
+		file, err := ioutil.TempFile("/bin/workflows", workflow.Name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to create a temp file for the workflow %s", name)
 		}
@@ -140,7 +139,7 @@ func (t *ArgoWorkflowTrigger) Execute(resource interface{}) (interface{}, error)
 		if _, err := file.Write(workflowYaml); err != nil {
 			return nil, errors.Wrapf(err, "failed to write workflow yaml %s to the temp file %s", name, file.Name())
 		}
-		cmd = exec.Command("argo", "-n", namespace, "submit", fmt.Sprintf("%s/%s", "/bin", file.Name()))
+		cmd = exec.Command("argo", "-n", namespace, "submit", file.Name())
 	case v1alpha1.Resubmit:
 		cmd = exec.Command("argo", "-n", namespace, "resubmit", name)
 	case v1alpha1.Resume:
