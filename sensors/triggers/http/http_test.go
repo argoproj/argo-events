@@ -124,7 +124,7 @@ func TestHTTPTrigger_ApplyPolicy(t *testing.T) {
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
 		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
 	}
-	response := &http.Response{Status: "200"}
+	response := &http.Response{StatusCode: 200}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)
 

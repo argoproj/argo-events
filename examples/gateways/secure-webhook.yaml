@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.12-rc
+          image: argoproj/gateway-client:v0.12
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: webhook-events
-          image: argoproj/webhook-gateway:v0.12-rc
+          image: argoproj/webhook-gateway:v0.12
           imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
           # `cert` and `key` files path

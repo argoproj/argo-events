@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.12-rc
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /git/argoproj

@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.12-rc
+          image: argoproj/gateway-client:v0.12
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: calendar-events
-          image: argoproj/calendar-gateway:v0.12-rc
+          image: argoproj/calendar-gateway:v0.12
           imagePullPolicy: Always
           command: ["/bin/calendar-gateway"]
       serviceAccountName: argo-events-sa

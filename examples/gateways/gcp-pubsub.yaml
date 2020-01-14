@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.12-rc
+          image: argoproj/gateway-client:v0.12
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: gcp-pubsub-events
-          image: argoproj/gcp-pubsub-gateway:v0.12-rc
+          image: argoproj/gcp-pubsub-gateway:v0.12
           imagePullPolicy: Always
           command: ["/bin/gcp-pubsub-gateway"]
           volumeMounts:
