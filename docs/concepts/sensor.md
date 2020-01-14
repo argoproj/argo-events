@@ -1,5 +1,6 @@
 # Sensor
-Sensors define a set of event dependencies (inputs) and triggers (outputs). 
+Sensor defines a set of event dependencies (inputs) and triggers (outputs). It listens to events from one or more
+gateways and act as an event dependency manager. 
 <br/>
 
 <p align="center">
@@ -8,9 +9,14 @@ Sensors define a set of event dependencies (inputs) and triggers (outputs).
 
 <br/>
 
-## What is an event dependency?
-A dependency is an event the sensor is expecting to happen. It is defined as "gateway-name:event-source-name".
-Also, you can use [globs](https://github.com/gobwas/glob#syntax) to catch a set of events (e.g. "gateway-name:*").
+## Event dependency
+A dependency is an event the sensor is waiting to happen.
+
+## Trigger
+A Trigger is the resource executed by sensor once the event dependencies are resolved.. 
 
 ## Specification
 Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md).
+
+## Examples
+Examples are located under `examples/sensors`.
