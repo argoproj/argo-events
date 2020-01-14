@@ -16,7 +16,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
         - name: gateway-controller
-          image: metalgearsolid/gateway-controller:v0.12
+          image: argoproj/gateway-controller:v0.12
           imagePullPolicy: Always
           env:
             - name: NAMESPACE

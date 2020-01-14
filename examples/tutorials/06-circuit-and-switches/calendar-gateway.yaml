@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: metalgearsolid/gateway-client:v0.12
+          image: argoproj/gateway-client:v0.12
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: calendar-events
-          image: metalgearsolid/calendar-gateway:v0.12
+          image: argoproj/calendar-gateway:v0.12
           imagePullPolicy: Always
           command: ["/bin/calendar-gateway"]
       serviceAccountName: argo-events-sa

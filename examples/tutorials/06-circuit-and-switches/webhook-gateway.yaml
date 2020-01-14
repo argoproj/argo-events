@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: metalgearsolid/gateway-client:v0.12
+          image: argoproj/gateway-client:v0.12
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: webhook-events
-          image: metalgearsolid/webhook-gateway:v0.12
+          image: argoproj/webhook-gateway:v0.12
           imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
       serviceAccountName: argo-events-sa

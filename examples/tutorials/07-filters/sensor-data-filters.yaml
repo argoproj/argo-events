@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: metalgearsolid/sensor:v0.12
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
