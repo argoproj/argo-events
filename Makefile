@@ -35,13 +35,11 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux minio-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux slack-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux webhook-linux calendar-linux resource-linux minio-linux file-linux nats-linux kafka-linux amqp-linux mqtt-linux storage-grid-linux github-linux hdfs-linux gitlab-linux sns-linux sqs-linux pubsub-linux slack-linux nsq-linux redis-linux emitter-linux stripe-linux azure-events-hub-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image minio-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image slack-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image webhook-image calendar-image resource-image minio-image file-image nats-image kafka-image amqp-image mqtt-image storage-grid-image github-image gitlab-image sns-image pubsub-image hdfs-image sqs-image slack-image nsq-image redis-image emitter-image stripe-image azure-events-hub-image
 
 all-controller-images: sensor-controller-image gateway-controller-image
-
-all-core-gateway-images: webhook-image calendar-image minio-image file-image nats-image kafka-image amqp-image mqtt-image resource-image
 
 .PHONY: all clean test
 
@@ -272,6 +270,46 @@ slack-linux:
 slack-image: slack-linux
 	docker build -t $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) -f ./gateways/server/slack/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) ; fi
+
+nsq:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/nsq-gateway ./gateways/server/nsq/cmd
+
+nsq-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nsq
+
+nsq-image: nsq-linux:
+	docker build -t $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) -f ./gateways/server/nsq/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) ; fi
+
+redis:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/redis-gateway ./gateways/server/redis/cmd
+
+redis-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make redis
+
+redis-image: redis-linux:
+	docker build -t $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) -f ./gateways/server/redis/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) ; fi
+
+emitter:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/emitter-gateway ./gateways/server/emitter/cmd
+
+emitter-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make emitter
+
+emitter-image: emitter-linux:
+	docker build -t $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) -f ./gateways/server/emitter/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) ; fi
+
+stripe:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/stripe-gateway ./gateways/server/stripe/cmd
+
+stripe-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stripe
+
+stripe-image: stripe-linux:
+	docker build -t $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) -f ./gateways/server/stripe/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
