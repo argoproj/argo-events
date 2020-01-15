@@ -17,8 +17,9 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 * Manage dependencies from 20+ event sources.
 * Ability to customize business-level constraint logic for event dependencies resolution.
 * Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Supports AWS Lambda and OpenFaas as triggers. 
-* CloudEvents as event delivery fabric.
+* Supports AWS Lambda and OpenFaas as triggers.
+* Supports integration of existing API servers with 20+ event sources.
+* CloudEvents compliant.
 
 ## Event Sources
 1. AMQP
