@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: azure-events-hub-event-source
+spec:
+  type: azureEventsHub
+  azureEventsHub:
+    example:
+      # FQDN of the EventsHub namespace you created
+      # More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
+      fqdn: your_fqdn
+      sharedAccessKeyName:
+        name: secret_containing_shared_access_key_name
+        key: key_within_the_secret_which_holds_the_value_of_shared_access_key_name
+      sharedAccessKey:
+        name: secret_containing_shared_access_key
+        key: key_within_the_secret_which_holds_the_value_of_shared_access_key
+      # Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
+      namespace: argo-events
+      # Event Hub path/name
+      hubName: hub_name
