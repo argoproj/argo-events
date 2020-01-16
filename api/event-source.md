@@ -1374,7 +1374,8 @@ NSQ event source
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -4431,6 +4432,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>fbe4d6c</code>. </em>
+commit <code>3f6eb5d</code>. </em>
 
 </p>

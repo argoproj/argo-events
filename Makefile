@@ -335,7 +335,7 @@ api-docs:
    ./hack/update-api-docs.sh
 
 .PHONY: codegen
-codegen: clientgen openapigen
+codegen: clientgen openapigen api-docs
 
 .PHONY: e2e
 e2e:
