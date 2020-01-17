@@ -25,15 +25,6 @@ import (
 
 // processQueue processes events received on internal queue and updates the state of the node representing the event dependency
 func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
-	defer func() {
-		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.SensorClient, sensorCtx.Sensor, sensorCtx.Logger)
-		if err != nil {
-			sensorCtx.Logger.WithError(err).Error("failed to persist sensor update")
-		}
-		// update Sensor ref. in case of failure to persist updates, this is a deep copy of old Sensor resource
-		sensorCtx.Sensor = updatedSensor
-	}()
-
 	switch notification.NotificationType {
 	case v1alpha1.EventNotification:
 		if sensorCtx.Sensor.Status.TriggerCycleStatus == v1alpha1.TriggerCycleFailure && sensorCtx.Sensor.Spec.ErrorOnFailedRound {
@@ -54,14 +45,14 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 		// set completion time
 		sensorCtx.Sensor.Status.LastCycleTime = metav1.Now()
 
-		// Mark all dependency nodes as active
-		for _, dependency := range sensorCtx.Sensor.Spec.Dependencies {
-			snctrl.MarkNodePhase(sensorCtx.Sensor, dependency.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency is re-activated")
+		sensorCtx.Logger.Infoln("persisting the sensor state")
+		updatedSensor, err := snctrl.PersistUpdates(sensorCtx.SensorClient, sensorCtx.Sensor, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).Error("failed to persist sensor update")
+			return
 		}
-		// Mark all dependency groups as active
-		for _, group := range sensorCtx.Sensor.Spec.DependencyGroups {
-			snctrl.MarkNodePhase(sensorCtx.Sensor, group.Name, v1alpha1.NodeTypeDependencyGroup, v1alpha1.NodePhaseActive, nil, sensorCtx.Logger, "dependency group is re-activated")
-		}
+		// update Sensor ref. in case of failure to persist updates, this is a deep copy of old Sensor resource
+		sensorCtx.Sensor = updatedSensor
 
 	case v1alpha1.ResourceUpdateNotification:
 		sensorCtx.operateResourceUpdateNotification(notification)

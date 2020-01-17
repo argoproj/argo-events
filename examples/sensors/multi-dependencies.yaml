@@ -1,0 +1,68 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: multi-dependencies-sensor
+  labels:
+    # sensor controller with instanceId "argo-events" will process this sensor
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  subscription:
+    http:
+      port: 9300
+  # waits for both test-dependency-webhook and test-dependency-calendar to resolve
+  dependencies:
+    - name: test-dependency-webhook
+      gatewayName: webhook-gateway
+      eventName: example
+    - name: test-dependency-calendar
+      gatewayName: calendar-gateway
+      eventName: example-with-interval
+  triggers:
+    - template:
+        name: multi-dependencies-workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: multi-signal-workflow-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                  - name: message1
+                    # the value will get overridden by event payload from dependency test-dependency-webhook
+                    value: hello world
+                  - name: message2
+                    # the value will get overridden by event payload from dependency test-dependency-calendar
+                    value: hello world
+                templates:
+                - name: whalesay
+                  inputs:
+                    parameters:
+                    - name: message
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args:
+                      - "{{inputs.parameters.message1}}"
+                      - "{{inputs.parameters.message2}}"
+          parameters:
+            - src:
+                dependencyName: test-dependency-webhook
+              dest: spec.arguments.parameters.0.value
+            - src:
+                dependencyName: test-dependency-calendar
+              dest: spec.arguments.parameters.1.value

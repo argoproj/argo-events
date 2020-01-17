@@ -19,7 +19,6 @@ package sensor
 import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
@@ -31,16 +30,21 @@ import (
 
 // generateServiceSpec returns a K8s service spec for the sensor
 func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
+	port := common.SensorServerPort
+	if ctx.sensor.Spec.Subscription.HTTP != nil {
+		port = ctx.sensor.Spec.Subscription.HTTP.Port
+	}
+
 	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels: ctx.sensor.Spec.EventProtocol.Http.Labels,
-			Annotations: ctx.sensor.Spec.EventProtocol.Http.Annotations,
+			Labels:      ctx.sensor.Spec.ServiceLabels,
+			Annotations: ctx.sensor.Spec.ServiceAnnotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Port:       intstr.Parse(ctx.sensor.Spec.EventProtocol.Http.Port).IntVal,
-					TargetPort: intstr.FromInt(int(intstr.Parse(ctx.sensor.Spec.EventProtocol.Http.Port).IntVal)),
+					Port:       intstr.FromInt(port).IntVal,
+					TargetPort: intstr.FromInt(port),
 				},
 			},
 			Type: corev1.ServiceTypeClusterIP,
@@ -137,12 +141,14 @@ func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
 	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierror.IsNotFound(err) {
+			ctx.updated = true
 			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
 		}
 		return nil, err
 	}
 
 	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
+		ctx.updated = true
 		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
@@ -153,34 +159,24 @@ func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
 
 // updateService updates the service for the sensor
 func (ctx *sensorContext) updateService() (*corev1.Service, error) {
-	isHttpTransport := ctx.sensor.Spec.EventProtocol.Type == apicommon.HTTP
 	currentMetadata := ctx.sensor.Status.Resources.Service
 
-	if currentMetadata == nil && !isHttpTransport {
-		return nil, nil
-	}
-	if currentMetadata != nil && !isHttpTransport {
-		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
-			// warning is sufficient instead of halting the entire sensor operation by marking it as failed.
-			ctx.logger.WithField("service-name", currentMetadata.Name).WithError(err).Warnln("failed to delete the current service")
-		}
-		return nil, nil
-	}
 	newService, err := ctx.serviceBuilder()
 	if err != nil {
 		return nil, err
 	}
-	if currentMetadata == nil && isHttpTransport {
+
+	if currentMetadata == nil {
+		ctx.updated = true
 		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
 	}
-	if currentMetadata == nil {
-		return nil, nil
-	}
+
 	if currentMetadata.Annotations != nil && currentMetadata.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
+		ctx.updated = true
 		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
-		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+
 	}
 	return ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 }

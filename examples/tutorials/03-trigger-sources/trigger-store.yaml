@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trigger-store
+data:
+  workflow: |-
+    apiVersion: argoproj.io/v1alpha1
+    kind: Workflow
+    metadata:
+      generateName: hello-world-
+      namespace: argo-events
+    spec:
+      entrypoint: whalesay
+      serviceAccountName: argo-events
+      templates:
+      - name: whalesay
+        container:
+          image: docker/whalesay:latest
+          command: [cowsay]
+          args: ["hello world"]

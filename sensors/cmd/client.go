@@ -18,13 +18,15 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/argoproj/argo-events/common"
 	sv1 "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors"
+	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"os"
 )
 
 func main() {
@@ -53,7 +55,7 @@ func main() {
 	kubeClient := kubernetes.NewForConfigOrDie(restConfig)
 	sensor, err := sensorClient.ArgoprojV1alpha1().Sensors(sensorNamespace).Get(sensorName, metav1.GetOptions{})
 	if err != nil {
-		panic(fmt.Errorf("failed to retrieve sensor. err: %+v", err))
+		panic(errors.Errorf("failed to retrieve sensor. err: %+v", err))
 	}
 
 	dynamicClient := dynamic.NewForConfigOrDie(restConfig)
@@ -61,6 +63,7 @@ func main() {
 	// wait for sensor http server to shutdown
 	sensorExecutionCtx := sensors.NewSensorContext(sensorClient, kubeClient, dynamicClient, sensor, controllerInstanceID)
 	if err := sensorExecutionCtx.ListenEvents(); err != nil {
-		panic(err)
+		sensorExecutionCtx.Logger.WithError(err).Errorln("failed to listen to events")
+		os.Exit(-1)
 	}
 }

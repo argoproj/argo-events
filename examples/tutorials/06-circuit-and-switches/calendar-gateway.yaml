@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Gateway
+metadata:
+  name: calendar-gateway
+  labels:
+    # gateway controller with instanceId "argo-events" will process this gateway
+    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+spec:
+  type: calendar
+  eventSourceRef:
+    name: calendar-event-source
+  template:
+    metadata:
+      name: calendar-gateway
+      labels:
+        gateway-name: calendar-gateway
+    spec:
+      containers:
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12
+          imagePullPolicy: Always
+          command: ["/bin/gateway-client"]
+        - name: calendar-events
+          image: argoproj/calendar-gateway:v0.12
+          imagePullPolicy: Always
+          command: ["/bin/calendar-gateway"]
+      serviceAccountName: argo-events-sa
+  subscribers:
+    http:
+      - "http://circuit-sensor.argo-events:9300/"

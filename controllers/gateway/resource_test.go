@@ -84,7 +84,9 @@ var gatewayObj = &v1alpha1.Gateway{
 				Port: "9330",
 			},
 		},
-		Subscribers: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
+		Subscribers: &v1alpha1.Subscribers{
+			HTTP: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
+		},
 	},
 }
 

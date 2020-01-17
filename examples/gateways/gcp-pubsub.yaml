@@ -7,30 +7,23 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: "pubsub"
+  type: gcp-pubsub
   eventSourceRef:
-    name: "gcp-pubsub-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: gcp-pubsub-event-source
   template:
     metadata:
-      name: "gcp-pubsub-gateway"
+      name: gcp-pubsub-gateway
       labels:
-        gateway-name: "gcp-pubsub-gateway"
+        gateway-name: gcp-pubsub-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "gcp-pubsub-events"
-          image: "argoproj/gcp-pubsub-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gcp-pubsub-events
+          image: argoproj/gcp-pubsub-gateway:v0.12
+          imagePullPolicy: Always
           command: ["/bin/gcp-pubsub-gateway"]
           volumeMounts:
             - mountPath: /gcp-pubsub-creds-dir
@@ -39,7 +32,7 @@ spec:
         - name: gcp-pubsub-data
           secret:
             secretName: gcp-pubsub
-      serviceAccountName: "argo-events-sa"
-  watchers:
-    sensors:
-      - name: "gcp-pubsub-sensor"
+      serviceAccountName: argo-events-sa
+  subscribers:
+    http:
+      - "http://gcp-pubsub-sensor.argo-events.svc:9300/"

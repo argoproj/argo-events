@@ -29,6 +29,105 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type Details struct {
+	Street string `json:"street"`
+	City   string `json:"city"`
+	Pin    string `json:"pin"`
+}
+
+type Payload struct {
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	Details   Details `json:"details"`
+}
+
+func TestConstructPayload(t *testing.T) {
+	obj := sensorObj.DeepCopy()
+	id := obj.NodeID("fake-dependency")
+	id2 := obj.NodeID("another-fake-dependency")
+
+	obj.Status = v1alpha1.SensorStatus{
+		Nodes: map[string]v1alpha1.NodeStatus{
+			id: {
+				Name: "fake-dependency",
+				Type: v1alpha1.NodeTypeEventDependency,
+				ID:   id,
+				Event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						ID:              "1",
+						Type:            "webhook",
+						Source:          "webhook-gateway",
+						DataContentType: "application/json",
+						SpecVersion:     "0.3",
+						Subject:         "example-1",
+					},
+					Data: []byte(`{"firstName": "fake"}`),
+				},
+			},
+			id2: {
+				Name: "another-fake-dependency",
+				Type: v1alpha1.NodeTypeEventDependency,
+				ID:   id,
+				Event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						ID:              "2",
+						Type:            "calendar",
+						Source:          "calendar-gateway",
+						DataContentType: "application/json",
+						SpecVersion:     "0.3",
+						Subject:         "example-1",
+					},
+					Data: []byte(`{"lastName": "foo"}`),
+				},
+			},
+		},
+	}
+
+	defaultFirstName := "faker"
+	defaultLastName := "bar"
+
+	parameters := []v1alpha1.TriggerParameter{
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataKey:        "firstName",
+				Value:          &defaultFirstName,
+			},
+			Dest: "firstName",
+		},
+		{
+			Src: &v1alpha1.TriggerParameterSource{
+				DependencyName: "another-fake-dependency",
+				DataKey:        "lastName",
+				Value:          &defaultLastName,
+			},
+			Dest: "lastName",
+		},
+	}
+
+	payloadBytes, err := ConstructPayload(obj, parameters)
+	assert.Nil(t, err)
+	assert.NotNil(t, payloadBytes)
+
+	var p *Payload
+	err = json.Unmarshal(payloadBytes, &p)
+	assert.Nil(t, err)
+	assert.Equal(t, "fake", p.FirstName)
+	assert.Equal(t, "foo", p.LastName)
+
+	parameters[0].Src.DataKey = "unknown"
+	parameters[1].Src.DataKey = "unknown"
+
+	payloadBytes, err = ConstructPayload(obj, parameters)
+	assert.Nil(t, err)
+	assert.NotNil(t, payloadBytes)
+
+	err = json.Unmarshal(payloadBytes, &p)
+	assert.Nil(t, err)
+	assert.Equal(t, "faker", p.FirstName)
+	assert.Equal(t, "bar", p.LastName)
+}
+
 func TestExtractEvents(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 	id := obj.NodeID("fake-dependency")
@@ -52,11 +151,11 @@ func TestExtractEvents(t *testing.T) {
 			},
 		},
 	}
-	events := extractEvents(obj, []v1alpha1.TriggerParameter{
+	events := ExtractEvents(obj, []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				Event:   "fake-dependency",
-				DataKey: "name",
+				DependencyName: "fake-dependency",
+				DataKey:        "name",
 			},
 		},
 	})
@@ -64,11 +163,11 @@ func TestExtractEvents(t *testing.T) {
 	assert.Equal(t, events["fake-dependency"].Context.Subject, "example-1")
 
 	delete(obj.Status.Nodes, id)
-	events = extractEvents(obj, []v1alpha1.TriggerParameter{
+	events = ExtractEvents(obj, []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				Event:   "fake-dependency",
-				DataKey: "name",
+				DependencyName: "fake-dependency",
+				DataKey:        "name",
 			},
 		},
 	})
@@ -105,40 +204,40 @@ func TestResolveParamValue(t *testing.T) {
 		{
 			name: "get first name",
 			source: &v1alpha1.TriggerParameterSource{
-				Event:   "fake-dependency",
-				DataKey: "name.first",
+				DependencyName: "fake-dependency",
+				DataKey:        "name.first",
 			},
 			result: "fake",
 		},
 		{
 			name: "get the event subject",
 			source: &v1alpha1.TriggerParameterSource{
-				Event:      "fake-dependency",
-				ContextKey: "subject",
+				DependencyName: "fake-dependency",
+				ContextKey:     "subject",
 			},
 			result: "example-1",
 		},
 		{
 			name: "get the entire payload",
 			source: &v1alpha1.TriggerParameterSource{
-				Event: "fake-dependency",
+				DependencyName: "fake-dependency",
 			},
 			result: string(eventBody),
 		},
 		{
 			name: "get the default value",
 			source: &v1alpha1.TriggerParameterSource{
-				Event: "fake-dependency",
-				Value: &defaultValue,
+				DependencyName: "fake-dependency",
+				Value:          &defaultValue,
 			},
 			result: defaultValue,
 		},
 		{
 			name: "data key has preference over context key",
 			source: &v1alpha1.TriggerParameterSource{
-				Event:      "fake-dependency",
-				ContextKey: "subject",
-				DataKey:    "name.first",
+				DependencyName: "fake-dependency",
+				ContextKey:     "subject",
+				DataKey:        "name.first",
 			},
 			result: "fake",
 		},
@@ -146,7 +245,7 @@ func TestResolveParamValue(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := resolveParamValue(test.source, events)
+			result, err := ResolveParamValue(test.source, events)
 			assert.Nil(t, err)
 			assert.Equal(t, test.result, string(result))
 		})
@@ -216,8 +315,8 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						Event:   "fake-dependency",
-						DataKey: "name.first",
+						DependencyName: "fake-dependency",
+						DataKey:        "name.first",
 					},
 					Dest:      "name",
 					Operation: v1alpha1.TriggerParameterOpNone,
@@ -231,8 +330,8 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						Event:   "fake-dependency",
-						DataKey: "name.first",
+						DependencyName: "fake-dependency",
+						DataKey:        "name.first",
 					},
 					Dest:      "name",
 					Operation: v1alpha1.TriggerParameterOpPrepend,
@@ -246,8 +345,8 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						Event:   "fake-dependency",
-						DataKey: "name.first",
+						DependencyName: "fake-dependency",
+						DataKey:        "name.first",
 					},
 					Dest:      "name",
 					Operation: v1alpha1.TriggerParameterOpAppend,
@@ -261,8 +360,8 @@ func TestApplyParams(t *testing.T) {
 			params: []v1alpha1.TriggerParameter{
 				{
 					Src: &v1alpha1.TriggerParameterSource{
-						Event:   "fake-dependency",
-						DataKey: "name.first",
+						DependencyName: "fake-dependency",
+						DataKey:        "name.first",
 					},
 					Dest:      "name",
 					Operation: v1alpha1.TriggerParameterOpOverwrite,
@@ -275,7 +374,7 @@ func TestApplyParams(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			result, err := applyParams(test.jsonObj, test.params, events)
+			result, err := ApplyParams(test.jsonObj, test.params, events)
 			assert.Nil(t, err)
 			assert.Equal(t, string(test.result), string(result))
 		})
@@ -299,7 +398,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
-	obj.Spec.Triggers[0].Template.Source = &v1alpha1.ArtifactLocation{
+	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: deployment,
 	}
 	id := obj.NodeID("fake-dependency")
@@ -311,18 +410,18 @@ func TestApplyResourceParameters(t *testing.T) {
 			Type:  v1alpha1.NodeTypeEventDependency,
 		},
 	}
-	obj.Spec.Triggers[0].ResourceParameters = []v1alpha1.TriggerParameter{
+	obj.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				Event:   "fake-dependency",
-				DataKey: "name.first",
+				DependencyName: "fake-dependency",
+				DataKey:        "name.first",
 			},
 			Operation: v1alpha1.TriggerParameterOpNone,
 			Dest:      "metadata.name",
 		},
 	}
 
-	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].ResourceParameters, deployment)
+	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }
@@ -350,17 +449,17 @@ func TestApplyTemplateParameters(t *testing.T) {
 			Type:  v1alpha1.NodeTypeEventDependency,
 		},
 	}
-	obj.Spec.Triggers[0].TemplateParameters = []v1alpha1.TriggerParameter{
+	obj.Spec.Triggers[0].Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
-				Event:   "fake-dependency",
-				DataKey: "group",
+				DependencyName: "fake-dependency",
+				DataKey:        "group",
 			},
 			Operation: v1alpha1.TriggerParameterOpOverwrite,
-			Dest:      "group",
+			Dest:      "k8s.group",
 		},
 	}
 	err := ApplyTemplateParameters(obj, &obj.Spec.Triggers[0])
 	assert.Nil(t, err)
-	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.GroupVersionResource.Group)
+	assert.Equal(t, "fake", obj.Spec.Triggers[0].Template.K8s.GroupVersionResource.Group)
 }

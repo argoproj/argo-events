@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: webhook-pod-trigger
+        k8s:
+          group: ""
+          version: v1
+          resource: pods
+          operation: create
+          source:
+            resource:
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                generateName: hello-world-
+              spec:
+                serviceAccountName: argo-events-sa
+                containers:
+                  - name: hello-container
+                    args:
+                      - "hello-world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep
+              dest: spec.containers.0.args.0

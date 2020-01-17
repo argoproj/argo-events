@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: webhook-event-source
+spec:
+  type: "webhook"
+  webhook:
+    # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
+    example:
+      # port to run HTTP server on
+      port: "12000"
+      # endpoint to listen to
+      endpoint: "/example"
+      # HTTP request method to allow. In this case, only POST requests are accepted
+      method: "POST"

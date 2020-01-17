@@ -13,7 +13,9 @@
 # But user would like to have dynamic trigger spec where depending on the data in the payload.
 # The example data payload contains information like bucket, key, name, namespace which is used to replace the placeholders in trigger spec.
 # The image in payload will be used to replace the image in the workflow.
-#
+
+# A parameter takes a key from event payload, extracts the value and set it at the destination.
+
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
@@ -25,62 +27,66 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:example"
-  eventProtocol:
-    type: "HTTP"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
-        name: THIS_WILL_BE_REPLACED_NAME
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          s3:
-            bucket:
-              name: THIS_WILL_BE_REPLACED_BUCKET
-              key: THIS_WILL_BE_REPLACED_KEY
-            endpoint: "minio-service.argo-events:"
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
-      # Apply parameter at template
-      templateParameters:
+        name: THIS_WILL_BE_REPLACED_BY_NAME_FROM_EVENT
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            s3:
+              bucket:
+                name: THIS_WILL_BE_REPLACED_BUCKET_FROM_EVENT
+                key: THIS_WILL_BE_REPLACED_KEY_FROM_EVENT
+              # endpoint can vary based on your minio installation
+              endpoint: minio-service.argo-events:9000
+              insecure: true
+              accessKey:
+                key: accesskey
+                name: artifacts-minio
+              secretKey:
+                key: secretkey
+                name: artifacts-minio
+          # Apply parameters for workflow resource fetched from the S3 bucket
+          parameters:
+            - src:
+                dependencyName: test-dep
+                path: image
+              dest: spec.templates.0.container.image
+      # Apply parameters at the template level.
+      parameters:
         - src:
-            event: "webhook-gateway:example"
+            dependencyName: test-dep
             path: name
           dest: name
         - src:
-            event: "webhook-gateway:example"
+            dependencyName: test-dep
             path: namespace
-          dest: namespace
+          dest: k8s.namespace
         - src:
-            event: "webhook-gateway:example"
+            dependencyName: test-dep
             path: bucket
-          dest: source.s3.bucket.name
+          dest: k8s.source.s3.bucket.name
         - src:
-            event: "webhook-gateway:example"
+            dependencyName: test-dep
             path: key
-          dest: source.s3.bucket.key
+          dest: k8s.source.s3.bucket.key
         - src:
-            event: "webhook-gateway:example"
+            dependencyName: test-dep
             path: port
-          dest: source.s3.endpoint
+          dest: k8s.source.s3.endpoint
           # Append the port to the existing source.s3.endpoint value
           operation: append
-      # Apply parameter for workflow
-      resourceParameters:
-        - src:
-            event: "webhook-gateway:example"
-            path: image
-          dest: spec.templates.0.container.image

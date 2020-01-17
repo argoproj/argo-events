@@ -87,7 +87,6 @@ func (ctx *gatewayContext) operate() error {
 			ctx.markGatewayPhase(v1alpha1.NodePhaseError, err.Error())
 			return err
 		}
-		ctx.updated = true
 
 	// Gateway is in error
 	case v1alpha1.NodePhaseError:

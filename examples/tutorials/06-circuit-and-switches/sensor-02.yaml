@@ -1,0 +1,74 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: circuit-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.12
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep-webhook
+      gatewayName: webhook-gateway
+      eventName: example
+    - name: test-dep-minio
+      gatewayName: minio-gateway
+      eventName: example
+
+  # group event dependencies
+  dependencyGroups:
+    - name: group_1
+      dependencies:
+        - test-dep-webhook
+    - name: group_2
+      dependencies:
+        - test-dep-minio
+
+  circuit: "group_1 && group_2"
+
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        switch:
+          all:
+            - group_1
+            - group_2
+        name: workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: group-1-and-2-
+              spec:
+                serviceAccountName: argo-events-sa
+                entrypoint: whalesay
+                templates:
+                  - name: whalesay
+                    container:
+                      args:
+                        - "hello world"
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep-webhook
+                dataKey: body.message
+              dest: spec.templates.0.container.args.0
+            - src:
+                dependencyName: test-dep-minio
+                dataKey: s3.bucket.name
+              dest: spec.templates.0.container.args.1

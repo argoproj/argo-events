@@ -32,14 +32,14 @@ type ResourceLabels struct {
 }
 
 func (rl *ResourceLabels) ApplyPolicy() error {
-	if rl.Trigger.Policy.ResourceLabels.Labels == nil {
+	if rl.Trigger.Policy.K8s == nil || rl.Trigger.Policy.K8s.Labels == nil || &rl.Trigger.Policy.K8s.Backoff == nil {
 		return nil
 	}
 
 	// check if success labels match with labels on object
 	completed := false
 
-	err := wait.ExponentialBackoff(rl.Trigger.Policy.Backoff, func() (bool, error) {
+	err := wait.ExponentialBackoff(rl.Trigger.Policy.K8s.Backoff, func() (bool, error) {
 		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -52,7 +52,7 @@ func (rl *ResourceLabels) ApplyPolicy() error {
 
 		completed = true
 
-		for key, value := range rl.Trigger.Policy.ResourceLabels.Labels {
+		for key, value := range rl.Trigger.Policy.K8s.Labels {
 			if v, ok := labels[key]; ok {
 				if value != v {
 					completed = false
@@ -72,7 +72,7 @@ func (rl *ResourceLabels) ApplyPolicy() error {
 	return err
 }
 
-func newResourceLabels(trigger *v1alpha1.Trigger, client dynamic.NamespaceableResourceInterface, obj *unstructured.Unstructured) *ResourceLabels {
+func NewResourceLabels(trigger *v1alpha1.Trigger, client dynamic.NamespaceableResourceInterface, obj *unstructured.Unstructured) *ResourceLabels {
 	return &ResourceLabels{
 		Trigger: trigger,
 		Client:  client,

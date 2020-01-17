@@ -56,7 +56,7 @@ type payload struct {
 	// Header is the http request header
 	Header http.Header `json:"header"`
 	// Body is http request body
-	Body []byte `json:"body"`
+	Body *json.RawMessage `json:"body"`
 }
 
 // Implement Router
@@ -97,10 +97,12 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	data, err := json.Marshal(&payload{
+	payload := &payload{
 		Header: request.Header,
-		Body:   body,
-	})
+		Body:   (*json.RawMessage)(&body),
+	}
+
+	data, err := json.Marshal(payload)
 	if err != nil {
 		logger.WithError(err).Error("failed to construct the event payload")
 		common.SendErrorResponse(writer, err.Error())

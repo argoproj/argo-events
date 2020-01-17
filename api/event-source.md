@@ -691,6 +691,29 @@ Password to use to connect to broker
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>connectionBackoff</code></br> <em>
+github.com/argoproj/argo-events/common.Backoff </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Backoff holds parameters applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1305,7 +1328,54 @@ Emitter event source
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>redis</code></br> <em>
+<a href="#argoproj.io/v1alpha1.RedisEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Redis event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nsq</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NSQEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+NSQ event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -2746,6 +2816,141 @@ ConnectionBackoff holds backoff applied to connection.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.NSQEventSource">
+
+NSQEventSource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NSQEventSource describes the event source for NSQ PubSub More info at
+<a href="https://godoc.org/github.com/nsqio/go-nsq">https://godoc.org/github.com/nsqio/go-nsq</a>
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>hostAddress</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+HostAddress is the address of the host for NSQ lookup
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>topic</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Topic to subscribe to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channel</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Channel used for subscription
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>connectionBackoff</code></br> <em>
+github.com/argoproj/argo-events/common.Backoff </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Backoff holds parameters applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.PubSubEventSource">
 
 PubSubEventSource
@@ -2891,6 +3096,168 @@ for GCP
 
 DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub
 subscription once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.RedisEventSource">
+
+RedisEventSource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+RedisEventSource describes an event source for the Redis PubSub. More
+info at
+<a href="https://godoc.org/github.com/go-redis/redis#example-PubSub">https://godoc.org/github.com/go-redis/redis\#example-PubSub</a>
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>hostAddress</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+HostAddress refers to the address of the Redis host/server
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Password required for authentication if any.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to use to retrieve the password from. It should only be
+specified if password is declared
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>db</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+DB to use. If not specified, default DB 0 will be used.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channels</code></br> <em> \[\]string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Channels to subscribe to listen events.
 
 </p>
 
@@ -4065,6 +4432,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9d4a5c5</code>. </em>
+commit <code>3f6eb5d</code>. </em>
 
 </p>

@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: nsq-event-source
+spec:
+  type: "nsq"
+  nsq:
+    example:
+      # HostAddress is the address of the host for NSQ lookup
+      hostAddress: http://nsq.argo-events.svc:4151
+      # Topic to subscribe to.
+      topic: topic_name
+      # Channel used for subscription
+      channel: channel_name
+      # Backoff holds parameters applied to connection.
+      # +optional
+      connectionBackoff:
+        # duration in nanoseconds. following value is 10 seconds.
+        duration: 10000000000
+        # how many times you want to apply backoff.
+        steps: 5
+        # factor to increase on each step.
+        # setting factor > 1 makes the backoff exponential.
+        factor: 2
+        jitter: 0.2

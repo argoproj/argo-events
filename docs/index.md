@@ -14,15 +14,14 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 <br/>
 
 ## Features 
-* Manage dependencies from a variety of event sources.
+* Manage dependencies from 20+ event sources.
 * Ability to customize business-level constraint logic for event dependencies resolution.
 * Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Ability to extends framework to add your own event source listener.
-* Define arbitrary boolean logic to resolve event dependencies.
+* Supports AWS Lambda and OpenFaas as triggers.
+* Supports integration of existing API servers with 20+ event sources.
 * CloudEvents compliant.
-* Ability to manage event sources at runtime.
 
-## Event Listeners
+## Event Sources
 1. AMQP
 2. AWS SNS
 3. AWS SQS
@@ -40,3 +39,17 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 15. Slack
 16. NetApp StorageGrid
 17. Webhooks
+18. Stripe
+19. NSQ
+20. Emitter
+21. Redis
+22. Azure Events Hub
+
+## Installation
+Follow the [setup](https://argoproj.github.io/argo-events/installation/) to install Argo Events.
+
+## Quick Start
+Check out the quick start [guide](https://argoproj.github.io/argo-events/getting_started/) to trigger Argo workflows on webhook events.
+
+## Deep Dive
+Explore the [tutorial](https://argoproj.github.io/argo-events/walkthrough/) to dive deep into Argo Events features.

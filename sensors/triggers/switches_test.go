@@ -17,11 +17,52 @@ limitations under the License.
 package triggers
 
 import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
+
+var sensorObj = &v1alpha1.Sensor{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-sensor",
+		Namespace: "fake",
+	},
+	Spec: v1alpha1.SensorSpec{
+		Triggers: []v1alpha1.Trigger{
+			{
+				Template: &v1alpha1.TriggerTemplate{
+					Name: "fake-trigger",
+					K8s: &v1alpha1.StandardK8sTrigger{
+						GroupVersionResource: &metav1.GroupVersionResource{
+							Group:    "apps",
+							Version:  "v1",
+							Resource: "deployments",
+						},
+					},
+				},
+			},
+		},
+	},
+}
+
+func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": apiVersion,
+			"kind":       kind,
+			"metadata": map[string]interface{}{
+				"namespace": namespace,
+				"name":      name,
+				"labels": map[string]interface{}{
+					"name": name,
+				},
+			},
+		},
+	}
+}
 
 func TestApplySwitches(t *testing.T) {
 	obj := sensorObj.DeepCopy()
