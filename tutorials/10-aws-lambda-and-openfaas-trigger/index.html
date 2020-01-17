@@ -719,26 +719,34 @@ that are not native to AWS.</p>
 <li>Set up the webhook gateway and event source.</li>
 <li>Create a K8s secret that holds your access and secret key. Make sure to store the base64
    encoded keys in the secret.</li>
-<li>Create a basic lambda function that can parse following payload,</li>
+<li>Create a basic lambda function that can parse following payload,<div class="codehilite"><pre><span></span>{&quot;name&quot;: &quot;foo&quot;}
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>json
-   {"name": "foo"}</code></p>
 <h2 id="lambda-trigger">Lambda Trigger<a class="headerlink" href="#lambda-trigger" title="Permanent link">&para;</a></h2>
 <p>The trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#awslambdatrigger">here</a></p>
 <p><strong>Note</strong>: You must declare the payload for the lambda trigger. Check out the HTTP trigger tutorial
 to understand how to construct the payload.</p>
 <ol>
-<li>Lets create a sensor with a lambda trigger</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/10-aws-lambda-trigger/sensor.yaml</code></p>
-<ol>
-<li>Send a http request to webhook gateway,</li>
-</ol>
-<p><code>curl
-   curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>You should see the lambda execution in CloudWatch logs.</li>
+<li>
+<p>Lets create a sensor with a lambda trigger</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/10-aws-lambda-trigger/sensor.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a http request to webhook gateway,</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;name&quot;:&quot;foo&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>You should see the lambda execution in CloudWatch logs.</p>
+</li>
 </ol>
 <h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
 <p>To determine whether the function was successful or not, Lambda trigger provides a <code>Status</code> policy.

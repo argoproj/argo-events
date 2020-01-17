@@ -701,96 +701,106 @@ create the Kubernetes resource of your choice.</li>
 </ol>
 <p>You will notice that the <code>group</code> key is empty, that means we want to use <code>core</code> group.
    For any other groups, you need to specify the <code>group</code> key.</p>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-pod.yaml</code></p>
-<ol>
-<li>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Now, you should see a pod being created.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events get po</code></p>
-<p>Output</p>
-<p>```</p>
-<hr />
-<p>/ {"context":{"type":"webhook","specVersi \
-  | on":"0.3","source":"webhook-gateway","e |
-  | ventID":"30306463666539362d346666642d34 |
-  | 3336332d383861312d336538363333613564313 |
-  | 932","time":"2020-01-11T21:23:07.682961 |
-  | Z","dataContentType":"application/json" |
-  | ,"subject":"example"},"data":"eyJoZWFkZ |
-  | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-  | LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |
-  | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-  | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-  \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="}       /</p>
-<hr />
-<div class="codehilite"><pre><span></span>  \
-   \
-    \     
-                  ##        .            
-            ## ## ##       ==            
-         ## ## ## ##      ===            
-     /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-     \______ o          __/            
-      \    \        __/             
-        \____\______/
+<div class="codehilite"><pre><span></span>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-pod.yaml
 </pre></div>
 
 
-<p>```</p>
+<ol>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see a pod being created.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get po
+</pre></div>
+
+
+</li>
+</ol>
+<p>Output</p>
+<div class="codehilite"><pre><span></span>    _________________________________________ 
+    / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
+    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
+    | ventID&quot;:&quot;30306463666539362d346666642d34 |
+    | 3336332d383861312d336538363333613564313 |
+    | 932&quot;,&quot;time&quot;:&quot;2020-01-11T21:23:07.682961 |
+    | Z&quot;,&quot;dataContentType&quot;:&quot;application/json&quot; |
+    | ,&quot;subject&quot;:&quot;example&quot;},&quot;data&quot;:&quot;eyJoZWFkZ |
+    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
+    | LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |
+    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
+    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
+    \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;}       /
+    ----------------------------------------- 
+      \
+       \
+        \     
+                      ##        .            
+                ## ## ##       ==            
+             ## ## ## ##      ===            
+         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+         \______ o          __/            
+          \    \        __/             
+            \____\______/
+</pre></div>
+
+
 <h2 id="deployment">Deployment<a class="headerlink" href="#deployment" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Lets create a sensor with a K8s deployment as trigger.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-deployment.yaml</code></p>
-<ol>
-<li>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Now, you should see a deployment being created. Get the corresponding pod.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events get deployments</code></p>
-<p>Output</p>
-<p>```</p>
-<hr />
-<p>/ {"context":{"type":"webhook","specVersi \
-  | on":"0.3","source":"webhook-gateway","e |
-  | ventID":"30306463666539362d346666642d34 |
-  | 3336332d383861312d336538363333613564313 |
-  | 932","time":"2020-01-11T21:23:07.682961 |
-  | Z","dataContentType":"application/json" |
-  | ,"subject":"example"},"data":"eyJoZWFkZ |
-  | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-  | LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |
-  | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-  | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-  \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ=="}       /</p>
-<hr />
-<div class="codehilite"><pre><span></span>  \
-   \
-    \     
-                  ##        .            
-            ## ## ##       ==            
-         ## ## ## ##      ===            
-     /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
-~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-     \______ o          __/            
-      \    \        __/             
-        \____\______/
+<li>
+<p>Lets create a sensor with a K8s deployment as trigger.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-deployment.yaml
 </pre></div>
 
 
-<p>```</p>
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see a deployment being created. Get the corresponding pod.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get deployments
+</pre></div>
+
+
+</li>
+</ol>
+<p>Output</p>
+<div class="codehilite"><pre><span></span>    _________________________________________ 
+    / {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
+    | on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
+    | ventID&quot;:&quot;30306463666539362d346666642d34 |
+    | 3336332d383861312d336538363333613564313 |
+    | 932&quot;,&quot;time&quot;:&quot;2020-01-11T21:23:07.682961 |
+    | Z&quot;,&quot;dataContentType&quot;:&quot;application/json&quot; |
+    | ,&quot;subject&quot;:&quot;example&quot;},&quot;data&quot;:&quot;eyJoZWFkZ |
+    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
+    | LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |
+    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
+    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
+    \ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;}       /
+    ----------------------------------------- 
+      \
+       \
+        \     
+                      ##        .            
+                ## ## ##       ==            
+             ## ## ## ##      ===            
+         /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+         \______ o          __/            
+          \    \        __/             
+            \____\______/
+</pre></div>
                 
                   
                 

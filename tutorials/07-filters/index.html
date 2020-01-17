@@ -711,55 +711,63 @@ apply constraints on the events in order to determine a validity.</p>
 <h2 id="data-filter">Data Filter<a class="headerlink" href="#data-filter" title="Permanent link">&para;</a></h2>
 <p>Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook gateway has
 payload structure as,</p>
-<p><code>json
-  {
-    "context": {
-      "type": "type_of_gateway",
-      "specVersion": "cloud_events_version",
-      "source": "name_of_the_gateway",
-      "eventID": "unique_event_id",
-      "time": "event_time",
-      "dataContentType": "type_of_data",
-      "subject": "name_of_the_event_within_event_source"
-    },
-    "data": {
-      "header": {},
-      "body": {},
+<div class="codehilite"><pre><span></span>    {
+        &quot;context&quot;: {
+          &quot;type&quot;: &quot;type_of_gateway&quot;,
+          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
+          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;time&quot;: &quot;event_time&quot;,
+          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+        },
+        &quot;data&quot;: {
+          &quot;header&quot;: {},
+          &quot;body&quot;: {},
+        }
     }
-  }</code> </p>
+</pre></div>
+
+
 <p>Data Filter are applied on <code>data</code> within the payload. We will make a simple HTTP request
 to webhook gateway with request data as <code>{"message":"this is my first webhook"}</code> and apply
 data filter on <code>message</code>.</p>
 <p>A data filter has following fields,</p>
-<div class="codehilite"><pre><span></span><span class="nt">data</span><span class="p">:</span>
-  <span class="p p-Indicator">-</span> <span class="nt">path</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">path_within_event_data</span>
-    <span class="nt">type</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">types_of_the_data</span>
-    <span class="nt">value</span><span class="p">:</span>
-      <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">list_of_possible_values</span>      
+<div class="codehilite"><pre><span></span>    data:
+      - path: path_within_event_data
+        type: types_of_the_data
+        value:
+          - list_of_possible_values
 </pre></div>
 
 
 <p><strong>Note</strong>: If data type is a <code>string</code>, then you can pass either an exact value or a regex.
 If data types is bool or float, then you need to pass the exact value.</p>
 <ol>
-<li>Lets create a webhook sensor with data filter.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml</code></p>
-<ol>
-<li>Send a HTTP request to gateway</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
+<li>
+<p>Lets create a webhook sensor with data filter.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to gateway</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
 <li>
 <p>You will notice that the sensor logs prints the event is invalid as the sensor expects for
    either <code>hello</code> or <code>hey</code> as the value of <code>body.message</code>.</p>
 </li>
 <li>
 <p>Send a valid HTTP request to gateway</p>
-<p><code>bash
-curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;hello&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
 </li>
 <li>
 <p>Watch for a workflow with name <code>data-workflow-xxxx</code>.</p>
@@ -769,18 +777,24 @@ curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http:/
 <p>Similar to the data filter, you can apply a filter on the context of the event.</p>
 <p>Change the subscriber in the webhook gateway to point it to <code>context-filter</code> sensor's URL.</p>
 <ol>
-<li>Lets create a webhook sensor with context filter.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml</code></p>
-<ol>
-<li>Send a HTTP request to gateway</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>You will notice that the sensor logs prints the event is invalid as the sensor expects for
-   either <code>custom-webhook</code> as the value of the <code>source</code>.</li>
+<li>
+<p>Lets create a webhook sensor with context filter.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to gateway</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>You will notice that the sensor logs prints the event is invalid as the sensor expects for
+   either <code>custom-webhook</code> as the value of the <code>source</code>.</p>
+</li>
 </ol>
 <h2 id="time-filter">Time Filter<a class="headerlink" href="#time-filter" title="Permanent link">&para;</a></h2>
 <p>Time filter is specially helpful when you need to make sure an event occurs between a 

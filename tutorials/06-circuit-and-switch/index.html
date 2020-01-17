@@ -703,80 +703,100 @@ If the logic results in <code>true</code> value, the sensor will execute the tri
 to trigger an Argo workflow if the sensor receives an event from the <code>Webhook</code> gateway,
 but, another workflow if it receives an event from the <code>Minio</code> gateway.</p>
 <ol>
-<li>Create the webhook event source and gateway. The gateway listens to HTTP requests
-   on port <code>12000</code></li>
+<li>
+<p>Create the webhook event source and gateway. The gateway listens to HTTP requests
+   on port <code>12000</code></p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
+
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Create the minio event source and gateway. The gateway listens to events of type
+   <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
+
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml</code></p>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml</code></p>
-<ol>
-<li>Create the minio event source and gateway. The gateway listens to events of type
-   <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml</code></p>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml</code></p>
 <p>Make sure there are no errors in any of the gateways and all event sources are active.</p>
 <ol>
-<li>Lets create the sensor. If you take a closer look at the trigger templates, you will
+<li>
+<p>Lets create the sensor. If you take a closer look at the trigger templates, you will
    notice that it contains <code>switch</code> key with <code>all</code> condition, meaning, execute this trigger
    when every group defined in <code>all</code> is resolved. In the sensor definition, there
    is only one group under <code>all</code> in both trigger templates. So, as soon as the group is resolved, the
-   corresponding trigger will be executed.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-01.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to Webhook gateway,</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>You will notice an Argo worklfow with name <code>group-1-xxxx</code> is created with following output,</li>
-</ol>
-<p><code>__________________________ 
-    &lt; this is my first webhook &gt;
-     -------------------------- 
-        \
-         \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/</code></p>
-<ol>
-<li>Now, lets generate a Minio event so that we can run <code>group-2-xxxx</code> workflow. Drop a file
+   corresponding trigger will be executed.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to Webhook gateway,</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>You will notice an Argo worklfow with name <code>group-1-xxxx</code> is created with following output,</p>
+<div class="codehilite"><pre><span></span> __________________________ 
+&lt; this is my first webhook &gt;
+ -------------------------- 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, lets generate a Minio event so that we can run <code>group-2-xxxx</code> workflow. Drop a file
    onto <code>test</code> bucket. The workflow that will get created will print the name of the bucket as
-   follow,</li>
+   follow,</p>
+<div class="codehilite"><pre><span></span> ______ 
+&lt; test &gt;
+ ------ 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/
+</pre></div>
+
+
+</li>
+<li>
+<p>Great!! You have now learned how to use a <code>circuit</code> and <code>switch</code>. Lets update the sensor with a trigger
+   that waits for both groups to resolve. This is the normal sensor behavior if circuit is not defined.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>______ 
-    &lt; test &gt;
-     ------ 
-        \
-         \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/</code></p>
-<ol>
-<li>Great!! You have now learned how to use a <code>circuit</code> and <code>switch</code>. Lets update the sensor with a trigger
-   that waits for both groups to resolve. This is the normal sensor behavior if circuit is not defined.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-02.yaml</code>
-   Send a HTTP request and perform a file drop on Minio bucket as done above. You should following output,</p>
-<p><code>_______________________________ 
+<p>Send a HTTP request and perform a file drop on Minio bucket as done above. You should following output,</p>
+<div class="codehilite"><pre><span></span>     _______________________________ 
     &lt; this is my first webhook test &gt;
      ------------------------------- 
         \
@@ -785,11 +805,12 @@ but, another workflow if it receives an event from the <code>Minio</code> gatewa
                         ##        .            
                   ## ## ##       ==            
                ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
            \______ o          __/            
             \    \        __/             
-              \____\______/</code></p>
+              \____\______/
+</pre></div>
                 
                   
                 

@@ -732,33 +732,41 @@ will explore other trigger sources.</p>
 </li>
 <li>
 <p>Create a K8s secret that holds the SSH keys</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/&lt;YOUR_SSH_KEY_FILE_NAME&gt;
+</pre></div>
+
+
 </li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/&lt;YOUR_SSH_KEY_FILE_NAME&gt;</code></p>
-<ol>
-<li>Create a K8s secret that holds known hosts.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts</code></p>
-<ol>
+<li>
+<p>Create a K8s secret that holds known hosts.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
+</pre></div>
+
+
+</li>
 <li>
 <p>Create a sensor with the git trigger source and refer it to the <code>hello world</code> worklfow stored
    on the Argo Git project</p>
-<p><code>bash
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml</code>   </p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml
+</pre></div>
+
+
 </li>
 <li>
 <p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see an Argo workflow being created.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
+</pre></div>
+
+
 </li>
 </ol>
-<p><code>bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Now, you should see an Argo workflow being created.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events get wf</code></p>
 <h2 id="s3">S3<a class="headerlink" href="#s3" title="Permanent link">&para;</a></h2>
 <p>You can refer to the K8s resource stored on S3 complaint store as the trigger source.</p>
 <p>For this tutorial, lets set up a minio server which is S3 compliant store.</p>
@@ -779,42 +787,58 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
 </li>
 <li>
 <p>Create the sensor with trigger source as S3.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see an Argo workflow being created.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
+</pre></div>
+
+
 </li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml</code></p>
-<ol>
-<li>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Now, you should see an Argo workflow being created.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events get wf</code></p>
 <h2 id="k8s-configmap">K8s Configmap<a class="headerlink" href="#k8s-configmap" title="Permanent link">&para;</a></h2>
 <p>K8s configmap can be treated as trigger source if needed.</p>
 <ol>
-<li>Lets create a configmap called <code>trigger-store</code>.</li>
+<li>
+<p>Lets create a configmap called <code>trigger-store</code>.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Create a sensor with trigger source as configmap and refer it to the <code>trigger-store</code>.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see an Argo workflow being created.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml</code></p>
-<ol>
-<li>Create a sensor with trigger source as configmap and refer it to the <code>trigger-store</code>.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml</code></p>
-<ol>
-<li>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Now, you should see an Argo workflow being created.</li>
-</ol>
-<p><code>bash
-   kubectl -n argo-events get wf</code></p>
 <h2 id="file-url">File &amp; URL<a class="headerlink" href="#file-url" title="Permanent link">&para;</a></h2>
 <p>File and URL trigger sources are pretty self explanatory. The example sensors are available under <code>examples/sensors</code> folder.</p>
                 

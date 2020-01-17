@@ -699,74 +699,89 @@ created in <code>argo-events</code> namespace.</li>
 <p>Lets set up a basic webhook gateway and sensor that listens to events over
 HTTP and executes an Argo workflow.</p>
 <ul>
-<li>Create the webhook event source.</li>
+<li>
+<p>Create the webhook event source.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Create the webhook gateway.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Create the webhook sensor.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events create -f https://github.com/argoproj/argo-events/tree/master/examples/sensors/webhook.yaml
+</pre></div>
+
+
+</li>
 </ul>
-<p><code>bash
-   kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml</code></p>
-<ul>
-<li>Create the webhook gateway.</li>
-</ul>
-<p><code>bash
-   kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml</code></p>
-<ul>
-<li>Create the webhook sensor.</li>
-</ul>
-<p><code>bash
-   kubectl -n argo-events create -f https://github.com/argoproj/argo-events/tree/master/examples/sensors/webhook.yaml</code></p>
 <p>If the commands are executed successfully, the gateway and sensor pods will get created. You will
 also notice that a service is created for both the gateway and sensor. </p>
 <ul>
-<li>Expose the gateway pod via Ingress, OpenShift Route
-or port forward to consume requests over HTTP.</li>
-</ul>
-<p><code>bash
-   kubectl -n port-forward &lt;gateway-pod-name&gt; 12000:12000</code></p>
-<ul>
-<li>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></li>
-</ul>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ul>
-<li>Now, you should see an Argo workflow being created.</li>
-</ul>
-<p><code>bash
-   kubectl -n argo-events get wf</code></p>
-<ul>
+<li>
+<p>Expose the gateway pod via Ingress, OpenShift Route
+or port forward to consume requests over HTTP.</p>
+<div class="codehilite"><pre><span></span>kubectl -n port-forward &lt;gateway-pod-name&gt; 12000:12000
+</pre></div>
+
+
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Now, you should see an Argo workflow being created.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get wf
+</pre></div>
+
+
+</li>
 <li>
 <p>Make sure the workflow pod ran successfully.</p>
-<p>```
-    <strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em></strong><strong><em>_</em>_ 
-    / {"context":{"type":"webhook","specVersi \
-    | on":"0.3","source":"webhook-gateway","e |
-    | ventID":"38376665363064642d343336352d34 |
-    | 3035372d393766662d366234326130656232343 |
-    | 337","time":"2020-01-11T16:55:42.996636 |
-    | Z","dataContentType":"application/json" |
-    | ,"subject":"example"},"data":"eyJoZWFkZ |
-    | XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
-    | LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
-    | iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
-    | FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
-    | jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
-    \ IHdlYmhvb2sifX0="}                      /
-     ----------------------------------------- 
-        \
-         \
-          \   <br />
-                        ##        .          <br />
-                  ## ## ##       ==          <br />
-               ## ## ## ##      ===          <br />
-           /""""""""""""""""</strong>_/ ===      <br />
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~ <br />
-           _<strong><em>_</em> o          </strong>/          <br />
-            \    \        <strong>/           <br />
-              _<strong><em>_</em></strong></strong>/   </p>
-<p>```
-<b>Note:</b> You will see the message printed in the workflow logs contains both the event context
-and data, with data being base64 encoded. In later sections, we will see how to extract particular key-value
-from event context or data and pass it to the workflow as arguments.</p>
+<div class="codehilite"><pre><span></span>_________________________________________ 
+/ {&quot;context&quot;:{&quot;type&quot;:&quot;webhook&quot;,&quot;specVersi \
+| on&quot;:&quot;0.3&quot;,&quot;source&quot;:&quot;webhook-gateway&quot;,&quot;e |
+| ventID&quot;:&quot;38376665363064642d343336352d34 |
+| 3035372d393766662d366234326130656232343 |
+| 337&quot;,&quot;time&quot;:&quot;2020-01-11T16:55:42.996636 |
+| Z&quot;,&quot;dataContentType&quot;:&quot;application/json&quot; |
+| ,&quot;subject&quot;:&quot;example&quot;},&quot;data&quot;:&quot;eyJoZWFkZ |
+| XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |
+| LUxlbmd0aCI6WyIzOCJdLCJDb250ZW50LVR5cGU |
+| iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |
+| FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |
+| jp7Im1lc3NhZ2UiOiJ0aGlzIGlzIG15IGZpcnN0 |
+\ IHdlYmhvb2sifX0=&quot;}                      /
+ ----------------------------------------- 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/
+</pre></div>
+
+
 </li>
 </ul>
+<p><b>Note:</b> You will see the message printed in the workflow logs contains both the event context
+and data, with data being base64 encoded. In later sections, we will see how to extract particular key-value
+from event context or data and pass it to the workflow as arguments.</p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
 <p>If you don't see the gateway and sensor pod in <code>argo-events</code> namespace,</p>
 <ol>
@@ -779,10 +794,16 @@ from event context or data and pass it to the workflow as arguments.</p>
 <li>Look for any error in gateway or sensor pod.</li>
 <li>
 <p>Inspect the gateway,</p>
-<p><code>kubectl -n argo-event gateway-object-name -o yaml</code>
- Inspect the sensor,</p>
-<p><code>kubectl -n argo-events sensor-object-name -o yaml</code>
- and look for any errors within the <code>Status</code>.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-event gateway-object-name -o yaml
+</pre></div>
+
+
+<p>Inspect the sensor,</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events sensor-object-name -o yaml
+</pre></div>
+
+
+<p>and look for any errors within the <code>Status</code>.</p>
 </li>
 <li>
 <p>Raise an issue on GitHub or post a question on <code>argo-events</code> slack channel.</p>

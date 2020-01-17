@@ -774,7 +774,7 @@ and how to use default values if certain <code>key</code> is not available withi
 <p>If you take a closer look at the <code>Sensor</code> object, you will notice it contains a list
 of triggers. Each <code>Trigger</code> contains the template that defines the context of the trigger
 and actual <code>resource</code> that we expect the sensor to execute. In previous section, the <code>resource</code> within
-the trigger template was an Argo workflow. </p>
+the trigger template was an Argo workflow.</p>
 <p>This subsection deals with how to parameterize the <code>resource</code> within trigger template
 with the event payload.</p>
 <h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h3>
@@ -782,22 +782,24 @@ with the event payload.</p>
 <h3 id="webhook-event-payload">Webhook Event Payload<a class="headerlink" href="#webhook-event-payload" title="Permanent link">&para;</a></h3>
 <p>Webhook gateway consumes events through HTTP requests and transforms them into CloudEvents.
 The structure of the event the Webhook sensor receives from the gateway looks like following,</p>
-<p><code>json
-  {
-    "context": {
-      "type": "type_of_gateway",
-      "specVersion": "cloud_events_version",
-      "source": "name_of_the_gateway",
-      "eventID": "unique_event_id",
-      "time": "event_time",
-      "dataContentType": "type_of_data",
-      "subject": "name_of_the_event_within_event_source"
-    },
-    "data": {
-      "header": {},
-      "body": {},
+<div class="codehilite"><pre><span></span>    {
+        &quot;context&quot;: {
+          &quot;type&quot;: &quot;type_of_gateway&quot;,
+          &quot;specVersion&quot;: &quot;cloud_events_version&quot;,
+          &quot;source&quot;: &quot;name_of_the_gateway&quot;,
+          &quot;eventID&quot;: &quot;unique_event_id&quot;,
+          &quot;time&quot;: &quot;event_time&quot;,
+          &quot;dataContentType&quot;: &quot;type_of_data&quot;,
+          &quot;subject&quot;: &quot;name_of_the_event_within_event_source&quot;
+        },
+        &quot;data&quot;: {
+          &quot;header&quot;: {},
+          &quot;body&quot;: {},
+        }
     }
-  }</code> </p>
+</pre></div>
+
+
 <ol>
 <li>
 <p><code>Context</code>: This is the CloudEvent context and it is populated by the gateway regardless of 
@@ -819,23 +821,31 @@ type of HTTP request.</p>
 <p>Now that we have an understanding of the structure of the event the webhook sensor receives from
 the gateway, lets see how we can use the event context to parameterize the Argo workflow.</p>
 <ol>
-<li>Update the <code>Webhook Sensor</code> and add the <code>contextKey</code> for the parameter at index 0.</li>
+<li>
+<p>Update the <code>Webhook Sensor</code> and add the <code>contextKey</code> for the parameter at index 0.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-01.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to the gateway.</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Inspect the output of the Argo workflow that was created.</p>
+<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-01.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to the gateway.</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Inspect the output of the Argo workflow that was created.</li>
-</ol>
-<p><code>bash
-   argo logs name_of_the_workflow</code></p>
 <p>You will see the following output,</p>
-<p><code>_________
-   &lt; webhook &gt;
+<div class="codehilite"><pre><span></span>    _________
+    &lt; webhook &gt;
     ---------
        \
         \
@@ -843,11 +853,14 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
                        ##        .
                  ## ## ##       ==
               ## ## ## ##      ===
-          /""""""""""""""""___/ ===
+          /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===
      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
           \______ o          __/
            \    \        __/
-             \____\______/</code></p>
+             \____\______/
+</pre></div>
+
+
 <p>We have successfully extracted the <code>type</code> key within the event context and parameterized
 the workflow to print the value of the <code>type</code>.</p>
 <h3 id="event-data">Event Data<a class="headerlink" href="#event-data" title="Permanent link">&para;</a></h3>
@@ -855,22 +868,30 @@ the workflow to print the value of the <code>type</code>.</p>
 We will extract the <code>message</code> from request payload and get the Argo workflow to 
 print the message.</p>
 <ol>
-<li>Update the <code>Webhook Sensor</code> and add the <code>dataKey</code> in the parameter at index 0.</li>
+<li>
+<p>Update the <code>Webhook Sensor</code> and add the <code>dataKey</code> in the parameter at index 0.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-02.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to the gateway.</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Inspect the output of the Argo workflow that was created.</p>
+<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-02.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to the gateway.</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Inspect the output of the Argo workflow that was created.</li>
-</ol>
-<p><code>bash
-   argo logs name_of_the_workflow</code></p>
 <p>You will see the following output,</p>
-<p><code>__________________________ 
+<div class="codehilite"><pre><span></span>     __________________________ 
     &lt; this is my first webhook &gt;
      -------------------------- 
         \
@@ -879,11 +900,14 @@ print the message.</p>
                         ##        .            
                   ## ## ##       ==            
                ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
            \______ o          __/            
             \    \        __/             
-              \____\______/</code></p>
+              \____\______/
+</pre></div>
+
+
 <p>Yay!! The Argo workflow printed the message. You can add however many number of parameters
 to update the trigger resource on the fly.</p>
 <p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a parameter, then
@@ -892,24 +916,32 @@ the <code>dataKey</code> takes the precedence.</p>
 <p>Each parameter comes with an option to configure the default value. This is specially
 important when the <code>key</code> you defined in the parameter doesn't exist in the event.</p>
 <ol>
-<li>Update the <code>Webhook Sensor</code> and add the <code>value</code> for the parameter at index 0.
-   We will also update the <code>dataKey</code> to an unknown event key.</li>
+<li>
+<p>Update the <code>Webhook Sensor</code> and add the <code>value</code> for the parameter at index 0.
+   We will also update the <code>dataKey</code> to an unknown event key.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-03.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to the gateway.</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Inspect the output of the Argo workflow that was created.</p>
+<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-03.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to the gateway.</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Inspect the output of the Argo workflow that was created.</li>
-</ol>
-<p><code>bash
-   argo logs name_of_the_workflow</code></p>
 <p>You will see the following output,</p>
-<p><code>_______________________ 
-   &lt; wow! a default value. &gt;
+<div class="codehilite"><pre><span></span>    _______________________ 
+    &lt; wow! a default value. &gt;
     ----------------------- 
        \
         \
@@ -917,33 +949,44 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
                        ##        .            
                  ## ## ##       ==            
               ## ## ## ##      ===            
-          /""""""""""""""""___/ ===        
+          /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
           \______ o          __/            
            \    \        __/             
-             \____\______/</code></p>
+             \____\______/
+</pre></div>
+
+
 <h3 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h3>
 <p>Sometimes you need the ability to append or prepend a parameter value to 
 an existing value in trigger resource. This is where the <code>operation</code> field within
 a parameter comes handy.</p>
 <ol>
-<li>Update the <code>Webhook Sensor</code> and add the <code>operation</code> in the parameter at index 0.
-   We will prepend the message to an existing value.</li>
+<li>
+<p>Update the <code>Webhook Sensor</code> and add the <code>operation</code> in the parameter at index 0.
+   We will prepend the message to an existing value.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-04.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to the gateway.</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;hey!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Inspect the output of the Argo workflow that was created.</p>
+<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-04.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to the gateway.</li>
-</ol>
-<p><code>bash
-   curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Inspect the output of the Argo workflow that was created.</li>
-</ol>
-<p><code>bash
-   argo logs name_of_the_workflow</code></p>
 <p>You will see the following output,</p>
-<p><code>__________________ 
+<div class="codehilite"><pre><span></span>     __________________ 
     &lt; hey!!hello world &gt;
      ------------------ 
         \
@@ -952,11 +995,14 @@ a parameter comes handy.</p>
                         ##        .            
                   ## ## ##       ==            
                ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
+           /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
       ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
            \______ o          __/            
             \    \        __/             
-              \____\______/</code></p>
+              \____\______/
+</pre></div>
+
+
 <h2 id="trigger-template-parameterization">Trigger Template Parameterization<a class="headerlink" href="#trigger-template-parameterization" title="Permanent link">&para;</a></h2>
 <p>The parameterization you saw above deals with the trigger resource, but sometimes
 you need to parameterize the trigger template itself. This comes handy when you have
@@ -968,35 +1014,46 @@ parameterize the trigger resource. What?...</p>
 trigger resource under <code>k8s</code>. We will parameterize that <code>parameter</code> by
 applying a parameter at the trigger template level.</p>
 <ol>
-<li>Update the <code>Webhook Sensor</code> and add parameters at trigger level.</li>
+<li>
+<p>Update the <code>Webhook Sensor</code> and add parameters at trigger level.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-05.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Send a HTTP request to the gateway.</p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;dependencyName&quot;:&quot;test-dep&quot;, &quot;dataKey&quot;: &quot;body.message&quot;, &quot;dest&quot;: &quot;spec.arguments.parameters.0.value&quot;, &quot;message&quot;: &quot;amazing!!&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Inspect the output of the Argo workflow that was created.</p>
+<div class="codehilite"><pre><span></span>argo logs name_of_the_workflow
+</pre></div>
+
+
+</li>
 </ol>
-<p><code>bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-05.yaml</code>  </p>
-<ol>
-<li>Send a HTTP request to the gateway.</li>
-</ol>
-<p><code>bash
-   curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example</code></p>
-<ol>
-<li>Inspect the output of the Argo workflow that was created.</li>
-</ol>
-<p><code>bash
-   argo logs name_of_the_workflow</code></p>
 <p>You will see the following output,</p>
-<p><code>___________ 
+<div class="codehilite"><pre><span></span>    ___________ 
     &lt; amazing!! &gt;
-     ----------- 
-        \
-         \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/</code></p>
+    ----------- 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;___/ ===        
+    ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/
+</pre></div>
+
+
 <p>Great!! You have now learned how to apply parameters at trigger resource and template level.
 Keep in mind that you can apply default values and operations like prepend and append for 
 trigger template parameters as well.</p>
