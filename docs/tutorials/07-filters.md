@@ -18,21 +18,21 @@ Data filter as the name suggests are applied on the event data. A CloudEvent fro
 payload structure as,
 
   ```json
-  {
-    "context": {
-      "type": "type_of_gateway",
-      "specVersion": "cloud_events_version",
-      "source": "name_of_the_gateway",
-      "eventID": "unique_event_id",
-      "time": "event_time",
-      "dataContentType": "type_of_data",
-      "subject": "name_of_the_event_within_event_source"
-    },
-    "data": {
-      "header": {},
-      "body": {},
-    }
-  }
+        {
+            "context": {
+              "type": "type_of_gateway",
+              "specVersion": "cloud_events_version",
+              "source": "name_of_the_gateway",
+              "eventID": "unique_event_id",
+              "time": "event_time",
+              "dataContentType": "type_of_data",
+              "subject": "name_of_the_event_within_event_source"
+            },
+            "data": {
+              "header": {},
+              "body": {},
+            }
+        }
   ``` 
 
 Data Filter are applied on `data` within the payload. We will make a simple HTTP request
@@ -41,37 +41,30 @@ data filter on `message`.
 
 A data filter has following fields,
 
-```yaml
-data:
-  - path: path_within_event_data
-    type: types_of_the_data
-    value:
-      - list_of_possible_values      
-``` 
+
+        data:
+          - path: path_within_event_data
+            type: types_of_the_data
+            value:
+              - list_of_possible_values      
 
 **Note**: If data type is a `string`, then you can pass either an exact value or a regex.
 If data types is bool or float, then you need to pass the exact value.
 
 1. Lets create a webhook sensor with data filter.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml
 
 2. Send a HTTP request to gateway
 
-   ```bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. You will notice that the sensor logs prints the event is invalid as the sensor expects for
    either `hello` or `hey` as the value of `body.message`.
  
 4.  Send a valid HTTP request to gateway
-    
-    ```bash
-    curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-    ```
+
+        curl -d '{"message":"hello"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 5. Watch for a workflow with name `data-workflow-xxxx`.
 
@@ -82,15 +75,11 @@ Change the subscriber in the webhook gateway to point it to `context-filter` sen
 
 1. Lets create a webhook sensor with context filter.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml
 
 2. Send a HTTP request to gateway
 
-   ```bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. You will notice that the sensor logs prints the event is invalid as the sensor expects for
    either `custom-webhook` as the value of the `source`.
