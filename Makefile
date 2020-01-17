@@ -277,7 +277,7 @@ nsq:
 nsq-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nsq
 
-nsq-image: nsq-linux:
+nsq-image: nsq-linux
 	docker build -t $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) -f ./gateways/server/nsq/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) ; fi
 
@@ -287,7 +287,7 @@ redis:
 redis-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make redis
 
-redis-image: redis-linux:
+redis-image: redis-linux
 	docker build -t $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) -f ./gateways/server/redis/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) ; fi
 
@@ -297,7 +297,7 @@ emitter:
 emitter-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make emitter
 
-emitter-image: emitter-linux:
+emitter-image: emitter-linux
 	docker build -t $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) -f ./gateways/server/emitter/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) ; fi
 
@@ -307,9 +307,19 @@ stripe:
 stripe-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stripe
 
-stripe-image: stripe-linux:
+stripe-image: stripe-linux
 	docker build -t $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) -f ./gateways/server/stripe/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) ; fi
+
+azure-events-hub:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/azure-events-hub-gateway ./gateways/server/azure-events-hub/cmd
+
+azure-events-hub-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make azure-events-hub
+
+azure-events-hub-image: azure-events-hub-linux
+	docker build -t $(IMAGE_PREFIX)azure-events-hub-gateway:$(IMAGE_TAG) -f ./gateways/server/azure-events-hub/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)azure-events-hub-gateway:$(IMAGE_TAG) ; fi
 
 test:
 	go test $(shell go list ./... | grep -v /vendor/ | grep -v /test/e2e/) -race -short -v
@@ -332,7 +342,7 @@ openapi-gen:
 
 .PHONY: api-docs
 api-docs:
-   ./hack/update-api-docs.sh
+	./hack/update-api-docs.sh
 
 .PHONY: codegen
 codegen: clientgen openapigen api-docs
