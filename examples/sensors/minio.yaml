@@ -9,41 +9,44 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
-  eventProtocol:
-    type: "HTTP"
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   dependencies:
-    - name: "minio-gateway:example-with-filter"
+    - name: test-dep
+      gatewayName: minio-gateway
+      eventName: example-with-filter
   triggers:
     - template:
         name: minio-workflow-trigger
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          resource:
-            apiVersion: argoproj.io/v1alpha1
-            kind: Workflow
-            metadata:
-              generateName: artifact-workflow-2-
-            spec:
-              entrypoint: whalesay
-              templates:
-                - name: whalesay
-                  container:
-                    command:
-                      - cowsay
-                    image: "docker/whalesay:latest"
-                    args:
-                      - THIS_WILL_BE_REPLACED
-      # The container args from the workflow are overridden by the s3 notification key
-      resourceParameters:
-        - src:
-            event: "minio-gateway:example-with-filter"
-            path: s3.object.key
-          dest: spec.templates.0.container.args.0
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: artifact-workflow-2-
+              spec:
+                entrypoint: whalesay
+                templates:
+                  - name: whalesay
+                    container:
+                      command:
+                        - cowsay
+                      image: docker/whalesay:latest
+                      args:
+                        - THIS_WILL_BE_REPLACED
+          # The container args from the workflow are overridden by the s3 notification key
+          parameters:
+            - src:
+                dependencyName: test-dep
+                path: s3.object.key
+              dest: spec.templates.0.container.args.0

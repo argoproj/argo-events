@@ -20,22 +20,24 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 <br/>
 
 ## Features 
-* Manage dependencies from a variety of event sources.
+* Manage dependencies from 20+ event sources.
 * Ability to customize business-level constraint logic for event dependencies resolution.
 * Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Ability to extends framework to add your own event source listener.
-* Define arbitrary boolean logic to resolve event dependencies.
-* Supports [CloudEvents](https://cloudevents.io/) for describing event data and transmission.
-* Ability to manage event sources at runtime.
+* Supports AWS Lambda and OpenFaas as triggers.
+* Supports integration of existing API servers with 20+ event sources.
+* [CloudEvents](https://cloudevents.io/) compliant.
 
 ## Getting Started
 Follow [setup](https://argoproj.github.io/argo-events/installation/) instructions for installation. To see the Argo-Events in action, follow the
-[getting started](https://argoproj.github.io/argo-events/getting_started/) guide. 
-Complete documentation is available at https://argoproj.github.io/argo-events/
+[quick start](https://argoproj.github.io/argo-events/quick_start/) guide. 
 
 [![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
-## Available Event Listeners
+## Tutorials
+
+Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/  
+
+## Supported Event Sources
 1. AMQP
 2. AWS SNS
 3. AWS SQS
@@ -53,6 +55,11 @@ Complete documentation is available at https://argoproj.github.io/argo-events/
 15. Slack
 16. NetApp StorageGrid
 17. Webhooks
+18. Stripe
+19. NSQ
+20. Emitter
+21. Redis
+22. Azure Events Hub
 
 ## Who uses Argo Events?
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
@@ -66,9 +73,10 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 
 ## Community Blogs and Presentations
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
+* [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://slack-files.com/T7A4Z4285-FPJNY0GEL-8a56867830)
 
 ## Contribute
-Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md)
+Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md).
 
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
 

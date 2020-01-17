@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: stripe-event-source
+spec:
+  type: stripe
+  stripe:
+    example:
+      # Webhook holds a REST endpoint configuration for Stripe to connect with.
+      webhook:
+        # port to run HTTP server on
+        port: "12000"
+        # endpoint to listen to
+        endpoint: /example
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: POST
+        # Webhook URL to configure at Stripe.
+        # This url must be reachable from outside the cluster.
+        # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Stripe can reach to.
+        url: http://myfakeurl.fake
+      # CreateWebhook if specified creates a new webhook programmatically.
+      # +optional
+      createWebhook: true
+      # APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.
+      # +optional
+      apiKey:
+        name: secret_containing_api_key
+        key: key_within_secret_that_holds_api_key
+      # Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
+      # +optional
+      namespace: argo-events
+
+    example-with-event-filter:
+      webhook:
+        port: "13000"
+        endpoint: /example1
+        method: POST
+        url: http://myfakeurl.fake
+      createWebhook: true
+      apiKey:
+        name: secret_containing_api_key
+        key: key_within_secret_that_holds_api_key
+      namespace: argo-events
+      # Specific filter for events. More info at https://stripe.com/docs/api/events/types
+      eventFilter:
+        - account.updated
+        - application_fee.created

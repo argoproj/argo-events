@@ -56,9 +56,9 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
 	defer server.Recover(eventSource.Name)
 
-	Logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	Logger.Infoln("parsing minio event source...")
+	logger.Infoln("parsing minio event source...")
 
 	var minioEventSource *apicommon.S3Artifact
 	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
@@ -67,9 +67,9 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		return
 	}
 
-	Logger.Info("started processing the event source...")
+	logger.Info("started processing the event source...")
 
-	Logger.Info("retrieving access and secret key...")
+	logger.Info("retrieving access and secret key...")
 	accessKey, err := store.GetSecrets(listener.K8sClient, listener.Namespace, minioEventSource.AccessKey.Name, minioEventSource.AccessKey.Key)
 	if err != nil {
 		errorCh <- err
@@ -81,28 +81,46 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		return
 	}
 
-	Logger.Infoln("setting up a minio client...")
+	logger.Infoln("setting up a minio client...")
 	minioClient, err := minio.New(minioEventSource.Endpoint, accessKey, secretKey, !minioEventSource.Insecure)
 	if err != nil {
 		errorCh <- err
 		return
 	}
 
-	Logger.Info("started listening to bucket notifications...")
-	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, minioEventSource.Filter.Prefix, minioEventSource.Filter.Suffix, minioEventSource.Events, doneCh) {
+	prefix, suffix := getFilters(minioEventSource)
+
+	logger.WithField("bucket-name", minioEventSource.Bucket.Name).Info("started listening to bucket notifications...")
+	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
 			errorCh <- notification.Err
 			return
 		}
 
-		Logger.Infoln("parsing notification from minio...")
+		logger.Infoln("parsing notification from minio...")
 		payload, err := json.Marshal(notification.Records[0])
 		if err != nil {
 			errorCh <- err
 			return
 		}
 
-		Logger.Infoln("dispatching notification on data channel...")
+		logger.Infoln("dispatching notification on data channel...")
 		dataCh <- payload
 	}
+}
+
+func getFilters(eventSource *apicommon.S3Artifact) (string, string) {
+	if eventSource.Filter == nil {
+		return "", ""
+	}
+	if eventSource.Filter.Prefix != "" && eventSource.Filter.Suffix != "" {
+		return eventSource.Filter.Prefix, eventSource.Filter.Suffix
+	}
+	if eventSource.Filter.Prefix != "" {
+		return eventSource.Filter.Prefix, ""
+	}
+	if eventSource.Filter.Suffix != "" {
+		return "", eventSource.Filter.Suffix
+	}
+	return "", ""
 }

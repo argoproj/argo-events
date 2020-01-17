@@ -32,8 +32,28 @@ func Validate(gatewayObj *v1alpha1.Gateway) error {
 	if gatewayObj.Spec.EventSourceRef == nil {
 		return errors.New("event source for the gateway is not specified")
 	}
-	if gatewayObj.Spec.ProcessorPort == "" {
-		return errors.New("gateway processor port is not specified")
+	if err := validateSubscribers(gatewayObj.Spec.Subscribers); err != nil {
+		return errors.Wrap(err, "subscribers are not valid")
+	}
+	return nil
+}
+
+func validateSubscribers(subscribers *v1alpha1.Subscribers) error {
+	if subscribers == nil {
+		return nil
+	}
+	if subscribers.NATS != nil {
+		for _, subscriber := range subscribers.NATS {
+			if subscriber.Name == "" {
+				return errors.New("name must be specified")
+			}
+			if subscriber.Subject == "" {
+				return errors.New("subject must be specified")
+			}
+			if subscriber.ServerURL == "" {
+				return errors.New("NATS server url must be specified")
+			}
+		}
 	}
 	return nil
 }

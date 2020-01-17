@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: http-server
+  labels:
+    app: http-server
+spec:
+  serviceAccountName: argo-events-sa
+  containers:
+    - name: http-server
+      image: argoproj/http-server
+      imagePullPolicy: Always
+      env:
+        - name: PORT
+          value: "13000"

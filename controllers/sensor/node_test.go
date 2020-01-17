@@ -91,3 +91,114 @@ func TestSensorState(t *testing.T) {
 		})
 	}
 }
+
+func TestIsDependencyResolved(t *testing.T) {
+	fakeSensorClient := fakesensor.NewSimpleClientset()
+	logger := common.NewArgoEventsLogger()
+	fakeSensor := &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-sensor",
+			Namespace: "test",
+		},
+	}
+
+	fakeSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Create(fakeSensor)
+	assert.Nil(t, err)
+
+	dep1 := InitializeNode(fakeSensor, "dep1", v1alpha1.NodeTypeEventDependency, logger)
+	assert.Equal(t, dep1.Phase, v1alpha1.NodePhaseNew)
+	assert.NotNil(t, dep1.StartedAt)
+	dep2 := InitializeNode(fakeSensor, "dep2", v1alpha1.NodeTypeEventDependency, logger)
+	assert.Equal(t, dep1.Phase, v1alpha1.NodePhaseNew)
+	assert.NotNil(t, dep1.StartedAt)
+
+	dep1 = MarkUpdatedAt(fakeSensor, dep1.Name)
+	assert.NotNil(t, dep1)
+	dep2 = MarkUpdatedAt(fakeSensor, dep2.Name)
+	assert.NotNil(t, dep2)
+
+	resolved := IsDependencyResolved(fakeSensor, dep1.Name)
+	assert.Equal(t, true, resolved)
+
+	resolved = IsDependencyResolved(fakeSensor, dep2.Name)
+	assert.Equal(t, true, resolved)
+
+	dep3 := InitializeNode(fakeSensor, "dep3", v1alpha1.NodeTypeEventDependency, logger)
+	MarkNodePhase(fakeSensor, dep3.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+	resolved = IsDependencyResolved(fakeSensor, dep3.Name)
+	assert.Equal(t, true, resolved)
+}
+
+func TestMarkUpdatedAt(t *testing.T) {
+	fakeSensorClient := fakesensor.NewSimpleClientset()
+	logger := common.NewArgoEventsLogger()
+	fakeSensor := &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-sensor",
+			Namespace: "test",
+		},
+	}
+
+	fakeSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Create(fakeSensor)
+	assert.Nil(t, err)
+
+	dep1 := InitializeNode(fakeSensor, "dep1", v1alpha1.NodeTypeEventDependency, logger)
+	assert.Equal(t, dep1.Phase, v1alpha1.NodePhaseNew)
+	assert.Empty(t, dep1.UpdatedAt.Time)
+
+	dep1 = MarkUpdatedAt(fakeSensor, dep1.Name)
+	assert.NotEmpty(t, dep1.UpdatedAt)
+}
+
+func TestMarkResolvedAt(t *testing.T) {
+	fakeSensorClient := fakesensor.NewSimpleClientset()
+	logger := common.NewArgoEventsLogger()
+	fakeSensor := &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-sensor",
+			Namespace: "test",
+		},
+	}
+
+	fakeSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Create(fakeSensor)
+	assert.Nil(t, err)
+
+	dep1 := InitializeNode(fakeSensor, "dep1", v1alpha1.NodeTypeEventDependency, logger)
+	assert.Equal(t, dep1.Phase, v1alpha1.NodePhaseNew)
+	assert.Empty(t, dep1.ResolvedAt)
+
+	dep1 = MarkResolvedAt(fakeSensor, dep1.Name)
+	assert.NotEmpty(t, dep1.ResolvedAt)
+}
+
+func TestAreAllDependenciesResolved(t *testing.T) {
+	fakeSensorClient := fakesensor.NewSimpleClientset()
+	logger := common.NewArgoEventsLogger()
+	fakeSensor := &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-sensor",
+			Namespace: "test",
+		},
+	}
+
+	fakeSensor, err := fakeSensorClient.ArgoprojV1alpha1().Sensors(fakeSensor.Namespace).Create(fakeSensor)
+	assert.Nil(t, err)
+
+	dep1 := InitializeNode(fakeSensor, "dep1", v1alpha1.NodeTypeEventDependency, logger)
+	dep2 := InitializeNode(fakeSensor, "dep2", v1alpha1.NodeTypeEventDependency, logger)
+	dep3 := InitializeNode(fakeSensor, "dep3", v1alpha1.NodeTypeEventDependency, logger)
+	dep4 := InitializeNode(fakeSensor, "dep4", v1alpha1.NodeTypeEventDependency, logger)
+
+	ok := AreAllDependenciesResolved(fakeSensor)
+	assert.Equal(t, false, ok)
+
+	MarkUpdatedAt(fakeSensor, dep1.Name)
+	MarkUpdatedAt(fakeSensor, dep2.Name)
+	ok = AreAllDependenciesResolved(fakeSensor)
+	assert.Equal(t, false, ok)
+
+	MarkUpdatedAt(fakeSensor, dep3.Name)
+	MarkUpdatedAt(fakeSensor, dep4.Name)
+	ok = AreAllDependenciesResolved(fakeSensor)
+	assert.Equal(t, true, ok)
+}

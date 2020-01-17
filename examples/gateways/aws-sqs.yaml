@@ -7,32 +7,25 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: "sqs"
+  type: sqs
   eventSourceRef:
-    name: "aws-sqs-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: aws-sqs-event-source
   template:
     metadata:
-      name: "aws-sqs-gateway"
+      name: aws-sqs-gateway
       labels:
-        gateway-name: "aws-sqs-gateway"
+        gateway-name: aws-sqs-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "aws-sqs-events"
-          image: "argoproj/aws-sqs-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: aws-sqs-events
+          image: argoproj/aws-sqs-gateway:v0.12
+          imagePullPolicy: Always
           command: ["/bin/aws-sqs-gateway"]
-      serviceAccountName: "argo-events-sa"
-  watchers:
-    sensors:
-      - name: "aws-sqs-sensor"
+      serviceAccountName: argo-events-sa
+  subscribers:
+    http:
+      - "http://aws-sqs-sensor.argo-events.svc:9300/"

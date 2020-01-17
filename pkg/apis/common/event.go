@@ -42,7 +42,8 @@ const (
 // Adheres to the CloudEvents v0.3 specification
 type Event struct {
 	Context EventContext `json:"context" protobuf:"bytes,1,opt,name=context"`
-	Data    []byte       `json:"data" protobuf:"bytes,2,opt,name=data"`
+	// +listType=bytes
+	Data []byte `json:"data" protobuf:"bytes,2,opt,name=data"`
 }
 
 // EventContext contains metadata that provides circumstantial information about the occurrence.
@@ -58,7 +59,7 @@ type EventContext struct {
 	// This describes the event producer.
 	Source string `json:"source" protobuf:"bytes,3,name=source"`
 	// ID of the event. The semantics are explicitly undefined to ease the implementation of producers.
-	ID string `json:"eventID" protobuf:"bytes,4,name=eventID"`
+	ID string `json:"id" protobuf:"bytes,4,name=id"`
 	// Time when the event happened. Must adhere to format specified in RFC 3339.
 	Time metav1.MicroTime `json:"time" protobuf:"bytes,5,name=time"`
 	// Content type of the data attribute value. Enables the data attribute to carry any type of content,

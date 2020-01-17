@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -92,7 +91,6 @@ func (ctx *sensorContext) operate() error {
 			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
-		ctx.updated = true
 		ctx.logger.Infoln("successfully processed sensor state update")
 
 	case v1alpha1.NodePhaseError:
@@ -127,22 +125,19 @@ func (ctx *sensorContext) createSensorResources() error {
 	}
 	ctx.sensor.Status.Resources.Deployment = &deployment.ObjectMeta
 
-	if ctx.sensor.Spec.EventProtocol.Type == apicommon.HTTP {
-		ctx.logger.Infoln("generating service specification for the sensor")
-		service, err := ctx.serviceBuilder()
-		if err != nil {
-			return err
-		}
-
-		ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
-		service, err = ctx.createService(service)
-		if err != nil {
-			return err
-		}
-		ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+	ctx.logger.Infoln("generating service specification for the sensor")
+	service, err := ctx.serviceBuilder()
+	if err != nil {
 		return err
 	}
-	return nil
+
+	ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
+	service, err = ctx.createService(service)
+	if err != nil {
+		return err
+	}
+	ctx.sensor.Status.Resources.Service = &service.ObjectMeta
+	return err
 }
 
 // updateSensorResources updates the sensor resources
@@ -293,6 +288,7 @@ func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor
 			log.WithError(err).Error("failed to re-apply update")
 			return nil, err
 		}
+		return sensorObj, nil
 	}
 	log.WithField(common.LabelPhase, string(sensorObj.Status.Phase)).Info("sensor state updated successfully")
 	return updatedSensor, nil

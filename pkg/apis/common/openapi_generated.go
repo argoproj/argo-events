@@ -53,6 +53,11 @@ func schema_argo_events_pkg_apis_common_Event(ref common.ReferenceCallback) comm
 						},
 					},
 					"data": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "bytes",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "byte",
@@ -95,7 +100,7 @@ func schema_argo_events_pkg_apis_common_EventContext(ref common.ReferenceCallbac
 							Format:      "",
 						},
 					},
-					"eventID": {
+					"id": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ID of the event. The semantics are explicitly undefined to ease the implementation of producers.",
 							Type:        []string{"string"},
@@ -123,7 +128,7 @@ func schema_argo_events_pkg_apis_common_EventContext(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"type", "specVersion", "source", "eventID", "time", "dataContentType", "subject"},
+				Required: []string{"type", "specVersion", "source", "id", "time", "dataContentType", "subject"},
 			},
 		},
 		Dependencies: []string{
@@ -339,6 +344,11 @@ func schema_argo_events_pkg_apis_common_S3Artifact(ref common.ReferenceCallback)
 						},
 					},
 					"events": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "string",
+							},
+						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{

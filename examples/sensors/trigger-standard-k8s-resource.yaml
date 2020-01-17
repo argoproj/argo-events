@@ -8,62 +8,66 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:example"
-  eventProtocol:
-    type: "HTTP"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
     http:
-      port: "9300"
-  # To add other standard K8s resources, change the version and pod in triggers/resource accordingly.
+      port: 9300
   triggers:
     - template:
         name: webhook-pod-trigger
-        group: ""
-        version: v1
-        resource: pods
-        source:
-          resource:
-            apiVersion: v1
-            kind: Pod
-            metadata:
-              generateName: hello-world-
-            spec:
-              containers:
-                - name: hello-container
-                  args:
-                    - "hello-world"
-                  command:
-                    - cowsay
-                  image: "docker/whalesay:latest"
+        k8s:
+          group: ""
+          version: v1
+          resource: pods
+          operation: create
+          source:
+            resource:
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                generateName: hello-world-
+              spec:
+                containers:
+                  - name: hello-container
+                    args:
+                      - "hello-world"
+                    command:
+                      - cowsay
+                    image: "docker/whalesay:latest"
     - template:
         name: webhook-deployment-trigger
-        group: apps
-        version: v1
-        resource: deployments
-        source:
-          resource:
-            apiVersion: apps/v1
-            kind: Deployment
-            metadata:
-              generateName: hello-world-
-            spec:
-              replicas: 1
-              selector:
-                matchLabels:
-                  app: mydeploy
-              template:
-                metadata:
-                  labels:
+        k8s:
+          group: apps
+          version: v1
+          resource: deployments
+          operation: create
+          source:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                generateName: hello-world-
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
                     app: mydeploy
-                spec:
-                  containers:
-                    - name: hello-container
-                      args:
-                       - "hello world"
-                      command:
-                       - cowsay
-                      image: "docker/whalesay:latest"
+                template:
+                  metadata:
+                    labels:
+                      app: mydeploy
+                  spec:
+                    containers:
+                      - name: hello-container
+                        args:
+                         - "hello world"
+                        command:
+                         - cowsay
+                        image: "docker/whalesay:latest"

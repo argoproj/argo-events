@@ -25,13 +25,13 @@ import (
 )
 
 // ResolveCircuit resolves a circuit
-func ResolveCircuit(sensor *v1alpha1.Sensor, logger *logrus.Logger) (bool, error) {
+func ResolveCircuit(sensor *v1alpha1.Sensor, logger *logrus.Logger) (bool, []string, error) {
 	if sensor.Spec.DependencyGroups != nil {
 		groups := make(map[string]interface{}, len(sensor.Spec.DependencyGroups))
 	group:
 		for _, group := range sensor.Spec.DependencyGroups {
 			for _, dependency := range group.Dependencies {
-				if nodeStatus := snctrl.GetNodeByName(sensor, dependency); nodeStatus.Phase != v1alpha1.NodePhaseComplete {
+				if resolved := snctrl.IsDependencyResolved(sensor, dependency); !resolved {
 					groups[group.Name] = false
 					continue group
 				}
@@ -42,15 +42,29 @@ func ResolveCircuit(sensor *v1alpha1.Sensor, logger *logrus.Logger) (bool, error
 
 		expression, err := govaluate.NewEvaluableExpression(sensor.Spec.Circuit)
 		if err != nil {
-			return false, errors.Errorf("failed to create circuit expression. err: %+v", err)
+			return false, nil, errors.Errorf("failed to create circuit expression. err: %+v", err)
 		}
 
 		result, err := expression.Evaluate(groups)
 		if err != nil {
-			return false, errors.Errorf("failed to evaluate circuit expression. err: %+v", err)
+			return false, nil, errors.Errorf("failed to evaluate circuit expression. err: %+v", err)
+		}
+		if result != true {
+			return false, nil, nil
 		}
 
-		return result == true, err
+		var snapshot []string
+		for name, resolved := range groups {
+			if resolved == true {
+				for _, depGroups := range sensor.Spec.DependencyGroups {
+					if depGroups.Name == name {
+						snapshot = append(snapshot, depGroups.Dependencies...)
+					}
+				}
+			}
+		}
+
+		return true, snapshot, err
 	}
-	return false, nil
+	return false, nil, nil
 }

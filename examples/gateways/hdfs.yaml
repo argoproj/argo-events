@@ -7,32 +7,25 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: "hdfs"
+  type: hdfs
   eventSourceRef:
-    name: "hdfs-event-source"
-    # optional, if event source is deployed in a different namespace than the gateway
-    # namespace: "other-namespace"
-  processorPort: "9330"
-  eventProtocol:
-    type: "HTTP"
-    http:
-      port: "9300"
+    name: hdfs-event-source
   template:
     metadata:
-      name: "hdfs-gateway"
+      name: hdfs-gateway
       labels:
-        gateway-name: "hdfs-gateway"
+        gateway-name: hdfs-gateway
     spec:
       containers:
-        - name: "gateway-client"
-          image: "argoproj/gateway-client:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.12
+          imagePullPolicy: Always
           command: ["/bin/gateway-client"]
-        - name: "hdfs-events"
-          image: "argoproj/hdfs-gateway:v0.12-rc"
-          imagePullPolicy: "Always"
+        - name: hdfs-events
+          image: argoproj/hdfs-gateway:v0.12
+          imagePullPolicy: Always
           command: ["/bin/hdfs-gateway"]
-      serviceAccountName: "argo-events-sa"
+      serviceAccountName: argo-events-sa
   watchers:
-    sensors:
-      - name: "hdfs-sensor"
+    http:
+      - "http://hdfs-sensor.argo-events.svc:9300/"

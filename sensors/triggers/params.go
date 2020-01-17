@@ -30,14 +30,37 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
+func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
+	jsonStr := "{}"
+
+	events := ExtractEvents(sensor, parameters)
+	if events == nil {
+		return nil, errors.New("payload can't be constructed as there are not events to extract data from")
+	}
+
+	for _, parameter := range parameters {
+		value, err := ResolveParamValue(parameter.Src, events)
+		if err != nil {
+			return nil, err
+		}
+		jsonStr, err = sjson.Set(jsonStr, parameter.Dest, value)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to construct the JSON payload")
+		}
+	}
+
+	return []byte(jsonStr), nil
+}
+
 // ApplyTemplateParameters applies parameters to trigger template
 func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) error {
-	if trigger.TemplateParameters != nil && len(trigger.TemplateParameters) > 0 {
+	if trigger.Parameters != nil && len(trigger.Parameters) > 0 {
 		templateBytes, err := json.Marshal(trigger.Template)
 		if err != nil {
 			return err
 		}
-		tObj, err := applyParams(templateBytes, trigger.TemplateParameters, extractEvents(sensor, trigger.TemplateParameters))
+		tObj, err := ApplyParams(templateBytes, trigger.Parameters, ExtractEvents(sensor, trigger.Parameters))
 		if err != nil {
 			return err
 		}
@@ -57,7 +80,7 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 		if err != nil {
 			return err
 		}
-		jUpdatedObj, err := applyParams(jObj, parameters, extractEvents(sensor, parameters))
+		jUpdatedObj, err := ApplyParams(jObj, parameters, ExtractEvents(sensor, parameters))
 		if err != nil {
 			return err
 		}
@@ -69,11 +92,11 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 	return nil
 }
 
-// apply the params to the resource json object
-func applyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
+// ApplyParams applies the params to the resource json object
+func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
-		v, err := resolveParamValue(param.Src, events)
+		v, err := ResolveParamValue(param.Src, events)
 		if err != nil {
 			return nil, err
 		}
@@ -137,11 +160,11 @@ func renderEventDataAsJSON(event *apicommon.Event) ([]byte, error) {
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
 	var err error
 	var value []byte
 	var key string
-	if event, ok := events[src.Event]; ok {
+	if event, ok := events[src.DependencyName]; ok {
 		// If context or data keys are not set, return the event payload as is
 		if src.ContextKey == "" && src.DataKey == "" {
 			value, err = json.Marshal(&event)
@@ -158,7 +181,7 @@ func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 		}
 	}
 	if err != nil && src.Value != nil {
-		fmt.Printf("failed to parse the event data, using default value. err: %+v", err)
+		fmt.Printf("failed to parse the event data, using default value. err: %+v\n", err)
 		return *src.Value, nil
 	}
 	// Get the value corresponding to specified key within JSON object
@@ -168,30 +191,30 @@ func resolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 			if res.Exists() {
 				return res.String(), nil
 			}
-			fmt.Printf("key %s does not exist to in the event object", key)
+			fmt.Printf("key %s does not exist to in the event object\n", key)
 		}
 		if src.Value != nil {
 			return *src.Value, nil
 		}
 		return string(value), nil
 	}
-	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.Event)
+	return "", errors.Wrapf(err, "unable to resolve '%s' parameter value", src.DependencyName)
 }
 
-// helper method to extract the events from the event dependencies nodes associated with the resource params
+// ExtractEvents is a helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func extractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
+func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
 	events := make(map[string]apicommon.Event)
 	for _, param := range params {
 		if param.Src != nil {
-			node := snctrl.GetNodeByName(sensor, param.Src.Event)
+			node := snctrl.GetNodeByName(sensor, param.Src.DependencyName)
 			if node == nil {
 				continue
 			}
 			if node.Event == nil {
 				continue
 			}
-			events[param.Src.Event] = *node.Event
+			events[param.Src.DependencyName] = *node.Event
 		}
 	}
 	return events

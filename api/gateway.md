@@ -270,7 +270,8 @@ configurations for the gateway
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -313,7 +314,8 @@ Service is the specifications of the service to expose the gateway Refer
 
 <td>
 
-<code>subscribers</code></br> <em> \[\]string </em>
+<code>subscribers</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Subscribers"> Subscribers </a> </em>
 
 </td>
 
@@ -323,7 +325,8 @@ Service is the specifications of the service to expose the gateway Refer
 
 <p>
 
-Subscribers are HTTP endpoints to send events to.
+Subscribers holds the contexts of the subscribers/sinks to send events
+to.
 
 </p>
 
@@ -355,8 +358,8 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
-</em>
+<code>eventProtocol</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
 
 </td>
 
@@ -598,7 +601,8 @@ configurations for the gateway
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -641,7 +645,8 @@ Service is the specifications of the service to expose the gateway Refer
 
 <td>
 
-<code>subscribers</code></br> <em> \[\]string </em>
+<code>subscribers</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Subscribers"> Subscribers </a> </em>
 
 </td>
 
@@ -651,7 +656,8 @@ Service is the specifications of the service to expose the gateway Refer
 
 <p>
 
-Subscribers are HTTP endpoints to send events to.
+Subscribers holds the contexts of the subscribers/sinks to send events
+to.
 
 </p>
 
@@ -683,8 +689,8 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
-</em>
+<code>eventProtocol</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
 
 </td>
 
@@ -875,6 +881,117 @@ the states for the configurations of gateway.
 <p>
 
 Resources refers to the metadata about the gateway resources
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.NATSSubscriber">
+
+NATSSubscriber
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Subscribers">Subscribers</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NATSSubscriber holds the context of subscriber over NATS.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serverURL</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerURL refers to the NATS server URL.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Subject refers to the NATS subject name.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>name</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the subscription. Must be unique.
 
 </p>
 
@@ -1110,11 +1227,102 @@ UpdateTime is the time when node(gateway configuration) was updated
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Subscribers">
+
+Subscribers
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>http</code></br> <em> \[\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+HTTP subscribers are HTTP endpoints to send events to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nats</code></br> <em>
+<a href="#argoproj.io/v1alpha1.NATSSubscriber"> \[\]NATSSubscriber </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+NATS refers to the subscribers over NATS protocol.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <hr/>
 
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9d4a5c5</code>. </em>
+commit <code>3f6eb5d</code>. </em>
 
 </p>

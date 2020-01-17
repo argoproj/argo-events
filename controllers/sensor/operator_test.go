@@ -17,6 +17,7 @@ limitations under the License.
 package sensor
 
 import (
+	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
@@ -94,6 +95,7 @@ func TestOperate(t *testing.T) {
 			test.updateFunc()
 			err := ctx.operate()
 			assert.Nil(t, err)
+			fmt.Printf("%+v", metadata)
 			test.testFunc(metadata)
 		})
 	}

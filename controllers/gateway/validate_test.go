@@ -18,12 +18,11 @@ package gateway
 
 import (
 	"fmt"
-	"io/ioutil"
-	"testing"
-
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"testing"
 )
 
 func TestValidate(t *testing.T) {
@@ -34,7 +33,7 @@ func TestValidate(t *testing.T) {
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 		assert.Nil(t, err)
 		var gateway *v1alpha1.Gateway
-		err = yaml.Unmarshal([]byte(content), &gateway)
+		err = yaml.Unmarshal(content, &gateway)
 		assert.Nil(t, err)
 		err = Validate(gateway)
 		assert.Nil(t, err)

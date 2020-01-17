@@ -9,37 +9,42 @@ spec:
   template:
     spec:
       containers:
-        - name: "sensor"
-          image: "argoproj/sensor:v0.12-rc"
+        - name: sensor
+          image: argoproj/sensor:v0.12
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
-    - name: "webhook-gateway:example"
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+      # The filter is applied on the context of the event.
+      # The trigger will be executed only of the event passes the filter
       filters:
         context:
-          source: "webhook-gateway"
-          subject: "example"
+          source: webhook-gateway
+          subject: example
           dataContentType: application/json
-  eventProtocol:
-    type: "HTTP"
+  subscription:
     http:
-      port: "9300"
+      port: 9300
   triggers:
     - template:
         name: done-workflow
-        group: argoproj.io
-        version: v1alpha1
-        resource: workflows
-        source:
-          s3:
-            bucket:
-              name: workflows
-              key: hello-world.yaml
-            endpoint: minio-service.argo-events:9000
-            insecure: true
-            accessKey:
-              key: accesskey
-              name: artifacts-minio
-            secretKey:
-              key: secretkey
-              name: artifacts-minio
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            s3:
+              bucket:
+                name: workflows
+                key: hello-world.yaml
+              endpoint: minio-service.argo-events:9000
+              insecure: true
+              accessKey:
+                key: accesskey
+                name: artifacts-minio
+              secretKey:
+                key: secretkey
+                name: artifacts-minio
