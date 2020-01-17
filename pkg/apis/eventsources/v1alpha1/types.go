@@ -95,7 +95,7 @@ type EventSourceSpec struct {
 	// Generic event source
 	Generic map[string]interface{} `json:"generic,omitempty" protobuf:"bytes,23,opt,name=generic"`
 	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,22,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,24,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
