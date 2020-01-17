@@ -35,7 +35,7 @@ Follow [setup](https://argoproj.github.io/argo-events/installation/) instruction
 
 ## Tutorials
 
-Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/  
+Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/01-introduction/  
 
 ## Supported Event Sources
 1. AMQP
