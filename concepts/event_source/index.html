@@ -286,7 +286,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../getting_started/" title="Getting Started" class="md-nav__link">
+    <a href="../../quick_start/" title="Getting Started" class="md-nav__link">
       Getting Started
     </a>
   </li>
@@ -376,6 +376,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
       
       
       
@@ -387,14 +394,38 @@
   </li>
 
         
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
           
           
           
 
 
   <li class="md-nav__item">
-    <a href="../trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
+      Introduction
     </a>
   </li>
 
@@ -405,8 +436,116 @@
 
 
   <li class="md-nav__item">
-    <a href="../parameterization/" title="Trigger Parameterization" class="md-nav__link">
-      Trigger Parameterization
+    <a href="../../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
+      Parameterization
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+      Trigger Sources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/04-standard-k8s-resources/" title="Standard K8s Resources" class="md-nav__link">
+      Standard K8s Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
+      Trigger Custom Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
+      Circuit and Switch
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/07-filters/" title="Filters" class="md-nav__link">
+      Filters
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/08-policy/" title="Policy" class="md-nav__link">
+      Policy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/09-http-trigger/" title="HTTP Trigger" class="md-nav__link">
+      HTTP Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/10-aws-lambda-and-openfaas-trigger/" title="AWS Lambda Trigger" class="md-nav__link">
+      AWS Lambda Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
+      Special Argo Workflow Trigger
     </a>
   </li>
 
@@ -503,6 +642,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
+  </a>
+  
+</li>
+      
       
       
       
@@ -523,10 +669,12 @@
                 
                 
                 <h1 id="event-source">Event Source<a class="headerlink" href="#event-source" title="Permanent link">&para;</a></h1>
-<p>Event Source are configuration store for a gateway to select from. The configuration stored in an Event Source is used by a gateway to consume events from
+<p>Event Sources are the configuration store for gateways. The configuration stored in an Event Source is used by a gateway to consume events from
 external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Complete specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md">here</a>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p>Examples are located under <code>examples/event-sources</code>.</p>
                 
                   
                 
@@ -562,13 +710,13 @@ external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
           </a>
         
         
-          <a href="../trigger/" title="Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../tutorials/01-introduction/" title="Introduction" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Trigger
+                Introduction
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

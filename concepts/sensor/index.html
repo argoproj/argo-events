@@ -286,7 +286,7 @@
 
 
   <li class="md-nav__item">
-    <a href="../../getting_started/" title="Getting Started" class="md-nav__link">
+    <a href="../../quick_start/" title="Getting Started" class="md-nav__link">
       Getting Started
     </a>
   </li>
@@ -358,8 +358,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-an-event-dependency" title="What is an event dependency?" class="md-nav__link">
-    What is an event dependency?
+  <a href="#event-dependency" title="Event dependency" class="md-nav__link">
+    Event dependency
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trigger" title="Trigger" class="md-nav__link">
+    Trigger
   </a>
   
 </li>
@@ -367,6 +374,13 @@
         <li class="md-nav__item">
   <a href="#specification" title="Specification" class="md-nav__link">
     Specification
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
   </a>
   
 </li>
@@ -394,14 +408,38 @@
   </li>
 
         
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
           
           
           
 
 
   <li class="md-nav__item">
-    <a href="../trigger/" title="Trigger" class="md-nav__link">
-      Trigger
+    <a href="../../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
+      Introduction
     </a>
   </li>
 
@@ -412,8 +450,116 @@
 
 
   <li class="md-nav__item">
-    <a href="../parameterization/" title="Trigger Parameterization" class="md-nav__link">
-      Trigger Parameterization
+    <a href="../../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
+      Parameterization
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+      Trigger Sources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/04-standard-k8s-resources/" title="Standard K8s Resources" class="md-nav__link">
+      Standard K8s Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
+      Trigger Custom Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
+      Circuit and Switch
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/07-filters/" title="Filters" class="md-nav__link">
+      Filters
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/08-policy/" title="Policy" class="md-nav__link">
+      Policy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/09-http-trigger/" title="HTTP Trigger" class="md-nav__link">
+      HTTP Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/10-aws-lambda-and-openfaas-trigger/" title="AWS Lambda Trigger" class="md-nav__link">
+      AWS Lambda Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
+      Special Argo Workflow Trigger
     </a>
   </li>
 
@@ -504,8 +650,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-an-event-dependency" title="What is an event dependency?" class="md-nav__link">
-    What is an event dependency?
+  <a href="#event-dependency" title="Event dependency" class="md-nav__link">
+    Event dependency
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trigger" title="Trigger" class="md-nav__link">
+    Trigger
   </a>
   
 </li>
@@ -513,6 +666,13 @@
         <li class="md-nav__item">
   <a href="#specification" title="Specification" class="md-nav__link">
     Specification
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" title="Examples" class="md-nav__link">
+    Examples
   </a>
   
 </li>
@@ -537,18 +697,22 @@
                 
                 
                 <h1 id="sensor">Sensor<a class="headerlink" href="#sensor" title="Permanent link">&para;</a></h1>
-<p>Sensors define a set of event dependencies (inputs) and triggers (outputs). 
+<p>Sensor defines a set of event dependencies (inputs) and triggers (outputs). It listens to events from one or more
+gateways and act as an event dependency manager. 
 <br/></p>
 <p align="center">
   <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/sensor.png?raw=true" alt="Sensor"/>
 </p>
 
 <p><br/></p>
-<h2 id="what-is-an-event-dependency">What is an event dependency?<a class="headerlink" href="#what-is-an-event-dependency" title="Permanent link">&para;</a></h2>
-<p>A dependency is an event the sensor is expecting to happen. It is defined as "gateway-name:event-source-name".
-Also, you can use <a href="https://github.com/gobwas/glob#syntax">globs</a> to catch a set of events (e.g. "gateway-name:*").</p>
+<h2 id="event-dependency">Event dependency<a class="headerlink" href="#event-dependency" title="Permanent link">&para;</a></h2>
+<p>A dependency is an event the sensor is waiting to happen.</p>
+<h2 id="trigger">Trigger<a class="headerlink" href="#trigger" title="Permanent link">&para;</a></h2>
+<p>A Trigger is the resource executed by sensor once the event dependencies are resolved.. </p>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Complete specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md">here</a>.</p>
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<p>Examples are located under <code>examples/sensors</code>.</p>
                 
                   
                 
