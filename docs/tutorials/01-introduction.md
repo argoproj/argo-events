@@ -1,6 +1,6 @@
 # Introduction
 
-In this tutorial, we will cover every aspect of Argo Events and demonstrate how you 
+The tutorials we will cover every aspect of Argo Events and demonstrate how you 
 can leverage these features to build an event driven workflow pipeline. All the concepts you will learn
 in this tutorial and subsequent ones can be applied to any type of gateway.
 
@@ -10,12 +10,11 @@ in this tutorial and subsequent ones can be applied to any type of gateway.
 created in `argo-events` namespace.
 * Make sure to read the concepts behind [gateway](https://argoproj.github.io/argo-events/concepts/gateway/),
 [sensor](https://argoproj.github.io/argo-events/concepts/sensor/),
-[event source](https://argoproj.github.io/argo-events/concepts/event_source/)
-and [trigger](https://argoproj.github.io/argo-events/concepts/trigger/).
+[event source](https://argoproj.github.io/argo-events/concepts/event_source/).
 
 ## Get Started
-To start off, lets set up a basic webhook gateway and sensor that listens to events over
-HTTP an Argo workflow.
+Lets set up a basic webhook gateway and sensor that listens to events over
+HTTP and executes an Argo workflow.
 
 * Create the webhook event source.
 
@@ -32,14 +31,14 @@ HTTP an Argo workflow.
 * Create the webhook sensor.
 
   ```bash
-  kubectl -n argo-events create -f https://github.com/argoproj/argo-events/tree/master/examples/sensors
+  kubectl -n argo-events create -f https://github.com/argoproj/argo-events/tree/master/examples/sensors/webhook.yaml
   ```
   
 If the commands are executed successfully, the gateway and sensor pods will get created. You will
 also notice that a service is created for both the gateway and sensor. 
 
 * Expose the gateway pod via Ingress, OpenShift Route
-or good ol' port forwarding to consume requests over HTTP.
+or port forward to consume requests over HTTP.
 
   ```bash
   kubectl -n port-forward <gateway-pod-name> 12000:12000
@@ -57,7 +56,7 @@ or good ol' port forwarding to consume requests over HTTP.
   kubectl -n argo-events get wf
   ```
 
-* Make sure the workflow pod ran successfully and it printed the event data.
+* Make sure the workflow pod ran successfully.
 
     ```
     _________________________________________ 
@@ -88,7 +87,7 @@ or good ol' port forwarding to consume requests over HTTP.
               \____\______/   
 
      ```
-<b>Note:</b> You will see the message printed in the workflow logs contains the event context
+<b>Note:</b> You will see the message printed in the workflow logs contains both the event context
 and data, with data being base64 encoded. In later sections, we will see how to extract particular key-value
 from event context or data and pass it to the workflow as arguments.
 

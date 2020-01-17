@@ -45,16 +45,16 @@ type of HTTP request.
 
 2. `Data`: Data contains following fields,
    1. `Header`: The `header` within event `data` contains the headers in the HTTP request that was dispatched
-   to the gateway. The gateway pretty much takes the headers from the request in receives and put it in
+   to the gateway. The gateway extracts the headers from the request and put it in
    the the `header` within event `data`. 
 
    2. `Body`: This is the request payload from the HTTP request.
 
 ### Event Context
-Now we have an understanding of the structure of the event the webhook sensor receives from
+Now that we have an understanding of the structure of the event the webhook sensor receives from
 the gateway, lets see how we can use the event context to parameterize the Argo workflow.
 
-1. Update the `Webhook Sensor` and add the `contextKey` in the parameter at index 0.
+1. Update the `Webhook Sensor` and add the `contextKey` for the parameter at index 0.
 
    ```bash
    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-01.yaml
@@ -147,7 +147,7 @@ the `dataKey` takes the precedence.
 Each parameter comes with an option to configure the default value. This is specially
 important when the `key` you defined in the parameter doesn't exist in the event.
 
-1. Update the `Webhook Sensor` and add the `value` in the parameter at index 0.
+1. Update the `Webhook Sensor` and add the `value` for the parameter at index 0.
    We will also update the `dataKey` to an unknown event key.
 
    ```bash
@@ -211,7 +211,7 @@ a parameter comes handy.
 
    You will see the following output,
 
-   ```   
+   ```
      __________________ 
     < hey!!hello world >
      ------------------ 
@@ -232,13 +232,13 @@ a parameter comes handy.
 The parameterization you saw above deals with the trigger resource, but sometimes
 you need to parameterize the trigger template itself. This comes handy when you have
 the trigger resource stored on some external source like S3, Git, etc. and you need
-to place the url of the source on the fly in trigger template.
+to replace the url of the source on the fly in trigger template.
 
 Imagine a scenario where you want to parameterize the parameters of trigger to 
 parameterize the trigger resource. What?...
 
 The sensor you have been using in this tutorial has one parameter defined in the
-trigger resource under `k8s` key. We will parameterize that `parameter` by
+trigger resource under `k8s`. We will parameterize that `parameter` by
 applying a parameter at the trigger template level.
 
 
