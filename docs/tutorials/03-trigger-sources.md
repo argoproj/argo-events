@@ -20,34 +20,24 @@ The specification for the Git source is available [here](https://github.com/argo
 
 3. Create a K8s secret that holds the SSH keys
 
-   ```bash
-   kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/<YOUR_SSH_KEY_FILE_NAME>
-   ```
+        kubectl -n argo-events create secret generic git-ssh --from-file=key=.ssh/<YOUR_SSH_KEY_FILE_NAME>
 
 4. Create a K8s secret that holds known hosts.
 
-   ```bash
-   kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
-   ```
+        kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
 
 5. Create a sensor with the git trigger source and refer it to the `hello world` worklfow stored
    on the Argo Git project
 
-    ```bash
-    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml 
-    ```   
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml 
 
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
-   
-   ```bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+
+        curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
    
 7. Now, you should see an Argo workflow being created.
-   
-   ```bash
-   kubectl -n argo-events get wf
-   ```
+
+        kubectl -n argo-events get wf
 
 ## S3
 You can refer to the K8s resource stored on S3 complaint store as the trigger source.
@@ -66,48 +56,34 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 
 5. Create the sensor with trigger source as S3.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
 
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
-   
-   ```bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+
+        curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
    
 7. Now, you should see an Argo workflow being created.
-   
-   ```bash
-   kubectl -n argo-events get wf
-   ```
+
+        kubectl -n argo-events get wf
 
 ## K8s Configmap
 K8s configmap can be treated as trigger source if needed.
 
 1. Lets create a configmap called `trigger-store`.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
    
 2. Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
    
 3. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
-   
-   ```bash
-   curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+
+        curl -d '{"message":"ok"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
    
 4. Now, you should see an Argo workflow being created.
    
-   ```bash
-   kubectl -n argo-events get wf
-   ```
-   
+        kubectl -n argo-events get wf
+
 ## File & URL
 File and URL trigger sources are pretty self explanatory. The example sensors are available under `examples/sensors` folder.

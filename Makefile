@@ -139,8 +139,8 @@ minio-linux:
 
 minio-image:
 	@if [ "$(BUILD_BINARY)" = "true" ]; then minio-linux; fi
-	docker build -t $(IMAGE_PREFIX)minio-gateway:$(IMAGE_TAG) -f ./gateways/server/minio/Dockerfile .
-	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)minio-gateway:$(IMAGE_TAG) ; fi
+	docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/server/minio/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
 
 file:
