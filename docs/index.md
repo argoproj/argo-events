@@ -49,7 +49,7 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 Follow the [setup](https://argoproj.github.io/argo-events/installation/) to install Argo Events.
 
 ## Quick Start
-Check out the quick start [guide](https://argoproj.github.io/argo-events/getting_started/) to trigger Argo workflows on webhook events.
+Check out the quick start [guide](https://argoproj.github.io/argo-events/quick_start/) to trigger Argo workflows on webhook events.
 
 ## Deep Dive
-Explore the [tutorial](https://argoproj.github.io/argo-events/walkthrough/) to dive deep into Argo Events features.
+Explore the [tutorial](https://argoproj.github.io/argo-events/tutorials/01-introduction/) to dive deep into Argo Events features.
