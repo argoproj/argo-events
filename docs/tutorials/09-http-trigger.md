@@ -8,7 +8,7 @@ without worrying about their respective event connector frameworks.
 ## Prerequisite
 Set up the `Minio` gateway and event source. The K8s manifests are available under `examples/tutorials/09-http-trigger`.
 
-## API servers Integration
+## API Server Integration
 We will set up a basic go http server and connect it with the minio events.
 
 1. Set up a simple http server that prints the request payload.
@@ -87,7 +87,7 @@ generate complex event payloads, take a look at [this library](https://github.co
 
 The complete specification of HTTP trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#httptrigger).
 
-## Serverless Workloads Integration
+## Serverless Workload Integration
 HTTP trigger provides an easy integration into 20+ event sources for the existing serverless workloads.
 
 In this section, we will look at how to invoke a `Kubeless` function.

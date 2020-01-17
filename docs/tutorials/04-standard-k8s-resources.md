@@ -4,7 +4,7 @@ will see how to trigger Pod and Deployment.
 
 Similarly you can trigger any standard Kubernetes resources.
 
-Having the ability to trigger standard Kubernetes resources is quite powerful as it gives ability to
+Having the ability to trigger standard Kubernetes resources is quite powerful as provides an avenue to
 set up pipelines for existing workloads.
 
 

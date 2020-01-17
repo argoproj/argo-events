@@ -18,15 +18,11 @@ you just need to set the policy labels as `workflows.argoproj.io/completed: 'tru
 
 In addition to labels, you can also define a `backoff` and option to error out if sensor
 is unable to determine status of the trigger after the backoff completes. Check out the specification of 
-resource labels policy [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#k8sresourcepolicy) 
+resource labels policy [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#k8sresourcepolicy).
 
 ## Status Policy
 For triggers like HTTP request or AWS Lambda, you can apply the `Status Policy` to determine the trigger status.
 The Status Policy supports list of expected response statuses. If the status of the HTTP request or Lamda is within
 the statuses defined in the policy, then the trigger is considered successful.
 
-Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#statuspolicy)
-
-## TBD
-Examples are located under `examples/sensors`. A detailed walkthrough is coming soon...
-
+Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#statuspolicy).

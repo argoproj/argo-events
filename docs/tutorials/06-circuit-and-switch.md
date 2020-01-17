@@ -1,5 +1,5 @@
 # Circuit and Switch
-In previous sections, you have been dealing with just a single dependency. But, in many
+In previous sections, you have been dealing with just a single dependency. But in many
 cases, you want to wait for multiple events to occur and then trigger a resource which means
 you need a mechanism to determine which triggers to execute based on set of different event dependencies.
 This mechanism is supported through `Circuit` and `Switch`.
@@ -18,12 +18,11 @@ dependencies in groups and the sensor will apply the circuit logic on those grou
 If the logic results in `true` value, the sensor will execute the triggers else it won't.
 
 ## Switch
-A switch is condition that applies on group of circuit groups. Through switch, you can
-micro manage the triggers.
+A switch is the conditional execution gate for a trigger.
 
 Consider a scenario where you have a `Webhook` and `Minio` gateway, and you want
-to trigger an Argo workflow if the sensor receives event from the `Webhook` gateway,
-but, another workflow if it receives event from the `Minio` gateway.
+to trigger an Argo workflow if the sensor receives an event from the `Webhook` gateway,
+but, another workflow if it receives an event from the `Minio` gateway.
 
 1. Create the webhook event source and gateway. The gateway listens to HTTP requests
    on port `12000`

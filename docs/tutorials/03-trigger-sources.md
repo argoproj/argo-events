@@ -10,11 +10,11 @@ will explore other trigger sources.
 1. The `Webhook` gateway is already set up.
 
 ## Git
-Git trigger source refers for K8s trigger refers to the K8s resource stored in Git. 
+Git trigger source refers to K8s trigger refers to the K8s resource stored in Git. 
 
 The specification for the Git source is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.GitArtifact).
 
-1. In order to fetch data from git, you need to set up the SSH key in sensor.
+1. In order to fetch data from git, you need to set up the private SSH key in sensor.
 
 2. If you don't have ssh keys available, create them following this [guide](https://help.github.com/en/github/authenticating-to-github/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 
@@ -83,7 +83,7 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
    ```
 
 ## K8s Configmap
-K8s configmap can be treated as trigger sources if needed.
+K8s configmap can be treated as trigger source if needed.
 
 1. Lets create a configmap called `trigger-store`.
 
