@@ -10,7 +10,7 @@ and how to use default values if certain `key` is not available within event pay
 If you take a closer look at the `Sensor` object, you will notice it contains a list
 of triggers. Each `Trigger` contains the template that defines the context of the trigger
 and actual `resource` that we expect the sensor to execute. In previous section, the `resource` within
-the trigger template was an Argo workflow. 
+the trigger template was an Argo workflow.
 
 This subsection deals with how to parameterize the `resource` within trigger template
 with the event payload.
@@ -22,23 +22,21 @@ Make sure to have the basic webhook gateway and sensor set up. Follow the [intro
 Webhook gateway consumes events through HTTP requests and transforms them into CloudEvents.
 The structure of the event the Webhook sensor receives from the gateway looks like following,
 
-  ```json
-  {
-    "context": {
-      "type": "type_of_gateway",
-      "specVersion": "cloud_events_version",
-      "source": "name_of_the_gateway",
-      "eventID": "unique_event_id",
-      "time": "event_time",
-      "dataContentType": "type_of_data",
-      "subject": "name_of_the_event_within_event_source"
-    },
-    "data": {
-      "header": {},
-      "body": {},
-    }
-  }
-  ``` 
+        {
+            "context": {
+              "type": "type_of_gateway",
+              "specVersion": "cloud_events_version",
+              "source": "name_of_the_gateway",
+              "eventID": "unique_event_id",
+              "time": "event_time",
+              "dataContentType": "type_of_data",
+              "subject": "name_of_the_event_within_event_source"
+            },
+            "data": {
+              "header": {},
+              "body": {},
+            }
+        }
 
 1. `Context`: This is the CloudEvent context and it is populated by the gateway regardless of 
 type of HTTP request.
@@ -56,41 +54,32 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
 
 1. Update the `Webhook Sensor` and add the `contextKey` for the parameter at index 0.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-01.yaml
-   ```  
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-01.yaml
 
 2. Send a HTTP request to the gateway.
 
-   ```bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. Inspect the output of the Argo workflow that was created.
 
-   ```bash
-   argo logs name_of_the_workflow
-   ```
+        argo logs name_of_the_workflow
    
    You will see the following output,
-  
-   ```
-    _________
-   < webhook >
-    ---------
-       \
-        \
-         \
-                       ##        .
-                 ## ## ##       ==
-              ## ## ## ##      ===
-          /""""""""""""""""___/ ===
-     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
-          \______ o          __/
-           \    \        __/
-             \____\______/
-   ```
 
+        _________
+        < webhook >
+        ---------
+           \
+            \
+             \
+                           ##        .
+                     ## ## ##       ==
+                  ## ## ## ##      ===
+              /""""""""""""""""___/ ===
+         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~
+              \______ o          __/
+               \    \        __/
+                 \____\______/
 
 We have successfully extracted the `type` key within the event context and parameterized
 the workflow to print the value of the `type`.
@@ -102,40 +91,33 @@ print the message.
 
 1. Update the `Webhook Sensor` and add the `dataKey` in the parameter at index 0.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-02.yaml
-   ```  
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-02.yaml
 
 2. Send a HTTP request to the gateway.
 
-   ```bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. Inspect the output of the Argo workflow that was created.
 
-   ```bash
-   argo logs name_of_the_workflow
-   ```
+        argo logs name_of_the_workflow
 
    You will see the following output,
-   
-   ```
-     __________________________ 
-    < this is my first webhook >
-     -------------------------- 
-        \
-         \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/   
-   ```
+
+         __________________________ 
+        < this is my first webhook >
+         -------------------------- 
+            \
+             \
+              \     
+                            ##        .            
+                      ## ## ##       ==            
+                   ## ## ## ##      ===            
+               /""""""""""""""""___/ ===        
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+               \______ o          __/            
+                \    \        __/             
+                  \____\______/   
+
 
 Yay!! The Argo workflow printed the message. You can add however many number of parameters
 to update the trigger resource on the fly.
@@ -150,40 +132,32 @@ important when the `key` you defined in the parameter doesn't exist in the event
 1. Update the `Webhook Sensor` and add the `value` for the parameter at index 0.
    We will also update the `dataKey` to an unknown event key.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-03.yaml
-   ```  
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-03.yaml
 
 2. Send a HTTP request to the gateway.
 
-   ```bash
-   curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"this is my first webhook"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. Inspect the output of the Argo workflow that was created.
 
-   ```bash
-   argo logs name_of_the_workflow
-   ```
+        argo logs name_of_the_workflow
 
    You will see the following output,
 
-   ```
-    _______________________ 
-   < wow! a default value. >
-    ----------------------- 
-       \
-        \
-         \     
-                       ##        .            
-                 ## ## ##       ==            
-              ## ## ## ##      ===            
-          /""""""""""""""""___/ ===        
-     ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-          \______ o          __/            
-           \    \        __/             
-             \____\______/   
-   ```
+        _______________________ 
+        < wow! a default value. >
+        ----------------------- 
+           \
+            \
+             \     
+                           ##        .            
+                     ## ## ##       ==            
+                  ## ## ## ##      ===            
+              /""""""""""""""""___/ ===        
+         ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+              \______ o          __/            
+               \    \        __/             
+                 \____\______/   
 
 ### Operations
 Sometimes you need the ability to append or prepend a parameter value to 
@@ -193,40 +167,33 @@ a parameter comes handy.
 1. Update the `Webhook Sensor` and add the `operation` in the parameter at index 0.
    We will prepend the message to an existing value.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-04.yaml
-   ```  
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-04.yaml
+
 
 2. Send a HTTP request to the gateway.
 
-   ```bash
-   curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"message":"hey!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. Inspect the output of the Argo workflow that was created.
 
-   ```bash
-   argo logs name_of_the_workflow
-   ```
+        argo logs name_of_the_workflow
 
    You will see the following output,
 
-   ```
-     __________________ 
-    < hey!!hello world >
-     ------------------ 
-        \
-         \
-          \     
-                        ##        .            
-                  ## ## ##       ==            
-               ## ## ## ##      ===            
-           /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
-           \______ o          __/            
-            \    \        __/             
-              \____\______/   
-   ```
+         __________________ 
+        < hey!!hello world >
+         ------------------ 
+            \
+             \
+              \     
+                            ##        .            
+                      ## ## ##       ==            
+                   ## ## ## ##      ===            
+               /""""""""""""""""___/ ===        
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+               \______ o          __/            
+                \    \        __/             
+                  \____\______/   
 
 ## Trigger Template Parameterization
 The parameterization you saw above deals with the trigger resource, but sometimes
@@ -244,28 +211,21 @@ applying a parameter at the trigger template level.
 
 1. Update the `Webhook Sensor` and add parameters at trigger level.
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-05.yaml
-   ```  
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/sensor-05.yaml
 
 2. Send a HTTP request to the gateway.
 
-   ```bash
-   curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"dependencyName":"test-dep", "dataKey": "body.message", "dest": "spec.arguments.parameters.0.value", "message": "amazing!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. Inspect the output of the Argo workflow that was created.
 
-   ```bash
-   argo logs name_of_the_workflow
-   ```
+        argo logs name_of_the_workflow
 
    You will see the following output,
 
-   ```
-     ___________ 
-    < amazing!! >
-     ----------- 
+        ___________ 
+        < amazing!! >
+        ----------- 
         \
          \
           \     
@@ -273,11 +233,11 @@ applying a parameter at the trigger template level.
                   ## ## ##       ==            
                ## ## ## ##      ===            
            /""""""""""""""""___/ ===        
-      ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+        ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
            \______ o          __/            
             \    \        __/             
               \____\______/      
-   ```
+
 
 Great!! You have now learned how to apply parameters at trigger resource and template level.
 Keep in mind that you can apply default values and operations like prepend and append for 

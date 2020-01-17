@@ -19,7 +19,7 @@ markdown_extensions:
 nav:
   - Overview: 'index.md'
   - 'installation.md'
-  - 'getting_started.md'
+  - 'quick_start.md'
   - Concepts:
       - 'concepts/gateway.md'
       - 'concepts/sensor.md'
@@ -33,7 +33,7 @@ nav:
       - 'tutorials/06-circuit-and-switch.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
-      - 'tutorials/09-http-triggers.md'
+      - 'tutorials/09-http-trigger.md'
       - 'tutorials/10-aws-lambda-and-openfaas-trigger.md'
       - 'tutorials/11-special-argo-workflow-trigger.md'
   - 'developer_guide.md'

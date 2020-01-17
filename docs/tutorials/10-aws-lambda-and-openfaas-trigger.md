@@ -10,9 +10,7 @@ that are not native to AWS.
    encoded keys in the secret.
 3. Create a basic lambda function that can parse following payload,
 
-   ```json
-   {"name": "foo"}
-   ```
+        {"name": "foo"}
 
 ## Lambda Trigger
 
@@ -23,15 +21,11 @@ to understand how to construct the payload.
 
 1. Lets create a sensor with a lambda trigger
 
-   ```bash
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/10-aws-lambda-trigger/sensor.yaml
-   ```
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/10-aws-lambda-trigger/sensor.yaml
 
 2. Send a http request to webhook gateway,
 
-   ```curl
-   curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
-   ```
+        curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
 3. You should see the lambda execution in CloudWatch logs.
 
