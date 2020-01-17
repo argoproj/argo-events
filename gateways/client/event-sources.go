@@ -39,6 +39,8 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 		return
 	}
 
+	fmt.Printf("%s\n", string(body))
+
 	hashKey := common.Hasher(name + string(body))
 
 	logger := gatewayContext.logger.WithFields(logrus.Fields{
