@@ -92,6 +92,8 @@ type EventSourceSpec struct {
 	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,21,opt,name=redis"`
 	// NSQ event source
 	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,22,opt,name=nsq"`
+	// Generic event source
+	Generic map[string]interface{} `json:"generic,omitempty" protobuf:"bytes,23,opt,name=generic"`
 	// Type of the event source
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,22,name=type"`
 }

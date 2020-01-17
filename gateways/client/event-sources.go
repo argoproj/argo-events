@@ -372,6 +372,10 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.NSQ {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	case apicommon.GenericEvent:
+		for key, value := range eventSource.Spec.Generic {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
 	}
 
 	return eventSourceContexts

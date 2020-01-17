@@ -365,6 +365,17 @@ func (in *EventSourceSpec) DeepCopyInto(out *EventSourceSpec) {
 			(*out)[key] = *val.DeepCopy()
 		}
 	}
+	if in.Generic != nil {
+		in, out := &in.Generic, &out.Generic
+		*out = make(map[string]interface{}, len(*in))
+		for key, val := range *in {
+			if val == nil {
+				(*out)[key] = nil
+			} else {
+				(*out)[key] = val.DeepCopyinterface{}()
+			}
+		}
+	}
 	return
 }
 

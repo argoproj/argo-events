@@ -691,6 +691,21 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 							},
 						},
 					},
+					"generic": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Generic event source",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"object"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 					"type": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Type of the event source",
