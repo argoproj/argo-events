@@ -107,7 +107,7 @@ The `Status` holds a list of response statuses that are considered valid.
 
 1. Lets update the sensor with acceptable response statuses as [`200`, `300`] and point the http trigger to an invalid server url.
 
-   kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/sensor-02.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/sensor-02.yaml
 
 2. Drop a file onto `test` bucket.
 

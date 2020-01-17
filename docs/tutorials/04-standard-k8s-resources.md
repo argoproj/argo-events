@@ -31,6 +31,7 @@ create the Kubernetes resource of your choice.
         kubectl -n argo-events get po
   
   Output
+
         _________________________________________ 
         / {"context":{"type":"webhook","specVersi \
         | on":"0.3","source":"webhook-gateway","e |

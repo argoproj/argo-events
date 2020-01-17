@@ -17,7 +17,7 @@ Webhook gateway must be set up.
 Data filter as the name suggests are applied on the event data. A CloudEvent from Webhook gateway has
 payload structure as,
 
-  ```json
+
         {
             "context": {
               "type": "type_of_gateway",
@@ -33,7 +33,6 @@ payload structure as,
               "body": {},
             }
         }
-  ``` 
 
 Data Filter are applied on `data` within the payload. We will make a simple HTTP request
 to webhook gateway with request data as `{"message":"this is my first webhook"}` and apply
