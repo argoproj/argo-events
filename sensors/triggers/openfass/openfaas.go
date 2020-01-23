@@ -16,9 +16,15 @@ limitations under the License.
 package openfass
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -63,18 +69,23 @@ func (t *OpenFaasTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resou
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to marshal the OpenFaas trigger resource")
 	}
+
 	parameters := t.Trigger.Template.OpenFaas.Parameters
+
 	if parameters != nil && len(parameters) > 0 {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.OpenFaas.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
 		}
+
 		var ht *v1alpha1.OpenFaasTrigger
 		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
 			return nil, errors.Wrap(err, "failed to unmarshal the updated OpenFaas trigger resource after applying resource parameters")
 		}
+
 		return ht, nil
 	}
+
 	return resource, nil
 }
 
@@ -83,6 +94,15 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 	obj, ok := resource.(*v1alpha1.OpenFaasTrigger)
 	if !ok {
 		return nil, errors.New("failed to marshal the OpenFaas trigger resource")
+	}
+
+	if obj.Payload == nil {
+		return nil, errors.New("payload parameters are not specified")
+	}
+
+	payload, err := triggers.ConstructPayload(t.Sensor, obj.Payload)
+	if err != nil {
+		return nil, err
 	}
 
 	if err := os.Setenv(EnvVarOpenFaasGatewayURL, obj.GatewayURL); err != nil {
@@ -103,12 +123,38 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		}
 	}
 
-	cmd := exec.Command("faas", "invoke", obj.FunctionName)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return nil, errors.Wrapf(err, "failed to invoke function %s using faas client", obj.FunctionName)
+	functionURL := fmt.Sprintf("%s/function/%s", obj.GatewayURL, obj.FunctionName)
+
+	parsedURL, err := url.Parse(functionURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse url %s", parsedURL)
 	}
+
+	t.Logger.WithField("url", parsedURL.String()).Infoln("openfaas function url")
+
+	client := http.Client{
+		Timeout: 1 * time.Minute,
+	}
+
+	request, err := http.NewRequest(http.MethodPost, parsedURL.String(), bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to create the function request %s", obj.FunctionName)
+	}
+
+	resp, err := client.Do(request)
+	if err != nil {
+		return nil, errors.Wrapf(err, "function invocation %s failed", obj.FunctionName)
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read the response")
+	}
+
+	t.Logger.WithField("response", body).Infoln("response")
+
 	return nil, nil
 }
 
