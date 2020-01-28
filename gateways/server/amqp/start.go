@@ -17,6 +17,9 @@ limitations under the License.
 package amqp
 
 import (
+	"encoding/json"
+	"time"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -31,6 +34,24 @@ import (
 type EventListener struct {
 	// Logger logs stuff
 	Logger *logrus.Logger
+}
+
+// Data refers to the event data.
+type Data struct {
+	ContentType     string    `json:"contentType"`     // MIME content type
+	ContentEncoding string    `json:"contentEncoding"` // MIME content encoding
+	DeliveryMode    int       `json:"deliveryMode"`    // queue implementation use - non-persistent (1) or persistent (2)
+	Priority        int       `json:"priority"`        // queue implementation use - 0 to 9
+	CorrelationId   string    `json:"correlationId"`   // application use - correlation identifier
+	ReplyTo         string    `json:"replyTo"`         // application use - address to reply to (ex: RPC)
+	Expiration      string    `json:"expiration"`      // implementation use - message expiration spec
+	MessageId       string    `json:"messageId"`       // application use - message identifier
+	Timestamp       time.Time `json:"timestamp"`       // application use - message timestamp
+	Type            string    `json:"type"`            // application use - message type name
+	AppId           string    `json:"appId"`           // application use - creating application id
+	Exchange        string    `json:"exchange"`        // basic.publish exchange
+	RoutingKey      string    `json:"routingKey"`      // basic.publish routing key
+	Body            []byte    `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -93,8 +114,32 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	for {
 		select {
 		case msg := <-delivery:
+			logger.WithField("message-id", msg.MessageId).Infoln("received the message")
+			body := &Data{
+				ContentType:     msg.ContentType,
+				ContentEncoding: msg.ContentEncoding,
+				DeliveryMode:    int(msg.DeliveryMode),
+				Priority:        int(msg.Priority),
+				CorrelationId:   msg.CorrelationId,
+				ReplyTo:         msg.ReplyTo,
+				Expiration:      msg.Expiration,
+				MessageId:       msg.MessageId,
+				Timestamp:       msg.Timestamp,
+				Type:            msg.Type,
+				AppId:           msg.AppId,
+				Exchange:        msg.Exchange,
+				RoutingKey:      msg.RoutingKey,
+				Body:            msg.Body,
+			}
+
+			bodyBytes, err := json.Marshal(body)
+			if err != nil {
+				logger.WithError(err).WithField("message-id", msg.MessageId).Errorln("failed to marshal the message")
+				continue
+			}
+
 			logger.Infoln("dispatching event on data channel...")
-			dataCh <- msg.Body
+			dataCh <- bodyBytes
 		case <-doneCh:
 			err = conn.Close()
 			if err != nil {

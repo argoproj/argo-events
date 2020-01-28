@@ -17,6 +17,8 @@ limitations under the License.
 package emitter
 
 import (
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -34,6 +36,12 @@ type EventListener struct {
 	K8sClient kubernetes.Interface
 	// Logger to log stuff
 	Logger *logrus.Logger
+}
+
+// Data refers to the event data
+type Data struct {
+	Topic string `json:"topic"`
+	Body  []byte `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -103,15 +111,28 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
+		eventData := &Data{
+			Topic: message.Topic(),
+			Body:  message.Payload(),
+		}
+
+		eventBytes, err := json.Marshal(eventData)
+		if err != nil {
+			logger.WithError(err).Errorln("failed to marshal the event data")
+			return
+		}
+
 		logger.Infoln("dispatching event on data channel...")
-		dataCh <- message.Payload()
+		dataCh <- eventBytes
 	}); err != nil {
 		errorCh <- errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
 		return
 	}
 
 	<-doneCh
+
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("event source stopped, unsubscribe the channel")
+
 	if err := client.Unsubscribe(channelKey, emitterEventSource.ChannelName); err != nil {
 		logger.WithError(err).WithField("channel-name", emitterEventSource.ChannelName).Errorln("failed to unsubscribe")
 	}

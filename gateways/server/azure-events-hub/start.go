@@ -18,6 +18,7 @@ package azure_events_hub
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	eventhub "github.com/Azure/azure-event-hubs-go"
@@ -36,6 +37,16 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+}
+
+// Data refers to the event data
+type Data struct {
+	// Id of the message
+	Id string `json:"id"`
+	// PartitionKey
+	PartitionKey string `json:"partitionKey"`
+	// Message body
+	Body []byte `json:"body"`
 }
 
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -80,7 +91,18 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
-		dataCh <- event.Data
+		eventData := &Data{
+			Id:           event.ID,
+			PartitionKey: *event.PartitionKey,
+			Body:         event.Data,
+		}
+
+		eventBytes, err := json.Marshal(eventData)
+		if err != nil {
+			return errors.Wrapf(err, "failed to marshal the event data for event source %s and message id %s", eventSource.Name, event.ID)
+		}
+
+		dataCh <- eventBytes
 		return nil
 	}
 
@@ -105,7 +127,9 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	<-doneCh
+
 	listener.Logger.Infoln("stopping listener handlers")
+
 	for _, handler := range listenerHandles {
 		handler.Close(ctx)
 	}

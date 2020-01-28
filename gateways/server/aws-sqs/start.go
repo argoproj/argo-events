@@ -17,6 +17,8 @@ limitations under the License.
 package aws_sqs
 
 import (
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -35,6 +37,19 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+}
+
+// Data refers to the event data.
+type Data struct {
+	// A unique identifier for the message. A MessageIdis considered unique across
+	// all AWS accounts for an extended period of time.
+	MessageId string `json:"messageId"`
+	// Each message attribute consists of a Name, Type, and Value. For more information,
+	// see Amazon SQS Message Attributes (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
+	// in the Amazon Simple Queue Service Developer Guide.
+	MessageAttributes map[string]*sqslib.MessageAttributeValue `json:"messageAttributes"`
+	// The message's contents (not URL-encoded).
+	Body []byte `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -98,13 +113,27 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 			}
 
 			if msg != nil && len(msg.Messages) > 0 {
-				listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("dispatching message from queue on data channel")
+				message := *msg.Messages[0]
+
 				listener.Logger.WithFields(map[string]interface{}{
 					common.LabelEventSource: eventSource.Name,
-					"message":               *msg.Messages[0].Body,
+					"message":               message.Body,
 				}).Debugln("message from queue")
 
-				dataCh <- []byte(*msg.Messages[0].Body)
+				data := &Data{
+					MessageId:         *message.MessageId,
+					MessageAttributes: message.MessageAttributes,
+					Body:              []byte(*message.Body),
+				}
+
+				eventBytes, err := json.Marshal(data)
+				if err != nil {
+					listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to marshal event data")
+					continue
+				}
+
+				listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("dispatching the event on data channel")
+				dataCh <- eventBytes
 
 				if _, err := sqsClient.DeleteMessage(&sqslib.DeleteMessageInput{
 					QueueUrl:      queueURL.QueueUrl,

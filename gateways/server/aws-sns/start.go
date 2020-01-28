@@ -17,6 +17,7 @@ limitations under the License.
 package aws_sns
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -39,6 +40,11 @@ var (
 // set up route activation and deactivation channels
 func init() {
 	go webhook.ProcessRouteStatus(controller)
+}
+
+// Data refers to the event data.
+type Data struct {
+	Body []byte `json:"body"`
 }
 
 // Implement Router
@@ -79,8 +85,6 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	logger.WithField("body", string(body)).Debugln("request body")
-
 	var notification *httpNotification
 	err = yaml.Unmarshal(body, &notification)
 	if err != nil {
@@ -92,6 +96,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	switch notification.Type {
 	case messageTypeSubscriptionConfirmation:
 		awsSession := router.session
+
 		response, err := awsSession.ConfirmSubscription(&snslib.ConfirmSubscriptionInput{
 			TopicArn: &router.eventSource.TopicArn,
 			Token:    &notification.Token,
@@ -101,12 +106,22 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			common.SendErrorResponse(writer, err.Error())
 			return
 		}
+
 		logger.Infoln("subscription successfully confirmed to aws sns")
 		router.subscriptionArn = response.SubscriptionArn
 
 	case messageTypeNotification:
 		logger.Infoln("dispatching notification on route's data channel")
-		route.DataCh <- body
+
+		eventData := &Data{Body: body}
+		eventBytes, err := json.Marshal(eventData)
+		if err != nil {
+			logger.WithError(err).Error("failed to marshal the event data")
+			common.SendErrorResponse(writer, err.Error())
+			return
+		}
+		route.DataCh <- eventBytes
+
 	}
 
 	logger.Info("request has been successfully processed")

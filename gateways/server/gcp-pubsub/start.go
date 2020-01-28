@@ -36,6 +36,10 @@ type EventListener struct {
 	Logger *logrus.Logger
 }
 
+// Data refers to the event data
+type Data struct {
+}
+
 // StartEventSource starts processing the GCP PubSub event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	defer server.Recover(eventSource.Name)
