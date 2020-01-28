@@ -45,7 +45,7 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 			return nil, err
 		}
 
-		result, err = sjson.SetRawBytes(result, parameter.Dest, []byte(value))
+		result, err = sjson.SetBytes(result, parameter.Dest, []byte(value))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to construct the JSON payload")
 		}

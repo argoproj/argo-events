@@ -61,7 +61,7 @@ func TestConstructPayload(t *testing.T) {
 						SpecVersion:     "0.3",
 						Subject:         "example-1",
 					},
-					Data: []byte(`{"firstName": "fake"}`),
+					Data: []byte("{\"firstName\": \"fake\"}"),
 				},
 			},
 			id2: {
@@ -77,7 +77,7 @@ func TestConstructPayload(t *testing.T) {
 						SpecVersion:     "0.3",
 						Subject:         "example-1",
 					},
-					Data: []byte(`{"lastName": "foo"}`),
+					Data: []byte("{\"lastName\": \"foo\"}"),
 				},
 			},
 		},
