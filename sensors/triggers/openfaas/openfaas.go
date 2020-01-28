@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package openfass
+package openfaas
 
 import (
 	"bytes"
@@ -130,8 +130,6 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.Wrapf(err, "failed to parse url %s", parsedURL)
 	}
 
-	t.Logger.WithField("url", parsedURL.String()).Infoln("openfaas function url")
-
 	client := http.Client{
 		Timeout: 1 * time.Minute,
 	}
@@ -153,9 +151,7 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.Wrap(err, "failed to read the response")
 	}
 
-	t.Logger.WithField("response", body).Infoln("response")
-
-	return nil, nil
+	return body, nil
 }
 
 // ApplyPolicy applies a policy on trigger execution response if any
