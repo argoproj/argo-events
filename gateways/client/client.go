@@ -59,6 +59,9 @@ func main() {
 		}
 	}()
 
+	// initialize the subscription clients
+	ctx.updateSubscriberClients()
+
 	// watch updates to gateway resource
 	if _, err := ctx.WatchGatewayUpdates(context.Background()); err != nil {
 		panic(err)

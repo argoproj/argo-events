@@ -97,6 +97,9 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 	}
 
 	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
+	if err != nil {
+		return nil, err
+	}
 
 	client := http.Client{}
 

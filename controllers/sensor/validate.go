@@ -42,9 +42,6 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if s.Spec.Template == nil {
 		return errors.Errorf("sensor pod template not defined")
 	}
-	if len(s.Spec.Template.Spec.Containers) > 1 {
-		return errors.Errorf("sensor pod specification can't have more than one container")
-	}
 	if s.Spec.Subscription == nil {
 		return errors.New("at least one subscription must be specified")
 	}

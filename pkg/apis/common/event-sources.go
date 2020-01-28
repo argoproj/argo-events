@@ -43,4 +43,5 @@ var (
 	EmitterEvent     EventSourceType = "emitter"
 	RedisEvent       EventSourceType = "redis"
 	NSQEvent         EventSourceType = "nsq"
+	GenericEvent     EventSourceType = "generic"
 )

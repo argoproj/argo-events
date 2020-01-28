@@ -92,8 +92,10 @@ type EventSourceSpec struct {
 	Redis map[string]RedisEventSource `json:"redis,omitempty" protobuf:"bytes,21,opt,name=redis"`
 	// NSQ event source
 	NSQ map[string]NSQEventSource `json:"nsq,omitempty" protobuf:"bytes,22,opt,name=nsq"`
+	// Generic event source
+	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,23,opt,name=generic"`
 	// Type of the event source
-	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,22,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,24,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -481,6 +483,12 @@ type NSQEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+}
+
+// GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
+type GenericEventSource struct {
+	// Value of the event source
+	Value string `json:"value" protobuf:"bytes,1,name=value"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

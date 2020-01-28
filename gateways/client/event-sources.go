@@ -39,6 +39,8 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 		return
 	}
 
+	fmt.Printf("%s\n", string(body))
+
 	hashKey := common.Hasher(name + string(body))
 
 	logger := gatewayContext.logger.WithFields(logrus.Fields{
@@ -370,6 +372,10 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		}
 	case apicommon.NSQEvent:
 		for key, value := range eventSource.Spec.NSQ {
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
+		}
+	case apicommon.GenericEvent:
+		for key, value := range eventSource.Spec.Generic {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	}
