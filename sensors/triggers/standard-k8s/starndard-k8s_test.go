@@ -161,4 +161,14 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	uObj, ok := resource.(*unstructured.Unstructured)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
+
+	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	resource, err = impl.Execute(deployment)
+	assert.Nil(t, err)
+	assert.NotNil(t, resource)
+
+	uObj, ok = resource.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, deployment.GetName(), uObj.GetName())
 }
