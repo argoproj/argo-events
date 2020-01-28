@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/store"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -122,6 +123,12 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 	case v1alpha1.Create:
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
 	case v1alpha1.Update:
+		if _, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{}); err != nil {
+			if !apierr.IsNotFound(err) {
+				return nil, err
+			}
+			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+		}
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
