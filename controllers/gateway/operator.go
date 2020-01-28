@@ -78,7 +78,6 @@ func (ctx *gatewayContext) operate() error {
 		ctx.logger.Infoln("marking gateway as active")
 		ctx.markGatewayPhase(v1alpha1.NodePhaseRunning, "gateway is active")
 
-		// Gateway is already running
 	case v1alpha1.NodePhaseRunning:
 		ctx.logger.Infoln("gateway is running")
 		err := ctx.updateGatewayResources()
@@ -88,7 +87,6 @@ func (ctx *gatewayContext) operate() error {
 			return err
 		}
 
-	// Gateway is in error
 	case v1alpha1.NodePhaseError:
 		ctx.logger.Errorln("gateway is in error state. checking updates for gateway object...")
 		err := ctx.updateGatewayResources()

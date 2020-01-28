@@ -20,7 +20,7 @@ import "github.com/argoproj/argo-events/pkg/apis/gateway"
 
 // Labels
 const (
-	//LabelKeyGatewayControllerInstanceID is the label which allows to separate application among multiple running controller controllers.
+	//LabelControllerInstanceID is the label which allows to separate gateways among multiple running controllers.
 	LabelControllerInstanceID = gateway.FullName + "/gateway-controller-instanceid"
 	// LabelGatewayKeyPhase is a label applied to gateways to indicate the current phase of the controller (for filtering purposes)
 	LabelPhase = gateway.FullName + "/phase"

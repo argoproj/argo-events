@@ -18,7 +18,7 @@ override LDFLAGS += \
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
 IMAGE_TAG?=v0.12
-BUILD_BINARY?=false
+BUILD_BINARY?=true
 
 ifeq (${DOCKER_PUSH},true)
 ifndef IMAGE_NAMESPACE
@@ -52,7 +52,7 @@ sensor-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor
 
 sensor-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then sensor-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make sensor-linux; fi
 	docker build -t $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) -f ./sensors/cmd/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor:$(IMAGE_TAG) ; fi
 
@@ -76,7 +76,7 @@ gateway-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-controller
 
 gateway-controller-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then gateway-controller-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make gateway-controller-linux; fi
 	docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./controllers/gateway/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
 
@@ -89,7 +89,7 @@ gateway-client-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gateway-client
 
 gateway-client-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then gateway-client-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make gateway-client-linux; fi
 	docker build -t $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) -f ./gateways/client/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-client:$(IMAGE_TAG) ; fi
 
@@ -102,7 +102,7 @@ webhook-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make webhook
 
 webhook-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then webhook-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make webhook-linux; fi
 	docker build -t $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) -f ./gateways/server/webhook/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)webhook-gateway:$(IMAGE_TAG) ; fi
 
@@ -114,7 +114,7 @@ calendar-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make calendar
 
 calendar-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then calendar-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make calendar-linux; fi
 	docker build -t $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) -f ./gateways/server/calendar/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)calendar-gateway:$(IMAGE_TAG) ; fi
 
@@ -126,7 +126,7 @@ resource-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make resource
 
 resource-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then resource-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make resource-linux; fi
 	docker build -t $(IMAGE_PREFIX)resource-gateway:$(IMAGE_TAG) -f ./gateways/server/resource/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)resource-gateway:$(IMAGE_TAG) ; fi
 
@@ -138,7 +138,7 @@ minio-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make minio
 
 minio-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then minio-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make minio-linux; fi
 	docker build -t $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) -f ./gateways/server/minio/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)artifact-gateway:$(IMAGE_TAG) ; fi
 
@@ -150,7 +150,7 @@ file-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make file
 
 file-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then file-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make file-linux; fi
 	docker build -t $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) -f ./gateways/server/file/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)file-gateway:$(IMAGE_TAG) ; fi
 
@@ -163,7 +163,7 @@ nats-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nats
 
 nats-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then nats-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make nats-linux; fi
 	docker build -t $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) -f ./gateways/server/nats/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nats-gateway:$(IMAGE_TAG) ; fi
 
@@ -175,7 +175,7 @@ kafka-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make kafka
 
 kafka-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then kafka-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make kafka-linux; fi
 	docker build -t $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) -f ./gateways/server/kafka/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)kafka-gateway:$(IMAGE_TAG) ; fi
 
@@ -187,7 +187,7 @@ amqp-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make amqp
 
 amqp-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then amqp-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make amqp-linux; fi
 	docker build -t $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) -f ./gateways/server/amqp/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)amqp-gateway:$(IMAGE_TAG) ; fi
 
@@ -199,7 +199,7 @@ mqtt-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make mqtt
 
 mqtt-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then mqtt-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make mqtt-linux; fi
 	docker build -t $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) -f ./gateways/server/mqtt/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)mqtt-gateway:$(IMAGE_TAG) ; fi
 
@@ -212,7 +212,7 @@ storage-grid-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make storage-grid
 
 storage-grid-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then storage-grid-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make storage-grid-linux; fi
 	docker build -t $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) -f ./gateways/server/storagegrid/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)storage-grid-gateway:$(IMAGE_TAG) ; fi
 
@@ -223,7 +223,7 @@ gitlab-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make gitlab
 
 gitlab-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then gitlab-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make gitlab-linux; fi
 	docker build -t $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) -f ./gateways/server/gitlab/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gitlab-gateway:$(IMAGE_TAG) ; fi
 
@@ -234,7 +234,7 @@ github-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make github
 
 github-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then github-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make github-linux; fi
 	docker build -t $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) -f ./gateways/server/github/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)github-gateway:$(IMAGE_TAG) ; fi
 
@@ -245,7 +245,7 @@ sns-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sns
 
 sns-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then sns-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make sns-linux; fi
 	docker build -t $(IMAGE_PREFIX)aws-sns-gateway:$(IMAGE_TAG) -f ./gateways/server/aws-sns/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sns-gateway:$(IMAGE_TAG) ; fi
 
@@ -256,7 +256,7 @@ pubsub-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make pubsub
 
 pubsub-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then pubsub-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make pubsub-linux; fi
 	docker build -t $(IMAGE_PREFIX)gcp-pubsub-gateway:$(IMAGE_TAG) -f ./gateways/server/gcp-pubsub/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gcp-pubsub-gateway:$(IMAGE_TAG) ; fi
 
@@ -267,7 +267,7 @@ hdfs-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make hdfs
 
 hdfs-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then hdfs-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make hdfs-linux; fi
 	docker build -t $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) -f ./gateways/server/hdfs/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)hdfs-gateway:$(IMAGE_TAG) ; fi
 
@@ -278,7 +278,7 @@ sqs-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sqs
 
 sqs-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then sqs-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make sqs-linux; fi
 	docker build -t $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) -f ./gateways/server/aws-sqs/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)aws-sqs-gateway:$(IMAGE_TAG) ; fi
 
@@ -289,7 +289,7 @@ slack-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make slack
 
 slack-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then slack-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make slack-linux; fi
 	docker build -t $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) -f ./gateways/server/slack/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)slack-gateway:$(IMAGE_TAG) ; fi
 
@@ -300,7 +300,7 @@ nsq-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make nsq
 
 nsq-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then nsq-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make nsq-linux; fi
 	docker build -t $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) -f ./gateways/server/nsq/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)nsq-gateway:$(IMAGE_TAG) ; fi
 
@@ -311,7 +311,7 @@ redis-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make redis
 
 redis-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then redis-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make redis-linux; fi
 	docker build -t $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) -f ./gateways/server/redis/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)redis-gateway:$(IMAGE_TAG) ; fi
 
@@ -322,7 +322,7 @@ emitter-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make emitter
 
 emitter-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then emitter-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make emitter-linux; fi
 	docker build -t $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) -f ./gateways/server/emitter/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)emitter-gateway:$(IMAGE_TAG) ; fi
 
@@ -333,7 +333,7 @@ stripe-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make stripe
 
 stripe-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then stripe-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make stripe-linux; fi
 	docker build -t $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) -f ./gateways/server/stripe/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)stripe-gateway:$(IMAGE_TAG) ; fi
 
@@ -344,7 +344,7 @@ azure-events-hub-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make azure-events-hub
 
 azure-events-hub-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then azure-events-hub-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make azure-events-hub-linux; fi
 	docker build -t $(IMAGE_PREFIX)azure-events-hub-gateway:$(IMAGE_TAG) -f ./gateways/server/azure-events-hub/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)azure-events-hub-gateway:$(IMAGE_TAG) ; fi
 
