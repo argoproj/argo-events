@@ -32,8 +32,8 @@ spec:
         name: github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
         key: token
-      # webHookSecret refers to K8s secret that stores the github hook secret
-      webHookSecret:
+      # webhookSecret refers to K8s secret that stores the github hook secret
+      webhookSecret:
         # Name of the K8s secret that contains the hook secret
         name: github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
@@ -62,7 +62,7 @@ spec:
       apiToken:
         name: github-access
         key: token
-      webHookSecret:
+      webhookSecret:
         name: github-access
         key: secret
       insecure: true
