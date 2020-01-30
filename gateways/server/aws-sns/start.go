@@ -27,6 +27,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server"
 	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
@@ -40,11 +41,6 @@ var (
 // set up route activation and deactivation channels
 func init() {
 	go webhook.ProcessRouteStatus(controller)
-}
-
-// Data refers to the event data.
-type Data struct {
-	Body []byte `json:"body"`
 }
 
 // Implement Router
@@ -113,7 +109,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	case messageTypeNotification:
 		logger.Infoln("dispatching notification on route's data channel")
 
-		eventData := &Data{Body: body}
+		eventData := &apicommon.SNSEventData{Body: body}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Error("failed to marshal the event data")

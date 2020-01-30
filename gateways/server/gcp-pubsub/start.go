@@ -18,6 +18,7 @@ package pubsub
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"cloud.google.com/go/pubsub"
@@ -34,10 +35,6 @@ import (
 type EventListener struct {
 	// Logger to log stuff
 	Logger *logrus.Logger
-}
-
-// Data refers to the event data
-type Data struct {
 }
 
 // StartEventSource starts processing the GCP PubSub event source
@@ -136,7 +133,18 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 	logger.Infoln("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		logger.Info("received GCP PubSub Message from topic")
-		dataCh <- m.Data
+		eventData := &Data{
+			ID:          m.ID,
+			Data:        m.Data,
+			Attributes:  m.Attributes,
+			PublishTime: m.PublishTime.String(),
+		}
+		eventBytes, err := json.Marshal(eventData)
+		if err != nil {
+			logger.WithError(err).Errorln("failed to marshal the event data")
+			return
+		}
+		dataCh <- eventBytes
 		m.Ack()
 	})
 	if err != nil {

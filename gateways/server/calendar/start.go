@@ -18,6 +18,7 @@ package calendar
 
 import (
 	"encoding/json"
+	common2 "github.com/argoproj/argo-events/pkg/apis/common"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
@@ -34,14 +35,6 @@ import (
 type EventListener struct {
 	// Logger to log stuff
 	Logger *logrus.Logger
-}
-
-// response is the event payload that is sent as response to sensor
-type response struct {
-	// EventTime is time at which event occurred
-	EventTime time.Time `json:"eventTime"`
-	// UserPayload if any
-	UserPayload *json.RawMessage `json:"userPayload"`
 }
 
 // Next is a function to compute the next event time from a given time
@@ -124,14 +117,14 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 			if location != nil {
 				lastT = lastT.In(location)
 			}
-			response := &response{
-				EventTime:   tx,
+			response := &common2.CalendarEventData{
+				EventTime:   tx.String(),
 				UserPayload: calendarEventSource.UserPayload,
 			}
 			payload, err := json.Marshal(response)
 			if err != nil {
-				errorCh <- err
-				return
+				logger.WithError(err).Errorln("failed to marshal the event data")
+				continue
 			}
 			logger.Infoln("event dispatched on data channel")
 			dataCh <- payload

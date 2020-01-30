@@ -18,10 +18,10 @@ package emitter
 
 import (
 	"encoding/json"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	common2 "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	emitter "github.com/emitter-io/go/v2"
 	"github.com/ghodss/yaml"
@@ -36,12 +36,6 @@ type EventListener struct {
 	K8sClient kubernetes.Interface
 	// Logger to log stuff
 	Logger *logrus.Logger
-}
-
-// Data refers to the event data
-type Data struct {
-	Topic string `json:"topic"`
-	Body  []byte `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -111,12 +105,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
-		eventData := &Data{
+		eventBytes, err := json.Marshal(&common2.EmitterEventData{
 			Topic: message.Topic(),
 			Body:  message.Payload(),
-		}
-
-		eventBytes, err := json.Marshal(eventData)
+		})
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data")
 			return

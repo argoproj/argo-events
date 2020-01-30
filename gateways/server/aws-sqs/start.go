@@ -18,11 +18,11 @@ package aws_sqs
 
 import (
 	"encoding/json"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
+	common2 "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -37,19 +37,6 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
-}
-
-// Data refers to the event data.
-type Data struct {
-	// A unique identifier for the message. A MessageIdis considered unique across
-	// all AWS accounts for an extended period of time.
-	MessageId string `json:"messageId"`
-	// Each message attribute consists of a Name, Type, and Value. For more information,
-	// see Amazon SQS Message Attributes (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
-	// in the Amazon Simple Queue Service Developer Guide.
-	MessageAttributes map[string]*sqslib.MessageAttributeValue `json:"messageAttributes"`
-	// The message's contents (not URL-encoded).
-	Body []byte `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -120,7 +107,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 					"message":               message.Body,
 				}).Debugln("message from queue")
 
-				data := &Data{
+				data := &common2.SQSEventData{
 					MessageId:         *message.MessageId,
 					MessageAttributes: message.MessageAttributes,
 					Body:              []byte(*message.Body),

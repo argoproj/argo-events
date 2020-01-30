@@ -20,11 +20,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	eventhub "github.com/Azure/azure-event-hubs-go"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	common2 "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -37,16 +37,6 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
-}
-
-// Data refers to the event data
-type Data struct {
-	// Id of the message
-	Id string `json:"id"`
-	// PartitionKey
-	PartitionKey string `json:"partitionKey"`
-	// Message body
-	Body []byte `json:"body"`
 }
 
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -91,7 +81,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
-		eventData := &Data{
+		eventData := &common2.AzureEventsHubEventData{
 			Id:           event.ID,
 			PartitionKey: *event.PartitionKey,
 			Body:         event.Data,

@@ -18,11 +18,11 @@ package amqp
 
 import (
 	"encoding/json"
-	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -34,24 +34,6 @@ import (
 type EventListener struct {
 	// Logger logs stuff
 	Logger *logrus.Logger
-}
-
-// Data refers to the event data.
-type Data struct {
-	ContentType     string    `json:"contentType"`     // MIME content type
-	ContentEncoding string    `json:"contentEncoding"` // MIME content encoding
-	DeliveryMode    int       `json:"deliveryMode"`    // queue implementation use - non-persistent (1) or persistent (2)
-	Priority        int       `json:"priority"`        // queue implementation use - 0 to 9
-	CorrelationId   string    `json:"correlationId"`   // application use - correlation identifier
-	ReplyTo         string    `json:"replyTo"`         // application use - address to reply to (ex: RPC)
-	Expiration      string    `json:"expiration"`      // implementation use - message expiration spec
-	MessageId       string    `json:"messageId"`       // application use - message identifier
-	Timestamp       time.Time `json:"timestamp"`       // application use - message timestamp
-	Type            string    `json:"type"`            // application use - message type name
-	AppId           string    `json:"appId"`           // application use - creating application id
-	Exchange        string    `json:"exchange"`        // basic.publish exchange
-	RoutingKey      string    `json:"routingKey"`      // basic.publish routing key
-	Body            []byte    `json:"body"`
 }
 
 // StartEventSource starts an event source
@@ -80,10 +62,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		return
 	}
 
-	var conn *amqplib.Connection
-
 	logger.Infoln("dialing connection...")
+
 	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
+
+	var conn *amqplib.Connection
 	if err := server.Connect(backoff, func() error {
 		var err error
 		conn, err = amqplib.Dial(amqpEventSource.URL)
@@ -115,7 +98,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		select {
 		case msg := <-delivery:
 			logger.WithField("message-id", msg.MessageId).Infoln("received the message")
-			body := &Data{
+			body := &apicommon.AMQPEventData{
 				ContentType:     msg.ContentType,
 				ContentEncoding: msg.ContentEncoding,
 				DeliveryMode:    int(msg.DeliveryMode),
@@ -124,7 +107,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 				ReplyTo:         msg.ReplyTo,
 				Expiration:      msg.Expiration,
 				MessageId:       msg.MessageId,
-				Timestamp:       msg.Timestamp,
+				Timestamp:       msg.Timestamp.String(),
 				Type:            msg.Type,
 				AppId:           msg.AppId,
 				Exchange:        msg.Exchange,
