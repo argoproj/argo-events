@@ -1,4 +1,4 @@
-# Argo Events - The Event-Based Dependency Manager for Kubernetes
+# Argo Events - The Event-driven Workflow Automation Framework
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/argoproj/argo-events)](https://goreportcard.com/report/github.com/argoproj/argo-events)
 [![slack](https://img.shields.io/badge/slack-argoproj-brightgreen.svg?logo=slack)](https://argoproj.github.io/community/join-slack)
@@ -7,8 +7,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 ## What is Argo Events?
-**Argo Events** is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
-and trigger Kubernetes objects after successful event dependencies resolution.
+**Argo Events** is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s resources, Argo Workflows and Serverless workloads on events from variety of event sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
 
 <br/>
 <br/>
@@ -20,11 +19,11 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 <br/>
 
 ## Features 
-* Manage dependencies from 20+ event sources.
-* Ability to customize business-level constraint logic for event dependencies resolution.
-* Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.
-* Supports AWS Lambda and OpenFaas as triggers.
-* Supports integration of existing API servers with 20+ event sources.
+* Supports events from 20+ event sources.
+* Ability to customize business-level constraint logic for workflow automation.
+* Manage everything from simple, linear, real-time to complex, multi-source events.
+* Supports Kubernetes Resources, Argo Workflow, AWS Lambda and OpenFaas as triggers.
+* Supports integration of existing API servers with event sources.
 * [CloudEvents](https://cloudevents.io/) compliant.
 
 ## Getting Started
