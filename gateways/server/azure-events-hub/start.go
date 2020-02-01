@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	eventhub "github.com/Azure/azure-event-hubs-go"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -40,44 +41,50 @@ type EventListener struct {
 }
 
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer server.Recover(eventSource.Name)
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	channels := server.NewChannels()
 
-	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("started processing the event source...")
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+
+	logger.Infoln("parsing the event source...")
 	var hubEventSource *v1alpha1.AzureEventsHubEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &hubEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parsed the event source %s", eventSource.Name)
 	}
 
+	logger.Infoln("retrieving the shared access key name...")
 	sharedAccessKeyName, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKeyName)
 	if err != nil {
-		errorCh <- errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
-		return
+		return errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
 	}
 
+	logger.Infoln("retrieving the shared access key...")
 	sharedAccessKey, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKey)
 	if err != nil {
-		errorCh <- errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
-		return
+		return errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
 	}
 
 	endpoint := fmt.Sprintf("Endpoint=sb://%s/;SharedAccessKeyName=%s;SharedAccessKey=%s;EntityPath=%s", hubEventSource.FQDN, sharedAccessKeyName, sharedAccessKey, hubEventSource.HubName)
 
+	logger.Infoln("connecting to the hub...")
 	hub, err := eventhub.NewHubFromConnectionString(endpoint)
 	if err != nil {
-		errorCh <- errors.Wrapf(err, "failed to connect to the hub %s", hubEventSource.HubName)
-		return
+		return errors.Wrapf(err, "failed to connect to the hub %s", hubEventSource.HubName)
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
@@ -92,35 +99,37 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 			return errors.Wrapf(err, "failed to marshal the event data for event source %s and message id %s", eventSource.Name, event.ID)
 		}
 
-		dataCh <- eventBytes
+		channels.Data <- eventBytes
 		return nil
 	}
 
 	ctx := context.Background()
 
 	// listen to each partition of the Event Hub
+	logger.Infoln("gathering the hub runtime information...")
 	runtimeInfo, err := hub.GetRuntimeInformation(ctx)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return errors.Wrapf(err, "failed to get the hub runtime information for %s", eventSource.Name)
 	}
 
 	var listenerHandles []*eventhub.ListenerHandle
 
+	logger.Infoln("handling the partitions...")
 	for _, partitionID := range runtimeInfo.PartitionIDs {
 		listenerHandle, err := hub.Receive(ctx, partitionID, handler, eventhub.ReceiveWithLatestOffset())
 		if err != nil {
-			errorCh <- errors.Wrapf(err, "failed to receive events from partition %s", partitionID)
-			continue
+			return errors.Wrapf(err, "failed to receive events from partition %s", partitionID)
 		}
 		listenerHandles = append(listenerHandles, listenerHandle)
 	}
 
-	<-doneCh
+	<-channels.Done
 
 	listener.Logger.Infoln("stopping listener handlers")
 
 	for _, handler := range listenerHandles {
 		handler.Close(ctx)
 	}
+
+	return nil
 }

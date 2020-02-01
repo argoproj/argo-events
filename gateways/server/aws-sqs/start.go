@@ -28,6 +28,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	sqslib "github.com/aws/aws-sdk-go/service/sqs"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
@@ -41,52 +42,56 @@ type EventListener struct {
 
 // StartEventSource starts an event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer server.Recover(eventSource.Name)
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	channels := server.NewChannels()
 
-	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("started processing the event source...")
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents fires an event when interval completes and item is processed from queue.
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
+	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+
+	logger.Infoln("parsing the event source...")
 	var sqsEventSource *v1alpha1.SQSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &sqsEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
-	var awsSession *session.Session
+	logger.Infoln("setting up aws session...")
 
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("setting up aws session...")
+	var awsSession *session.Session
 	awsSession, err := commonaws.CreateAWSSession(listener.K8sClient, sqsEventSource.Namespace, sqsEventSource.Region, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to create aws session for %s", eventSource.Name)
 	}
 
 	sqsClient := sqslib.New(awsSession)
 
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("fetching queue url...")
+	logger.Infoln("fetching queue url...")
 	queueURL, err := sqsClient.GetQueueUrl(&sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
 	})
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to get the queue url for %s", eventSource.Name)
 	}
 
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("listening for messages on the queue...")
+	logger.Infoln("listening for messages on the queue...")
 	for {
 		select {
-		case <-doneCh:
-			return
+		case <-channels.Done:
+			return nil
 
 		default:
 			msg, err := sqsClient.ReceiveMessage(&sqslib.ReceiveMessageInput{
@@ -95,17 +100,12 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 				WaitTimeSeconds:     aws.Int64(sqsEventSource.WaitTimeSeconds),
 			})
 			if err != nil {
-				listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Error("failed to process item from queue, waiting for next timeout")
+				logger.WithError(err).Errorln("failed to process item from queue, waiting for next timeout")
 				continue
 			}
 
 			if msg != nil && len(msg.Messages) > 0 {
 				message := *msg.Messages[0]
-
-				listener.Logger.WithFields(map[string]interface{}{
-					common.LabelEventSource: eventSource.Name,
-					"message":               message.Body,
-				}).Debugln("message from queue")
 
 				data := &common2.SQSEventData{
 					MessageId:         *message.MessageId,
@@ -115,19 +115,18 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 
 				eventBytes, err := json.Marshal(data)
 				if err != nil {
-					listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Errorln("failed to marshal event data")
+					logger.WithError(err).Errorln("failed to marshal event data, will process next message...")
 					continue
 				}
 
-				listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("dispatching the event on data channel")
-				dataCh <- eventBytes
+				logger.Infoln("dispatching the event on data channel")
+				channels.Data <- eventBytes
 
 				if _, err := sqsClient.DeleteMessage(&sqslib.DeleteMessageInput{
 					QueueUrl:      queueURL.QueueUrl,
 					ReceiptHandle: msg.Messages[0].ReceiptHandle,
 				}); err != nil {
-					errorCh <- err
-					return
+					return errors.Wrapf(err, "failed to delete the message after consuming from queue for event source %s", eventSource.Name)
 				}
 			}
 		}

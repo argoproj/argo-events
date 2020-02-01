@@ -93,19 +93,20 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger.WithField("bucket-name", minioEventSource.Bucket.Name).Info("started listening to bucket notifications...")
 	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
-			errorCh <- notification.Err
-			return
+			logger.WithError(notification.Err).Errorln("error occurred while listening to notifications")
+			continue
 		}
 
-		logger.Infoln("parsing notification from minio...")
-		payload, err := json.Marshal(notification.Records[0])
+		eventData := &apicommon.MinioEventData{Notification: notification.Records}
+
+		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			errorCh <- err
-			return
+			logger.WithError(notification.Err).Errorln("error occurred while marshalling event data")
+			continue
 		}
 
 		logger.Infoln("dispatching notification on data channel...")
-		dataCh <- payload
+		dataCh <- eventBytes
 	}
 }
 

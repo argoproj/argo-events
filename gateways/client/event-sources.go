@@ -226,6 +226,7 @@ func (gatewayContext *GatewayContext) activateEventSources(eventSources map[stri
 							id:      eventSource.source.Id,
 						},
 					}
+					eventStream.CloseSend()
 					return
 				}
 				err = gatewayContext.dispatchEvent(event)

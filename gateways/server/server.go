@@ -27,6 +27,22 @@ import (
 	"google.golang.org/grpc"
 )
 
+// Channels holds the necessary channels for gateway server to process.
+type Channels struct {
+	Data chan []byte
+	Stop chan struct{}
+	Done chan struct{}
+}
+
+// NewChannels returns an instance of channels.
+func NewChannels() *Channels {
+	return &Channels{
+		Data: make(chan []byte),
+		Stop: make(chan struct{}, 1),
+		Done: make(chan struct{}, 1),
+	}
+}
+
 // StartGateway start a gateway
 func StartGateway(es gateways.EventingServer) {
 	port, ok := os.LookupEnv(common.EnvVarGatewayServerPort)
@@ -55,27 +71,26 @@ func Recover(eventSource string) {
 }
 
 // HandleEventsFromEventSource handles events from the event source.
-func HandleEventsFromEventSource(name string, eventStream gateways.Eventing_StartEventSourceServer, dataCh chan []byte, errorCh chan error, doneCh chan struct{}, log *logrus.Logger) error {
+func HandleEventsFromEventSource(name string, eventStream gateways.Eventing_StartEventSourceServer, channels *Channels, logger *logrus.Logger) {
 	for {
 		select {
-		case data := <-dataCh:
-			log.WithField(common.LabelEventSource, name).Info("new event received, dispatching to gateway client")
+		case data := <-channels.Data:
+			logger.WithField(common.LabelEventSource, name).Info("new event received, dispatching to gateway client")
 			err := eventStream.Send(&gateways.Event{
 				Name:    name,
 				Payload: data,
 			})
 			if err != nil {
-				return err
+				logger.WithField(common.LabelEventSource, name).WithError(err).Errorln("failed to send the event data to the gateway client")
 			}
 
-		case err := <-errorCh:
-			log.WithField(common.LabelEventSource, name).WithError(err).Error("error occurred processing the event source")
-			return err
+		case <-channels.Stop:
+			logger.WithField(common.LabelEventSource, name).Infoln("event source is stopped")
+			return
 
 		case <-eventStream.Context().Done():
-			log.WithField(common.LabelEventSource, name).Info("connection is closed by client")
-			doneCh <- struct{}{}
-			return nil
+			logger.WithField(common.LabelEventSource, name).Info("connection is closed by client")
+			channels.Done <- struct{}{}
 		}
 	}
 }

@@ -57,6 +57,8 @@ type Route struct {
 	Active bool
 	// data channel to receive data on this endpoint
 	DataCh chan []byte
+	// Stop channel to signal the end of the event source.
+	StopChan chan struct{}
 	// initialized indicates whether the route has been initialized and there exist a http router
 	// to process incoming requests
 	initialized bool
