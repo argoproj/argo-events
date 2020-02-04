@@ -17,6 +17,8 @@ spec:
         endpoint: "/push"
         # port to run internal HTTP server on
         port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
@@ -51,6 +53,7 @@ spec:
       webhook:
         endpoint: "/push"
         port: "13000"
+        method: "POST"
         url: "http://myargofakeurl.fake"
         # path to file that is mounted in gateway pod which contains certs
         serverCertPath: "some path in pod"
