@@ -16,7 +16,7 @@ Make sure you have helm client installed and Tiller server is running. To instal
 
 2. Install `argo-events` chart
 
-        helm install argo/argo-events
+        helm install argo-events argo/argo-events
 
 ### Using kubectl
 
