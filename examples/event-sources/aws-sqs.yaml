@@ -4,7 +4,7 @@ metadata:
   name: aws-sqs-event-source
 spec:
   type: "sqs"
-  spec:
+  sqs:
     example:
       # accessKey contains information about K8s secret that stores the access key
       accessKey:
