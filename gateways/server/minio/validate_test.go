@@ -49,9 +49,9 @@ func TestValidateS3EventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Minio)
 
-	for name, value := range eventSource.Spec.Minio {
-		fmt.Println(name)
+	for _, value := range eventSource.Spec.Minio {
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
@@ -60,7 +60,6 @@ func TestValidateS3EventSource(t *testing.T) {
 			Value: content,
 			Type:  "minio",
 		})
-		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)
 	}
 }

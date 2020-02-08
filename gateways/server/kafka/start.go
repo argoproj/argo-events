@@ -17,12 +17,14 @@ limitations under the License.
 package kafka
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -48,25 +50,29 @@ func verifyPartitionAvailable(part int32, partitions []int32) bool {
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	channels := server.NewChannels()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
+
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
 	var kafkaEventSource *v1alpha1.KafkaEventSource
-	if err := yaml.Unmarshal(eventSource.Value, kafkaEventSource); err != nil {
-		errorCh <- err
-		return
+	if err := yaml.Unmarshal(eventSource.Value, &kafkaEventSource); err != nil {
+		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
 	}
 
 	var consumer sarama.Consumer
@@ -80,9 +86,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		}
 		return nil
 	}); err != nil {
-		logger.WithError(err).WithField(common.LabelURL, kafkaEventSource.URL).Error("failed to connect")
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to connect to Kafka broker for event source %s", eventSource.Name)
 	}
 
 	logger = logger.WithField("partition-id", kafkaEventSource.Partition)
@@ -90,29 +94,25 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger.Infoln("parsing the partition value...")
 	pInt, err := strconv.ParseInt(kafkaEventSource.Partition, 10, 32)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse Kafka partition %s for event source %s", kafkaEventSource.Partition, eventSource.Name)
 	}
 	partition := int32(pInt)
 
 	logger.Infoln("getting available partitions...")
 	availablePartitions, err := consumer.Partitions(kafkaEventSource.Topic)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to get the available partitions for topic %s and event source %s", kafkaEventSource.Topic, eventSource.Name)
 	}
 
 	logger.Infoln("verifying the partition exists within available partitions...")
 	if ok := verifyPartitionAvailable(partition, availablePartitions); !ok {
-		errorCh <- errors.Errorf("partition %d is not available", partition)
-		return
+		return errors.Wrapf(err, "partition %d is not available. event source %s", partition, eventSource.Name)
 	}
 
 	logger.Infoln("getting partition consumer...")
 	partitionConsumer, err := consumer.ConsumePartition(kafkaEventSource.Topic, partition, sarama.OffsetNewest)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to create consumer partition for event source %s", eventSource.Name)
 	}
 
 	logger.Info("listening to messages on the partition...")
@@ -120,18 +120,29 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		select {
 		case msg := <-partitionConsumer.Messages():
 			logger.Infoln("dispatching event on the data channel...")
-			dataCh <- msg.Value
+			eventData := &apicommon.KafkaEventData{
+				Topic:     msg.Topic,
+				Partition: int(msg.Partition),
+				Body:      msg.Value,
+				Timestamp: msg.Timestamp.String(),
+			}
+			eventBody, err := json.Marshal(eventData)
+			if err != nil {
+				logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
+				continue
+			}
+			channels.Data <- eventBody
 
 		case err := <-partitionConsumer.Errors():
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to consume messages for event source %s", eventSource.Name)
 
-		case <-doneCh:
+		case <-channels.Done:
+			logger.Infoln("event source is stopped, closing partition consumer")
 			err = partitionConsumer.Close()
 			if err != nil {
 				logger.WithError(err).Error("failed to close consumer")
 			}
-			return
+			return nil
 		}
 	}
 }

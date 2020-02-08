@@ -38,37 +38,41 @@ type EventListener struct {
 	Logger *logrus.Logger
 }
 
-// StartEventSource starts an event source
+// StartEventSource starts an event source.
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-	log.Info("started processing event source...")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	channels := server.NewChannels()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
-}
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-// listenEvents listen to file related events
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	var fileEventSource *v1alpha1.FileEventSource
-	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
-		errorCh <- err
-		return
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
 	}
 
-	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
+	return nil
+}
+
+// listenEvents listen to file related events.
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
+	logger := listener.Logger.WithField(common.LabelEventSourceName, eventSource.Name)
+
+	logger.Infoln("parsing the event source")
+	var fileEventSource *v1alpha1.FileEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &fileEventSource); err != nil {
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
+	}
 
 	// create new fs watcher
 	logger.Infoln("setting up a new file watcher...")
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to set up a file watcher for %s", eventSource.Name)
 	}
 	defer watcher.Close()
 
@@ -76,8 +80,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger.Infoln("adding directory to monitor for the watcher...")
 	err = watcher.Add(fileEventSource.WatchPathConfig.Directory)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to add directory %s to the watcher for %s", fileEventSource.WatchPathConfig.Directory, eventSource.Name)
 	}
 
 	var pathRegexp *regexp.Regexp
@@ -85,8 +88,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		logger.WithField("regex", fileEventSource.WatchPathConfig.PathRegexp).Infoln("matching file path with configured regex...")
 		pathRegexp, err = regexp.Compile(fileEventSource.WatchPathConfig.PathRegexp)
 		if err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to match file path with configured regex %s for %s", fileEventSource.WatchPathConfig.PathRegexp, eventSource.Name)
 		}
 	}
 
@@ -97,8 +99,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 			if !ok {
 				logger.Info("fs watcher has stopped")
 				// watcher stopped watching file events
-				errorCh <- errors.New("fs watcher stopped")
-				return
+				return errors.Errorf("fs watcher stopped for %s", eventSource.Name)
 			}
 			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
 			matched := false
@@ -120,8 +121,8 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 				fileEvent := fsevent.Event{Name: event.Name, Op: fsevent.NewOp(event.Op.String())}
 				payload, err := json.Marshal(fileEvent)
 				if err != nil {
-					errorCh <- err
-					return
+					logger.WithError(err).Errorln("failed to marshal the event to the fs event")
+					continue
 				}
 				logger.WithFields(
 					map[string]interface{}{
@@ -129,13 +130,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 						"descriptor-name": event.Name,
 					},
 				).Infoln("dispatching file event on data channel...")
-				dataCh <- payload
+				channels.Data <- payload
 			}
 		case err := <-watcher.Errors:
-			errorCh <- err
-			return
-		case <-doneCh:
-			return
+			return errors.Wrapf(err, "failed to process %s", eventSource.Name)
+		case <-channels.Done:
+			logger.Infoln("event source has been stopped")
+			return nil
 		}
 	}
 }

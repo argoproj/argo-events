@@ -7,9 +7,9 @@ import (
 	"os"
 	"strings"
 
+	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
 	gwv1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/go-openapi/spec"
 	"k8s.io/kube-openapi/pkg/common"
 )

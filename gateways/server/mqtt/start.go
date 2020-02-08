@@ -17,12 +17,16 @@ limitations under the License.
 package mqtt
 
 import (
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,39 +40,46 @@ type EventListener struct {
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	channels := server.NewChannels()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
+
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens to events from a mqtt broker
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
 	var mqttEventSource *v1alpha1.MQTTEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &mqttEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
 	}
-
-	logger = logger.WithFields(
-		map[string]interface{}{
-			common.LabelURL:      mqttEventSource.URL,
-			common.LabelClientID: mqttEventSource.ClientId,
-		},
-	)
 
 	logger.Infoln("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
-		logger.Infoln("dispatching event on data channel...")
-		dataCh <- msg.Payload()
+		eventData := &apicommon.MQTTEventData{
+			Topic:     msg.Topic(),
+			MessageId: int(msg.MessageID()),
+			Body:      msg.Payload(),
+		}
+		eventBody, err := json.Marshal(eventData)
+		if err != nil {
+			logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
+			return
+		}
+		logger.Infoln("dispatching event on the data channel...")
+		channels.Data <- eventBody
 	}
 
 	logger.Infoln("setting up the mqtt broker client...")
@@ -84,21 +95,21 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		}
 		return nil
 	}); err != nil {
-		logger.Info("failed to connect")
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to connect to the mqtt broker for event source %s", eventSource.Name)
 	}
 
 	logger.Info("subscribing to the topic...")
 	if token := client.Subscribe(mqttEventSource.Topic, 0, handler); token.Wait() && token.Error() != nil {
-		logger.WithError(token.Error()).Error("failed to subscribe")
-		errorCh <- token.Error()
-		return
+		return errors.Wrapf(token.Error(), "failed to subscribe to the topic %s for event source %s", mqttEventSource.Topic, eventSource.Name)
 	}
 
-	<-doneCh
+	<-channels.Done
+	logger.Infoln("event source is stopped, unsubscribing the client...")
+
 	token := client.Unsubscribe(mqttEventSource.Topic)
 	if token.Error() != nil {
 		logger.WithError(token.Error()).Error("failed to unsubscribe client")
 	}
+
+	return nil
 }
