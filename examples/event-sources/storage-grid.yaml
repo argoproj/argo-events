@@ -11,6 +11,8 @@ spec:
       webhook:
         # port to run HTTP server on
         port: "8080"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
         # endpoint to listen events on
         endpoint: "/"
       # List of supported events can be derived from AWS S3 events https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#supported-notification-event-types
@@ -22,6 +24,8 @@ spec:
       webhook:
         # port to run HTTP server on
         port: "8090"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
         # endpoint to listen events on
         endpoint: "/"
         # path to file that is mounted in gateway pod which contains certs
