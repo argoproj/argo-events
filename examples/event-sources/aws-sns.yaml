@@ -15,6 +15,8 @@ spec:
         endpoint: "/"
         # port to run HTTP server on
         port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
         # url the gateway will use to register at AWS.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
@@ -40,6 +42,7 @@ spec:
         endpoint: "/"
         # gateway can run multiple HTTP servers, just define a unique port.
         port: "13000"
+        method: "POST"
         url: "http://mysecondfakeurl.fake"
         # path to file that is mounted in gateway pod which contains certs
         serverCertPath: "some path in pod"
@@ -60,5 +63,6 @@ spec:
       webhook:
         endpoint: "/"
         port: "13000"
+        method: "POST"
         url: "http://mysecondfakeurl.fake"
       region: "us-east-1"

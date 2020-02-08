@@ -13,6 +13,8 @@ spec:
         endpoint: "/"
         # port to run HTTP server on
         port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
       # token contains information about K8s secret that stores the token
       token:
         # Name of the K8s secret that contains the token
@@ -33,6 +35,7 @@ spec:
       webhook:
         endpoint: "/"
         port: "14000"
+        method: "POST"
         # path to file that is mounted in gateway pod which contains certs
         serverCertPath: "some path in pod"
         # path to file that is mounted in gateway pod which contains private key
