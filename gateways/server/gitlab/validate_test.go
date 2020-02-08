@@ -19,7 +19,6 @@ package gitlab
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 
@@ -27,9 +26,10 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateGitlabEventSource(t *testing.T) {
+func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	}
@@ -49,6 +49,7 @@ func TestValidateGitlabEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Gitlab)
 
 	for name, value := range eventSource.Spec.Gitlab {
 		fmt.Println(name)

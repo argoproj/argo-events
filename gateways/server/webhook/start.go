@@ -18,6 +18,7 @@ package webhook
 
 import (
 	"encoding/json"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"io/ioutil"
 	"net/http"
 
@@ -49,14 +50,6 @@ var (
 // set up the activation and inactivation channels to control the state of routes.
 func init() {
 	go webhook.ProcessRouteStatus(controller)
-}
-
-// webhook event payload
-type payload struct {
-	// Header is the http request header
-	Header http.Header `json:"header"`
-	// Body is http request body
-	Body *json.RawMessage `json:"body"`
 }
 
 // Implement Router
@@ -97,7 +90,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	payload := &payload{
+	payload := &apicommon.WebhookEventData{
 		Header: request.Header,
 		Body:   (*json.RawMessage)(&body),
 	}

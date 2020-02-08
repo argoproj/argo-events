@@ -19,17 +19,17 @@ package aws_sns
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"io/ioutil"
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
+func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
@@ -47,9 +47,9 @@ func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 	var eventSource *esv1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.SNS)
 
-	for name, value := range eventSource.Spec.SNS {
-		fmt.Println(name)
+	for _, value := range eventSource.Spec.SNS {
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
@@ -58,7 +58,6 @@ func TestSNSEventSourceExecutor_ValidateEventSource(t *testing.T) {
 			Value: content,
 			Type:  "sns",
 		})
-		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)
 	}
 }

@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateS3EventSource(t *testing.T) {
+func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	}
