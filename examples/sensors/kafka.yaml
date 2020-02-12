@@ -19,7 +19,7 @@ spec:
   dependencies:
     - name: test-dep
       gatewayName: kafka-gateway
-      eventName: example-with-retry
+      eventName: example
   triggers:
     - template:
         name: kafka-workflow-trigger
