@@ -63,8 +63,8 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
-	var kafkaEventSource *v1alpha1.KafkaEventSource
-	if err := yaml.Unmarshal(eventSource.Value, kafkaEventSource); err != nil {
+	var kafkaEventSource v1alpha1.KafkaEventSource
+	if err := yaml.Unmarshal(eventSource.Value, &kafkaEventSource); err != nil {
 		errorCh <- err
 		return
 	}
