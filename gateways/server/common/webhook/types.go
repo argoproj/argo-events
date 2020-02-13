@@ -68,8 +68,8 @@ type Route struct {
 type Controller struct {
 	// ActiveServerHandlers keeps track of currently active mux/router for the http servers.
 	ActiveServerHandlers map[string]*mux.Router
-	// ActiveRoutes keep track of routes that are already registered with server and their status active or inactive
-	ActiveRoutes map[string]*Route
+	// AllRoutes keep track of routes that are already registered with server and their status active or inactive
+	AllRoutes map[string]*mux.Route
 	// RouteActivateChan handles activation of routes
 	RouteActivateChan chan Router
 	// RouteDeactivateChan handles inactivation of routes

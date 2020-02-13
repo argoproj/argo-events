@@ -18,14 +18,13 @@ package webhook
 
 import (
 	"encoding/json"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"io/ioutil"
 	"net/http"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 )
@@ -65,7 +64,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	route := router.route
+	route := router.GetRoute()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{
@@ -120,8 +119,6 @@ func (router *Router) PostInactivate() error {
 
 // StartEventSource starts a event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer server.Recover(eventSource.Name)
-
 	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("started operating on the event source...")

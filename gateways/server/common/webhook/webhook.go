@@ -18,17 +18,18 @@ package webhook
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // NewController returns a webhook controller
 func NewController() *Controller {
 	return &Controller{
-		ActiveRoutes:         make(map[string]*Route),
+		AllRoutes:            make(map[string]*mux.Route),
 		ActiveServerHandlers: make(map[string]*mux.Router),
 		RouteActivateChan:    make(chan Router),
 		RouteDeactivateChan:  make(chan Router),
@@ -44,6 +45,7 @@ func NewRoute(hookContext *Context, logger *logrus.Logger, eventSource *gateways
 		Active:      false,
 		DataCh:      make(chan []byte),
 		StartCh:     make(chan struct{}),
+		StopChan:    make(chan struct{}),
 	}
 }
 
@@ -92,15 +94,17 @@ func startServer(router Router, controller *Controller) {
 		}()
 	}
 
-	// if route is not previously initialized, then assign a router against it
-	if !route.initialized {
-		handler := controller.ActiveServerHandlers[route.Context.Port]
-		if route.Context.Method == "" {
-			handler.HandleFunc(route.Context.Endpoint, router.HandleRoute)
-		} else {
-			handler.HandleFunc(route.Context.Endpoint, router.HandleRoute).Methods(route.Context.Method)
-		}
+	handler := controller.ActiveServerHandlers[route.Context.Port]
+
+	routeName := route.Context.Port + route.Context.Endpoint
+
+	r := handler.GetRoute(routeName)
+	if r == nil {
+		r = handler.NewRoute().Name(routeName)
+		r = r.Path(route.Context.Endpoint)
 	}
+
+	r = r.HandlerFunc(router.HandleRoute)
 
 	Lock.Unlock()
 }
@@ -108,7 +112,6 @@ func startServer(router Router, controller *Controller) {
 // activateRoute activates a route to process incoming requests
 func activateRoute(router Router, controller *Controller) {
 	route := router.GetRoute()
-	endpoint := route.Context.Endpoint
 	// change status of route as a active route
 	controller.RouteActivateChan <- router
 
@@ -121,10 +124,9 @@ func activateRoute(router Router, controller *Controller) {
 		map[string]interface{}{
 			common.LabelEventSource: route.EventSource.Name,
 			common.LabelPort:        route.Context.Port,
-			common.LabelEndpoint:    endpoint,
+			common.LabelEndpoint:    route.Context.Endpoint,
 		})
 
-	log.Info("activating the route...")
 	route.Active = true
 	log.Info("route is activated")
 }
@@ -187,8 +189,6 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 		logger.WithError(err).Error("error occurred while performing post route activation operations")
 		return err
 	}
-
-	route.Active = true
 
 	<-eventStream.Context().Done()
 	route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("connection is closed by client")
