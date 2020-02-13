@@ -30,7 +30,9 @@ import (
 )
 
 func TestValidateEventSource(t *testing.T) {
-	listener := &EventListener{}
+	listener := &EventListener{
+		Logger: common.NewArgoEventsLogger(),
+	}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",

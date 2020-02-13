@@ -67,7 +67,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	route := router.route
+	route := router.GetRoute()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{

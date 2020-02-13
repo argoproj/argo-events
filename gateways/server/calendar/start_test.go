@@ -22,66 +22,59 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/server"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
-	"github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestResolveSchedule(t *testing.T) {
-	convey.Convey("Given a calendar schedule, resolve it", t, func() {
-		schedule, err := resolveSchedule(&v1alpha1.CalendarEventSource{
-			Schedule: "* * * * *",
-		})
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(schedule, convey.ShouldNotBeNil)
+	schedule, err := resolveSchedule(&v1alpha1.CalendarEventSource{
+		Schedule: "* * * * *",
 	})
+	assert.Nil(t, err)
+	assert.NotNil(t, schedule)
 }
 
 func TestListenEvents(t *testing.T) {
-	convey.Convey("Given a calendar schedule, listen events", t, func() {
-		listener := &EventListener{
-			Logger: common.NewArgoEventsLogger(),
-		}
+	listener := &EventListener{
+		Logger: common.NewArgoEventsLogger(),
+	}
+	payload := []byte(`"{\r\n\"hello\": \"world\"\r\n}"`)
+	raw := json.RawMessage(payload)
 
-		dataCh := make(chan []byte)
-		errorCh := make(chan error)
-		doneCh := make(chan struct{}, 1)
-		dataCh2 := make(chan []byte)
+	calendarEventSource := &v1alpha1.CalendarEventSource{
+		Interval:    "2s",
+		UserPayload: &raw,
+	}
 
-		go func() {
-			data := <-dataCh
-			dataCh2 <- data
-		}()
+	body, err := yaml.Marshal(calendarEventSource)
+	assert.Nil(t, err)
 
-		payload := []byte(`"{\r\n\"hello\": \"world\"\r\n}"`)
-		raw := json.RawMessage(payload)
-
-		calendarEventSource := &v1alpha1.CalendarEventSource{
-			Schedule:    "* * * * *",
-			UserPayload: &raw,
-		}
-
-		body, err := yaml.Marshal(calendarEventSource)
-		convey.So(err, convey.ShouldBeNil)
-
-		go listener.listenEvents(&gateways.EventSource{
-			Name:  "fake",
-			Value: body,
-			Id:    "1234",
-			Type:  string(apicommon.CalendarEvent),
-		}, dataCh, errorCh, doneCh)
-
-		data := <-dataCh2
-		doneCh <- struct{}{}
-
-		var cal *response
+	channels := &server.Channels{
+		Data: make(chan []byte),
+		Stop: make(chan struct{}),
+		Done: make(chan struct{}),
+	}
+	go func() {
+		data := <-channels.Data
+		var cal *apicommon.CalendarEventData
 		err = yaml.Unmarshal(data, &cal)
-		convey.So(err, convey.ShouldBeNil)
+		assert.Nil(t, err)
 
 		payload, err = cal.UserPayload.MarshalJSON()
-		convey.So(err, convey.ShouldBeNil)
+		assert.Nil(t, err)
 
-		convey.So(string(payload), convey.ShouldEqual, `"{\r\n\"hello\": \"world\"\r\n}"`)
-	})
+		assert.Equal(t, `"{\r\n\"hello\": \"world\"\r\n}"`, string(payload))
+		channels.Done <- struct{}{}
+	}()
+
+	err = listener.listenEvents(&gateways.EventSource{
+		Name:  "fake",
+		Value: body,
+		Id:    "1234",
+		Type:  string(apicommon.CalendarEvent),
+	}, channels)
+	assert.Nil(t, err)
 }

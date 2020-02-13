@@ -95,7 +95,11 @@ func startServer(router Router, controller *Controller) {
 	// if route is not previously initialized, then assign a router against it
 	if !route.initialized {
 		handler := controller.ActiveServerHandlers[route.Context.Port]
-		handler.HandleFunc(route.Context.Endpoint, router.HandleRoute).Methods(route.Context.Method)
+		if route.Context.Method == "" {
+			handler.HandleFunc(route.Context.Endpoint, router.HandleRoute)
+		} else {
+			handler.HandleFunc(route.Context.Endpoint, router.HandleRoute).Methods(route.Context.Method)
+		}
 	}
 
 	Lock.Unlock()
@@ -183,6 +187,8 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 		logger.WithError(err).Error("error occurred while performing post route activation operations")
 		return err
 	}
+
+	route.Active = true
 
 	<-eventStream.Context().Done()
 	route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("connection is closed by client")
