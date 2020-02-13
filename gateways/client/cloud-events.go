@@ -29,71 +29,71 @@ import (
 )
 
 // updateSubscriberClients updates the active clients for event subscribers
-func (gc *GatewayContext) updateSubscriberClients() {
-	if gc.gateway.Spec.Subscribers == nil {
+func (gatewayContext *GatewayContext) updateSubscriberClients() {
+	if gatewayContext.gateway.Spec.Subscribers == nil {
 		return
 	}
 
-	if gc.httpSubscribers == nil {
-		gc.httpSubscribers = make(map[string]cloudevents.Client)
+	if gatewayContext.httpSubscribers == nil {
+		gatewayContext.httpSubscribers = make(map[string]cloudevents.Client)
 	}
-	if gc.natsSubscribers == nil {
-		gc.natsSubscribers = make(map[string]cloudevents.Client)
+	if gatewayContext.natsSubscribers == nil {
+		gatewayContext.natsSubscribers = make(map[string]cloudevents.Client)
 	}
 
 	// http subscribers
-	for _, subscriber := range gc.gateway.Spec.Subscribers.HTTP {
-		if _, ok := gc.httpSubscribers[subscriber]; !ok {
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
+		if _, ok := gatewayContext.httpSubscribers[subscriber]; !ok {
 			t, err := cloudevents.NewHTTPTransport(
 				cloudevents.WithTarget(subscriber),
 				cloudevents.WithEncoding(cloudevents.HTTPBinaryV03),
 			)
 			if err != nil {
-				gc.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
 				continue
 			}
 
 			client, err := cloudevents.NewClient(t)
 			if err != nil {
-				gc.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
 				continue
 			}
-			gc.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gc.httpSubscribers[subscriber] = client
+			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
+			gatewayContext.httpSubscribers[subscriber] = client
 		}
 	}
 
 	// nats subscribers
-	for _, subscriber := range gc.gateway.Spec.Subscribers.NATS {
-		if _, ok := gc.natsSubscribers[subscriber.Name]; !ok {
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
+		if _, ok := gatewayContext.natsSubscribers[subscriber.Name]; !ok {
 			t, err := cloudeventsnats.New(subscriber.ServerURL, subscriber.Subject)
 			if err != nil {
-				gc.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
 				continue
 			}
 
 			client, err := cloudevents.NewClient(t)
 			if err != nil {
-				gc.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
 				continue
 			}
-			gc.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gc.natsSubscribers[subscriber.Name] = client
+			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
+			gatewayContext.natsSubscribers[subscriber.Name] = client
 		}
 	}
 }
 
 // dispatchEvent dispatches event to gateway transformer for further processing
-func (gc *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
-	logger := gc.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
+func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
+	logger := gatewayContext.logger.WithField(common.LabelEventSource, gatewayEvent.Name)
 	logger.Infoln("dispatching event to subscribers")
 
-	if gc.gateway.Spec.Subscribers == nil {
+	if gatewayContext.gateway.Spec.Subscribers == nil {
 		logger.Warnln("no active subscribers to send event to.")
 		return nil
 	}
 
-	cloudEvent, err := gc.transformEvent(gatewayEvent)
+	cloudEvent, err := gatewayContext.transformEvent(gatewayEvent)
 	if err != nil {
 		return err
 	}
@@ -101,10 +101,10 @@ func (gc *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 	completeSuccess := true
 
 	// http subscribers
-	for _, subscriber := range gc.gateway.Spec.Subscribers.HTTP {
-		client, ok := gc.httpSubscribers[subscriber]
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
+		client, ok := gatewayContext.httpSubscribers[subscriber]
 		if !ok {
-			gc.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
+			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
 			continue
 		}
@@ -117,10 +117,10 @@ func (gc *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 	}
 
 	// http subscribers
-	for _, subscriber := range gc.gateway.Spec.Subscribers.NATS {
-		client, ok := gc.httpSubscribers[subscriber.Name]
+	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
+		client, ok := gatewayContext.httpSubscribers[subscriber.Name]
 		if !ok {
-			gc.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
+			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
 			continue
 		}
@@ -143,12 +143,12 @@ func (gc *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event) error {
 
 // transformEvent transforms an event from gateway server into a CloudEvent
 // See https://github.com/cloudevents/spec for more info.
-func (gc *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*cloudevents.Event, error) {
+func (gatewayContext *GatewayContext) transformEvent(gatewayEvent *gateways.Event) (*cloudevents.Event, error) {
 	event := cloudevents.NewEvent(cloudevents.VersionV03)
 	event.SetID(fmt.Sprintf("%x", uuid.New()))
 	event.SetSpecVersion(cloudevents.VersionV03)
-	event.SetType(string(gc.gateway.Spec.Type))
-	event.SetSource(gc.gateway.Name)
+	event.SetType(string(gatewayContext.gateway.Spec.Type))
+	event.SetSource(gatewayContext.gateway.Name)
 	event.SetDataContentType("application/json")
 	event.SetSubject(gatewayEvent.Name)
 	event.SetTime(time.Now())

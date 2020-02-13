@@ -32,10 +32,10 @@ import (
 )
 
 // populateEventSourceContexts sets up the contexts for event sources
-func (gc *GatewayContext) populateEventSourceContexts(name string, value interface{}, eventSourceContexts map[string]*EventSourceContext) {
+func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, value interface{}, eventSourceContexts map[string]*EventSourceContext) {
 	body, err := yaml.Marshal(value)
 	if err != nil {
-		gc.logger.WithField("event-source-name", name).Errorln("failed to marshal the event source value, won't process it")
+		gatewayContext.logger.WithField("event-source-name", name).Errorln("failed to marshal the event source value, won't process it")
 		return
 	}
 
@@ -43,7 +43,7 @@ func (gc *GatewayContext) populateEventSourceContexts(name string, value interfa
 
 	hashKey := common.Hasher(name + string(body))
 
-	logger := gc.logger.WithFields(logrus.Fields{
+	logger := gatewayContext.logger.WithFields(logrus.Fields{
 		"name":  name,
 		"value": value,
 	})
@@ -53,7 +53,7 @@ func (gc *GatewayContext) populateEventSourceContexts(name string, value interfa
 	// create a connection to gateway server
 	connCtx, cancel := context.WithCancel(context.Background())
 	conn, err := grpc.Dial(
-		fmt.Sprintf("localhost:%s", gc.serverPort),
+		fmt.Sprintf("localhost:%s", gatewayContext.serverPort),
 		grpc.WithBlock(),
 		grpc.WithInsecure())
 	if err != nil {
@@ -69,7 +69,7 @@ func (gc *GatewayContext) populateEventSourceContexts(name string, value interfa
 			Id:    hashKey,
 			Name:  name,
 			Value: body,
-			Type:  string(gc.gateway.Spec.Type),
+			Type:  string(gatewayContext.gateway.Spec.Type),
 		},
 		cancel: cancel,
 		ctx:    connCtx,
@@ -83,19 +83,19 @@ func (gc *GatewayContext) populateEventSourceContexts(name string, value interfa
 // and although the event sources are actually same, this method will treat them as different event sources.
 // old event sources - event sources to be deactivate
 // new event sources - new event sources to activate
-func (gc *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) (staleEventSources []string, newEventSources []string) {
+func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) (staleEventSources []string, newEventSources []string) {
 	var currentEventSources []string
 	var updatedEventSources []string
 
-	for currentEventSource := range gc.eventSourceContexts {
+	for currentEventSource := range gatewayContext.eventSourceContexts {
 		currentEventSources = append(currentEventSources, currentEventSource)
 	}
 	for updatedEventSource := range eventSourceContexts {
 		updatedEventSources = append(updatedEventSources, updatedEventSource)
 	}
 
-	gc.logger.WithField("current-event-sources-keys", currentEventSources).Debugln("event sources hashes")
-	gc.logger.WithField("updated-event-sources-keys", updatedEventSources).Debugln("event sources hashes")
+	gatewayContext.logger.WithField("current-event-sources-keys", currentEventSources).Debugln("event sources hashes")
+	gatewayContext.logger.WithField("updated-event-sources-keys", updatedEventSources).Debugln("event sources hashes")
 
 	swapped := false
 	// iterates over current event sources and updated event sources
@@ -126,145 +126,14 @@ func (gc *GatewayContext) diffEventSources(eventSourceContexts map[string]*Event
 	return
 }
 
-// newConn returns a new gRPC connection to the gateway server.
-func (gc *GatewayContext) newConn() (*grpc.ClientConn, error) {
-	return grpc.Dial(
-		fmt.Sprintf("localhost:%s", gc.serverPort),
-		grpc.WithBlock(),
-		grpc.WithInsecure())
-}
-
-func (gc *GatewayContext) operateEventSource(esctx *EventSourceContext) {
-	logger := gc.logger.WithField(common.LabelEventSource, esctx.source.Name)
-
-	logger.Infoln("operating on the event source...")
-
-	logger.Infoln("setting up a new connection to the gateway server")
-	conn, err := gc.newConn()
-	if err != nil {
-		logger.WithError(err).Errorln("failed to connect with the gateway server")
-		gc.statusCh <- notification{
-			eventSourceNotification: &eventSourceUpdate{
-				phase:   v1alpha1.NodePhaseError,
-				id:      esctx.source.Id,
-				message: fmt.Sprintf("failed to connect to the gateway server. err: %+v", err),
-				name:    esctx.source.Name,
-			},
-		}
-		return
-	}
-
-	defer conn.Close()
-
-	// conn should be in READY state
-	if esctx.conn.GetState() != connectivity.Ready {
-		logger.Errorln("connection is not in ready state.")
-		gc.statusCh <- notification{
-			eventSourceNotification: &eventSourceUpdate{
-				phase:   v1alpha1.NodePhaseError,
-				id:      esctx.source.Id,
-				message: "connection is not in the ready state",
-				name:    esctx.source.Name,
-			},
-		}
-		return
-	}
-
-	client := gateways.NewEventingClient(conn)
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	// validate event source
-	if valid, _ := client.ValidateEventSource(ctx, esctx.source); !valid.IsValid {
-		logger.WithField("reason", valid.Reason).Errorln("event source is not valid")
-		gc.statusCh <- notification{
-			eventSourceNotification: &eventSourceUpdate{
-				phase:   v1alpha1.NodePhaseError,
-				id:      esctx.source.Id,
-				message: fmt.Sprintf("event source is not valid. reason: %s", valid.Reason),
-				name:    esctx.source.Name,
-			},
-		}
-		return
-	}
-
-	logger.Infoln("event source is valid")
-
-	// mark event source as running
-	gc.statusCh <- notification{
-		eventSourceNotification: &eventSourceUpdate{
-			phase:   v1alpha1.NodePhaseRunning,
-			message: "event source is running",
-			id:      esctx.source.Id,
-			name:    esctx.source.Name,
-		},
-	}
-
-	// listen to events from gateway server
-	eventStream, err := client.StartEventSource(ctx, esctx.source)
-	if err != nil {
-		logger.WithError(err).Errorln("error occurred while starting event source")
-		gc.statusCh <- notification{
-			eventSourceNotification: &eventSourceUpdate{
-				phase:   v1alpha1.NodePhaseError,
-				message: "failed to receive event stream",
-				name:    esctx.source.Name,
-				id:      esctx.source.Id,
-			},
-		}
-		return
-	}
-
-	for {
-		select {
-		case <-esctx.stop:
-
-		default:
-		event, err := eventStream.Recv()
-			if err != nil {
-				if err == io.EOF {
-					logger.Infoln("event source has stopped")
-					gc.statusCh <- notification{
-						eventSourceNotification: &eventSourceUpdate{
-							phase:   v1alpha1.NodePhaseCompleted,
-							message: "event source has been stopped",
-							name:    esctx.source.Name,
-							id:      esctx.source.Id,
-						},
-					}
-					return
-				}
-
-				logger.WithError(err).Errorln("failed to receive event from stream")
-				gc.statusCh <- notification{
-					eventSourceNotification: &eventSourceUpdate{
-						phase:   v1alpha1.NodePhaseError,
-						message: "failed to receive event from the event source stream",
-						name:    esctx.source.Name,
-						id:      esctx.source.Id,
-					},
-				}
-				eventStream.CloseSend()
-				return
-			}
-			err = gc.dispatchEvent(event)
-			if err != nil {
-				logger.WithError(err).Errorln("failed to dispatch event to watchers")
-			}
-		}
-	}
-
-	logger.Infoln("listening to events from gateway server...")
-}
-
 // activateEventSources activate new event sources
-func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSourceContext, keys []string) {
+func (gatewayContext *GatewayContext) activateEventSources(eventSources map[string]*EventSourceContext, keys []string) {
 	for _, key := range keys {
 		eventSource := eventSources[key]
 		// register the event source
-		gc.eventSourceContexts[key] = eventSource
+		gatewayContext.eventSourceContexts[key] = eventSource
 
-		logger := gc.logger.WithField(common.LabelEventSource, eventSource.source.Name)
+		logger := gatewayContext.logger.WithField(common.LabelEventSource, eventSource.source.Name)
 
 		logger.Infoln("activating new event source...")
 
@@ -272,7 +141,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 			// conn should be in READY state
 			if eventSource.conn.GetState() != connectivity.Ready {
 				logger.Errorln("connection is not in ready state.")
-				gc.statusCh <- notification{
+				gatewayContext.statusCh <- notification{
 					eventSourceNotification: &eventSourceUpdate{
 						phase:   v1alpha1.NodePhaseError,
 						id:      eventSource.source.Id,
@@ -293,7 +162,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 				if err := eventSource.conn.Close(); err != nil {
 					logger.WithError(err).Errorln("failed to close client connection")
 				}
-				gc.statusCh <- notification{
+				gatewayContext.statusCh <- notification{
 					eventSourceNotification: &eventSourceUpdate{
 						phase:   v1alpha1.NodePhaseError,
 						id:      eventSource.source.Id,
@@ -307,7 +176,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 			logger.Infoln("event source is valid")
 
 			// mark event source as running
-			gc.statusCh <- notification{
+			gatewayContext.statusCh <- notification{
 				eventSourceNotification: &eventSourceUpdate{
 					phase:   v1alpha1.NodePhaseRunning,
 					message: "event source is running",
@@ -320,7 +189,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 			eventStream, err := eventSource.client.StartEventSource(eventSource.ctx, eventSource.source)
 			if err != nil {
 				logger.WithError(err).Errorln("error occurred while starting event source")
-				gc.statusCh <- notification{
+				gatewayContext.statusCh <- notification{
 					eventSourceNotification: &eventSourceUpdate{
 						phase:   v1alpha1.NodePhaseError,
 						message: "failed to receive event stream",
@@ -337,7 +206,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 				if err != nil {
 					if err == io.EOF {
 						logger.Infoln("event source has stopped")
-						gc.statusCh <- notification{
+						gatewayContext.statusCh <- notification{
 							eventSourceNotification: &eventSourceUpdate{
 								phase:   v1alpha1.NodePhaseCompleted,
 								message: "event source has been stopped",
@@ -349,7 +218,7 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 					}
 
 					logger.WithError(err).Errorln("failed to receive event from stream")
-					gc.statusCh <- notification{
+					gatewayContext.statusCh <- notification{
 						eventSourceNotification: &eventSourceUpdate{
 							phase:   v1alpha1.NodePhaseError,
 							message: "failed to receive event from the event source stream",
@@ -357,10 +226,9 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 							id:      eventSource.source.Id,
 						},
 					}
-					eventStream.CloseSend()
 					return
 				}
-				err = gc.dispatchEvent(event)
+				err = gatewayContext.dispatchEvent(event)
 				if err != nil {
 					logger.WithError(err).Errorln("failed to dispatch event to watchers")
 				}
@@ -370,18 +238,18 @@ func (gc *GatewayContext) activateEventSources(eventSources map[string]*EventSou
 }
 
 // deactivateEventSources inactivate an existing event sources
-func (gc *GatewayContext) deactivateEventSources(eventSourceNames []string) {
+func (gatewayContext *GatewayContext) deactivateEventSources(eventSourceNames []string) {
 	for _, eventSourceName := range eventSourceNames {
-		eventSource := gc.eventSourceContexts[eventSourceName]
+		eventSource := gatewayContext.eventSourceContexts[eventSourceName]
 		if eventSource == nil {
 			continue
 		}
 
-		logger := gc.logger.WithField(common.LabelEventSource, eventSourceName)
+		logger := gatewayContext.logger.WithField(common.LabelEventSource, eventSourceName)
 
 		logger.WithField(common.LabelEventSource, eventSource.source.Name).Infoln("stopping the event source")
-		delete(gc.eventSourceContexts, eventSourceName)
-		gc.statusCh <- notification{
+		delete(gatewayContext.eventSourceContexts, eventSourceName)
+		gatewayContext.statusCh <- notification{
 			eventSourceNotification: &eventSourceUpdate{
 				phase:   v1alpha1.NodePhaseRemove,
 				id:      eventSource.source.Id,
@@ -396,125 +264,119 @@ func (gc *GatewayContext) deactivateEventSources(eventSourceNames []string) {
 	}
 }
 
-// getOutOfSyncEventSources returns event sources that are stale and out of sync.
-func (gc *GatewayContext) getOutOfSyncEventSources(eventSource *eventSourceV1Alpha1.EventSource) []string {
-	var result []string
-	for name, source := range
-}
-
 // syncEventSources syncs active event-sources and the updated ones
-func (gc *GatewayContext) syncEventSources(eventSource *eventSourceV1Alpha1.EventSource) error {
-	eventSourceContexts := gc.initEventSourceContexts(eventSource)
+func (gatewayContext *GatewayContext) syncEventSources(eventSource *eventSourceV1Alpha1.EventSource) error {
+	eventSourceContexts := gatewayContext.initEventSourceContexts(eventSource)
 
-	staleEventSources, newEventSources := gc.diffEventSources(eventSourceContexts)
-	gc.logger.WithField(common.LabelEventSource, staleEventSources).Infoln("deleted event sources")
-	gc.logger.WithField(common.LabelEventSource, newEventSources).Infoln("new event sources")
+	staleEventSources, newEventSources := gatewayContext.diffEventSources(eventSourceContexts)
+	gatewayContext.logger.WithField(common.LabelEventSource, staleEventSources).Infoln("deleted event sources")
+	gatewayContext.logger.WithField(common.LabelEventSource, newEventSources).Infoln("new event sources")
 
 	// stop existing event sources
-	gc.deactivateEventSources(staleEventSources)
+	gatewayContext.deactivateEventSources(staleEventSources)
 
 	// start new event sources
-	gc.activateEventSources(eventSourceContexts, newEventSources)
+	gatewayContext.activateEventSources(eventSourceContexts, newEventSources)
 
 	return nil
 }
 
 // initEventSourceContext creates an internal representation of event sources.
-func (gc *GatewayContext) initEventSourceContexts(eventSource *eventSourceV1Alpha1.EventSource) map[string]*EventSourceContext {
+func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *eventSourceV1Alpha1.EventSource) map[string]*EventSourceContext {
 	eventSourceContexts := make(map[string]*EventSourceContext)
 
-	switch gc.gateway.Spec.Type {
+	switch gatewayContext.gateway.Spec.Type {
 	case apicommon.SNSEvent:
 		for key, value := range eventSource.Spec.SNS {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.SQSEvent:
 		for key, value := range eventSource.Spec.SQS {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.PubSubEvent:
 		for key, value := range eventSource.Spec.PubSub {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.NATSEvent:
 		for key, value := range eventSource.Spec.NATS {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.FileEvent:
 		for key, value := range eventSource.Spec.File {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.CalendarEvent:
 		for key, value := range eventSource.Spec.Calendar {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.AMQPEvent:
 		for key, value := range eventSource.Spec.AMQP {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.GitHubEvent:
 		for key, value := range eventSource.Spec.Github {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.GitLabEvent:
 		for key, value := range eventSource.Spec.Gitlab {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.HDFSEvent:
 		for key, value := range eventSource.Spec.HDFS {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.KafkaEvent:
 		for key, value := range eventSource.Spec.Kafka {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.MinioEvent:
 		for key, value := range eventSource.Spec.Minio {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.MQTTEvent:
 		for key, value := range eventSource.Spec.MQTT {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.ResourceEvent:
 		for key, value := range eventSource.Spec.Resource {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.SlackEvent:
 		for key, value := range eventSource.Spec.Slack {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.StorageGridEvent:
 		for key, value := range eventSource.Spec.StorageGrid {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.WebhookEvent:
 		for key, value := range eventSource.Spec.Webhook {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.AzureEventsHub:
 		for key, value := range eventSource.Spec.AzureEventsHub {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.StripeEvent:
 		for key, value := range eventSource.Spec.Stripe {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.EmitterEvent:
 		for key, value := range eventSource.Spec.Emitter {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.RedisEvent:
 		for key, value := range eventSource.Spec.Redis {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.NSQEvent:
 		for key, value := range eventSource.Spec.NSQ {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	case apicommon.GenericEvent:
 		for key, value := range eventSource.Spec.Generic {
-			gc.populateEventSourceContexts(key, value, eventSourceContexts)
+			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
 	}
 
