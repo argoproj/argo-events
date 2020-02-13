@@ -78,6 +78,7 @@ type EventSourceContext struct {
 	client gateways.EventingClient
 	// conn is grpc connection
 	conn *grpc.ClientConn
+	stop chan struct{}
 }
 
 // NewGatewayContext returns a new gateway context

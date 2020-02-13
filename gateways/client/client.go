@@ -54,8 +54,11 @@ func main() {
 
 	// handle gateway status updates
 	go func() {
-		for status := range ctx.statusCh {
-			ctx.UpdateGatewayState(&status)
+		for {
+			select {
+			case status := <-ctx.statusCh:
+				ctx.UpdateGatewayState(&status)
+			}
 		}
 	}()
 
