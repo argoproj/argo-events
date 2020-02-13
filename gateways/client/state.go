@@ -52,8 +52,8 @@ type resourceUpdate struct {
 }
 
 // markNodePhase marks the gateway node with a phase
-func (gatewayContext *GatewayContext) markNodePhase(notification *eventSourceUpdate) *v1alpha1.NodeStatus {
-	logger := gatewayContext.logger.WithFields(
+func (gc *GatewayContext) markNodePhase(notification *eventSourceUpdate) *v1alpha1.NodeStatus {
+	logger := gc.logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: notification.name,
 			common.LabelPhase:    string(notification.phase),
@@ -62,7 +62,7 @@ func (gatewayContext *GatewayContext) markNodePhase(notification *eventSourceUpd
 
 	logger.Infoln("marking node phase")
 
-	node := gatewayContext.getNodeByID(notification.id)
+	node := gc.getNodeByID(notification.id)
 	if node == nil {
 		logger.Warnln("node is not initialized")
 		return nil
@@ -72,14 +72,14 @@ func (gatewayContext *GatewayContext) markNodePhase(notification *eventSourceUpd
 		node.Phase = notification.phase
 	}
 	node.Message = notification.message
-	gatewayContext.gateway.Status.Nodes[node.ID] = *node
-	gatewayContext.updated = true
+	gc.gateway.Status.Nodes[node.ID] = *node
+	gc.updated = true
 	return node
 }
 
 // getNodeByName returns a gateway node by the id
-func (gatewayContext *GatewayContext) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
-	node, ok := gatewayContext.gateway.Status.Nodes[nodeID]
+func (gc *GatewayContext) getNodeByID(nodeID string) *v1alpha1.NodeStatus {
+	node, ok := gc.gateway.Status.Nodes[nodeID]
 	if !ok {
 		return nil
 	}
@@ -87,14 +87,14 @@ func (gatewayContext *GatewayContext) getNodeByID(nodeID string) *v1alpha1.NodeS
 }
 
 // create a new node
-func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
-	if gatewayContext.gateway.Status.Nodes == nil {
-		gatewayContext.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
+func (gc *GatewayContext) initializeNode(nodeID string, nodeName string, messages string) v1alpha1.NodeStatus {
+	if gc.gateway.Status.Nodes == nil {
+		gc.gateway.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
 
-	gatewayContext.logger.WithField(common.LabelNodeName, nodeName).Infoln("initializing the node")
+	gc.logger.WithField(common.LabelNodeName, nodeName).Infoln("initializing the node")
 
-	node, ok := gatewayContext.gateway.Status.Nodes[nodeID]
+	node, ok := gc.gateway.Status.Nodes[nodeID]
 	if !ok {
 		node = v1alpha1.NodeStatus{
 			ID:          nodeID,
@@ -105,32 +105,32 @@ func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName str
 	}
 	node.Phase = v1alpha1.NodePhaseRunning
 	node.Message = messages
-	gatewayContext.gateway.Status.Nodes[nodeID] = node
+	gc.gateway.Status.Nodes[nodeID] = node
 
-	gatewayContext.logger.WithFields(
+	gc.logger.WithFields(
 		map[string]interface{}{
 			common.LabelNodeName: nodeName,
 			"node-message":       node.Message,
 		},
 	).Infoln("node is running")
 
-	gatewayContext.updated = true
+	gc.updated = true
 	return node
 }
 
 // UpdateGatewayState updates the gateway resource or the event source node status
-func (gatewayContext *GatewayContext) UpdateGatewayState(notification *notification) {
+func (gc *GatewayContext) UpdateGatewayState(notification *notification) {
 	defer func() {
-		gatewayContext.updated = false
+		gc.updated = false
 	}()
 
-	logger := gatewayContext.logger
+	logger := gc.logger
 
 	if notification.gatewayNotification != nil {
 		logger.Infoln("received a gateway resource update notification")
-		gatewayContext.gateway = notification.gatewayNotification.gateway
+		gc.gateway = notification.gatewayNotification.gateway
 		logger.Infoln("checking if any new subscribers are added")
-		gatewayContext.updateSubscriberClients()
+		gc.updateSubscriberClients()
 	}
 
 	if notification.eventSourceNotification != nil {
@@ -140,24 +140,24 @@ func (gatewayContext *GatewayContext) UpdateGatewayState(notification *notificat
 		switch notification.eventSourceNotification.phase {
 		case v1alpha1.NodePhaseRunning:
 			// init the node and mark it as running
-			gatewayContext.initializeNode(notification.eventSourceNotification.id, notification.eventSourceNotification.name, notification.eventSourceNotification.message)
+			gc.initializeNode(notification.eventSourceNotification.id, notification.eventSourceNotification.name, notification.eventSourceNotification.message)
 
 		case v1alpha1.NodePhaseCompleted, v1alpha1.NodePhaseError:
-			gatewayContext.markNodePhase(notification.eventSourceNotification)
+			gc.markNodePhase(notification.eventSourceNotification)
 
 		case v1alpha1.NodePhaseRemove:
-			delete(gatewayContext.gateway.Status.Nodes, notification.eventSourceNotification.id)
+			delete(gc.gateway.Status.Nodes, notification.eventSourceNotification.id)
 			logger.Infoln("event source is removed")
-			gatewayContext.updated = true
+			gc.updated = true
 		}
 	}
 
-	if gatewayContext.updated {
-		updatedGw, err := gtw.PersistUpdates(gatewayContext.gatewayClient, gatewayContext.gateway, gatewayContext.logger)
+	if gc.updated {
+		updatedGw, err := gtw.PersistUpdates(gc.gatewayClient, gc.gateway, gc.logger)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to persist gateway resource updates, reverting to old state")
 			return
 		}
-		gatewayContext.gateway = updatedGw
+		gc.gateway = updatedGw
 	}
 }

@@ -31,8 +31,8 @@ import (
 )
 
 // WatchGatewayEventSources watches change in event source for the gateway
-func (gatewayContext *GatewayContext) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
-	source := gatewayContext.newEventSourceWatch(gatewayContext.eventSourceRef)
+func (gc *GatewayContext) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
+	source := gc.newEventSourceWatch(gc.eventSourceRef)
 	_, controller := cache.NewInformer(
 		source,
 		&eventSourceV1Alpha1.EventSource{},
@@ -40,35 +40,34 @@ func (gatewayContext *GatewayContext) WatchGatewayEventSources(ctx context.Conte
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if newEventSource, ok := obj.(*eventSourceV1Alpha1.EventSource); ok {
-					gatewayContext.logger.WithField(common.LabelEventSource, newEventSource.Name).Infoln("detected a new event-source...")
-					err := gatewayContext.syncEventSources(newEventSource)
+					gc.logger.WithField(common.LabelEventSource, newEventSource.Name).Infoln("detected a new event-source...")
+					err := gc.syncEventSources(newEventSource)
 					if err != nil {
-						gatewayContext.logger.WithField(common.LabelEventSource, newEventSource.Name).WithError(err).Errorln("failed to process the event-source reference")
+						gc.logger.WithField(common.LabelEventSource, newEventSource.Name).WithError(err).Errorln("failed to process the event-source reference")
 					}
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
 				if eventSource, ok := new.(*eventSourceV1Alpha1.EventSource); ok {
-					gatewayContext.logger.WithField(common.LabelEventSource, eventSource.Name).Info("detected event-source update...")
-					err := gatewayContext.syncEventSources(eventSource)
+					gc.logger.WithField(common.LabelEventSource, eventSource.Name).Info("detected event-source update...")
+					err := gc.syncEventSources(eventSource)
 					if err != nil {
-						gatewayContext.logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Error("failed to process event source update")
+						gc.logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Error("failed to process event source update")
 					}
 				}
 			},
 		})
-
 	go controller.Run(ctx.Done())
 	return controller, nil
 }
 
 // newEventSourceWatch creates a new event source watcher
-func (gatewayContext *GatewayContext) newEventSourceWatch(eventSourceRef *v1alpha1.EventSourceRef) *cache.ListWatch {
-	client := gatewayContext.eventSourceClient.ArgoprojV1alpha1().RESTClient()
+func (gc *GatewayContext) newEventSourceWatch(eventSourceRef *v1alpha1.EventSourceRef) *cache.ListWatch {
+	client := gc.eventSourceClient.ArgoprojV1alpha1().RESTClient()
 	resource := "eventsources"
 
 	if eventSourceRef.Namespace == "" {
-		eventSourceRef.Namespace = gatewayContext.namespace
+		eventSourceRef.Namespace = gc.namespace
 	}
 
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", eventSourceRef.Name))
@@ -94,8 +93,8 @@ func (gatewayContext *GatewayContext) newEventSourceWatch(eventSourceRef *v1alph
 }
 
 // WatchGatewayUpdates watches for changes in the gateway resource
-func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (cache.Controller, error) {
-	source := gatewayContext.newGatewayWatch(gatewayContext.name)
+func (gc *GatewayContext) WatchGatewayUpdates(ctx context.Context) (cache.Controller, error) {
+	source := gc.newGatewayWatch(gc.name)
 	_, controller := cache.NewInformer(
 		source,
 		&v1alpha1.Gateway{},
@@ -103,8 +102,8 @@ func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(old, new interface{}) {
 				if g, ok := new.(*v1alpha1.Gateway); ok {
-					gatewayContext.logger.Info("detected gateway update. updating gateway watchers")
-					gatewayContext.statusCh <- notification{
+					gc.logger.Info("detected gateway update. updating gateway watchers")
+					gc.statusCh <- notification{
 						gatewayNotification: &resourceUpdate{gateway: g},
 					}
 				}
@@ -116,15 +115,15 @@ func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (
 }
 
 // newGatewayWatch creates a new gateway watcher
-func (gatewayContext *GatewayContext) newGatewayWatch(name string) *cache.ListWatch {
-	x := gatewayContext.gatewayClient.ArgoprojV1alpha1().RESTClient()
+func (gc *GatewayContext) newGatewayWatch(name string) *cache.ListWatch {
+	x := gc.gatewayClient.ArgoprojV1alpha1().RESTClient()
 	resource := "gateways"
 	fieldSelector := fields.ParseSelectorOrDie(fmt.Sprintf("metadata.name=%s", name))
 
 	listFunc := func(options metav1.ListOptions) (runtime.Object, error) {
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gatewayContext.namespace).
+			Namespace(gc.namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Do().Get()
@@ -133,7 +132,7 @@ func (gatewayContext *GatewayContext) newGatewayWatch(name string) *cache.ListWa
 		options.Watch = true
 		options.FieldSelector = fieldSelector.String()
 		req := x.Get().
-			Namespace(gatewayContext.namespace).
+			Namespace(gc.namespace).
 			Resource(resource).
 			VersionedParams(&options, metav1.ParameterCodec)
 		return req.Watch()
