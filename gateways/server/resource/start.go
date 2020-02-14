@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -57,37 +58,37 @@ type EventListener struct {
 
 // StartEventSource starts an event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("activating the event source...")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	channels := server.NewChannels()
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents watches resource updates and consume those events
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
-
-	logger.Infoln("started processing the event source...")
 
 	logger.Infoln("parsing resource event source...")
 	var resourceEventSource *v1alpha1.ResourceEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &resourceEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
 	logger.Infoln("setting up a K8s client")
 	client, err := dynamic.NewForConfig(listener.K8RestConfig)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to set up a dynamic K8s client for the event source %s", eventSource.Name)
 	}
 
 	gvr := schema.GroupVersionResource{
@@ -104,8 +105,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Labels != nil {
 		sel, err := LabelSelector(resourceEventSource.Filter.Labels)
 		if err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to create the label selector for the event source %s", eventSource.Name)
 		}
 		options.LabelSelector = sel.String()
 	}
@@ -113,8 +113,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Fields != nil {
 		sel, err := LabelSelector(resourceEventSource.Filter.Fields)
 		if err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to create the field selector for the event source %s", eventSource.Name)
 		}
 		options.FieldSelector = sel.String()
 	}
@@ -136,18 +135,32 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 			select {
 			case event, ok := <-informerEventCh:
 				if !ok {
+					logger.Warnln("received an invalid event, rejecting it...")
 					return
 				}
-				eventBody, err := json.Marshal(event)
+				objBody, err := json.Marshal(event.Obj)
 				if err != nil {
-					logger.WithError(err).Errorln("failed to parse event from resource informer")
+					logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
+					continue
+				}
+
+				eventData := &apicommon.ResourceEventData{
+					EventType: string(event.Type),
+					Body:      objBody,
+					Group:     resourceEventSource.Group,
+					Version:   resourceEventSource.Version,
+					Resource:  resourceEventSource.Resource,
+				}
+				eventBody, err := json.Marshal(eventData)
+				if err != nil {
+					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
 					continue
 				}
 				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceEventSource.Filter); err != nil {
-					logger.WithError(err).Warnln("failed to apply the filter")
+					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
 					continue
 				}
-				dataCh <- eventBody
+				channels.Data <- eventBody
 			}
 		}
 	}()
@@ -177,10 +190,16 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		},
 	)
 
+	doneCh := make(chan struct{})
 	sharedInformer.Run(doneCh)
-	logger.Infoln("resource informer is stopped")
+
+	<-channels.Done
+	doneCh <- struct{}{}
+
+	logger.Infoln("event source is stopped")
 	close(informerEventCh)
-	close(doneCh)
+
+	return nil
 }
 
 // LabelReq returns label requirements

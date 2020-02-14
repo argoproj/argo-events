@@ -33,6 +33,7 @@ func TestValidateEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.HDFS)
 
 	for name, value := range eventSource.Spec.HDFS {
 		fmt.Println(name)

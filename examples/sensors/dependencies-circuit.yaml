@@ -38,8 +38,8 @@ spec:
       port: 9300
   triggers:
     - template:
-        # when is the switch that determines whether to execute the trigger or not
-        when:
+        # switch that determines whether to execute the trigger or not
+        switch:
           # all is boolean equivalent of AND.
           # you can use `any` as well which is boolean equivalent of OR.
           all:
@@ -67,7 +67,7 @@ spec:
                         - cowsay
                       image: "docker/whalesay:latest"
     - template:
-        when:
+        switch:
           all:
             - group_2
         name: webhook-workflow-trigger-2

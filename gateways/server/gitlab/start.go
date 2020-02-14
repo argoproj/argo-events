@@ -67,7 +67,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	route := router.route
+	route := router.GetRoute()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{
@@ -78,7 +78,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	logger.Info("received a request, processing it...")
 
-	if route.Active {
+	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
 		common.SendErrorResponse(writer, "inactive endpoint")
 		return

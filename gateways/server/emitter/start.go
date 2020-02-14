@@ -17,9 +17,12 @@ limitations under the License.
 package emitter
 
 import (
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	emitter "github.com/emitter-io/go/v2"
 	"github.com/ghodss/yaml"
@@ -40,25 +43,30 @@ type EventListener struct {
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	channels := server.NewChannels()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
+
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens events from emitter subscription
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSourceName, eventSource.Name)
 
 	logger.Infoln("parsing the event source")
-
 	var emitterEventSource *v1alpha1.EmitterEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &emitterEventSource); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
 	var options []func(client *emitter.Client)
@@ -67,15 +75,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	logger.WithField("secret-name", emitterEventSource.ChannelKey.Name).Infoln("retrieving the channel key")
 	channelKey, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.ChannelKey)
 	if err != nil {
-		errorCh <- errors.Wrapf(err, "failed to retrieve the channel key from %s", emitterEventSource.ChannelKey.Name)
-		return
+		return errors.Wrapf(err, "failed to retrieve the channel key from %s", emitterEventSource.ChannelKey.Name)
 	}
 
 	if emitterEventSource.Username != nil {
 		username, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
 		if err != nil {
-			errorCh <- errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
-			return
+			return errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
 		}
 		options = append(options, emitter.WithUsername(username))
 	}
@@ -83,8 +89,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	if emitterEventSource.Password != nil {
 		password, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Password)
 		if err != nil {
-			errorCh <- errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
-			return
+			return errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
 		}
 		options = append(options, emitter.WithPassword(password))
 	}
@@ -98,21 +103,32 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		}
 		return nil
 	}); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
-		return
+		return errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
 	}
 
 	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
+		eventBytes, err := json.Marshal(&apicommon.EmitterEventData{
+			Topic: message.Topic(),
+			Body:  message.Payload(),
+		})
+		if err != nil {
+			logger.WithError(err).Errorln("failed to marshal the event data")
+			return
+		}
+
 		logger.Infoln("dispatching event on data channel...")
-		dataCh <- message.Payload()
+		channels.Data <- eventBytes
 	}); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
-		return
+		return errors.Wrapf(err, "failed to subscribe to channel %s", emitterEventSource.ChannelName)
 	}
 
-	<-doneCh
+	<-channels.Done
+
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("event source stopped, unsubscribe the channel")
+
 	if err := client.Unsubscribe(channelKey, emitterEventSource.ChannelName); err != nil {
 		logger.WithError(err).WithField("channel-name", emitterEventSource.ChannelName).Errorln("failed to unsubscribe")
 	}
+
+	return nil
 }

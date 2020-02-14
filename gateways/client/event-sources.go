@@ -40,8 +40,6 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 		return
 	}
 
-	fmt.Printf("%s\n", string(body))
-
 	hashKey := common.Hasher(name + string(body))
 
 	logger := gatewayContext.logger.WithFields(logrus.Fields{
@@ -261,7 +259,9 @@ func (gatewayContext *GatewayContext) deactivateEventSources(eventSourceNames []
 		eventSource.cancel()
 		if err := eventSource.conn.Close(); err != nil {
 			logger.WithField(common.LabelEventSource, eventSource.source.Name).WithError(err).Errorln("failed to close client connection")
+			continue
 		}
+		logger.WithField(common.LabelEventSource, eventSource.source.Name).Infoln("event source stopped")
 	}
 }
 
@@ -281,6 +281,8 @@ func (gatewayContext *GatewayContext) syncEventSources(eventSource *eventSourceV
 
 	// start new event sources
 	gatewayContext.activateEventSources(eventSourceContexts, newEventSources)
+
+	gatewayContext.eventSourceContexts = eventSourceContexts
 
 	return nil
 }
