@@ -25,7 +25,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -131,7 +131,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		logger.Info("received GCP PubSub Message from topic")
-		eventData := &apicommon.PubSubEventData{
+		eventData := &events.PubSubEventData{
 			ID:          m.ID,
 			Body:        m.Data,
 			Attributes:  m.Attributes,

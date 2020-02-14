@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
@@ -99,7 +100,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			continue
 		}
 
-		eventData := &apicommon.MinioEventData{Notification: notification.Records}
+		eventData := &events.MinioEventData{Notification: notification.Records}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(notification.Err).Errorln("failed to marshal the event data, rejecting the event...")
