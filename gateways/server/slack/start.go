@@ -150,7 +150,7 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 
 	if eventsAPIEvent.Type == slackevents.URLVerification {
 		var r *slackevents.ChallengeResponse
-		err = json.Unmarshal([]byte(body), &r)
+		err = json.Unmarshal(body, &r)
 		if err != nil {
 			return data, response, errors.Wrap(err, "failed to verify the challenge")
 		}
@@ -158,9 +158,9 @@ func (rc *Router) handleEvent(request *http.Request) ([]byte, []byte, error) {
 	}
 
 	if eventsAPIEvent.Type == slackevents.CallbackEvent {
-		data, err = json.Marshal(eventsAPIEvent.InnerEvent.Data)
+		data, err = json.Marshal(&eventsAPIEvent.InnerEvent)
 		if err != nil {
-			return data, response, errors.Wrap(err, "failed to marshal event data")
+			return data, response, errors.Wrap(err, "failed to marshal event data, rejecting the event...")
 		}
 	}
 

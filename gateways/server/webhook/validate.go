@@ -18,8 +18,6 @@ package webhook
 
 import (
 	"context"
-	"fmt"
-	"net/http"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -63,12 +61,5 @@ func validate(webhookEventSource *webhook.Context) error {
 	if webhookEventSource == nil {
 		return common.ErrNilEventSource
 	}
-
-	switch webhookEventSource.Method {
-	case http.MethodHead, http.MethodPut, http.MethodConnect, http.MethodDelete, http.MethodGet, http.MethodOptions, http.MethodPatch, http.MethodPost, http.MethodTrace:
-	default:
-		return fmt.Errorf("unknown HTTP method %s", webhookEventSource.Method)
-	}
-
 	return webhook.ValidateWebhookContext(webhookEventSource)
 }

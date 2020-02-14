@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kafka
+package azure_events_hub
 
 import (
 	"context"
@@ -34,32 +34,30 @@ func TestValidateEventSource(t *testing.T) {
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",
-		Name:  "kafka",
+		Name:  "azureEventsHub",
 		Value: nil,
-		Type:  "sq",
+		Type:  "ae",
 	})
 	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, common.ErrEventSourceTypeMismatch("kafka"), valid.Reason)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("azureEventsHub"), valid.Reason)
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "kafka.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "azure-events-hub.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
-	assert.NotNil(t, eventSource.Spec.Kafka)
+	assert.NotNil(t, eventSource.Spec.AzureEventsHub)
 
-	for name, value := range eventSource.Spec.Kafka {
-		fmt.Println(name)
+	for _, value := range eventSource.Spec.AzureEventsHub {
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Id:    "1",
-			Name:  "kafka",
+			Name:  "azureEventsHub",
 			Value: content,
-			Type:  "kafka",
+			Type:  "azureEventsHub",
 		})
-		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)
 	}
 }

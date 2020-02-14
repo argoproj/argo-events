@@ -23,8 +23,8 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 )
@@ -51,14 +51,6 @@ func init() {
 	go webhook.ProcessRouteStatus(controller)
 }
 
-// webhook event payload
-type payload struct {
-	// Header is the http request header
-	Header http.Header `json:"header"`
-	// Body is http request body
-	Body *json.RawMessage `json:"body"`
-}
-
 // Implement Router
 // 1. GetRoute
 // 2. HandleRoute
@@ -72,7 +64,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	route := router.route
+	route := router.GetRoute()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{
@@ -97,7 +89,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	payload := &payload{
+	payload := &apicommon.WebhookEventData{
 		Header: request.Header,
 		Body:   (*json.RawMessage)(&body),
 	}
@@ -127,8 +119,6 @@ func (router *Router) PostInactivate() error {
 
 // StartEventSource starts a event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer server.Recover(eventSource.Name)
-
 	log := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	log.Info("started operating on the event source...")

@@ -57,7 +57,6 @@ func (gatewayContext *GatewayContext) WatchGatewayEventSources(ctx context.Conte
 				}
 			},
 		})
-
 	go controller.Run(ctx.Done())
 	return controller, nil
 }

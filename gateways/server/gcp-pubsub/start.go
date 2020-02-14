@@ -18,14 +18,17 @@ package pubsub
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/option"
 )
@@ -38,22 +41,26 @@ type EventListener struct {
 
 // StartEventSource starts processing the GCP PubSub event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	defer server.Recover(eventSource.Name)
-
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	ctx := eventStream.Context()
+	channels := server.NewChannels()
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	go listener.listenEvents(ctx, eventSource, dataCh, errorCh, doneCh)
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
+
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens to GCP PubSub events
-func (listener *EventListener) listenEvents(ctx context.Context, eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	// In order to listen events from GCP PubSub,
 	// 1. Parse the event source that contains configuration to connect to GCP PubSub
 	// 2. Create a new PubSub client
@@ -64,22 +71,20 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
-	logger.Infoln("parsing PubSub event source...")
+	logger.Infoln("parsing the PubSub event source...")
 	var pubsubEventSource *v1alpha1.PubSubEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &pubsubEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
 	logger = logger.WithField("topic", pubsubEventSource.Topic)
-
-	logger.Infoln("setting up a client to connect to PubSub...")
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Create a new topic with the given name if none exists
+	logger.Infoln("setting up a client to connect to PubSub...")
 	client, err := pubsub.NewClient(ctx, pubsubEventSource.ProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
 	}
 
 	// use same client for topic and subscription by default
@@ -87,8 +92,7 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 	if pubsubEventSource.TopicProjectID != "" && pubsubEventSource.TopicProjectID != pubsubEventSource.ProjectID {
 		topicClient, err = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
 		if err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
 		}
 	}
 
@@ -96,14 +100,12 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 	topic := topicClient.Topic(pubsubEventSource.Topic)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to get status of the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 	}
 	if !exists {
-		logger.Infoln("topic doesn't exist, creating the GCP PubSub topic...")
+		logger.Infoln("topic doesn't exist, creating the PubSub topic...")
 		if _, err := topicClient.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to create the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 		}
 	}
 
@@ -114,33 +116,45 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 	logger.Infoln("subscribing to PubSub topic...")
 	subscription := client.Subscription(subscriptionName)
 	exists, err = subscription.Exists(ctx)
-
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to get status of the subscription %s for %s", subscriptionName, eventSource.Name)
 	}
 	if exists {
 		logger.Warnln("using an existing subscription...")
 	} else {
 		logger.Infoln("creating a new subscription...")
 		if _, err := client.CreateSubscription(ctx, subscriptionName, pubsub.SubscriptionConfig{Topic: topic}); err != nil {
-			errorCh <- err
-			return
+			return errors.Wrapf(err, "failed to create the subscription %s for %s", subscriptionName, eventSource.Name)
 		}
 	}
 
 	logger.Infoln("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		logger.Info("received GCP PubSub Message from topic")
-		dataCh <- m.Data
+		eventData := &apicommon.PubSubEventData{
+			ID:          m.ID,
+			Body:        m.Data,
+			Attributes:  m.Attributes,
+			PublishTime: m.PublishTime.String(),
+		}
+		eventBytes, err := json.Marshal(eventData)
+		if err != nil {
+			logger.WithError(err).Errorln("failed to marshal the event data")
+			return
+		}
+
+		logger.Info("sending event on the data channel...")
+		channels.Data <- eventBytes
 		m.Ack()
 	})
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to receive the messages for subscription %s and topic %s for %s", subscriptionName, pubsubEventSource.Topic, eventSource.Name)
 	}
 
-	<-doneCh
+	<-channels.Done
+	cancel()
+
+	logger.Infoln("event source has been stopped")
 
 	if pubsubEventSource.DeleteSubscriptionOnFinish {
 		logger.Info("deleting PubSub subscription...")
@@ -153,4 +167,6 @@ func (listener *EventListener) listenEvents(ctx context.Context, eventSource *ga
 	if err = client.Close(); err != nil {
 		logger.WithError(err).Errorln("failed to close the PubSub client")
 	}
+
+	return nil
 }

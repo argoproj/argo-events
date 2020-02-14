@@ -1374,8 +1374,30 @@ NSQ event source
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>generic</code></br> <em>
+<a href="#argoproj.io/v1alpha1.GenericEventSource">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GenericEventSource
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Generic event source
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -1546,6 +1568,78 @@ github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig
 <p>
 
 WatchPathConfig contains configuration about the file path to watch
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.GenericEventSource">
+
+GenericEventSource
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+GenericEventSource refers to a generic event source. It can be used to
+implement a custom event source.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>value</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Value of the event source
 
 </p>
 
@@ -4432,6 +4526,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>3f6eb5d</code>. </em>
+commit <code>02c6134</code>. </em>
 
 </p>
