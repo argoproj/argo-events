@@ -417,6 +417,9 @@ type CustomTrigger struct {
 	ServerNameOverride string `json:"serverNameOverride,omitempty" protobuf:"bytes,4,opt,name=serverNameOverride"`
 	// TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
 	TriggerBody string `json:"triggerBody" protobuf:"bytes,5,name=triggerBody"`
+	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

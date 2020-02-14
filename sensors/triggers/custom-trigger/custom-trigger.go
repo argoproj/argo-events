@@ -16,8 +16,12 @@ limitations under the License.
 package custom_trigger
 
 import (
+	"context"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
@@ -25,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// CustomTrigger implements Trigger interface for custom trigger resource
 type CustomTrigger struct {
 	// Sensor object
 	Sensor *v1alpha1.Sensor
@@ -32,8 +37,8 @@ type CustomTrigger struct {
 	Trigger *v1alpha1.Trigger
 	// logger to log stuff
 	Logger *logrus.Logger
-	// gRPCClient is the gRPC client for the custom trigger server
-	gRPCClient *grpc.ClientConn
+	// triggerClient is the gRPC client for the custom trigger server
+	triggerClient triggers.TriggerClient
 }
 
 func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
@@ -47,7 +52,7 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 
 	if conn, ok := customTriggerClients[trigger.Template.Name]; ok {
 		if conn.GetState() == connectivity.Ready {
-			customTrigger.gRPCClient = conn
+			customTrigger.triggerClient = triggers.NewTriggerClient(conn)
 			return customTrigger, nil
 		}
 		delete(customTriggerClients, trigger.Template.Name)
@@ -85,7 +90,71 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 		return nil, err
 	}
 
-	customTrigger.gRPCClient = conn
+	customTrigger.triggerClient = triggers.NewTriggerClient(conn)
 	customTriggerClients[trigger.Template.Name] = conn
 	return customTrigger, nil
+}
+
+// FetchResource fetches the trigger resource from external source
+func (ct *CustomTrigger) FetchResource() (interface{}, error) {
+	resource, err := ct.triggerClient.FetchResource(context.Background(), &triggers.FetchResourceRequest{
+		Resource: []byte(ct.Trigger.Template.CustomTrigger.TriggerBody),
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to fetch the custom trigger resource for %s", ct.Trigger.Template.Name)
+	}
+	return resource, nil
+}
+
+// ApplyResourceParameters applies parameters to the trigger resource
+func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+	obj, ok := resource.([]byte)
+	if !ok {
+		return nil, errors.New("failed to interpret the trigger resource for resource parameters application")
+	}
+	parameters := ct.Trigger.Template.CustomTrigger.Parameters
+
+	if parameters != nil && len(parameters) > 0 {
+		resource, err := triggers.ApplyParams(obj, ct.Trigger.Template.OpenFaas.Parameters, triggers.ExtractEvents(sensor, parameters))
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to apply the parameters to the custom trigger resource for %s", ct.Trigger.Template.Name)
+		}
+		return resource, nil
+	}
+
+	return resource, nil
+}
+
+// Execute executes the trigger
+func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
+	obj, ok := resource.([]byte)
+	if !ok {
+		return nil, errors.New("failed to interpret the trigger resource for the execution")
+	}
+	result, err := ct.triggerClient.Execute(context.Background(), &triggers.ExecuteRequest{
+		Resource: obj,
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to execute the custom trigger resource for %s", ct.Trigger.Template.Name)
+	}
+	return result, nil
+}
+
+// ApplyPolicy applies the policy on the trigger
+func (ct *CustomTrigger) ApplyPolicy(resource interface{}) error {
+	obj, ok := resource.([]byte)
+	if !ok {
+		return errors.New("failed to interpret the trigger resource for the policy application")
+	}
+	result, err := ct.triggerClient.ApplyPolicy(context.Background(), &triggers.ApplyPolicyRequest{
+		Request: obj,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "failed to apply the policy for the custom trigger resource for %s", ct.Trigger.Template.Name)
+	}
+	ct.Logger.WithFields(logrus.Fields{
+		"success": result.Success,
+		"message": result.Message,
+	}).Infoln("policy application result")
+	return err
 }

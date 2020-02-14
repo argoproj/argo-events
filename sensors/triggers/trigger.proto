@@ -3,7 +3,7 @@
 */
 syntax = "proto3";
 
-package sensors;
+package triggers;
 
 // Trigger offers services to build a custom trigger
 service Trigger {
