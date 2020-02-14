@@ -3,14 +3,16 @@
 */
 syntax = "proto3";
 
+package sensors;
+
 // Trigger offers services to build a custom trigger
 service Trigger {
     // FetchResource fetches the resource to be triggered.
-    rpc FetchResource(FetchResourceRequest) returns (FetchResourceResponse)
+    rpc FetchResource(FetchResourceRequest) returns (FetchResourceResponse);
     // Execute executes the requested trigger resource.
-    rpc Execute(ExecuteRequest) returns (ExecuteResponse)
+    rpc Execute(ExecuteRequest) returns (ExecuteResponse);
     // ApplyPolicy applies policies on the trigger execution result.
-    rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse)
+    rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse);
 }
 
 // FetchResourceRequest is the request to fetch trigger resource
