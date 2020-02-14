@@ -17,6 +17,8 @@ spec:
         endpoint: "/push"
         # port to run internal HTTP server on
         port: "12000"
+        # HTTP request method to allow. In this case, only POST requests are accepted
+        method: "POST"
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
@@ -32,8 +34,8 @@ spec:
         name: github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
         key: token
-      # webHookSecret refers to K8s secret that stores the github hook secret
-      webHookSecret:
+      # webhookSecret refers to K8s secret that stores the github hook secret
+      webhookSecret:
         # Name of the K8s secret that contains the hook secret
         name: github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
@@ -51,6 +53,7 @@ spec:
       webhook:
         endpoint: "/push"
         port: "13000"
+        method: "POST"
         url: "http://myargofakeurl.fake"
         # path to file that is mounted in gateway pod which contains certs
         serverCertPath: "some path in pod"
@@ -62,7 +65,7 @@ spec:
       apiToken:
         name: github-access
         key: token
-      webHookSecret:
+      webhookSecret:
         name: github-access
         key: secret
       insecure: true
