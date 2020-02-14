@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package kafka
+package redis
 
 import (
 	"context"
@@ -29,35 +29,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateEventSource(t *testing.T) {
+func TestValidateRedisEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",
-		Name:  "kafka",
+		Name:  "redis",
 		Value: nil,
 		Type:  "sq",
 	})
 	assert.Equal(t, false, valid.IsValid)
-	assert.Equal(t, common.ErrEventSourceTypeMismatch("kafka"), valid.Reason)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("redis"), valid.Reason)
 
-	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "kafka.yaml"))
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "redis.yaml"))
 	assert.Nil(t, err)
 
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
-	assert.NotNil(t, eventSource.Spec.Kafka)
+	assert.NotNil(t, eventSource.Spec.Redis)
 
-	for name, value := range eventSource.Spec.Kafka {
+	for name, value := range eventSource.Spec.Redis {
 		fmt.Println(name)
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 			Id:    "1",
-			Name:  "kafka",
+			Name:  "redis",
 			Value: content,
-			Type:  "kafka",
+			Type:  "redis",
 		})
 		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)

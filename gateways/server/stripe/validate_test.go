@@ -16,37 +16,52 @@ limitations under the License.
 
 package stripe
 
-//
-//func TestStripeEventSource(t *testing.T) {
-//    listener := &EventListener{}
-//
-//    valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
-//        Id:    "1",
-//        Name:  "stripe",
-//        Value: nil,
-//        Type:  "sq",
-//    })
-//    assert.Equal(t, false, valid.IsValid)
-//    assert.Equal(t, common.ErrEventSourceTypeMismatch("stripe"), valid.Reason)
-//
-//    content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "stripe.yaml"))
-//    assert.Nil(t, err)
-//
-//    var eventSource *v1alpha1.EventSource
-//    err = yaml.Unmarshal(content, &eventSource)
-//    assert.Nil(t, err)
-//
-//    for name, value := range eventSource.Spec.Stripe {
-//        fmt.Println(name)
-//        content, err := yaml.Marshal(value)
-//        assert.Nil(t, err)
-//        valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
-//            Id:    "1",
-//            Name:  "stripe",
-//            Value: content,
-//            Type:  string(apicommon.StripeEvent),
-//        })
-//        fmt.Println(valid.Reason)
-//        assert.Equal(t, true, valid.IsValid)
-//    }
-//}
+import (
+	"context"
+	"fmt"
+	"io/ioutil"
+	"testing"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestValidateEventSource(t *testing.T) {
+	listener := &EventListener{
+		Logger: common.NewArgoEventsLogger(),
+	}
+
+	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+		Id:    "1",
+		Name:  "stripe",
+		Value: nil,
+		Type:  "sq",
+	})
+	assert.Equal(t, false, valid.IsValid)
+	assert.Equal(t, common.ErrEventSourceTypeMismatch("stripe"), valid.Reason)
+
+	content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", gateways.EventSourceDir, "stripe.yaml"))
+	assert.Nil(t, err)
+
+	var eventSource *v1alpha1.EventSource
+	err = yaml.Unmarshal(content, &eventSource)
+	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Stripe)
+
+	for name, value := range eventSource.Spec.Stripe {
+		fmt.Println(name)
+		content, err := yaml.Marshal(value)
+		assert.Nil(t, err)
+		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
+			Id:    "1",
+			Name:  "stripe",
+			Value: content,
+			Type:  "stripe",
+		})
+		fmt.Println(valid.Reason)
+		assert.Equal(t, true, valid.IsValid)
+	}
+}

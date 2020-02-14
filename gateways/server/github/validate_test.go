@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestValidateGithubEventSource(t *testing.T) {
+func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{}
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
@@ -47,6 +47,7 @@ func TestValidateGithubEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Github)
 
 	for name, value := range eventSource.Spec.Github {
 		fmt.Println(name)

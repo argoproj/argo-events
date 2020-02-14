@@ -81,10 +81,9 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 
-	event := stripe.Event{}
-
+	var event *stripe.Event
 	if err := json.Unmarshal(payload, &event); err != nil {
-		logger.WithError(err).Errorln("failed to parse webhook body json")
+		logger.WithError(err).Errorln("failed to parse request body")
 		common.SendErrorResponse(writer, "failed to parse the event")
 		return
 	}
@@ -92,20 +91,14 @@ func (rc *Router) HandleRoute(writer http.ResponseWriter, request *http.Request)
 	ok := filterEvent(event, rc.stripeEventSource.EventFilter)
 	if !ok {
 		logger.WithField("event-type", event.Type).Warnln("failed to pass the filters")
-		common.SendSuccessResponse(writer, "success")
+		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}
 
-	response := Response{
-		Id:        event.ID,
-		EventType: event.Type,
-		Data:      event.Data.Raw,
-	}
-
-	data, err := json.Marshal(response)
+	data, err := json.Marshal(event)
 	if err != nil {
 		logger.WithField("event-id", event.ID).Warnln("failed to marshal event into gateway response")
-		common.SendSuccessResponse(writer, "success")
+		common.SendSuccessResponse(writer, "invalid event")
 		return
 	}
 
@@ -157,7 +150,7 @@ func (rc *Router) PostInactivate() error {
 	return nil
 }
 
-func filterEvent(event stripe.Event, filters []string) bool {
+func filterEvent(event *stripe.Event, filters []string) bool {
 	if filters == nil {
 		return true
 	}

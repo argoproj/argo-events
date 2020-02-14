@@ -19,10 +19,10 @@ package aws_sqs
 import (
 	"context"
 	"fmt"
-	"github.com/argoproj/argo-events/common"
 	"io/ioutil"
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -34,7 +34,7 @@ func TestValidateEventSource(t *testing.T) {
 
 	valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
 		Id:    "1",
-		Name:  "sns",
+		Name:  "sqs",
 		Value: nil,
 		Type:  "sq",
 	})
@@ -47,9 +47,9 @@ func TestValidateEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.SQS)
 
-	for name, value := range eventSource.Spec.SQS {
-		fmt.Println(name)
+	for _, value := range eventSource.Spec.SQS {
 		content, err := yaml.Marshal(value)
 		assert.Nil(t, err)
 		valid, _ := listener.ValidateEventSource(context.Background(), &gateways.EventSource{
@@ -58,7 +58,6 @@ func TestValidateEventSource(t *testing.T) {
 			Value: content,
 			Type:  "sqs",
 		})
-		fmt.Println(valid.Reason)
 		assert.Equal(t, true, valid.IsValid)
 	}
 }

@@ -64,7 +64,7 @@ func validate(eventSource *v1alpha1.StripeEventSource) error {
 		return common.ErrNilEventSource
 	}
 	if eventSource.CreateWebhook {
-		if eventSource.APIKey != nil {
+		if eventSource.APIKey == nil {
 			return errors.New("api key K8s secret selector not provided")
 		}
 		if eventSource.Namespace == "" {
