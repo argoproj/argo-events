@@ -53,20 +53,21 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
    If you don't see the pod in `argo-events` namespace, check the gateway controller logs
    for errors.
 
-3. **Make sure to create the bucket. If you don't have the bucket created, then the gateway will mark the event source as failure.**
+3. **Make sure to create the bucket called `input`. If you don't have the bucket created, then the gateway will mark the event source as failure.**
 
-4. If you inspect the gateway resource definition, you will notice it points to the event source called
-   `minio-event-source`. Lets install event source in the `argo-events` namespace,
+4. If the minio service name differs from the event source, then make sure to update the event source.
+
+5. If you inspect the gateway resource definition, you will notice that it refers to the event source `minio-event-source`. Lets install event source in the `argo-events` namespace,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/minio.yaml
    
-5. Check the gateway logs to make sure the gateway has processed the event source.
+6. Check the gateway logs to make sure the gateway has processed the event source.
 
-6. Lets create the sensor,
+7. Lets create the sensor,
    
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/minio.yaml   
 
-7. Create a file named and `hello-world.txt` and upload it onto to the bucket. This will trigger the argo workflow.
+8. Create a file named and `hello-world.txt` and upload it onto to the bucket. This will trigger the argo workflow.
 
 <br/>
 
