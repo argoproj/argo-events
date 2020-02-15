@@ -41,7 +41,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 ## Setup
 
-1. Make sure to have minio server deployed and reachable to the gateway. More info on minio server setup 
+1. Make sure to have minio server deployed and reachable from the gateway. More info on minio server setup 
 is available at https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md.
 
 2. Install gateway in the `argo-events` namespace using following command,
@@ -64,7 +64,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 
 6. Lets create the sensor,
    
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/calendar.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/minio.yaml   
 
 7. Create a file named and `hello-world.txt` and upload it onto to the bucket. This will trigger the argo workflow.
 
