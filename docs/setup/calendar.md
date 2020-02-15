@@ -7,7 +7,7 @@ Calendar gateway generates events at on a cron schedule or interval and help tri
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/setup/docs/assets/calendar-setup.png?raw=true" alt="Calendar Setup"/>
+  <img src="https://github.com/argoproj/argo-events/blob/docs-gateway-setup/docs/assets/calendar-setup.png?raw=true" alt="Calendar Setup"/>
 </p>
 
 <br/>
