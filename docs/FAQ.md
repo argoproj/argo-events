@@ -1,4 +1,11 @@
-# FAQ
+# FAQs
+
+**Q**. **How to get started with Argo Events?**
+
+**A**. Recommended way to get started with Argo Events is,
+ 1. Read the basic concepts about [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/), [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) and [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/).
+ 2. Install the setup as outlined [here](https://argoproj.github.io/argo-events/installation/).
+ 3. Read the tutorials available [here](https://argoproj.github.io/argo-events/tutorials/01-introduction/). 
 
 **Q**. **Can I deploy gateway and sensor in a namespace different that `argo-events`?**
 
@@ -15,4 +22,10 @@ appropriate controller configmap.
        registered as a subscriber in order to receive events from gateway. The `gateway-client` container should also log an error related to this situation.
        Second, if the gateway was able to send an event to sensor, then check the sensor logs, either the sensor event resolution circuitry has rejected the event or
        the sensor failed to execute the trigger due to an error.
-  
+
+**Q.** **Helm chart installation does not work.**
+
+**A.** The helm chart for argo events is maintained by the community and can be out of sync with latest release version. The official installation file is available [here](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml).
+If you notice the helm chart is outdated, we encourage you to contribute to the [argo-helm](https://github.com/argoproj/argo-helm).
+
+
