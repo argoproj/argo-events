@@ -18,13 +18,13 @@ package sensor
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"net/http"
 	"time"
 
 	"github.com/Knetic/govaluate"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 // ValidateSensor accepts a sensor and performs validation against it
@@ -141,6 +141,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.CustomTrigger != nil {
+		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	return nil
 }
 
@@ -211,6 +216,13 @@ func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 			return errors.New("only GET, DELETE, PATCH, POST and PUT methods are supported")
 		}
 	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -227,6 +239,13 @@ func validateOpenFaasTrigger(trigger *v1alpha1.OpenFaasTrigger) error {
 	}
 	if trigger.Password != nil && trigger.Namespace == "" {
 		return errors.New("namespace can't be empty when password secret selector is specified")
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
 	}
 	return nil
 }
@@ -250,6 +269,39 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	}
 	if trigger.Payload == nil {
 		return errors.New("payload parameters are not specified")
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
+	}
+	return nil
+}
+
+// validateCustomTrigger validates the custom trigger.
+func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
+	if trigger == nil {
+		return errors.New("custom trigger for can't be nil")
+	}
+	if trigger.ServerURL == "" {
+		return errors.New("custom trigger gRPC server url is not defined")
+	}
+	if trigger.TriggerBody == "" {
+		return errors.New("trigger body can't be empty")
+	}
+	if trigger.Secure {
+		if trigger.CertFilePath == "" {
+			return errors.New("cert file path can't be nil when the trigger server connection is secure")
+		}
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
 	}
 	return nil
 }
