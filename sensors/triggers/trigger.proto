@@ -28,6 +28,7 @@ message FetchResourceResponse {
 // ExecuteRequest is a request to execute a trigger resource.
 message ExecuteRequest {
     bytes resource = 1;
+    bytes payload = 2;
 }
 
 // ExecuteResponse is the response of the trigger execution

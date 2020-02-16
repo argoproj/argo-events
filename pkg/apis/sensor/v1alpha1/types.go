@@ -420,6 +420,9 @@ type CustomTrigger struct {
 	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

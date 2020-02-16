@@ -131,8 +131,17 @@ func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource for the execution")
 	}
+	trigger := ct.Trigger.Template.CustomTrigger
+	if trigger.Payload == nil {
+		return nil, errors.New("payload parameters are not specified")
+	}
+	payload, err := triggers.ConstructPayload(ct.Sensor, trigger.Payload)
+	if err != nil {
+		return nil, err
+	}
 	result, err := ct.triggerClient.Execute(context.Background(), &triggers.ExecuteRequest{
 		Resource: obj,
+		Payload:  payload,
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to execute the custom trigger resource for %s", ct.Trigger.Template.Name)
