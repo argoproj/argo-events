@@ -156,7 +156,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
 					continue
 				}
-				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceEventSource.Filter); err != nil {
+				if err := passFilters(event, resourceEventSource.Filter, resourceEventSource.EventType); err != nil {
 					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
 					continue
 				}
@@ -238,17 +238,21 @@ func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) error {
+func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, eventType v1alpha1.ResourceEventType) error {
+	uObj := event.Obj.(*unstructured.Unstructured)
 	// no filters are applied.
 	if filter == nil {
 		return nil
 	}
-	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		return errors.Errorf("resource name does not match prefix. resource-name: %s, prefix: %s", obj.GetName(), filter.Prefix)
+	if !strings.HasPrefix(uObj.GetName(), filter.Prefix) {
+		return errors.Errorf("resource name does not match prefix. resource-name: %s, prefix: %s", uObj.GetName(), filter.Prefix)
 	}
-	created := obj.GetCreationTimestamp()
+	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
 		return errors.Errorf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
+	}
+	if eventType != "" && event.Type != eventType {
+		return errors.Errorf("resource event type mismatch. expected: %s, actual: %s", string(eventType), string(event.Type))
 	}
 	return nil
 }
