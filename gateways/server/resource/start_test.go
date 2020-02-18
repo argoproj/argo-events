@@ -17,6 +17,7 @@ limitations under the License.
 package resource
 
 import (
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"testing"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
@@ -24,7 +25,6 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/kubernetes/fake"
 )
 
@@ -61,9 +61,16 @@ func TestFilter(t *testing.T) {
 		err = mapstructure.Decode(pod, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
-		err = passFilters(&unstructured.Unstructured{
-			Object: outmap,
-		}, resourceEventSource.Filter)
+		err = passFilters(&InformerEvent{
+			Obj:  &unstructured.Unstructured{Object: outmap},
+			Type: "ADD",
+		}, resourceEventSource.Filter, v1alpha1.ADD)
 		convey.So(err, convey.ShouldBeNil)
+
+		err = passFilters(&InformerEvent{
+			Obj:  &unstructured.Unstructured{Object: outmap},
+			Type: "ADD",
+		}, resourceEventSource.Filter, v1alpha1.UPDATE)
+		convey.So(err, convey.ShouldNotBeNil)
 	})
 }
