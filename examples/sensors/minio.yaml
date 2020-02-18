@@ -48,5 +48,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                path: s3.object.key
+                dataKey: s3.object.key
               dest: spec.templates.0.container.args.0
