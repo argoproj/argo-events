@@ -27,8 +27,6 @@ import (
 	"github.com/ghodss/yaml"
 )
 
-const ()
-
 // ValidateEventSource validates calendar event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
 	if apicommon.EventSourceType(eventSource.Type) != apicommon.CalendarEvent {

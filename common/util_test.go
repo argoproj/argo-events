@@ -17,10 +17,10 @@ limitations under the License.
 package common
 
 import (
-	"github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"testing"
 
+	"github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

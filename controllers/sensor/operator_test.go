@@ -120,7 +120,7 @@ func TestMarkSensorPhase(t *testing.T) {
 	sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensorObj.Namespace).Create(sensorObj)
 	assert.Nil(t, err)
 	ctx.sensor = sensor.DeepCopy()
-	ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
+	ctx.markSensorPhase(v1alpha1.NodePhaseActive, "sensor is active")
 	assert.Equal(t, v1alpha1.NodePhaseActive, ctx.sensor.Status.Phase)
 	assert.Equal(t, "sensor is active", ctx.sensor.Status.Message)
 }

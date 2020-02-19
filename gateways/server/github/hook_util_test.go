@@ -47,13 +47,13 @@ func TestCompareHook(t *testing.T) {
 
 func TestGetHook(t *testing.T) {
 	hooks := []*gh.Hook{
-		&gh.Hook{
+		{
 			Config: map[string]interface{}{
 				"url": "https://example.com/",
 			},
 			Events: []string{"pull_request"},
 		},
-		&gh.Hook{
+		{
 			Config: map[string]interface{}{
 				"url": "https://example.com/",
 			},

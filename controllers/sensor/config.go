@@ -33,7 +33,7 @@ import (
 )
 
 // watchControllerConfigMap watches updates to sensor controller configmap
-func (controller *Controller) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
+func (controller *Controller) watchControllerConfigMap(ctx context.Context) cache.Controller {
 	log.Info("watching controller config map updates")
 	source := controller.newControllerConfigMapWatch()
 	_, ctrl := cache.NewInformer(
@@ -60,9 +60,7 @@ func (controller *Controller) watchControllerConfigMap(ctx context.Context) (cac
 				}
 			},
 		})
-
-	go ctrl.Run(ctx.Done())
-	return ctrl, nil
+	return ctrl
 }
 
 // newControllerConfigMapWatch returns a configmap watcher

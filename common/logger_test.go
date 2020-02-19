@@ -17,10 +17,11 @@ limitations under the License.
 package common
 
 import (
-	"github.com/sirupsen/logrus"
-	"github.com/smartystreets/goconvey/convey"
 	"os"
 	"testing"
+
+	"github.com/sirupsen/logrus"
+	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestNewArgoEventsLogger(t *testing.T) {

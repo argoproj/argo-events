@@ -35,10 +35,6 @@ import (
 	"k8s.io/client-go/kubernetes/fake"
 )
 
-var (
-	registry = runtime.NewEquivalentResourceRegistry()
-)
-
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
 	return &unstructured.Unstructured{
 		Object: map[string]interface{}{

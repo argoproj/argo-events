@@ -136,7 +136,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("configuring the type of the GitLab event the hook must register against...")
-	elem := reflect.ValueOf(opt).Elem().FieldByName(string(router.gitlabEventSource.Event))
+	elem := reflect.ValueOf(opt).Elem().FieldByName(router.gitlabEventSource.Event)
 	if ok := elem.IsValid(); !ok {
 		return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
 	}

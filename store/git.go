@@ -68,7 +68,7 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
-	signer, err := ssh.ParsePrivateKey([]byte(sshKey))
+	signer, err := ssh.ParsePrivateKey(sshKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
 	}

@@ -27,7 +27,6 @@ import (
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/wait"
-	informersv1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
@@ -65,10 +64,8 @@ type Controller struct {
 	// gatewayClient is the Argo-Events gateway resource client
 	gatewayClient clientset.Interface
 	// gateway-controller informer and queue
-	podInformer informersv1.PodInformer
-	svcInformer informersv1.ServiceInformer
-	informer    cache.SharedIndexInformer
-	queue       workqueue.RateLimitingInterface
+	informer cache.SharedIndexInformer
+	queue    workqueue.RateLimitingInterface
 }
 
 // NewGatewayController creates a new controller
@@ -158,12 +155,10 @@ func (c *Controller) Run(ctx context.Context, threads int) {
 			common.LabelVersion:    base.GetVersion().Version,
 		}).Infoln("starting controller")
 
-	_, err := c.watchControllerConfigMap(ctx)
-	if err != nil {
-		c.logger.WithError(err).Errorln("failed to register watch for controller config map")
-		return
-	}
+	configMapCtrl := c.watchControllerConfigMap(ctx)
+	go configMapCtrl.Run(ctx.Done())
 
+	var err error
 	c.informer, err = c.newGatewayInformer()
 	if err != nil {
 		panic(err)

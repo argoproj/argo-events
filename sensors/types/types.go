@@ -25,7 +25,7 @@ import (
 type Notification struct {
 	// Event is the internal representation of cloud event received from the gateway
 	Event *apicommon.Event
-	// EventDependency refers to the dependency against the event received from teh gateway
+	// EventDependency refers to the dependency against the event received from the gateway
 	EventDependency *v1alpha1.EventDependency
 	// Sensor refers to the sensor object
 	// It is a reference to the sensor object updated by some other process and now it is required

@@ -156,12 +156,10 @@ func (controller *Controller) Run(ctx context.Context, threads int) {
 			common.LabelVersion:    base.GetVersion().Version,
 		}).Infoln("starting the controller...")
 
-	_, err := controller.watchControllerConfigMap(ctx)
-	if err != nil {
-		controller.logger.WithError(err).Error("failed to register watch for controller config map")
-		return
-	}
+	configMapCtrl := controller.watchControllerConfigMap(ctx)
+	go configMapCtrl.Run(ctx.Done())
 
+	var err error
 	controller.informer, err = controller.newSensorInformer()
 	if err != nil {
 		controller.logger.WithError(err).Errorln("failed to create a new sensor controller")
