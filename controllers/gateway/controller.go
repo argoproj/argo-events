@@ -155,7 +155,7 @@ func (c *Controller) Run(ctx context.Context, threads int) {
 			common.LabelVersion:    base.GetVersion().Version,
 		}).Infoln("starting controller")
 
-	configMapCtrl := c.watchControllerConfigMap(ctx)
+	configMapCtrl := c.watchControllerConfigMap()
 	go configMapCtrl.Run(ctx.Done())
 
 	var err error
