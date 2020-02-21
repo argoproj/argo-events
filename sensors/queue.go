@@ -41,7 +41,8 @@ func (sensorCtx *SensorContext) processQueue(notification *types.Notification) {
 		}
 
 		// increment completion counter
-		sensorCtx.Sensor.Status.TriggerCycleCount = sensorCtx.Sensor.Status.TriggerCycleCount + 1
+		sensorCtx.Sensor.Status.TriggerCycleCount++
+
 		// set completion time
 		sensorCtx.Sensor.Status.LastCycleTime = metav1.Now()
 

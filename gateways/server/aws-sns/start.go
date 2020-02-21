@@ -117,7 +117,6 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			return
 		}
 		route.DataCh <- eventBytes
-
 	}
 
 	logger.Info("request has been successfully processed")

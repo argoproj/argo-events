@@ -79,6 +79,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger = logger.WithField("topic", pubsubEventSource.Topic)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Create a new topic with the given name if none exists
 	logger.Infoln("setting up a client to connect to PubSub...")
@@ -152,7 +153,6 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	<-channels.Done
-	cancel()
 
 	logger.Infoln("event source has been stopped")
 

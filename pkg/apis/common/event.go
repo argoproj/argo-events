@@ -71,7 +71,8 @@ type EventContext struct {
 	Subject string `json:"subject" protobuf:"bytes,7,name=subject"`
 }
 
-// Dispatch protocol contains configuration necessary to dispatch an event to sensor over different communication protocols
+// Dispatch protocol contains configuration necessary to dispatch an event
+// to sensor over different communication protocols.
 type EventProtocol struct {
 	Type EventProtocolType `json:"type" protobuf:"bytes,1,opt,name=type"`
 	Http Http              `json:"http" protobuf:"bytes,2,opt,name=http"`

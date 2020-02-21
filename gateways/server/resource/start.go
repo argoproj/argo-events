@@ -119,7 +119,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	tweakListOptions := func(op *metav1.ListOptions) {
-		op = options
+		*op = *options
 	}
 
 	logger.Infoln("setting up informer factory...")
@@ -131,37 +131,30 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	go func() {
 		logger.Infoln("listening to resource events...")
-		for {
-			select {
-			case event, ok := <-informerEventCh:
-				if !ok {
-					logger.Warnln("received an invalid event, rejecting it...")
-					return
-				}
-				objBody, err := json.Marshal(event.Obj)
-				if err != nil {
-					logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
-					continue
-				}
-
-				eventData := &apicommon.ResourceEventData{
-					EventType: string(event.Type),
-					Body:      objBody,
-					Group:     resourceEventSource.Group,
-					Version:   resourceEventSource.Version,
-					Resource:  resourceEventSource.Resource,
-				}
-				eventBody, err := json.Marshal(eventData)
-				if err != nil {
-					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
-					continue
-				}
-				if err := passFilters(event, resourceEventSource.Filter, resourceEventSource.EventType); err != nil {
-					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
-					continue
-				}
-				channels.Data <- eventBody
+		for event := range informerEventCh {
+			objBody, err := json.Marshal(event.Obj)
+			if err != nil {
+				logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
+				continue
 			}
+
+			eventData := &apicommon.ResourceEventData{
+				EventType: string(event.Type),
+				Body:      objBody,
+				Group:     resourceEventSource.Group,
+				Version:   resourceEventSource.Version,
+				Resource:  resourceEventSource.Resource,
+			}
+			eventBody, err := json.Marshal(eventData)
+			if err != nil {
+				logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
+				continue
+			}
+			if err := passFilters(event, resourceEventSource.Filter, resourceEventSource.EventType); err != nil {
+				logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
+				continue
+			}
+			channels.Data <- eventBody
 		}
 	}()
 

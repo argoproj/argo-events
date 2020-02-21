@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+
 	"github.com/argoproj/argo-events/gateways"
 	"google.golang.org/grpc/metadata"
 )
@@ -25,7 +26,6 @@ func (f *FakeGRPCStream) SendHeader(metadata.MD) error {
 }
 
 func (f *FakeGRPCStream) SetTrailer(metadata.MD) {
-	return
 }
 
 func (f *FakeGRPCStream) Context() context.Context {

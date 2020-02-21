@@ -18,6 +18,8 @@ package store
 
 import (
 	"fmt"
+	"io/ioutil"
+
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
@@ -26,7 +28,6 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 	go_git_ssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
-	"io/ioutil"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -68,7 +69,7 @@ func getSSHKeyAuth(sshKeyFile string) (transport.AuthMethod, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to read ssh key file. err: %+v", err)
 	}
-	signer, err := ssh.ParsePrivateKey([]byte(sshKey))
+	signer, err := ssh.ParsePrivateKey(sshKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh key. err: %+v", err)
 	}

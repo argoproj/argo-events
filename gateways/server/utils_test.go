@@ -17,9 +17,10 @@ limitations under the License.
 package server
 
 import (
+	"testing"
+
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"testing"
 )
 
 func TestConnect(t *testing.T) {

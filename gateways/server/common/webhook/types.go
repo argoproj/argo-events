@@ -59,9 +59,6 @@ type Route struct {
 	DataCh chan []byte
 	// Stop channel to signal the end of the event source.
 	StopChan chan struct{}
-	// initialized indicates whether the route has been initialized and there exist a http router
-	// to process incoming requests
-	initialized bool
 }
 
 // Controller controls the active servers and endpoints

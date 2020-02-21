@@ -54,11 +54,8 @@ func main() {
 
 	// handle gateway status updates
 	go func() {
-		for {
-			select {
-			case status := <-ctx.statusCh:
-				ctx.UpdateGatewayState(&status)
-			}
+		for status := range ctx.statusCh {
+			ctx.UpdateGatewayState(&status)
 		}
 	}()
 
@@ -66,12 +63,12 @@ func main() {
 	ctx.updateSubscriberClients()
 
 	// watch updates to gateway resource
-	if _, err := ctx.WatchGatewayUpdates(context.Background()); err != nil {
-		panic(err)
-	}
+	gwWatcher := ctx.WatchGatewayUpdates()
+	go gwWatcher.Run(context.Background().Done())
+
 	// watch for event source updates
-	if _, err := ctx.WatchGatewayEventSources(context.Background()); err != nil {
-		panic(err)
-	}
+	esWatcher := ctx.WatchGatewayEventSources()
+	go esWatcher.Run(context.Background().Done())
+
 	select {}
 }

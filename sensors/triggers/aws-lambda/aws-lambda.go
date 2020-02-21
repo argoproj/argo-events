@@ -63,7 +63,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, reso
 		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
