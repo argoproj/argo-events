@@ -33,7 +33,7 @@ func TestValidateSensor(t *testing.T) {
 		content, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 		assert.Nil(t, err)
 		var sensor *v1alpha1.Sensor
-		err = yaml.Unmarshal([]byte(content), &sensor)
+		err = yaml.Unmarshal(content, &sensor)
 		assert.Nil(t, err)
 		err = ValidateSensor(sensor)
 		assert.Nil(t, err)

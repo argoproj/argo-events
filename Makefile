@@ -384,3 +384,8 @@ kind-e2e:
 
 .PHONY: build-e2e-images
 build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image webhook-image
+
+.PHONY: lint
+lint:
+	golangci-lint run
+

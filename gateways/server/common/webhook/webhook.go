@@ -104,7 +104,7 @@ func startServer(router Router, controller *Controller) {
 		r = r.Path(route.Context.Endpoint)
 	}
 
-	r = r.HandlerFunc(router.HandleRoute)
+	r.HandlerFunc(router.HandleRoute)
 
 	Lock.Unlock()
 }
@@ -132,7 +132,7 @@ func activateRoute(router Router, controller *Controller) {
 }
 
 // manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
-func manageRouteChannels(router Router, controller *Controller, eventStream gateways.Eventing_StartEventSourceServer) {
+func manageRouteChannels(router Router, eventStream gateways.Eventing_StartEventSourceServer) {
 	route := router.GetRoute()
 
 	for {
@@ -175,7 +175,7 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 	}
 
 	logger.Info("listening to payloads for the route...")
-	go manageRouteChannels(router, controller, eventStream)
+	go manageRouteChannels(router, eventStream)
 
 	defer func() {
 		route.StopChan <- struct{}{}

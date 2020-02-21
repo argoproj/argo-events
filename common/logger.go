@@ -17,8 +17,9 @@ limitations under the License.
 package common
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Logger constants
