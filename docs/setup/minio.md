@@ -9,7 +9,7 @@ set up the AWS SNS gateway._**
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/docs-gateway-setup/docs/assets/minio-setup.png?raw=true" alt="Minio Setup"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/minio-setup.png?raw=true" alt="Minio Setup"/>
 </p>
 
 <br/>

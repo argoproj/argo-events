@@ -6,7 +6,7 @@ NATS gateway listens to NATS subject notifications and helps sensor trigger the 
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/docs-gateway-setup/docs/assets/nats-setup.png?raw=true" alt="NATS Setup"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/nats-setup.png?raw=true" alt="NATS Setup"/>
 </p>
 
 <br/>
