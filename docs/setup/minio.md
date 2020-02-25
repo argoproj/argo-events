@@ -44,6 +44,19 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 1. Make sure to have minio server deployed and reachable from the gateway. More info on minio server setup 
 is available at https://github.com/minio/minio/blob/master/docs/orchestration/kubernetes/k8s-yaml.md.
 
+2. Create a K8s secret that holds the access and secret key. This secret will be referred in the minio event source definition that we are going to install in a later step.
+
+        apiVersion: v1
+        data:
+          # base64 of minio
+          accesskey: bWluaW8=
+          # base64 of minio123
+          secretkey: bWluaW8xMjM=
+        kind: Secret
+        metadata:
+          name: artifacts-minio
+          namespace: argo-events
+
 2. Install gateway in the `argo-events` namespace using following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/minio.yaml
@@ -68,6 +81,8 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/minio.yaml   
 
 8. Create a file named and `hello-world.txt` and upload it onto to the bucket. This will trigger the argo workflow.
+
+9. Run `argo list` to find the workflow.
 
 <br/>
 
