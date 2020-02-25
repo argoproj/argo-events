@@ -1,0 +1,48 @@
+/**
+* Trigger related messages and services
+*/
+syntax = "proto3";
+
+package triggers;
+
+// Trigger offers services to build a custom trigger
+service Trigger {
+    // FetchResource fetches the resource to be triggered.
+    rpc FetchResource(FetchResourceRequest) returns (FetchResourceResponse);
+    // Execute executes the requested trigger resource.
+    rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+    // ApplyPolicy applies policies on the trigger execution result.
+    rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse);
+}
+
+// FetchResourceRequest is the request to fetch trigger resource
+message FetchResourceRequest {
+    bytes resource = 1;
+}
+
+// FetchResourceRequest contains the fetched resource.
+message FetchResourceResponse {
+    bytes resource = 1;
+}
+
+// ExecuteRequest is a request to execute a trigger resource.
+message ExecuteRequest {
+    bytes resource = 1;
+    bytes payload = 2;
+}
+
+// ExecuteResponse is the response of the trigger execution
+message ExecuteResponse {
+    bytes response = 1;
+}
+
+// ApplyPolicyRequest is the request to apply policy on the trigger execution result.
+message ApplyPolicyRequest {
+    bytes request = 1;
+}
+
+// ApplyPolicyResponse is the response of the application of the trigger policy.
+message ApplyPolicyResponse {
+    bool success = 1;
+    string message = 2;
+}

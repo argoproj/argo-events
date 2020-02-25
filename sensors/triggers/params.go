@@ -19,6 +19,7 @@ package triggers
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -32,7 +33,7 @@ import (
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
-	var result []byte
+	payload := make(map[string]string)
 
 	events := ExtractEvents(sensor, parameters)
 	if events == nil {
@@ -44,14 +45,10 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 		if err != nil {
 			return nil, err
 		}
-
-		result, err = sjson.SetBytes(result, parameter.Dest, []byte(value))
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to construct the JSON payload")
-		}
+		payload[parameter.Dest] = value
 	}
 
-	return result, nil
+	return json.Marshal(payload)
 }
 
 // ApplyTemplateParameters applies parameters to trigger template

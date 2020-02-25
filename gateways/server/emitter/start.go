@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	emitter "github.com/emitter-io/go/v2"
 	"github.com/ghodss/yaml"
@@ -107,7 +107,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
-		eventBytes, err := json.Marshal(&apicommon.EmitterEventData{
+		eventBytes, err := json.Marshal(&events.EmitterEventData{
 			Topic: message.Topic(),
 			Body:  message.Payload(),
 		})

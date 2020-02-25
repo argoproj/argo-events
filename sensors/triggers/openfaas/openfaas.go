@@ -151,6 +151,8 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.Wrap(err, "failed to read the response")
 	}
 
+	t.Logger.WithField("body", string(body)).Infoln("response body")
+
 	return body, nil
 }
 

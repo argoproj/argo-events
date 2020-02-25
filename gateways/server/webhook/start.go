@@ -24,7 +24,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/ghodss/yaml"
 	"github.com/sirupsen/logrus"
 )
@@ -89,7 +89,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	payload := &apicommon.WebhookEventData{
+	payload := &events.WebhookEventData{
 		Header: request.Header,
 		Body:   (*json.RawMessage)(&body),
 	}

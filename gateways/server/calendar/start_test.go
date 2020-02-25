@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
@@ -59,7 +60,7 @@ func TestListenEvents(t *testing.T) {
 	}
 	go func() {
 		data := <-channels.Data
-		var cal *apicommon.CalendarEventData
+		var cal *events.CalendarEventData
 		err = yaml.Unmarshal(data, &cal)
 		assert.Nil(t, err)
 
