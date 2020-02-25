@@ -6,7 +6,7 @@ Resource gateway watches change notifications for K8s object and helps sensor tr
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/docs-gateway-setup/docs/assets/resource-setup.png?raw=true" alt="Resource Setup"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/resource-setup.png?raw=true" alt="Resource Setup"/>
 </p>
 
 <br/>

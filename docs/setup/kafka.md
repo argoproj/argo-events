@@ -4,7 +4,7 @@
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/docs-gateway-setup/docs/assets/kafka-setup.png?raw=true" alt="KAFKA Setup"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/kafka-setup.png?raw=true" alt="KAFKA Setup"/>
 </p>
 
 <br/>
