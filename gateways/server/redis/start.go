@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/go-redis/redis"
@@ -98,7 +98,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		select {
 		case message := <-ch:
 			logger.WithField("channel", message.Channel).Infoln("received a message")
-			eventData := &apicommon.RedisEventData{
+			eventData := &events.RedisEventData{
 				Channel: message.Channel,
 				Pattern: message.Pattern,
 				Body:    message.Payload,

@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	natslib "github.com/nats-io/go-nats"
@@ -81,7 +81,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
-		eventData := &apicommon.NATSEventData{
+		eventData := &events.NATSEventData{
 			Subject: msg.Subject,
 			Body:    msg.Data,
 		}

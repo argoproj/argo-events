@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/nsqio/go-nsq"
@@ -102,7 +102,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 // HandleMessage implements the Handler interface.
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 	h.logger.Infoln("received a message")
-	eventData := &apicommon.NSQEventData{
+	eventData := &events.NSQEventData{
 		Body:        m.Body,
 		Timestamp:   strconv.Itoa(int(m.Timestamp)),
 		NSQDAddress: m.NSQDAddress,

@@ -18,11 +18,12 @@ package aws_sqs
 
 import (
 	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
-	common2 "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -107,7 +108,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			if msg != nil && len(msg.Messages) > 0 {
 				message := *msg.Messages[0]
 
-				data := &common2.SQSEventData{
+				data := &events.SQSEventData{
 					MessageId:         *message.MessageId,
 					MessageAttributes: message.MessageAttributes,
 					Body:              []byte(*message.Body),

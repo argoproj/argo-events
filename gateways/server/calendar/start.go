@@ -23,7 +23,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -118,7 +118,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			if location != nil {
 				lastT = lastT.In(location)
 			}
-			response := &apicommon.CalendarEventData{
+			response := &events.CalendarEventData{
 				EventTime:   tx.String(),
 				UserPayload: calendarEventSource.UserPayload,
 			}

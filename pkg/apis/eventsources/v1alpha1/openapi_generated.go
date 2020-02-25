@@ -38,6 +38,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EventSourceSpec":           schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EventSourceStatus":         schema_pkg_apis_eventsources_v1alpha1_EventSourceStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource":           schema_pkg_apis_eventsources_v1alpha1_FileEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GenericEventSource":        schema_pkg_apis_eventsources_v1alpha1_GenericEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource":         schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource":         schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource":           schema_pkg_apis_eventsources_v1alpha1_HDFSEventSource(ref),
@@ -699,8 +700,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"object"},
-										Format: "",
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GenericEventSource"),
 									},
 								},
 							},
@@ -718,7 +718,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceSpec(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
+			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource"},
 	}
 }
 
@@ -768,6 +768,27 @@ func schema_pkg_apis_eventsources_v1alpha1_FileEventSource(ref common.ReferenceC
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig"},
+	}
+}
+
+func schema_pkg_apis_eventsources_v1alpha1_GenericEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "GenericEventSource refers to a generic event source. It can be used to implement a custom event source.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Value of the event source",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"value"},
+			},
+		},
 	}
 }
 
