@@ -396,8 +396,26 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							},
 						},
 					},
+					"payload": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "payloadParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"serverURL", "secure", "triggerBody"},
+				Required: []string{"serverURL", "secure", "triggerBody", "payload"},
 			},
 		},
 		Dependencies: []string{
@@ -1301,7 +1319,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
+							Description: "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.",
 							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
 						},
 					},
