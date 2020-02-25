@@ -57,6 +57,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
           name: artifacts-minio
           namespace: argo-events
 
+
 2. Install gateway in the `argo-events` namespace using following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/minio.yaml
