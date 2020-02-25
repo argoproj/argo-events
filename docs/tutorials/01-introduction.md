@@ -1,6 +1,6 @@
 # Introduction
 
-The tutorials we will cover every aspect of Argo Events and demonstrate how you 
+In the tutorials, we will cover every aspect of Argo Events and demonstrate how you 
 can leverage these features to build an event driven workflow pipeline. All the concepts you will learn
 in this tutorial and subsequent ones can be applied to any type of gateway.
 
