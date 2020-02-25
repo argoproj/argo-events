@@ -28,7 +28,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
             },
             "data": {
               "subject": "name_of_the_nats_subject",
-              "data": "message_payload"
+              "body": "message_payload"
             }
         }
 
@@ -39,8 +39,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 1. Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer https://github.com/nats-io/nats-operator for details.
 
-   To test the NATS gateway quickly, you can set up a test only NATS cluster by deploying following
-   resource,
+   NATS cluster setup for test purposes,
    
         apiVersion: v1
         kind: Service
