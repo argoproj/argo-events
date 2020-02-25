@@ -17,7 +17,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v0.12
+IMAGE_TAG?=v0.12.1
 BUILD_BINARY?=true
 
 ifeq (${DOCKER_PUSH},true)
@@ -64,7 +64,7 @@ sensor-controller-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make sensor-controller
 
 sensor-controller-image:
-	@if [ "$(BUILD_BINARY)" = "true" ]; then sensor-controller-linux; fi
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make sensor-controller-linux; fi
 	docker build -t $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) -f ./controllers/sensor/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)sensor-controller:$(IMAGE_TAG) ; fi
 
@@ -384,3 +384,8 @@ kind-e2e:
 
 .PHONY: build-e2e-images
 build-e2e-images: sensor-controller-image gateway-controller-image gateway-client-image webhook-image
+
+.PHONY: lint
+lint:
+	golangci-lint run
+

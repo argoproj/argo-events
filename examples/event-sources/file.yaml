@@ -15,9 +15,9 @@ spec:
       # supported types are: CREATE, WRITE, REMOVE, RENAME, CHMOD
       eventType: "CREATE"
 
-    example-with-path-regex:
-      watchPathConfig:
-        directory: "/bin/"
-        # the gateway will watch events for path that matches following regex
-        pathRegexp: "([a-z]+).txt"
-      eventType: "CREATE"
+#    example-with-path-regex:
+#      watchPathConfig:
+#        directory: "/bin/"
+#        # the gateway will watch events for path that matches following regex
+#        pathRegexp: "([a-z]+).txt"
+#      eventType: "CREATE"

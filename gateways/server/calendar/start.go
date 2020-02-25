@@ -145,14 +145,14 @@ func resolveSchedule(cal *v1alpha1.CalendarEventSource) (cronlib.Schedule, error
 			return nil, errors.Errorf("failed to parse schedule %s from calendar event. Cause: %+v", cal.Schedule, err.Error())
 		}
 		return schedule, nil
-	} else if cal.Interval != "" {
+	}
+	if cal.Interval != "" {
 		intervalDuration, err := time.ParseDuration(cal.Interval)
 		if err != nil {
 			return nil, errors.Errorf("failed to parse interval %s from calendar event. Cause: %+v", cal.Interval, err.Error())
 		}
 		schedule := cronlib.ConstantDelaySchedule{Delay: intervalDuration}
 		return schedule, nil
-	} else {
-		return nil, errors.New("calendar event must contain either a schedule or interval")
 	}
+	return nil, errors.New("calendar event must contain either a schedule or interval")
 }

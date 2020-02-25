@@ -73,7 +73,7 @@ func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger)
 
 // ApplyResourceParameters applies parameters to K8s resource within trigger
 func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
 			return err
@@ -108,7 +108,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 				if op == v1alpha1.TriggerParameterOpAppend {
 					v = current.String() + v
 				} else {
-					v = v + current.String()
+					v += current.String()
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:

@@ -35,9 +35,7 @@ func ParseExclusionDates(vals []string) ([]time.Time, error) {
 			if err != nil {
 				return nil, err
 			}
-			for _, d := range dates {
-				exclusionDates = append(exclusionDates, d)
-			}
+			exclusionDates = append(exclusionDates, dates...)
 		}
 	}
 	return exclusionDates, nil

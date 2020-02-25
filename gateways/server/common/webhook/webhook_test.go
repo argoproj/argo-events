@@ -22,10 +22,6 @@ import (
 	"github.com/smartystreets/goconvey/convey"
 )
 
-var rc = &FakeRouter{
-	route: GetFakeRoute(),
-}
-
 func TestValidateWebhook(t *testing.T) {
 	convey.Convey("Given a webhook, validate it", t, func() {
 		convey.So(ValidateWebhookContext(Hook), convey.ShouldBeNil)

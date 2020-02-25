@@ -71,7 +71,7 @@ func (t *HTTPTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource 
 		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
 	}
 	parameters := fetchedResource.Parameters
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err

@@ -121,7 +121,8 @@ type SensorSpec struct {
 	// +listType=triggers
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
-	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
+	// Template contains sensor pod specification. For more information,
+	// read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
 	// Subscription refers to the modes of events subscriptions for the sensor.
 	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
@@ -136,7 +137,8 @@ type SensorSpec struct {
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
 	// ServiceLabels to be set for the service generated
 	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,11,rep,name=serviceLabels"`
-	// ServiceAnnotations refers to annotations to be set for the service generated
+	// ServiceAnnotations refers to annotations to be set
+	// for the service generated
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
 }
 

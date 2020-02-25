@@ -64,7 +64,7 @@ func (ctx *sensorContext) operate() error {
 	// Validation failure prevents any sort processing of the sensor object
 	if err := ValidateSensor(ctx.sensor); err != nil {
 		ctx.logger.WithError(err).Errorln("failed to validate sensor")
-		ctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+		ctx.markSensorPhase(v1alpha1.NodePhaseError, err.Error())
 		return err
 	}
 
@@ -79,10 +79,10 @@ func (ctx *sensorContext) operate() error {
 
 		if err := ctx.createSensorResources(); err != nil {
 			ctx.logger.WithError(err).Errorln("failed to create resources for the sensor")
-			ctx.markSensorPhase(v1alpha1.NodePhaseError, false, err.Error())
+			ctx.markSensorPhase(v1alpha1.NodePhaseError, err.Error())
 			return nil
 		}
-		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
+		ctx.markSensorPhase(v1alpha1.NodePhaseActive, "sensor is active")
 		ctx.logger.Infoln("successfully created resources for the sensor. sensor is in active state")
 
 	case v1alpha1.NodePhaseActive:
@@ -100,7 +100,7 @@ func (ctx *sensorContext) operate() error {
 			ctx.logger.WithError(err).Errorln("failed to update the sensor resources")
 			return err
 		}
-		ctx.markSensorPhase(v1alpha1.NodePhaseActive, false, "sensor is active")
+		ctx.markSensorPhase(v1alpha1.NodePhaseActive, "sensor is active")
 		ctx.logger.Infoln("successfully processed the update")
 	}
 
@@ -176,7 +176,7 @@ func (ctx *sensorContext) updateSensorState() {
 }
 
 // mark the overall sensor phase
-func (ctx *sensorContext) markSensorPhase(phase v1alpha1.NodePhase, markComplete bool, message ...string) {
+func (ctx *sensorContext) markSensorPhase(phase v1alpha1.NodePhase, message ...string) {
 	justCompleted := ctx.sensor.Status.Phase != phase
 	if justCompleted {
 		ctx.logger.WithFields(
@@ -215,22 +215,19 @@ func (ctx *sensorContext) markSensorPhase(phase v1alpha1.NodePhase, markComplete
 		ctx.sensor.Status.Message = message[0]
 	}
 
-	switch phase {
-	case v1alpha1.NodePhaseError:
-		if markComplete && justCompleted {
-			ctx.logger.Infoln("marking sensor state as complete")
-			ctx.sensor.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
+	if phase == v1alpha1.NodePhaseError && justCompleted {
+		ctx.logger.Infoln("marking sensor state as complete")
+		ctx.sensor.Status.CompletedAt = metav1.Time{Time: time.Now().UTC()}
 
-			if ctx.sensor.ObjectMeta.Labels == nil {
-				ctx.sensor.ObjectMeta.Labels = make(map[string]string)
-			}
-			if ctx.sensor.ObjectMeta.Annotations == nil {
-				ctx.sensor.ObjectMeta.Annotations = make(map[string]string)
-			}
-
-			ctx.sensor.ObjectMeta.Labels[LabelComplete] = "true"
-			ctx.sensor.ObjectMeta.Annotations[LabelComplete] = string(phase)
+		if ctx.sensor.ObjectMeta.Labels == nil {
+			ctx.sensor.ObjectMeta.Labels = make(map[string]string)
 		}
+		if ctx.sensor.ObjectMeta.Annotations == nil {
+			ctx.sensor.ObjectMeta.Annotations = make(map[string]string)
+		}
+
+		ctx.sensor.ObjectMeta.Labels[LabelComplete] = "true"
+		ctx.sensor.ObjectMeta.Annotations[LabelComplete] = string(phase)
 	}
 	ctx.updated = true
 }

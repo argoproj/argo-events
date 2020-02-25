@@ -82,7 +82,10 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 // and although the event sources are actually same, this method will treat them as different event sources.
 // old event sources - event sources to be deactivate
 // new event sources - new event sources to activate
-func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) (staleEventSources []string, newEventSources []string) {
+func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) ([]string, []string) {
+	var staleEventSources []string
+	var newEventSources []string
+
 	var currentEventSources []string
 	var updatedEventSources []string
 
@@ -122,7 +125,7 @@ func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[s
 			swapped = true
 		}
 	}
-	return
+	return staleEventSources, newEventSources
 }
 
 // activateEventSources activate new event sources
