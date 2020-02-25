@@ -47,4 +47,6 @@ raise a PR.
 **A.** When it comes to image tags, the golden rule is do not trust the latest tag. Always use the pinned version of the images.
    We will try to keep the `latest` in sync with the latest release version.
 
+**Q. Where can I find the event structure for a particular gateway?**
 
+**A.** Please refer https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/event-data.go to understand the structure of different types of events dispatched by gateways.
