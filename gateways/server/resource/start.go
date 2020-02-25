@@ -138,7 +138,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				continue
 			}
 
-			eventData := &apicommon.ResourceEventData{
+			eventData := &events.ResourceEventData{
 				EventType: string(event.Type),
 				Body:      objBody,
 				Group:     resourceEventSource.Group,
