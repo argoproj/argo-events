@@ -25,7 +25,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -79,6 +79,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger = logger.WithField("topic", pubsubEventSource.Topic)
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Create a new topic with the given name if none exists
 	logger.Infoln("setting up a client to connect to PubSub...")
@@ -131,7 +132,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("listening for messages from PubSub...")
 	err = subscription.Receive(ctx, func(msgCtx context.Context, m *pubsub.Message) {
 		logger.Info("received GCP PubSub Message from topic")
-		eventData := &apicommon.PubSubEventData{
+		eventData := &events.PubSubEventData{
 			ID:          m.ID,
 			Body:        m.Data,
 			Attributes:  m.Attributes,
@@ -152,7 +153,6 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	<-channels.Done
-	cancel()
 
 	logger.Infoln("event source has been stopped")
 

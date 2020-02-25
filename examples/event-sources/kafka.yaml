@@ -5,7 +5,7 @@ metadata:
 spec:
   type: "kafka"
   kafka:
-    example:
+    example-with-retry:
       url: "kafka.argo-events:9092"
       topic: "topic-2"
       partition: "1"

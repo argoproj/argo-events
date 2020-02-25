@@ -39,8 +39,8 @@ func main() {
 	}
 
 	server.StartGateway(&minio.EventListener{
-		common.NewArgoEventsLogger(),
-		clientset,
-		namespace,
+		Logger:    common.NewArgoEventsLogger(),
+		K8sClient: clientset,
+		Namespace: namespace,
 	})
 }

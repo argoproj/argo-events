@@ -18,7 +18,7 @@ func sliceEqual(first []string, second []string) bool {
 		return false
 	}
 
-	for index, _ := range first {
+	for index := range first {
 		if first[index] != second[index] {
 			return false
 		}

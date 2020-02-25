@@ -121,7 +121,8 @@ type SensorSpec struct {
 	// +listType=triggers
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
-	// Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
+	// Template contains sensor pod specification. For more information,
+	// read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.
 	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
 	// Subscription refers to the modes of events subscriptions for the sensor.
 	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
@@ -136,7 +137,8 @@ type SensorSpec struct {
 	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"bytes,7,opt,name=errorOnFailedRound"`
 	// ServiceLabels to be set for the service generated
 	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,11,rep,name=serviceLabels"`
-	// ServiceAnnotations refers to annotations to be set for the service generated
+	// ServiceAnnotations refers to annotations to be set
+	// for the service generated
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
 }
 
@@ -274,7 +276,11 @@ type TriggerTemplate struct {
 	// +optional
 	OpenFaas *OpenFaasTrigger `json:"openFaas,omitempty" protobuf:"bytes,5,opt,name=openFaas"`
 	// AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
+	// +optional
 	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`
+	// CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.
+	// +optional
+	CustomTrigger *CustomTrigger `json:"customTrigger,omitempty" protobuf:"bytes,7,opt,name=customTrigger"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -399,6 +405,26 @@ type AWSLambdaTrigger struct {
 	// +listType=triggerParameters
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
+}
+
+// CustomTrigger refers to the specification of the custom trigger.
+type CustomTrigger struct {
+	// ServerURL is the url of the gRPC server that executes custom trigger
+	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	// Secure refers to type of the connection between sensor to custom trigger gRPC
+	Secure bool `json:"secure" protobuf:"bytes,2,name=secure"`
+	// CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
+	CertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,3,opt,name=certFilePath"`
+	// ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
+	ServerNameOverride string `json:"serverNameOverride,omitempty" protobuf:"bytes,4,opt,name=serverNameOverride"`
+	// TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
+	TriggerBody string `json:"triggerBody" protobuf:"bytes,5,name=triggerBody"`
+	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

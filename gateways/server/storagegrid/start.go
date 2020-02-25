@@ -129,13 +129,16 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	switch request.Method {
-	case http.MethodHead:
+	if request.Method == http.MethodHead {
 		respBody = ""
 	}
+
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Add("Content-Type", "text/plain")
-	writer.Write([]byte(respBody))
+	if _, err := writer.Write([]byte(respBody)); err != nil {
+		logger.WithError(err).Errorln("failed to write the response")
+		return
+	}
 
 	// notification received from storage grid is url encoded.
 	parsedURL, err := url.QueryUnescape(string(body))

@@ -46,7 +46,6 @@ func (f *FakeGRPCStream) SendHeader(metadata.MD) error {
 }
 
 func (f *FakeGRPCStream) SetTrailer(metadata.MD) {
-	return
 }
 
 func (f *FakeGRPCStream) Context() context.Context {

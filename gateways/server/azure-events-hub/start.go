@@ -25,7 +25,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	common2 "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -88,7 +88,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	handler := func(c context.Context, event *eventhub.Event) error {
-		eventData := &common2.AzureEventsHubEventData{
+		eventData := &events.AzureEventsHubEventData{
 			Id:           event.ID,
 			PartitionKey: *event.PartitionKey,
 			Body:         event.Data,

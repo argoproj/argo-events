@@ -72,7 +72,7 @@ func (t *OpenFaasTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resou
 
 	parameters := t.Trigger.Template.OpenFaas.Parameters
 
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.OpenFaas.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
@@ -150,6 +150,8 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read the response")
 	}
+
+	t.Logger.WithField("body", string(body)).Infoln("response body")
 
 	return body, nil
 }

@@ -19,6 +19,7 @@ package triggers
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -32,7 +33,7 @@ import (
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
-	var result []byte
+	payload := make(map[string]string)
 
 	events := ExtractEvents(sensor, parameters)
 	if events == nil {
@@ -44,14 +45,10 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 		if err != nil {
 			return nil, err
 		}
-
-		result, err = sjson.SetBytes(result, parameter.Dest, []byte(value))
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to construct the JSON payload")
-		}
+		payload[parameter.Dest] = value
 	}
 
-	return result, nil
+	return json.Marshal(payload)
 }
 
 // ApplyTemplateParameters applies parameters to trigger template
@@ -76,7 +73,7 @@ func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger)
 
 // ApplyResourceParameters applies parameters to K8s resource within trigger
 func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter, obj *unstructured.Unstructured) error {
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		jObj, err := obj.MarshalJSON()
 		if err != nil {
 			return err
@@ -111,7 +108,7 @@ func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[
 				if op == v1alpha1.TriggerParameterOpAppend {
 					v = current.String() + v
 				} else {
-					v = v + current.String()
+					v += current.String()
 				}
 			}
 		case v1alpha1.TriggerParameterOpOverwrite, v1alpha1.TriggerParameterOpNone:

@@ -1,6 +1,7 @@
 package naivewatcher
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -54,7 +55,11 @@ func TestWatcherAutoCheck(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer watcher.Stop()
+	defer func() {
+		if err := watcher.Stop(); err != nil {
+			fmt.Printf("failed to stop the watcher. err: %+v\n", err)
+		}
+	}()
 
 	// Create a file
 	_, err = os.Create(filepath.Join(tmpdir, "foo"))

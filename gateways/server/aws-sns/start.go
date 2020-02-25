@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server"
 	commonaws "github.com/argoproj/argo-events/gateways/server/common/aws"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	snslib "github.com/aws/aws-sdk-go/service/sns"
 	"github.com/ghodss/yaml"
@@ -109,7 +109,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	case messageTypeNotification:
 		logger.Infoln("dispatching notification on route's data channel")
 
-		eventData := &apicommon.SNSEventData{Body: body}
+		eventData := &events.SNSEventData{Body: body}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Error("failed to marshal the event data")
@@ -117,7 +117,6 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 			return
 		}
 		route.DataCh <- eventBytes
-
 	}
 
 	logger.Info("request has been successfully processed")

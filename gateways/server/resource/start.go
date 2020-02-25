@@ -24,7 +24,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -119,7 +119,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	tweakListOptions := func(op *metav1.ListOptions) {
-		op = options
+		*op = *options
 	}
 
 	logger.Infoln("setting up informer factory...")
@@ -131,37 +131,30 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	go func() {
 		logger.Infoln("listening to resource events...")
-		for {
-			select {
-			case event, ok := <-informerEventCh:
-				if !ok {
-					logger.Warnln("received an invalid event, rejecting it...")
-					return
-				}
-				objBody, err := json.Marshal(event.Obj)
-				if err != nil {
-					logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
-					continue
-				}
-
-				eventData := &apicommon.ResourceEventData{
-					EventType: string(event.Type),
-					Body:      objBody,
-					Group:     resourceEventSource.Group,
-					Version:   resourceEventSource.Version,
-					Resource:  resourceEventSource.Resource,
-				}
-				eventBody, err := json.Marshal(eventData)
-				if err != nil {
-					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
-					continue
-				}
-				if err := passFilters(event.Obj.(*unstructured.Unstructured), resourceEventSource.Filter); err != nil {
-					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
-					continue
-				}
-				channels.Data <- eventBody
+		for event := range informerEventCh {
+			objBody, err := json.Marshal(event.Obj)
+			if err != nil {
+				logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
+				continue
 			}
+
+			eventData := &events.ResourceEventData{
+				EventType: string(event.Type),
+				Body:      objBody,
+				Group:     resourceEventSource.Group,
+				Version:   resourceEventSource.Version,
+				Resource:  resourceEventSource.Resource,
+			}
+			eventBody, err := json.Marshal(eventData)
+			if err != nil {
+				logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
+				continue
+			}
+			if err := passFilters(event, resourceEventSource.Filter, resourceEventSource.EventType); err != nil {
+				logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
+				continue
+			}
+			channels.Data <- eventBody
 		}
 	}()
 
@@ -238,17 +231,21 @@ func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(obj *unstructured.Unstructured, filter *v1alpha1.ResourceFilter) error {
+func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, eventType v1alpha1.ResourceEventType) error {
+	uObj := event.Obj.(*unstructured.Unstructured)
 	// no filters are applied.
 	if filter == nil {
 		return nil
 	}
-	if !strings.HasPrefix(obj.GetName(), filter.Prefix) {
-		return errors.Errorf("resource name does not match prefix. resource-name: %s, prefix: %s", obj.GetName(), filter.Prefix)
+	if !strings.HasPrefix(uObj.GetName(), filter.Prefix) {
+		return errors.Errorf("resource name does not match prefix. resource-name: %s, prefix: %s", uObj.GetName(), filter.Prefix)
 	}
-	created := obj.GetCreationTimestamp()
+	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
 		return errors.Errorf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
+	}
+	if eventType != "" && event.Type != eventType {
+		return errors.Errorf("resource event type mismatch. expected: %s, actual: %s", string(eventType), string(event.Type))
 	}
 	return nil
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -96,7 +96,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		select {
 		case msg := <-delivery:
 			logger.WithField("message-id", msg.MessageId).Infoln("received the message")
-			body := &apicommon.AMQPEventData{
+			body := &events.AMQPEventData{
 				ContentType:     msg.ContentType,
 				ContentEncoding: msg.ContentEncoding,
 				DeliveryMode:    int(msg.DeliveryMode),

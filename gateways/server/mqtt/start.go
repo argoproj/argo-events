@@ -22,7 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/ghodss/yaml"
@@ -68,7 +68,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.Infoln("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
-		eventData := &apicommon.MQTTEventData{
+		eventData := &events.MQTTEventData{
 			Topic:     msg.Topic(),
 			MessageId: int(msg.MessageID()),
 			Body:      msg.Payload(),
