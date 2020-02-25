@@ -39,6 +39,61 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 1. Make sure to have NATS cluster deployed in the Kubernetes. If you don't have one already installed, please refer https://github.com/nats-io/nats-operator for details.
 
+   To test the NATS gateway quickly, you can set up a test only NATS cluster by deploying following
+   resource,
+   
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: nats
+          namespace: argo-events
+          labels:
+            component: nats
+        spec:
+          selector:
+            component: nats
+          type: ClusterIP
+          ports:
+          - name: client
+            port: 4222
+          - name: cluster
+            port: 6222
+          - name: monitor
+            port: 8222
+        ---
+        apiVersion: apps/v1beta1
+        kind: StatefulSet
+        metadata:
+          name: nats
+          namespace: argo-events
+          labels:
+            component: nats
+        spec:
+          serviceName: nats
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                component: nats
+            spec:
+              serviceAccountName: argo-events-sa
+              containers:
+              - name: nats
+                image: nats:latest
+                ports:
+                - containerPort: 4222
+                  name: client
+                - containerPort: 6222
+                  name: cluster
+                - containerPort: 8222
+                  name: monitor
+                livenessProbe:
+                  httpGet:
+                    path: /
+                    port: 8222
+                  initialDelaySeconds: 10
+                  timeoutSeconds: 5
+
 2. Create the event source by running the following command. Make sure to update the appropriate fields.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/nats.yaml
