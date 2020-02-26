@@ -1,4 +1,4 @@
-# Calendar Gateway & Sensor
+# Calendar
 
 Calendar gateway generates events on either a cron schedule or an interval and help trigger workloads.
 

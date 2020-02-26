@@ -1,4 +1,4 @@
-# Resource Gateway & Sensor
+# Resource
 
 Resource gateway watches change notifications for K8s object and helps sensor trigger the workloads.
 
