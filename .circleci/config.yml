@@ -83,14 +83,10 @@ workflows:
             tags:
               only: /.*/
       - test:
-          requires:
-            - lint
           filters:
             tags:
               only: /.*/
       - build:
-          requires:
-            - e2e_test
           filters:
             tags:
               only: /.*/
