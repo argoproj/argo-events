@@ -24,6 +24,13 @@ nav:
       - 'concepts/gateway.md'
       - 'concepts/sensor.md'
       - 'concepts/event_source.md'
+  - Setup:
+      - 'setup/webhook.md'
+      - 'setup/calendar.md'
+      - 'setup/minio.md'
+      - 'setup/resource.md'
+      - 'setup/kafka.md'
+      - 'setup/nats.md'
   - Tutorials:
       - 'tutorials/01-introduction.md'
       - 'tutorials/02-parameterization.md'
@@ -38,6 +45,7 @@ nav:
       - 'tutorials/11-special-argo-workflow-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
+  - 'FAQ.md'
   - Releases ⧉: https://github.com/argoproj/argo-events/releases
   - Roadmap ⧉: https://github.com/argoproj/argo-events/milestones
   - Blog ⧉: https://blog.argoproj.io/
