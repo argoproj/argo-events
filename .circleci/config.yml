@@ -53,7 +53,7 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - ./dist/argo-events-linux-amd64.tar.gz
+            - ./dist
   # push_bin pushes both the linux and mac binaries to a github release when a new tag is added to the project
   push_bin:
     environment:
@@ -91,6 +91,7 @@ workflows:
       - build:
           requires:
             - install_dep
+            - test
           filters:
             tags:
               only: /.*/
