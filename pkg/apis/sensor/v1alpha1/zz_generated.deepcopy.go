@@ -192,6 +192,13 @@ func (in *CustomTrigger) DeepCopyInto(out *CustomTrigger) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Payload != nil {
+		in, out := &in.Payload, &out.Payload
+		*out = make([]TriggerParameter, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	return
 }
 
