@@ -1,4 +1,4 @@
-# Kafka Gateway & Sensor
+# Kafka
 
 <br/>
 <br/>

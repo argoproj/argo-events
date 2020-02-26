@@ -1,4 +1,4 @@
-# Webhook Gateway & Sensor
+# Webhook
 
 Webhook gateway exposes a http server and allows external entities to trigger workloads via
 http requests.

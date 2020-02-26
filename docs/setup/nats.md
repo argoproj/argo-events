@@ -1,4 +1,4 @@
-# NATS Gateway & Sensor
+# NATS
 
 NATS gateway listens to NATS subject notifications and helps sensor trigger the workloads.
 

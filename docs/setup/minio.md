@@ -1,4 +1,4 @@
-# Minio Gateway & Sensor
+# Minio
 
 Minio gateway listens to minio bucket notifications and helps sensor trigger the workloads.
 
