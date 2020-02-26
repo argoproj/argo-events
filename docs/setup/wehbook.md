@@ -7,7 +7,7 @@ http requests.
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/setup/docs/assets/webhook-gateway.png?raw=true" alt="Webhook Gateway"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/setup/docs/assets/webhook-gateway.png?raw=true" alt="Webhook Gateway"/>
 </p>
 
 <br/>
