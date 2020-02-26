@@ -40,7 +40,7 @@ jobs:
           root: .
           paths:
             - ./dist
-  # push_bin pushes both the linux and mac binaries to a github release when a new tag is added to the project
+  # push_bin pushes both the linux binaries to a github release when a new tag is added to the project
   push_bin:
     environment:
       - CIRCLE_PROJECT_USERNAME: argoproj
@@ -81,5 +81,5 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              # only recognise tags with semantic versioning e.g. 0.1.0
-              only: /^\d+\.\d+\.\d+.*$/
+              # only recognise tags with semantic versioning e.g. v0.1.0
+              only: /^v\d+\.\d+\.\d+.*$/
