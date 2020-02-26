@@ -1030,6 +1030,29 @@ trigger trigger object.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3337,7 +3360,7 @@ Kubernetes core/v1.PodTemplateSpec </a> </em>
 <p>
 
 Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
 
 </p>
 
@@ -3702,7 +3725,7 @@ Kubernetes core/v1.PodTemplateSpec </a> </em>
 <p>
 
 Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
 
 </p>
 
@@ -5479,6 +5502,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>b0ce469</code>. </em>
+commit <code>95e393b</code>. </em>
 
 </p>
