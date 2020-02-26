@@ -3,6 +3,8 @@
 We are going to set up a gateway, sensor and event-source for webhook. The goal is
 to trigger an Argo workflow upon a HTTP Post request.
 
+Note: You will need to have [Argo Workflows](https://argoproj.github.io/docs/argo/readme.html) installed for this tutorial.
+
  * First, we need to setup event sources for gateway to listen.
    
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
