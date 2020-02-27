@@ -8,7 +8,7 @@ metadata:
 spec:
   type: calendar
   eventSourceRef:
-    name: calendar-event-source
+    name: calendar-source
   template:
     metadata:
       name: calendar-gateway

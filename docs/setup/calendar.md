@@ -46,7 +46,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
    for errors.
 
 2. If you inspect the gateway resource definition, you will notice it points to the event source called
-   `calendar-event-source`. Lets install event source in the `argo-events` namespace,
+   `calendar-source`. Lets install event source in the `argo-events` namespace,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/calendar.yaml
    
