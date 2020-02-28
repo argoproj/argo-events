@@ -36,7 +36,7 @@ also notice that a service is created for both the gateway and sensor.
 * Expose the gateway pod via Ingress, OpenShift Route
 or port forward to consume requests over HTTP.
 
-        kubectl -n port-forward <gateway-pod-name> 12000:12000
+        kubectl -n argo-events port-forward <gateway-pod-name> 12000:12000
 
 * Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
