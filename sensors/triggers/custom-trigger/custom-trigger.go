@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package custom_trigger
+package customtrigger
 
 import (
 	"context"
@@ -41,6 +41,7 @@ type CustomTrigger struct {
 	triggerClient triggers.TriggerClient
 }
 
+// NewCustomTrigger returns a new custom trigger
 func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, customTriggerClients map[string]*grpc.ClientConn) (*CustomTrigger, error) {
 	customTrigger := &CustomTrigger{
 		Sensor:  sensor,

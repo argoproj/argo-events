@@ -47,6 +47,8 @@ type SensorContext struct {
 	Updated bool
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients map[string]*grpc.ClientConn
+	// openfaasConnectors holds the references to the openfaas controller connectors.
+	openfaasConnectors map[string]*types.OpenFaasContext
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -60,5 +62,6 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
 		customTriggerClients: make(map[string]*grpc.ClientConn),
+		openfaasConnectors:   make(map[string]*types.OpenFaasContext),
 	}
 }

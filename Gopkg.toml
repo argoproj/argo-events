@@ -124,6 +124,14 @@ required = [
   name = "github.com/nsqio/go-nsq"
   version = "v1.0.8"
 
+[[constraint]]
+  name = "github.com/openfaas-incubator/connector-sdk"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/openfaas/faas-provider/auth"
+  version = "0.5.5"
+
 [[override]]
   branch = "release-1.15"
   name = "k8s.io/api"
