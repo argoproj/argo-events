@@ -83,4 +83,13 @@ func TestAWS(t *testing.T) {
 			convey.So(session, convey.ShouldNotBeNil)
 		})
 	})
+
+	convey.Convey("create AWS credential using assume roleARN", t, func(){
+		convey.Convey("Get a new aws session", func() {
+			session, err := GetAWSAssumeRoleCreds("moke-roleARN", "mock-region")
+			convey.So(err, convey.ShouldBeNil)
+			convey.So(session, convey.ShouldNotBeNil)
+
+		})
+	})
 }
