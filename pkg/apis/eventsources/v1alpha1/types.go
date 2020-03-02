@@ -227,6 +227,10 @@ type SNSEventSource struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,6,name=region"`
+	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+	// +optional
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -245,6 +249,9 @@ type SQSEventSource struct {
 	// Namespace refers to Kubernetes namespace to read access related secret from.
 	// +optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
+	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+	// +optional
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
