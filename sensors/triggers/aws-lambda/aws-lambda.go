@@ -93,7 +93,7 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	awsSession, err := commonaws.CreateAWSSession(t.K8sClient, trigger.Namespace, trigger.Region, trigger.AccessKey, trigger.SecretKey)
+	awsSession, err := commonaws.CreateAWSSession(t.K8sClient, trigger.Namespace, trigger.Region, "", trigger.AccessKey, trigger.SecretKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a AWS session")
 	}
