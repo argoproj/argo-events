@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.12
+          image: argoproj/sensor:v0.13.0-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
@@ -47,5 +47,4 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                path: name
               dest: spec.templates.0.container.args.1

@@ -856,6 +856,207 @@ Key within configmap data which contains trigger resource definition
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.CustomTrigger">
+
+CustomTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+CustomTrigger refers to the specification of the custom trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serverURL</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerURL is the url of the gRPC server that executes custom trigger
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>secure</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+Secure refers to type of the connection between sensor to custom trigger
+gRPC
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>certFilePath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CertFilePath is path to the cert file within sensor for secure
+connection between sensor and custom trigger gRPC server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverNameOverride</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerNameOverride for the secure connection between sensor and custom
+trigger gRPC server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>triggerBody</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+TriggerBody is the custom trigger resource specification that custom
+trigger gRPC server knows how to interpret.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved custom
+trigger trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.DataFilter">
 
 DataFilter
@@ -3159,7 +3360,7 @@ Kubernetes core/v1.PodTemplateSpec </a> </em>
 <p>
 
 Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
 
 </p>
 
@@ -3524,7 +3725,7 @@ Kubernetes core/v1.PodTemplateSpec </a> </em>
 <p>
 
 Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
 
 </p>
 
@@ -4484,6 +4685,7 @@ TriggerParameter
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger">AWSLambdaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
+<a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
@@ -5163,10 +5365,36 @@ with with on-the-fly constructable payload.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 AWSLambda refers to the trigger designed to invoke AWS Lambda function
 with with on-the-fly constructable payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>customTrigger</code></br> <em>
+<a href="#argoproj.io/v1alpha1.CustomTrigger"> CustomTrigger </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+CustomTrigger refers to the trigger designed to connect to a gRPC
+trigger server and execute a custom trigger.
 
 </p>
 
@@ -5274,6 +5502,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>3f6eb5d</code>. </em>
+commit <code>95e393b</code>. </em>
 
 </p>

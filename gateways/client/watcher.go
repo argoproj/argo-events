@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
@@ -31,7 +30,7 @@ import (
 )
 
 // WatchGatewayEventSources watches change in event source for the gateway
-func (gatewayContext *GatewayContext) WatchGatewayEventSources(ctx context.Context) (cache.Controller, error) {
+func (gatewayContext *GatewayContext) WatchGatewayEventSources() cache.Controller {
 	source := gatewayContext.newEventSourceWatch(gatewayContext.eventSourceRef)
 	_, controller := cache.NewInformer(
 		source,
@@ -57,9 +56,7 @@ func (gatewayContext *GatewayContext) WatchGatewayEventSources(ctx context.Conte
 				}
 			},
 		})
-
-	go controller.Run(ctx.Done())
-	return controller, nil
+	return controller
 }
 
 // newEventSourceWatch creates a new event source watcher
@@ -94,7 +91,7 @@ func (gatewayContext *GatewayContext) newEventSourceWatch(eventSourceRef *v1alph
 }
 
 // WatchGatewayUpdates watches for changes in the gateway resource
-func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (cache.Controller, error) {
+func (gatewayContext *GatewayContext) WatchGatewayUpdates() cache.Controller {
 	source := gatewayContext.newGatewayWatch(gatewayContext.name)
 	_, controller := cache.NewInformer(
 		source,
@@ -110,9 +107,7 @@ func (gatewayContext *GatewayContext) WatchGatewayUpdates(ctx context.Context) (
 				}
 			},
 		})
-
-	go controller.Run(ctx.Done())
-	return controller, nil
+	return controller
 }
 
 // newGatewayWatch creates a new gateway watcher

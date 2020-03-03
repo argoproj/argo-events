@@ -19,6 +19,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -28,7 +30,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/connectivity"
-	"io"
 )
 
 // populateEventSourceContexts sets up the contexts for event sources
@@ -38,8 +39,6 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 		gatewayContext.logger.WithField("event-source-name", name).Errorln("failed to marshal the event source value, won't process it")
 		return
 	}
-
-	fmt.Printf("%s\n", string(body))
 
 	hashKey := common.Hasher(name + string(body))
 
@@ -83,7 +82,10 @@ func (gatewayContext *GatewayContext) populateEventSourceContexts(name string, v
 // and although the event sources are actually same, this method will treat them as different event sources.
 // old event sources - event sources to be deactivate
 // new event sources - new event sources to activate
-func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) (staleEventSources []string, newEventSources []string) {
+func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[string]*EventSourceContext) ([]string, []string) {
+	var staleEventSources []string
+	var newEventSources []string
+
 	var currentEventSources []string
 	var updatedEventSources []string
 
@@ -123,7 +125,7 @@ func (gatewayContext *GatewayContext) diffEventSources(eventSourceContexts map[s
 			swapped = true
 		}
 	}
-	return
+	return staleEventSources, newEventSources
 }
 
 // activateEventSources activate new event sources
@@ -260,13 +262,18 @@ func (gatewayContext *GatewayContext) deactivateEventSources(eventSourceNames []
 		eventSource.cancel()
 		if err := eventSource.conn.Close(); err != nil {
 			logger.WithField(common.LabelEventSource, eventSource.source.Name).WithError(err).Errorln("failed to close client connection")
+			continue
 		}
+		logger.WithField(common.LabelEventSource, eventSource.source.Name).Infoln("event source stopped")
 	}
 }
 
 // syncEventSources syncs active event-sources and the updated ones
 func (gatewayContext *GatewayContext) syncEventSources(eventSource *eventSourceV1Alpha1.EventSource) error {
-	eventSourceContexts := gatewayContext.initEventSourceContexts(eventSource)
+	eventSourceContexts, err := gatewayContext.initEventSourceContexts(eventSource)
+	if err != nil {
+		return err
+	}
 
 	staleEventSources, newEventSources := gatewayContext.diffEventSources(eventSourceContexts)
 	gatewayContext.logger.WithField(common.LabelEventSource, staleEventSources).Infoln("deleted event sources")
@@ -278,12 +285,17 @@ func (gatewayContext *GatewayContext) syncEventSources(eventSource *eventSourceV
 	// start new event sources
 	gatewayContext.activateEventSources(eventSourceContexts, newEventSources)
 
+	gatewayContext.eventSourceContexts = eventSourceContexts
+
 	return nil
 }
 
 // initEventSourceContext creates an internal representation of event sources.
-func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *eventSourceV1Alpha1.EventSource) map[string]*EventSourceContext {
+// It returns an error if the Gateway is set in such a way
+// that it wouldn't pick up any known Event Source.
+func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *eventSourceV1Alpha1.EventSource) (map[string]*EventSourceContext, error) {
 	eventSourceContexts := make(map[string]*EventSourceContext)
+	var err error
 
 	switch gatewayContext.gateway.Spec.Type {
 	case apicommon.SNSEvent:
@@ -378,7 +390,9 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 		for key, value := range eventSource.Spec.Generic {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
+	default:
+		err = fmt.Errorf("gateway with type %s is invalid", gatewayContext.gateway.Spec.Type)
 	}
 
-	return eventSourceContexts
+	return eventSourceContexts, err
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/store"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
@@ -55,8 +56,19 @@ func GetAWSSessionWithoutCreds(region string) (*session.Session, error) {
 	})
 }
 
+func GetAWSAssumeRoleCreds(roleARN, region string) (*session.Session, error) {
+	sess := session.Must(session.NewSession())
+	creds := stscreds.NewCredentials(sess, roleARN)
+	return GetAWSSession(creds, region)
+}
+
 // CreateAWSSession based on credentials settings return a aws session
-func CreateAWSSession(client kubernetes.Interface, namespace, region string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+func CreateAWSSession(client kubernetes.Interface, namespace, region string, roleARN string, accessKey *corev1.SecretKeySelector, secretKey *corev1.SecretKeySelector) (*session.Session, error) {
+
+	if roleARN != "" {
+		return GetAWSAssumeRoleCreds(roleARN, region)
+	}
+
 	if accessKey == nil && secretKey == nil {
 		return GetAWSSessionWithoutCreds(region)
 	}

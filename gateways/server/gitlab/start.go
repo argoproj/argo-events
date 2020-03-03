@@ -67,7 +67,7 @@ func (router *Router) GetRoute() *webhook.Route {
 
 // HandleRoute handles incoming requests on the route
 func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Request) {
-	route := router.route
+	route := router.GetRoute()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{
@@ -78,7 +78,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 	logger.Info("received a request, processing it...")
 
-	if route.Active {
+	if !route.Active {
 		logger.Info("endpoint is not active, won't process the request")
 		common.SendErrorResponse(writer, "inactive endpoint")
 		return
@@ -136,7 +136,7 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("configuring the type of the GitLab event the hook must register against...")
-	elem := reflect.ValueOf(opt).Elem().FieldByName(string(router.gitlabEventSource.Event))
+	elem := reflect.ValueOf(opt).Elem().FieldByName(router.gitlabEventSource.Event)
 	if ok := elem.IsValid(); !ok {
 		return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
 	}

@@ -22,6 +22,7 @@ import (
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -44,6 +45,8 @@ type SensorContext struct {
 	ControllerInstanceID string
 	// Updated indicates update to Sensor resource
 	Updated bool
+	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
+	customTriggerClients map[string]*grpc.ClientConn
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -56,5 +59,6 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
+		customTriggerClients: make(map[string]*grpc.ClientConn),
 	}
 }

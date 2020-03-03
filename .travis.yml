@@ -13,7 +13,6 @@ cache:
 env:
   global:
     - DOCKER_PUSH=false
-    - IMAGE_TAG=v0.11
     - PATH=$HOME/bin:$PATH
 
 before_install:
@@ -37,12 +36,6 @@ install:
   - dep ensure -vendor-only
 
 script:
+  - make test
   - make all
   - make test coverage
-
-deploy:
-  provider: releases
-  api_key: $GITHUB_OAUTH_TOKEN
-  skip_cleanup: true
-  on:
-    tags: true

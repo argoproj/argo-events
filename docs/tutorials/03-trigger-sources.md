@@ -26,7 +26,7 @@ The specification for the Git source is available [here](https://github.com/argo
 
         kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
 
-5. Create a sensor with the git trigger source and refer it to the `hello world` worklfow stored
+5. Create a sensor with the git trigger source and refer it to the `hello world` workflow stored
    on the Argo Git project
 
         kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml 

@@ -17,7 +17,6 @@ limitations under the License.
 package stripe
 
 import (
-	"encoding/json"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/sirupsen/logrus"
@@ -40,14 +39,4 @@ type Router struct {
 	stripeEventSource *v1alpha1.StripeEventSource
 	// k8sClient is the Kubernetes client
 	k8sClient kubernetes.Interface
-}
-
-// Response describes the event dispatched by the gateway
-type Response struct {
-	// Id of the stripe event
-	Id string `json:"id"`
-	// EventType refers to stripe event type
-	EventType string `json:"eventType"`
-	// Data refers to event data
-	Data json.RawMessage `json:"data"`
 }

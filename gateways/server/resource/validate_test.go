@@ -29,7 +29,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEventListener_ValidateEventSource(t *testing.T) {
+func TestValidateEventSource(t *testing.T) {
 	listener := &EventListener{
 		Logger: common.NewArgoEventsLogger(),
 	}
@@ -49,6 +49,7 @@ func TestEventListener_ValidateEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Resource)
 
 	for name, value := range eventSource.Spec.Resource {
 		fmt.Println(name)

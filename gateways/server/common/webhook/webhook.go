@@ -18,17 +18,18 @@ package webhook
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 // NewController returns a webhook controller
 func NewController() *Controller {
 	return &Controller{
-		ActiveRoutes:         make(map[string]*Route),
+		AllRoutes:            make(map[string]*mux.Route),
 		ActiveServerHandlers: make(map[string]*mux.Router),
 		RouteActivateChan:    make(chan Router),
 		RouteDeactivateChan:  make(chan Router),
@@ -44,6 +45,7 @@ func NewRoute(hookContext *Context, logger *logrus.Logger, eventSource *gateways
 		Active:      false,
 		DataCh:      make(chan []byte),
 		StartCh:     make(chan struct{}),
+		StopChan:    make(chan struct{}),
 	}
 }
 
@@ -92,11 +94,17 @@ func startServer(router Router, controller *Controller) {
 		}()
 	}
 
-	// if route is not previously initialized, then assign a router against it
-	if !route.initialized {
-		handler := controller.ActiveServerHandlers[route.Context.Port]
-		handler.HandleFunc(route.Context.Endpoint, router.HandleRoute).Methods(route.Context.Method)
+	handler := controller.ActiveServerHandlers[route.Context.Port]
+
+	routeName := route.Context.Port + route.Context.Endpoint
+
+	r := handler.GetRoute(routeName)
+	if r == nil {
+		r = handler.NewRoute().Name(routeName)
+		r = r.Path(route.Context.Endpoint)
 	}
+
+	r.HandlerFunc(router.HandleRoute)
 
 	Lock.Unlock()
 }
@@ -104,7 +112,6 @@ func startServer(router Router, controller *Controller) {
 // activateRoute activates a route to process incoming requests
 func activateRoute(router Router, controller *Controller) {
 	route := router.GetRoute()
-	endpoint := route.Context.Endpoint
 	// change status of route as a active route
 	controller.RouteActivateChan <- router
 
@@ -117,16 +124,15 @@ func activateRoute(router Router, controller *Controller) {
 		map[string]interface{}{
 			common.LabelEventSource: route.EventSource.Name,
 			common.LabelPort:        route.Context.Port,
-			common.LabelEndpoint:    endpoint,
+			common.LabelEndpoint:    route.Context.Endpoint,
 		})
 
-	log.Info("activating the route...")
 	route.Active = true
 	log.Info("route is activated")
 }
 
-// manageRouteStream consumes data from route's data channel and stops the processing when the event source is stopped/removed
-func manageRouteStream(router Router, controller *Controller, eventStream gateways.Eventing_StartEventSourceServer) error {
+// manageRouteChannels consumes data from route's data channel and stops the processing when the event source is stopped/removed
+func manageRouteChannels(router Router, eventStream gateways.Eventing_StartEventSourceServer) {
 	route := router.GetRoute()
 
 	for {
@@ -139,13 +145,12 @@ func manageRouteStream(router Router, controller *Controller, eventStream gatewa
 			})
 			if err != nil {
 				route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).WithError(err).Error("failed to send event")
-				return err
+				continue
 			}
 
-		case <-eventStream.Context().Done():
-			route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("connection is closed by client")
-			controller.RouteDeactivateChan <- router
-			return nil
+		case <-route.StopChan:
+			route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Infoln("event source is stopped")
+			return
 		}
 	}
 }
@@ -169,6 +174,13 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 		return err
 	}
 
+	logger.Info("listening to payloads for the route...")
+	go manageRouteChannels(router, eventStream)
+
+	defer func() {
+		route.StopChan <- struct{}{}
+	}()
+
 	logger.Info("activating the route...")
 	activateRoute(router, controller)
 
@@ -178,11 +190,11 @@ func ManageRoute(router Router, controller *Controller, eventStream gateways.Eve
 		return err
 	}
 
-	logger.Info("listening to payloads for the route...")
-	if err := manageRouteStream(router, controller, eventStream); err != nil {
-		logger.WithError(err).Error("error occurred in consuming payload from the route")
-		return err
-	}
+	<-eventStream.Context().Done()
+	route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("connection is closed by client")
+
+	route.Logger.WithField(common.LabelEventSource, route.EventSource.Name).Info("marking route as inactive")
+	controller.RouteDeactivateChan <- router
 
 	logger.Info("running operations post route inactivation...")
 	if err := router.PostInactivate(); err != nil {

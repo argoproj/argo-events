@@ -75,7 +75,6 @@ func TestRouteActiveHandler(t *testing.T) {
 }
 
 func TestSlackSignature(t *testing.T) {
-
 	convey.Convey("Given a route that receives a message from Slack", t, func() {
 		router := &Router{
 			route:     webhook.GetFakeRoute(),
@@ -94,7 +93,8 @@ func TestSlackSignature(t *testing.T) {
 			rts := int(time.Now().UTC().UnixNano())
 			hmac := hmac.New(sha256.New, []byte(router.signingSecret))
 			b := strings.Join([]string{"v0", strconv.Itoa(rts), string(payload)}, ":")
-			hmac.Write([]byte(b))
+			_, err := hmac.Write([]byte(b))
+			convey.So(err, convey.ShouldBeNil)
 			hash := hex.EncodeToString(hmac.Sum(nil))
 			genSig := strings.TrimRight(strings.Join([]string{"v0=", hash}, ""), "\n")
 			h.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -118,7 +118,6 @@ func TestSlackSignature(t *testing.T) {
 }
 
 func TestInteractionHandler(t *testing.T) {
-
 	convey.Convey("Given a route that receives an interaction event", t, func() {
 		router := &Router{
 			route:     webhook.GetFakeRoute(),
@@ -158,7 +157,6 @@ func TestInteractionHandler(t *testing.T) {
 }
 
 func TestEventHandler(t *testing.T) {
-
 	convey.Convey("Given a route that receives an event", t, func() {
 		router := &Router{
 			route:     webhook.GetFakeRoute(),
@@ -178,8 +176,7 @@ func TestEventHandler(t *testing.T) {
 }
 `)
 
-			var j json.RawMessage
-			j = event
+			j := json.RawMessage(event)
 			ce := slackevents.EventsAPICallbackEvent{
 				Token:     "Jhj5dZrVaK7ZwHHjRyZWjbDl",
 				Type:      slackevents.CallbackEvent,

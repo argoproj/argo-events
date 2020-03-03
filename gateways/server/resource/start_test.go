@@ -61,9 +61,16 @@ func TestFilter(t *testing.T) {
 		err = mapstructure.Decode(pod, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
-		err = passFilters(&unstructured.Unstructured{
-			Object: outmap,
-		}, resourceEventSource.Filter)
+		err = passFilters(&InformerEvent{
+			Obj:  &unstructured.Unstructured{Object: outmap},
+			Type: "ADD",
+		}, resourceEventSource.Filter, v1alpha1.ADD)
 		convey.So(err, convey.ShouldBeNil)
+
+		err = passFilters(&InformerEvent{
+			Obj:  &unstructured.Unstructured{Object: outmap},
+			Type: "ADD",
+		}, resourceEventSource.Filter, v1alpha1.UPDATE)
+		convey.So(err, convey.ShouldNotBeNil)
 	})
 }

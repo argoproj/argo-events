@@ -18,9 +18,11 @@ package redis
 
 import (
 	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/go-redis/redis"
@@ -37,47 +39,42 @@ type EventListener struct {
 	K8sClient kubernetes.Interface
 }
 
-// RedisMessage holds the message received from Redis PubSub.
-type RedisMessage struct {
-	Channel string `json:"channel"`
-	Pattern string `json:"pattern"`
-	Payload string `json:"payload"`
-}
-
 // StartEventSource starts an event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	channels := server.NewChannels()
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens events published by redis
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
 	var redisEventSource *v1alpha1.RedisEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &redisEventSource); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
+	logger.Infoln("retrieving password if it has been configured...")
 	password, err := listener.getPassword(redisEventSource)
 	if err != nil {
-		errorCh <- err
-		return
+		return err
 	}
 
-	logger.Infoln("setting up a redis client")
-
+	logger.Infoln("setting up a redis client...")
 	client := redis.NewClient(&redis.Options{
 		Addr:     redisEventSource.HostAddress,
 		Password: password,
@@ -85,15 +82,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 	})
 
 	if status := client.Ping(); status.Err() != nil {
-		errorCh <- errors.Wrapf(status.Err(), "failed to connect to host %s and db %d", redisEventSource.HostAddress, redisEventSource.DB)
-		return
+		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, eventSource.Name)
 	}
 
 	pubsub := client.Subscribe(redisEventSource.Channels...)
 	// Wait for confirmation that subscription is created before publishing anything.
 	if _, err := pubsub.Receive(); err != nil {
-		errorCh <- errors.Wrapf(err, "failed to receive the subscription confirmation for event source %s", eventSource.Name)
-		return
+		return errors.Wrapf(err, "failed to receive the subscription confirmation for event source %s", eventSource.Name)
 	}
 
 	// Go channel which receives messages.
@@ -103,25 +98,25 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		select {
 		case message := <-ch:
 			logger.WithField("channel", message.Channel).Infoln("received a message")
-			data := RedisMessage{
+			eventData := &events.RedisEventData{
 				Channel: message.Channel,
 				Pattern: message.Pattern,
-				Payload: message.Payload,
+				Body:    message.Payload,
 			}
-			body, err := json.Marshal(&data)
+			eventBody, err := json.Marshal(&eventData)
 			if err != nil {
-				logger.WithError(err).WithField("channel", message.Channel).Errorln("failed to marshal the message")
+				logger.WithError(err).WithField("channel", message.Channel).Errorln("failed to marshal the event data, rejecting the event...")
 				continue
 			}
-			logger.WithField("channel", message.Channel).Infoln("dispatching message on the data channel")
-			dataCh <- body
+			logger.WithField("channel", message.Channel).Infoln("dispatching th event on the data channel...")
+			channels.Data <- eventBody
 
-		case <-doneCh:
-			logger.Infoln("event source is stopped. Unsubscribe the subscription")
+		case <-channels.Done:
+			logger.Infoln("event source is stopped. unsubscribing the subscription")
 			if err := pubsub.Unsubscribe(redisEventSource.Channels...); err != nil {
 				logger.WithError(err).Errorln("failed to unsubscribe")
-				return
 			}
+			return nil
 		}
 	}
 }

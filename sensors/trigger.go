@@ -18,7 +18,8 @@ package sensors
 import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	argoworkflow "github.com/argoproj/argo-events/sensors/triggers/argo-workflow"
-	aws_lambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
+	awslambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
+	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/openfaas"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
@@ -51,7 +52,15 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 		return http.NewHTTPTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
 	if trigger.Template.AWSLambda != nil {
-		return aws_lambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		return awslambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+	}
+	if trigger.Template.CustomTrigger != nil {
+		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.customTriggerClients)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
 	}
 	return nil
 }

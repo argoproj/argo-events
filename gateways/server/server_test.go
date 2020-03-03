@@ -18,7 +18,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -47,7 +46,6 @@ func (f *FakeGRPCStream) SendHeader(metadata.MD) error {
 }
 
 func (f *FakeGRPCStream) SetTrailer(metadata.MD) {
-	return
 }
 
 func (f *FakeGRPCStream) Context() context.Context {
@@ -64,36 +62,23 @@ func (f *FakeGRPCStream) RecvMsg(m interface{}) error {
 
 func TestHandleEventsFromEventSource(t *testing.T) {
 	convey.Convey("Given a gateway server, handle events from an event source", t, func() {
-		dataCh := make(chan []byte)
-		errorCh := make(chan error)
-		doneCh := make(chan struct{})
 		logger := common.NewArgoEventsLogger()
-
+		channels := &Channels{
+			Data: make(chan []byte),
+			Stop: make(chan struct{}),
+			Done: make(chan struct{}),
+		}
 		ctx, cancel := context.WithCancel(context.Background())
 
 		convey.Convey("handle data", func() {
 			es := &FakeGRPCStream{
 				Ctx: ctx,
 			}
-			go HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, logger)
-			dataCh <- []byte("hello")
+			go HandleEventsFromEventSource("fake", es, channels, logger)
+			channels.Data <- []byte("hello")
 			time.Sleep(1 * time.Second)
 			cancel()
 			convey.So(string(es.SentData.Payload), convey.ShouldEqual, "hello")
-		})
-
-		convey.Convey("handle error", func() {
-			es := &FakeGRPCStream{
-				Ctx: ctx,
-			}
-			errorCh2 := make(chan error)
-			go func() {
-				err := HandleEventsFromEventSource("fake", es, dataCh, errorCh, doneCh, logger)
-				errorCh2 <- err
-			}()
-			errorCh <- fmt.Errorf("fake error")
-			err := <-errorCh2
-			convey.So(err.Error(), convey.ShouldEqual, "fake error")
 		})
 	})
 }

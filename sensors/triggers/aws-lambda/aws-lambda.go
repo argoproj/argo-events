@@ -63,7 +63,7 @@ func (t *AWSLambdaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, reso
 		return nil, errors.Wrap(err, "failed to marshal the aws lamda trigger resource")
 	}
 	parameters := t.Trigger.Template.AWSLambda.Parameters
-	if parameters != nil && len(parameters) > 0 {
+	if parameters != nil {
 		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, t.Trigger.Template.AWSLambda.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, err
@@ -88,27 +88,12 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("payload parameters are not specified")
 	}
 
-	payload := make(map[string][]byte)
-
-	events := triggers.ExtractEvents(t.Sensor, trigger.Payload)
-	if events == nil {
-		return nil, errors.New("payload can't be constructed as there are not events to extract data from")
-	}
-
-	for _, parameter := range trigger.Payload {
-		value, err := triggers.ResolveParamValue(parameter.Src, events)
-		if err != nil {
-			return nil, err
-		}
-		payload[parameter.Dest] = []byte(value)
-	}
-
-	payloadBody, err := json.Marshal(payload)
+	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal payload")
+		return nil, err
 	}
 
-	awsSession, err := commonaws.CreateAWSSession(t.K8sClient, trigger.Namespace, trigger.Region, trigger.AccessKey, trigger.SecretKey)
+	awsSession, err := commonaws.CreateAWSSession(t.K8sClient, trigger.Namespace, trigger.Region, "", trigger.AccessKey, trigger.SecretKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create a AWS session")
 	}
@@ -117,7 +102,7 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 
 	response, err := client.Invoke(&lambda.InvokeInput{
 		FunctionName: &trigger.FunctionName,
-		Payload:      payloadBody,
+		Payload:      payload,
 	})
 	if err != nil {
 		return nil, err

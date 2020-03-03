@@ -140,7 +140,8 @@ func TestInitEventSourceContexts(t *testing.T) {
 		fmt.Println("server is stopped")
 	}()
 
-	contexts := gatewayContext.initEventSourceContexts(eventSource)
+	contexts, err := gatewayContext.initEventSourceContexts(eventSource)
+	assert.NoError(t, err)
 	assert.NotNil(t, contexts)
 	for _, esContext := range contexts {
 		assert.Equal(t, "first-webhook", esContext.source.Name)

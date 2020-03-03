@@ -63,12 +63,12 @@ func main() {
 	ctx.updateSubscriberClients()
 
 	// watch updates to gateway resource
-	if _, err := ctx.WatchGatewayUpdates(context.Background()); err != nil {
-		panic(err)
-	}
+	gwWatcher := ctx.WatchGatewayUpdates()
+	go gwWatcher.Run(context.Background().Done())
+
 	// watch for event source updates
-	if _, err := ctx.WatchGatewayEventSources(context.Background()); err != nil {
-		panic(err)
-	}
+	esWatcher := ctx.WatchGatewayEventSources()
+	go esWatcher.Run(context.Background().Done())
+
 	select {}
 }

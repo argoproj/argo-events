@@ -23,9 +23,11 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
@@ -42,71 +44,78 @@ type EventListener struct {
 
 // StartEventSource activates an event source and streams back events
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
-	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("activating the event source...")
+	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	channels := server.NewChannels()
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
+
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
+
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens to minio bucket notifications
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing minio event source...")
-
 	var minioEventSource *apicommon.S3Artifact
 	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
 	}
-
-	logger.Info("started processing the event source...")
 
 	logger.Info("retrieving access and secret key...")
 	accessKey, err := store.GetSecrets(listener.K8sClient, listener.Namespace, minioEventSource.AccessKey.Name, minioEventSource.AccessKey.Key)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to retrieve the access key for event source %s", eventSource.Name)
 	}
 	secretKey, err := store.GetSecrets(listener.K8sClient, listener.Namespace, minioEventSource.SecretKey.Name, minioEventSource.SecretKey.Key)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to retrieve the secret key for event source %s", eventSource.Name)
 	}
 
 	logger.Infoln("setting up a minio client...")
 	minioClient, err := minio.New(minioEventSource.Endpoint, accessKey, secretKey, !minioEventSource.Insecure)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to create a client for event source %s", eventSource.Name)
 	}
 
 	prefix, suffix := getFilters(minioEventSource)
 
+	doneCh := make(chan struct{})
+
 	logger.WithField("bucket-name", minioEventSource.Bucket.Name).Info("started listening to bucket notifications...")
 	for notification := range minioClient.ListenBucketNotification(minioEventSource.Bucket.Name, prefix, suffix, minioEventSource.Events, doneCh) {
 		if notification.Err != nil {
-			errorCh <- notification.Err
-			return
+			logger.WithError(notification.Err).Errorln("invalid notification")
+			continue
 		}
 
-		logger.Infoln("parsing notification from minio...")
-		payload, err := json.Marshal(notification.Records[0])
+		eventData := &events.MinioEventData{Notification: notification.Records}
+		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
-			errorCh <- err
-			return
+			logger.WithError(notification.Err).Errorln("failed to marshal the event data, rejecting the event...")
+			continue
 		}
 
-		logger.Infoln("dispatching notification on data channel...")
-		dataCh <- payload
+		logger.Infoln("dispatching the event on data channel...")
+		channels.Data <- eventBytes
 	}
+
+	<-channels.Done
+	doneCh <- struct{}{}
+
+	logger.Infoln("event source is stopped")
+	return nil
 }
 
 func getFilters(eventSource *apicommon.S3Artifact) (string, string) {

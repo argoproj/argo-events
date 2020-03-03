@@ -143,7 +143,7 @@ func filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error
 		return false, fmt.Errorf("nil Event")
 	}
 	payload := event.Data
-	if payload == nil || len(payload) == 0 {
+	if payload == nil {
 		return true, nil
 	}
 	var js *json.RawMessage

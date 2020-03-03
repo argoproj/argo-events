@@ -17,9 +17,12 @@ limitations under the License.
 package amqp
 
 import (
+	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -36,33 +39,35 @@ type EventListener struct {
 // StartEventSource starts an event source
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
 	listener.Logger.WithField(common.LabelEventSource, eventSource.Name).Infoln("started processing the event source...")
+	channels := server.NewChannels()
 
-	dataCh := make(chan []byte)
-	errorCh := make(chan error)
-	doneCh := make(chan struct{}, 1)
+	go server.HandleEventsFromEventSource(eventSource.Name, eventStream, channels, listener.Logger)
 
-	go listener.listenEvents(eventSource, dataCh, errorCh, doneCh)
+	defer func() {
+		channels.Stop <- struct{}{}
+	}()
 
-	return server.HandleEventsFromEventSource(eventSource.Name, eventStream, dataCh, errorCh, doneCh, listener.Logger)
+	if err := listener.listenEvents(eventSource, channels); err != nil {
+		listener.Logger.WithField(common.LabelEventSource, eventSource.Name).WithError(err).Errorln("failed to listen to events")
+		return err
+	}
+
+	return nil
 }
 
 // listenEvents listens to events from amqp server
-func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, dataCh chan []byte, errorCh chan error, doneCh chan struct{}) {
-	defer server.Recover(eventSource.Name)
-
+func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, channels *server.Channels) error {
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing the event source...")
 	var amqpEventSource *v1alpha1.AMQPEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &amqpEventSource); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
-
-	var conn *amqplib.Connection
 
 	logger.Infoln("dialing connection...")
 	backoff := common.GetConnectionBackoff(amqpEventSource.ConnectionBackoff)
+	var conn *amqplib.Connection
 	if err := server.Connect(backoff, func() error {
 		var err error
 		conn, err = amqplib.Dial(amqpEventSource.URL)
@@ -71,36 +76,57 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, d
 		}
 		return nil
 	}); err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to connect to amqp broker for the event source %s", eventSource.Name)
 	}
 
 	logger.Infoln("opening the server channel...")
 	ch, err := conn.Channel()
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to open the channel for the event source %s", eventSource.Name)
 	}
 
 	logger.Infoln("setting up the delivery channel...")
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
-		errorCh <- err
-		return
+		return errors.Wrapf(err, "failed to get the delivery for the event source %s", eventSource.Name)
 	}
 
 	logger.Info("listening to messages on channel...")
 	for {
 		select {
 		case msg := <-delivery:
+			logger.WithField("message-id", msg.MessageId).Infoln("received the message")
+			body := &events.AMQPEventData{
+				ContentType:     msg.ContentType,
+				ContentEncoding: msg.ContentEncoding,
+				DeliveryMode:    int(msg.DeliveryMode),
+				Priority:        int(msg.Priority),
+				CorrelationId:   msg.CorrelationId,
+				ReplyTo:         msg.ReplyTo,
+				Expiration:      msg.Expiration,
+				MessageId:       msg.MessageId,
+				Timestamp:       msg.Timestamp.String(),
+				Type:            msg.Type,
+				AppId:           msg.AppId,
+				Exchange:        msg.Exchange,
+				RoutingKey:      msg.RoutingKey,
+				Body:            msg.Body,
+			}
+
+			bodyBytes, err := json.Marshal(body)
+			if err != nil {
+				logger.WithError(err).WithField("message-id", msg.MessageId).Errorln("failed to marshal the message")
+				continue
+			}
+
 			logger.Infoln("dispatching event on data channel...")
-			dataCh <- msg.Body
-		case <-doneCh:
+			channels.Data <- bodyBytes
+		case <-channels.Done:
 			err = conn.Close()
 			if err != nil {
 				logger.WithError(err).Info("failed to close connection")
 			}
-			return
+			return nil
 		}
 	}
 }

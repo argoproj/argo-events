@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.12
+          image: argoproj/gateway-client:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: hdfs-events
-          image: argoproj/hdfs-gateway:v0.12
+          image: argoproj/hdfs-gateway:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/hdfs-gateway"]
       serviceAccountName: argo-events-sa

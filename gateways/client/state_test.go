@@ -97,7 +97,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 			},
 		}
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
-			"1234": v1alpha1.NodeStatus{
+			"1234": {
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
 				Name:    "fake",

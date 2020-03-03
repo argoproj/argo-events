@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	wfv1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -13,10 +12,6 @@ import (
 type ConfigMapReader struct {
 	kubeClientset     kubernetes.Interface
 	configmapArtifact *v1alpha1.ConfigmapArtifact
-}
-
-type configmapWf struct {
-	wf wfv1.Workflow
 }
 
 // NewConfigMapReader returns a new configmap reader

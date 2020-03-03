@@ -17,7 +17,6 @@ limitations under the License.
 package gateway
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
@@ -32,7 +31,7 @@ import (
 )
 
 // watches configuration for gateway controller
-func (c *Controller) watchControllerConfigMap(ctx context.Context) (cache.Controller, error) {
+func (c *Controller) watchControllerConfigMap() cache.Controller {
 	c.logger.Infoln("watching gateway-controller config map updates")
 	source := c.newControllerConfigMapWatch()
 	_, controller := cache.NewInformer(
@@ -59,9 +58,7 @@ func (c *Controller) watchControllerConfigMap(ctx context.Context) (cache.Contro
 				}
 			},
 		})
-
-	go controller.Run(ctx.Done())
-	return controller, nil
+	return controller
 }
 
 // creates a new config map watcher

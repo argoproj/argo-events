@@ -1,6 +1,6 @@
 # Introduction
 
-The tutorials we will cover every aspect of Argo Events and demonstrate how you 
+In the tutorials, we will cover every aspect of Argo Events and demonstrate how you 
 can leverage these features to build an event driven workflow pipeline. All the concepts you will learn
 in this tutorial and subsequent ones can be applied to any type of gateway.
 
@@ -18,17 +18,17 @@ HTTP and executes an Argo workflow.
 
 * Create the webhook event source.
 
-        kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
   
   
 * Create the webhook gateway.
 
-        kubectl -n argo-events create -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
 
 
 * Create the webhook sensor.
 
-        kubectl -n argo-events create -f https://github.com/argoproj/argo-events/tree/master/examples/sensors/webhook.yaml
+        kubectl -n argo-events apply -f https://github.com/argoproj/argo-events/tree/master/examples/sensors/webhook.yaml
   
 If the commands are executed successfully, the gateway and sensor pods will get created. You will
 also notice that a service is created for both the gateway and sensor. 
@@ -36,7 +36,7 @@ also notice that a service is created for both the gateway and sensor.
 * Expose the gateway pod via Ingress, OpenShift Route
 or port forward to consume requests over HTTP.
 
-        kubectl -n port-forward <gateway-pod-name> 12000:12000
+        kubectl -n argo-events port-forward <gateway-pod-name> 12000:12000
 
 * Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 

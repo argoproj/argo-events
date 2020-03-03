@@ -57,17 +57,16 @@ type Route struct {
 	Active bool
 	// data channel to receive data on this endpoint
 	DataCh chan []byte
-	// initialized indicates whether the route has been initialized and there exist a http router
-	// to process incoming requests
-	initialized bool
+	// Stop channel to signal the end of the event source.
+	StopChan chan struct{}
 }
 
 // Controller controls the active servers and endpoints
 type Controller struct {
 	// ActiveServerHandlers keeps track of currently active mux/router for the http servers.
 	ActiveServerHandlers map[string]*mux.Router
-	// ActiveRoutes keep track of routes that are already registered with server and their status active or inactive
-	ActiveRoutes map[string]*Route
+	// AllRoutes keep track of routes that are already registered with server and their status active or inactive
+	AllRoutes map[string]*mux.Route
 	// RouteActivateChan handles activation of routes
 	RouteActivateChan chan Router
 	// RouteDeactivateChan handles inactivation of routes

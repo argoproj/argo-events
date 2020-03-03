@@ -19,7 +19,6 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 
@@ -27,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateEventSource(t *testing.T) {
@@ -47,6 +47,7 @@ func TestValidateEventSource(t *testing.T) {
 	var eventSource *v1alpha1.EventSource
 	err = yaml.Unmarshal(content, &eventSource)
 	assert.Nil(t, err)
+	assert.NotNil(t, eventSource.Spec.Webhook)
 
 	for name, value := range eventSource.Spec.Webhook {
 		fmt.Println(name)

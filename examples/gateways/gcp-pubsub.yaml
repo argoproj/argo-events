@@ -7,7 +7,7 @@ metadata:
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
 spec:
   replica: 1
-  type: gcp-pubsub
+  type: pubsub
   eventSourceRef:
     name: gcp-pubsub-event-source
   template:
@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.12
+          image: argoproj/gateway-client:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: gcp-pubsub-events
-          image: argoproj/gcp-pubsub-gateway:v0.12
+          image: argoproj/gcp-pubsub-gateway:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/gcp-pubsub-gateway"]
           volumeMounts:

@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.12
+          image: argoproj/sensor:v0.13.0-rc
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
@@ -64,29 +64,29 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                path: image
+                dataKey: image
               dest: spec.templates.0.container.image
       # Apply parameters at the template level.
       parameters:
         - src:
             dependencyName: test-dep
-            path: name
+            dataKey: name
           dest: name
         - src:
             dependencyName: test-dep
-            path: namespace
+            dataKey: namespace
           dest: k8s.namespace
         - src:
             dependencyName: test-dep
-            path: bucket
+            dataKey: bucket
           dest: k8s.source.s3.bucket.name
         - src:
             dependencyName: test-dep
-            path: key
+            dataKey: key
           dest: k8s.source.s3.bucket.key
         - src:
             dependencyName: test-dep
-            path: port
+            dataKey: port
           dest: k8s.source.s3.endpoint
           # Append the port to the existing source.s3.endpoint value
           operation: append
