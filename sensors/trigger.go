@@ -42,18 +42,28 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	if trigger.Template.K8s != nil {
 		return standardk8s.NewStandardK8sTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
+
 	if trigger.Template.ArgoWorkflow != nil {
 		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
+
 	if trigger.Template.OpenFaas != nil {
-		return openfaas.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := openfaas.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.openfaasHttpClient)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
 	}
+
 	if trigger.Template.HTTP != nil {
 		return http.NewHTTPTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
+
 	if trigger.Template.AWSLambda != nil {
 		return awslambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
+
 	if trigger.Template.CustomTrigger != nil {
 		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.customTriggerClients)
 		if err != nil {

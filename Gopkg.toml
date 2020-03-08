@@ -14,7 +14,7 @@ required = [
 
 [[override]]
   name = "k8s.io/code-generator"
-  branch = "release-1.15"
+  version = "v0.17.3"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
@@ -125,15 +125,15 @@ required = [
   version = "v1.0.8"
 
 [[override]]
-  branch = "release-1.15"
+  version = "v0.17.3"
   name = "k8s.io/api"
 
 [[override]]
-  branch = "release-1.15"
+  version = "v0.17.3"
   name = "k8s.io/apimachinery"
 
 [[override]]
-  version = "v12.0.0"
+  version = "v0.17.3"
   name = "k8s.io/client-go"
 
 [prune]
@@ -142,6 +142,14 @@ required = [
 
   [[prune.project]]
     name = "k8s.io/code-generator"
+    unused-packages = false
+
+  [[prune.project]]
+    name = "k8s.io/api"
+    unused-packages = false
+
+  [[prune.project]]
+    name = "k8s.io/apimachinery"
     unused-packages = false
 
   [[prune.project]]
