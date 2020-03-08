@@ -73,7 +73,9 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("setting up aws session...")
 
 	var awsSession *session.Session
-	awsSession, err := commonaws.CreateAWSSession(listener.K8sClient, sqsEventSource.Namespace, sqsEventSource.Region, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
+
+	awsSession, err := commonaws.CreateAWSSession(listener.K8sClient, sqsEventSource.Namespace, sqsEventSource.Region, sqsEventSource.RoleARN, sqsEventSource.AccessKey, sqsEventSource.SecretKey)
+
 	if err != nil {
 		return errors.Wrapf(err, "failed to create aws session for %s", eventSource.Name)
 	}
