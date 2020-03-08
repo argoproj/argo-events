@@ -130,6 +130,17 @@
   version = "v2.6.1"
 
 [[projects]]
+  digest = "1:f50c4e59aad56c9f234eeb3867112bd2f7fd7859d55627ea942e16df32f85647"
+  name = "github.com/argoproj/argo-rollouts"
+  packages = [
+    "pkg/apis/rollouts",
+    "pkg/apis/rollouts/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "e78453e51a98914cc07b40dba7efcfb60b13a3e1"
+  version = "v0.7.2"
+
+[[projects]]
   branch = "master"
   digest = "1:84acc62d1b78e1032e98d10bb5e63831f8961a59de68b7a0e9557595b52f8d4a"
   name = "github.com/aws/aws-sdk-go"
@@ -813,28 +824,23 @@
   version = "v1.0.8"
 
 [[projects]]
-  digest = "1:208f4dd7e6312b7d56a810a0fc98e10f9c2d239409d058f46411f59c496e53c6"
+  digest = "1:23c090b7e676e1bb49ab9a87562156fd49d6f4cd28eabb1f23010695fbd1a325"
   name = "github.com/openfaas-incubator/connector-sdk"
   packages = ["types"]
   pruneopts = "UT"
-  revision = "d4baf95d4c62f6295c5d4af1d36bb2b9d03a32d4"
-  version = "0.4.1"
+  revision = "df5d76475412b74c3516ba912ae4522793780994"
+  version = "0.5.5"
 
 [[projects]]
-  digest = "1:3f69624cb4ae8ab815a672f7d169d64786ee027a9d42eefab3c9d4e9debe0750"
-  name = "github.com/openfaas/faas"
-  packages = ["gateway/requests"]
-  pruneopts = "UT"
-  revision = "a65df4795bc66147c41161c48bfd4c72f60c7434"
-  version = "0.9.14"
-
-[[projects]]
-  digest = "1:deb76da5396c9f641ddea9ca79e31a14bdb09c787cdfda90488768b7539b1fd6"
+  digest = "1:5ef12e7154e453638378dfc853ca53d2d775aee2d7a6da535df639d5933b39c7"
   name = "github.com/openfaas/faas-provider"
-  packages = ["auth"]
+  packages = [
+    "auth",
+    "types",
+  ]
   pruneopts = "UT"
-  revision = "220324e98f5db5aa61f02d1ab13f03e91310796c"
-  version = "0.8.1"
+  revision = "d6579bdcf7c85f4d01f398d65ea0cab37e9633d0"
+  version = "0.13.3"
 
 [[projects]]
   digest = "1:0d21409d74019b65b488ecb02bed6d0f539d8d8563b86aac5734dfdbdf860cdf"
@@ -848,12 +854,12 @@
   version = "v2.4.1"
 
 [[projects]]
-  digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "614d223910a179a466c1767a985424175c39b465"
-  version = "v0.9.1"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -2028,6 +2034,7 @@
     "github.com/Azure/azure-event-hubs-go",
     "github.com/Knetic/govaluate",
     "github.com/Shopify/sarama",
+    "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/credentials",
