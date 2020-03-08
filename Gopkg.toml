@@ -73,6 +73,10 @@ required = [
   version = "v2.6.1"
 
 [[constraint]]
+  name = "github.com/argoproj/argo-rollouts"
+  version = "v0.7.2"
+
+[[constraint]]
   name = "github.com/Shopify/sarama"
   version = "v1.23.0"
 
