@@ -19,6 +19,7 @@ package types
 import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	openfaas "github.com/openfaas-incubator/connector-sdk/types"
 )
 
 // Notification to update event dependency's state or the sensor resource
@@ -33,4 +34,10 @@ type Notification struct {
 	Sensor *v1alpha1.Sensor
 	// NotificationType for event notification and state update notification
 	NotificationType v1alpha1.NotificationType
+}
+
+// OpenFaasContext holds the context for the openfaas controller context
+type OpenFaasContext struct {
+	Controller openfaas.Controller
+	ResponseCh chan openfaas.InvokerResponse
 }

@@ -19,23 +19,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"net/url"
-	"os"
-	"os/exec"
-	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-)
-
-const (
-	EnvVarOpenFaasGatewayURL = "OPENFAAS_URL"
 )
 
 // OpenFaasTrigger holds the context to invoke OpenFaas functions
@@ -48,16 +40,19 @@ type OpenFaasTrigger struct {
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
 	Logger *logrus.Logger
+	// http client to invoke function.
+	httpClient *http.Client
 }
 
 // NewOpenFaasTrigger returns a new OpenFaas trigger context
-func NewOpenFaasTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *OpenFaasTrigger {
+func NewOpenFaasTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, httpClient *http.Client) (*OpenFaasTrigger, error) {
 	return &OpenFaasTrigger{
-		K8sClient: k8sClient,
-		Sensor:    sensor,
-		Trigger:   trigger,
-		Logger:    logger,
-	}
+		K8sClient:  k8sClient,
+		Sensor:     sensor,
+		Trigger:    trigger,
+		Logger:     logger,
+		httpClient: httpClient,
+	}, nil
 }
 
 func (t *OpenFaasTrigger) FetchResource() (interface{}, error) {
@@ -105,58 +100,47 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	if err := os.Setenv(EnvVarOpenFaasGatewayURL, obj.GatewayURL); err != nil {
-		return nil, errors.Wrapf(err, "failed to set environment variable OPENFAAS_URL to %s", obj.GatewayURL)
-	}
+	username := "admin"
+	password := ""
 
-	if obj.Password != nil {
-		password, err := common.GetSecrets(t.K8sClient, obj.Namespace, obj.Password)
+	openfaastrigger := t.Trigger.Template.OpenFaas
+
+	if openfaastrigger.Username != nil {
+		password, err = common.GetSecrets(t.K8sClient, openfaastrigger.Namespace, openfaastrigger.Username)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", obj.Password.Name, obj.Namespace)
-		}
-
-		cmd := exec.Command("faas", "login", "--password", password)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return nil, errors.Wrap(err, "failed to login using faas client")
+			return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", openfaastrigger.Username.Name, openfaastrigger.Namespace)
 		}
 	}
 
-	functionURL := fmt.Sprintf("%s/function/%s", obj.GatewayURL, obj.FunctionName)
+	if openfaastrigger.Password != nil {
+		password, err = common.GetSecrets(t.K8sClient, openfaastrigger.Namespace, openfaastrigger.Password)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", openfaastrigger.Password.Name, openfaastrigger.Namespace)
+		}
+	}
 
-	parsedURL, err := url.Parse(functionURL)
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/function/%s", openfaastrigger.GatewayURL, openfaastrigger.FunctionName), bytes.NewReader(payload))
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to parse url %s", parsedURL)
+		return nil, errors.Wrapf(err, "failed to construct request for function %s", openfaastrigger.FunctionName)
 	}
+	request.SetBasicAuth(username, password)
 
-	client := http.Client{
-		Timeout: 1 * time.Minute,
-	}
+	t.Logger.WithField("function", openfaastrigger.FunctionName).Infoln("invoking the function...")
 
-	request, err := http.NewRequest(http.MethodPost, parsedURL.String(), bytes.NewBuffer(payload))
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create the function request %s", obj.FunctionName)
-	}
-
-	resp, err := client.Do(request)
-	if err != nil {
-		return nil, errors.Wrapf(err, "function invocation %s failed", obj.FunctionName)
-	}
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to read the response")
-	}
-
-	t.Logger.WithField("body", string(body)).Infoln("response body")
-
-	return body, nil
+	return t.httpClient.Do(request)
 }
 
 // ApplyPolicy applies a policy on trigger execution response if any
 func (t *OpenFaasTrigger) ApplyPolicy(resource interface{}) error {
-	return nil
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
+		return nil
+	}
+	response, ok := resource.(*http.Response)
+	if !ok {
+		return errors.New("failed to interpret the trigger execution response")
+	}
+
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
+
+	return p.ApplyPolicy()
 }

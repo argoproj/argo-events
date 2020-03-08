@@ -21,12 +21,11 @@ import (
 	"hash/fnv"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -372,15 +371,18 @@ type OpenFaasTrigger struct {
 	// +listType=triggerParameters
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
+	// Username refers to the Kubernetes secret that holds the username required to log into the gateway.
+	// +optional
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,4,opt,name=username"`
 	// Password refers to the Kubernetes secret that holds the password required to log into the gateway.
 	// +optional
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,5,opt,name=password"`
 	// Namespace to read the password secret from.
 	// This is required if the password secret selector is specified.
 	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
 	// FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes
-	FunctionName string `json:"functionName" protobuf:"bytes,6,name=functionName"`
+	FunctionName string `json:"functionName" protobuf:"bytes,7,name=functionName"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function

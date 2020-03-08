@@ -19,11 +19,11 @@ package github
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"io/ioutil"
 	"net/http"
 	"testing"
 
+	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/google/go-github/github"
@@ -51,7 +51,8 @@ func TestGetCredentials(t *testing.T) {
 	convey.Convey("Given a kubernetes secret, get credentials", t, func() {
 		secret, err := router.k8sClient.CoreV1().Secrets(router.githubEventSource.Namespace).Create(&corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: secretName,
+				Name:      secretName,
+				Namespace: router.githubEventSource.Namespace,
 			},
 			Data: map[string][]byte{
 				LabelAccessKey: []byte(accessKey),
@@ -77,6 +78,7 @@ func TestGetCredentials(t *testing.T) {
 					Name: "github-access",
 				},
 			},
+			Namespace: "fake",
 		}
 
 		creds, err := router.getCredentials(githubEventSource.APIToken, githubEventSource.Namespace)
