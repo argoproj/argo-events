@@ -16,6 +16,7 @@ limitations under the License.
 package openfaas
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -56,11 +57,11 @@ var sensorObj = &v1alpha1.Sensor{
 
 func getOpenFaasTrigger() *OpenFaasTrigger {
 	return &OpenFaasTrigger{
-		K8sClient:       fake.NewSimpleClientset(),
-		Sensor:          sensorObj.DeepCopy(),
-		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:          common.NewArgoEventsLogger(),
-		OpenFaasContext: nil,
+		K8sClient:  fake.NewSimpleClientset(),
+		Sensor:     sensorObj.DeepCopy(),
+		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:     common.NewArgoEventsLogger(),
+		httpClient: &http.Client{},
 	}
 }
 

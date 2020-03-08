@@ -16,15 +16,15 @@ limitations under the License.
 package openfaas
 
 import (
+	"bytes"
 	"encoding/json"
-	"time"
+	"fmt"
+	"net/http"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/argoproj/argo-events/sensors/types"
-	openfaas "github.com/openfaas-incubator/connector-sdk/types"
-	"github.com/openfaas/faas-provider/auth"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -40,79 +40,18 @@ type OpenFaasTrigger struct {
 	Trigger *v1alpha1.Trigger
 	// Logger to log stuff
 	Logger *logrus.Logger
-	// Controller is the openfaas connector controller
-	OpenFaasContext *types.OpenFaasContext
-}
-
-// ResponseReceiver enables connector to receive results from the
-// function invocation
-type ResponseReceiver struct {
-	ResponseCh chan openfaas.InvokerResponse
-}
-
-// Response is triggered by the controller when a message is
-// received from the function invocation
-func (r ResponseReceiver) Response(res openfaas.InvokerResponse) {
-	r.ResponseCh <- res
+	// http client to invoke function.
+	httpClient *http.Client
 }
 
 // NewOpenFaasTrigger returns a new OpenFaas trigger context
-func NewOpenFaasTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, connectors map[string]*types.OpenFaasContext) (*OpenFaasTrigger, error) {
-	openfaastrigger := trigger.Template.OpenFaas
-
-	if _, ok := connectors[openfaastrigger.GatewayURL]; !ok {
-		var err error
-
-		username := "admin"
-		password := ""
-
-		if openfaastrigger.Username != nil {
-			password, err = common.GetSecrets(k8sClient, openfaastrigger.Namespace, openfaastrigger.Username)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", openfaastrigger.Username.Name, openfaastrigger.Namespace)
-			}
-		}
-
-		if openfaastrigger.Password != nil {
-			password, err = common.GetSecrets(k8sClient, openfaastrigger.Namespace, openfaastrigger.Password)
-			if err != nil {
-				return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", openfaastrigger.Password.Name, openfaastrigger.Namespace)
-			}
-		}
-
-		creds := &auth.BasicAuthCredentials{
-			User:     username,
-			Password: password,
-		}
-
-		config := &openfaas.ControllerConfig{
-			RebuildInterval: time.Millisecond * 1000,
-			GatewayURL:      openfaastrigger.GatewayURL,
-		}
-
-		controller := openfaas.NewController(creds, config)
-
-		responseCh := make(chan openfaas.InvokerResponse)
-
-		receiver := ResponseReceiver{
-			ResponseCh: responseCh,
-		}
-		controller.Subscribe(&receiver)
-
-		controller.BeginMapBuilder()
-
-		connectors[openfaastrigger.GatewayURL] = &types.OpenFaasContext{
-			Controller: controller,
-			ResponseCh: responseCh,
-		}
-	}
-
+func NewOpenFaasTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger, httpClient *http.Client) (*OpenFaasTrigger, error) {
 	return &OpenFaasTrigger{
-		K8sClient:       k8sClient,
-		Sensor:          sensor,
-		Trigger:         trigger,
-		Logger:          logger,
-		OpenFaasContext: connectors[openfaastrigger.GatewayURL],
+		K8sClient:  k8sClient,
+		Sensor:     sensor,
+		Trigger:    trigger,
+		Logger:     logger,
+		httpClient: httpClient,
 	}, nil
 }
 
@@ -161,18 +100,47 @@ func (t *OpenFaasTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	t.OpenFaasContext.Controller.Invoke(t.Trigger.Template.OpenFaas.FunctionName, &payload)
+	username := "admin"
+	password := ""
 
-	t.Logger.WithField("function-name", t.Trigger.Template.OpenFaas.FunctionName).Infoln("invoked the openfaas function")
+	openfaastrigger := t.Trigger.Template.OpenFaas
 
-	response := <-t.OpenFaasContext.ResponseCh
+	if openfaastrigger.Username != nil {
+		password, err = common.GetSecrets(t.K8sClient, openfaastrigger.Namespace, openfaastrigger.Username)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", openfaastrigger.Username.Name, openfaastrigger.Namespace)
+		}
+	}
 
-	t.Logger.WithField("body", string(*response.Body)).Infoln("response body")
+	if openfaastrigger.Password != nil {
+		password, err = common.GetSecrets(t.K8sClient, openfaastrigger.Namespace, openfaastrigger.Password)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", openfaastrigger.Password.Name, openfaastrigger.Namespace)
+		}
+	}
 
-	return response, nil
+	request, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/function/%s", openfaastrigger.GatewayURL, openfaastrigger.FunctionName), bytes.NewReader(payload))
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to construct request for function %s", openfaastrigger.FunctionName)
+	}
+	request.SetBasicAuth(username, password)
+
+	t.Logger.WithField("function", openfaastrigger.FunctionName).Infoln("invoking the function...")
+
+	return t.httpClient.Do(request)
 }
 
 // ApplyPolicy applies a policy on trigger execution response if any
 func (t *OpenFaasTrigger) ApplyPolicy(resource interface{}) error {
-	return nil
+	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
+		return nil
+	}
+	response, ok := resource.(*http.Response)
+	if !ok {
+		return errors.New("failed to interpret the trigger execution response")
+	}
+
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
+
+	return p.ApplyPolicy()
 }

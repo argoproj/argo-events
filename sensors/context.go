@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package sensors
 
 import (
@@ -25,6 +24,8 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"net/http"
+	"time"
 )
 
 // SensorContext contains execution context for Sensor
@@ -47,8 +48,8 @@ type SensorContext struct {
 	Updated bool
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients map[string]*grpc.ClientConn
-	// openfaasConnectors holds the references to the openfaas controller connectors.
-	openfaasConnectors map[string]*types.OpenFaasContext
+	// http client to invoke openfaas functions.
+	openfaasHttpClient *http.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -62,6 +63,8 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
 		customTriggerClients: make(map[string]*grpc.ClientConn),
-		openfaasConnectors:   make(map[string]*types.OpenFaasContext),
+		openfaasHttpClient: &http.Client{
+			Timeout: time.Minute * 5,
+		},
 	}
 }
