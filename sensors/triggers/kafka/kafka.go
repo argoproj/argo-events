@@ -120,7 +120,7 @@ func (t *KafkaTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 
 	resourceBytes, err := json.Marshal(fetchedResource)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to marshal the http trigger resource")
+		return nil, errors.Wrap(err, "failed to marshal the kafka trigger resource")
 	}
 	parameters := fetchedResource.Parameters
 	if parameters != nil {
