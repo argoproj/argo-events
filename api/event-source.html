@@ -722,7 +722,7 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Generi
 <td>
 <code>type</code></br>
 <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType
+Argo Events common.EventSourceType
 </em>
 </td>
 <td>
@@ -1932,6 +1932,18 @@ string
 <p>Region is AWS region</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>roleARN</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RoleARN is the Amazon Resource Name (ARN) of the role to assume.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.SQSEventSource">SQSEventSource
@@ -2021,6 +2033,18 @@ string
 <td>
 <em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace to read access related secret from.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>roleARN</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>RoleARN is the Amazon Resource Name (ARN) of the role to assume.</p>
 </td>
 </tr>
 </tbody>
@@ -2272,5 +2296,5 @@ More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.co
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>95e393b</code>.
+on git commit <code>d0d11e4</code>.
 </em></p>

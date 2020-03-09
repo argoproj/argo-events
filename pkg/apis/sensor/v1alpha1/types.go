@@ -279,7 +279,10 @@ type TriggerTemplate struct {
 	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`
 	// CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.
 	// +optional
-	CustomTrigger *CustomTrigger `json:"customTrigger,omitempty" protobuf:"bytes,7,opt,name=customTrigger"`
+	CustomTrigger *CustomTrigger `json:"custom,omitempty" protobuf:"bytes,7,opt,name=custom"`
+	// Kafka refers to the trigger designed to place messages on Kafka topic.
+	// +optional.
+	Kafka *KafkaTrigger `json:"kafka" `
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -332,7 +335,7 @@ type HTTPTrigger struct {
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
-	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
 	// Method refers to the type of the HTTP request.
 	// Refer https://golang.org/src/net/http/method.go for more info.
 	// Default value is POST.
@@ -348,8 +351,8 @@ type HTTPTrigger struct {
 	Timeout int `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
 }
 
-// HTTPTriggerTLS refers to TLS configuration for the HTTP client
-type HTTPTriggerTLS struct {
+// TLSConfig refers to TLS configuration for the HTTP client
+type TLSConfig struct {
 	// CACertPath refers the file path that contains the CA cert.
 	CACertPath string `json:"caCertPath" protobuf:"bytes,1,name=caCertPath"`
 	// ClientCertPath refers the file path that contains client cert.
@@ -407,6 +410,43 @@ type AWSLambdaTrigger struct {
 	// +listType=triggerParameters
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
+}
+
+// KafkaTrigger refers to the specification of the Kafka trigger.
+type KafkaTrigger struct {
+	// URL of the Kafka broker.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Name of the topic.
+	// More info at https://kafka.apache.org/documentation/#intro_topics
+	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
+	// Partition to write data to.
+	Partition int `json:"partition" protobuf:"bytes,3,name=partition"`
+	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// RequiredAcks used in producer to tell the broker how many replica acknowledgements
+	// Defaults to 1 (Only wait for the leader to ack).
+	// +optional.
+	RequiredAcks int `json:"requiredAcks,omitempty" protobuf:"bytes,5,opt,name=requiredAcks"`
+	// Compress determines whether to compress message or not.
+	// Defaults to false.
+	// If set to true, compresses message using snappy compression.
+	// +optional
+	Compress bool `json:"compress,omitempty" protobuf:"bytes,6,opt,name=compress"`
+	// FlushFrequency refers to the frequency in milliseconds to flush batches.
+	// Defaults to 500 milliseconds.
+	// +optional
+	FlushFrequency int `json:"flushFrequency,omitempty" protobuf:"bytes,7,opt,name=flushFrequency"`
+	// TLS configuration for the Kafka producer.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
+	// The partitioning key for the messages put on the Kafka topic.
+	// Defaults to broker url.
+	// +optional.
+	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
 }
 
 // CustomTrigger refers to the specification of the custom trigger.

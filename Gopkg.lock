@@ -16,7 +16,7 @@
     "pubsub/internal/distribution",
   ]
   pruneopts = "UT"
-  revision = "386c9b99ffb6a082e5de780ccd38dd8ce5f2b994"
+  revision = "52020a63249f2e4201e59458009f5af55acf483d"
 
 [[projects]]
   digest = "1:487dc37a77bbba996bf4ddae0bff1c69fde98027d507e75eca317ca7c94483c3"
@@ -111,10 +111,13 @@
   revision = "de5bf2ad457846296e2031421a34e2568e304e35"
 
 [[projects]]
-  digest = "1:648c705cb6dfd4c285ad15eced5237a658a07b7de4c41c506a6e4a2a8ee93cb5"
+  digest = "1:c3fe4ae203a7fd972a43357906375909e0ea096a15f07588c72b1e1dbe6e587e"
   name = "github.com/Shopify/sarama"
-  packages = ["."]
-  pruneopts = "UT"
+  packages = [
+    ".",
+    "mocks",
+  ]
+  pruneopts = "T"
   revision = "b3a812117be917e2dd4f8cbcf4ff861e3ae7ef38"
   version = "v1.26.1"
 
@@ -357,20 +360,20 @@
   version = "v0.19.3"
 
 [[projects]]
-  digest = "1:97899a475b12f80513ede1ea1806dc3bd91380e233d463aff8360a2ac1bfb3b4"
+  digest = "1:9e6992ea4c7005c711e3460e90d20e0c40cce6743bbdc65d12e8fe45e5b6beaf"
   name = "github.com/go-openapi/spec"
   packages = ["."]
   pruneopts = "UT"
-  revision = "dce82e4362c708e636da7feb0831bd29efb5cd97"
-  version = "v0.19.6"
+  revision = "1297e9a4ddf9325269fe013d7c1300aac3985f92"
+  version = "v0.19.7"
 
 [[projects]]
-  digest = "1:46055af5313a0deb06c423d849283aac853f554df5a3c42e705a81b8ebf7f1c4"
+  digest = "1:8b59d79dc97889c333cdad6fcbd9c47d4d9abc19a5ec0683bfa40e5a36d1b1b7"
   name = "github.com/go-openapi/swag"
   packages = ["."]
   pruneopts = "UT"
-  revision = "6a1eb9830f1c6b090dcd01cee6c3983604a2306f"
-  version = "v0.19.7"
+  revision = "59a9232e9392613952a0a4c90523c40c99140043"
+  version = "v0.19.8"
 
 [[projects]]
   digest = "1:e17320223c7c866dfbec405efe8abc8e383ccad131fb76ca7ff70580dafb9067"
@@ -2034,6 +2037,7 @@
     "github.com/Azure/azure-event-hubs-go",
     "github.com/Knetic/govaluate",
     "github.com/Shopify/sarama",
+    "github.com/Shopify/sarama/mocks",
     "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",
