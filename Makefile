@@ -16,8 +16,8 @@ override LDFLAGS += \
 
 #  docker image publishing options
 DOCKER_PUSH?=true
-IMAGE_NAMESPACE?=metalgearsolid
-IMAGE_TAG?=v0.13.1
+IMAGE_NAMESPACE?=argoproj
+IMAGE_TAG?=v0.13.0
 BUILD_BINARY?=true
 
 ifeq (${DOCKER_PUSH},true)
