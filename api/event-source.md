@@ -1397,8 +1397,7 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -3833,6 +3832,28 @@ Region is AWS region
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>roleARN</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4005,6 +4026,28 @@ for a message to arrive in the queue before returning.
 
 Namespace refers to Kubernetes namespace to read access related secret
 from.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>roleARN</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 
 </p>
 
@@ -4527,6 +4570,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>95e393b</code>. </em>
+commit <code>d0d11e4</code>. </em>
 
 </p>

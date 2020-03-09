@@ -16,6 +16,7 @@ limitations under the License.
 package sensors
 
 import (
+	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -50,6 +51,8 @@ type SensorContext struct {
 	customTriggerClients map[string]*grpc.ClientConn
 	// http client to invoke openfaas functions.
 	openfaasHttpClient *http.Client
+	// kafkaProducers holds references to the active kafka producers
+	kafkaProducers map[string]sarama.AsyncProducer
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -66,5 +69,6 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		openfaasHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
+		kafkaProducers: make(map[string]sarama.AsyncProducer),
 	}
 }

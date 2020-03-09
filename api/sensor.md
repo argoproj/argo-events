@@ -473,8 +473,7 @@ Description
 
 <td>
 
-<code>s3</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
+<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
 
 </td>
 
@@ -1496,8 +1495,7 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
+<code>context</code></br> <em> Argo Events common.EventContext </em>
 
 </td>
 
@@ -2219,9 +2217,8 @@ construct the HTTP request payload.
 
 <td>
 
-<code>tls</code></br> <em>
-<a href="#argoproj.io/v1alpha1.HTTPTriggerTLS"> HTTPTriggerTLS </a>
-</em>
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
 
 </td>
 
@@ -2302,117 +2299,6 @@ are applied to the HTTP trigger resource.
 
 Timeout refers to the HTTP request timeout in seconds. Default value is
 10 seconds
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.HTTPTriggerTLS">
-
-HTTPTriggerTLS
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
-
-</p>
-
-<p>
-
-<p>
-
-HTTPTriggerTLS refers to TLS configuration for the HTTP client
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>caCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-CACertPath refers the file path that contains the CA cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientCertPath refers the file path that contains client cert.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>clientKeyPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-ClientKeyPath refers the file path that contains client key.
 
 </p>
 
@@ -2553,6 +2439,275 @@ Backoff before checking resource state
 ErrorOnBackoffTimeout determines whether sensor should transition to
 error state if the trigger policy is unable to determine the state of
 the resource
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.KafkaTrigger">
+
+KafkaTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+KafkaTrigger refers to the specification of the Kafka trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL of the Kafka broker.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>topic</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the topic. More info at
+<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/\#intro\_topics</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>partition</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+Partition to write data to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved Kafka
+trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>requiredAcks</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+RequiredAcks used in producer to tell the broker how many replica
+acknowledgements Defaults to 1 (Only wait for the leader to ack).
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>compress</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Compress determines whether to compress message or not. Defaults to
+false. If set to true, compresses message using snappy compression.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>flushFrequency</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+FlushFrequency refers to the frequency in milliseconds to flush batches.
+Defaults to 500 milliseconds.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the Kafka producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>partitioningKey</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+The partitioning key for the messages put on the Kafka topic. Defaults
+to broker url.
 
 </p>
 
@@ -2928,8 +3083,7 @@ events
 
 <td>
 
-<code>event</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.Event </em>
+<code>event</code></br> <em> Argo Events common.Event </em>
 
 </td>
 
@@ -3147,6 +3301,31 @@ construct the request payload.
 
 Parameters is the list of key-value extracted from event’s payload that
 are applied to the HTTP trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>username</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Username refers to the Kubernetes secret that holds the username
+required to log into the gateway.
 
 </p>
 
@@ -4436,6 +4615,118 @@ NATS refers to the NATS subscription of events for the sensor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.TLSConfig">
+
+TLSConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
+<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+TLSConfig refers to TLS configuration for the HTTP client
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.TimeFilter">
 
 TimeFilter
@@ -4687,6 +4978,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
+<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -5382,7 +5674,7 @@ with with on-the-fly constructable payload.
 
 <td>
 
-<code>customTrigger</code></br> <em>
+<code>custom</code></br> <em>
 <a href="#argoproj.io/v1alpha1.CustomTrigger"> CustomTrigger </a> </em>
 
 </td>
@@ -5395,6 +5687,27 @@ with with on-the-fly constructable payload.
 
 CustomTrigger refers to the trigger designed to connect to a gRPC
 trigger server and execute a custom trigger.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>kafka</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KafkaTrigger"> KafkaTrigger </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Kafka refers to the trigger designed to place messages on Kafka topic.
 
 </p>
 
@@ -5502,6 +5815,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>95e393b</code>. </em>
+commit <code>d0d11e4</code>. </em>
 
 </p>
