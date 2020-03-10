@@ -18,10 +18,14 @@ package nats
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	natslib "github.com/nats-io/go-nats"
-	"github.com/sirupsen/logrus"
+	"encoding/json"
 	"io/ioutil"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"github.com/argoproj/argo-events/sensors/triggers"
+	natslib "github.com/nats-io/go-nats"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // NATSTrigger holds the context of the NATS trigger.
@@ -85,4 +89,64 @@ func NewNATSTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, natsConn
 		Conn:    conn,
 		Logger:  logger,
 	}, nil
+}
+
+// FetchResource fetches the trigger. As the NATS trigger is simply a NATS client, there
+// is no need to fetch any resource from external source
+func (t *NATSTrigger) FetchResource() (interface{}, error) {
+	return t.Trigger.Template.NATS, nil
+}
+
+// ApplyResourceParameters applies parameters to the trigger resource
+func (t *NATSTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource interface{}) (interface{}, error) {
+	fetchedResource, ok := resource.(*v1alpha1.NATSTrigger)
+	if !ok {
+		return nil, errors.New("failed to interpret the fetched trigger resource")
+	}
+
+	resourceBytes, err := json.Marshal(fetchedResource)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal the nats trigger resource")
+	}
+	parameters := fetchedResource.Parameters
+	if parameters != nil {
+		updatedResourceBytes, err := triggers.ApplyParams(resourceBytes, parameters, triggers.ExtractEvents(sensor, parameters))
+		if err != nil {
+			return nil, err
+		}
+		var ht *v1alpha1.NATSTrigger
+		if err := json.Unmarshal(updatedResourceBytes, &ht); err != nil {
+			return nil, errors.Wrap(err, "failed to unmarshal the updated nats trigger resource after applying resource parameters")
+		}
+		return ht, nil
+	}
+	return resource, nil
+}
+
+// Execute executes the trigger
+func (t *NATSTrigger) Execute(resource interface{}) (interface{}, error) {
+	trigger, ok := resource.(*v1alpha1.NATSTrigger)
+	if !ok {
+		return nil, errors.New("failed to interpret the trigger resource")
+	}
+
+	if trigger.Payload == nil {
+		return nil, errors.New("payload parameters are not specified")
+	}
+
+	payload, err := triggers.ConstructPayload(t.Sensor, trigger.Payload)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := t.Conn.Publish(t.Trigger.Template.NATS.Subject, payload); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+// ApplyPolicy applies policy on the trigger
+func (t *NATSTrigger) ApplyPolicy(resource interface{}) error {
+	return nil
 }
