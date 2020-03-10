@@ -1397,8 +1397,7 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -2216,6 +2215,28 @@ access token from.
 
 DeleteHookOnFinish determines whether to delete the GitLab hook for the
 project once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>allowDuplicate</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+AllowDuplicate allows the gateway to register the same webhook
+integrations for multiple event source configurations. Defaults to
+false.
 
 </p>
 
@@ -4571,6 +4592,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>ce4ab23</code>. </em>
+commit <code>7f3198f</code>. </em>
 
 </p>

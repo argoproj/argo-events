@@ -976,6 +976,13 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 							Format:      "",
 						},
 					},
+					"allowDuplicate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations. Defaults to false.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL", "namespace"},
 			},
