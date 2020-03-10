@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"net/http"
 	"net/url"
 	"time"
@@ -105,8 +106,20 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	event := &events.GithubEventData{
+		Headers: request.Header,
+		Body:    (*json.RawMessage)(&body),
+	}
+
+	eventBody, err := json.Marshal(event)
+	if err != nil {
+		logger.Info("failed to marshal event")
+		common.SendErrorResponse(writer, "invalid event")
+		return
+	}
+
 	logger.Infoln("dispatching event on route's data channel")
-	route.DataCh <- body
+	route.DataCh <- eventBody
 	logger.Info("request successfully processed")
 
 	common.SendSuccessResponse(writer, "success")
