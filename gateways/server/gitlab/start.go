@@ -155,8 +155,7 @@ func (router *Router) PostActivate() error {
 			if ok := elem.IsValid(); !ok {
 				return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
 			}
-			iev := reflect.New(elem.Type().Elem())
-			value := reflect.Indirect(iev).Bool()
+			value := elem.Bool()
 
 			if value && hook.URL == formattedUrl {
 				logger.Infoln("webhook already exists, won't register it...")
