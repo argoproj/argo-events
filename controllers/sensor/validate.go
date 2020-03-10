@@ -141,6 +141,16 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.Kafka != nil {
+		if err := validateKafkaTrigger(template.Kafka); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	if template.NATS != nil {
+		if err := validateNATSTrigger(template.NATS); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	if template.CustomTrigger != nil {
 		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
@@ -276,6 +286,40 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
 			}
 		}
+	}
+	return nil
+}
+
+// validateKafkaTrigger validates the kafka trigger.
+func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
+	if trigger == nil {
+		return errors.New("trigger can't be nil")
+	}
+	if trigger.URL ==  "" {
+		return errors.New("broker url must not be empty")
+	}
+	if trigger.Payload == nil {
+		return errors.New("payload must not be empty")
+	}
+	if trigger.Topic == "" {
+		return errors.New("topic must not be empty")
+	}
+	return nil
+}
+
+// validateNATSTrigger validates the NATS trigger.
+func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
+	if trigger == nil {
+		return errors.New("trigger can't be nil")
+	}
+	if trigger.URL == "" {
+		return errors.New("nats server url can't be empty")
+	}
+	if trigger.Subject == "" {
+		return errors.New("nats subject can't be empty")
+	}
+	if trigger.Payload == nil {
+		return errors.New("payload can't be nil")
 	}
 	return nil
 }

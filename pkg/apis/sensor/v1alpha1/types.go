@@ -282,7 +282,10 @@ type TriggerTemplate struct {
 	CustomTrigger *CustomTrigger `json:"custom,omitempty" protobuf:"bytes,7,opt,name=custom"`
 	// Kafka refers to the trigger designed to place messages on Kafka topic.
 	// +optional.
-	Kafka *KafkaTrigger `json:"kafka" `
+	Kafka *KafkaTrigger `json:"kafka,omitempty" protobuf:"bytes,8,opt,name=kafka"`
+	// NATS refers to the trigger designed to place message on NATS subject.
+	// +optional.
+	NATS *NATSTrigger `json:"nats,omitempty" protobuf:"bytes,9,opt,name=nats"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -447,6 +450,23 @@ type KafkaTrigger struct {
 	// Defaults to broker url.
 	// +optional.
 	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+}
+
+// NATSTrigger refers to the specification of the NATS trigger.
+type NATSTrigger struct {
+	// URL of the NATS cluster.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Name of the subject to put message on.
+	Subject string `json:"subject" protobuf:"bytes,2,name=subject"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,3,rep,name=payload"`
+	// Parameters is the list of parameters that is applied to resolved NATS trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// TLS configuration for the Kafka producer.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // CustomTrigger refers to the specification of the custom trigger.

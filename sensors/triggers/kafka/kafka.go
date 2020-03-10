@@ -47,6 +47,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 	producer, ok := kafkaProducers[trigger.Template.Name]
 	if !ok {
+		var err error
 		config := sarama.NewConfig()
 
 		if kafkatrigger.TLS != nil {
@@ -89,7 +90,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 		}
 		config.Producer.RequiredAcks = ra
 
-		producer, err := sarama.NewAsyncProducer([]string{kafkatrigger.URL}, config)
+		producer, err = sarama.NewAsyncProducer([]string{kafkatrigger.URL}, config)
 		if err != nil {
 			return nil, err
 		}
