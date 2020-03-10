@@ -143,6 +143,27 @@ func (router *Router) PostActivate() error {
 
 	formattedUrl := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
 
+	// Get existing webhooks and check if the integration for same url and event type is already available
+	if !gitlabEventSource.AllowDuplicate {
+		hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(router.gitlabEventSource.ProjectId, &gitlab.ListProjectHooksOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectId)
+		}
+
+		for _, hook := range hooks {
+			elem := reflect.ValueOf(hook).Elem().FieldByName(router.gitlabEventSource.Event)
+			if ok := elem.IsValid(); !ok {
+				return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
+			}
+			value := elem.Bool()
+
+			if value && hook.URL == formattedUrl {
+				logger.Infoln("webhook already exists, won't register it...")
+				return nil
+			}
+		}
+	}
+
 	opt := &gitlab.AddProjectHookOptions{
 		URL:                   &formattedUrl,
 		Token:                 &c.token,

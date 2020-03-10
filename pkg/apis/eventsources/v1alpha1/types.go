@@ -230,7 +230,6 @@ type SNSEventSource struct {
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
 	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
-
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -331,6 +330,10 @@ type GitlabEventSource struct {
 	// DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,8,opt,name=deleteHookOnFinish"`
+	// AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations.
+	// Defaults to false.
+	// +optional.
+	AllowDuplicate bool `json:"allowDuplicate,omitempty" protobuf:"bytes,9,opt,name=allowDuplicate"`
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
