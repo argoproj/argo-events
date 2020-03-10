@@ -473,7 +473,8 @@ Description
 
 <td>
 
-<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
+<code>s3</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 </td>
 
@@ -1495,7 +1496,8 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em> Argo Events common.EventContext </em>
+<code>context</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
 
 </td>
 
@@ -2837,6 +2839,166 @@ Subject refers to NATS subject name.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.NATSTrigger">
+
+NATSTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NATSTrigger refers to the specification of the NATS trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL of the NATS cluster.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the subject to put message on.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved NATS
+trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the Kafka producer.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.NodePhase">
 
 NodePhase (<code>string</code> alias)
@@ -3083,7 +3245,8 @@ events
 
 <td>
 
-<code>event</code></br> <em> Argo Events common.Event </em>
+<code>event</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Event </em>
 
 </td>
 
@@ -4625,7 +4788,8 @@ TLSConfig
 
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
-<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>)
+<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
+<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>)
 
 </p>
 
@@ -4979,6 +5143,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
+<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -5715,6 +5880,27 @@ Kafka refers to the trigger designed to place messages on Kafka topic.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>nats</code></br> <em> <a href="#argoproj.io/v1alpha1.NATSTrigger">
+NATSTrigger </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+NATS refers to the trigger designed to place message on NATS subject.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -5815,6 +6001,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>d0d11e4</code>. </em>
+commit <code>ce4ab23</code>. </em>
 
 </p>
