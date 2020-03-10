@@ -141,6 +141,16 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.Kafka != nil {
+		if err := validateKafkaTrigger(template.Kafka); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	if template.NATS != nil {
+		if err := validateNATSTrigger(template.NATS); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	if template.CustomTrigger != nil {
 		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
