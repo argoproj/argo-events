@@ -16,17 +16,19 @@ limitations under the License.
 package sensors
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/Shopify/sarama"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors/types"
+	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
-	"net/http"
-	"time"
 )
 
 // SensorContext contains execution context for Sensor
@@ -53,6 +55,8 @@ type SensorContext struct {
 	openfaasHttpClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
 	kafkaProducers map[string]sarama.AsyncProducer
+	// natsConnections holds the references to the active nats connections.
+	natsConnections map[string]*natslib.Conn
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -69,6 +73,7 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		openfaasHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers: make(map[string]sarama.AsyncProducer),
+		kafkaProducers:  make(map[string]sarama.AsyncProducer),
+		natsConnections: make(map[string]*natslib.Conn),
 	}
 }
