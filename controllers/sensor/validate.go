@@ -280,6 +280,40 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	return nil
 }
 
+// validateKafkaTrigger validates the kafka trigger.
+func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
+	if trigger == nil {
+		return errors.New("trigger can't be nil")
+	}
+	if trigger.URL ==  "" {
+		return errors.New("broker url must not be empty")
+	}
+	if trigger.Payload == nil {
+		return errors.New("payload must not be empty")
+	}
+	if trigger.Topic == "" {
+		return errors.New("topic must not be empty")
+	}
+	return nil
+}
+
+// validateNATSTrigger validates the NATS trigger.
+func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
+	if trigger == nil {
+		return errors.New("trigger can't be nil")
+	}
+	if trigger.URL == "" {
+		return errors.New("nats server url can't be empty")
+	}
+	if trigger.Subject == "" {
+		return errors.New("nats subject can't be empty")
+	}
+	if trigger.Payload == nil {
+		return errors.New("payload can't be nil")
+	}
+	return nil
+}
+
 // validateCustomTrigger validates the custom trigger.
 func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 	if trigger == nil {
