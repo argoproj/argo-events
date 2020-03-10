@@ -116,9 +116,9 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 		}
 	}
 
-	// http subscribers
+	// NATS subscribers
 	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
-		client, ok := gatewayContext.httpSubscribers[subscriber.Name]
+		client, ok := gatewayContext.natsSubscribers[subscriber.Name]
 		if !ok {
 			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
