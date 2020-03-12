@@ -49,7 +49,7 @@ spec:
       group: argoproj.io
       version: v1alpha1
       resource: workflows
-      type: ADDED
+      type: ADD
       filter:
         createdBy: "2019-04-06T12:52:11Z"
 
@@ -58,7 +58,7 @@ spec:
       group: ""
       version: v1
       resource: pods
-      type: ADDED
+      type: ADD
       filter:
         createdBy: "2019-04-06T12:52:11Z"
         labels:
@@ -71,7 +71,7 @@ spec:
       group: "k8s.io"
       version: v1
       resource: workflows
-      type: ADDED
+      type: ADD
       filter:
         labels:
           workflows.argoproj.io/completed: "true"
