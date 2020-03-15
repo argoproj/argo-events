@@ -539,7 +539,7 @@ type TriggerParameterSource struct {
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
 	// DataTemplate is a go-template for extracting a string from the event's data.
-	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the ContextKey.
+	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
 	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
 	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,3,opt,name=dataTemplate"`

@@ -245,7 +245,11 @@ func getValueWithTemplate(value []byte, templString string) (string, error) {
 	}); err != nil {
 		return "", err
 	}
-	return buf.String(), nil
+	out := buf.String()
+	if out == "" || out == "<no value>" {
+		return "", fmt.Errorf("Template evaluated to empty string or no value: %s", templString)
+	}
+	return out, nil
 }
 
 // getValueByKey will return the value in the raw json bytes at the provided key,
