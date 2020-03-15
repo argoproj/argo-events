@@ -207,7 +207,7 @@ type MQTTEventSource struct {
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,4,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
 }
 
 // NATSEventSource refers to event-source for NATS related events
@@ -262,11 +262,11 @@ type SQSEventSource struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
-	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,7,opt,name=roleARN"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,6,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
