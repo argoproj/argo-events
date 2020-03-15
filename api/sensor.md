@@ -473,7 +473,8 @@ Description
 
 <td>
 
-<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
+<code>s3</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 </td>
 
@@ -1495,7 +1496,8 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em> Argo Events common.EventContext </em>
+<code>context</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
 
 </td>
 
@@ -3243,7 +3245,8 @@ events
 
 <td>
 
-<code>event</code></br> <em> Argo Events common.Event </em>
+<code>event</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Event </em>
 
 </td>
 
@@ -5998,6 +6001,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>7f3198f</code>. </em>
+commit <code>72bb77b</code>. </em>
 
 </p>
