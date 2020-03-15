@@ -528,11 +528,21 @@ type TriggerParameterSource struct {
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	ContextKey string `json:"contextKey,omitempty" protobuf:"bytes,2,opt,name=contextKey"`
+	// ContextTemplate is a go-template for extracting a string from the event's context.
+	// If a ContextTemplate is provided with a ContextKey, the template will be evaluated first and fallback to the ContextKey.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	ContextTemplate string `json:"contextTemplate,omitempty" protobuf:"bytes,3,opt,name=contextTemplate"`
 	// DataKey is the JSONPath of the event's (JSON decoded) data key
 	// DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
+	// DataTemplate is a go-template for extracting a string from the event's data.
+	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the ContextKey.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,3,opt,name=dataTemplate"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.

@@ -17,9 +17,12 @@ limitations under the License.
 package triggers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"text/template"
 
+	"github.com/Masterminds/sprig"
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -162,19 +165,22 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 	var err error
 	var value []byte
 	var key string
+	var template string
 	if event, ok := events[src.DependencyName]; ok {
 		// If context or data keys are not set, return the event payload as is
-		if src.ContextKey == "" && src.DataKey == "" {
+		if src.ContextKey == "" && src.DataKey == "" && src.DataTemplate == "" && src.ContextTemplate == "" {
 			value, err = json.Marshal(&event)
 		}
 		// Get the context bytes
-		if src.ContextKey != "" {
+		if src.ContextKey != "" || src.ContextTemplate != "" {
 			key = src.ContextKey
+			template = src.ContextTemplate
 			value, err = json.Marshal(&event.Context)
 		}
 		// Get the payload bytes
-		if src.DataKey != "" {
+		if src.DataKey != "" || src.DataTemplate != "" {
 			key = src.DataKey
+			template = src.DataTemplate
 			value, err = renderEventDataAsJSON(&event)
 		}
 	}
@@ -184,12 +190,19 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 	}
 	// Get the value corresponding to specified key within JSON object
 	if value != nil {
-		if key != "" {
-			res := gjson.GetBytes(value, key)
-			if res.Exists() {
-				return res.String(), nil
+		if template != "" {
+			out, err := getValueWithTemplate(value, template)
+			if err == nil {
+				return out, nil
 			}
-			fmt.Printf("key %s does not exist to in the event object\n", key)
+			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
+		}
+		if key != "" {
+			res, err := getValueByKey(value, key)
+			if err == nil {
+				return res, nil
+			}
+			fmt.Printf("Failed to get value by key: %+v\n", err)
 		}
 		if src.Value != nil {
 			return *src.Value, nil
@@ -216,4 +229,31 @@ func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) 
 		}
 	}
 	return events
+}
+
+// getValueWithTemplate will attempt to execute the provided template against
+// the raw json bytes and then returns the result or any error
+func getValueWithTemplate(value []byte, templString string) (string, error) {
+	res := gjson.ParseBytes(value)
+	tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(templString)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := tpl.Execute(&buf, map[string]interface{}{
+		"Input": res.Value(),
+	}); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+// getValueByKey will return the value in the raw json bytes at the provided key,
+// or an error if it does not exist.
+func getValueByKey(value []byte, key string) (string, error) {
+	res := gjson.GetBytes(value, key)
+	if res.Exists() {
+		return res.String(), nil
+	}
+	return "", fmt.Errorf("key %s does not exist to in the event object\n", key)
 }
