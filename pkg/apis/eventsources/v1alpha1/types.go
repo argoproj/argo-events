@@ -251,6 +251,10 @@ type SQSEventSource struct {
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
 	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,6,opt,name=jsonBody"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.

@@ -70,6 +70,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
+	if sqsEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Infoln("setting up aws session...")
 
 	var awsSession *session.Session
@@ -110,10 +114,21 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			if msg != nil && len(msg.Messages) > 0 {
 				message := *msg.Messages[0]
 
-				data := &events.SQSEventData{
-					MessageId:         *message.MessageId,
-					MessageAttributes: message.MessageAttributes,
-					Body:              []byte(*message.Body),
+				var data *events.SQSEventData
+				if sqsEventSource.JSONBody {
+					body := []byte(*message.Body)
+
+					data = &events.SQSEventData{
+						MessageId:         *message.MessageId,
+						MessageAttributes: message.MessageAttributes,
+						Body:              (*json.RawMessage)(&body),
+					}
+				} else {
+					data = &events.SQSEventData{
+						MessageId:         *message.MessageId,
+						MessageAttributes: message.MessageAttributes,
+						Body:              []byte(*message.Body),
+					}
 				}
 
 				eventBytes, err := json.Marshal(data)
