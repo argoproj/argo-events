@@ -187,6 +187,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2817,6 +2840,29 @@ ConnectionBackoff holds backoff applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2922,6 +2968,29 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 ConnectionBackoff holds backoff applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -4616,6 +4685,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>72bb77b</code>. </em>
+commit <code>ef7e405</code>. </em>
 
 </p>

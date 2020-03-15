@@ -84,6 +84,19 @@ github.com/argoproj/argo-events/common.Backoff
 <p>Backoff holds parameters applied to connection.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.AzureEventsHubEventSource">AzureEventsHubEventSource
@@ -1432,6 +1445,19 @@ github.com/argoproj/argo-events/common.Backoff
 <p>ConnectionBackoff holds backoff applied to connection.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource
@@ -1482,6 +1508,19 @@ github.com/argoproj/argo-events/common.Backoff
 </td>
 <td>
 <p>ConnectionBackoff holds backoff applied to connection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
 </td>
 </tr>
 </tbody>
@@ -2321,5 +2360,5 @@ More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.co
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>72bb77b</code>.
+on git commit <code>ef7e405</code>.
 </em></p>
