@@ -79,12 +79,21 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to connect to the nats server for event source %s", eventSource.Name)
 	}
 
+	if natsEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
 		eventData := &events.NATSEventData{
 			Subject: msg.Subject,
-			Body:    msg.Data,
 		}
+		if natsEventSource.JSONBody {
+			eventData.Body = (*json.RawMessage)(&msg.Data)
+		} else {
+			eventData.Body = msg.Data
+		}
+
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")

@@ -187,6 +187,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1397,7 +1420,8 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -2816,6 +2840,29 @@ ConnectionBackoff holds backoff applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2921,6 +2968,29 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 ConnectionBackoff holds backoff applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -4077,6 +4147,29 @@ RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4592,6 +4685,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>7f3198f</code>. </em>
+commit <code>468aced</code>. </em>
 
 </p>
