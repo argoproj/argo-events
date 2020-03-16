@@ -91,6 +91,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to get the delivery for the event source %s", eventSource.Name)
 	}
 
+	if amqpEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Info("listening to messages on channel...")
 	for {
 		select {
@@ -110,7 +114,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				AppId:           msg.AppId,
 				Exchange:        msg.Exchange,
 				RoutingKey:      msg.RoutingKey,
-				Body:            msg.Body,
+			}
+			if amqpEventSource.JSONBody {
+				body.Body = (*json.RawMessage)(&msg.Body)
+			} else {
+				body.Body = msg.Body
 			}
 
 			bodyBytes, err := json.Marshal(body)
