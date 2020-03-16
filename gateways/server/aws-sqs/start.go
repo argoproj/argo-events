@@ -90,6 +90,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to get the queue url for %s", eventSource.Name)
 	}
 
+	if sqsEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Infoln("listening for messages on the queue...")
 	for {
 		select {
@@ -113,7 +117,12 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				data := &events.SQSEventData{
 					MessageId:         *message.MessageId,
 					MessageAttributes: message.MessageAttributes,
-					Body:              []byte(*message.Body),
+				}
+				if sqsEventSource.JSONBody {
+					body := []byte(*message.Body)
+					data.Body = (*json.RawMessage)(&body)
+				} else {
+					data.Body = []byte(*message.Body)
 				}
 
 				eventBytes, err := json.Marshal(data)
