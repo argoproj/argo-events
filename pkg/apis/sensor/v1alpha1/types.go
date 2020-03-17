@@ -242,7 +242,22 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
+	// Comparator compares the event data with a user given value.
+	// Can be ">=", ">", "=", "<", or "<=".
+	// Is optional, and if left blank treated as equality "=".
+	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator"`
 }
+
+type Comparator string
+
+const (
+	GreaterThanOrEqualTo Comparator = ">="
+	GreaterThan Comparator = ">"
+	EqualTo Comparator = "="
+	LessThan Comparator = "<"
+	LessThanOrEqualTo Comparator = "<="
+	EmptyComparator = ""
+)
 
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {
