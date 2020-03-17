@@ -91,6 +91,18 @@ const (
 	Resume   ArgoWorkflowOperation = "resume"   // resume a workflow
 )
 
+// Comparator refers to the comparator operator for a data filter
+type Comparator string
+
+const (
+	GreaterThanOrEqualTo Comparator = ">=" 	// Greater than or equal to value provided in data filter
+	GreaterThan Comparator = ">"			// Greater than value provided in data filter
+	EqualTo Comparator = "="				// Equal to value provided in data filter
+	LessThan Comparator = "<"				// Less than value provided in data filter
+	LessThanOrEqualTo Comparator = "<="		// Less than or equal to value provided in data filter
+	EmptyComparator = ""					// Equal to value provided in data filter
+)
+
 // Sensor is the definition of a sensor resource
 // +genclient
 // +genclient:noStatus
@@ -247,17 +259,6 @@ type DataFilter struct {
 	// Is optional, and if left blank treated as equality "=".
 	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator"`
 }
-
-type Comparator string
-
-const (
-	GreaterThanOrEqualTo Comparator = ">="
-	GreaterThan Comparator = ">"
-	EqualTo Comparator = "="
-	LessThan Comparator = "<"
-	LessThanOrEqualTo Comparator = "<="
-	EmptyComparator = ""
-)
 
 // Trigger is an action taken, output produced, an event created, a message sent
 type Trigger struct {

@@ -745,6 +745,31 @@ Exit with error after this many steps
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Comparator">
+
+Comparator (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Comparator refers to the comparator operator for a data filter
+
+</p>
+
+</p>
+
 <h3 id="argoproj.io/v1alpha1.ConfigmapArtifact">
 
 ConfigmapArtifact
@@ -1168,6 +1193,29 @@ Type contains the JSON type of the data
 Value is the allowed string values for this key Booleans are passed
 using strconv.ParseBool() Numbers are parsed using as float64 using
 strconv.ParseFloat() Strings are taken as is Nils this value is ignored
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>comparator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Comparator"> Comparator </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Comparator compares the event data with a user given value. Can be
+“\>=”, “\>”, “=”, “\<”, or “\<=”. Is optional, and if left blank
+treated as equality “=”.
 
 </p>
 
@@ -6001,6 +6049,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>468aced</code>. </em>
+commit <code>3f5408f</code>. </em>
 
 </p>
