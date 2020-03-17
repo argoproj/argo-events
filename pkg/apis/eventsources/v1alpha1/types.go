@@ -176,6 +176,10 @@ type AMQPEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,5,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,6,opt,name=jsonBody"`
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -200,6 +204,10 @@ type MQTTEventSource struct {
 	ClientId string `json:"clientId" protobuf:"bytes,3,name=clientId"`
 	// ConnectionBackoff holds backoff applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
 }
 
 // NATSEventSource refers to event-source for NATS related events
@@ -210,6 +218,10 @@ type NATSEventsSource struct {
 	Subject string `json:"subject" protobuf:"bytes,2,name=2"`
 	// ConnectionBackoff holds backoff applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,3,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,4,opt,name=jsonBody"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events
@@ -250,7 +262,11 @@ type SQSEventSource struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
-	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,7,opt,name=roleARN"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
