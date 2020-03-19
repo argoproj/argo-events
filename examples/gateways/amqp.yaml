@@ -16,8 +16,8 @@ spec:
         gateway-name: amqp-gateway
     spec:
       containers:
-        - name: gateway-client:v0.13.0-rc
-          image: argoproj/gateway-client
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: amqp-events
