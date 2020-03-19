@@ -18,6 +18,7 @@ package aws_sqs
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -70,6 +71,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
+	fmt.Printf("EventSource: %+v\n", sqsEventSource)
 	logger.Infoln("setting up aws session...")
 
 	var awsSession *session.Session
@@ -82,10 +84,20 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	sqsClient := sqslib.New(awsSession)
 
+	accountId := "236162914611";
+
 	logger.Infoln("fetching queue url...")
-	queueURL, err := sqsClient.GetQueueUrl(&sqslib.GetQueueUrlInput{
+	getQueueUrlInput:= &sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
-	})
+		QueueOwnerAWSAccountId: &accountId,
+	}
+	if sqsEventSource.QueueAccountId != "" {
+	getQueueUrlInput = getQueueUrlInput.SetQueueOwnerAWSAccountId(sqsEventSource.QueueAccountId)
+	}
+	logger.Infoln(getQueueUrlInput.String())
+	logger.Infof("QueueAccountId: %s\n", sqsEventSource.QueueAccountId)
+
+	queueURL, err := sqsClient.GetQueueUrl(getQueueUrlInput)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the queue url for %s", eventSource.Name)
 	}
