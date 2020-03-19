@@ -35,6 +35,7 @@ spec:
               metadata:
                 generateName: aws-sqs-workflow-
               spec:
+                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 arguments:
                   parameters:
