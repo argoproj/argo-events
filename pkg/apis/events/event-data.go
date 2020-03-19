@@ -195,7 +195,7 @@ type ResourceEventData struct {
 	// EventType of the type of the event.
 	EventType string `json:"type"`
 	// Resource body.
-	Body []byte `json:"body"`
+	Body *json.RawMessage `json:"body"`
 	// Resource group name.
 	Group string `json:"group"`
 	// Resource version.
