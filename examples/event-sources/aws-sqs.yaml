@@ -23,6 +23,8 @@ spec:
       region: "us-east-1"
       # name of the queue. The gateway resolves the url of the queue from the queue name.
       queue: "my-fake-queue-1"
+      # Namespace where the event source will reside
+      namespace: "argo-events"
       # The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.
       # MUST BE > 0 AND <= 20
       waitTimeSeconds: 20
