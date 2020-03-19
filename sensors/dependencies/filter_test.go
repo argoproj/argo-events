@@ -172,6 +172,81 @@ func TestFilterData(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "comparator filter GreaterThan return true, JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"1.0"},
+					Comparator: ">",
+				},
+			},
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte("{\"k\": \"2.0\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter LessThanOrEqualTo return false, JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"1.0"},
+					Comparator: "<=",
+				},
+			},
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte("{\"k\": \"2.0\"}"),
+				}},
+			want:    false,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter Equal, JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"5.0"},
+					Comparator: "=",
+				},
+			},
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte("{\"k\": \"5.0\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
+			name: "comparator filter empty, JSON data",
+			args: args{data: []v1alpha1.DataFilter{
+				{
+					Path:  "k",
+					Type:  v1alpha1.JSONTypeNumber,
+					Value: []string{"10.0"},
+				},
+			},
+				event: &apicommon.Event{
+					Context: apicommon.EventContext{
+						DataContentType: "application/json",
+					},
+					Data: []byte("{\"k\": \"10.0\"}"),
+				}},
+			want:    true,
+			wantErr: false,
+		},
+		{
 			name: "multiple filters, nested JSON data",
 			args: args{
 				data: []v1alpha1.DataFilter{
