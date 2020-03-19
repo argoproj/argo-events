@@ -176,12 +176,33 @@ filter:
 
 		case v1alpha1.JSONTypeNumber:
 			for _, value := range f.Value {
-				val, err := strconv.ParseFloat(value, 64)
+				filterVal, err := strconv.ParseFloat(value, 64)
+				eventVal := res.Float()
 				if err != nil {
 					return false, err
 				}
-				if val == res.Float() {
-					continue filter
+
+				switch f.Comparator {
+				case v1alpha1.GreaterThanOrEqualTo:
+					if eventVal >= filterVal {
+						continue filter
+					}
+				case v1alpha1.GreaterThan:
+					if eventVal > filterVal {
+						continue filter
+					}
+				case v1alpha1.LessThan:
+					if eventVal < filterVal {
+						continue filter
+					}
+				case v1alpha1.LessThanOrEqualTo:
+					if eventVal <= filterVal {
+						continue filter
+					}
+				case v1alpha1.EqualTo, v1alpha1.EmptyComparator:
+					if eventVal == filterVal {
+						continue filter
+					}
 				}
 			}
 			return false, nil
