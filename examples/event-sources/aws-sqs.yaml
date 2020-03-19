@@ -18,6 +18,7 @@ spec:
         key: secretkey
         # Name of the K8s secret that contains the secret key
         name: aws-secret
+      namespace: argo-events
       # aws region
       region: "us-east-1"
       # name of the queue. The gateway resolves the url of the queue from the queue name.
@@ -33,4 +34,20 @@ spec:
       # the AWS session will utilize the existing config and hence we do not need to provide explicit credentials.
       region: "us-east-1"
       queue: "my-fake-queue-2"
+      waitTimeSeconds: 20
+
+    cross-aws-account:
+      # Make sure AWS access credentials have permissions to "GetQueueUrl", "ReceiveMessage", and "DeleteMessage" of cross account Queue
+      accessKey:
+        key: accesskey
+        name: aws-secret
+      secretKey:
+        key: secretkey
+        name: aws-secret
+      namespace: argo-events
+      region: "us-east-1"
+      # name of queue to monitor
+      queue: "other-queue-name-3"
+      # AWS Account Id that created the queue
+      queueAccountId: "12345678"
       waitTimeSeconds: 20

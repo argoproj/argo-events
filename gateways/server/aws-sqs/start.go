@@ -18,7 +18,6 @@ package aws_sqs
 
 import (
 	"encoding/json"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -83,9 +82,14 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	sqsClient := sqslib.New(awsSession)
 
 	logger.Infoln("fetching queue url...")
-	queueURL, err := sqsClient.GetQueueUrl(&sqslib.GetQueueUrlInput{
+	getQueueUrlInput:= &sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
-	})
+	}
+	if sqsEventSource.QueueAccountId != "" {
+	getQueueUrlInput = getQueueUrlInput.SetQueueOwnerAWSAccountId(sqsEventSource.QueueAccountId)
+	}
+
+	queueURL, err := sqsClient.GetQueueUrl(getQueueUrlInput)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the queue url for %s", eventSource.Name)
 	}
