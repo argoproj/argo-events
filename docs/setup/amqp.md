@@ -14,6 +14,8 @@ AMQP gateway listens to messages on the MQ and helps sensor trigger the workload
 
 ## Event Structure
 
+The structure of an event dispatched by the gateway to the sensor looks like following,
+
         {
             "context": {
               "type": "type_of_gateway",
