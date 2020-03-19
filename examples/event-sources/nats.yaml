@@ -5,11 +5,16 @@ metadata:
 spec:
   type: "nats"
   nats:
-    example-with-retry:
+    example:
       # url of the nats service
       url: "nats://nats.argo-events:4222"
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
       # subject name
       subject: "foo"
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000
