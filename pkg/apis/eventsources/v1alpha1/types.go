@@ -476,6 +476,10 @@ type EmitterEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -509,6 +513,10 @@ type NSQEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,9,opt,name=jsonBody"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

@@ -94,6 +94,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		options = append(options, emitter.WithPassword(password))
 	}
 
+	if emitterEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("creating a client")
 	client := emitter.NewClient(options...)
 
@@ -107,10 +111,16 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
-		eventBytes, err := json.Marshal(&events.EmitterEventData{
+		body := message.Payload()
+		event := &events.EmitterEventData{
 			Topic: message.Topic(),
-			Body:  message.Payload(),
-		})
+			Body:  body,
+		}
+		if emitterEventSource.JSONBody {
+			event.Body = (*json.RawMessage)(&body)
+		}
+		eventBytes, err := json.Marshal(event)
+
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data")
 			return
