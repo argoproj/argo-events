@@ -14,6 +14,8 @@ GitHub gateway programatically configures webhooks for projects on GitHub and he
 
 ## Event Structure
 
+The structure of an event dispatched by the gateway to the sensor looks like following,
+
             {
                 "context": {
                   "type": "type_of_gateway",

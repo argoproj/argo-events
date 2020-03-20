@@ -25,7 +25,7 @@ spec:
       # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
       event: "PushEvents"
 
-#      # Namespace where the api token and webhook secret live.
+#      # Namespace where the api token secret live.
 #      # +Optional. Default to gateway's namespace.
 #      namespace: "argo-events"
 

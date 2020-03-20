@@ -14,6 +14,9 @@ Emitter gateway subscribes to a channel and helps sensor trigger the workloads.
 
 # Event Structure
 
+The structure of an event dispatched by the gateway to the sensor looks like following,
+
+
         {
             "context": {
               "type": "type_of_gateway",

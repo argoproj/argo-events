@@ -194,6 +194,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if snsEventSource.Namespace == "" {
+		snsEventSource.Namespace = listener.Namespace
+	}
+
 	route := webhook.NewRoute(snsEventSource.Webhook, listener.Logger, eventSource)
 
 	logger.Infoln("operating on the route...")

@@ -14,6 +14,9 @@ NSQ gateway subscribes to nsq pub/sub notifications and helps sensor trigger the
 
 ## Event Structure
 
+The structure of an event dispatched by the gateway to the sensor looks like following,
+
+
             {
                 "context": {
                   "type": "type_of_gateway",
