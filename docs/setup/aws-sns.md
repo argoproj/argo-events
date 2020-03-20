@@ -78,7 +78,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/aws-sns.yaml
 
-13. Make a change to one of your project files and commit. It will trigger an argo workflow.
+13. Publish a message to the SNS topic and it will trigger an argo workflow.
 
 14. Run `argo list` to find the workflow. 
 
