@@ -109,7 +109,10 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	case messageTypeNotification:
 		logger.Infoln("dispatching notification on route's data channel")
 
-		eventData := &events.SNSEventData{Body: body}
+		eventData := &events.SNSEventData{
+			Header: request.Header,
+			Body:   (*json.RawMessage)(&body),
+		}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Error("failed to marshal the event data")
