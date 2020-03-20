@@ -140,7 +140,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 			eventData := &events.ResourceEventData{
 				EventType: string(event.Type),
-				Body:      objBody,
+				Body:      (*json.RawMessage)(&objBody),
 				Group:     resourceEventSource.Group,
 				Version:   resourceEventSource.Version,
 				Resource:  resourceEventSource.Resource,

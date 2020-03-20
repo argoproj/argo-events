@@ -40,6 +40,7 @@ type EventListener struct {
 type messageHandler struct {
 	dataCh chan []byte
 	logger *logrus.Entry
+	isJSON bool
 }
 
 // StartEventSource starts an event source
@@ -86,7 +87,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to create a new consumer for topic %s and channel %s for event source %s", nsqEventSource.Topic, nsqEventSource.Channel, eventSource.Name)
 	}
 
-	consumer.AddHandler(&messageHandler{dataCh: channels.Data, logger: logger})
+	if nsqEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
+	consumer.AddHandler(&messageHandler{dataCh: channels.Data, logger: logger, isJSON: nsqEventSource.JSONBody})
 
 	err := consumer.ConnectToNSQLookupd(nsqEventSource.HostAddress)
 	if err != nil {
@@ -102,11 +107,16 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 // HandleMessage implements the Handler interface.
 func (h *messageHandler) HandleMessage(m *nsq.Message) error {
 	h.logger.Infoln("received a message")
+
 	eventData := &events.NSQEventData{
 		Body:        m.Body,
 		Timestamp:   strconv.Itoa(int(m.Timestamp)),
 		NSQDAddress: m.NSQDAddress,
 	}
+	if h.isJSON {
+		eventData.Body = (*json.RawMessage)(&m.Body)
+	}
+
 	eventBody, err := json.Marshal(eventData)
 	if err != nil {
 		h.logger.WithError(err).Errorln("failed to marshal the event data. rejecting the event...")

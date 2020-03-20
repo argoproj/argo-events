@@ -26,7 +26,8 @@ import (
 
 // EventListener implements ConfigExecutor
 type EventListener struct {
-	Logger *logrus.Logger
+	Logger    *logrus.Logger
+	Namespace string
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface
 }

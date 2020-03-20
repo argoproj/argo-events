@@ -5,10 +5,10 @@ metadata:
 spec:
   type: file
   file:
-    example-with-path:
+    example:
       watchPathConfig:
         # directory to watch
-        directory: "/bin/"
+        directory: "/test-data/"
         # path to watch
         path: "x.txt"
       # type of the event
