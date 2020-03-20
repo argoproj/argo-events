@@ -38,9 +38,6 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 ## Setup
 
-
-## Setup
-
 1. Make sure to setup the MQTT Broker and Bridge in Kubernetes if you don't already have one. 
 
 2. Create the event source by running the following command. Make sure to update the appropriate fields.
