@@ -68,10 +68,10 @@ func validate(eventSource *v1alpha1.EmitterEventSource) error {
 	if eventSource.ChannelName == "" {
 		return errors.New("channel name must be specified")
 	}
-	if eventSource.ChannelKey == nil {
+	if eventSource.ChannelKey == "" {
 		return errors.New("channel key secret selector must be specified")
 	}
-	if eventSource.Namespace == "" {
+	if (eventSource.Username != nil || eventSource.Password != nil) && eventSource.Namespace == "" {
 		return errors.New("namespace to retrieve the secret from is not specified")
 	}
 	return nil

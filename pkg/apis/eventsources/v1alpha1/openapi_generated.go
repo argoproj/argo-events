@@ -243,7 +243,8 @@ func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.Referen
 					"channelKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ChannelKey refers to the channel key",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"channelName": {

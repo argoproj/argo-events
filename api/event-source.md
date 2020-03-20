@@ -607,9 +607,7 @@ Broker URI to connect to.
 
 <td>
 
-<code>channelKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
+<code>channelKey</code></br> <em> string </em>
 
 </td>
 
@@ -4730,6 +4728,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>c8ce397</code>. </em>
+commit <code>14f13c7</code>. </em>
 
 </p>

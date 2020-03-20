@@ -462,7 +462,7 @@ type EmitterEventSource struct {
 	// Broker URI to connect to.
 	Broker string `json:"broker" protobuf:"bytes,1,name=broker"`
 	// ChannelKey refers to the channel key
-	ChannelKey *corev1.SecretKeySelector `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
+	ChannelKey string `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
 	// ChannelName refers to the channel name
 	ChannelName string `json:"channelName" protobuf:"bytes,3,name=channelName"`
 	// Namespace to use to retrieve the channel key and optional username/password
