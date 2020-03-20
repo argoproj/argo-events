@@ -1,5 +1,7 @@
 # Emitter
 
+Emitter gateway subscribes to a channel and helps sensor trigger the workloads.
+
 <br/>
 <br/>
 
