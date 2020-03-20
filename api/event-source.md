@@ -4213,6 +4213,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>queueAccountId</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+QueueAccountId is the ID of the account that created the queue to
+monitor
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4728,6 +4751,8 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
+
 commit <code>d7d0a7d</code>. </em>
+
 
 </p>

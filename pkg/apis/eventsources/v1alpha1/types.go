@@ -267,6 +267,9 @@ type SQSEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
+	// QueueAccountId is the ID of the account that created the queue to monitor
+	// +optional
+	QueueAccountId string `json:"queueAccountId,omitempty" protobuf:"bytes,9,opt,name=queueAccountId"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
