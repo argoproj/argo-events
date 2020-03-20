@@ -39,7 +39,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 ## Setup
 
 
-1. Create an API token if you don't have one. Follow [instructions](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) to create a new GitHub API Token.
+1. Create an API token if you don't have one. Follow [instructions](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) to create a new GitLab API Token.
    Grant it the `api` permissions.
 
 2. Base64 encode your api token key,
