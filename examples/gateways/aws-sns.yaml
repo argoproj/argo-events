@@ -16,8 +16,8 @@ spec:
         gateway-name: aws-sns-gateway
     spec:
       containers:
-        - name: gateway-client:v0.13.0-rc
-          image: argoproj/gateway-client
+        - name: gateway-client
+          image: argoproj/gateway-client:v0.13.0-rc
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: aws-sns-events
@@ -37,4 +37,4 @@ spec:
       type: LoadBalancer
   subscribers:
     http:
-      - "https://aws-sns-sensor.argo-events.svc:9300/"
+      - "http://aws-sns-sensor.argo-events.svc:9300/"

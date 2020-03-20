@@ -19,7 +19,7 @@ spec:
   dependencies:
     - name: test-dep
       gatewayName: amqp-gateway
-      eventName: example-with-retry
+      eventName: example
   triggers:
     - template:
         name: amqp-workflow-trigger
@@ -50,7 +50,7 @@ spec:
                       image: docker/whalesay:latest
                       command: [cowsay]
                       args: ["{{inputs.parameters.message}}"]
-          resourceParameters:
+          parameters:
             - src:
                 dependencyName: test-dep
               dest: spec.arguments.parameters.0.value

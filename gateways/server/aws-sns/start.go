@@ -109,7 +109,10 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 	case messageTypeNotification:
 		logger.Infoln("dispatching notification on route's data channel")
 
-		eventData := &events.SNSEventData{Body: body}
+		eventData := &events.SNSEventData{
+			Header: request.Header,
+			Body:   (*json.RawMessage)(&body),
+		}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Error("failed to marshal the event data")
@@ -192,6 +195,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 	if err := yaml.Unmarshal(eventSource.Value, &snsEventSource); err != nil {
 		logger.WithError(err).Error("failed to parse event source")
 		return err
+	}
+
+	if snsEventSource.Namespace == "" {
+		snsEventSource.Namespace = listener.Namespace
 	}
 
 	route := webhook.NewRoute(snsEventSource.Webhook, listener.Logger, eventSource)

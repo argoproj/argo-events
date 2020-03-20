@@ -19,7 +19,7 @@ spec:
   dependencies:
     - name: test-dep
       gatewayName: minio-gateway
-      eventName: example-with-filter
+      eventName: example
   triggers:
     - template:
         name: minio-workflow-trigger
@@ -48,4 +48,5 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
+                dataKey: notification.0.s3.object.key
               dest: spec.templates.0.container.args.0

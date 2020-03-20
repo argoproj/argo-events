@@ -18,7 +18,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: test-gateway
+      gatewayName: emitter-gateway
       eventName: example
   triggers:
     - template:
@@ -33,7 +33,7 @@ spec:
               apiVersion: argoproj.io/v1alpha1
               kind: Workflow
               metadata:
-                generateName: test-
+                generateName: emitter-
               spec:
                 entrypoint: whalesay
                 arguments:
@@ -50,7 +50,7 @@ spec:
                       image: docker/whalesay:latest
                       command: [cowsay]
                       args: ["{{inputs.parameters.message}}"]
-          resourceParameters:
+          parameters:
             - src:
                 dependencyName: test-dep
               dest: spec.arguments.parameters.0.value

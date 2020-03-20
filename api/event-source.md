@@ -607,9 +607,7 @@ Broker URI to connect to.
 
 <td>
 
-<code>channelKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
+<code>channelKey</code></br> <em> string </em>
 
 </td>
 
@@ -730,6 +728,29 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 Backoff holds parameters applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -1420,8 +1441,7 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -3133,6 +3153,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4708,6 +4751,8 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>f010086</code>. </em>
+
+commit <code>d7d0a7d</code>. </em>
+
 
 </p>

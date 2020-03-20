@@ -24,10 +24,10 @@ spec:
           image: argoproj/file-gateway:v0.13.0-rc
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /bin
-              name: example-with-path
+            - mountPath: /test-data
+              name: test-data
       volumes:
-        - name: example-with-path
+        - name: test-data
           emptyDir: {}
       serviceAccountName: argo-events-sa
   subscribers:

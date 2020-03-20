@@ -289,9 +289,7 @@ string
 <td>
 <code>channelKey</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector
-</a>
+string
 </em>
 </td>
 <td>
@@ -358,6 +356,19 @@ github.com/argoproj/argo-events/common.Backoff
 <td>
 <em>(Optional)</em>
 <p>Backoff holds parameters applied to connection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
 </td>
 </tr>
 </tbody>
@@ -735,7 +746,7 @@ map[string]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Generi
 <td>
 <code>type</code></br>
 <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType
+Argo Events common.EventSourceType
 </em>
 </td>
 <td>
@@ -1588,6 +1599,19 @@ github.com/argoproj/argo-events/common.Backoff
 <p>Backoff holds parameters applied to connection.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>jsonBody</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>JSONBody specifies that all event body payload coming from this
+source will be JSON</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.PubSubEventSource">PubSubEventSource
@@ -2372,5 +2396,5 @@ More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.co
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>f010086</code>.
+on git commit <code>d7d0a7d</code>.
 </em></p>
