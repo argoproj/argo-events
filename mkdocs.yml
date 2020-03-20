@@ -26,7 +26,7 @@ nav:
       - 'concepts/event_source.md'
   - Setup:
       - 'setup/amqp.md'
-      - 'setup/aws-sns'
+      - 'setup/aws-sns.md'
       - 'setup/aws-sqs.md'
       - 'setup/calendar.md'
       - 'setup/emitter.md'
