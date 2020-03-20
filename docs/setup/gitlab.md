@@ -29,7 +29,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                   "subject": "name_of_the_event_within_event_source"
                 },
                 "data": {
-                  	"body": "Body is the github event data",
+                  	"body": "Body is the gitlab event data",
                   	"headers": "Headers from the Gitlab event",
                 }
             }
