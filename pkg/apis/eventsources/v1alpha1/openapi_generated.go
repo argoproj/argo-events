@@ -1358,6 +1358,13 @@ func schema_pkg_apis_eventsources_v1alpha1_PubSubEventSource(ref common.Referenc
 							Format:      "",
 						},
 					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"projectID", "topicProjectID", "topic", "credentialsFile"},
 			},

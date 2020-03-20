@@ -283,6 +283,10 @@ type PubSubEventSource struct {
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"bytes,1,opt,name=deleteSubscriptionOnFinish"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // GithubEventSource refers to event-source for github related events
