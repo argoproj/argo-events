@@ -66,27 +66,97 @@ The AWS Lambda trigger specification is available [here](https://github.com/argo
 
 ## Request Payload
 
-The trigger specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#awslambdatrigger)
+Invoking the AWS Lambda without a request payload would not be very useful. The lambda trigger within a sensor
+is invoked when sensor receives an event from a gateway. In order to construct a request payload based on the event data, sensor offers 
+`payload` field as a part of the lambda trigger.
 
-**Note**: You must declare the payload for the lambda trigger. Check out the HTTP trigger tutorial
-to understand how to construct the payload.
+Let's examine a lambda trigger,
 
-1. Lets create a sensor with a lambda trigger
+                awsLambda:
+                  functionName: hello
+                  accessKey:
+                    name: aws-secret
+                    key: accesskey
+                  secretKey:
+                    name: aws-secret
+                    key: secretkey
+                  namespace: argo-events
+                  region: us-east-1
+                  payload:
+                    - src:
+                        dependencyName: test-dep
+                        dataKey: body.name
+                      dest: name
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/10-aws-lambda-trigger/sensor.yaml
+The `payload` contains the list of `src` which refers to the source event and `dest` which refers to destination key within result request payload.
 
-2. Send a http request to webhook gateway,
+The `payload` declared above will generate a request payload like below,
 
-        curl -d '{"name":"foo"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+        {
+          "name": "foo" // name field from event data
+        }
 
-3. You should see the lambda execution in CloudWatch logs.
+The above payload will be passed in the request to invoke the AWS lambda. You can add however many number of `src` and `dest` under `payload`. 
 
-## Policy
-To determine whether the function was successful or not, Lambda trigger provides a `Status` policy.
-The `Status` holds a list of response statuses that are considered valid.
+**Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from
+event data.
 
 ## Parameterization
-Similar to HTTP trigger, the Lambda trigger provides `parameters` at both trigger resource and trigger template level.
+Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
+you want to define a generic trigger template in the sensor and populate values like funcation name, payload values on the fly.
 
-## OpenFaas Trigger
-Similar to AWS lambda, you can trigger a OpenFaas function. The trigger specification is available [here](https://github.com/argoproj/argo-events/blob/worflow-triggers/api/sensor.md#openfaastrigger)
+Consider a scenario where you don't want to hard-code the function name and let the event data populate it.
+
+                awsLambda:
+                  functionName: hello // this will be replaced.
+                  accessKey:
+                    name: aws-secret
+                    key: accesskey
+                  secretKey:
+                    name: aws-secret
+                    key: secretkey
+                  namespace: argo-events
+                  region: us-east-1
+                  payload:
+                    - src:
+                        dependencyName: test-dep
+                        dataKey: body.message
+                      dest: message
+                  parameters:
+                    - src:
+                        dependencyName: test-dep
+                        dataKey: body.function_name
+                      dest: functionName
+
+With `parameters` the sensor will replace the function name `hello` with the value of field `function_name` from event data.
+
+You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
+
+## Policy
+Trigger policy helps you determine the status of the lambda invocation and decide whether to stop or continue sensor. 
+
+To determine whether the lamda was successful or not, Lambda trigger provides a `Status` policy.
+The `Status` holds a list of response statuses that are considered valid.
+
+                        awsLambda:
+                          functionName: hello // this will be replaced.
+                          accessKey:
+                            name: aws-secret
+                            key: accesskey
+                          secretKey:
+                            name: aws-secret
+                            key: secretkey
+                          namespace: argo-events
+                          region: us-east-1
+                          payload:
+                            - src:
+                                dependencyName: test-dep
+                                dataKey: body.message
+                              dest: message
+                          policy:
+                            status:
+                                allow:
+                                    - 200
+                                    - 201
+
+The above lambda trigger will be treated successful only if its invocation returns with either 200 or 201 status. 
