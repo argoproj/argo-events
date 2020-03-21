@@ -17,10 +17,10 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
+          image: argoproj/gateway-client:v0.13.0
           imagePullPolicy: Always
         - name: minio-events
-          image: argoproj/minio-gateway:v0.13.0-rc
+          image: argoproj/minio-gateway:v0.13.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   subscribers:
