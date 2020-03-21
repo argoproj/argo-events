@@ -1,0 +1,69 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: trigger-template
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: argoproj/sensor:v0.13.0-rc
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: templated-workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                  - name: message
+                templates:
+                - name: whalesay
+                  serviceAccountName: argo-events-sa
+                  inputs:
+                    parameters:
+                    - name: message
+                    - name: subject
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}} from {{inputs.parameters.subject}}"]
+          parameters:
+            # Retrieve the 'message' key from the payload
+            - src:
+                dependencyName: test-dep
+                dataTemplate: "{{ .Input.message }}"
+              dest: spec.arguments.parameters.0.value
+            # Title case the context subject
+            - src:
+                dependencyName: test-dep
+                contextTemplate: "{{ .Input.subject | title }}"
+              dest: spec.arguments.parameters.1.value
+            # You can also form arbitrary values that don't derive from the
+            # dependency input
+            - src:
+                dependencyName: test-dep
+                dataTemplate: "{{ now | unixEpoch }}-"
+              dest: metadata.generateName
+              operation: append

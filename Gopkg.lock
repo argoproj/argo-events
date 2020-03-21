@@ -96,6 +96,30 @@
   revision = "9aa49832a739dcd78a5542ff189fb82c3e423116"
 
 [[projects]]
+  digest = "1:3b10c6fd33854dc41de2cf78b7bae105da94c2789b6fa5b9ac9e593ea43484ac"
+  name = "github.com/Masterminds/goutils"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "41ac8693c5c10a92ea1ff5ac3a7f95646f6123b0"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:f313598719f69ec4edbcd75b0f2ef1c8ed9e00f6ff3d7583ac3966db2d70d326"
+  name = "github.com/Masterminds/semver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "910aa146bd66780c2815d652b92a7fc5331e533c"
+  version = "v3.0.3"
+
+[[projects]]
+  digest = "1:b565deb585c50ab8e94fe5d6c9903f1495970b97814803e4ab0e70c0a9c87a30"
+  name = "github.com/Masterminds/sprig"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e4c0945838d570720d876a6ad9b4568ed32317b4"
+  version = "v2.22.0"
+
+[[projects]]
   digest = "1:a2682518d905d662d984ef9959984ef87cecb777d379bfa9d9fe40e78069b3e4"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -591,6 +615,14 @@
   version = "v0.5.4"
 
 [[projects]]
+  digest = "1:af811250c188f2a74c35fb390631d282b669cba8f99532789aeb6d200bebc723"
+  name = "github.com/huandu/xstrings"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "73cc8800d807c1a3393060290e46ab19b565d584"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:78d28d5b84a26159c67ea51996a230da4bc07cac648adaae1dfb5fc0ec8e40d3"
   name = "github.com/imdario/mergo"
   packages = ["."]
@@ -726,6 +758,14 @@
   version = "v6.0.25"
 
 [[projects]]
+  digest = "1:09ca328575f38b80969ccf857f6d7302f2ce09d53778ea7aaba526cfd2cec739"
+  name = "github.com/mitchellh/copystructure"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9a1b6f44e8da0e0e374624fb0a825a231b00c537"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:5d231480e1c64a726869bc4142d270184c419749d34f167646baa21008eb0a79"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
@@ -740,6 +780,14 @@
   pruneopts = "UT"
   revision = "3536a929edddb9a5b34bd6861dc4a9647cb459fe"
   version = "v1.1.2"
+
+[[projects]]
+  digest = "1:2a7e6f8bebdca6bd8bc359c37f01ae1c4ea4f8481eaabf93b1ae4863f15b72c7"
+  name = "github.com/mitchellh/reflectwalk"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3e2c75dfad4fbf904b58782a80fd595c760ad185"
+  version = "v1.0.1"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -1089,7 +1137,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:efeee531ee99dc395ae70e13cf578b66d0053c0e3c77feb4765b4adf96875a6f"
+  digest = "1:9a40f17538bda77f1c2e82df2c9a3a62a46cb524342e1733c985e98faa21d1dd"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
@@ -1112,6 +1160,7 @@
     "pkcs12",
     "pkcs12/internal/rc2",
     "poly1305",
+    "scrypt",
     "ssh",
     "ssh/agent",
     "ssh/internal/bcrypt_pbkdf",
@@ -2044,6 +2093,7 @@
     "cloud.google.com/go/pubsub",
     "github.com/Azure/azure-event-hubs-go",
     "github.com/Knetic/govaluate",
+    "github.com/Masterminds/sprig",
     "github.com/Shopify/sarama",
     "github.com/Shopify/sarama/mocks",
     "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1",
