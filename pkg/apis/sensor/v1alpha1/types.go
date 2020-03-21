@@ -95,12 +95,12 @@ const (
 type Comparator string
 
 const (
-	GreaterThanOrEqualTo Comparator = ">=" 	// Greater than or equal to value provided in data filter
-	GreaterThan Comparator = ">"			// Greater than value provided in data filter
-	EqualTo Comparator = "="				// Equal to value provided in data filter
-	LessThan Comparator = "<"				// Less than value provided in data filter
-	LessThanOrEqualTo Comparator = "<="		// Less than or equal to value provided in data filter
-	EmptyComparator = ""					// Equal to value provided in data filter
+	GreaterThanOrEqualTo Comparator = ">=" // Greater than or equal to value provided in data filter
+	GreaterThan          Comparator = ">"  // Greater than value provided in data filter
+	EqualTo              Comparator = "="  // Equal to value provided in data filter
+	LessThan             Comparator = "<"  // Less than value provided in data filter
+	LessThanOrEqualTo    Comparator = "<=" // Less than or equal to value provided in data filter
+	EmptyComparator                 = ""   // Equal to value provided in data filter
 )
 
 // Sensor is the definition of a sensor resource
@@ -416,8 +416,8 @@ type AWSLambdaTrigger struct {
 	// SecretKey refers K8 secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
 	// Namespace refers to Kubernetes namespace to read access related secret from.
-	// Must be defined if either accesskey or secretkey secret selector is specified.
-	// +optional
+	// Defaults to sensor's namespace.
+	// +optional.
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,5,name=region"`

@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors/types"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -57,6 +58,8 @@ type SensorContext struct {
 	kafkaProducers map[string]sarama.AsyncProducer
 	// natsConnections holds the references to the active nats connections.
 	natsConnections map[string]*natslib.Conn
+	// awsLambdaClients holds the references to active AWS Lambda clients.
+	awsLambdaClients map[string]*lambda.Lambda
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -73,7 +76,8 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		openfaasHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
-		kafkaProducers:  make(map[string]sarama.AsyncProducer),
-		natsConnections: make(map[string]*natslib.Conn),
+		kafkaProducers:   make(map[string]sarama.AsyncProducer),
+		natsConnections:  make(map[string]*natslib.Conn),
+		awsLambdaClients: make(map[string]*lambda.Lambda),
 	}
 }

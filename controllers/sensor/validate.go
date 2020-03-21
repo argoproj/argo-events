@@ -274,9 +274,6 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 	if trigger.AccessKey == nil || trigger.SecretKey == nil {
 		return errors.New("either accesskey or secretkey secret selector is not specified")
 	}
-	if trigger.Namespace == "" {
-		return errors.New("namespace to retrieve the accesskey or secretkey secret selector is not specified")
-	}
 	if trigger.Payload == nil {
 		return errors.New("payload parameters are not specified")
 	}
@@ -295,7 +292,7 @@ func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
 	if trigger == nil {
 		return errors.New("trigger can't be nil")
 	}
-	if trigger.URL ==  "" {
+	if trigger.URL == "" {
 		return errors.New("broker url must not be empty")
 	}
 	if trigger.Payload == nil {
