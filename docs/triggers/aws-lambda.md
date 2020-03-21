@@ -15,7 +15,7 @@ that are not native to AWS.
 <br/>
 
 
-## Trigger A Simple Lambda Function
+## Trigger A Simple Lambda
 
 1. Make sure your AWS account has permissions to execute Lambda. More info on AWS permissions is available
    [here](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_change-permissions.html).
@@ -139,7 +139,7 @@ To determine whether the lamda was successful or not, Lambda trigger provides a 
 The `Status` holds a list of response statuses that are considered valid.
 
                         awsLambda:
-                          functionName: hello // this will be replaced.
+                          functionName: hello
                           accessKey:
                             name: aws-secret
                             key: accesskey
