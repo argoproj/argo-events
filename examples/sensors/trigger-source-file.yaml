@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
+          image: argoproj/sensor:v0.13.0
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /workflows/hello_world.yaml

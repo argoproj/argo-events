@@ -19,8 +19,6 @@ package pubsub
 import (
 	"context"
 	"fmt"
-	"os"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -67,10 +65,8 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource.Topic == "" {
 		return fmt.Errorf("must specify topic")
 	}
-	if eventSource.CredentialsFile != "" {
-		if _, err := os.Stat(eventSource.CredentialsFile); err != nil {
-			return err
-		}
+	if eventSource.CredentialsFile == "" {
+		return fmt.Errorf("must specify credentials file path")
 	}
 	return nil
 }
