@@ -63,7 +63,12 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	}
 
 	if trigger.Template.AWSLambda != nil {
-		return awslambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
 	}
 
 	if trigger.Template.Kafka != nil {
