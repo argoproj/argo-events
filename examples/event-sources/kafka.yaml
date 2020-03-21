@@ -5,10 +5,18 @@ metadata:
 spec:
   type: "kafka"
   kafka:
-    example-with-retry:
+    example:
+      # kafka broker url
       url: "kafka.argo-events:9092"
+      # name of the kafka topic
       topic: "topic-2"
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # partition id
       partition: "1"
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000

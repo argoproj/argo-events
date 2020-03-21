@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 ## What is Argo Events?
-**Argo Events** is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s resources, Argo Workflows and Serverless workloads on events from variety of event sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
+**Argo Events** is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s resources, Argo Workflows and Serverless workloads on events from variety of event sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc. https://argoproj.github.io/argo-events/
 
 <br/>
 <br/>
@@ -27,12 +27,15 @@
 * [CloudEvents](https://cloudevents.io/) compliant.
 
 ## Getting Started
-Follow [setup](https://argoproj.github.io/argo-events/installation/) instructions for installation. To see the Argo-Events in action, follow the
+Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
+ 
+To see the Argo-Events in action, follow the
 [quick start](https://argoproj.github.io/argo-events/quick_start/) guide. 
 
 [![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
-## Tutorials
+## Guide
+Installation guide for gateways and sensors is available [here](https://argoproj.github.io/argo-events/setup/webhook/). 
 
 Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/01-introduction/  
 

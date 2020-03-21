@@ -282,6 +282,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if githubEventSource.Namespace == "" {
+		githubEventSource.Namespace = listener.Namespace
+	}
+
 	route := webhook.NewRoute(githubEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{

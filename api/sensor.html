@@ -225,7 +225,7 @@ Kubernetes meta/v1.GroupVersionResource
 <td>
 <code>s3</code></br>
 <em>
-github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
+Argo Events common.S3Artifact
 </em>
 </td>
 <td>
@@ -369,6 +369,15 @@ int
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.Comparator">Comparator
+(<code>string</code> alias)</p></h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>)
+</p>
+<p>
+<p>Comparator refers to the comparator operator for a data filter</p>
+</p>
 <h3 id="argoproj.io/v1alpha1.ConfigmapArtifact">ConfigmapArtifact
 </h3>
 <p>
@@ -582,6 +591,21 @@ Strings are taken as is
 Nils this value is ignored</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>comparator</code></br>
+<em>
+<a href="#argoproj.io/v1alpha1.Comparator">
+Comparator
+</a>
+</em>
+</td>
+<td>
+<p>Comparator compares the event data with a user given value.
+Can be &ldquo;&gt;=&rdquo;, &ldquo;&gt;&rdquo;, &ldquo;=&rdquo;, &ldquo;&lt;&rdquo;, or &ldquo;&lt;=&rdquo;.
+Is optional, and if left blank treated as equality &ldquo;=&rdquo;.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.DependencyGroup">DependencyGroup
@@ -735,7 +759,7 @@ TimeFilter
 <td>
 <code>context</code></br>
 <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventContext
+Argo Events common.EventContext
 </em>
 </td>
 <td>
@@ -1609,7 +1633,7 @@ string
 <td>
 <code>event</code></br>
 <em>
-github.com/argoproj/argo-events/pkg/apis/common.Event
+Argo Events common.Event
 </em>
 </td>
 <td>
@@ -3008,5 +3032,5 @@ bool
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>468aced</code>.
+on git commit <code>d7d0a7d</code>.
 </em></p>

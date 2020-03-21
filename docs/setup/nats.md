@@ -93,7 +93,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
                   initialDelaySeconds: 10
                   timeoutSeconds: 5
 
-2. Create the event source by running the following command. Make sure to update the appropriate fields.
+2. Create the event source by running the following command.
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/nats.yaml
 
@@ -106,8 +106,14 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 5. Create the sensor by running the following command,
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/nats.yaml
+
+7. If you are running NATS on local K8s cluster, make sure to `port-forward` to pod,
+
+        kubectl -n argo-events port-forward <nats-pod-name> 4222:4222
         
-6. Its time to publish a message for the subject specified in the event source. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.
+6. Publish a message for the subject specified in the event source. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.
+
+        go run main.go -s localhost foo '{"message": "hello"}'
 
 7. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
 

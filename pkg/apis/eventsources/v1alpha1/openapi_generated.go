@@ -100,6 +100,13 @@ func schema_pkg_apis_eventsources_v1alpha1_AMQPEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
 						},
 					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
 			},
@@ -236,7 +243,8 @@ func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.Referen
 					"channelKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ChannelKey refers to the channel key",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"channelName": {
@@ -269,6 +277,13 @@ func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.Referen
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},
@@ -1192,6 +1207,13 @@ func schema_pkg_apis_eventsources_v1alpha1_MQTTEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
 						},
 					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"url", "topic", "clientId"},
 			},
@@ -1226,6 +1248,13 @@ func schema_pkg_apis_eventsources_v1alpha1_NATSEventsSource(ref common.Reference
 						SchemaProps: spec.SchemaProps{
 							Description: "ConnectionBackoff holds backoff applied to connection.",
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},
@@ -1269,6 +1298,13 @@ func schema_pkg_apis_eventsources_v1alpha1_NSQEventSource(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff holds parameters applied to connection.",
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
+							Format:      "",
 						},
 					},
 				},
@@ -1318,6 +1354,13 @@ func schema_pkg_apis_eventsources_v1alpha1_PubSubEventSource(ref common.Referenc
 					"deleteSubscriptionOnFinish": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
@@ -1612,6 +1655,13 @@ func schema_pkg_apis_eventsources_v1alpha1_SQSEventSource(ref common.ReferenceCa
 						SchemaProps: spec.SchemaProps{
 							Description: "RoleARN is the Amazon Resource Name (ARN) of the role to assume.",
 							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"jsonBody": {
+						SchemaProps: spec.SchemaProps{
+							Description: "JSONBody specifies that all event body payload coming from this source will be JSON",
+							Type:        []string{"boolean"},
 							Format:      "",
 						},
 					},

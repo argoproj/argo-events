@@ -72,12 +72,6 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var options []func(client *emitter.Client)
 	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
 
-	logger.WithField("secret-name", emitterEventSource.ChannelKey.Name).Infoln("retrieving the channel key")
-	channelKey, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.ChannelKey)
-	if err != nil {
-		return errors.Wrapf(err, "failed to retrieve the channel key from %s", emitterEventSource.ChannelKey.Name)
-	}
-
 	if emitterEventSource.Username != nil {
 		username, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
 		if err != nil {
@@ -94,6 +88,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		options = append(options, emitter.WithPassword(password))
 	}
 
+	if emitterEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("creating a client")
 	client := emitter.NewClient(options...)
 
@@ -106,11 +104,17 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
 	}
 
-	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
-		eventBytes, err := json.Marshal(&events.EmitterEventData{
+	if err := client.Subscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
+		body := message.Payload()
+		event := &events.EmitterEventData{
 			Topic: message.Topic(),
-			Body:  message.Payload(),
-		})
+			Body:  body,
+		}
+		if emitterEventSource.JSONBody {
+			event.Body = (*json.RawMessage)(&body)
+		}
+		eventBytes, err := json.Marshal(event)
+
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data")
 			return
@@ -126,7 +130,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("event source stopped, unsubscribe the channel")
 
-	if err := client.Unsubscribe(channelKey, emitterEventSource.ChannelName); err != nil {
+	if err := client.Unsubscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName); err != nil {
 		logger.WithError(err).WithField("channel-name", emitterEventSource.ChannelName).Errorln("failed to unsubscribe")
 	}
 

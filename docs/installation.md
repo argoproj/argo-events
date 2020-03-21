@@ -26,6 +26,10 @@ Make sure you have helm client installed and Tiller server is running. To instal
    
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
 
+   NOTE: On GKE, you may need to grant your account the ability to create new clusterroles
+
+        kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+
 #### Step-by-Step Installation
 
 1. Create the namespace

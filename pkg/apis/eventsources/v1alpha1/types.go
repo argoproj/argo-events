@@ -267,6 +267,9 @@ type SQSEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
+	// QueueAccountId is the ID of the account that created the queue to monitor
+	// +optional
+	QueueAccountId string `json:"queueAccountId,omitempty" protobuf:"bytes,9,opt,name=queueAccountId"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -283,6 +286,10 @@ type PubSubEventSource struct {
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
 	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"bytes,1,opt,name=deleteSubscriptionOnFinish"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -462,7 +469,7 @@ type EmitterEventSource struct {
 	// Broker URI to connect to.
 	Broker string `json:"broker" protobuf:"bytes,1,name=broker"`
 	// ChannelKey refers to the channel key
-	ChannelKey *corev1.SecretKeySelector `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
+	ChannelKey string `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
 	// ChannelName refers to the channel name
 	ChannelName string `json:"channelName" protobuf:"bytes,3,name=channelName"`
 	// Namespace to use to retrieve the channel key and optional username/password
@@ -476,6 +483,10 @@ type EmitterEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -509,6 +520,10 @@ type NSQEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,9,opt,name=jsonBody"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.

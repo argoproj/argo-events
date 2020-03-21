@@ -270,8 +270,7 @@ configurations for the gateway
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -358,8 +357,8 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>eventProtocol</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
+<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
+</em>
 
 </td>
 
@@ -601,8 +600,7 @@ configurations for the gateway
 
 <td>
 
-<code>type</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
+<code>type</code></br> <em> Argo Events common.EventSourceType </em>
 
 </td>
 
@@ -689,8 +687,8 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>eventProtocol</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
+<code>eventProtocol</code></br> <em> Argo Events common.EventProtocol
+</em>
 
 </td>
 
@@ -1323,6 +1321,7 @@ NATS refers to the subscribers over NATS protocol.
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>468aced</code>. </em>
+
+commit <code>d7d0a7d</code>. </em>
 
 </p>

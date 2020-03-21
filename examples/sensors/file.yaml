@@ -10,13 +10,13 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
+          image: argoproj/sensor:v0.13.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       gatewayName: file-gateway
-      eventName: example-with-path
+      eventName: example
   subscription:
     http:
       port: 9300
@@ -48,5 +48,4 @@ spec:
           parameters:
             - src:
                 dependencyName: test-dep
-                dataKey: name
-              dest: spec.templates.0.container.args.1
+              dest: spec.templates.0.container.args.0

@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
+          image: argoproj/gateway-client:v0.13.0
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: gitlab-events
-          image: argoproj/gitlab-gateway:v0.13.0-rc
+          image: argoproj/gitlab-gateway:v0.13.0
           imagePullPolicy: Always
           command: ["/bin/gitlab-gateway"]
       serviceAccountName: argo-events-sa

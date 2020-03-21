@@ -17,17 +17,17 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
+          image: argoproj/gateway-client:v0.13.0
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: file-events
-          image: argoproj/file-gateway:v0.13.0-rc
+          image: argoproj/file-gateway:v0.13.0
           imagePullPolicy: Always
           volumeMounts:
-            - mountPath: /bin
-              name: example-with-path
+            - mountPath: /test-data
+              name: test-data
       volumes:
-        - name: example-with-path
+        - name: test-data
           emptyDir: {}
       serviceAccountName: argo-events-sa
   subscribers:

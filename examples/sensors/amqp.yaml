@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
+          image: argoproj/sensor:v0.13.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   subscription:
@@ -19,7 +19,7 @@ spec:
   dependencies:
     - name: test-dep
       gatewayName: amqp-gateway
-      eventName: example-with-retry
+      eventName: example
   triggers:
     - template:
         name: amqp-workflow-trigger
@@ -50,7 +50,7 @@ spec:
                       image: docker/whalesay:latest
                       command: [cowsay]
                       args: ["{{inputs.parameters.message}}"]
-          resourceParameters:
+          parameters:
             - src:
                 dependencyName: test-dep
               dest: spec.arguments.parameters.0.value

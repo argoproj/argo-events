@@ -473,8 +473,7 @@ Description
 
 <td>
 
-<code>s3</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
+<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
 
 </td>
 
@@ -744,6 +743,31 @@ Exit with error after this many steps
 </tbody>
 
 </table>
+
+<h3 id="argoproj.io/v1alpha1.Comparator">
+
+Comparator (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Comparator refers to the comparator operator for a data filter
+
+</p>
+
+</p>
 
 <h3 id="argoproj.io/v1alpha1.ConfigmapArtifact">
 
@@ -1175,6 +1199,29 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>comparator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Comparator"> Comparator </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Comparator compares the event data with a user given value. Can be
+“\>=”, “\>”, “=”, “\<”, or “\<=”. Is optional, and if left blank
+treated as equality “=”.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1496,8 +1543,7 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
+<code>context</code></br> <em> Argo Events common.EventContext </em>
 
 </td>
 
@@ -3245,8 +3291,7 @@ events
 
 <td>
 
-<code>event</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.Event </em>
+<code>event</code></br> <em> Argo Events common.Event </em>
 
 </td>
 
@@ -6001,6 +6046,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>468aced</code>. </em>
+commit <code>d7d0a7d</code>. </em>
 
 </p>

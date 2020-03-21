@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a070b90dceca426116f1723436a46bc66bf4e2fa96741d018f92adc04e75f15a"
+  digest = "1:e4c7e170dbc2f12d6b7ee4fd51dccfb912da27048be45f51156ae62063e088ad"
   name = "cloud.google.com/go"
   packages = [
     ".",
@@ -14,9 +14,10 @@
     "pubsub",
     "pubsub/apiv1",
     "pubsub/internal/distribution",
+    "pubsub/internal/scheduler",
   ]
   pruneopts = "UT"
-  revision = "4b0e7192a0e5ab6e9d43f56245493eaec62c68c4"
+  revision = "09ba3f8614bab8557260ba47b7bd3a7ec711991a"
 
 [[projects]]
   digest = "1:487dc37a77bbba996bf4ddae0bff1c69fde98027d507e75eca317ca7c94483c3"
@@ -51,15 +52,15 @@
   version = "v1.3.1"
 
 [[projects]]
-  digest = "1:ad699c6385a8e6ae7cc971a2dd137ff7332801c0736ce1953d296253daaa33e8"
+  digest = "1:1f16df85b55dd491a5268ecbd7851d7ae84d76b9f18e925ddbe380cde8bb3c9c"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
     "services/eventhub/mgmt/2017-04-01/eventhub",
     "version",
   ]
   pruneopts = "UT"
-  revision = "58f0a1b3cf842e1d702da8226e100f726ec26579"
-  version = "v40.2.0"
+  revision = "f1b3b9b7d4962c94c77d16ce75f9a8e981eb2488"
+  version = "v40.4.0"
 
 [[projects]]
   digest = "1:24f3d5aa436b7cf0244efff65e6346602eb0af08e1026bb9d1940b458c5326f9"
@@ -146,107 +147,15 @@
   version = "v1.26.1"
 
 [[projects]]
-  digest = "1:11a6ee5cf7fab26517f6a6e47ea5f7c0bd1da1f6ede469c05721324c3612f2a3"
+  digest = "1:a6810205f5359c84aa5f4b2551ac319ef4320203455246baf68fe6a05444099d"
   name = "github.com/argoproj/argo"
   packages = [
     "pkg/apis/workflow",
     "pkg/apis/workflow/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "842739d7831cc5b417c4f524ed85288408a32bbf"
-  version = "v2.6.1"
-
-[[projects]]
-  branch = "master"
-  digest = "1:2f30afdfd2fb10e8b7a5d0653cd57d6293a8a6c6054c7c35066003f21874b1e3"
-  name = "github.com/argoproj/argo-events"
-  packages = [
-    ".",
-    "common",
-    "controllers/common",
-    "controllers/gateway",
-    "controllers/sensor",
-    "gateways",
-    "gateways/server",
-    "gateways/server/amqp",
-    "gateways/server/aws-sns",
-    "gateways/server/aws-sqs",
-    "gateways/server/azure-events-hub",
-    "gateways/server/calendar",
-    "gateways/server/common/aws",
-    "gateways/server/common/fsevent",
-    "gateways/server/common/naivewatcher",
-    "gateways/server/common/webhook",
-    "gateways/server/emitter",
-    "gateways/server/file",
-    "gateways/server/gcp-pubsub",
-    "gateways/server/github",
-    "gateways/server/gitlab",
-    "gateways/server/hdfs",
-    "gateways/server/kafka",
-    "gateways/server/minio",
-    "gateways/server/mqtt",
-    "gateways/server/nats",
-    "gateways/server/nsq",
-    "gateways/server/redis",
-    "gateways/server/resource",
-    "gateways/server/slack",
-    "gateways/server/storagegrid",
-    "gateways/server/stripe",
-    "gateways/server/webhook",
-    "pkg/apis/common",
-    "pkg/apis/events",
-    "pkg/apis/eventsources",
-    "pkg/apis/eventsources/v1alpha1",
-    "pkg/apis/gateway",
-    "pkg/apis/gateway/v1alpha1",
-    "pkg/apis/sensor",
-    "pkg/apis/sensor/v1alpha1",
-    "pkg/client/eventsources/clientset/versioned",
-    "pkg/client/eventsources/clientset/versioned/scheme",
-    "pkg/client/eventsources/clientset/versioned/typed/eventsources/v1alpha1",
-    "pkg/client/eventsources/clientset/versioned/typed/eventsources/v1alpha1/fake",
-    "pkg/client/eventsources/informers/externalversions/eventsources",
-    "pkg/client/eventsources/informers/externalversions/eventsources/v1alpha1",
-    "pkg/client/eventsources/informers/externalversions/internalinterfaces",
-    "pkg/client/eventsources/listers/eventsources/v1alpha1",
-    "pkg/client/gateway/clientset/versioned",
-    "pkg/client/gateway/clientset/versioned/fake",
-    "pkg/client/gateway/clientset/versioned/scheme",
-    "pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1",
-    "pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1/fake",
-    "pkg/client/gateway/informers/externalversions",
-    "pkg/client/gateway/informers/externalversions/gateway",
-    "pkg/client/gateway/informers/externalversions/gateway/v1alpha1",
-    "pkg/client/gateway/informers/externalversions/internalinterfaces",
-    "pkg/client/gateway/listers/gateway/v1alpha1",
-    "pkg/client/sensor/clientset/versioned",
-    "pkg/client/sensor/clientset/versioned/fake",
-    "pkg/client/sensor/clientset/versioned/scheme",
-    "pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1",
-    "pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1/fake",
-    "pkg/client/sensor/informers/externalversions",
-    "pkg/client/sensor/informers/externalversions/internalinterfaces",
-    "pkg/client/sensor/informers/externalversions/sensor",
-    "pkg/client/sensor/informers/externalversions/sensor/v1alpha1",
-    "pkg/client/sensor/listers/sensor/v1alpha1",
-    "sensors",
-    "sensors/dependencies",
-    "sensors/policy",
-    "sensors/triggers",
-    "sensors/triggers/argo-workflow",
-    "sensors/triggers/aws-lambda",
-    "sensors/triggers/custom-trigger",
-    "sensors/triggers/http",
-    "sensors/triggers/kafka",
-    "sensors/triggers/nats",
-    "sensors/triggers/openfaas",
-    "sensors/triggers/standard-k8s",
-    "sensors/types",
-    "store",
-  ]
-  pruneopts = "UT"
-  revision = "c8ef5762237123f276b245f16178ef2949e22a15"
+  revision = "2e8ac609cba1ad3d69c765dea19bc58ea4b8a8c3"
+  version = "v2.6.3"
 
 [[projects]]
   digest = "1:f50c4e59aad56c9f234eeb3867112bd2f7fd7859d55627ea942e16df32f85647"
@@ -261,7 +170,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a90301650fe4aae2afe9cc04b3d1bced220a034f121879c99522ad78cfc7cbdc"
+  digest = "1:43b5cd058cb76f9f2edee6ff60f1f16027c0df08b9051bd1fd3be7d9011e1ffc"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -306,7 +215,7 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "a8376627714c0e8170ae07b957bfc243eafb3917"
+  revision = "6194da3047dec68bb49483652866575d1841ea3d"
 
 [[projects]]
   digest = "1:b3593a62778035a246ff254b02ac1289862dbfc52a3bea493565ff24b4dd4059"
@@ -445,11 +354,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:925a2ad8acf10a486cdae4366eaf45847b16d6d7448e654814d8f1d51adeefe4"
+  digest = "1:80057945464ffb5b0da1f026beb8df0e8dbd098eaf771a349291bed2cd29a83e"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4bf2d1fec78374803a39307bfb8d340688f4f28e"
+  revision = "45d7d09e39ef4ac08d493309fa031790c15bfe8a"
 
 [[projects]]
   branch = "master"
@@ -800,7 +709,7 @@
   version = "1.0"
 
 [[projects]]
-  digest = "1:5647ffc57e1889aaf1fc349cf09474e9d2babdd15ba93a7806e4d4689c83e896"
+  digest = "1:a91b999a29bf71efd8671253f77c8854d48d83cef7dc1333bf120fab4c904560"
   name = "github.com/klauspost/compress"
   packages = [
     "fse",
@@ -810,8 +719,8 @@
     "zstd/internal/xxhash",
   ]
   pruneopts = "UT"
-  revision = "d4b3bb13d45b000ac3a915d4f32069a9284540bb"
-  version = "v1.10.2"
+  revision = "788b7f06fee85b7e1d2aa4a3a86f8dbbbcc771ae"
+  version = "v1.10.3"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -967,23 +876,28 @@
   version = "v1.0.8"
 
 [[projects]]
-  digest = "1:23c090b7e676e1bb49ab9a87562156fd49d6f4cd28eabb1f23010695fbd1a325"
+  digest = "1:208f4dd7e6312b7d56a810a0fc98e10f9c2d239409d058f46411f59c496e53c6"
   name = "github.com/openfaas-incubator/connector-sdk"
   packages = ["types"]
   pruneopts = "UT"
-  revision = "df5d76475412b74c3516ba912ae4522793780994"
-  version = "0.5.5"
+  revision = "d4baf95d4c62f6295c5d4af1d36bb2b9d03a32d4"
+  version = "0.4.1"
 
 [[projects]]
-  digest = "1:5ef12e7154e453638378dfc853ca53d2d775aee2d7a6da535df639d5933b39c7"
-  name = "github.com/openfaas/faas-provider"
-  packages = [
-    "auth",
-    "types",
-  ]
+  digest = "1:3f69624cb4ae8ab815a672f7d169d64786ee027a9d42eefab3c9d4e9debe0750"
+  name = "github.com/openfaas/faas"
+  packages = ["gateway/requests"]
   pruneopts = "UT"
-  revision = "d6579bdcf7c85f4d01f398d65ea0cab37e9633d0"
-  version = "0.13.3"
+  revision = "a65df4795bc66147c41161c48bfd4c72f60c7434"
+  version = "0.9.14"
+
+[[projects]]
+  digest = "1:deb76da5396c9f641ddea9ca79e31a14bdb09c787cdfda90488768b7539b1fd6"
+  name = "github.com/openfaas/faas-provider"
+  packages = ["auth"]
+  pruneopts = "UT"
+  revision = "220324e98f5db5aa61f02d1ab13f03e91310796c"
+  version = "0.8.1"
 
 [[projects]]
   digest = "1:0d21409d74019b65b488ecb02bed6d0f539d8d8563b86aac5734dfdbdf860cdf"
@@ -997,12 +911,12 @@
   version = "v2.4.1"
 
 [[projects]]
-  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
+  revision = "614d223910a179a466c1767a985424175c39b465"
+  version = "v0.9.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -1014,11 +928,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5bbebe8ac19ecb6c87790a89faa20566e38ed0d6494a1d14c4f5b05d9ce2436c"
+  digest = "1:294a3024486051ac61d8c1b0e2f31e0598c2339d7483ef70af7cadc81cd93c48"
   name = "github.com/rcrowley/go-metrics"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cac0b30c2563378d434b5af411844adff8e32960"
+  revision = "10cdbea86bc0b922507ce91d43f4f78a5bea2e8f"
 
 [[projects]]
   digest = "1:ed615c5430ecabbb0fb7629a182da65ecee6523900ac1ac932520860878ffcad"
@@ -1107,7 +1021,7 @@
   version = "v1.5.1"
 
 [[projects]]
-  digest = "1:5cae9364bbce5be3b7788ceeb6a93053783b2f0d41d5de9e0ce919fd3a5bd82d"
+  digest = "1:dcf5a344bc2c01d5b53c8550ef5bd5969f9953a7b7d37b71f3560fe5d54d551c"
   name = "github.com/stripe/stripe-go"
   packages = [
     ".",
@@ -1115,8 +1029,8 @@
     "webhookendpoint",
   ]
   pruneopts = "UT"
-  revision = "40d9a01150102dc53b1552334694b3fc6c2052ee"
-  version = "v70.2.0"
+  revision = "023fd8d3b5675a207862c946ebcaefa8d07fe89e"
+  version = "v70.5.0"
 
 [[projects]]
   digest = "1:358f9a53d3bb46b9dd07b4490f9b30f9f85218b41f6bbb48d6503668a45721a6"
@@ -1207,7 +1121,7 @@
   version = "v1.5.0"
 
 [[projects]]
-  digest = "1:7cf33d98a2a8d4ddb940ee365e1d93c334de32813767cf2e78bfb2774f6d78ec"
+  digest = "1:37db8edb1893509ed6230cb160a98ff5dc8fe4f82b6818baa88af4b478ce3824"
   name = "go.uber.org/zap"
   packages = [
     ".",
@@ -1218,12 +1132,12 @@
     "zapcore",
   ]
   pruneopts = "UT"
-  revision = "c89bd3c833f56cad3bc6dfa104b9c6d144526145"
-  version = "v1.14.0"
+  revision = "2aa9fa25da83bdfff756c36a91442edc9a84576c"
+  version = "v1.14.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:ca06bad88a9b9d82acc92b5e23233f2dd6027ac71943f5748244d3fcd3bcb5de"
+  digest = "1:9a40f17538bda77f1c2e82df2c9a3a62a46cb524342e1733c985e98faa21d1dd"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
@@ -1254,7 +1168,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "78000ba7a073cafc0278790f6bce552a0f25850e"
+  revision = "1b76d66859c6111b3d5c3ea6600ea44dc188bf12"
 
 [[projects]]
   branch = "master"
@@ -1315,18 +1229,18 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a2fc247e64b5dafd3251f12d396ec85f163d5bb38763c4997856addddf6e78d8"
+  digest = "1:ec98ab215ad6fe290c86fe0c15b73684dd44680fc7b131fc1e0398b8dd5738f1"
   name = "golang.org/x/sync"
   packages = [
     "errgroup",
     "semaphore",
   ]
   pruneopts = "UT"
-  revision = "cd5d95a43a6e21273425c7ae415d3df9ea832eeb"
+  revision = "43a5402ce75a95522677f77c619865d66b8c57ab"
 
 [[projects]]
   branch = "master"
-  digest = "1:c5e0e6de42c14702f7a8355c934a8b1ced4de2db964ca033d0b7e83f6d5aba20"
+  digest = "1:017491fb7a712fbb21cd733af00c3a9032c193ea9ae51fa0403b1b33a1b487b0"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -1334,7 +1248,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "5c8b2ff67527cb88b770f693cebf3799036d8bc0"
+  revision = "5766fd39f98ddd8d769ad4aedcee557dd28de90f"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -1372,7 +1286,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d9231422d9d05608234c055a565efdd8bf7fa8daf2d9e1063cc6806035ff354a"
+  digest = "1:4f095ed07031ccfe09fe36448c2f40288ebdc8d69b7eef416fbe9197f225ddd6"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -1397,7 +1311,7 @@
     "internal/packagesinternal",
   ]
   pruneopts = "UT"
-  revision = "20ab64c0d93f083c2eb6362b7f17c7e094783a84"
+  revision = "2944c61d58b4b44936759b37e08703fc37be20e2"
 
 [[projects]]
   branch = "master"
@@ -1447,7 +1361,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ac00ae7e8736047e98fcb432eeeaa45daacf9817c1cb8d3028d352c957342222"
+  digest = "1:54299ac581b70a93f7f1d42f67e857e82fbca7c87e389f2949aeb989143ec7fe"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api/annotations",
@@ -1458,10 +1372,10 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "5b75447e413d20e557aecdd993c0bd102825c4f1"
+  revision = "1f3552e48f24ac35a91be3fd5ea65959428857e4"
 
 [[projects]]
-  digest = "1:e2a6248e67bdf105b17b795f56e085b754529556f05a56b4dc4ac4cd0730de93"
+  digest = "1:c5cb55dc71404526bd9002c7b0f63c8910f51b19751248e15dcba2c46210662a"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -1496,8 +1410,10 @@
     "internal/buffer",
     "internal/channelz",
     "internal/envconfig",
+    "internal/grpclog",
     "internal/grpcrand",
     "internal/grpcsync",
+    "internal/grpcutil",
     "internal/resolver/dns",
     "internal/resolver/passthrough",
     "internal/syscall",
@@ -1513,8 +1429,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "f495f5b15ae7ccda3b38c53a1bfcde4c1a58a2bc"
-  version = "v1.27.1"
+  revision = "142182889d38b76209f1d9f1d8e91d7608aff542"
+  version = "v1.28.0"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -1525,12 +1441,12 @@
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:b9e2424fb01adfa88b03cf56d3ccd83bd3ce6a1a1b573031ca282178b6397d5a"
+  digest = "1:a064971c78455f088b48483cf48a61dbe2f173dc02043cf76a06e19acba3c5e4"
   name = "gopkg.in/ini.v1"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8e0f5b3a15fc93a84881c6cc50129bd62e83a314"
-  version = "v1.54.0"
+  revision = "39bc4ddcb8b9d0100f7a040816380ccda878b94a"
+  version = "v1.55.0"
 
 [[projects]]
   digest = "1:c902038ee2d6f964d3b9f2c718126571410c5d81251cbab9fe58abd37803513c"
@@ -1765,7 +1681,7 @@
   version = "2020.1.3"
 
 [[projects]]
-  digest = "1:ca7cda307ba81de08d6f448cb5a52a30ad604650f16df8f5cbdc0fb25af4a8a1"
+  digest = "1:de0c000e3ac116dc373472b8a15cf2d0b163b04eada027018433bdcafcc19aba"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1",
@@ -1810,8 +1726,8 @@
     "storage/v1beta1",
   ]
   pruneopts = "T"
-  revision = "ef0cd3ac5f239dcd07b58dc7f6f0698d7aa74efd"
-  version = "v0.17.3"
+  revision = "d3c87f2f52e31c74a4ccb065b706b688f4e6341d"
+  version = "v0.17.4"
 
 [[projects]]
   digest = "1:4403949d51282e512c2d479be84a75abd7187e067a50ab7872ba8618cf4fdf15"
@@ -1862,10 +1778,10 @@
   ]
   pruneopts = "T"
   revision = "731dcecc205498f52a21b12e311af095efb4b188"
-  version = "v0.17.3"
+  version = "v0.17.4"
 
 [[projects]]
-  digest = "1:c492dc096a30a1a942eeefa12a767ebc8f2fd723147c440058cf52ec372ce1a5"
+  digest = "1:9cd50e6f501221fd9a3efb357d5b8db0b028eb72bebfc8e9906029428b594e99"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -2077,8 +1993,8 @@
     "util/workqueue",
   ]
   pruneopts = "UT"
-  revision = "ae93ed28af1516427c76ef4e784b9ba231664e0f"
-  version = "v0.17.3"
+  revision = "9927afa2880713c4332723b7f0865adee5e63a7b"
+  version = "v0.17.4"
 
 [[projects]]
   digest = "1:bbef9e84cb20ea8c86261d1487c5bf35f0f6f391d70ffcde1103f82694862563"
@@ -2097,7 +2013,7 @@
   ]
   pruneopts = "T"
   revision = "4ae19cfe9b46bf48d232c065a9078d1dff3de06c"
-  version = "v0.17.3"
+  version = "v0.17.4"
 
 [[projects]]
   digest = "1:a9f99f1c11620be972d49d2e4e296031a5fbc168ada49a9e618d9b35f751f119"
@@ -2149,7 +2065,7 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "0a110f9eb7ab662220ed640640f50c4be9b6b485"
+  revision = "138672cc43f8470f6802e22baa03a8c20ada54bd"
 
 [[projects]]
   digest = "1:caa7785e6f87eb44fe0688b7eaea489a7f904ed8cbb09eb2d963bd5cde592601"
@@ -2180,89 +2096,6 @@
     "github.com/Masterminds/sprig",
     "github.com/Shopify/sarama",
     "github.com/Shopify/sarama/mocks",
-    "github.com/argoproj/argo-events",
-    "github.com/argoproj/argo-events/common",
-    "github.com/argoproj/argo-events/controllers/common",
-    "github.com/argoproj/argo-events/controllers/gateway",
-    "github.com/argoproj/argo-events/controllers/sensor",
-    "github.com/argoproj/argo-events/gateways",
-    "github.com/argoproj/argo-events/gateways/server",
-    "github.com/argoproj/argo-events/gateways/server/amqp",
-    "github.com/argoproj/argo-events/gateways/server/aws-sns",
-    "github.com/argoproj/argo-events/gateways/server/aws-sqs",
-    "github.com/argoproj/argo-events/gateways/server/azure-events-hub",
-    "github.com/argoproj/argo-events/gateways/server/calendar",
-    "github.com/argoproj/argo-events/gateways/server/common/aws",
-    "github.com/argoproj/argo-events/gateways/server/common/fsevent",
-    "github.com/argoproj/argo-events/gateways/server/common/naivewatcher",
-    "github.com/argoproj/argo-events/gateways/server/common/webhook",
-    "github.com/argoproj/argo-events/gateways/server/emitter",
-    "github.com/argoproj/argo-events/gateways/server/file",
-    "github.com/argoproj/argo-events/gateways/server/gcp-pubsub",
-    "github.com/argoproj/argo-events/gateways/server/github",
-    "github.com/argoproj/argo-events/gateways/server/gitlab",
-    "github.com/argoproj/argo-events/gateways/server/hdfs",
-    "github.com/argoproj/argo-events/gateways/server/kafka",
-    "github.com/argoproj/argo-events/gateways/server/minio",
-    "github.com/argoproj/argo-events/gateways/server/mqtt",
-    "github.com/argoproj/argo-events/gateways/server/nats",
-    "github.com/argoproj/argo-events/gateways/server/nsq",
-    "github.com/argoproj/argo-events/gateways/server/redis",
-    "github.com/argoproj/argo-events/gateways/server/resource",
-    "github.com/argoproj/argo-events/gateways/server/slack",
-    "github.com/argoproj/argo-events/gateways/server/storagegrid",
-    "github.com/argoproj/argo-events/gateways/server/stripe",
-    "github.com/argoproj/argo-events/gateways/server/webhook",
-    "github.com/argoproj/argo-events/pkg/apis/common",
-    "github.com/argoproj/argo-events/pkg/apis/events",
-    "github.com/argoproj/argo-events/pkg/apis/eventsources",
-    "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/apis/gateway",
-    "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/apis/sensor",
-    "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/scheme",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/typed/eventsources/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned/typed/eventsources/v1alpha1/fake",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/informers/externalversions/eventsources",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/informers/externalversions/eventsources/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/informers/externalversions/internalinterfaces",
-    "github.com/argoproj/argo-events/pkg/client/eventsources/listers/eventsources/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned",
-    "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake",
-    "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/scheme",
-    "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/typed/gateway/v1alpha1/fake",
-    "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions",
-    "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/gateway",
-    "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/gateway/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions/internalinterfaces",
-    "github.com/argoproj/argo-events/pkg/client/gateway/listers/gateway/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned",
-    "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake",
-    "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/scheme",
-    "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/typed/sensor/v1alpha1/fake",
-    "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions",
-    "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/internalinterfaces",
-    "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/sensor",
-    "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions/sensor/v1alpha1",
-    "github.com/argoproj/argo-events/pkg/client/sensor/listers/sensor/v1alpha1",
-    "github.com/argoproj/argo-events/sensors",
-    "github.com/argoproj/argo-events/sensors/dependencies",
-    "github.com/argoproj/argo-events/sensors/policy",
-    "github.com/argoproj/argo-events/sensors/triggers",
-    "github.com/argoproj/argo-events/sensors/triggers/argo-workflow",
-    "github.com/argoproj/argo-events/sensors/triggers/aws-lambda",
-    "github.com/argoproj/argo-events/sensors/triggers/custom-trigger",
-    "github.com/argoproj/argo-events/sensors/triggers/http",
-    "github.com/argoproj/argo-events/sensors/triggers/kafka",
-    "github.com/argoproj/argo-events/sensors/triggers/nats",
-    "github.com/argoproj/argo-events/sensors/triggers/openfaas",
-    "github.com/argoproj/argo-events/sensors/triggers/standard-k8s",
-    "github.com/argoproj/argo-events/sensors/types",
-    "github.com/argoproj/argo-events/store",
     "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
     "github.com/aws/aws-sdk-go/aws",

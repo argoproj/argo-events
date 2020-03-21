@@ -227,6 +227,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if gitlabEventSource.Namespace == "" {
+		gitlabEventSource.Namespace = listener.Namespace
+	}
+
 	route := webhook.NewRoute(gitlabEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{

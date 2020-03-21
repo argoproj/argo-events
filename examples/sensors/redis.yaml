@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
+          image: argoproj/sensor:v0.13.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   subscription:
@@ -36,21 +36,16 @@ spec:
                 generateName: redis-
               spec:
                 entrypoint: whalesay
-                arguments:
-                  parameters:
-                    - name: message
-                      # value will get overridden by the event payload
-                      value: hello world
                 templates:
-                  - name: whalesay
-                    inputs:
-                      parameters:
-                        - name: message
+                  -
                     container:
-                      image: docker/whalesay:latest
-                      command: [cowsay]
-                      args: ["{{inputs.parameters.message}}"]
-          resourceParameters:
+                      args:
+                        - "hello" # it will get replaced by the event payload
+                      command:
+                        - cowsay
+                      image: "docker/whalesay:latest"
+                    name: whalesay
+          parameters:
             - src:
                 dependencyName: test-dep
-              dest: spec.arguments.parameters.0.value
+              dest: spec.templates.0.container.args.0
