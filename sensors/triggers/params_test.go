@@ -241,6 +241,65 @@ func TestResolveParamValue(t *testing.T) {
 			},
 			result: "fake",
 		},
+		{
+			name: "get first name with template",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataTemplate:   "{{ .Input.name.first }}",
+			},
+			result: "fake",
+		},
+		{
+			name: "get capitalized first name with template",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataTemplate:   "{{ upper .Input.name.first }}",
+			},
+			result: "FAKE",
+		},
+		{
+			name: "get subject with template",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				ContextTemplate: "{{ .Input.subject }}",
+			},
+			result: "example-1",
+		},
+		{
+			name: "get formatted subject with template",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				ContextTemplate: `{{ .Input.subject | replace "-" "_" }}`,
+			},
+			result: "example_1",
+		},
+		{
+			name: "data template has preference over context template",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName:  "fake-dependency",
+				ContextTemplate: "{{ .Input.subject }}",
+				DataTemplate:    "{{ .Input.name.first }}",
+			},
+			result: "fake",
+		},
+		{
+			name: "data template fails over to data key",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataTemplate:   "{{ .Input.name.non_exist }}",
+				DataKey:        "name.first",
+			},
+			result: "fake",
+		},
+		{
+			name: "invalid template fails over to data key",
+			source: &v1alpha1.TriggerParameterSource{
+				DependencyName: "fake-dependency",
+				DataTemplate:   "{{ no }}",
+				DataKey:        "name.first",
+			},
+			result: "fake",
+		},
 	}
 
 	for _, test := range tests {
