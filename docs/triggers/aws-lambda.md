@@ -103,7 +103,7 @@ event data.
 
 ## Parameterization
 Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
-you want to define a generic trigger template in the sensor and populate values like funcation name, payload values on the fly.
+you want to define a generic trigger template in the sensor and populate values like function name, payload values on the fly.
 
 Consider a scenario where you don't want to hard-code the function name and let the event data populate it.
 

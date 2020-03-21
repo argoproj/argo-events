@@ -69,7 +69,8 @@ We will set up a basic go http server and connect it with the minio events.
 
 7. Now, drop a file onto `input` bucket in Minio server.
 
-8. The sensor has triggered a http request to out basic go http server. Take a look at the logs
+  
+8. The sensor has triggered a http request to the http server. Take a look at the logs
 
         server is listening on 8090
         {"type":"minio","bucket":"input"}
@@ -109,3 +110,10 @@ The above payload will be passed in the HTTP request. You can add however many n
 
 **Note**: Take a look at [Parameterization](https://argoproj.github.io/argo-events/tutorials/02-parameterization/) in order to understand how to extract particular key-value from
 event data.
+
+### Parameterization
+
+Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
+you want to define a generic trigger template in the sensor and populate values like URL, payload values on the fly.
+
+You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
