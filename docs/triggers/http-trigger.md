@@ -117,3 +117,69 @@ Similar to other type of triggers, sensor offers parameterization for the AWS La
 you want to define a generic trigger template in the sensor and populate values like URL, payload values on the fly.
 
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
+
+## Kubeless
+
+Similar to REST API calls, you can easily invoke Kubeless functions using HTTP trigger.
+
+1. If you don't have Kubeless installed, follow the [installation](https://kubeless.io/docs/quick-start/).
+
+2. Lets create a basic function,
+
+        def hello(event, context):
+          print event
+          return event['data']
+
+3. Make sure the function pod and service is created.
+
+4. Now, we are going to invoke the Kubeless function when a message is placed on a NATS queue.
+
+5. Lets set up the NATS Gateway and EventSource. Follow [instructions](https://argoproj.github.io/argo-events/setup/nats/#setup) for details.
+   Do not create the NATS sensor, we are going to create it in next step.
+   
+6. Lets create NATS sensor with HTTP trigger,
+
+        apiVersion: argoproj.io/v1alpha1
+        kind: Sensor
+        metadata:
+          name: nats-sensor
+          labels:
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
+        spec:
+          template:
+            spec:
+              containers:
+                - name: sensor
+                  image: argoproj/sensor:v0.13.0
+                  imagePullPolicy: Always
+              serviceAccountName: argo-events-sa
+          dependencies:
+            - name: test-dep
+              gatewayName: nats-gateway
+              eventName: example
+          subscription:
+            http:
+              port: 9300
+          triggers:
+            - template:
+                name: http-trigger
+                http:
+                  serverURL: http://hello.kubeless.svc.cluster.local:8080
+                  payload:
+                    - src:
+                        dependencyName: test-dep
+                        dataKey: body.first_name
+                      dest: first_name
+                    - src:
+                        dependencyName: test-dep
+                        dataKey: body.last_name
+                      dest: last_name
+                  method: POST
+
+7. Once gateway and sensor pod are up and running, dispatch a message on `foo` subject using nats client,
+
+        go run main.go -s localhost foo '{"first_name": "foo", "last_name": "bar"}'
+
+8. It will invoke Kubeless function `hello`,
+        
+        {'event-time': None, 'extensions': {'request': <LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/> }, 'event-type': None, 'event-namespace': None, 'data': '{"first_name":"foo","last_name":"bar"}', 'event-id': None}
