@@ -8,7 +8,7 @@ that are not native to AWS.
 <br/>
 
 <p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/cleanup-aws-lambda/docs/assets/aws-lambda-trigger.png?raw=true" alt="AWS Lambda Trigger"/>
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/aws-lambda-trigger.png?raw=true" alt="AWS Lambda Trigger"/>
 </p>
 
 <br/>
