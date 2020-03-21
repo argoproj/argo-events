@@ -57,6 +57,10 @@ func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kube
 		lambdaClients[trigger.Template.Name] = lambdaClient
 	}
 
+	if lambdatrigger.Namespace == "" {
+		lambdatrigger.Namespace = sensor.Namespace
+	}
+
 	return &AWSLambdaTrigger{
 		LambdaClient: lambdaClient,
 		K8sClient:    k8sClient,
