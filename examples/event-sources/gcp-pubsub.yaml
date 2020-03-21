@@ -10,7 +10,7 @@ spec:
       # source will be JSON
       jsonBody: true
       # id of your project
-      projectID: "argo-events-235100"
+      projectID: "argo-events-XXXXX"
       # (optional) id of project for topic, same as projectID by default
       # topicProjectID: "project-id"
       # topic name
