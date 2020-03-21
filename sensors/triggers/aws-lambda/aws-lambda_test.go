@@ -62,7 +62,13 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getAWSTrigger() *AWSLambdaTrigger {
-	return NewAWSLambdaTrigger(fake.NewSimpleClientset(), sensorObj.DeepCopy(), &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	return &AWSLambdaTrigger{
+		LambdaClient: nil,
+		K8sClient:    fake.NewSimpleClientset(),
+		Sensor:       sensorObj.DeepCopy(),
+		Trigger:      &sensorObj.Spec.Triggers[0],
+		Logger:       common.NewArgoEventsLogger(),
+	}
 }
 
 func TestAWSLambdaTrigger_FetchResource(t *testing.T) {

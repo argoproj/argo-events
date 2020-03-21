@@ -31,6 +31,8 @@ import (
 
 // AWSLambdaTrigger refers to trigger that invokes AWS Lambda functions
 type AWSLambdaTrigger struct {
+	// LambdaClient is AWS Lambda client
+	LambdaClient *lambda.Lambda
 	// K8sClient is Kubernetes client
 	K8sClient kubernetes.Interface
 	// Sensor object
@@ -42,13 +44,26 @@ type AWSLambdaTrigger struct {
 }
 
 // NewAWSLambdaTrigger returns a new AWS Lambda context
-func NewAWSLambdaTrigger(k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *AWSLambdaTrigger {
-	return &AWSLambdaTrigger{
-		K8sClient: k8sClient,
-		Sensor:    sensor,
-		Trigger:   trigger,
-		Logger:    logger,
+func NewAWSLambdaTrigger(lambdaClients map[string]*lambda.Lambda, k8sClient kubernetes.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) (*AWSLambdaTrigger, error) {
+	lambdatrigger := trigger.Template.AWSLambda
+
+	lambdaClient, ok := lambdaClients[trigger.Template.Name]
+	if !ok {
+		awsSession, err := commonaws.CreateAWSSession(k8sClient, lambdatrigger.Namespace, lambdatrigger.Region, "", lambdatrigger.AccessKey, lambdatrigger.SecretKey)
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to create a AWS session")
+		}
+		lambdaClient = lambda.New(awsSession, &aws.Config{Region: &lambdatrigger.Region})
+		lambdaClients[trigger.Template.Name] = lambdaClient
 	}
+
+	return &AWSLambdaTrigger{
+		LambdaClient: lambdaClient,
+		K8sClient:    k8sClient,
+		Sensor:       sensor,
+		Trigger:      trigger,
+		Logger:       logger,
+	}, nil
 }
 
 // FetchResource fetches the trigger resource
@@ -93,14 +108,7 @@ func (t *AWSLambdaTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, err
 	}
 
-	awsSession, err := commonaws.CreateAWSSession(t.K8sClient, trigger.Namespace, trigger.Region, "", trigger.AccessKey, trigger.SecretKey)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create a AWS session")
-	}
-
-	client := lambda.New(awsSession, &aws.Config{Region: &trigger.Region})
-
-	response, err := client.Invoke(&lambda.InvokeInput{
+	response, err := t.LambdaClient.Invoke(&lambda.InvokeInput{
 		FunctionName: &trigger.FunctionName,
 		Payload:      payload,
 	})
