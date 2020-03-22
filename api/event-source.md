@@ -3332,6 +3332,29 @@ subscription once the event source is stopped.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4751,8 +4774,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-
-commit <code>d7d0a7d</code>. </em>
-
+commit <code>75425b5</code>. </em>
 
 </p>

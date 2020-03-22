@@ -1665,6 +1665,13 @@ func schema_pkg_apis_eventsources_v1alpha1_SQSEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"queueAccountId": {
+						SchemaProps: spec.SchemaProps{
+							Description: "QueueAccountId is the ID of the account that created the queue to monitor",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"region", "queue", "waitTimeSeconds"},
 			},
