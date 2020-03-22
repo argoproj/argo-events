@@ -18,7 +18,7 @@ spec:
       # type of event
       # possible values are ADD, DELETE, UPDATE
       # Optional
-      type: UPDATE
+      eventType: UPDATE
       # Filters to apply on watched object
       # Optional
       filter:
@@ -26,20 +26,13 @@ spec:
           workflows.argoproj.io/phase: Succeeded
           app: "my-workflow"
 
-#    # watch all namespace related events
-#    example-with-all-types-and-no-filter:
-#      namespace: "argo-events"
-#      group: ""
-#      version: "v1"
-#      resource: "namespaces"
-#
 #    # create event if workflow with prefix "my-workflow" gets modified
 #    example-with-prefix-filter:
 #      namespace: "argo-events"
 #      group: argoproj.io
 #      version: v1alpha1
 #      resource: workflows
-#      type: UPDATE
+#      eventType: UPDATE
 #      filter:
 #        prefix: "my-workflow"
 #
@@ -49,7 +42,7 @@ spec:
 #      group: argoproj.io
 #      version: v1alpha1
 #      resource: workflows
-#      type: ADD
+#      eventType: ADD
 #      filter:
 #        createdBy: "2019-04-06T12:52:11Z"
 #
@@ -58,7 +51,7 @@ spec:
 #      group: ""
 #      version: v1
 #      resource: pods
-#      type: ADD
+#      eventType: ADD
 #      filter:
 #        createdBy: "2019-04-06T12:52:11Z"
 #        labels:
@@ -71,7 +64,7 @@ spec:
 #      group: "k8s.io"
 #      version: v1
 #      resource: workflows
-#      type: ADD
+#      eventType: ADD
 #      filter:
 #        labels:
 #          workflows.argoproj.io/completed: "true"
