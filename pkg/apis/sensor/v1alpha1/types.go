@@ -347,8 +347,8 @@ type ArgoWorkflowTrigger struct {
 
 // HTTPTrigger is the trigger for the HTTP request
 type HTTPTrigger struct {
-	// ServerURL refers to the URL to send HTTP request to.
-	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	// URL refers to the URL to send HTTP request to.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
 	// Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
 	// +listType=payloadParameters
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
@@ -365,9 +365,12 @@ type HTTPTrigger struct {
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
-	// Default value is 10 seconds
+	// Default value is 60 seconds.
 	// +optional
 	Timeout int `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
+	// BasicAuth configuration for the http request.
+	// +optional
+	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client
@@ -378,6 +381,18 @@ type TLSConfig struct {
 	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,name=clientCertPath"`
 	// ClientKeyPath refers the file path that contains client key.
 	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
+}
+
+// BasicAuth contains the reference to K8s secrets that holds the username and password
+type BasicAuth struct {
+	// Username refers to the Kubernetes secret that holds the username required for basic auth.
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	// Password refers to the Kubernetes secret that holds the password required for basic auth.
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
+	// Namespace to read the secrets from.
+	// Defaults to sensor's namespace.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
 }
 
 // OpenFaasTrigger refers to the trigger type of OpenFass
