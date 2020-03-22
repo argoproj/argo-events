@@ -175,7 +175,7 @@ to invoke OpenFaas function.
 4. We are going to invoke OpenFaas function on a message on Redis Subscriber.
 
 5. Lets set up the Redis Database, Redis PubSub Gateway and EventSource as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
-   Do not create the NATS sensor, we are going to create it in next step.
+   Do not create the Redis sensor, we are going to create it in next step.
 
 6. Lets create the sensor with OpenFaas trigger
 
