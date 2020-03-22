@@ -5,7 +5,6 @@ metadata:
 spec:
   type: "resource"
   resource:
-    # watch workflows that are in successful state
     example:
       # namespace to listen events within
       namespace: "argo-events"
@@ -18,12 +17,11 @@ spec:
       # type of event
       # possible values are ADD, DELETE, UPDATE
       # Optional
-      eventType: UPDATE
+      eventType: ADD
       # Filters to apply on watched object
       # Optional
       filter:
         labels:
-          workflows.argoproj.io/phase: Succeeded
           app: "my-workflow"
 
 #    # create event if workflow with prefix "my-workflow" gets modified
