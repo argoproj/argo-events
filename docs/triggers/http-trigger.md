@@ -152,7 +152,70 @@ The above HTTP trigger will be treated successful only if the HTTP request retur
 OpenFaas offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
 to invoke OpenFaas function.
 
-1. If you don't have  
+1. If you don't have OpenFaas installed, follow the [instructions](https://docs.openfaas.com/deployment/kubernetes/).
+
+2. Lets create a basic function. You can follow the [steps](https://blog.alexellis.io/serverless-golang-with-openfaas/)
+   to set up the function.
+        
+        
+        package function
+        
+        import (
+        	"fmt"
+        )
+        
+        // Handle a serverless request
+        func Handle(req []byte) string {
+        	return fmt.Sprintf("Hello, Go. You said: %s", string(req))
+        }
+
+
+3. Make sure the function pod is up and running.
+
+4. We are going to invoke OpenFaas function on a message on Redis Subscriber.
+
+5. Lets set up the Redis Database, Redis PubSub Gateway and EventSource as specified [here](https://argoproj.github.io/argo-events/setup/redis/).
+   Do not create the NATS sensor, we are going to create it in next step.
+
+6. Lets create the sensor with OpenFaas trigger
+
+        apiVersion: argoproj.io/v1alpha1
+        kind: Sensor
+        metadata:
+          name: redis-sensor
+          labels:
+            sensors.argoproj.io/sensor-controller-instanceid: argo-events
+        spec:
+          template:
+            spec:
+              containers:
+                - name: sensor
+                  image: argoproj/sensor:v0.13.0
+                  imagePullPolicy: Always
+              serviceAccountName: argo-events-sa
+          dependencies:
+            - name: test-dep
+              gatewayName: redis-gateway
+              eventName: example
+          subscription:
+            http:
+              port: 9300
+          triggers:
+            - template:
+                name: openfaas-trigger
+                http:
+                  url: http://gateway.openfaas.svc.cluster.local:8080/function/gohash
+                  payload:
+                    - src:
+                        dependencyName: test-dep
+                      dest: bucket
+                  method: POST
+
+7. Publish a message on `FOO` channel using `redis-cli`.
+
+        PUBLISH FOO hello
+
+8. As soon as you publish the message, the sensor will invoke the OpenFaas function `gohash`.
 
 ## Kubeless
 
@@ -198,7 +261,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
               port: 9300
           triggers:
             - template:
-                name: http-trigger
+                name: kubeless-trigger
                 http:
                   serverURL: http://hello.kubeless.svc.cluster.local:8080
                   payload:
@@ -222,4 +285,4 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 
 # Other serverless frameworks
 
-Similar to OpenFaas and Kubeless invocation demostrated above, you can easily trigger KNative, Nucio, Fission functions using HTTP trigger.
+Similar to OpenFaas and Kubeless invocation demonstrated above, you can easily trigger KNative, Nuclio, Fission functions using HTTP trigger.

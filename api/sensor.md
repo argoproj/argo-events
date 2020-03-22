@@ -158,13 +158,10 @@ SecretKey refers K8 secret containing aws secret key
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
 Namespace refers to Kubernetes namespace to read access related secret
-from. Must be defined if either accesskey or secretkey secret selector
-is specified.
+from. Defaults to sensor’s namespace.
 
 </p>
 
@@ -733,6 +730,126 @@ The amount of jitter applied each iteration
 <p>
 
 Exit with error after this many steps
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.BasicAuth">
+
+BasicAuth
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+BasicAuth contains the reference to K8s secrets that holds the username
+and password
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>username</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Username refers to the Kubernetes secret that holds the username
+required for basic auth.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Password refers to the Kubernetes secret that holds the password
+required for basic auth.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the secrets from. Defaults to sensor’s namespace.
 
 </p>
 
@@ -2222,7 +2339,7 @@ Description
 
 <td>
 
-<code>serverURL</code></br> <em> string </em>
+<code>url</code></br> <em> string </em>
 
 </td>
 
@@ -2230,7 +2347,7 @@ Description
 
 <p>
 
-ServerURL refers to the URL to send HTTP request to.
+URL refers to the URL to send HTTP request to.
 
 </p>
 
@@ -2346,7 +2463,30 @@ are applied to the HTTP trigger resource.
 <p>
 
 Timeout refers to the HTTP request timeout in seconds. Default value is
-10 seconds
+60 seconds.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>basicAuth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BasicAuth"> BasicAuth </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+BasicAuth configuration for the http request.
 
 </p>
 
@@ -5430,6 +5570,33 @@ for more information on how to use this.
 
 <td>
 
+<code>contextTemplate</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ContextTemplate is a go-template for extracting a string from the
+event’s context. If a ContextTemplate is provided with a ContextKey,
+the template will be evaluated first and fallback to the ContextKey. The
+templating follows the standard go-template syntax as well as sprig’s
+extra functions. See
+<a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
+and
+<a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>dataKey</code></br> <em> string </em>
 
 </td>
@@ -5444,6 +5611,32 @@ characters ‘\*’ and ‘?’. To access an array value use the index as the
 key. The dot and wildcard characters can be escaped with ‘\&rsquo;. See
 <a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
 for more information on how to use this.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dataTemplate</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DataTemplate is a go-template for extracting a string from the event’s
+data. If a DataTemplate is provided with a DataKey, the template will be
+evaluated first and fallback to the DataKey. The templating follows the
+standard go-template syntax as well as sprig’s extra functions. See
+<a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
+and
+<a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
 
 </p>
 
@@ -6046,6 +6239,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>d7d0a7d</code>. </em>
+commit <code>75425b5</code>. </em>
 
 </p>
