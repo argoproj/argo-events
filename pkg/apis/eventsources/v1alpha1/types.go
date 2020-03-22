@@ -140,14 +140,14 @@ type ResourceEventSource struct {
 	// Namespace where resource is deployed
 	Namespace string `json:"namespace" protobuf:"bytes,1,name=namespace"`
 	// Filter is applied on the metadata of the resource
+	// If you apply filter, then the internal event informer will only monitor objects that pass the filter.
 	// +optional
 	Filter *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	// Group of the resource
 	metav1.GroupVersionResource `json:",inline"`
-	// Type is the event type.
-	// If not provided, the gateway will watch all events for a resource.
-	// +optional
-	EventType ResourceEventType `json:"eventType,omitempty" protobuf:"bytes,3,opt,name=eventType"`
+	// EventTypes is the list of event type to watch.
+	// Possible values are - ADD, UPDATE and DELETE.
+	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,3,name=eventTypes"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects

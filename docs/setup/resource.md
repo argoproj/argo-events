@@ -50,17 +50,16 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
 
 4. The event source we created in step 1 contains configuration which makes the gateway listen to 
-   Argo workflows marked with label `workflows.argoproj.io/phase: Succeeded` and `app: my-workflow`.
+   Argo workflows marked with label and `name: my-workflow`.
 
-5. Lets create a workflow called `my-workflow` with label `app: my-workflow`, so that when it transitions into `success` state, the gateway
-   will get a notification.
+5. Lets create a workflow called `my-workflow`
    
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow
         metadata:
           name: my-workflow
           labels:
-            app: my-workflow
+            name: my-workflow
         spec:
           entrypoint: whalesay
           templates:
@@ -70,11 +69,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
               command: [cowsay]
               args: ["hello world"]
 
-6. Create `my-wokflow` and wait for the workflow to complete.
-
-        kubectl -n argo-events create my-worflow.yaml
-
-5. Once the `my-workflow` completes, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
+6. Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
