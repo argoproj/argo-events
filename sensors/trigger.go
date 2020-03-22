@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
-	"github.com/argoproj/argo-events/sensors/triggers/openfaas"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
 
@@ -49,17 +48,13 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
 
-	if trigger.Template.OpenFaas != nil {
-		result, err := openfaas.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.openfaasHttpClient)
+	if trigger.Template.HTTP != nil {
+		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 		if err != nil {
 			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
 		}
 		return result
-	}
-
-	if trigger.Template.HTTP != nil {
-		return http.NewHTTPTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
 
 	if trigger.Template.AWSLambda != nil {

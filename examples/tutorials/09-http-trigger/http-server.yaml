@@ -8,8 +8,8 @@ spec:
   serviceAccountName: argo-events-sa
   containers:
     - name: http-server
-      image: argoproj/http-server
+      image: metalgearsolid/http-server
       imagePullPolicy: Always
       env:
         - name: PORT
-          value: "13000"
+          value: "8090"

@@ -23,11 +23,11 @@ spec:
     - template:
         name: http-trigger
         http:
-          serverURL: http://http-server.argo-events.svc:8090/hello
+          url: http://http-server.argo-events.svc:8090/hello
           payload:
             - src:
                 dependencyName: test-dep
-                dataKey: s3.bucket.name
+                dataKey: notification.0.s3.bucket.name
               dest: bucket
             - src:
                 dependencyName: test-dep

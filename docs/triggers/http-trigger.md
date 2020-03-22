@@ -1,6 +1,6 @@
-# Kubeless, KNative & REST API Trigger
+# OpenFaas, Kubeless, KNative & REST API Trigger
 
-Argo Events offers HTTP trigger which can easily invoke serverless functions like Kubeless, Knative, Nuclio and make REST API calls.
+Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaas, Kubeless, Knative, Nuclio and make REST API calls.
 
 <br/>
 <br/>
@@ -11,6 +11,9 @@ Argo Events offers HTTP trigger which can easily invoke serverless functions lik
 
 <br/>
 <br/>
+
+## Specification
+The HTTP trigger specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#httptrigger).
 
 ## REST API Calls
 
@@ -85,11 +88,11 @@ In order to construct a request payload based on the event data, sensor offers
 Let's examine a HTTP trigger,
 
         http:
-          serverURL: http://http-server.argo-events.svc:8090/hello
+          url: http://http-server.argo-events.svc:8090/hello
           payload:
             - src:
                 dependencyName: test-dep
-                dataKey: s3.bucket.name
+                dataKey: notification.0.s3.bucket.name
               dest: bucket
             - src:
                 dependencyName: test-dep
@@ -117,6 +120,39 @@ Similar to other type of triggers, sensor offers parameterization for the AWS La
 you want to define a generic trigger template in the sensor and populate values like URL, payload values on the fly.
 
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).
+
+### Policy
+Trigger policy helps you determine the status of the HTTP request and decide whether to stop or continue sensor. 
+
+To determine whether the HTTP request was successful or not, the HTTP trigger provides a `Status` policy.
+The `Status` holds a list of response statuses that are considered valid.
+
+        http:
+          url: http://http-server.argo-events.svc:8090/hello
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: notification.0s3.bucket.name
+              dest: bucket
+            - src:
+                dependencyName: test-dep
+                contextKey: type
+              dest: type
+          method: POST  // GET, DELETE, POST, PUT, HEAD, etc.
+          policy:
+            status:
+              allow:
+                - 200
+                - 201
+
+The above HTTP trigger will be treated successful only if the HTTP request returns with either 200 or 201 status. 
+
+## OpenFaas
+
+OpenFaas offers a simple way to spin up serverless functions. Lets see how we can leverage Argo Events HTTP trigger
+to invoke OpenFaas function.
+
+1. If you don't have  
 
 ## Kubeless
 
@@ -183,3 +219,7 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
 8. It will invoke Kubeless function `hello`,
         
         {'event-time': None, 'extensions': {'request': <LocalRequest: POST http://hello.kubeless.svc.cluster.local:8080/> }, 'event-type': None, 'event-namespace': None, 'data': '{"first_name":"foo","last_name":"bar"}', 'event-id': None}
+
+# Other serverless frameworks
+
+Similar to OpenFaas and Kubeless invocation demostrated above, you can easily trigger KNative, Nucio, Fission functions using HTTP trigger.

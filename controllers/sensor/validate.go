@@ -216,7 +216,7 @@ func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 	if trigger == nil {
 		return errors.New("openfaas trigger for can't be nil")
 	}
-	if trigger.ServerURL == "" {
+	if trigger.URL == "" {
 		return errors.New("server URL is not specified")
 	}
 	if trigger.Method != "" {

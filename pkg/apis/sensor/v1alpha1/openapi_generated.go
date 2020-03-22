@@ -33,6 +33,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger":    schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation":       schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff":                schema_pkg_apis_sensor_v1alpha1_Backoff(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth":              schema_pkg_apis_sensor_v1alpha1_BasicAuth(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact":      schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":          schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
@@ -99,7 +100,7 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 					},
 					"namespace": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Namespace refers to Kubernetes namespace to read access related secret from. Must be defined if either accesskey or secretkey secret selector is specified.",
+							Description: "Namespace refers to Kubernetes namespace to read access related secret from. Defaults to sensor's namespace.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -303,6 +304,40 @@ func schema_pkg_apis_sensor_v1alpha1_Backoff(ref common.ReferenceCallback) commo
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_BasicAuth(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "BasicAuth contains the reference to K8s secrets that holds the username and password",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"username": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Username refers to the Kubernetes secret that holds the username required for basic auth.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"password": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Password refers to the Kubernetes secret that holds the password required for basic auth.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace to read the secrets from. Defaults to sensor's namespace.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -463,6 +498,13 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 									},
 								},
 							},
+						},
+					},
+					"comparator": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Comparator compares the event data with a user given value. Can be \">=\", \">\", \"=\", \"<\", or \"<=\". Is optional, and if left blank treated as equality \"=\".",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 				},
@@ -805,9 +847,9 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 				Description: "HTTPTrigger is the trigger for the HTTP request",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"serverURL": {
+					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServerURL refers to the URL to send HTTP request to.",
+							Description: "URL refers to the URL to send HTTP request to.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -863,17 +905,23 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 					},
 					"timeout": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Timeout refers to the HTTP request timeout in seconds. Default value is 10 seconds",
+							Description: "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
 					},
+					"basicAuth": {
+						SchemaProps: spec.SchemaProps{
+							Description: "BasicAuth configuration for the http request.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth"),
+						},
+					},
 				},
-				Required: []string{"serverURL", "payload"},
+				Required: []string{"url", "payload"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
 	}
 }
 
@@ -1906,9 +1954,23 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"contextTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ContextTemplate is a go-template for extracting a string from the event's context. If a ContextTemplate is provided with a ContextKey, the template will be evaluated first and fallback to the ContextKey. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"dataKey": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DataKey is the JSONPath of the event's (JSON decoded) data key DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'. To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'. See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"dataTemplate": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DataTemplate is a go-template for extracting a string from the event's data. If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey. The templating follows the standard go-template syntax as well as sprig's extra functions. See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/",
 							Type:        []string{"string"},
 							Format:      "",
 						},

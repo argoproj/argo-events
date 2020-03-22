@@ -50,6 +50,8 @@ type SensorContext struct {
 	ControllerInstanceID string
 	// Updated indicates update to Sensor resource
 	Updated bool
+	// httpClients holds the reference to HTTP clients for HTTP triggers.
+	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients map[string]*grpc.ClientConn
 	// http client to invoke openfaas functions.
@@ -72,6 +74,7 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
+		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
 		openfaasHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
