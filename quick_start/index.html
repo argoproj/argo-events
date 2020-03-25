@@ -294,9 +294,38 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Getting Started
+      </label>
+    
     <a href="./" title="Getting Started" class="md-nav__link md-nav__link--active">
       Getting Started
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" title="Prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -834,6 +863,22 @@
     
   
   
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" title="Prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -848,21 +893,23 @@
                 
                 
                 <h1 id="getting-started">Getting Started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h1>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Make sure to configure <a href="https://github.com/argoproj/argo/blob/master/docs/getting-started.md">Argo Workflow</a> controller to listen to workflow objects
+created in <code>argo-events</code> namespace.</li>
+</ul>
 <p>We are going to set up a gateway, sensor and event-source for webhook. The goal is
 to trigger an Argo workflow upon a HTTP Post request.</p>
-<p>Note: You will need to have <a href="https://argoproj.github.io/docs/argo/readme.html">Argo Workflows</a> installed for this tutorial.</p>
 <ul>
-<li>
-<p>First, we need to setup event sources for gateway to listen.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+<li>First, we need to setup event sources for gateway to listen.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
 </pre></div>
 
 
-<p>The event-source drives the configuration required for a gateway to consume events from external sources.</p>
 </li>
-<li>
-<p>Create webhook gateway, </p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+</ul>
+<p>The event-source drives the configuration required for a gateway to consume events from external sources.</p>
+<ul>
+<li>Create webhook gateway, <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
 </pre></div>
 
 
@@ -878,37 +925,28 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
 </ul>
 <p>Once sensor object is created, sensor controller will create corresponding pod and service. </p>
 <ul>
-<li>Once the gateway and sensor pods are running, dispatch a HTTP POST request to <code>/example</code> endpoint.
-   Note: the <code>WEBHOOK_SERVICE_URL</code> will differ based on the Kubernetes cluster.<div class="codehilite"><pre><span></span>export WEBHOOK_SERVICE_URL=$(minikube service -n argo-events --url webhook-gateway-svc)
+<li>
+<p>Expose the gateway pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;gateway-pod-name&gt; 12000:12000
+</pre></div>
 
-echo $WEBHOOK_SERVICE_URL
 
-curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST $WEBHOOK_SERVICE_URL/example
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+</pre></div>
+
+
+</li>
+<li>
+<p>Verify that an Argo workflow was triggered.</p>
+<div class="codehilite"><pre><span></span>kubectl -n argo-events get workflows | grep &quot;webhook&quot;
 </pre></div>
 
 
 </li>
 </ul>
-<p><b>Note</b>: 
-   If you are facing an issue getting service url by running </p>
-<div class="codehilite"><pre><span></span>    minikube service -n argo-events --url webhook-gateway-svc
-</pre></div>
-
-
-<p>You can use port forwarding to access the service as well,</p>
-<div class="codehilite"><pre><span></span>    kubectl port-forward
-</pre></div>
-
-
-<p>Open another terminal window and enter </p>
-<div class="codehilite"><pre><span></span>    kubectl port-forward -n argo-events &lt;name_of_the_webhook_gateway_pod&gt; 12000:12000
-</pre></div>
-
-
-<p>You can now use <code>localhost:12000</code> to query webhook gateway</p>
-<p>Verify that an Argo workflow was triggered.</p>
-<div class="codehilite"><pre><span></span>   kubectl -n argo-events get workflows | grep &quot;webhook&quot;
-</pre></div>
                 
                   
                 
