@@ -985,10 +985,12 @@
 </ol>
 <h2 id="gateway-server">Gateway Server<a class="headerlink" href="#gateway-server" title="Permanent link">&para;</a></h2>
 <p>Gateway server listens to events from event sources.</p>
-<p>Its responsibilities are,
-1. Validate an event source.
-2. Implement the logic for consuming events from an event source.
-3. Dispatch events to gateway client.</p>
+<p>Its responsibilities are,</p>
+<ol>
+<li>Validate an event source.</li>
+<li>Implement the logic for consuming events from an event source.</li>
+<li>Dispatch events to gateway client.</li>
+</ol>
 <h2 id="gateway-event-source">Gateway &amp; Event Source<a class="headerlink" href="#gateway-event-source" title="Permanent link">&para;</a></h2>
 <p>Event Source are event configuration store for a gateway. The configuration stored in an Event Source is used by a gateway to consume events from
 external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
