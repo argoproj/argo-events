@@ -964,8 +964,7 @@
                 
                 <h1 id="argo-events">Argo Events<a class="headerlink" href="#argo-events" title="Permanent link">&para;</a></h1>
 <h2 id="what-is-argo-events">What is Argo Events?<a class="headerlink" href="#what-is-argo-events" title="Permanent link">&para;</a></h2>
-<p><strong>Argo Events</strong> is an event-based dependency manager for Kubernetes which helps you define multiple dependencies from a variety of event sources like webhook, s3, schedules, streams etc.
-and trigger Kubernetes objects after successful event dependencies resolution.</p>
+<p><strong>Argo Events</strong> is an event-driven workflow automation framework for Kubernetes which helps you trigger K8s resources, Argo Workflows and Serverless workloads on events from variety of event sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -975,12 +974,12 @@ and trigger Kubernetes objects after successful event dependencies resolution.</
 <p><br/></p>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Manage dependencies from 20+ event sources.</li>
-<li>Ability to customize business-level constraint logic for event dependencies resolution.</li>
-<li>Manage everything from simple, linear, real-time dependencies to complex, multi-source, batch job dependencies.</li>
-<li>Supports AWS Lambda and OpenFaas as triggers.</li>
-<li>Supports integration of existing API servers with 20+ event sources.</li>
-<li>CloudEvents compliant.</li>
+<li>Supports events from 20+ event sources.</li>
+<li>Ability to customize business-level constraint logic for workflow automation.</li>
+<li>Manage everything from simple, linear, real-time to complex, multi-source events.</li>
+<li>Supports Kubernetes Resources, Argo Workflow, AWS Lambda and OpenFaas as triggers.</li>
+<li>Supports integration of existing API servers with event sources.</li>
+<li><a href="https://cloudevents.io/">CloudEvents</a> compliant.</li>
 </ul>
 <h2 id="event-sources">Event Sources<a class="headerlink" href="#event-sources" title="Permanent link">&para;</a></h2>
 <ol>

@@ -901,7 +901,7 @@ created in <code>argo-events</code> namespace.</li>
 <p>We are going to set up a gateway, sensor and event-source for webhook. The goal is
 to trigger an Argo workflow upon a HTTP Post request.</p>
 <ul>
-<li>First, we need to setup event sources for gateway to listen.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+<li>First, we need to setup event sources for gateway to listen to.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -915,7 +915,7 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
 
 </li>
 </ul>
-<p>After running above command, gateway controller will create corresponding a pod and service.</p>
+<p>After running above command, gateway controller will create corresponding pod and service.</p>
 <ul>
 <li>Create webhook sensor,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
 </pre></div>
