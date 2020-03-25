@@ -976,11 +976,13 @@
 <p>There are two components for a gateway,</p>
 <h2 id="gateway-client">Gateway Client<a class="headerlink" href="#gateway-client" title="Permanent link">&para;</a></h2>
 <p>Gateway client manages the event source for the gateway.</p>
-<p>Its responsibilities are,
-1. Monitor and manage the event sources.
-2. Monitor and manage the subscribers.
-3. Convert the events received from the gateway server into CloudEvents.
-4. Dispatch the cloudevents to subscribers.</p>
+<p>Its responsibilities are,</p>
+<ol>
+<li>Monitor and manage the event sources.</li>
+<li>Monitor and manage the subscribers.</li>
+<li>Convert the events received from the gateway server into CloudEvents.</li>
+<li>Dispatch the cloudevents to subscribers.</li>
+</ol>
 <h2 id="gateway-server">Gateway Server<a class="headerlink" href="#gateway-server" title="Permanent link">&para;</a></h2>
 <p>Gateway server listens to events from event sources.</p>
 <p>Its responsibilities are,
