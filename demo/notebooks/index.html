@@ -1179,14 +1179,14 @@ go run main.go -s localhost:4222 image-match
 </li>
 <li>
 <p>Lets change the parameters for the curl request to get &gt;80% match,</p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;filterA&quot;:&quot;5&quot;, &quot;filterB&quot;: &quot;5&quot;, &quot;sVSp&quot;: &quot;0.008&quot;, &quot;amount&quot;: &quot;0.0008&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
+<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;filterA&quot;:&quot;5&quot;, &quot;filterB&quot;: &quot;5&quot;, &quot;sVSp&quot;: &quot;0.003&quot;, &quot;amount&quot;: &quot;0.010&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
 </pre></div>
 
 
 </li>
 <li>
-<p>Still only 51% match,</p>
-<div class="codehilite"><pre><span></span>[#2] Received on [image-match]: &#39;FAILURE: 0.519408012194793&#39;
+<p>Still only 52% match,</p>
+<div class="codehilite"><pre><span></span>[#2] Received on [image-match]: &#39;FAILURE: 0.5223784891887815&#39;
 </pre></div>
 
 
