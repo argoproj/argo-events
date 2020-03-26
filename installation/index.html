@@ -1019,7 +1019,9 @@
 <h3 id="using-kubectl">Using kubectl<a class="headerlink" href="#using-kubectl" title="Permanent link">&para;</a></h3>
 <h4 id="one-command-installation">One Command Installation<a class="headerlink" href="#one-command-installation" title="Permanent link">&para;</a></h4>
 <ol>
-<li>Deploy Argo Events SA, Roles, ConfigMap, Sensor Controller and Gateway Controller<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
+<li>Deploy Argo Events SA, Roles, ConfigMap, Sensor Controller and Gateway Controller<div class="codehilite"><pre><span></span>kubectl create ns argo-events
+
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
 </pre></div>
 
 
