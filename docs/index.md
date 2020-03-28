@@ -45,6 +45,21 @@ and trigger Kubernetes objects after successful event dependencies resolution.
 21. Redis
 22. Azure Events Hub
 
+
+## Triggers
+
+1. Argo Workflows
+1. Standard K8s Objects
+1. HTTP Requests / Serverless (OpenFaas, Kubeless, KNative etc.)
+1. AWS Lambda
+1. NATS Messages
+1. Kafka Messages
+1. Slack Notifications
+1. Argo Rollouts CR
+1. Custom Triggers
+1. Apache OpenWhisk [Coming Soon...]
+
+
 ## Installation
 Follow the [setup](https://argoproj.github.io/argo-events/installation/) to install Argo Events.
 
@@ -52,4 +67,4 @@ Follow the [setup](https://argoproj.github.io/argo-events/installation/) to inst
 Check out the quick start [guide](https://argoproj.github.io/argo-events/quick_start/) to trigger Argo workflows on webhook events.
 
 ## Deep Dive
-Explore the [tutorial](https://argoproj.github.io/argo-events/tutorials/01-introduction/) to dive deep into Argo Events features.
+Explore the [tutorials](https://argoproj.github.io/argo-events/tutorials/01-introduction/) to dive deep into Argo Events features.

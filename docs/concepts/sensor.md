@@ -12,9 +12,6 @@ gateways and act as an event dependency manager.
 ## Event dependency
 A dependency is an event the sensor is waiting to happen.
 
-## Trigger
-A Trigger is the resource executed by sensor once the event dependencies are resolved.. 
-
 ## Specification
 Complete specification is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md).
 
