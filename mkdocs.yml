@@ -24,6 +24,10 @@ nav:
       - 'concepts/gateway.md'
       - 'concepts/sensor.md'
       - 'concepts/event_source.md'
+      - 'concepts/trigger.md'
+      - 'concepts/high_level_architecture.md'
+  - Demo:
+      - 'demo/notebooks.md'
   - Setup:
       - 'setup/amqp.md'
       - 'setup/aws-sns.md'
