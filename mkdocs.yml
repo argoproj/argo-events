@@ -51,9 +51,11 @@ nav:
       - 'tutorials/06-circuit-and-switch.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
-      - 'tutorials/09-http-trigger.md'
-      - 'tutorials/10-aws-lambda-and-openfaas-trigger.md'
       - 'tutorials/11-special-argo-workflow-trigger.md'
+  - Triggers:
+      - 'triggers/aws-lambda.md'
+      - 'triggers/http-trigger.md'
+      - 'triggers/nats-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'
