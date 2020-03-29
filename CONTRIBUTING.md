@@ -20,28 +20,22 @@ Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster.
 ### Requirements
 - Golang 1.11
 - Docker
-- dep
 
 ### Installation & Setup
 
 #### 1. Get the project
 ```
-go get github.com/argoproj/argo-events
-cd $GOPATH/src/github.com/argoproj/argo-events
+git clone git@github.com:argoproj/argo-events
+cd argo-events
 ```
 
-#### 2. Vendor dependencies
-```
-dep ensure -vendor-only
-```
-
-#### 3. Start Minikube and point Docker Client to Minikube's Docker Daemon
+#### 2. Start Minikube and point Docker Client to Minikube's Docker Daemon
 ```
 minikube start
 eval $(minikube docker-env)
 ```
 
-#### 5. Build the project
+#### 3. Build the project
 ```
 make all
 ```

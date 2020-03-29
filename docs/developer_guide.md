@@ -4,30 +4,24 @@
 Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for `Minikube` for local development, but if you have another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
-- Golang 1.11
+- Golang 1.13
 - Docker
-- dep
 
 ### Installation & Setup
 
 #### 1. Get the project
 ```
-go get github.com/argoproj/argo-events
-cd $GOPATH/src/github.com/argoproj/argo-events
+git clone git@github.com:argoproj/argo-events
+cd argo-events
 ```
 
-#### 2. Vendor dependencies
-```
-dep ensure -vendor-only
-```
-
-#### 3. Start Minikube and point Docker Client to Minikube's Docker Daemon
+#### 2. Start Minikube and point Docker Client to Minikube's Docker Daemon
 ```
 minikube start
 eval $(minikube docker-env)
 ```
 
-#### 5. Build the project
+#### 3. Build the project
 ```
 make all
 ```
@@ -53,7 +47,7 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 <br/>
 
 ### Proto Definition
-1. The proto file is located [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto) 
+1. The proto file is located [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto)
 
 2. If you choose to implement the gateway in `Go`, then you can find generated client stubs [here](https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go)
 
@@ -73,7 +67,7 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 
 
 ### Available Environment Variables to Server
- 
+
  | Field                           | Description                                      |
  | ------------------------------- | ------------------------------------------------ |
  | GATEWAY_NAMESPACE               | K8s namespace of the gateway                     |
@@ -82,4 +76,4 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
  | GATEWAY_CONTROLLER_INSTANCE_ID  | gateway controller instance id                   |
  | GATEWAY_CONTROLLER_NAME         | gateway controller name                          |
  | GATEWAY_SERVER_PORT             | Port on which the gateway gRPC server should run |
- 
+
