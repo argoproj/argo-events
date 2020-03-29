@@ -495,7 +495,7 @@ type NATSTrigger struct {
 	// Parameters is the list of parameters that is applied to resolved NATS trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
-	// TLS configuration for the Kafka producer.
+	// TLS configuration for the NATS producer.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
