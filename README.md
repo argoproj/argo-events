@@ -39,23 +39,40 @@ To see the Argo-Events in action, follow the
 ## Guide
 Installation guide for gateways and sensors is available [here](https://argoproj.github.io/argo-events/setup/webhook/). 
 
+Main components of Argo Events are:
+
+1. [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/)
+2. [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
+3. [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/)
+4. [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/)
+
+<br/>
+<br/>
+
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/high-level-architecture.png?raw=true" alt="High Level Architecture"/>
+</p>
+
+<br/>
+<br/>
+
 Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/01-introduction/  
 
-## Supported Triggers
+## Triggers
 
 1. Argo Workflows
 1. Standard K8s Objects
-1. HTTP Requests / Serverless (OpenFaas, Kubeless, KNative etc.)
+1. HTTP Requests / Serverless Workloads (OpenFaas, Kubeless, KNative etc.)
 1. AWS Lambda
 1. NATS Messages
 1. Kafka Messages
-1. Slack Notifications
-1. Argo Rollouts CR
+1. Slack Notifications (Coming Soon...)
+1. Argo Rollouts
 1. Custom Trigger / Build Your Own Trigger
 1. Apache OpenWhisk (Coming Soon...)
 
 
-## Supported Event Sources
+## Event Sources
 1. AMQP
 2. AWS SNS
 3. AWS SQS
