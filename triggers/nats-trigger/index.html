@@ -32,17 +32,17 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.2.0">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.3">
     
     
       
-        <title>HTTP Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>NATS Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.750b69bd.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.adb8469c.css">
       
-        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.224b79ff.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
       
       
         
@@ -51,12 +51,12 @@
       
     
     
-      <script src="../../assets/javascripts/modernizr.74668098.js"></script>
+      <script src="../../assets/javascripts/modernizr.86422ebf.js"></script>
     
     
       
         <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,400i,700|">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,400i,700%7C&display=fallback">
         <style>body,input{font-family:"Work Sans","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"","Courier New",Courier,monospace}</style>
       
     
@@ -102,24 +102,7 @@
       <defs>
         
         
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
-    viewBox="0 0 416 448" id="__github">
-  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
-        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
-        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
-        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
-        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
-        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
-        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
-        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
-        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
-        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
-        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
-        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
-        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
-        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
-        99.5z" />
-</svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
         
       </defs>
     </svg>
@@ -127,7 +110,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#http-trigger" tabindex="1" class="md-skip">
+      <a href="#nats-trigger" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -136,9 +119,9 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-header-nav__button md-logo">
+        <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" aria-label="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-header-nav__button md-logo">
           
-            <img src="../../assets/logo.png" width="24" height="24">
+            <img alt="logo" src="../../assets/logo.png" width="24" height="24">
           
         </a>
       </div>
@@ -152,7 +135,9 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              HTTP Trigger
+              
+                NATS Trigger
+              
             </span>
           
         </div>
@@ -165,7 +150,7 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <input type="text" class="md-search__input" aria-label="search" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
       <label class="md-icon md-search__icon" for="__search"></label>
       <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
         &#xE5CD;
@@ -217,7 +202,7 @@
         
       
       
-      <main class="md-main">
+      <main class="md-main" role="main">
         <div class="md-main__inner md-grid" data-md-component="container">
           
             
@@ -228,7 +213,7 @@
   <label class="md-nav__title md-nav__title--site" for="__drawer">
     <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-nav__button md-logo">
       
-        <img src="../../assets/logo.png" width="48" height="48">
+        <img alt="logo" src="../../assets/logo.png" width="48" height="48">
       
     </a>
     Argo Events - The Event-Based Dependency Manager for Kubernetes
@@ -347,6 +332,30 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/high_level_architecture/" title="High Level Architecture" class="md-nav__link">
+      High Level Architecture
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -362,10 +371,46 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
     
     <label class="md-nav__link" for="nav-5">
-      Setup
+      Demo
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-5">
+        Demo
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
+      Event-Driven Parameterized Jupyter Notebooks
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      Setup
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
         Setup
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
@@ -587,14 +632,14 @@
 
   <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7">
     
-    <label class="md-nav__link" for="nav-6">
-      Demo
+    <label class="md-nav__link" for="nav-7">
+      Tutorials
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-6">
-        Demo
+      <label class="md-nav__title" for="nav-7">
+        Tutorials
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -605,8 +650,104 @@
 
 
   <li class="md-nav__item">
-    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
-      Event-Driven Parameterized Jupyter Notebooks
+    <a href="../../tutorials/01-introduction/" title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/02-parameterization/" title="Parameterization" class="md-nav__link">
+      Parameterization
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+      Trigger Sources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/04-standard-k8s-resources/" title="Standard K8s Resources" class="md-nav__link">
+      Standard K8s Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
+      Trigger Custom Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
+      Circuit and Switch
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/07-filters/" title="Filters" class="md-nav__link">
+      Filters
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/08-policy/" title="Policy" class="md-nav__link">
+      Policy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
+      Special Argo Workflow Trigger
     </a>
   </li>
 
@@ -625,14 +766,14 @@
 
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
     
-    <label class="md-nav__link" for="nav-7">
-      Tutorials
+    <label class="md-nav__link" for="nav-8">
+      Triggers
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-7">
-        Tutorials
+      <label class="md-nav__title" for="nav-8">
+        Triggers
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -643,8 +784,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../01-introduction/" title="Introduction" class="md-nav__link">
-      Introduction
+    <a href="../aws-lambda/" title="AWS Lambda" class="md-nav__link">
+      AWS Lambda
     </a>
   </li>
 
@@ -655,80 +796,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../02-parameterization/" title="Parameterization" class="md-nav__link">
-      Parameterization
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
-      Trigger Sources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../04-standard-k8s-resources/" title="Standard K8s Resources" class="md-nav__link">
-      Standard K8s Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
-      Trigger Custom Resources
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
-      Circuit and Switch
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../07-filters/" title="Filters" class="md-nav__link">
-      Filters
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../08-policy/" title="Policy" class="md-nav__link">
-      Policy
+    <a href="../http-trigger/" title="OpenFaas, Kubeless, KNative & REST API Trigger" class="md-nav__link">
+      OpenFaas, Kubeless, KNative & REST API Trigger
     </a>
   </li>
 
@@ -748,11 +817,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        HTTP Trigger
+        NATS Trigger
       </label>
     
-    <a href="./" title="HTTP Trigger" class="md-nav__link md-nav__link--active">
-      HTTP Trigger
+    <a href="./" title="NATS Trigger" class="md-nav__link md-nav__link--active">
+      NATS Trigger
     </a>
     
       
@@ -766,63 +835,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisite" title="Prerequisite" class="md-nav__link">
-    Prerequisite
+  <a href="#specification" class="md-nav__link">
+    Specification
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-server-integration" title="API Server Integration" class="md-nav__link">
-    API Server Integration
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#payload-construction" title="Payload Construction" class="md-nav__link">
-    Payload Construction
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#serverless-workload-integration" title="Serverless Workload Integration" class="md-nav__link">
-    Serverless Workload Integration
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisite_1" title="Prerequisite" class="md-nav__link">
-    Prerequisite
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#invoke-function" title="Invoke Function" class="md-nav__link">
-    Invoke Function
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy" title="Policy" class="md-nav__link">
-    Policy
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
+  <a href="#walkthrough" class="md-nav__link">
+    Walkthrough
   </a>
   
 </li>
@@ -835,30 +856,6 @@
   
 </nav>
     
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../10-aws-lambda-and-openfaas-trigger/" title="AWS Lambda Trigger" class="md-nav__link">
-      AWS Lambda Trigger
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
-    </a>
   </li>
 
         
@@ -960,63 +957,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#prerequisite" title="Prerequisite" class="md-nav__link">
-    Prerequisite
+  <a href="#specification" class="md-nav__link">
+    Specification
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#api-server-integration" title="API Server Integration" class="md-nav__link">
-    API Server Integration
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#payload-construction" title="Payload Construction" class="md-nav__link">
-    Payload Construction
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#serverless-workload-integration" title="Serverless Workload Integration" class="md-nav__link">
-    Serverless Workload Integration
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#prerequisite_1" title="Prerequisite" class="md-nav__link">
-    Prerequisite
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#invoke-function" title="Invoke Function" class="md-nav__link">
-    Invoke Function
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy" title="Policy" class="md-nav__link">
-    Policy
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
+  <a href="#walkthrough" class="md-nav__link">
+    Walkthrough
   </a>
   
 </li>
@@ -1037,152 +986,108 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/tutorials/09-http-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/nats-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="http-trigger">HTTP Trigger<a class="headerlink" href="#http-trigger" title="Permanent link">&para;</a></h1>
-<p>Sometimes you face a situation where creating an Argo workflow on every event 
-is not an ideal solution. This is where the HTTP trigger can help you. With this type of trigger, you can
-connect any old/new API server with 20+ event sources supported by Argo Events or invoke serveless fucntions
-without worrying about their respective event connector frameworks.</p>
-<h2 id="prerequisite">Prerequisite<a class="headerlink" href="#prerequisite" title="Permanent link">&para;</a></h2>
-<p>Set up the <code>Minio</code> gateway and event source. The K8s manifests are available under <code>examples/tutorials/09-http-trigger</code>.</p>
-<h2 id="api-server-integration">API Server Integration<a class="headerlink" href="#api-server-integration" title="Permanent link">&para;</a></h2>
-<p>We will set up a basic go http server and connect it with the minio events.</p>
+                <h1 id="nats-trigger">NATS Trigger<a class="headerlink" href="#nats-trigger" title="Permanent link">&para;</a></h1>
+<p>NATS trigger allows sensor to publish events on NATS subjects. This trigger helps source the events from outside world into your messaging queues.</p>
+<h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
+<p>The NATS trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#natstrigger">here</a>.</p>
+<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Set up a simple http server that prints the request payload.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server.yaml
-</pre></div>
+<p>Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event
+   on a NATS subject.</p>
+</li>
+<li>
+<p>Set up the Minio Event Source and Gateway <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>. 
+   Do not create the Minio sensor, we are going to create it in next step.</p>
+</li>
+<li>
+<p>Lets create the sensor,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
+<span class="n">metadata</span><span class="o">:</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
+  <span class="n">labels</span><span class="o">:</span>
+    <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+<span class="n">spec</span><span class="o">:</span>
+  <span class="n">template</span><span class="o">:</span>
+    <span class="n">spec</span><span class="o">:</span>
+      <span class="n">containers</span><span class="o">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">sensor</span>
+          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">13.0</span>
+          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
+      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+  <span class="n">dependencies</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
+  <span class="n">subscription</span><span class="o">:</span>
+    <span class="n">http</span><span class="o">:</span>
+      <span class="n">port</span><span class="o">:</span> <span class="mi">9300</span>
+  <span class="n">triggers</span><span class="o">:</span>
+    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
+        <span class="n">name</span><span class="o">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">trigger</span>
+        <span class="n">nats</span><span class="o">:</span>
+          <span class="err">#</span> <span class="n">NATS</span> <span class="n">Server</span> <span class="n">URL</span>
+          <span class="n">url</span><span class="o">:</span> <span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
+          <span class="err">#</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">subject</span>
+          <span class="n">subject</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">events</span>
+          <span class="n">payload</span><span class="o">:</span>
+            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
+                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">object</span><span class="o">.</span><span class="na">key</span>
+              <span class="n">dest</span><span class="o">:</span> <span class="n">fileName</span>
+            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
+                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
+                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">bucket</span><span class="o">.</span><span class="na">name</span>
+              <span class="n">dest</span><span class="o">:</span> <span class="n">bucket</span>
+</code></pre></div>
 
 
 </li>
 <li>
-<p>Create a service to expose the http server</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server-svc.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Either use Ingress, OpenShift Route or port-forwarding to expose the http server. We will
-   use port-forwarding here.</p>
-</li>
-<li>
-<p>Create a sensor with <code>HTTP</code> trigger. We will discuss the trigger details in the following sections.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/sensor-01.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Now, drop a file onto <code>test</code> bucket in Minio server.</p>
-</li>
-<li>
-<p>The sensor has triggered a http request to out basic go http server. Take a look at the logs</p>
-<div class="codehilite"><pre><span></span>server is listening on 8090
-{&quot;type&quot;:&quot;minio&quot;,&quot;bucket&quot;:&quot;test&quot;}
-</pre></div>
-
-
-</li>
-<li>
-<p>Great!!! But how did the sensor constructed a payload for the http request? We will see that in next section.</p>
+<p>The NATS message needs a body. In order to construct message based on the event data, sensor offers 
+   <code>payload</code> field as a part of the NATS trigger.</p>
 </li>
 </ol>
-<p><strong>Note</strong>: HTTP trigger must have a payload, otherwise it is pretty useless to send a request without event data.</p>
-<h2 id="payload-construction">Payload Construction<a class="headerlink" href="#payload-construction" title="Permanent link">&para;</a></h2>
-<p>The http trigger payload has the following structure,</p>
-<div class="codehilite"><pre><span></span>    payload:
-      - src:
-          dependencyName: test-dep
-          dataKey: s3.bucket.name
-        dest: bucket
-      - src:
-          dependencyName: test-dep
-          contextKey: type
-        dest: type
-</pre></div>
+<p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
+<p>The <code>payload</code> declared above will generate a message body like below,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="err">{</span>
+        <span class="ss">&quot;fileName&quot;</span><span class="p">:</span> <span class="ss">&quot;hello.txt&quot;</span> <span class="o">//</span> <span class="n">name</span><span class="o">/</span><span class="k">key</span> <span class="k">of</span> <span class="n">the</span> <span class="k">object</span>
+        <span class="ss">&quot;bucket&quot;</span><span class="p">:</span> <span class="ss">&quot;input&quot;</span> <span class="o">//</span> <span class="n">name</span> <span class="k">of</span> <span class="n">the</span> <span class="n">bucket</span>
+    <span class="err">}</span>
+</code></pre></div>
 
 
-<p>This looks very similar to the parameter structure you have seen in previous sections for trigger parameterization.</p>
-<p>The <code>src</code> is the source of event. It contains,</p>
-<ol>
-<li><code>dependencyName</code>: name of the event dependency to extract the event from.</li>
-<li><code>dataKey</code>: to extract a particular key-value from event's data.</li>
-<li><code>contextKey</code>: to extract a particular key-value from event' context.</li>
-</ol>
-<p>The <code>dest</code> is the destination key within the result payload.</p>
-<p>So, the above trigger payload will generate a request payload as,</p>
-<div class="codehilite"><pre><span></span>    {
-        &quot;bucket&quot;: &quot;value_of_the_bucket_name_extracted_from_event_data&quot;,
-        &quot;type&quot;: &quot;value_of_the_event_type_extracted_from_event_context&quot;
-    }
-</pre></div>
-
-
-<p><strong><em>Note</em></strong>: If you define both the <code>contextKey</code> and <code>dataKey</code> within a payload item, then
-the <code>dataKey</code> takes the precedence.</p>
-<p>You can create any payload structure you want. To get more info on how to 
-generate complex event payloads, take a look at <a href="https://github.com/tidwall/sjson">this library</a>.</p>
-<p>The complete specification of HTTP trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#httptrigger">here</a>.</p>
-<h2 id="serverless-workload-integration">Serverless Workload Integration<a class="headerlink" href="#serverless-workload-integration" title="Permanent link">&para;</a></h2>
-<p>HTTP trigger provides an easy integration into 20+ event sources for the existing serverless workloads.</p>
-<p>In this section, we will look at how to invoke a <code>Kubeless</code> function.</p>
-<h3 id="prerequisite_1">Prerequisite<a class="headerlink" href="#prerequisite_1" title="Permanent link">&para;</a></h3>
-<p>Kubeless must be installed :). You can follow the installation <a href="https://kubeless.io/docs/quick-start/">here</a>.
-Make sure to deploy the <code>test</code> function.</p>
-<h3 id="invoke-function">Invoke Function<a class="headerlink" href="#invoke-function" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>First, lets create an http trigger for kubeless function,</p>
-<div class="codehilite"><pre><span></span>kubeless trigger http create hello --function-name hello
-</pre></div>
+<p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">port</span><span class="o">-</span><span class="k">forward</span> <span class="o">&lt;</span><span class="n">nats</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="mi">4222</span><span class="p">:</span><span class="mi">4222</span>
+</code></pre></div>
 
 
 </li>
 <li>
-<p>Update the sensor and update the <code>serverURL</code> to point to your Kubeless function URL.</p>
+<p>Subscribe to the subject called <code>minio-events</code>. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.</p>
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="err">&#39;</span><span class="w"></span>
+</code></pre></div>
+
+
 </li>
 <li>
-<p>Drop a file onto <code>test</code> bucket.</p>
-</li>
-<li>
-<p>You will see the <code>hello</code> function getting invoked with following output,</p>
-<div class="codehilite"><pre><span></span>{&#39;event-time&#39;: None, &#39;extensions&#39;: {&#39;request&#39;: &lt;LocalRequest: POST http://&lt;URL&gt;:8080/&gt;}, &#39;event-type&#39;: None, &#39;event-namespace&#39;: None, &#39;data&#39;: &#39;{&quot;type&quot;:&quot;minio&quot;,&quot;bucket&quot;:&quot;test&quot;}&#39;, &#39;event-id&#39;: None}
-</pre></div>
+<p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber
+   as follows,</p>
+<div class="codehilite"><pre><span></span><code><span class="p">[</span><span class="o">#</span><span class="mi">1</span><span class="p">]</span> <span class="n">Received</span> <span class="k">on</span> <span class="p">[</span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="p">]:</span> <span class="s1">&#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;</span>
+</code></pre></div>
 
 
 </li>
 </ol>
-<p>Note: The output was taken from <code>Kubeless</code> deployed on GCP.</p>
-<h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
-<p>To determine whether the request was successful or not, HTTP trigger provides a <code>Status</code> policy.
-The <code>Status</code> holds a list of response statuses that are considered valid.</p>
-<ol>
-<li>
-<p>Lets update the sensor with acceptable response statuses as [<code>200</code>, <code>300</code>] and point the http trigger to an invalid server url.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/sensor-02.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Drop a file onto <code>test</code> bucket.</p>
-</li>
-<li>
-<p>Inspect the sensor logs, you will see the trigger resulted in failure.</p>
-<div class="codehilite"><pre><span></span>ERRO[2020-01-13 21:27:04] failed to operate on the event notification   error=&quot;policy application resulted in failure. http response status 404 is not allowed&quot;
-</pre></div>
-
-
-</li>
-</ol>
-<h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
-<p>You can either use <code>parameters</code> within http trigger or <code>parameter</code> under the template to parameterize
-the trigger on fly.</p>
                 
                   
+                
                 
               
               
@@ -1201,7 +1106,7 @@ the trigger on fly.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../08-policy/" title="Policy" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../http-trigger/" title="OpenFaas, Kubeless, KNative & REST API Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1210,19 +1115,19 @@ the trigger on fly.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Policy
+                OpenFaas, Kubeless, KNative & REST API Trigger
               </span>
             </div>
           </a>
         
         
-          <a href="../10-aws-lambda-and-openfaas-trigger/" title="AWS Lambda Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../developer_guide/" title="Developer Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                AWS Lambda Trigger
+                Developer Guide
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
@@ -1238,9 +1143,9 @@ the trigger on fly.</p>
       <div class="md-footer-copyright">
         
         powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
+        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>
         and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs</a>
       </div>
       
@@ -1250,7 +1155,7 @@ the trigger on fly.</p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.39abc4af.js"></script>
+      <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
       <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
       
