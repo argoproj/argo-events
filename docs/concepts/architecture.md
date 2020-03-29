@@ -1,4 +1,4 @@
-# High Level Architecture
+# Architecture
 
 Main components of Argo Events are:
 
