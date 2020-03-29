@@ -25,7 +25,7 @@ nav:
       - 'concepts/sensor.md'
       - 'concepts/event_source.md'
       - 'concepts/trigger.md'
-      - 'concepts/high_level_architecture.md'
+      - 'concepts/architecture.md'
   - Demo:
       - 'demo/notebooks.md'
   - Setup:
