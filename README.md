@@ -30,33 +30,14 @@ https://argoproj.github.io/argo-events/
 
 ## Getting Started
 Follow these [instruction](https://argoproj.github.io/argo-events/installation/) to set up Argo Events.
- 
-To see the Argo-Events in action, follow the
-[quick start](https://argoproj.github.io/argo-events/quick_start/) guide. 
 
 [![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
-## Guide
-Installation guide for gateways and sensors is available [here](https://argoproj.github.io/argo-events/setup/webhook/). 
-
-Main components of Argo Events are:
-
-1. [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/)
-2. [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/)
-3. [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/)
-4. [Trigger](https://argoproj.github.io/argo-events/concepts/trigger/)
-
-<br/>
-<br/>
-
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/high-level-architecture.png?raw=true" alt="High Level Architecture"/>
-</p>
-
-<br/>
-<br/>
-
-Deep dive into Argo Events at https://argoproj.github.io/argo-events/tutorials/01-introduction/  
+## Documentation
+- [Concepts](https://argoproj.github.io/argo-events/concepts/high_level_architecture/).
+- [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/).
+- [Deploy gateways and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
+- [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/)  
 
 ## Triggers
 
