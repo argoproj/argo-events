@@ -60,6 +60,7 @@ nav:
       - 'triggers/aws-lambda.md'
       - 'triggers/http-trigger.md'
       - 'triggers/nats-trigger.md'
+      - 'triggers/kafka-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'
