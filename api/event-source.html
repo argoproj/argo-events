@@ -174,6 +174,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.</p>
 </td>
 </tr>
@@ -315,6 +316,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace to use to retrieve the channel key and optional username/password</p>
 </td>
 </tr>
@@ -1025,6 +1027,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.</p>
 </td>
 </tr>
@@ -1137,6 +1140,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace which is used to retrieve access token from.</p>
 </td>
 </tr>
@@ -1327,6 +1331,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.</p>
 </td>
 </tr>
@@ -1899,7 +1904,9 @@ string
 <td>
 <code>labels</code></br>
 <em>
-map[string]string
+<a href="#argoproj.io/v1alpha1.Selector">
+[]Selector
+</a>
 </em>
 </td>
 <td>
@@ -1910,7 +1917,9 @@ map[string]string
 <td>
 <code>fields</code></br>
 <em>
-map[string]string
+<a href="#argoproj.io/v1alpha1.Selector">
+[]Selector
+</a>
 </em>
 </td>
 <td>
@@ -2162,6 +2171,61 @@ string
 </tr>
 </tbody>
 </table>
+<h3 id="argoproj.io/v1alpha1.Selector">Selector
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ResourceFilter">ResourceFilter</a>)
+</p>
+<p>
+<p>Selector represents conditional operation to select K8s objects.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>key</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Key name</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>operation</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Supported operations like ==, !=, &lt;=, &gt;= etc.
+Defaults to ==.
+Refer <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors</a> for more info.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>value</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Value</p>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="argoproj.io/v1alpha1.SlackEventSource">SlackEventSource
 </h3>
 <p>
@@ -2224,6 +2288,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.</p>
 </td>
 </tr>
@@ -2409,5 +2474,5 @@ More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.co
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>1782e0f</code>.
+on git commit <code>739f169</code>.
 </em></p>
