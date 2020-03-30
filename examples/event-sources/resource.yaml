@@ -3,27 +3,26 @@ kind: EventSource
 metadata:
   name: resource-event-source
 spec:
-  type: resource
+  type: "resource"
   resource:
     example:
       # namespace to listen events within
-      namespace: argo-events
+      namespace: "argo-events"
       # resource group
-      group: argoproj.io
+      group: "argoproj.io"
       # resource version
-      version: v1alpha1
+      version: "v1alpha1"
       # resource kind
-      resource: workflows
-      # types of events to listen for.
+      resource: "workflows"
+      # type of event
       # possible values are ADD, DELETE, UPDATE
-      eventTypes:
-        - ADD
-      # Filters to apply on watched object.
-      # If you apply filter, then the internal event informer will only monitor objects that pass the filter.
+      # Optional
+      eventType: ADD
+      # Filters to apply on watched object
       # Optional
       filter:
         labels:
-          app: my-workflow
+          app: "my-workflow"
 
 #    # create event if workflow with prefix "my-workflow" gets modified
 #    example-with-prefix-filter:
@@ -35,26 +34,22 @@ spec:
 #      filter:
 #        prefix: "my-workflow"
 #
-
 #    # create event when a pod is created before 2019-03-27T010:52:32Z
 #    example-with-created-by-filter:
 #      namespace: "argo-events"
 #      group: argoproj.io
 #      version: v1alpha1
 #      resource: workflows
-#      eventTypes:
-#        - ADD
+#      eventType: ADD
 #      filter:
 #        createdBy: "2019-04-06T12:52:11Z"
-
-#    # filters object that has prefix "my-"
-#    example-with-prefix:
+#
+#    example-with-multi-filters:
 #      namespace: "argo-events"
-#      group: argoproj.io
-#      version: v1alpha1
-#      resource: workflows
-#      eventTypes:
-#        - ADD
+#      group: ""
+#      version: v1
+#      resource: pods
+#      eventType: ADD
 #      filter:
 #        createdBy: "2019-04-06T12:52:11Z"
 #        labels:
@@ -67,7 +62,7 @@ spec:
 #      group: "k8s.io"
 #      version: v1
 #      resource: workflows
-#      eventTypes: 
-#        - ADD
+#      eventType: ADD
 #      filter:
-#        prefix: my-
+#        labels:
+#          workflows.argoproj.io/completed: "true"
