@@ -36,7 +36,8 @@ type EventListener struct {
 	// K8sClient is the kubernetes client
 	K8sClient kubernetes.Interface
 	// Logger to log stuff
-	Logger *logrus.Logger
+	Logger    *logrus.Logger
+	Namespace string
 }
 
 // StartEventSource starts an event source
@@ -67,6 +68,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var emitterEventSource *v1alpha1.EmitterEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &emitterEventSource); err != nil {
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
+	}
+
+	if emitterEventSource.Namespace == "" {
+		emitterEventSource.Namespace = listener.Namespace
 	}
 
 	var options []func(client *emitter.Client)

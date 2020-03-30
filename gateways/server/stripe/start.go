@@ -178,6 +178,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if stripeEventSource.Namespace == "" {
+		stripeEventSource.Namespace = listener.Namespace
+	}
+
 	route := webhook.NewRoute(stripeEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
