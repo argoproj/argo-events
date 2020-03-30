@@ -38,6 +38,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -65,6 +66,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var hubEventSource *v1alpha1.AzureEventsHubEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &hubEventSource); err != nil {
 		return errors.Wrapf(err, "failed to parsed the event source %s", eventSource.Name)
+	}
+
+	if hubEventSource.Namespace == "" {
+		hubEventSource.Namespace = listener.Namespace
 	}
 
 	logger.Infoln("retrieving the shared access key name...")

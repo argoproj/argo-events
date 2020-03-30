@@ -37,6 +37,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// K8sClient is the kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 // StartEventSource starts an event source
@@ -66,6 +67,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var redisEventSource *v1alpha1.RedisEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &redisEventSource); err != nil {
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
+	}
+
+	if redisEventSource.Namespace == "" {
+		redisEventSource.Namespace = listener.Namespace
 	}
 
 	logger.Infoln("retrieving password if it has been configured...")
