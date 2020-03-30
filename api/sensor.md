@@ -6240,5 +6240,4 @@ VerifyCert decides whether the connection is secure or not
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
 commit <code>1782e0f</code>. </em>
-
 </p>

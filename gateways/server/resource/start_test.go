@@ -64,13 +64,13 @@ func TestFilter(t *testing.T) {
 		err = passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter, v1alpha1.ADD)
+		}, resourceEventSource.Filter)
 		convey.So(err, convey.ShouldBeNil)
 
 		err = passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter, v1alpha1.UPDATE)
+		}, resourceEventSource.Filter)
 		convey.So(err, convey.ShouldNotBeNil)
 	})
 }

@@ -664,6 +664,11 @@ func (in *ResourceEventSource) DeepCopyInto(out *ResourceEventSource) {
 		(*in).DeepCopyInto(*out)
 	}
 	out.GroupVersionResource = in.GroupVersionResource
+	if in.EventTypes != nil {
+		in, out := &in.EventTypes, &out.EventTypes
+		*out = make([]ResourceEventType, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

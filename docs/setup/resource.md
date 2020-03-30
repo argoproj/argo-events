@@ -59,7 +59,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
         metadata:
           name: my-workflow
           labels:
-            app: my-workflow
+            name: my-workflow
         spec:
           entrypoint: whalesay
           templates:

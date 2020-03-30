@@ -68,5 +68,8 @@ func validate(eventSource *v1alpha1.ResourceEventSource) error {
 	if eventSource.Resource == "" {
 		return fmt.Errorf("resource must be specified")
 	}
+	if eventSource.EventTypes == nil {
+		return fmt.Errorf("event types must be specified")
+	}
 	return nil
 }
