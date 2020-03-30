@@ -326,7 +326,8 @@ type GithubEventSource struct {
 	// +optional
 	GithubUploadURL string `json:"githubUploadURL,omitempty" protobuf:"bytes,12,opt,name=githubUploadURL"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
-	Namespace string `json:"namespace" protobuf:"bytes,13,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,13.opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,14,opt,name=deleteHookOnFinish"`
@@ -349,7 +350,8 @@ type GitlabEventSource struct {
 	// GitlabBaseURL is the base URL for API requests to a custom endpoint
 	GitlabBaseURL string `json:"gitlabBaseURL" protobuf:"bytes,6,name=gitlabBaseURL"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve access token from.
-	Namespace string `json:"namespace" protobuf:"bytes,7,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,7,opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,8,opt,name=deleteHookOnFinish"`
@@ -391,7 +393,8 @@ type HDFSEventSource struct {
 	// It must be set if either ccache or keytab is used.
 	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
-	Namespace string `json:"namespace" protobuf:"bytes,1,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
 }
 
 // SlackEventSource refers to event-source for Slack related events
@@ -403,7 +406,8 @@ type SlackEventSource struct {
 	// Webhook holds configuration for a REST endpoint
 	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
-	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4.opt,name=namespace"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -439,7 +443,8 @@ type AzureEventsHubEventSource struct {
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,name=hubName"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-	Namespace string `json:"namespace" protobuf:"bytes,5,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications
@@ -473,7 +478,8 @@ type EmitterEventSource struct {
 	// ChannelName refers to the channel name
 	ChannelName string `json:"channelName" protobuf:"bytes,3,name=channelName"`
 	// Namespace to use to retrieve the channel key and optional username/password
-	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Username to use to connect to broker
 	// +optional
 	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`

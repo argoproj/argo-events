@@ -32,9 +32,13 @@ func main() {
 		panic(err)
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
-
+	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
+	if !ok {
+		panic("namespace is not provided")
+	}
 	server.StartGateway(&azure_events_hub.EventListener{
 		Logger:    common.NewArgoEventsLogger(),
 		K8sClient: clientset,
+		Namespace: namespace,
 	})
 }
