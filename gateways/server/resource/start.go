@@ -111,7 +111,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	if resourceEventSource.Filter != nil && resourceEventSource.Filter.Fields != nil {
-		sel, err := LabelSelector(resourceEventSource.Filter.Fields)
+		sel, err := FieldSelector(resourceEventSource.Filter.Fields)
 		if err != nil {
 			return errors.Wrapf(err, "failed to create the field selector for the event source %s", eventSource.Name)
 		}
@@ -128,66 +128,88 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	informer := factory.ForResource(gvr)
 
 	informerEventCh := make(chan *InformerEvent)
+	stopCh := make(chan struct{})
 
 	go func() {
 		logger.Infoln("listening to resource events...")
-		for event := range informerEventCh {
-			objBody, err := json.Marshal(event.Obj)
-			if err != nil {
-				logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
-				continue
-			}
+		for {
+			select {
+			case event := <-informerEventCh:
+				objBody, err := json.Marshal(event.Obj)
+				if err != nil {
+					logger.WithError(err).Errorln("failed to marshal the resource, rejecting the event...")
+					continue
+				}
 
-			eventData := &events.ResourceEventData{
-				EventType: string(event.Type),
-				Body:      (*json.RawMessage)(&objBody),
-				Group:     resourceEventSource.Group,
-				Version:   resourceEventSource.Version,
-				Resource:  resourceEventSource.Resource,
+				eventData := &events.ResourceEventData{
+					EventType: string(event.Type),
+					Body:      (*json.RawMessage)(&objBody),
+					Group:     resourceEventSource.Group,
+					Version:   resourceEventSource.Version,
+					Resource:  resourceEventSource.Resource,
+				}
+				eventBody, err := json.Marshal(eventData)
+				if err != nil {
+					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
+					continue
+				}
+				if err := passFilters(event, resourceEventSource.Filter); err != nil {
+					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
+					continue
+				}
+				channels.Data <- eventBody
+			case <-stopCh:
+				return
 			}
-			eventBody, err := json.Marshal(eventData)
-			if err != nil {
-				logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
-				continue
-			}
-			if err := passFilters(event, resourceEventSource.Filter, resourceEventSource.EventType); err != nil {
-				logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
-				continue
-			}
-			channels.Data <- eventBody
 		}
 	}()
 
-	sharedInformer := informer.Informer()
-	sharedInformer.AddEventHandler(
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
+	handlerFuncs := cache.ResourceEventHandlerFuncs{}
+
+	for _, eventType := range resourceEventSource.EventTypes {
+		switch eventType {
+		case v1alpha1.ADD:
+			handlerFuncs.AddFunc = func(obj interface{}) {
+				logger.Infoln("detected create event")
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.ADD,
 				}
-			},
-			UpdateFunc: func(oldObj, newObj interface{}) {
+			}
+		case v1alpha1.UPDATE:
+			handlerFuncs.UpdateFunc = func(oldObj, newObj interface{}) {
+				logger.Infoln("detected update event")
 				informerEventCh <- &InformerEvent{
 					Obj:    newObj,
 					OldObj: oldObj,
 					Type:   v1alpha1.UPDATE,
 				}
-			},
-			DeleteFunc: func(obj interface{}) {
+			}
+		case v1alpha1.DELETE:
+			handlerFuncs.DeleteFunc = func(obj interface{}) {
+				logger.Infoln("detected delete event")
 				informerEventCh <- &InformerEvent{
 					Obj:  obj,
 					Type: v1alpha1.DELETE,
 				}
-			},
-		},
-	)
+			}
+		default:
+			stopCh <- struct{}{}
+			return errors.Errorf("unknown event type: %s", string(eventType))
+		}
+	}
+
+	sharedInformer := informer.Informer()
+	sharedInformer.AddEventHandler(handlerFuncs)
 
 	doneCh := make(chan struct{})
+
+	logger.Infoln("running informer...")
 	sharedInformer.Run(doneCh)
 
 	<-channels.Done
 	doneCh <- struct{}{}
+	stopCh <- struct{}{}
 
 	logger.Infoln("event source is stopped")
 	close(informerEventCh)
@@ -231,7 +253,7 @@ func FieldSelector(fieldSelectors map[string]string) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, eventType v1alpha1.ResourceEventType) error {
+func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter) error {
 	uObj := event.Obj.(*unstructured.Unstructured)
 	// no filters are applied.
 	if filter == nil {
@@ -243,9 +265,6 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, eventTyp
 	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
 		return errors.Errorf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
-	}
-	if eventType != "" && event.Type != eventType {
-		return errors.Errorf("resource event type mismatch. expected: %s, actual: %s", string(eventType), string(event.Type))
 	}
 	return nil
 }

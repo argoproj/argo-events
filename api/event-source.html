@@ -1822,7 +1822,8 @@ ResourceFilter
 </td>
 <td>
 <em>(Optional)</em>
-<p>Filter is applied on the metadata of the resource</p>
+<p>Filter is applied on the metadata of the resource
+If you apply filter, then the internal event informer will only monitor objects that pass the filter.</p>
 </td>
 </tr>
 <tr>
@@ -1843,17 +1844,16 @@ Kubernetes meta/v1.GroupVersionResource
 </tr>
 <tr>
 <td>
-<code>eventType</code></br>
+<code>eventTypes</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.ResourceEventType">
-ResourceEventType
+[]ResourceEventType
 </a>
 </em>
 </td>
 <td>
-<em>(Optional)</em>
-<p>Type is the event type.
-If not provided, the gateway will watch all events for a resource.</p>
+<p>EventTypes is the list of event type to watch.
+Possible values are - ADD, UPDATE and DELETE.</p>
 </td>
 </tr>
 </tbody>

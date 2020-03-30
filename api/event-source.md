@@ -3605,7 +3605,9 @@ Namespace where resource is deployed
 
 <p>
 
-Filter is applied on the metadata of the resource
+Filter is applied on the metadata of the resource If you apply filter,
+then the internal event informer will only monitor objects that pass the
+filter.
 
 </p>
 
@@ -3646,20 +3648,18 @@ Group of the resource
 
 <td>
 
-<code>eventType</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ResourceEventType"> ResourceEventType
+<code>eventTypes</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ResourceEventType"> \[\]ResourceEventType
 </a> </em>
 
 </td>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-Type is the event type. If not provided, the gateway will watch all
-events for a resource.
+EventTypes is the list of event type to watch. Possible values are -
+ADD, UPDATE and DELETE.
 
 </p>
 
@@ -4775,5 +4775,4 @@ all types of events will be processed. More info at
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
 commit <code>1782e0f</code>. </em>
-
 </p>
