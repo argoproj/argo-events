@@ -23,7 +23,18 @@ spec:
       # Optional
       filter:
         labels:
-          name: my-workflow
+          app: my-workflow
+
+#    # create event if workflow with prefix "my-workflow" gets modified
+#    example-with-prefix-filter:
+#      namespace: "argo-events"
+#      group: argoproj.io
+#      version: v1alpha1
+#      resource: workflows
+#      eventType: UPDATE
+#      filter:
+#        prefix: "my-workflow"
+#
 
 #    # create event when a pod is created before 2019-03-27T010:52:32Z
 #    example-with-created-by-filter:
@@ -43,6 +54,20 @@ spec:
 #      version: v1alpha1
 #      resource: workflows
 #      eventTypes:
+#        - ADD
+#      filter:
+#        createdBy: "2019-04-06T12:52:11Z"
+#        labels:
+#          workflows.argoproj.io/completed: "true"
+#        prefix: "hello"
+#
+#    # watch for completed workflows in any namespace
+#    example-without-namespace:
+#      # namespace: (omitted to match any namespace)
+#      group: "k8s.io"
+#      version: v1
+#      resource: workflows
+#      eventTypes: 
 #        - ADD
 #      filter:
 #        prefix: my-

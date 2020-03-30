@@ -1,4 +1,4 @@
-# OpenFaas, Kubeless, KNative & REST API Trigger
+# HTTP Trigger
 
 Argo Events offers HTTP trigger which can easily invoke serverless functions like OpenFaas, Kubeless, Knative, Nuclio and make REST API calls.
 

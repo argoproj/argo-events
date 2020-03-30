@@ -50,9 +50,9 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
 
 4. The event source we created in step 1 contains configuration which makes the gateway listen to 
-   Argo workflows marked with label and `name: my-workflow`.
+   Argo workflows marked with label `app: my-workflow`.
 
-5. Lets create a workflow called `my-workflow`
+5. Lets create a workflow called `my-workflow` with label `app: my-workflow`
    
         apiVersion: argoproj.io/v1alpha1
         kind: Workflow

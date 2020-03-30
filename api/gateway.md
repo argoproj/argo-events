@@ -1321,6 +1321,5 @@ NATS refers to the subscribers over NATS protocol.
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>c16a1c5</code>. </em>
-
+commit <code>1782e0f</code>. </em>
 </p>
