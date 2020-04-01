@@ -28,7 +28,7 @@ func ApplySwitches(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) bool {
 	}
 	if trigger.Template.Switch.Any != nil {
 		for _, group := range trigger.Template.Switch.Any {
-			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
+			if status := snctrl.GetNodeByName(sensor, group); status != nil && status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase == v1alpha1.NodePhaseComplete {
 				return true
 			}
 		}
@@ -36,7 +36,7 @@ func ApplySwitches(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger) bool {
 	}
 	if trigger.Template.Switch.All != nil {
 		for _, group := range trigger.Template.Switch.All {
-			if status := snctrl.GetNodeByName(sensor, group); status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
+			if status := snctrl.GetNodeByName(sensor, group); status != nil && status.Type == v1alpha1.NodeTypeDependencyGroup && status.Phase != v1alpha1.NodePhaseComplete {
 				return false
 			}
 		}
