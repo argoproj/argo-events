@@ -155,11 +155,24 @@ type ResourceFilter struct {
 	// +optional
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
 	// +optional
-	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
 	// +optional
-	Fields map[string]string `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
+	Fields []Selector `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
 	// +optional
 	CreatedBy metav1.Time `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+}
+
+// Selector represents conditional operation to select K8s objects.
+type Selector struct {
+	// Key name
+	Key string `json:"key" protobuf:"bytes,1,name=key"`
+	// Supported operations like ==, !=, <=, >= etc.
+	// Defaults to ==.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
+	// +optional
+	Operation string `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
+	// Value
+	Value string `json:"value" protobuf:"bytes,3,name=value"`
 }
 
 // AMQPEventSource refers to an event-source for AMQP stream events
