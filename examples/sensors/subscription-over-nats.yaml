@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor-over-nats
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -18,8 +18,8 @@ spec:
       eventName: example
   subscription:
     nats:
-      serverURL: nats://test-nats.argo-events.svc:4222
-      subject: webhook-sensor-subject
+      serverURL: nats://nats.argo-events.svc:4222
+      subject: webhook-events
   triggers:
     - template:
         name: webhook-workflow-trigger

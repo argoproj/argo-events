@@ -42,5 +42,5 @@ spec:
       - "http://webhook-time-filter-sensor.argo-events.svc:9300/"
     nats:
       - name: webhook-sensor
-        serverURL: nats://test-nats.argo-events.svc:4222
+        serverURL: nats://nats.argo-events.svc:4222
         subject: webhook-sensor-subject

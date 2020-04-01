@@ -7,7 +7,7 @@ spec:
   nats:
     example:
       # url of the nats service
-      url: "nats://nats.argo-events:4222"
+      url: nats://nats.argo-events.svc:4222
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true
