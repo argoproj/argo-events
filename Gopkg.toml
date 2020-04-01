@@ -8,14 +8,6 @@ required = [
   "gopkg.in/src-d/go-git.v4"
 ]
 
-[[override]]
-  name = "k8s.io/kube-openapi"
-  branch = "master"
-
-[[override]]
-  name = "k8s.io/code-generator"
-  version = "v0.17.3"
-
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   branch = "master"
@@ -70,7 +62,11 @@ required = [
 
 [[constraint]]
   name = "github.com/argoproj/argo"
-  version = "v2.6.1"
+  version = "v2.7.0"
+
+[[constraint]]
+  name = "github.com/argoproj/argo-cd"
+  version = "v1.4.2"
 
 [[constraint]]
   name = "github.com/argoproj/argo-rollouts"
@@ -129,16 +125,24 @@ required = [
   version = "v1.0.8"
 
 [[override]]
-  version = "v0.17.3"
+  version = "v0.17.4"
   name = "k8s.io/api"
 
 [[override]]
-  version = "v0.17.3"
+  version = "v0.17.4"
   name = "k8s.io/apimachinery"
 
 [[override]]
-  version = "v0.17.3"
+  version = "v0.17.4"
   name = "k8s.io/client-go"
+
+[[override]]
+  name = "k8s.io/kube-openapi"
+  branch = "release-1.17"
+
+[[override]]
+  name = "k8s.io/code-generator"
+  version = "v0.17.4"
 
 [prune]
   go-tests = true
