@@ -302,6 +302,9 @@ type TriggerTemplate struct {
 	// NATS refers to the trigger designed to place message on NATS subject.
 	// +optional.
 	NATS *NATSTrigger `json:"nats,omitempty" protobuf:"bytes,9,opt,name=nats"`
+	// Slack refers to the trigger designed to send slack notification message.
+	// +optional
+	Slack *SlackTrigger `json:"slack,omitempty" protobuf:"bytes,10,opt,name=slack"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -518,6 +521,30 @@ type CustomTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	// +listType=payloadParameters
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
+}
+
+type SlackTrigger struct {
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	// +optional
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,1,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the HTTP trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
+	// Password refers to the Kubernetes secret that holds the slack token required to send messages.
+	// +optional
+	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,3,opt,name=secretToken"`
+	// Namespace to read the password secret from.
+	// This is required if the password secret selector is specified.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	// Channel refers to which Slack channel to send slack message.
+	Channel string `json:"channel,omitempty" protobuf:"bytes,5,opt,name=channel"`
+	// Message refers to the message to send to the Slack channel.
+	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
+	SlackToken string `json:"slackToken,omitempty" protobuf:"bytes,7,opt,name=slackToken"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination
