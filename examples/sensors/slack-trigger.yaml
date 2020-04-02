@@ -23,7 +23,7 @@ spec:
     - template:
         name: slack-trigger
         slack:
-#          slackToken: xoxb-1020333389910-1006657799923-jWAfxPMYNwhjSvvZ43ICRyTN
+#          slackToken: slack-token-here
           channel: general
           message: hello world
           payload:
