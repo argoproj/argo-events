@@ -18,7 +18,6 @@ package slack
 import (
 	//"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/argoproj/argo-events/common"
 	"k8s.io/client-go/kubernetes"
 
@@ -26,7 +25,6 @@ import (
 	"net/http"
 
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -93,84 +91,49 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 
 // Execute executes the trigger
 func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
-	fmt.Println("Executing SlackTrigger")
-	obj, ok := resource.(*v1alpha1.SlackTrigger)
+	t.Logger.Infoln("executing SlackTrigger")
+	_, ok := resource.(*v1alpha1.SlackTrigger)
 	if !ok {
 		return nil, errors.New("failed to marshal the Slack trigger resource")
 	}
 
-	if obj.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
-	}
-
-	payload, err := triggers.ConstructPayload(t.Sensor, obj.Payload)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("Sensor payload: %v\n", payload)
-
 	slacktrigger := t.Trigger.Template.Slack
 
 	channel := slacktrigger.Channel
-	slackMessage := slacktrigger.Message
-	slackToken := slacktrigger.SlackToken
+	if channel == "" {
+		return nil, errors.New("no slack channel provided")
+	}
 
-	secretToken := ""
+	message := slacktrigger.Message
+	if message == "" {
+		return nil, errors.New("no slack message to post")
+	}
 
-	if slacktrigger.SecretToken != nil && slackToken == ""{
-		secretToken, err = common.GetSecrets(t.K8sClient, slacktrigger.Namespace, slacktrigger.SecretToken)
+	slackToken := ""
+	if slacktrigger.SlackToken != nil {
+		secretToken, err := common.GetSecrets(t.K8sClient, slacktrigger.Namespace, slacktrigger.SlackToken)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", slacktrigger.SecretToken.Name, slacktrigger.Namespace)
+			return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s and namespace %s", slacktrigger.SlackToken.Name, slacktrigger.Namespace)
 		}
 		slackToken = secretToken
 	}
 
-
 	api := slack.New(slackToken, slack.OptionDebug(true))
-	joinedChannel, err := api.JoinChannel(channel)
-	fmt.Printf("joinedChannel: %v\n", joinedChannel)
+	_, err := api.JoinChannel(channel)
+	if err != nil {
+		t.Logger.WithField("channel", slacktrigger.Channel).Errorf("unable to join channel...")
+		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
+	}
 
 	t.Logger.WithField("channel", slacktrigger.Channel).Infoln("posting to channel...")
-	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(slackMessage, false))
 
-	//attachment := slack.Attachment{
-	//	Pretext: "attachment pretext",
-	//	Text:    "attachment text",
-	//	//Uncomment the following part to send a field too
-	//
-	//		Fields: []slack.AttachmentField{
-	//			slack.AttachmentField{
-	//				Title: "field title",
-	//				Value: "field value",
-	//			},
-	//		},
-	//
-	//		}
-	//channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionAttachments(attachment))
+	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 
-
-	if err != nil {
-		fmt.Printf("error: %s\n", err)
-	}
-	fmt.Printf("Message successfully sent to channel %s at %s\n", channelID, timestamp)
-
-	fmt.Println("Finished Executing SlackTrigger")
-
+	t.Logger.WithField("message", slacktrigger.Message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
+	t.Logger.Infoln("finished executing SlackTrigger")
 	return nil, nil
 }
 
-// ApplyPolicy applies a policy on trigger execution response if any
 func (t *SlackTrigger) ApplyPolicy(resource interface{}) error {
-	if t.Trigger.Policy == nil || t.Trigger.Policy.Status == nil || t.Trigger.Policy.Status.Allow == nil {
-		return nil
-	}
-	response, ok := resource.(*http.Response)
-	if !ok {
-		return errors.New("failed to interpret the trigger execution response")
-	}
-
-	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
-
-	return p.ApplyPolicy()
+	return nil
 }

@@ -151,6 +151,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
+	if template.Slack != nil {
+		if err := validateSlackTrigger(template.Slack); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
 	if template.CustomTrigger != nil {
 		if err := validateCustomTrigger(template.CustomTrigger); err != nil {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
@@ -317,6 +322,20 @@ func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
 	}
 	if trigger.Payload == nil {
 		return errors.New("payload can't be nil")
+	}
+	return nil
+}
+
+// validateSlackTrigger validates the Slack trigger.
+func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
+	if trigger == nil {
+		return errors.New("trigger can't be nil")
+	}
+	if trigger.SlackToken == nil {
+		return errors.New("slack token can't be empty")
+	}
+	if trigger.Namespace == "" {
+		return errors.New("namespace can't be empty")
 	}
 	return nil
 }

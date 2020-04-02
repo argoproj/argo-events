@@ -524,27 +524,22 @@ type CustomTrigger struct {
 }
 
 type SlackTrigger struct {
-	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
-	// +optional
-	Payload []TriggerParameter `json:"payload" protobuf:"bytes,1,rep,name=payload"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
-	// the HTTP trigger resource.
+	// the trigger resource.
 	// +listType=triggerParameters
 	// +optional
-	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
-	// Password refers to the Kubernetes secret that holds the slack token required to send messages.
-	// +optional
-	SecretToken *corev1.SecretKeySelector `json:"secretToken,omitempty" protobuf:"bytes,3,opt,name=secretToken"`
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
+	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
+	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,name=slackToken"`
 	// Namespace to read the password secret from.
 	// This is required if the password secret selector is specified.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Namespace string `json:"namespace" protobuf:"bytes,3,name=namespace"`
 	// Channel refers to which Slack channel to send slack message.
-	Channel string `json:"channel,omitempty" protobuf:"bytes,5,opt,name=channel"`
+	// +optional
+	Channel string `json:"channel,omitempty" protobuf:"bytes,4,opt,name=channel"`
 	// Message refers to the message to send to the Slack channel.
-	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
-	SlackToken string `json:"slackToken,omitempty" protobuf:"bytes,7,opt,name=slackToken"`
+	// +optional
+	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

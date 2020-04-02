@@ -2363,20 +2363,6 @@ SensorResources
 <tbody>
 <tr>
 <td>
-<code>payload</code></br>
-<em>
-<a href="#argoproj.io/v1alpha1.TriggerParameter">
-[]TriggerParameter
-</a>
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>Payload is the list of key-value extracted from an event payload to construct the request payload.</p>
-</td>
-</tr>
-<tr>
-<td>
 <code>parameters</code></br>
 <em>
 <a href="#argoproj.io/v1alpha1.TriggerParameter">
@@ -2387,12 +2373,12 @@ SensorResources
 <td>
 <em>(Optional)</em>
 <p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
-the HTTP trigger resource.</p>
+the trigger resource.</p>
 </td>
 </tr>
 <tr>
 <td>
-<code>secretToken</code></br>
+<code>slackToken</code></br>
 <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector
@@ -2400,8 +2386,7 @@ Kubernetes core/v1.SecretKeySelector
 </em>
 </td>
 <td>
-<em>(Optional)</em>
-<p>Password refers to the Kubernetes secret that holds the slack token required to send messages.</p>
+<p>SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.</p>
 </td>
 </tr>
 <tr>
@@ -2412,7 +2397,6 @@ string
 </em>
 </td>
 <td>
-<em>(Optional)</em>
 <p>Namespace to read the password secret from.
 This is required if the password secret selector is specified.</p>
 </td>
@@ -2425,6 +2409,7 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Channel refers to which Slack channel to send slack message.</p>
 </td>
 </tr>
@@ -2436,17 +2421,8 @@ string
 </em>
 </td>
 <td>
+<em>(Optional)</em>
 <p>Message refers to the message to send to the Slack channel.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>slackToken</code></br>
-<em>
-string
-</em>
-</td>
-<td>
 </td>
 </tr>
 </tbody>
@@ -3252,5 +3228,5 @@ bool
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>3bf768b</code>.
+on git commit <code>9813a95</code>.
 </em></p>

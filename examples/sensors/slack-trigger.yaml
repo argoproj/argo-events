@@ -23,16 +23,10 @@ spec:
     - template:
         name: slack-trigger
         slack:
-#          slackToken: slack-token-here
           channel: general
           message: hello world
-          payload:
-            - src:
-                dependencyName: test-dep
-                dataKey: body.name
-              dest: name
-          secretToken:
-            key: slackToken
+          slackToken:
+            key: token
             name: slack-secret
           namespace: argo-events
       parameters:
@@ -44,7 +38,3 @@ spec:
             dependencyName: test-dep
             dataKey: body.message
           dest: slack.message
-        - src:
-            dependencyName: test-dep
-            dataKey: body.slackToken
-          dest: slack.dest.slackToken

@@ -4686,31 +4686,6 @@ Description
 
 <td>
 
-<code>payload</code></br> <em>
-<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
-</a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Payload is the list of key-value extracted from an event payload to
-construct the request payload.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>parameters</code></br> <em>
 <a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
 </a> </em>
@@ -4724,7 +4699,7 @@ construct the request payload.
 <p>
 
 Parameters is the list of key-value extracted from event’s payload that
-are applied to the HTTP trigger resource.
+are applied to the trigger resource.
 
 </p>
 
@@ -4736,7 +4711,7 @@ are applied to the HTTP trigger resource.
 
 <td>
 
-<code>secretToken</code></br> <em>
+<code>slackToken</code></br> <em>
 <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
 Kubernetes core/v1.SecretKeySelector </a> </em>
 
@@ -4744,11 +4719,9 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-Password refers to the Kubernetes secret that holds the slack token
+SlackToken refers to the Kubernetes secret that holds the slack token
 required to send messages.
 
 </p>
@@ -4766,8 +4739,6 @@ required to send messages.
 </td>
 
 <td>
-
-<em>(Optional)</em>
 
 <p>
 
@@ -4790,6 +4761,8 @@ password secret selector is specified.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Channel refers to which Slack channel to send slack message.
@@ -4810,25 +4783,13 @@ Channel refers to which Slack channel to send slack message.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Message refers to the message to send to the Slack channel.
 
 </p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>slackToken</code></br> <em> string </em>
-
-</td>
-
-<td>
 
 </td>
 
@@ -6463,6 +6424,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>3bf768b</code>. </em>
+commit <code>9813a95</code>. </em>
 
 </p>
