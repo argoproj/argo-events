@@ -61,6 +61,7 @@ nav:
       - 'triggers/http-trigger.md'
       - 'triggers/nats-trigger.md'
       - 'triggers/kafka-trigger.md'
+      - 'triggers/k8s-object-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'
