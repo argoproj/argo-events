@@ -116,7 +116,7 @@ event data.
 
 ### Parameterization
 
-Similar to other type of triggers, sensor offers parameterization for the AWS Lambda trigger. Parameterization is specially useful when
+Similar to other type of triggers, sensor offers parameterization for the HTTP trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate values like URL, payload values on the fly.
 
 You can learn more about trigger parameterization [here](https://argoproj.github.io/argo-events/tutorials/02-parameterization/).

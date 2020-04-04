@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor-http
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -41,33 +41,37 @@ spec:
                     command:
                       - cowsay
                     image: "docker/whalesay:latest"
-    - template:
-        name: webhook-deployment-trigger
-        k8s:
-          group: apps
-          version: v1
-          resource: deployments
-          operation: create
-          source:
-            resource:
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                generateName: hello-world-
-              spec:
-                replicas: 1
-                selector:
-                  matchLabels:
-                    app: mydeploy
-                template:
-                  metadata:
-                    labels:
-                      app: mydeploy
-                  spec:
-                    containers:
-                      - name: hello-container
-                        args:
-                         - "hello world"
-                        command:
-                         - cowsay
-                        image: "docker/whalesay:latest"
+          parameters:
+            - src:
+                dependencyName: test-dep
+              dest: spec.containers.0.args.0
+#    - template:
+#        name: webhook-deployment-trigger
+#        k8s:
+#          group: apps
+#          version: v1
+#          resource: deployments
+#          operation: create
+#          source:
+#            resource:
+#              apiVersion: apps/v1
+#              kind: Deployment
+#              metadata:
+#                generateName: hello-world-
+#              spec:
+#                replicas: 1
+#                selector:
+#                  matchLabels:
+#                    app: mydeploy
+#                template:
+#                  metadata:
+#                    labels:
+#                      app: mydeploy
+#                  spec:
+#                    containers:
+#                      - name: hello-container
+#                        args:
+#                         - "hello world"
+#                        command:
+#                         - cowsay
+#                        image: "docker/whalesay:latest"
