@@ -36,7 +36,7 @@
     
     
       
-        <title>NATS Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Kubernetes Object Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -110,7 +110,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#nats-trigger" tabindex="0" class="md-skip">
+      <a href="#kubernetes-object-trigger" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -136,7 +136,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                NATS Trigger
+                Kubernetes Object Trigger
               
             </span>
           
@@ -806,56 +806,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        NATS Trigger
-      </label>
-    
-    <a href="./" title="NATS Trigger" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../nats-trigger/" title="NATS Trigger" class="md-nav__link">
       NATS Trigger
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#specification" class="md-nav__link">
-    Specification
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#walkthrough" class="md-nav__link">
-    Walkthrough
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -875,11 +830,63 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Kubernetes Object Trigger
+      </label>
+    
+    <a href="./" title="Kubernetes Object Trigger" class="md-nav__link md-nav__link--active">
       Kubernetes Object Trigger
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#trigger-a-k8s-pod" class="md-nav__link">
+    Trigger a K8s Pod
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameterization" class="md-nav__link">
+    Parameterization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    Policy
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -981,15 +988,22 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#specification" class="md-nav__link">
-    Specification
+  <a href="#trigger-a-k8s-pod" class="md-nav__link">
+    Trigger a K8s Pod
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#walkthrough" class="md-nav__link">
-    Walkthrough
+  <a href="#parameterization" class="md-nav__link">
+    Parameterization
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    Policy
   </a>
   
 </li>
@@ -1010,29 +1024,41 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/nats-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/k8s-object-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="nats-trigger">NATS Trigger<a class="headerlink" href="#nats-trigger" title="Permanent link">&para;</a></h1>
-<p>NATS trigger allows sensor to publish events on NATS subjects. This trigger helps source the events from outside world into your messaging queues.</p>
-<h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
-<p>The NATS trigger specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#natstrigger">here</a>.</p>
-<h2 id="walkthrough">Walkthrough<a class="headerlink" href="#walkthrough" title="Permanent link">&para;</a></h2>
+                <h1 id="kubernetes-object-trigger">Kubernetes Object Trigger<a class="headerlink" href="#kubernetes-object-trigger" title="Permanent link">&para;</a></h1>
+<p>Apart from Argo workflow objects, the sensor lets you trigger standard Kubernetes objects such as Pod, Deployment, Job, CronJob, etc.
+Having the ability to trigger standard Kubernetes objects is quite powerful as provides an avenue to
+set up event-driven pipelines for existing workloads.</p>
+<p><br/>
+<br/></p>
+<p align="center">
+  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/k8s-trigger.png?raw=true" alt="K8s Trigger"/>
+</p>
+
+<p><br/>
+<br/></p>
+<h2 id="trigger-a-k8s-pod">Trigger a K8s Pod<a class="headerlink" href="#trigger-a-k8s-pod" title="Permanent link">&para;</a></h2>
 <ol>
 <li>
-<p>Consider a scenario where you are expecting a file drop onto a Minio bucket and want to place that event
-   on a NATS subject.</p>
+<p>We will use webhook gateway and sensor to trigger a K8s pod.</p>
 </li>
 <li>
-<p>Set up the Minio Event Source and Gateway <a href="https://argoproj.github.io/argo-events/setup/minio/">here</a>. 
-   Do not create the Minio sensor, we are going to create it in next step.</p>
+<p>Lets set up a webhook gateway and event source to process incoming requests.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">gateways</span><span class="o">/</span><span class="n">webhook</span><span class="p">.</span><span class="n">yaml</span>
+
+<span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">event</span><span class="o">-</span><span class="n">sources</span><span class="o">/</span><span class="n">webhook</span><span class="p">.</span><span class="n">yaml</span>
+</code></pre></div>
+
+
 </li>
 <li>
-<p>Lets create the sensor,</p>
+<p>To trigger a pod, we need to create a sensor as defined below,</p>
 <div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
   <span class="n">labels</span><span class="o">:</span>
     <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
@@ -1045,70 +1071,130 @@
       <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
       <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
   <span class="n">subscription</span><span class="o">:</span>
     <span class="n">http</span><span class="o">:</span>
       <span class="n">port</span><span class="o">:</span> <span class="mi">9300</span>
   <span class="n">triggers</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">nats</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">nats</span><span class="o">:</span>
-          <span class="err">#</span> <span class="n">NATS</span> <span class="n">Server</span> <span class="n">URL</span>
-          <span class="n">url</span><span class="o">:</span> <span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
-          <span class="err">#</span> <span class="n">Name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">subject</span>
-          <span class="n">subject</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">events</span>
-          <span class="n">payload</span><span class="o">:</span>
+        <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">trigger</span>
+        <span class="n">k8s</span><span class="o">:</span>
+          <span class="n">group</span><span class="o">:</span> <span class="s2">&quot;&quot;</span>
+          <span class="n">version</span><span class="o">:</span> <span class="n">v1</span>
+          <span class="n">resource</span><span class="o">:</span> <span class="n">pods</span>
+          <span class="n">operation</span><span class="o">:</span> <span class="n">create</span>
+          <span class="n">source</span><span class="o">:</span>
+            <span class="n">resource</span><span class="o">:</span>
+              <span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+              <span class="n">kind</span><span class="o">:</span> <span class="n">Pod</span>
+              <span class="n">metadata</span><span class="o">:</span>
+                <span class="n">generateName</span><span class="o">:</span> <span class="n">hello</span><span class="o">-</span><span class="n">world</span><span class="o">-</span>
+              <span class="n">spec</span><span class="o">:</span>
+                <span class="n">containers</span><span class="o">:</span>
+                  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">hello</span><span class="o">-</span><span class="n">container</span>
+                    <span class="n">args</span><span class="o">:</span>
+                      <span class="o">-</span> <span class="s2">&quot;hello-world&quot;</span>
+                    <span class="n">command</span><span class="o">:</span>
+                      <span class="o">-</span> <span class="n">cowsay</span>
+                    <span class="n">image</span><span class="o">:</span> <span class="s2">&quot;docker/whalesay:latest&quot;</span>
+          <span class="n">parameters</span><span class="o">:</span>
             <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
                 <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">object</span><span class="o">.</span><span class="na">key</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">fileName</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                <span class="n">dataKey</span><span class="o">:</span> <span class="n">notification</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">s3</span><span class="o">.</span><span class="na">bucket</span><span class="o">.</span><span class="na">name</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">bucket</span>
+              <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">containers</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="mi">0</span>
 </code></pre></div>
 
 
 </li>
 <li>
-<p>The NATS message needs a body. In order to construct message based on the event data, sensor offers 
-   <code>payload</code> field as a part of the NATS trigger.</p>
+<p>The <code>group</code>, <code>version</code> and <code>resource</code> under <code>k8s</code> in the trigger template determines the type of 
+   K8s object. Change it accordingly if you want to trigger something else than a pod.</p>
+</li>
+<li>
+<p>Create the sensor,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="n">apply</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">sensors</span><span class="o">/</span><span class="k">trigger</span><span class="o">-</span><span class="n">standard</span><span class="o">-</span><span class="n">k8s</span><span class="o">-</span><span class="n">resource</span><span class="p">.</span><span class="n">yaml</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Lets expose the webhook gateway using <code>port-forward</code> so that we can make a request to it.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">port</span><span class="o">-</span><span class="k">forward</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">-</span><span class="k">of</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">pod</span><span class="o">&gt;</span> <span class="mi">12000</span><span class="p">:</span><span class="mi">12000</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span><code><span class="n">curl</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;{&quot;message&quot;:&quot;ok&quot;}&#39;</span> <span class="o">-</span><span class="n">H</span> <span class="ss">&quot;Content-Type: application/json&quot;</span> <span class="o">-</span><span class="n">X</span> <span class="n">POST</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">12000</span><span class="o">/</span><span class="n">example</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Inspect the logs of the pod, you will something similar as below,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">_________________________________________</span> 
+<span class="o">/</span> <span class="err">{</span><span class="ss">&quot;context&quot;</span><span class="p">:</span><span class="err">{</span><span class="ss">&quot;type&quot;</span><span class="p">:</span><span class="ss">&quot;webhook&quot;</span><span class="p">,</span><span class="ss">&quot;specVersi \</span>
+<span class="ss">| on&quot;</span><span class="p">:</span><span class="ss">&quot;0.3&quot;</span><span class="p">,</span><span class="ss">&quot;source&quot;</span><span class="p">:</span><span class="ss">&quot;webhook-gateway&quot;</span><span class="p">,</span><span class="ss">&quot;e |</span>
+<span class="ss">| ventID&quot;</span><span class="p">:</span><span class="ss">&quot;30306463666539362d346666642d34 |</span>
+<span class="ss">| 3336332d383861312d336538363333613564313 |</span>
+<span class="ss">| 932&quot;</span><span class="p">,</span><span class="ss">&quot;time&quot;</span><span class="p">:</span><span class="ss">&quot;2020-01-11T21:23:07.682961 |</span>
+<span class="ss">| Z&quot;</span><span class="p">,</span><span class="ss">&quot;dataContentType&quot;</span><span class="p">:</span><span class="ss">&quot;application/json&quot;</span> <span class="o">|</span>
+<span class="o">|</span> <span class="p">,</span><span class="ss">&quot;subject&quot;</span><span class="p">:</span><span class="ss">&quot;example&quot;</span><span class="err">}</span><span class="p">,</span><span class="ss">&quot;data&quot;</span><span class="p">:</span><span class="ss">&quot;eyJoZWFkZ |</span>
+<span class="ss">| XIiOnsiQWNjZXB0IjpbIiovKiJdLCJDb250ZW50 |</span>
+<span class="ss">| LUxlbmd0aCI6WyIxOSJdLCJDb250ZW50LVR5cGU |</span>
+<span class="ss">| iOlsiYXBwbGljYXRpb24vanNvbiJdLCJVc2VyLU |</span>
+<span class="ss">| FnZW50IjpbImN1cmwvNy41NC4wIl19LCJib2R5I |</span>
+<span class="ss">\ jp7Im1lc3NhZ2UiOiJoZXkhISJ9fQ==&quot;</span><span class="err">}</span>       <span class="o">/</span>
+<span class="c1">----------------------------------------- </span>
+  <span class="err">\</span>
+   <span class="err">\</span>
+    <span class="err">\</span>     
+                  <span class="o">##</span>        <span class="p">.</span>            
+            <span class="o">##</span> <span class="o">##</span> <span class="o">##</span>       <span class="o">==</span>            
+         <span class="o">##</span> <span class="o">##</span> <span class="o">##</span> <span class="o">##</span>      <span class="o">===</span>            
+     <span class="o">/</span><span class="ss">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="n">___</span><span class="o">/</span> <span class="o">===</span>        
+<span class="o">~~~</span> <span class="err">{</span><span class="o">~~</span> <span class="o">~~~~</span> <span class="o">~~~</span> <span class="o">~~~~</span> <span class="o">~~</span> <span class="o">~</span> <span class="o">/</span>  <span class="o">===-</span> <span class="o">~~~</span>   
+     <span class="err">\</span><span class="n">______</span> <span class="n">o</span>          <span class="n">__</span><span class="o">/</span>            
+      <span class="err">\</span>    <span class="err">\</span>        <span class="n">__</span><span class="o">/</span>             
+        <span class="err">\</span><span class="n">____</span><span class="err">\</span><span class="n">______</span><span class="o">/</span>
+</code></pre></div>
+
+
 </li>
 </ol>
-<p>The <code>payload</code> contains the list of <code>src</code> which refers to the source event and <code>dest</code> which refers to destination key within result request payload.</p>
-<p>The <code>payload</code> declared above will generate a message body like below,</p>
-<div class="codehilite"><pre><span></span><code>    <span class="err">{</span>
-        <span class="ss">&quot;fileName&quot;</span><span class="p">:</span> <span class="ss">&quot;hello.txt&quot;</span> <span class="o">//</span> <span class="n">name</span><span class="o">/</span><span class="k">key</span> <span class="k">of</span> <span class="n">the</span> <span class="k">object</span>
-        <span class="ss">&quot;bucket&quot;</span><span class="p">:</span> <span class="ss">&quot;input&quot;</span> <span class="o">//</span> <span class="n">name</span> <span class="k">of</span> <span class="n">the</span> <span class="n">bucket</span>
-    <span class="err">}</span>
+<h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
+<p>Similar to other type of triggers, sensor offers parameterization for the K8s trigger. Parameterization is specially useful when
+you want to define a generic trigger template in the sensor and populate the K8s object values on the fly.</p>
+<p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
+<h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
+<p>Trigger policy helps you determine the status of the triggered K8s object and decide whether to stop or continue sensor. </p>
+<p>To determine whether the K8s object was successful or not, the K8s trigger provides a <code>Resource Labels</code> policy.
+The <code>Resource Labels</code> holds a list of labels which are checked against the triggered K8s object to determine the status of the object.</p>
+<div class="codehilite"><pre><span></span><code>            # <span class="nv">Policy</span> <span class="nv">to</span> <span class="nv">configure</span> <span class="nv">backoff</span> <span class="nv">and</span> <span class="nv">execution</span> <span class="nv">criteria</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">trigger</span>
+            # <span class="nv">Because</span> <span class="nv">the</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">able</span> <span class="nv">to</span> <span class="nv">trigger</span> <span class="nv">any</span> <span class="nv">K8s</span> <span class="nv">resource</span>, <span class="nv">it</span> <span class="nv">determines</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">state</span> <span class="nv">by</span> <span class="nv">looking</span> <span class="nv">at</span> <span class="nv">the</span> <span class="nv">resource</span><span class="s1">&#39;</span><span class="s">s labels.</span>
+            <span class="nv">policy</span>:
+              <span class="nv">k8s</span>:
+                # <span class="nv">Backoff</span> <span class="nv">before</span> <span class="nv">checking</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">labels</span>
+                <span class="nv">backoff</span>:
+                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">the</span> <span class="nv">duration</span> <span class="nv">in</span> <span class="nv">nanoseconds</span>
+                  <span class="nv">duration</span>: <span class="mi">1000000000</span> # <span class="mi">1</span> <span class="nv">second</span>
+                  # <span class="nv">Duration</span> <span class="nv">is</span> <span class="nv">multiplied</span> <span class="nv">by</span> <span class="nv">factor</span> <span class="nv">each</span> <span class="nv">iteration</span>
+                  <span class="nv">factor</span>: <span class="mi">2</span>
+                  # <span class="nv">The</span> <span class="nv">amount</span> <span class="nv">of</span> <span class="nv">jitter</span> <span class="nv">applied</span> <span class="nv">each</span> <span class="nv">iteration</span>
+                  <span class="nv">jitter</span>: <span class="mi">0</span>.<span class="mi">1</span>
+                  # <span class="k">Exit</span> <span class="nv">with</span> <span class="nv">error</span> <span class="nv">after</span> <span class="nv">these</span> <span class="nv">many</span> <span class="nv">steps</span>
+                  <span class="nv">steps</span>: <span class="mi">5</span>
+                # <span class="nv">labels</span> <span class="nv">set</span> <span class="nv">on</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">decide</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">resource</span> <span class="nv">has</span> <span class="nv">transitioned</span> <span class="nv">into</span> <span class="nv">the</span> <span class="nv">success</span> <span class="nv">state</span>.
+                <span class="nv">labels</span>:
+                  <span class="nv">workflows</span>.<span class="nv">argoproj</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">phase</span>: <span class="nv">Succeeded</span>
+                # <span class="nv">Determines</span> <span class="nv">whether</span> <span class="nv">trigger</span> <span class="nv">should</span> <span class="nv">be</span> <span class="nv">marked</span> <span class="nv">as</span> <span class="nv">failed</span> <span class="k">if</span> <span class="nv">the</span> <span class="nv">backoff</span> <span class="nv">times</span> <span class="nv">out</span> <span class="nv">and</span> <span class="nv">sensor</span> <span class="nv">is</span> <span class="nv">still</span> <span class="nv">unable</span> <span class="nv">to</span> <span class="nv">decide</span> <span class="nv">the</span> <span class="nv">state</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">trigger</span>.
+                # <span class="nv">defaults</span> <span class="nv">to</span> <span class="nv">false</span>
+                <span class="nv">errorOnBackoffTimeout</span>: <span class="nv">true</span>
 </code></pre></div>
 
 
-<ol>
-<li>
-<p>If you are running NATS on local K8s cluster, make sure to <code>port-forward</code> to pod,</p>
-<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">port</span><span class="o">-</span><span class="k">forward</span> <span class="o">&lt;</span><span class="n">nats</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="mi">4222</span><span class="p">:</span><span class="mi">4222</span>
-</code></pre></div>
-
-
-</li>
-<li>
-<p>Subscribe to the subject called <code>minio-events</code>. Refer the nats example to publish a message to the subject https://github.com/nats-io/go-nats-examples/tree/master/patterns/publish-subscribe.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="k">go</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="n">main</span><span class="p">.</span><span class="k">go</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">localhost</span><span class="w"> </span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="err">&#39;</span><span class="w"></span>
-</code></pre></div>
-
-
-</li>
-<li>
-<p>Drop a file called <code>hello.txt</code> onto the bucket <code>input</code> and you will receive the message on NATS subscriber
-   as follows,</p>
-<div class="codehilite"><pre><span></span><code><span class="p">[</span><span class="o">#</span><span class="mi">1</span><span class="p">]</span> <span class="n">Received</span> <span class="k">on</span> <span class="p">[</span><span class="n">minio</span><span class="o">-</span><span class="n">events</span><span class="p">]:</span> <span class="s1">&#39;{&quot;bucket&quot;:&quot;input&quot;,&quot;fileName&quot;:&quot;hello.txt&quot;}&#39;</span>
-</code></pre></div>
-
-
-</li>
-</ol>
+<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/trigger-with-policy.yaml">here</a>. </p>
                 
                   
                 
@@ -1130,7 +1216,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../http-trigger/" title="HTTP Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../kafka-trigger/" title="Kafka Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1139,19 +1225,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                HTTP Trigger
+                Kafka Trigger
               </span>
             </div>
           </a>
         
         
-          <a href="../kafka-trigger/" title="Kafka Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../developer_guide/" title="Developer Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Kafka Trigger
+                Developer Guide
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
