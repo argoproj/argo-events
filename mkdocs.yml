@@ -57,6 +57,7 @@ nav:
       - 'tutorials/08-policy.md'
       - 'tutorials/11-special-argo-workflow-trigger.md'
   - Triggers:
+      - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
       - 'triggers/http-trigger.md'
       - 'triggers/nats-trigger.md'
