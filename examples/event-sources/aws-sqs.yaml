@@ -3,7 +3,7 @@ kind: EventSource
 metadata:
   name: aws-sqs-event-source
 spec:
-  type: "sqs"
+  type: sqs
   sqs:
     example:
       # jsonBody specifies that all event body payload coming from this
@@ -28,9 +28,9 @@ spec:
 
 
       # aws region
-      region: "us-east-1"
+      region: us-east-1
       # name of the queue. The gateway resolves the url of the queue from the queue name.
-      queue: "test"
+      queue: test
       # The duration (in seconds) for which the call waits for a message to arrive in the queue before returning.
       # MUST BE > 0 AND <= 20
       waitTimeSeconds: 20

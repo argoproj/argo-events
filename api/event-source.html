@@ -1898,6 +1898,7 @@ string
 </td>
 <td>
 <em>(Optional)</em>
+<p>Prefix filter is applied on the resource name.</p>
 </td>
 </tr>
 <tr>
@@ -1911,6 +1912,8 @@ string
 </td>
 <td>
 <em>(Optional)</em>
+<p>Labels provide listing options to K8s API to watch resource/s.
+Refer <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a> for more info.</p>
 </td>
 </tr>
 <tr>
@@ -1924,6 +1927,8 @@ string
 </td>
 <td>
 <em>(Optional)</em>
+<p>Fields provide listing options to K8s API to watch resource/s.
+Refer <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a> for more info.</p>
 </td>
 </tr>
 <tr>
@@ -1937,6 +1942,7 @@ Kubernetes meta/v1.Time
 </td>
 <td>
 <em>(Optional)</em>
+<p>If resource is created before the specified time then the event is treated as valid.</p>
 </td>
 </tr>
 </tbody>
@@ -2474,5 +2480,5 @@ More info at <a href="https://stripe.com/docs/api/events/list">https://stripe.co
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>739f169</code>.
+on git commit <code>b1925a6</code>.
 </em></p>

@@ -3766,6 +3766,12 @@ Description
 
 <em>(Optional)</em>
 
+<p>
+
+Prefix filter is applied on the resource name.
+
+</p>
+
 </td>
 
 </tr>
@@ -3782,6 +3788,14 @@ Description
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+Labels provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a>
+for more info.
+
+</p>
 
 </td>
 
@@ -3800,6 +3814,14 @@ Description
 
 <em>(Optional)</em>
 
+<p>
+
+Fields provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>
+for more info.
+
+</p>
+
 </td>
 
 </tr>
@@ -3817,6 +3839,13 @@ Kubernetes meta/v1.Time </a> </em>
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+If resource is created before the specified time then the event is
+treated as valid.
+
+</p>
 
 </td>
 
@@ -4903,6 +4932,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>739f169</code>. </em>
+commit <code>b1925a6</code>. </em>
 
 </p>

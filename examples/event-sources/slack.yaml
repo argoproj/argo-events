@@ -3,7 +3,7 @@ kind: EventSource
 metadata:
   name: slack-event-source
 spec:
-  type: "slack"
+  type: slack
   slack:
     example-insecure:
       # hook contains configuration for the HTTP server running in the gateway.
@@ -14,18 +14,18 @@ spec:
         # port to run HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
       # token contains information about K8s secret that stores the token
       token:
         # Name of the K8s secret that contains the token
-        name: "slack-secret"
+        name: slack-secret
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is token
         key: tokenkey
       # signingSecret contains information about the K8s secret that stores
       # Slack Signing Secret used to sign every request from Slack
       signingSecret:
         # Name of the K8s secret that contains the signingSecret
-        name: "slack-secret"
+        name: slack-secret
         # Key within the K8s secret whose corresponding value contains the
         # base64-encoded Slack signing secret
         key: signingSecret
@@ -41,11 +41,11 @@ spec:
         # path to file that is mounted in gateway pod which contains private key
         serverKeyPath: "some path in pod"
       token:
-        name: "slack-secret"
+        name: slack-secret
         key: tokenkey
       signingSecret:
         # Name of the K8s secret that contains the signingSecret
-        name: "slack-secret"
+        name: slack-secret
         # Key within the K8s secret whose corresponding value contains the
         # base64-encoded Slack signing secret
         key: signingSecret

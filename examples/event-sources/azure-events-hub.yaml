@@ -16,6 +16,7 @@ spec:
         name: secret_containing_shared_access_key
         key: key_within_the_secret_which_holds_the_value_of_shared_access_key
       # Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-      namespace: argo-events
+      # Optional. Defaults to gateway's namespace
+#      namespace: argo-events
       # Event Hub path/name
       hubName: hub_name

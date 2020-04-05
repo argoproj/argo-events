@@ -3,13 +3,13 @@ kind: EventSource
 metadata:
   name: kafka-event-source
 spec:
-  type: "kafka"
+  type: kafka
   kafka:
     example:
       # kafka broker url
-      url: "kafka.argo-events:9092"
+      url: kafka.argo-events:9092
       # name of the kafka topic
-      topic: "topic-2"
+      topic: topic-2
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true

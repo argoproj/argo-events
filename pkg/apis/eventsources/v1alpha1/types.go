@@ -152,12 +152,18 @@ type ResourceEventSource struct {
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 type ResourceFilter struct {
+	// Prefix filter is applied on the resource name.
 	// +optional
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
+	// Labels provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
 	// +optional
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	// Fields provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
 	// +optional
 	Fields []Selector `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
+	// If resource is created before the specified time then the event is treated as valid.
 	// +optional
 	CreatedBy metav1.Time `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
