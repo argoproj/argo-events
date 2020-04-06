@@ -1450,7 +1450,7 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceEventSource(ref common.Refere
 					},
 					"filter": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Filter is applied on the metadata of the resource",
+							Description: "Filter is applied on the metadata of the resource If you apply filter, then the internal event informer will only monitor objects that pass the filter.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceFilter"),
 						},
 					},
@@ -1472,15 +1472,22 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceEventSource(ref common.Refere
 							Format: "",
 						},
 					},
-					"eventType": {
+					"eventTypes": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Type is the event type. If not provided, the gateway will watch all events for a resource.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "EventTypes is the list of event type to watch. Possible values are - ADD, UPDATE and DELETE.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"namespace", "group", "version", "resource"},
+				Required: []string{"namespace", "group", "version", "resource", "eventTypes"},
 			},
 		},
 		Dependencies: []string{

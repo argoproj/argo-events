@@ -121,7 +121,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	updatedTrigger, ok := resource.(*v1alpha1.HTTPTrigger)
 	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "http://another-fake.com", updatedTrigger.URL)
+	assert.Equal(t, "http://fake.com:12000", updatedTrigger.URL)
 	assert.Equal(t, http.MethodGet, updatedTrigger.Method)
 }
 

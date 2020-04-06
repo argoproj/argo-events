@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor
+  name: minio-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -9,28 +9,28 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0
+          image: metalgearsolid/sensor:v0.14.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook-gateway
+      gatewayName: minio-gateway
       eventName: example
   subscription:
     http:
       port: 9300
   triggers:
     - template:
-        name: openfaas-trigger
-        openFaas:
-          gatewayURL: http://gateway.openfaas.svc.cluster.local:8080
-          functionName: gohash
-          password:
-            name: openfaas-password
-            key: pass
-          namespace: argo-events
+        name: nats-trigger
+        nats:
+          url: nats.argo-events.svc:4222
+          subject: minio-events
           payload:
             - src:
                 dependencyName: test-dep
-                dataKey: body.name
-              dest: name
+                dataKey: notification.0.s3.object.key
+              dest: fileName
+            - src:
+                dependencyName: test-dep
+                dataKey: notification.0.s3.bucket.name
+              dest: bucket

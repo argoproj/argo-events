@@ -73,6 +73,10 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 // MarkNodePhase marks the node with a phase, returns the node
 func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, logger *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		logger.WithField("node-name", nodeName).Infoln("node is empty, this should not happen...")
+		return nil
+	}
 	if node.Phase != phase {
 		logger.WithFields(
 			map[string]interface{}{
@@ -121,6 +125,9 @@ func AreAllDependenciesResolved(sensor *v1alpha1.Sensor) bool {
 // IsDependencyResolved checks whether a dependency is resolved.
 func IsDependencyResolved(sensor *v1alpha1.Sensor, nodeName string) bool {
 	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		return true
+	}
 	if node.Phase == v1alpha1.NodePhaseError {
 		return false
 	}

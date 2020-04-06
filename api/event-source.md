@@ -359,6 +359,8 @@ Event Hub path/name
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace refers to Kubernetes namespace which is used to retrieve the
@@ -652,6 +654,8 @@ ChannelName refers to the channel name
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -2010,6 +2014,8 @@ GitHub upload URL (for GitHub Enterprise)
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace refers to Kubernetes namespace which is used to retrieve
@@ -2232,6 +2238,8 @@ GitlabBaseURL is the base URL for API requests to a custom endpoint
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -2585,6 +2593,8 @@ must be set if either ccache or keytab is used.
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -3606,7 +3616,9 @@ Namespace where resource is deployed
 
 <p>
 
-Filter is applied on the metadata of the resource
+Filter is applied on the metadata of the resource If you apply filter,
+then the internal event informer will only monitor objects that pass the
+filter.
 
 </p>
 
@@ -3647,20 +3659,18 @@ Group of the resource
 
 <td>
 
-<code>eventType</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ResourceEventType"> ResourceEventType
+<code>eventTypes</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ResourceEventType"> \[\]ResourceEventType
 </a> </em>
 
 </td>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-Type is the event type. If not provided, the gateway will watch all
-events for a resource.
+EventTypes is the list of event type to watch. Possible values are -
+ADD, UPDATE and DELETE.
 
 </p>
 
@@ -3765,7 +3775,8 @@ Description
 
 <td>
 
-<code>labels</code></br> <em> map\[string\]string </em>
+<code>labels</code></br> <em> <a href="#argoproj.io/v1alpha1.Selector">
+\[\]Selector </a> </em>
 
 </td>
 
@@ -3781,7 +3792,8 @@ Description
 
 <td>
 
-<code>fields</code></br> <em> map\[string\]string </em>
+<code>fields</code></br> <em> <a href="#argoproj.io/v1alpha1.Selector">
+\[\]Selector </a> </em>
 
 </td>
 
@@ -4264,6 +4276,121 @@ monitor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Selector">
+
+Selector
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ResourceFilter">ResourceFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Selector represents conditional operation to select K8s objects.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>key</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Key name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>operation</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Supported operations like ==, \!=, \<=, \>= etc. Defaults to ==. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/\#label-selectors</a>
+for more info.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>value</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Value
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.SlackEventSource">
 
 SlackEventSource
@@ -4386,6 +4513,8 @@ Webhook holds configuration for a REST endpoint
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -4775,6 +4904,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9813a95</code>. </em>
+commit <code>739f169</code>. </em>
 
 </p>

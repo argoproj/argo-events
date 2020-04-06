@@ -3175,7 +3175,7 @@ TLSConfig </a> </em>
 
 <p>
 
-TLS configuration for the Kafka producer.
+TLS configuration for the NATS producer.
 
 </p>
 
@@ -6423,7 +6423,6 @@ VerifyCert decides whether the connection is secure or not
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9813a95</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code> on git commit <code>739f169</code>. </em>
 
 </p>

@@ -43,6 +43,7 @@ spec:
                     value: hello world
                 templates:
                 - name: whalesay
+                  serviceAccountName: argo-events-sa
                   inputs:
                     parameters:
                     - name: message
