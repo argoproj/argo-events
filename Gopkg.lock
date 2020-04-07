@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8bbc243a0bd1ac56597d04eb3800bece28b7c7200c370c4aafb9b9d5e9ef993f"
+  digest = "1:4f16ab62b99c38b548157ba92675ce9d3def3509edca28232f45cb6d8a3664b0"
   name = "cloud.google.com/go"
   packages = [
     ".",
@@ -17,7 +17,7 @@
     "pubsub/internal/scheduler",
   ]
   pruneopts = "UT"
-  revision = "faf16f86a2763e719f7ba4cd343ee6450d98ab0c"
+  revision = "792acb5b8cd3ef26c3a821ef57058c05b4c3b71c"
 
 [[projects]]
   digest = "1:487dc37a77bbba996bf4ddae0bff1c69fde98027d507e75eca317ca7c94483c3"
@@ -63,7 +63,7 @@
   version = "v41.1.0"
 
 [[projects]]
-  digest = "1:cdb473fccb39edbe7a860b9324c60f204b2e93ed341bfb1a269a8bcca3f3ca63"
+  digest = "1:0c774aa3f3f3ba0a2562b9aa24400dfe12c425efc28b65ebf12d97188f455b8a"
   name = "github.com/Azure/go-autorest"
   packages = [
     "autorest",
@@ -76,8 +76,8 @@
     "tracing",
   ]
   pruneopts = "UT"
-  revision = "2368760b211997f3c5dd61e85e8665a523a09247"
-  version = "v14.0.0"
+  revision = "e727cfcfc902307f3a34d6f6ce50748ca944786a"
+  version = "v14.0.1"
 
 [[projects]]
   digest = "1:9f3b30d9f8e0d7040f729b82dcbc8f0dead820a133b3147ce355fc451f32d761"
@@ -158,7 +158,7 @@
   version = "v2.7.0"
 
 [[projects]]
-  digest = "1:fac4351ea3f155913297e8261c117b08d89314c1c95ab45bbfb519a35076ce44"
+  digest = "1:3eea6d86e7f97daf4f2dfe19c0e0b3db758d013bb59797fb1260db12962bf114"
   name = "github.com/argoproj/argo-cd"
   packages = [
     "common",
@@ -173,8 +173,8 @@
     "util/tracing",
   ]
   pruneopts = "UT"
-  revision = "bdda41046378a855e289b5f1602d5c923a3f914a"
-  version = "v1.5.0"
+  revision = "8a3b36bd28fe278f7407b9a8797c79ad859d1acd"
+  version = "v1.5.1"
 
 [[projects]]
   digest = "1:f50c4e59aad56c9f234eeb3867112bd2f7fd7859d55627ea942e16df32f85647"
@@ -200,7 +200,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f841f3b0b80f19b6ef20cfcfea6aaf3a8ba6dc5ae7e80b1da75959c05187c4bd"
+  digest = "1:9bc93ba3e38010ce2c4d59a3a1fe234cd2db5626b96b788ee9d1e9b8ab36c09a"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -245,7 +245,7 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "fa81b5cb4456a1e77f5ccd74d729d1761821aea7"
+  revision = "d232400d94bf267b9f37db55da05bfaa44ea729a"
 
 [[projects]]
   digest = "1:c3f1f1fece710906858d1adfb20ac0519836d151c1e49e45a0d3be41580dfe82"
@@ -942,15 +942,15 @@
   version = "v1.0.8"
 
 [[projects]]
-  digest = "1:0d21409d74019b65b488ecb02bed6d0f539d8d8563b86aac5734dfdbdf860cdf"
+  digest = "1:45e0ec056a328e0b0fc82d93594c5e594a19561b9a4995ef26dd1373a98c4a78"
   name = "github.com/pierrec/lz4"
   packages = [
     ".",
     "internal/xxh32",
   ]
   pruneopts = "UT"
-  revision = "edce7c4c96dac9adc01d38b18fd2456a7c0c5773"
-  version = "v2.4.1"
+  revision = "ac37b5b48a0a3f689dea69ce1dcd32a0f012c7cb"
+  version = "v2.5.0"
 
 [[projects]]
   digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
@@ -1055,12 +1055,9 @@
   revision = "1c71cc93ed716f9a6f4c2ae8955c25f9176d9f19"
 
 [[projects]]
-  digest = "1:49b1087f45b1e49687da2f8eb49d9e07919d4bad3813344251c722141dcb31d6"
+  digest = "1:5e8f46b412421d2d6cceea845d28ac46f3f5a5f60a6e86f0ee75e24fd43a02a9"
   name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "require",
-  ]
+  packages = ["assert"]
   pruneopts = "UT"
   revision = "3ebf1ddaeb260c4b1ae502a01c7844fa8c1fa0e9"
   version = "v1.5.1"
@@ -1185,7 +1182,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:75185f4130ec67fde37705e05d4280ee649110ad07697b37ce97bcfbae915996"
+  digest = "1:bfc471d7ab75e3e57a337f9db81c25a0c40b51f0fd7ee1b3ed959191e536fcd6"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
@@ -1216,7 +1213,7 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "baeed622b8d86045ff442b324772b0ad306a2b3f"
+  revision = "056763e48d71961566155f089ac0f02f1dda9b5a"
 
 [[projects]]
   branch = "master"
@@ -1288,7 +1285,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3dcef1d66750aa78c2c57361b88e715b70a2486ab2a9f6c70a7cfb5e0712e9c3"
+  digest = "1:239d57da60840aaa8950c4ae6e94cc8849430eaf6e5717adb488f42b53aed4fe"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -1296,7 +1293,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "c3d80250170dec19bf61949c81233cede5ddaf61"
+  revision = "e3b113bbe6a423737ae98f42118ce9366e112e12"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -1360,7 +1357,7 @@
     "internal/packagesinternal",
   ]
   pruneopts = "UT"
-  revision = "44a64ad78b9b521790ab78240c17a3bc75b5eaa7"
+  revision = "066fd1390ee0526e4b0a2855752efb3ea41a6648"
 
 [[projects]]
   branch = "master"
@@ -1410,7 +1407,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1d80b254efb45b0d2da79aa938ca5eeab01a164c332bd8de643042a77a03027d"
+  digest = "1:37d9cd1def452297562fa1a2fb8b97cd11d9a35fed0d12949b6adf88909c8db8"
   name = "google.golang.org/genproto"
   packages = [
     "googleapis/api/annotations",
@@ -1421,10 +1418,10 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "c50568487044f7393f957c36b91edbf731220cba"
+  revision = "9eb9bb161a06a920f3d66021baea7837c7d3b209"
 
 [[projects]]
-  digest = "1:c5cb55dc71404526bd9002c7b0f63c8910f51b19751248e15dcba2c46210662a"
+  digest = "1:6ff5d0fc1c8e4c73c1e9f03218fcfb7f2f462ae2ae6e4f9358829814b880f9fc"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -1478,8 +1475,8 @@
     "tap",
   ]
   pruneopts = "UT"
-  revision = "142182889d38b76209f1d9f1d8e91d7608aff542"
-  version = "v1.28.0"
+  revision = "ac54eec90516cee50fc6b9b113b34628a85f976f"
+  version = "v1.28.1"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
@@ -2156,7 +2153,6 @@
     "github.com/aws/aws-sdk-go/service/sns",
     "github.com/aws/aws-sdk-go/service/sqs",
     "github.com/cloudevents/sdk-go",
-    "github.com/cloudevents/sdk-go/pkg/cloudevents",
     "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/nats",
     "github.com/colinmarc/hdfs",
     "github.com/eclipse/paho.mqtt.golang",
@@ -2186,7 +2182,6 @@
     "github.com/smartystreets/goconvey/convey",
     "github.com/streadway/amqp",
     "github.com/stretchr/testify/assert",
-    "github.com/stretchr/testify/require",
     "github.com/stripe/stripe-go",
     "github.com/stripe/stripe-go/webhookendpoint",
     "github.com/tidwall/gjson",

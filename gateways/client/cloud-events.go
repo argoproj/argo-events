@@ -109,13 +109,12 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 			continue
 		}
 
-		_, event, err := client.Send(context.Background(), *cloudEvent)
+		_, _, err := client.Send(context.Background(), *cloudEvent)
 		if err != nil {
 			logger.WithError(err).WithField("target", subscriber).Warnln("failed to send the event")
 			completeSuccess = false
 			continue
 		}
-
 	}
 
 	// NATS subscribers
