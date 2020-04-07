@@ -16,24 +16,16 @@ limitations under the License.
 package slack
 
 import (
-	//"bytes"
 	"encoding/json"
-	"github.com/argoproj/argo-events/common"
-	"k8s.io/client-go/kubernetes"
-
-	//"github.com/argoproj/argo-events/common"
 	"net/http"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/triggers"
+	"github.com/nlopes/slack"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-
-	//offical:
-	//"github.com/slack-go/slack"
-
-	//old:
-	"github.com/nlopes/slack"
+	"k8s.io/client-go/kubernetes"
 )
 
 type SlackTrigger struct {
@@ -88,7 +80,6 @@ func (t *SlackTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resource
 	return resource, nil
 }
 
-
 // Execute executes the trigger
 func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 	t.Logger.Infoln("executing SlackTrigger")
@@ -98,6 +89,11 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 	}
 
 	slacktrigger := t.Trigger.Template.Slack
+
+	namespace := slacktrigger.Namespace
+	if namespace == "" {
+		namespace = t.Sensor.Namespace
+	}
 
 	channel := slacktrigger.Channel
 	if channel == "" {
@@ -109,27 +105,22 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("no slack message to post")
 	}
 
-	slackToken := ""
-	if slacktrigger.SlackToken != nil {
-		secretToken, err := common.GetSecrets(t.K8sClient, slacktrigger.Namespace, slacktrigger.SlackToken)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s and namespace %s", slacktrigger.SlackToken.Name, slacktrigger.Namespace)
-		}
-		slackToken = secretToken
+	slackToken, err := common.GetSecrets(t.K8sClient, namespace, slacktrigger.SlackToken)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s and namespace %s", slacktrigger.SlackToken.Name, namespace)
 	}
 
 	api := slack.New(slackToken, slack.OptionDebug(true))
-	_, err := api.JoinChannel(channel)
+	_, err = api.JoinChannel(channel)
 	if err != nil {
-		t.Logger.WithField("channel", slacktrigger.Channel).Errorf("unable to join channel...")
+		t.Logger.WithField("channel", channel).Errorf("unable to join channel...")
 		return nil, errors.Wrapf(err, "failed to join channel %s", channel)
 	}
 
-	t.Logger.WithField("channel", slacktrigger.Channel).Infoln("posting to channel...")
-
+	t.Logger.WithField("channel", channel).Infoln("posting to channel...")
 	channelID, timestamp, err := api.PostMessage(channel, slack.MsgOptionText(message, false))
 
-	t.Logger.WithField("message", slacktrigger.Message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
+	t.Logger.WithField("message", message).WithField("channelID", channelID).WithField("timestamp", timestamp).Infoln("message successfully sent to channelID with timestamp")
 	t.Logger.Infoln("finished executing SlackTrigger")
 	return nil, nil
 }
