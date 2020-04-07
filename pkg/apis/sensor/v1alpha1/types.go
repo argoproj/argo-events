@@ -302,6 +302,9 @@ type TriggerTemplate struct {
 	// NATS refers to the trigger designed to place message on NATS subject.
 	// +optional.
 	NATS *NATSTrigger `json:"nats,omitempty" protobuf:"bytes,9,opt,name=nats"`
+	// Slack refers to the trigger designed to send slack notification message.
+	// +optional
+	Slack *SlackTrigger `json:"slack,omitempty" protobuf:"bytes,10,opt,name=slack"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -518,6 +521,26 @@ type CustomTrigger struct {
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	// +listType=payloadParameters
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
+}
+
+type SlackTrigger struct {
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
+	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
+	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,name=slackToken"`
+	// Namespace to read the password secret from.
+	// This is required if the password secret selector is specified.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// Channel refers to which Slack channel to send slack message.
+	// +optional
+	Channel string `json:"channel,omitempty" protobuf:"bytes,4,opt,name=channel"`
+	// Message refers to the message to send to the Slack channel.
+	// +optional
+	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

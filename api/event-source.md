@@ -1445,7 +1445,8 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -4903,6 +4904,6 @@ all types of events will be processed. More info at
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>739f169</code>. </em>
+commit <code>7021110</code>. </em>
 
 </p>

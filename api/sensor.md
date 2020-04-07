@@ -470,7 +470,8 @@ Description
 
 <td>
 
-<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
+<code>s3</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 </td>
 
@@ -1660,7 +1661,8 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em> Argo Events common.EventContext </em>
+<code>context</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
 
 </td>
 
@@ -3431,7 +3433,8 @@ events
 
 <td>
 
-<code>event</code></br> <em> Argo Events common.Event </em>
+<code>event</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Event </em>
 
 </td>
 
@@ -4638,6 +4641,166 @@ Resources refers to metadata of the resources created for the sensor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.SlackTrigger">
+
+SlackTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>slackToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SlackToken refers to the Kubernetes secret that holds the slack token
+required to send messages.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the password secret from. This is required if the
+password secret selector is specified.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channel</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Channel refers to which Slack channel to send slack message.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>message</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Message refers to the message to send to the Slack channel.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
 
 StandardK8sTrigger
@@ -5330,6 +5493,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
@@ -6139,6 +6303,29 @@ NATS refers to the trigger designed to place message on NATS subject.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>slack</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger"> SlackTrigger </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Slack refers to the trigger designed to send slack notification message.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -6239,6 +6426,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>739f169</code>. </em>
+commit <code>7021110</code>. </em>
 
 </p>
