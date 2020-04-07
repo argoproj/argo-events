@@ -205,7 +205,7 @@ type EventDependencyFilter struct {
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 	// Context filter constraints
-	Context *apicommon.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 	// +listType=data
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,opt,name=data"`
@@ -672,7 +672,7 @@ type NodeStatus struct {
 	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 	// Event stores the last seen event for this node
-	Event *apicommon.Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
+	Event *Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
 	// UpdatedAt refers to the time at which the node was updated.
 	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,10,opt,name=updatedAt"`
 	// ResolvedAt refers to the time at which the node was resolved.
@@ -769,6 +769,30 @@ type GitRemoteConfig struct {
 type GitCreds struct {
 	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
 	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
+}
+
+// Event represents the cloudevent received from a gateway.
+type Event struct {
+	Context *EventContext `json:"context" protobuf:"bytes,1,name=context"`
+	Data    []byte        `json:"data" protobuf:"bytes,2,name=data"`
+}
+
+// EventContext holds the context of the cloudevent received from a gateway.
+type EventContext struct {
+	// ID of the event; must be non-empty and unique within the scope of the producer.
+	ID string `json:"id" protobuf:"bytes,1,name=id"`
+	// Source - A URI describing the event producer.
+	Source string `json:"source" protobuf:"bytes,2,name=source"`
+	// SpecVersion - The version of the CloudEvents specification used by the event.
+	SpecVersion string `json:"specversion" protobuf:"bytes,3,name=specVersion"`
+	// Type - The type of the occurrence which has happened.
+	Type string `json:"type" protobuf:"bytes,4,name=type"`
+	// DataContentType - A MIME (RFC2046) string describing the media type of `data`.
+	DataContentType string `json:"dataContentType" protobuf:"bytes,5,name=dataContentType"`
+	// Subject - The subject of the event in the context of the event producer
+	Subject string `json:"subject" protobuf:"bytes,6,name=subject"`
+	// Time - A Timestamp when the event happened.
+	Time metav1.Time `json:"time" protobuf:"bytes,7,name=time"`
 }
 
 // HasLocation whether or not an minio has a location defined

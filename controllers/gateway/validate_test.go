@@ -18,11 +18,12 @@ package gateway
 
 import (
 	"fmt"
+	"io/ioutil"
+	"testing"
+
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"testing"
 )
 
 func TestValidate(t *testing.T) {

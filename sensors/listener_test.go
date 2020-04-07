@@ -37,7 +37,7 @@ func TestHandleEvent(t *testing.T) {
 		},
 	}
 
-	event := cloudevents.NewEvent(cloudevents.VersionV03)
+	event := cloudevents.NewEvent(cloudevents.VersionV1)
 	event.SetID("1")
 	event.SetSource("webhook-gateway")
 	event.SetSubject("example-1")

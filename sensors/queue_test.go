@@ -20,12 +20,13 @@ import (
 	"testing"
 	"time"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/argoproj/argo-events/sensors/types"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	dfake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
@@ -43,15 +44,15 @@ func TestProcessQueue(t *testing.T) {
 	obj = newObj.DeepCopy()
 	sensorCtx := NewSensorContext(sensorClient, k8sClient, dynamicClient, obj, "1")
 
-	event := &apicommon.Event{
-		Context: apicommon.EventContext{
-			DataContentType: "application/json",
-			Subject:         "example-1",
-			SpecVersion:     "0.3",
-			Source:          "webhook-gateway",
-			Type:            "webhook",
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Source:          "webhook-gateway",
+			SpecVersion:     cloudevents.VersionV1,
+			Type:            "webhook",
+			DataContentType: common.MediaTypeJSON,
+			Subject:         "example-1",
+			Time:            v1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}

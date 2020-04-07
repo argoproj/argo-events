@@ -110,7 +110,7 @@ required = [
 
 [[constraint]]
   name = "github.com/cloudevents/sdk-go"
-  version = "v0.10.1"
+  version = "v1.1.2"
 
 [[constraint]]
   name = "github.com/emitter-io/go"

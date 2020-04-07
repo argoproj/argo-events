@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
 	"github.com/pkg/errors"
@@ -46,7 +45,7 @@ func ApplyFilter(notification *types.Notification) error {
 }
 
 // apply the filters to an Event
-func filterEvent(filter *v1alpha1.EventDependencyFilter, event *apicommon.Event) (bool, error) {
+func filterEvent(filter *v1alpha1.EventDependencyFilter, event *v1alpha1.Event) (bool, error) {
 	dataFilter, err := filterData(filter.Data, event)
 	if err != nil {
 		return false, err
@@ -55,7 +54,7 @@ func filterEvent(filter *v1alpha1.EventDependencyFilter, event *apicommon.Event)
 	if err != nil {
 		return false, err
 	}
-	ctxFilter := filterContext(filter.Context, &event.Context)
+	ctxFilter := filterContext(filter.Context, event.Context)
 
 	return timeFilter && ctxFilter && dataFilter, err
 }
@@ -110,7 +109,7 @@ func filterTime(timeFilter *v1alpha1.TimeFilter, eventTime time.Time) (bool, err
 // applyContextFilter checks the expected EventContext against the actual EventContext
 // values are only enforced if they are non-zero values
 // map types check that the expected map is a subset of the actual map
-func filterContext(expected *apicommon.EventContext, actual *apicommon.EventContext) bool {
+func filterContext(expected *v1alpha1.EventContext, actual *v1alpha1.EventContext) bool {
 	if expected == nil {
 		return true
 	}
@@ -121,8 +120,8 @@ func filterContext(expected *apicommon.EventContext, actual *apicommon.EventCont
 	if expected.Type != "" {
 		res = res && expected.Type == actual.Type
 	}
-	if expected.SpecVersion != "" {
-		res = res && expected.SpecVersion == actual.SpecVersion
+	if expected.Subject != "" {
+		res = res && expected.Subject == actual.Subject
 	}
 	if expected.Source != "" {
 		res = res && expected.Source == actual.Source
@@ -135,7 +134,7 @@ func filterContext(expected *apicommon.EventContext, actual *apicommon.EventCont
 
 // applyDataFilter runs the dataFilter against the Event's data
 // returns (true, nil) when data passes filters, false otherwise
-func filterData(data []v1alpha1.DataFilter, event *apicommon.Event) (bool, error) {
+func filterData(data []v1alpha1.DataFilter, event *v1alpha1.Event) (bool, error) {
 	if data == nil {
 		return true, nil
 	}
