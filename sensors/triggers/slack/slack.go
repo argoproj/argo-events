@@ -125,6 +125,7 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 	return nil, nil
 }
 
+// No Policies for SlackTrigger
 func (t *SlackTrigger) ApplyPolicy(resource interface{}) error {
 	return nil
 }
