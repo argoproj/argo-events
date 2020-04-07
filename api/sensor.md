@@ -4740,6 +4740,8 @@ required to send messages.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace to read the password secret from. This is required if the
@@ -6423,6 +6425,7 @@ VerifyCert decides whether the connection is secure or not
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git commit <code>739f169</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code> on git
+commit <code>7021110</code>. </em>
 
 </p>

@@ -102,7 +102,3 @@ You can create any paramater structure you want. To get more info on how to
 generate complex event payloads, take a look at [this library](https://github.com/tidwall/sjson).
 
 The complete specification of Slack trigger is available [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#slacktrigger).
-
-### Prerequisite
-Kubeless must be installed. You can follow the installation [here](https://kubeless.io/docs/quick-start/).
-Make sure to deploy the `test` function.
