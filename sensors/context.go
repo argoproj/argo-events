@@ -56,6 +56,8 @@ type SensorContext struct {
 	customTriggerClients map[string]*grpc.ClientConn
 	// http client to invoke openfaas functions.
 	openfaasHttpClient *http.Client
+	// http client to send slack messages.
+	slackHttpClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
 	kafkaProducers map[string]sarama.AsyncProducer
 	// natsConnections holds the references to the active nats connections.
@@ -77,6 +79,9 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
 		openfaasHttpClient: &http.Client{
+			Timeout: time.Minute * 5,
+		},
+		slackHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
 		kafkaProducers:   make(map[string]sarama.AsyncProducer),
