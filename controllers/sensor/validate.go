@@ -334,9 +334,6 @@ func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 	if trigger.SlackToken == nil {
 		return errors.New("slack token can't be empty")
 	}
-	if trigger.Namespace == "" {
-		return errors.New("namespace can't be empty")
-	}
 	return nil
 }
 

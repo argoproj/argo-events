@@ -533,7 +533,8 @@ type SlackTrigger struct {
 	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,name=slackToken"`
 	// Namespace to read the password secret from.
 	// This is required if the password secret selector is specified.
-	Namespace string `json:"namespace" protobuf:"bytes,3,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
 	// Channel refers to which Slack channel to send slack message.
 	// +optional
 	Channel string `json:"channel,omitempty" protobuf:"bytes,4,opt,name=channel"`
