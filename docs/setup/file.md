@@ -67,7 +67,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 8. Once you create file `x.txt`, the sensor will trigger argo workflow.  Run `argo list` to find the workflow. 
 
-9. For real-world use cases, you should user PersistentVolume and PersistentVolumeClaim.
+9. For real-world use cases, you should use PersistentVolume and PersistentVolumeClaim.
                                                                   
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/faq/). 
