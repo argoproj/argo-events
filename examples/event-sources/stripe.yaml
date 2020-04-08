@@ -30,18 +30,18 @@ spec:
       # +optional
       namespace: argo-events
 
-    example-with-event-filter:
-      webhook:
-        port: "13000"
-        endpoint: /example1
-        method: POST
-        url: http://myfakeurl.fake
-      createWebhook: true
-      apiKey:
-        name: secret_containing_api_key
-        key: key_within_secret_that_holds_api_key
-      namespace: argo-events
-      # Specific filter for events. More info at https://stripe.com/docs/api/events/types
-      eventFilter:
-        - account.updated
-        - application_fee.created
+#    example-with-event-filter:
+#      webhook:
+#        port: "13000"
+#        endpoint: /example1
+#        method: POST
+#        url: http://myfakeurl.fake
+#      createWebhook: true
+#      apiKey:
+#        name: secret_containing_api_key
+#        key: key_within_secret_that_holds_api_key
+#      namespace: argo-events
+#      # Specific filter for events. More info at https://stripe.com/docs/api/events/types
+#      eventFilter:
+#        - account.updated
+#        - application_fee.created

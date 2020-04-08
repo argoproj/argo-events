@@ -3,11 +3,11 @@ kind: EventSource
 metadata:
   name: aws-sns-event-source
 spec:
-  type: "sns"
+  type: sns
   sns:
     example:
       # arn of SNS topic
-      topicArn: "arn:aws:sns:us-east-1:XXXXXXXX:test"
+      topicArn: arn:aws:sns:us-east-1:XXXXXXXX:test
       # hook contains configuration for the HTTP server running in the gateway.
       # AWS will send events to following port and endpoint
       webhook:
@@ -16,11 +16,11 @@ spec:
         # port to run HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
         # url the gateway will use to register at AWS.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service AWS can reach to.
-        url: "http://url-that-is-reachable-from-AWS"
+        url: http://url-that-is-reachable-from-AWS
       # accessKey contains information about K8s secret that stores the access key
       accessKey:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access key
@@ -34,7 +34,7 @@ spec:
         # Name of the K8s secret that contains the secret key
         name: aws-secret
       # aws region
-      region: "us-east-1"
+      region: us-east-1
 #      # Namespace to read secrets from.
 #      # +Optional. Default to gateway's namespace.
 #      namespace: "argo-events"
