@@ -51,12 +51,6 @@ func getGatewayContext() *GatewayContext {
 				Subscribers: &v1alpha1.Subscribers{
 					HTTP: []string{},
 				},
-				EventProtocol: &apicommon.EventProtocol{
-					Type: apicommon.HTTP,
-					Http: apicommon.Http{
-						Port: "9000",
-					},
-				},
 				Type: apicommon.WebhookEvent,
 			},
 		},

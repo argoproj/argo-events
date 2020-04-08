@@ -470,8 +470,7 @@ Description
 
 <td>
 
-<code>s3</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
+<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
 
 </td>
 
@@ -1435,6 +1434,283 @@ Dependencies of events
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Event">
+
+Event
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Event represents the cloudevent received from a gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>context</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>data</code></br> <em> \[\]byte </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.EventContext">
+
+EventContext
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em> <a href="#argoproj.io/v1alpha1.Event">Event</a>,
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventContext holds the context of the cloudevent received from a
+gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>id</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ID of the event; must be non-empty and unique within the scope of the
+producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>source</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Source - A URI describing the event producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>specversion</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+SpecVersion - The version of the CloudEvents specification used by the
+event.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Type - The type of the occurrence which has happened.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dataContentType</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DataContentType - A MIME (RFC2046) string describing the media type of
+<code>data</code>.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Subject - The subject of the event in the context of the event producer
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>time</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Time - A Timestamp when the event happened.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EventDependency">
 
 EventDependency
@@ -1662,7 +1938,7 @@ Time filter on the event with escalation
 <td>
 
 <code>context</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
 
 </td>
 
@@ -3433,8 +3709,8 @@ events
 
 <td>
 
-<code>event</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.Event </em>
+<code>event</code></br> <em> <a href="#argoproj.io/v1alpha1.Event">
+Event </a> </em>
 
 </td>
 
@@ -6426,6 +6702,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>7021110</code>. </em>
+commit <code>1a7bf12</code>. </em>
 
 </p>

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	configmapName = common.DefaultConfigMapName("gateway-controller")
+	configmapName = "gateway-controller-configmap"
 )
 
 func TestController_ResyncConfig(t *testing.T) {

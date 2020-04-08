@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -271,38 +270,27 @@ func (ctx *sensorContext) markDependencyNodesActive() {
 func PersistUpdates(client sensorclientset.Interface, sensorObj *v1alpha1.Sensor, log *logrus.Logger) (*v1alpha1.Sensor, error) {
 	sensorClient := client.ArgoprojV1alpha1().Sensors(sensorObj.ObjectMeta.Namespace)
 
-	updatedSensor, err := sensorClient.Update(sensorObj)
+	obj, err := sensorClient.Get(sensorObj.Name, metav1.GetOptions{})
 	if err != nil {
-		if errors.IsConflict(err) {
-			log.WithError(err).Error("error updating sensor")
-			return nil, err
-		}
-
-		log.Infoln(err)
-		log.Infoln("re-applying updates on latest version and retrying update")
-		err = ReapplyUpdate(client, sensorObj)
-		if err != nil {
-			log.WithError(err).Error("failed to re-apply update")
-			return nil, err
-		}
-		return sensorObj, nil
+		obj = sensorObj.DeepCopy()
 	}
-	log.WithField(common.LabelPhase, string(sensorObj.Status.Phase)).Info("sensor state updated successfully")
-	return updatedSensor, nil
-}
 
-// Reapply the update to sensor
-func ReapplyUpdate(sensorClient sensorclientset.Interface, sensor *v1alpha1.Sensor) error {
-	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		client := sensorClient.ArgoprojV1alpha1().Sensors(sensor.Namespace)
-		s, err := client.Update(sensor)
+	obj.Status = *sensorObj.Status.DeepCopy()
+
+	if err := wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		s, err := sensorClient.Update(obj)
 		if err != nil {
 			if !common.IsRetryableKubeAPIError(err) {
 				return false, err
 			}
 			return false, nil
 		}
-		sensor = s
+		obj = s.DeepCopy()
 		return true, nil
-	})
+	}); err != nil {
+		log.WithError(err).Error("error updating sensor")
+		return nil, err
+	}
+
+	return obj, nil
 }

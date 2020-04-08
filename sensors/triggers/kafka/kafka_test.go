@@ -21,8 +21,8 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/Shopify/sarama/mocks"
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -86,13 +86,13 @@ func TestKafkaTrigger_ApplyResourceParameters(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     cloudevents.VersionV1,
 						Subject:         "example-1",
 					},
 					Data: []byte(`{"url": "another-fake-kafka-url"}`),
@@ -137,13 +137,13 @@ func TestKafkaTrigger_Execute(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     cloudevents.VersionV1,
 						Subject:         "example-1",
 					},
 					Data: []byte(`{"message": "world"}`),

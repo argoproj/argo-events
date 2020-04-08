@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	SensorControllerConfigmap  = common.DefaultConfigMapName("sensor-controller")
+	SensorControllerConfigmap  = "sensor-controller-configmap"
 	SensorControllerInstanceID = "argo-events"
 )
 

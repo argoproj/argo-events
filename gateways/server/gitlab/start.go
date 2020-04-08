@@ -136,9 +136,9 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("setting up the client to connect to GitLab...")
-	router.gitlabClient = gitlab.NewClient(nil, c.token)
-	if err = router.gitlabClient.SetBaseURL(gitlabEventSource.GitlabBaseURL); err != nil {
-		return errors.Errorf("failed to set gitlab base url, err: %+v", err)
+	router.gitlabClient, err = gitlab.NewClient(c.token, gitlab.WithBaseURL(gitlabEventSource.GitlabBaseURL))
+	if err != nil {
+		return errors.Wrapf(err, "failed to initialize client")
 	}
 
 	formattedUrl := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)

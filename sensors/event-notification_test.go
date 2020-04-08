@@ -22,7 +22,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorFake "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/argoproj/argo-events/sensors/types"
@@ -163,7 +162,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "if only dep1 is complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
 				obj.Status.TriggerCycleStatus = ""
 				obj.Spec.ErrorOnFailedRound = true
 			},
@@ -174,8 +173,8 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "if only dep2 is complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
-				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger, "node is active")
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
 			},
 			hasError: false,
 			result:   true,
@@ -184,8 +183,8 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "if all dependencies are complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
-				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
 			},
 			hasError: false,
 			result:   true,
@@ -194,8 +193,8 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "if no dependencies are complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
-				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger, "node is active")
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger, "node is active")
 			},
 			hasError: false,
 			result:   false,
@@ -208,8 +207,8 @@ func TestIsEligibleForExecution(t *testing.T) {
 				delete(obj.Status.Nodes, group2)
 				obj.Spec.Circuit = ""
 				obj.Spec.DependencyGroups = nil
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
-				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger, "node is active")
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, nil, logger, "node is active")
 			},
 			hasError: false,
 			result:   false,
@@ -218,7 +217,7 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "if only dep1 is complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
 			},
 			hasError: false,
 			result:   false,
@@ -227,8 +226,8 @@ func TestIsEligibleForExecution(t *testing.T) {
 		{
 			name: "both dep1 and dep2 are complete",
 			updateFunc: func() {
-				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
-				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+				snctrl.MarkNodePhase(obj, "dep1", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
+				snctrl.MarkNodePhase(obj, "dep2", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "node is complete")
 			},
 			hasError: false,
 			result:   true,
@@ -258,15 +257,16 @@ func TestOperateEventNotification(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 	sensorCtx := NewSensorContext(sensorClient, k8sClient, dynamicClient, obj, "1")
 
-	event := &apicommon.Event{
-		Context: apicommon.EventContext{
-			DataContentType: "application/json",
-			Subject:         "example-1",
-			SpecVersion:     "0.3",
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			ID:              "1",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
-			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			DataContentType: common.MediaTypeJSON,
+			Subject:         "example-1",
+			Time: metav1.Time{
+				Time: time.Now().UTC(),
+			},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}

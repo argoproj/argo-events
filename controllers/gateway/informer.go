@@ -17,13 +17,11 @@ limitations under the License.
 package gateway
 
 import (
+	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
-
-	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
 func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
@@ -49,7 +47,6 @@ func (c *Controller) newGatewayInformer() (cache.SharedIndexInformer, error) {
 		gatewayResyncPeriod,
 		gatewayinformers.WithNamespace(c.Config.Namespace),
 		gatewayinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
-			options.FieldSelector = fields.Everything().String()
 			options.LabelSelector = labelSelector.String()
 		}),
 	)

@@ -83,10 +83,10 @@ func TestResolveCircuit(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 
 	for _, dependency := range obj.Spec.Dependencies {
-		snctrl.InitializeNode(obj, dependency.Name, v1alpha1.NodeTypeEventDependency, logger, "dependency is initialized")
+		snctrl.InitializeNode(obj, dependency.Name, v1alpha1.NodeTypeEventDependency, logger)
 	}
 	for _, group := range obj.Spec.DependencyGroups {
-		snctrl.InitializeNode(obj, group.Name, v1alpha1.NodeTypeDependencyGroup, logger, "dependency group initialized")
+		snctrl.InitializeNode(obj, group.Name, v1alpha1.NodeTypeDependencyGroup, logger)
 	}
 
 	tests := []struct {

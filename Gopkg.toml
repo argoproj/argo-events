@@ -9,6 +9,10 @@ required = [
 ]
 
 [[constraint]]
+  name = "github.com/xanzy/go-gitlab"
+  version = "v0.31.0"
+
+[[constraint]]
   name = "github.com/sirupsen/logrus"
   branch = "master"
 
@@ -110,7 +114,7 @@ required = [
 
 [[constraint]]
   name = "github.com/cloudevents/sdk-go"
-  version = "v0.10.1"
+  version = "v1.1.2"
 
 [[constraint]]
   name = "github.com/emitter-io/go"

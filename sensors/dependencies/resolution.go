@@ -17,13 +17,12 @@ limitations under the License.
 package dependencies
 
 import (
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/gobwas/glob"
 )
 
 // ResolveDependency resolves a dependency based on Event and gateway name
-func ResolveDependency(dependencies []v1alpha1.EventDependency, events *apicommon.Event) *v1alpha1.EventDependency {
+func ResolveDependency(dependencies []v1alpha1.EventDependency, events *v1alpha1.Event) *v1alpha1.EventDependency {
 	for _, dependency := range dependencies {
 		gatewayNameGlob, err := glob.Compile(dependency.GatewayName)
 		if err != nil {
