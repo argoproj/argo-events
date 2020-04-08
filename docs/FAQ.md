@@ -2,7 +2,7 @@
 
 **Q. How to get started with Argo Events?**
 
-**A Recommended way to get started with Argo Events is,
+**A**. Recommended way to get started with Argo Events is,
 
  1. Read the basic concepts about [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/), [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) and [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/).
  2. Install the setup as outlined [here](https://argoproj.github.io/argo-events/installation/).
@@ -16,13 +16,30 @@ Also note that the gateway and sensor controllers are configured to process the 
 in `argo-events` namespace with instance-id `argo-events`. You can change the configuration by updating the
 appropriate controller configmap. 
 
+**Q. How to debug Argo-Events.**
+
+**A**.
+ 
+1. Make sure you have installed everything as instructed [here](https://argoproj.github.io/argo-events/installation/).
+1. The gateway and sensor pods must be running. If you see any issue with the pods, check the logs
+   for sensor-controller and gateway-controller.
+1. If gateway and sensor pods are running, but you are not receiving any events:
+     * Make sure you have configured the event source correctly.
+     * Check the logs for both of the gateway pod's containers.
+1. If the gateway-client displays `dispatched event` but nothing happens then read following Q and A.   
+
+Note: You can set environment variable `DEBUG_LOG:true` in any of the containers to output debug logs.
+
 **Q. Gateway is receiving the events but nothing happens.**
 
-**A**. First, check the sensor resource is deployed and a pod is created for the resource.
-       If sensor pod is running, check the `subscribers` list in the gateway resource. The sensor service url must be
-       registered as a subscriber in order to receive events from gateway. The `gateway-client` container should also log an error related to this situation.
-       Second, if the gateway was able to send an event to sensor, then check the sensor logs, either the sensor event resolution circuitry has rejected the event or
-       the sensor failed to execute the trigger due to an error.
+**A**. 
+
+1. Check the sensor resource is deployed and a pod is created for the resource.
+If sensor pod is running, check the `subscribers` list in the gateway resource. The sensor service url must be
+registered as a subscriber in order to receive events from gateway. The `gateway-client` container should also log an error related to this situation.
+
+1. If the gateway was able to send an event to sensor, then check the sensor logs, either the sensor event resolution circuitry has rejected the event or
+the sensor failed to execute the trigger due to an error.
 
 **Q. Helm chart installation does not work.**
 
@@ -50,4 +67,4 @@ raise a PR.
 
 **Q. Where can I find the event structure for a particular gateway?**
 
-**A.** Please refer https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/event-data.go to understand the structure of different types of events dispatched by gateways.
+**A.** Please refer [this file](https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/event-data.go) to understand the structure of different types of events dispatched by gateways.
