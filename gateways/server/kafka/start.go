@@ -80,7 +80,18 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("connecting to Kafka cluster...")
 	if err := server.Connect(common.GetConnectionBackoff(kafkaEventSource.ConnectionBackoff), func() error {
 		var err error
-		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, nil)
+		config := &sarama.Config{}
+
+		if kafkaEventSource.TLS != nil {
+			tlsConfig, err := common.GetTLSConfig(kafkaEventSource.TLS.CACertPath, kafkaEventSource.TLS.ClientCertPath, kafkaEventSource.TLS.ClientKeyPath)
+			if err != nil {
+				return errors.Wrap(err, "failed to get the tls configuration")
+			}
+			config.Net.TLS.Config = tlsConfig
+			config.Net.TLS.Enable = true
+		}
+
+		consumer, err = sarama.NewConsumer([]string{kafkaEventSource.URL}, config)
 		if err != nil {
 			return err
 		}

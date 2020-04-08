@@ -68,5 +68,8 @@ func validate(eventSource *v1alpha1.NATSEventsSource) error {
 	if eventSource.Subject == "" {
 		return errors.New("subject must be specified")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }

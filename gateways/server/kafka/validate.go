@@ -71,5 +71,8 @@ func validate(eventSource *v1alpha1.KafkaEventSource) error {
 	if eventSource.Partition == "" {
 		return fmt.Errorf("partition must be specified")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }
