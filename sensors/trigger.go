@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-events/sensors/triggers/http"
 	"github.com/argoproj/argo-events/sensors/triggers/kafka"
 	"github.com/argoproj/argo-events/sensors/triggers/nats"
+	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
 
@@ -77,6 +78,15 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 
 	if trigger.Template.NATS != nil {
 		result, err := nats.NewNATSTrigger(sensorCtx.Sensor, trigger, sensorCtx.natsConnections, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.Slack != nil {
+		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.slackHttpClient)
 		if err != nil {
 			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
 			return nil
