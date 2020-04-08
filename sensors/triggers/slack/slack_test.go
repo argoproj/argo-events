@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -46,8 +45,8 @@ var sensorObj = &v1alpha1.Sensor{
 							Key: "token",
 						},
 						Namespace: "fake",
-						Channel: "fake-channel",
-						Message: "fake-message",
+						Channel:   "fake-channel",
+						Message:   "fake-message",
 					},
 				},
 			},
@@ -86,13 +85,13 @@ func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     "1.0",
 						Subject:         "example-1",
 					},
 					Data: []byte(`{"channel": "real-channel", "message": "real-message"}`),
