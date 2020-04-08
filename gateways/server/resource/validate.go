@@ -19,13 +19,13 @@ package resource
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/selection"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 // ValidateEventSource validates a resource event source
@@ -89,6 +89,9 @@ func validate(eventSource *v1alpha1.ResourceEventSource) error {
 
 func validateSelectors(selectors []v1alpha1.Selector) error {
 	for _, sel := range selectors {
+		if sel.Key == "" {
+			return fmt.Errorf("key can't be empty for selector")
+		}
 		if sel.Operation == "" {
 			continue
 		}

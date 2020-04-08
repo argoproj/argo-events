@@ -4,25 +4,25 @@ kind: EventSource
 metadata:
   name: github-event-source
 spec:
-  type: "github"
+  type: github
   github:
     example:
       # owner of the repo
-      owner: "VaibhavPage"
+      owner: argoproj
       # repository name
-      repository: "argo-events-demo"
+      repository: argo-events
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
-        endpoint: "/push"
+        endpoint: /push
         # port to run internal HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-        url: "http://url-that-is-reachable-from-GitHub"
+        url: http://url-that-is-reachable-from-GitHub
       # type of events to listen to.
       # following listens to everything, hence *
       # You can find more info on https://developer.github.com/v3/activity/events/types/
@@ -54,7 +54,7 @@ spec:
       # Determines if notifications are sent when the webhook is triggered
       active: true
       # The media type used to serialize the payloads
-      contentType: "json"
+      contentType: json
 
 #    example-with-secure-connection:
 #      owner: "argoproj"
