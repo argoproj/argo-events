@@ -34,7 +34,7 @@ import (
 )
 
 const (
-	gatewayResyncPeriod  = 20 * time.Minute
+	gatewayResyncPeriod  = 10 * time.Minute
 	rateLimiterBaseDelay = 5 * time.Second
 	rateLimiterMaxDelay  = 1000 * time.Second
 )

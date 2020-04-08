@@ -20,11 +20,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/smartystreets/goconvey/convey"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 type fakeHttpWriter struct {
@@ -45,77 +41,21 @@ func (f *fakeHttpWriter) WriteHeader(status int) {
 	f.header = status
 }
 
-func TestGetObjectHash(t *testing.T) {
-	convey.Convey("Given a value, hash it", t, func() {
-		hash, err := GetObjectHash(&corev1.Pod{})
-		convey.So(hash, convey.ShouldNotBeEmpty)
-		convey.So(err, convey.ShouldBeEmpty)
-	})
-}
-
-func TestHasher(t *testing.T) {
-	convey.Convey("Given a value, hash it", t, func() {
-		hash := Hasher("test")
-		convey.So(hash, convey.ShouldNotBeEmpty)
-	})
-}
-
-func TestDefaultConfigMapName(t *testing.T) {
-	res := DefaultConfigMapName("sensor-controller")
-	assert.Equal(t, "sensor-controller-configmap", res)
-}
-
-func TestDefaultNatsQueueName(t *testing.T) {
-	convey.Convey("Given a nats queue, get the default name", t, func() {
-		convey.So(DefaultNatsQueueName("default"), convey.ShouldEqual, "default-queue")
-	})
-}
-
 func TestHTTPMethods(t *testing.T) {
-	convey.Convey("Given a http write", t, func() {
-		convey.Convey("Write a success response", func() {
-			f := &fakeHttpWriter{}
-			SendSuccessResponse(f, "hello")
-			convey.So(string(f.payload), convey.ShouldEqual, "hello")
-			convey.So(f.header, convey.ShouldEqual, http.StatusOK)
-		})
+	f := &fakeHttpWriter{}
+	SendSuccessResponse(f, "hello")
+	assert.Equal(t, "hello", string(f.payload))
+	assert.Equal(t, http.StatusOK, f.header)
 
-		convey.Convey("Write a failure response", func() {
-			f := &fakeHttpWriter{}
-			SendErrorResponse(f, "failure")
-			convey.So(string(f.payload), convey.ShouldEqual, "failure")
-			convey.So(f.header, convey.ShouldEqual, http.StatusBadRequest)
-		})
-	})
+	SendErrorResponse(f, "failure")
+	assert.Equal(t, "failure", string(f.payload))
+	assert.Equal(t, http.StatusBadRequest, f.header)
 }
 
-func TestServerResourceForGroupVersionKind(t *testing.T) {
-	convey.Convey("Given a k8s client", t, func() {
-		fakeClient := fake.NewSimpleClientset()
-		fakeDisco := fakeClient.Discovery()
-		gvk := schema.GroupVersionKind{
-			Group:   "",
-			Version: "v1",
-			Kind:    "Pod",
-		}
-		convey.Convey("Get a server resource for group, version and kind", func() {
-			apiresource, err := ServerResourceForGroupVersionKind(fakeDisco, gvk)
-			convey.Convey("Make sure error occurs and the resource is nil", func() {
-				convey.So(err, convey.ShouldNotBeNil)
-				convey.So(apiresource, convey.ShouldBeNil)
-			})
-		})
-	})
+func TestFormatEndpoint(t *testing.T) {
+	assert.Equal(t, "/hello", FormatEndpoint("hello"))
 }
 
-func TestFormatWebhookEndpoint(t *testing.T) {
-	convey.Convey("Given a webhook endpoint, format it", t, func() {
-		convey.So(FormatEndpoint("hello"), convey.ShouldEqual, "/hello")
-	})
-}
-
-func TestGenerateFormattedURL(t *testing.T) {
-	convey.Convey("Given a webhook, generate formatted URL", t, func() {
-		convey.So(FormattedURL("test-url", "fake"), convey.ShouldEqual, "test-url/fake")
-	})
+func TestFormattedURL(t *testing.T) {
+	assert.Equal(t, "test-url/fake", FormattedURL("test-url", "fake"))
 }

@@ -21,56 +21,57 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestFilterContext(t *testing.T) {
 	tests := []struct {
 		name            string
-		expectedContext *apicommon.EventContext
-		actualContext   *apicommon.EventContext
+		expectedContext *v1alpha1.EventContext
+		actualContext   *v1alpha1.EventContext
 		result          bool
 	}{
 		{
 			name: "different event contexts",
-			expectedContext: &apicommon.EventContext{
-				Type:        "webhook",
-				SpecVersion: "0.3",
+			expectedContext: &v1alpha1.EventContext{
+				Type: "webhook",
 			},
-			actualContext: &apicommon.EventContext{
-				Type:            "calendar",
-				SpecVersion:     "0.3",
-				Source:          "calendar-gateway",
-				ID:              "1",
-				Time:            v1.MicroTime{Time: time.Now()},
-				DataContentType: "application/json",
+			actualContext: &v1alpha1.EventContext{
+				Type:   "calendar",
+				Source: "calendar-gateway",
+				ID:     "1",
+				Time: metav1.Time{
+					Time: time.Now().UTC(),
+				},
+				DataContentType: common.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			result: false,
 		},
 		{
 			name: "contexts are same",
-			expectedContext: &apicommon.EventContext{
+			expectedContext: &v1alpha1.EventContext{
 				Type:   "webhook",
 				Source: "webhook-gateway",
 			},
-			actualContext: &apicommon.EventContext{
-				Type:            "webhook",
-				SpecVersion:     "0.3",
-				Source:          "webhook-gateway",
-				ID:              "1",
-				Time:            v1.MicroTime{Time: time.Now()},
-				DataContentType: "application/json",
+			actualContext: &v1alpha1.EventContext{
+				Type:        "webhook",
+				SpecVersion: "0.3",
+				Source:      "webhook-gateway",
+				ID:          "1",
+				Time: metav1.Time{
+					Time: time.Now().UTC(),
+				},
+				DataContentType: common.MediaTypeJSON,
 				Subject:         "example-1",
 			},
 			result: true,
 		},
 		{
 			name:            "actual event context is nil",
-			expectedContext: &apicommon.EventContext{},
+			expectedContext: &v1alpha1.EventContext{},
 			actualContext:   nil,
 			result:          false,
 		},
@@ -92,7 +93,7 @@ func TestFilterContext(t *testing.T) {
 func TestFilterData(t *testing.T) {
 	type args struct {
 		data  []v1alpha1.DataFilter
-		event *apicommon.Event
+		event *v1alpha1.Event
 	}
 	tests := []struct {
 		name    string
@@ -108,15 +109,15 @@ func TestFilterData(t *testing.T) {
 		},
 		{
 			name:    "unsupported content type",
-			args:    args{data: nil, event: &apicommon.Event{Data: []byte("a")}},
+			args:    args{data: nil, event: &v1alpha1.Event{Data: []byte("a")}},
 			want:    true,
 			wantErr: false,
 		},
 		{
 			name: "empty data",
-			args: args{data: nil, event: &apicommon.Event{
-				Context: apicommon.EventContext{
-					DataContentType: "application/json",
+			args: args{data: nil, event: &v1alpha1.Event{
+				Context: &v1alpha1.EventContext{
+					DataContentType: ("application/json"),
 				},
 			}},
 			want:    true,
@@ -124,9 +125,9 @@ func TestFilterData(t *testing.T) {
 		},
 		{
 			name: "nil filters, JSON data",
-			args: args{data: nil, event: &apicommon.Event{
-				Context: apicommon.EventContext{
-					DataContentType: "application/json",
+			args: args{data: nil, event: &v1alpha1.Event{
+				Context: &v1alpha1.EventContext{
+					DataContentType: ("application/json"),
 				},
 				Data: []byte("{\"k\": \"v\"}"),
 			}},
@@ -143,9 +144,9 @@ func TestFilterData(t *testing.T) {
 						Value: []string{"v"},
 					},
 				},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"v\"}"),
 				},
@@ -162,9 +163,9 @@ func TestFilterData(t *testing.T) {
 					Value: []string{"1.0"},
 				},
 			},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"1.0\"}"),
 				}},
@@ -175,15 +176,15 @@ func TestFilterData(t *testing.T) {
 			name: "comparator filter GreaterThan return true, JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Path:  "k",
-					Type:  v1alpha1.JSONTypeNumber,
-					Value: []string{"1.0"},
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
 					Comparator: ">",
 				},
 			},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"2.0\"}"),
 				}},
@@ -194,15 +195,15 @@ func TestFilterData(t *testing.T) {
 			name: "comparator filter LessThanOrEqualTo return false, JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Path:  "k",
-					Type:  v1alpha1.JSONTypeNumber,
-					Value: []string{"1.0"},
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"1.0"},
 					Comparator: "<=",
 				},
 			},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"2.0\"}"),
 				}},
@@ -213,15 +214,15 @@ func TestFilterData(t *testing.T) {
 			name: "comparator filter Equal, JSON data",
 			args: args{data: []v1alpha1.DataFilter{
 				{
-					Path:  "k",
-					Type:  v1alpha1.JSONTypeNumber,
-					Value: []string{"5.0"},
+					Path:       "k",
+					Type:       v1alpha1.JSONTypeNumber,
+					Value:      []string{"5.0"},
 					Comparator: "=",
 				},
 			},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"5.0\"}"),
 				}},
@@ -237,9 +238,9 @@ func TestFilterData(t *testing.T) {
 					Value: []string{"10.0"},
 				},
 			},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": \"10.0\"}"),
 				}},
@@ -266,9 +267,9 @@ func TestFilterData(t *testing.T) {
 						Value: []string{"hello,world", "hello there"},
 					},
 				},
-				event: &apicommon.Event{
-					Context: apicommon.EventContext{
-						DataContentType: "application/json",
+				event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
+						DataContentType: ("application/json"),
 					},
 					Data: []byte("{\"k\": true, \"k1\": {\"k\": 3.14, \"k2\": \"hello, world\"}}"),
 				}},
@@ -350,7 +351,7 @@ func TestFilterEvent(t *testing.T) {
 			Start: "09:09:09",
 			Stop:  "",
 		},
-		Context: &apicommon.EventContext{
+		Context: &v1alpha1.EventContext{
 			Type:   "webhook",
 			Source: "webhook-gateway",
 		},
@@ -362,15 +363,15 @@ func TestFilterEvent(t *testing.T) {
 			},
 		},
 	}
-	event := &apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			Type:            "webhook",
 			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			ID:              "1",
-			Time:            v1.MicroTime{Time: eventTime},
-			DataContentType: "application/json",
-			Subject:         "example-1",
+			Time:            metav1.Time{Time: eventTime},
+			DataContentType: ("application/json"),
+			Subject:         ("example-1"),
 		},
 		Data: []byte("{\"k\": \"v\"}"),
 	}

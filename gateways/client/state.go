@@ -109,8 +109,8 @@ func (gatewayContext *GatewayContext) initializeNode(nodeID string, nodeName str
 
 	gatewayContext.logger.WithFields(
 		map[string]interface{}{
-			common.LabelNodeName: nodeName,
-			"node-message":       node.Message,
+			common.LabelNodeName:    nodeName,
+			common.LabelNodeMessage: node.Message,
 		},
 	).Infoln("node is running")
 
