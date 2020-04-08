@@ -75,6 +75,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	var options []func(client *emitter.Client)
+	if emitterEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS.CACertPath, emitterEventSource.TLS.ClientCertPath, emitterEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		options = append(options, emitter.WithTLSConfig(tlsConfig))
+	}
 	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
 
 	if emitterEventSource.Username != nil {
