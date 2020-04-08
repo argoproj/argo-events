@@ -79,12 +79,22 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return err
 	}
 
-	logger.Infoln("setting up a redis client...")
-	client := redis.NewClient(&redis.Options{
+	opt := &redis.Options{
 		Addr:     redisEventSource.HostAddress,
 		Password: password,
 		DB:       redisEventSource.DB,
-	})
+	}
+
+	if redisEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS.CACertPath, redisEventSource.TLS.ClientCertPath, redisEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		opt.TLSConfig = tlsConfig
+	}
+
+	logger.Infoln("setting up a redis client...")
+	client := redis.NewClient(opt)
 
 	if status := client.Ping(); status.Err() != nil {
 		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, eventSource.Name)

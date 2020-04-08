@@ -77,6 +77,16 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("creating a NSQ consumer")
 	var consumer *nsq.Consumer
 	config := nsq.NewConfig()
+
+	if nsqEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(nsqEventSource.TLS.CACertPath, nsqEventSource.TLS.ClientCertPath, nsqEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		config.TlsConfig = tlsConfig
+		config.TlsV1 = true
+	}
+
 	if err := server.Connect(common.GetConnectionBackoff(nsqEventSource.ConnectionBackoff), func() error {
 		var err error
 		if consumer, err = nsq.NewConsumer(nsqEventSource.Topic, nsqEventSource.Channel, config); err != nil {

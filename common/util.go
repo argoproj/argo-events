@@ -17,9 +17,12 @@ limitations under the License.
 package common
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -107,4 +110,23 @@ func GetSecrets(client kubernetes.Interface, namespace string, selector *v1.Secr
 		return "", errors.Errorf("secret '%s' does not have the key '%s'", selector.Name, selector.Key)
 	}
 	return string(val), nil
+}
+
+// GetTLSConfig returns a tls configuration for given cert and key.
+func GetTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(caCertPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
+	}
+	pool := x509.NewCertPool()
+	pool.AppendCertsFromPEM(caCert)
+
+	clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to load client cert key pair %s", caCertPath)
+	}
+	return &tls.Config{
+		RootCAs:      pool,
+		Certificates: []tls.Certificate{clientCert},
+	}, nil
 }

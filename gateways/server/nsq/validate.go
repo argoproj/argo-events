@@ -70,5 +70,8 @@ func validate(eventSource *v1alpha1.NSQEventSource) error {
 	if eventSource.Channel == "" {
 		return errors.New("channel must be specified")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }

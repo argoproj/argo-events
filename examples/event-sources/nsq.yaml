@@ -26,3 +26,13 @@ spec:
         # setting factor > 1 makes the backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      hostAddress: nsqlookupd.argo-events.svc:4161
+#      jsonBody: true
+#      topic: hello
+#      channel: my-channel
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway

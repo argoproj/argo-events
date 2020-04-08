@@ -25,3 +25,13 @@ spec:
       # Channels to subscribe to listen events.
       channels:
         - FOO
+
+#    example-tls:
+#      hostAddress: redis.argo-events.svc:6379
+#      db: 0
+#      channels:
+#        - FOO
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway

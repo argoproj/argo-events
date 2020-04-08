@@ -26,3 +26,13 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      url: "kafka.argo-events:9092"
+#      topic: "topic-2"
+#      jsonBody: true
+#      partition: "1"
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
