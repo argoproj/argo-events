@@ -3,6 +3,7 @@
 **Q. How to get started with Argo Events?**
 
 **A Recommended way to get started with Argo Events is,
+
  1. Read the basic concepts about [Gateway](https://argoproj.github.io/argo-events/concepts/gateway/), [Sensor](https://argoproj.github.io/argo-events/concepts/sensor/) and [Event Source](https://argoproj.github.io/argo-events/concepts/event_source/).
  2. Install the setup as outlined [here](https://argoproj.github.io/argo-events/installation/).
  3. Read the tutorials available [here](https://argoproj.github.io/argo-events/tutorials/01-introduction/). 
