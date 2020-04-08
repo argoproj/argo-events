@@ -20,8 +20,8 @@ spec:
     http:
       port: 9300
     nats:
-      serverURL: nats://test-nats.argo-events.svc:4222
-      subject: webhook-sensor-subject
+      serverURL: nats://nats.argo-events.svc:4222
+      subject: webhook-events
   triggers:
     - template:
         name: webhook-workflow-trigger

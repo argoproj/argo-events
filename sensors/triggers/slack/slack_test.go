@@ -13,15 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package aws_lambda
+package slack
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/aws/aws-sdk-go/service/lambda"
-	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,22 +37,16 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					AWSLambda: &v1alpha1.AWSLambdaTrigger{
-						FunctionName: "fake-function",
-						AccessKey: &corev1.SecretKeySelector{
+					Slack: &v1alpha1.SlackTrigger{
+						SlackToken: &corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "fake-secret",
+								Name: "secret",
 							},
-							Key: "accesskey",
-						},
-						SecretKey: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "fake-secret",
-							},
-							Key: "secretkey",
+							Key: "token",
 						},
 						Namespace: "fake",
-						Region:    "us-east",
+						Channel:   "fake-channel",
+						Message:   "fake-message",
 					},
 				},
 			},
@@ -61,30 +54,30 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getAWSTrigger() *AWSLambdaTrigger {
-	return &AWSLambdaTrigger{
-		LambdaClient: nil,
-		K8sClient:    fake.NewSimpleClientset(),
-		Sensor:       sensorObj.DeepCopy(),
-		Trigger:      &sensorObj.Spec.Triggers[0],
-		Logger:       common.NewArgoEventsLogger(),
+func getSlackTrigger() *SlackTrigger {
+	return &SlackTrigger{
+		K8sClient:  fake.NewSimpleClientset(),
+		Sensor:     sensorObj.DeepCopy(),
+		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:     common.NewArgoEventsLogger(),
+		httpClient: &http.Client{},
 	}
 }
 
-func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
-	trigger := getAWSTrigger()
+func TestSlackTrigger_FetchResource(t *testing.T) {
+	trigger := getSlackTrigger()
 	resource, err := trigger.FetchResource()
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	at, ok := resource.(*v1alpha1.AWSLambdaTrigger)
-	assert.Nil(t, err)
+	ot, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-function", at.FunctionName)
+	assert.Equal(t, "fake-channel", ot.Channel)
+	assert.Equal(t, "fake-message", ot.Message)
 }
 
-func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
-	trigger := getAWSTrigger()
+func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
+	trigger := getSlackTrigger()
 	id := trigger.Sensor.NodeID("fake-dependency")
 	trigger.Sensor.Status = v1alpha1.SensorStatus{
 		Nodes: map[string]v1alpha1.NodeStatus{
@@ -98,56 +91,38 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     cloudevents.VersionV1,
+						SpecVersion:     "1.0",
 						Subject:         "example-1",
 					},
-					Data: []byte(`{"function": "real-function"}`),
+					Data: []byte(`{"channel": "real-channel", "message": "real-message"}`),
 				},
 			},
 		},
 	}
 
-	defaultValue := "default"
-	defaultRegion := "region"
-
-	trigger.Trigger.Template.AWSLambda.Parameters = []v1alpha1.TriggerParameter{
+	trigger.Trigger.Template.Slack.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "function",
-				Value:          &defaultValue,
+				DataKey:        "channel",
 			},
-			Dest: "functionName",
+			Dest: "channel",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "region",
-				Value:          &defaultRegion,
+				DataKey:        "message",
 			},
-			Dest: "region",
+			Dest: "message",
 		},
 	}
 
-	response, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.AWSLambda)
+	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.Slack)
 	assert.Nil(t, err)
-	assert.NotNil(t, response)
+	assert.NotNil(t, resource)
 
-	updatedObj, ok := response.(*v1alpha1.AWSLambdaTrigger)
+	ot, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "real-function", updatedObj.FunctionName)
-	assert.Equal(t, "region", updatedObj.Region)
-}
-
-func TestAWSLambdaTrigger_ApplyPolicy(t *testing.T) {
-	trigger := getAWSTrigger()
-	status := int64(200)
-	response := &lambda.InvokeOutput{
-		StatusCode: &status,
-	}
-	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
-	}
-	err := trigger.ApplyPolicy(response)
-	assert.Nil(t, err)
+	assert.Equal(t, "real-channel", ot.Channel)
+	assert.Equal(t, "real-message", ot.Message)
 }

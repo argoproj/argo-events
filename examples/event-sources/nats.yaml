@@ -24,3 +24,14 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
+
+

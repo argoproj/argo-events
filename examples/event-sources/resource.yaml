@@ -27,11 +27,11 @@ spec:
         # labels provide listing options to K8s API to watch objects
         labels:
           - key: app
-            # Supported operations like ==, !=, <=, >= etc.
+            # Supported operations like ==, !=, etc.
             # Defaults to ==.
             # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
             # optional.
-            operation: ==
+            operation: "=="
             value: my-workflow
 
 #        # fields provide listing options to K8s API to watch objects

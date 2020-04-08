@@ -74,5 +74,8 @@ func validate(eventSource *v1alpha1.EmitterEventSource) error {
 	if (eventSource.Username != nil || eventSource.Password != nil) && eventSource.Namespace == "" {
 		return errors.New("namespace to retrieve the secret from is not specified")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }

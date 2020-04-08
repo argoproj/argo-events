@@ -18,16 +18,15 @@ package sensors
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
 	cloudeventsnats "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/nats"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -131,18 +130,18 @@ func (sensorCtx *SensorContext) listenEventsOverNATS(ctx context.Context) error 
 	return nil
 }
 
-func cloudEventConverter(event *cloudevents.Event) (*apicommon.Event, error) {
+func cloudEventConverter(event *cloudevents.Event) (*v1alpha1.Event, error) {
 	data, err := event.DataBytes()
 	if err != nil {
 		return nil, err
 	}
-	return &apicommon.Event{
-		Context: apicommon.EventContext{
+	return &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: event.Context.GetDataContentType(),
 			Source:          event.Context.GetSource(),
 			SpecVersion:     event.Context.GetSpecVersion(),
 			Type:            event.Context.GetType(),
-			Time:            metav1.MicroTime{Time: event.Context.GetTime()},
+			Time:            metav1.Time{Time: event.Context.GetTime()},
 			ID:              event.Context.GetID(),
 			Subject:         event.Context.GetSubject(),
 		},
@@ -150,28 +149,26 @@ func cloudEventConverter(event *cloudevents.Event) (*apicommon.Event, error) {
 	}, nil
 }
 
-// handleEvent handles a cloudevent, validates and sends it over internal Event NotificationQueue
+// handleEvent handles a cloudevent, validates and sends it over internal event notification queue
 func (sensorCtx *SensorContext) handleEvent(ctx context.Context, event cloudevents.Event) error {
 	internalEvent, err := cloudEventConverter(&event)
 	if err != nil {
-		return errors.Wrap(err, "failed to parse the cloud event payload")
+		return errors.Wrap(err, "failed to parse the cloudevent")
 	}
 
 	sensorCtx.Logger.WithFields(logrus.Fields{
-		"source":  internalEvent.Context.Source,
-		"subject": internalEvent.Context.Subject,
+		"source":  event.Context.GetSource(),
+		"subject": event.Context.GetSubject(),
 	}).Infoln("received event")
 
 	// Resolve Dependency
-	// validate whether the Event is from gateway that this Sensor is watching
+	// validate whether the event is from gateway that this sensor is watching
 	if eventDependency := dependencies.ResolveDependency(sensorCtx.Sensor.Spec.Dependencies, internalEvent); eventDependency != nil {
-		// send Event on internal NotificationQueue
 		sensorCtx.NotificationQueue <- &types.Notification{
 			Event:            internalEvent,
 			EventDependency:  eventDependency,
 			NotificationType: v1alpha1.EventNotification,
 		}
 	}
-
 	return nil
 }

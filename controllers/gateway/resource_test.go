@@ -78,12 +78,6 @@ var gatewayObj = &v1alpha1.Gateway{
 				},
 			},
 		},
-		EventProtocol: &apicommon.EventProtocol{
-			Type: apicommon.HTTP,
-			Http: apicommon.Http{
-				Port: "9330",
-			},
-		},
 		Subscribers: &v1alpha1.Subscribers{
 			HTTP: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
 		},

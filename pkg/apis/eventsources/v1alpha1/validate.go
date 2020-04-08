@@ -29,3 +29,20 @@ func ValidateEventSource(eventSource *EventSource) error {
 	}
 	return nil
 }
+
+// ValidateTLSConfig validates a TLS configuration.
+func ValidateTLSConfig(tlsConfig *TLSConfig) error {
+	if tlsConfig == nil {
+		return nil
+	}
+	if tlsConfig.ClientKeyPath == "" {
+		return errors.New("tls config error. client key path is not specified")
+	}
+	if tlsConfig.ClientCertPath == "" {
+		return errors.New("tls config error. client cert path is not specified")
+	}
+	if tlsConfig.CACertPath == "" {
+		return errors.New("tls config error. ca cert path is not specified")
+	}
+	return nil
+}

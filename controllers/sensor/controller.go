@@ -35,7 +35,7 @@ import (
 
 // informer constants
 const (
-	sensorResyncPeriod   = 20 * time.Minute
+	sensorResyncPeriod   = 10 * time.Minute
 	rateLimiterBaseDelay = 5 * time.Second
 	rateLimiterMaxDelay  = 1000 * time.Second
 )

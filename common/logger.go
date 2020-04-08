@@ -24,22 +24,17 @@ import (
 
 // Logger constants
 const (
-	LabelNamespace      = "namespace"
-	LabelPhase          = "phase"
-	LabelInstanceID     = "instance-id"
-	LabelPodName        = "pod-name"
-	LabelDeploymentName = "deployment-name"
-	LabelServiceName    = "svc-name"
-	LabelEndpoint       = "endpoint"
-	LabelPort           = "port"
-	LabelURL            = "url"
-	LabelNodeName       = "node-name"
-	LabelNodeType       = "node-type"
-	LabelHTTPMethod     = "http-method"
-	LabelClientID       = "client-id"
-	LabelVersion        = "version"
-	LabelTime           = "time"
-	LabelTriggerName    = "trigger-name"
+	LabelNamespace   = "namespace"
+	LabelPhase       = "phase"
+	LabelInstanceID  = "instance-id"
+	LabelEndpoint    = "endpoint"
+	LabelPort        = "port"
+	LabelNodeName    = "node-name"
+	LabelNodeMessage = "node-message"
+	LabelNodeType    = "node-type"
+	LabelHTTPMethod  = "http-method"
+	LabelVersion     = "version"
+	LabelTime        = "time"
 )
 
 // NewArgoEventsLogger returns a new ArgoEventsLogger

@@ -18,11 +18,12 @@ package sensor
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestOperate(t *testing.T) {
@@ -156,9 +157,8 @@ func TestPersistUpdates(t *testing.T) {
 	sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensorObj.Namespace).Create(sensorObj)
 	assert.Nil(t, err)
 	ctx.sensor = sensor.DeepCopy()
-	ctx.sensor.Spec.Circuit = "fake-group"
+	ctx.sensor.Status.Message = "updated-message"
 	sensor, err = PersistUpdates(controller.sensorClient, ctx.sensor.DeepCopy(), ctx.logger)
 	assert.Nil(t, err)
-	assert.Equal(t, "fake-group", sensor.Spec.Circuit)
-	assert.Equal(t, "fake-group", ctx.sensor.Spec.Circuit)
+	assert.Equal(t, "updated-message", sensor.Status.Message)
 }

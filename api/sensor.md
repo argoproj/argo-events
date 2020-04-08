@@ -1434,6 +1434,283 @@ Dependencies of events
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Event">
+
+Event
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Event represents the cloudevent received from a gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>context</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>data</code></br> <em> \[\]byte </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.EventContext">
+
+EventContext
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em> <a href="#argoproj.io/v1alpha1.Event">Event</a>,
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventContext holds the context of the cloudevent received from a
+gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>id</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ID of the event; must be non-empty and unique within the scope of the
+producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>source</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Source - A URI describing the event producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>specversion</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+SpecVersion - The version of the CloudEvents specification used by the
+event.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Type - The type of the occurrence which has happened.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dataContentType</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DataContentType - A MIME (RFC2046) string describing the media type of
+<code>data</code>.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Subject - The subject of the event in the context of the event producer
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>time</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Time - A Timestamp when the event happened.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EventDependency">
 
 EventDependency
@@ -1660,7 +1937,8 @@ Time filter on the event with escalation
 
 <td>
 
-<code>context</code></br> <em> Argo Events common.EventContext </em>
+<code>context</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
 
 </td>
 
@@ -3431,7 +3709,8 @@ events
 
 <td>
 
-<code>event</code></br> <em> Argo Events common.Event </em>
+<code>event</code></br> <em> <a href="#argoproj.io/v1alpha1.Event">
+Event </a> </em>
 
 </td>
 
@@ -4638,6 +4917,166 @@ Resources refers to metadata of the resources created for the sensor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.SlackTrigger">
+
+SlackTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>slackToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SlackToken refers to the Kubernetes secret that holds the slack token
+required to send messages.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the password secret from. This is required if the
+password secret selector is specified.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channel</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Channel refers to which Slack channel to send slack message.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>message</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Message refers to the message to send to the Slack channel.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
 
 StandardK8sTrigger
@@ -5330,6 +5769,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
@@ -6139,6 +6579,29 @@ NATS refers to the trigger designed to place message on NATS subject.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>slack</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger"> SlackTrigger </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Slack refers to the trigger designed to send slack notification message.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -6239,6 +6702,5 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>b1925a6</code>. </em>
-
+commit <code>28e23ce</code>. </em>
 </p>

@@ -210,6 +210,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the amqp client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -755,6 +778,29 @@ Backoff holds parameters applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the emitter client.
 
 </p>
 
@@ -2738,6 +2784,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the kafka client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2893,6 +2962,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the mqtt client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3021,6 +3113,29 @@ ConnectionBackoff holds backoff applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nats client.
 
 </p>
 
@@ -3179,6 +3294,29 @@ Backoff holds parameters applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nsq client.
 
 </p>
 
@@ -3520,6 +3658,29 @@ DB to use. If not specified, default DB 0 will be used.
 <p>
 
 Channels to subscribe to listen events.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the redis client.
 
 </p>
 
@@ -4927,11 +5088,129 @@ all types of events will be processed. More info at
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.TLSConfig">
+
+TLSConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
+<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+TLSConfig refers to TLS configuration for a client.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <hr/>
 
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>b1925a6</code>. </em>
+commit <code>28e23ce</code>. </em>
+
 
 </p>

@@ -20,7 +20,6 @@ import (
 	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
@@ -51,7 +50,6 @@ func (controller *Controller) newSensorInformer() (cache.SharedIndexInformer, er
 		sensorResyncPeriod,
 		sensorinformers.WithNamespace(controller.Config.Namespace),
 		sensorinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
-			options.FieldSelector = fields.Everything().String()
 			options.LabelSelector = labelSelector.String()
 		}),
 	)

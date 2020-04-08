@@ -17,41 +17,22 @@ limitations under the License.
 package common
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
+	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/discovery"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
-
-// DefaultConfigMapName returns a formulated name for a configmap name based on the sensor-controller deployment name
-func DefaultConfigMapName(controllerName string) string {
-	return fmt.Sprintf("%s-configmap", controllerName)
-}
-
-// ServiceDNSName returns a formulated dns name for a service
-func ServiceDNSName(serviceName, namespace string) string {
-	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
-}
-
-// DefaultEventSourceName returns a formulated name for a gateway configuration
-func DefaultEventSourceName(gatewayName string, configurationName string) string {
-	return fmt.Sprintf("%s:%s", gatewayName, configurationName)
-}
-
-// DefaultNatsQueueName returns a queue name for nats subject
-func DefaultNatsQueueName(subject string) string {
-	return fmt.Sprintf("%s-%s", subject, "queue")
-}
 
 // GetClientConfig return rest config, if path not specified, assume in cluster config
 func GetClientConfig(kubeconfig string) (*rest.Config, error) {
@@ -59,20 +40,6 @@ func GetClientConfig(kubeconfig string) (*rest.Config, error) {
 		return clientcmd.BuildConfigFromFlags("", kubeconfig)
 	}
 	return rest.InClusterConfig()
-}
-
-// ServerResourceForGroupVersionKind finds the API resources that fit the GroupVersionKind schema
-func ServerResourceForGroupVersionKind(disco discovery.DiscoveryInterface, gvk schema.GroupVersionKind) (*metav1.APIResource, error) {
-	resources, err := disco.ServerResourcesForGroupVersion(gvk.GroupVersion().String())
-	if err != nil {
-		return nil, err
-	}
-	for _, r := range resources.APIResources {
-		if r.Kind == gvk.Kind {
-			return &r, nil
-		}
-	}
-	return nil, fmt.Errorf("server is unable to handle %s", gvk)
 }
 
 // SendSuccessResponse sends http success response
@@ -143,4 +110,23 @@ func GetSecrets(client kubernetes.Interface, namespace string, selector *v1.Secr
 		return "", errors.Errorf("secret '%s' does not have the key '%s'", selector.Name, selector.Key)
 	}
 	return string(val), nil
+}
+
+// GetTLSConfig returns a tls configuration for given cert and key.
+func GetTLSConfig(caCertPath, clientCertPath, clientKeyPath string) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(caCertPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read ca cert file %s", caCertPath)
+	}
+	pool := x509.NewCertPool()
+	pool.AppendCertsFromPEM(caCert)
+
+	clientCert, err := tls.LoadX509KeyPair(clientCertPath, clientKeyPath)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to load client cert key pair %s", caCertPath)
+	}
+	return &tls.Config{
+		RootCAs:      pool,
+		Certificates: []tls.Certificate{clientCert},
+	}, nil
 }

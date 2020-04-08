@@ -19,7 +19,6 @@ package dependencies
 import (
 	"testing"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
@@ -64,8 +63,8 @@ func TestResolveDependency(t *testing.T) {
 		},
 	}
 
-	event := &apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			Source:  "fake-gateway",
 			Subject: "example-1",
 		},

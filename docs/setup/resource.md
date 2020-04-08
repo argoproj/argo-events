@@ -71,5 +71,50 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 6. Once the `my-workflow` is created, the sensor will trigger the workflow. Run `argo list` to list the triggered workflow.
 
+## List Options
+
+The Resource Event-Source allows to configure the list options through `labels` and `field` selectors for setting up a watch on objects.
+
+In the example above, we had set up the list option as follows,
+
+        filter:
+        # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
+        # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
+        
+            # labels provide listing options to K8s API to watch objects
+            labels:
+              - key: app
+                # Supported operations like ==, !=, etc.
+                # Defaults to ==.
+                # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
+                # optional.
+                operation: "=="
+                value: my-workflow
+
+
+The `key-operation-value` items under the `filter -> labels` are used by the gateway to filter the objects
+that are eligible for the watch. So, in the present case, the gateway will set up a watch for those
+objects who have label "app: my-workflow". You can add more `key-operation-value` items to the list as per your use-case.   
+
+Similarly, you can pass `field` selectors to the watch list options, e.g.,
+
+      filter:
+        # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
+        # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
+
+        # fields provide listing options to K8s API to watch objects
+        fields:
+          - key: metadata.name
+            # Supported operations like ==, !=, <=, >= etc.
+            # Defaults to ==.
+            # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
+            # optional.
+            operation: ==
+            value: my-workflow
+ 
+
+**Note:** The `label` and `fields` under `filter` are used at the time of setting up the watch by the gateway. If you want to filter the objects
+based on the `annotations` or some other fields, use the `Data Filters` available in sensor.
+
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
