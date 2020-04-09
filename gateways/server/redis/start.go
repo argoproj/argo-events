@@ -139,7 +139,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 // getPassword returns the password for authentication
 func (listener *EventListener) getPassword(redisEventSource *v1alpha1.RedisEventSource) (string, error) {
 	if redisEventSource.Password != nil {
-		password, err := common.GetSecrets(listener.K8sClient, redisEventSource.Namespace, redisEventSource.Password)
+		password, err := common.GetSecretValue(listener.K8sClient, redisEventSource.Namespace, redisEventSource.Password)
 		if err != nil {
 			return "", errors.Wrapf(err, "failed to retrieve the password from secret %s within namespace %s", redisEventSource.Password.Name, redisEventSource.Namespace)
 		}

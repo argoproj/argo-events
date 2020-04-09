@@ -116,7 +116,7 @@ func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resour
 	parameters := ct.Trigger.Template.CustomTrigger.Parameters
 
 	if parameters != nil && len(parameters) > 0 {
-		resource, err := triggers.ApplyParams(obj, ct.Trigger.Template.OpenFaas.Parameters, triggers.ExtractEvents(sensor, parameters))
+		resource, err := triggers.ApplyParams(obj, ct.Trigger.Template.CustomTrigger.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to apply the parameters to the custom trigger resource for %s", ct.Trigger.Template.Name)
 		}

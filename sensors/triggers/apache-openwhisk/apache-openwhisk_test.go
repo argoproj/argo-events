@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package openfaas
+package apache_openwhisk
 
 import (
 	"net/http"
@@ -21,10 +21,9 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -37,16 +36,9 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					OpenFaas: &v1alpha1.OpenFaasTrigger{
-						GatewayURL: "http://openfaas-fake.com",
-						Password: &corev1.SecretKeySelector{
-							LocalObjectReference: corev1.LocalObjectReference{
-								Name: "secret",
-							},
-							Key: "password",
-						},
-						Namespace:    "fake",
-						FunctionName: "fake-function",
+					OpenWhisk: &v1alpha1.OpenWhiskTrigger{
+						Host:       "fake.com",
+						ActionName: "hello",
 					},
 				},
 			},
@@ -54,29 +46,28 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getOpenFaasTrigger() *OpenFaasTrigger {
-	return &OpenFaasTrigger{
-		K8sClient:  fake.NewSimpleClientset(),
-		Sensor:     sensorObj.DeepCopy(),
-		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
-		Logger:     common.NewArgoEventsLogger(),
-		httpClient: &http.Client{},
+func getFakeTriggerImpl() *TriggerImpl {
+	return &TriggerImpl{
+		OpenWhiskClient: nil,
+		K8sClient:       nil,
+		Sensor:          sensorObj.DeepCopy(),
+		Trigger:         sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:          common.NewArgoEventsLogger(),
 	}
 }
 
-func TestOpenFaasTrigger_FetchResource(t *testing.T) {
-	trigger := getOpenFaasTrigger()
-	resource, err := trigger.FetchResource()
+func TestTriggerImpl_FetchResource(t *testing.T) {
+	trigger := getFakeTriggerImpl()
+	obj, err := trigger.FetchResource()
 	assert.Nil(t, err)
-	assert.NotNil(t, resource)
-
-	ot, ok := resource.(*v1alpha1.OpenFaasTrigger)
+	assert.NotNil(t, obj)
+	trigger1, ok := obj.(*v1alpha1.OpenWhiskTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-function", ot.FunctionName)
+	assert.Equal(t, trigger.Trigger.Template.OpenWhisk.Host, trigger1.Host)
 }
 
-func TestOpenFaasTrigger_ApplyResourceParameters(t *testing.T) {
-	trigger := getOpenFaasTrigger()
+func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
+	trigger := getFakeTriggerImpl()
 	id := trigger.Sensor.NodeID("fake-dependency")
 	trigger.Sensor.Status = v1alpha1.SensorStatus{
 		Nodes: map[string]v1alpha1.NodeStatus{
@@ -90,38 +81,58 @@ func TestOpenFaasTrigger_ApplyResourceParameters(t *testing.T) {
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "1.0",
+						SpecVersion:     cloudevents.VersionV1,
 						Subject:         "example-1",
 					},
-					Data: []byte(`{"gateway-url": "http://another-fake.com", "function-name": "real-function"}`),
+					Data: []byte(`{"host": "another-fake.com", "actionName": "world"}`),
 				},
 			},
 		},
 	}
 
-	trigger.Trigger.Template.OpenFaas.Parameters = []v1alpha1.TriggerParameter{
+	defaultValue := "http://default.com"
+
+	trigger.Trigger.Template.OpenWhisk.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "gateway-url",
+				DataKey:        "host",
+				Value:          &defaultValue,
 			},
-			Dest: "gatewayURL",
+			Dest: "host",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "function-name",
+				DataKey:        "actionName",
+				Value:          &defaultValue,
 			},
-			Dest: "functionName",
+			Dest: "actionName",
 		},
 	}
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.OpenFaas)
+	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.OpenWhisk)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.OpenFaasTrigger)
+	updatedTrigger, ok := resource.(*v1alpha1.OpenWhiskTrigger)
+	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "real-function", ot.FunctionName)
-	assert.Equal(t, "http://another-fake.com", ot.GatewayURL)
+	assert.Equal(t, "another-fake.com", updatedTrigger.Host)
+}
+
+func TestTriggerImpl_ApplyPolicy(t *testing.T) {
+	trigger := getFakeTriggerImpl()
+	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
+		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+	}
+	response := &http.Response{StatusCode: 200}
+	err := trigger.ApplyPolicy(response)
+	assert.Nil(t, err)
+
+	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
+		Status: &v1alpha1.StatusPolicy{Allow: []int{300}},
+	}
+	err = trigger.ApplyPolicy(response)
+	assert.NotNil(t, err)
 }

@@ -3818,9 +3818,9 @@ sensor
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.OpenFaasTrigger">
+<h3 id="argoproj.io/v1alpha1.OpenWhiskTrigger">
 
-OpenFaasTrigger
+OpenWhiskTrigger
 
 </h3>
 
@@ -3835,7 +3835,7 @@ OpenFaasTrigger
 
 <p>
 
-OpenFaasTrigger refers to the trigger type of OpenFass
+OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
 
 </p>
 
@@ -3869,7 +3869,7 @@ Description
 
 <td>
 
-<code>gatewayURL</code></br> <em> string </em>
+<code>host</code></br> <em> string </em>
 
 </td>
 
@@ -3877,7 +3877,93 @@ Description
 
 <p>
 
-GatewayURL refers to the OpenFaas Gateway URL.
+Host URL of the OpenWhisk.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>version</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Version for the API. Defaults to v1.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Namespace for the action. Defaults to “\_”.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>authToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+AuthToken for authentication.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>actionName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the action/function.
 
 </p>
 
@@ -3896,8 +3982,6 @@ GatewayURL refers to the OpenFaas Gateway URL.
 </td>
 
 <td>
-
-<em>(Optional)</em>
 
 <p>
 
@@ -3927,101 +4011,7 @@ construct the request payload.
 <p>
 
 Parameters is the list of key-value extracted from event’s payload that
-are applied to the HTTP trigger resource.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>username</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Username refers to the Kubernetes secret that holds the username
-required to log into the gateway.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Password refers to the Kubernetes secret that holds the password
-required to log into the gateway.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to read the password secret from. This is required if the
-password secret selector is specified.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>functionName</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-FunctionName refers to the name of OpenFaas function that will be
-invoked once the trigger executes
+are applied to the trigger resource.
 
 </p>
 
@@ -4932,6 +4922,13 @@ SlackTrigger
 
 <p>
 
+<p>
+
+SlackTrigger refers to the specification of the slack notification
+trigger.
+
+</p>
+
 </p>
 
 <table>
@@ -5768,7 +5765,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
 <a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
-<a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
+<a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
@@ -6467,31 +6464,6 @@ on-the-fly constructable payload.
 
 <td>
 
-<code>openFaas</code></br> <em>
-<a href="#argoproj.io/v1alpha1.OpenFaasTrigger"> OpenFaasTrigger </a>
-</em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-OpenFaas refers to the trigger designed to invoke openfaas functions
-with with on-the-fly constructable payload.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>awsLambda</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger"> AWSLambdaTrigger </a>
 </em>
@@ -6602,6 +6574,30 @@ Slack refers to the trigger designed to send slack notification message.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>openWhisk</code></br> <em>
+<a href="#argoproj.io/v1alpha1.OpenWhiskTrigger"> OpenWhiskTrigger </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -6702,5 +6698,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>28e23ce</code>. </em>
+commit <code>81d8555</code>. </em>
+
 </p>

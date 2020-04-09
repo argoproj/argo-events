@@ -99,8 +99,8 @@ func ErrEventSourceTypeMismatch(eventSourceType string) string {
 	return fmt.Sprintf("event source is not type of %s", eventSourceType)
 }
 
-// GetSecrets retrieves the secret value from the secret in namespace with name and key
-func GetSecrets(client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
+// GetSecretValue retrieves the secret value from the secret in namespace with name and key
+func GetSecretValue(client kubernetes.Interface, namespace string, selector *v1.SecretKeySelector) (string, error) {
 	secret, err := client.CoreV1().Secrets(namespace).Get(selector.Name, metav1.GetOptions{})
 	if err != nil {
 		return "", err

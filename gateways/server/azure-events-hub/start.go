@@ -73,13 +73,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	logger.Infoln("retrieving the shared access key name...")
-	sharedAccessKeyName, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKeyName)
+	sharedAccessKeyName, err := common.GetSecretValue(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKeyName)
 	if err != nil {
 		return errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
 	}
 
 	logger.Infoln("retrieving the shared access key...")
-	sharedAccessKey, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKey)
+	sharedAccessKey, err := common.GetSecretValue(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKey)
 	if err != nil {
 		return errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
 	}
