@@ -105,7 +105,7 @@ func (t *SlackTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.New("no slack message to post")
 	}
 
-	slackToken, err := common.GetSecrets(t.K8sClient, namespace, slacktrigger.SlackToken)
+	slackToken, err := common.GetSecretValue(t.K8sClient, namespace, slacktrigger.SlackToken)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to retrieve the slack token from secret %s and namespace %s", slacktrigger.SlackToken.Name, namespace)
 	}

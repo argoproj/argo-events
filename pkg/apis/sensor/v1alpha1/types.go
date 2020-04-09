@@ -287,9 +287,6 @@ type TriggerTemplate struct {
 	// HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.
 	// +optional
 	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,4,opt,name=http"`
-	// OpenFaas refers to the trigger designed to invoke openfaas functions with with on-the-fly constructable payload.
-	// +optional
-	OpenFaas *OpenFaasTrigger `json:"openFaas,omitempty" protobuf:"bytes,5,opt,name=openFaas"`
 	// AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
 	// +optional
 	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`
@@ -305,6 +302,9 @@ type TriggerTemplate struct {
 	// Slack refers to the trigger designed to send slack notification message.
 	// +optional
 	Slack *SlackTrigger `json:"slack,omitempty" protobuf:"bytes,10,opt,name=slack"`
+	// OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
+	// +optional
+	OpenWhisk *OpenWhiskTrigger `json:"openWhisk,omitempty" protobuf:"bytes,11,opt,name=openWhisk"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -396,33 +396,6 @@ type BasicAuth struct {
 	// Defaults to sensor's namespace.
 	// +optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
-}
-
-// OpenFaasTrigger refers to the trigger type of OpenFass
-type OpenFaasTrigger struct {
-	// GatewayURL refers to the OpenFaas Gateway URL.
-	GatewayURL string `json:"gatewayURL" protobuf:"bytes,1,name=gatewayURL"`
-	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
-	// +optional
-	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
-	// Parameters is the list of key-value extracted from event's payload that are applied to
-	// the HTTP trigger resource.
-	// +listType=triggerParameters
-	// +optional
-	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
-	// Username refers to the Kubernetes secret that holds the username required to log into the gateway.
-	// +optional
-	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,4,opt,name=username"`
-	// Password refers to the Kubernetes secret that holds the password required to log into the gateway.
-	// +optional
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,5,opt,name=password"`
-	// Namespace to read the password secret from.
-	// This is required if the password secret selector is specified.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
-	// FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes
-	FunctionName string `json:"functionName" protobuf:"bytes,7,name=functionName"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
@@ -523,6 +496,7 @@ type CustomTrigger struct {
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
 }
 
+// SlackTrigger refers to the specification of the slack notification trigger.
 type SlackTrigger struct {
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the trigger resource.
@@ -541,6 +515,33 @@ type SlackTrigger struct {
 	// Message refers to the message to send to the Slack channel.
 	// +optional
 	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
+}
+
+// OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
+type OpenWhiskTrigger struct {
+	// Host URL of the OpenWhisk.
+	Host string `json:"host" protobuf:"bytes,1,name=host"`
+	// Version for the API.
+	// Defaults to v1.
+	// +optional
+	Version string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	// Namespace for the action.
+	// Defaults to "_".
+	// +optional.
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// AuthToken for authentication.
+	// +optional
+	AuthToken *corev1.SecretKeySelector `json:"authToken,omitempty" protobuf:"bytes,4,opt,name=authToken"`
+	// Name of the action/function.
+	ActionName string `json:"actionName" protobuf:"bytes,5,name=actionName"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination

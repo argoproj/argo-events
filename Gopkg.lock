@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4f16ab62b99c38b548157ba92675ce9d3def3509edca28232f45cb6d8a3664b0"
+  digest = "1:25f2b5d09bf9dfd9e9a9bb684efee0fd8e6cf49789737bec45b362dc304d72c2"
   name = "cloud.google.com/go"
   packages = [
     ".",
@@ -17,7 +17,7 @@
     "pubsub/internal/scheduler",
   ]
   pruneopts = "UT"
-  revision = "792acb5b8cd3ef26c3a821ef57058c05b4c3b71c"
+  revision = "fc3b2ad6791bc406392eb99df59074e2674bc043"
 
 [[projects]]
   digest = "1:487dc37a77bbba996bf4ddae0bff1c69fde98027d507e75eca317ca7c94483c3"
@@ -52,15 +52,15 @@
   version = "v1.3.1"
 
 [[projects]]
-  digest = "1:2356f5354b9dfa09fd1bd62b9a69b891c4927392e15446d3f84c03cd29d68cc6"
+  digest = "1:b08bc721b3d57af183ae74f2971d06fa7011123e05e5f118b209448300d17e36"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
     "services/eventhub/mgmt/2017-04-01/eventhub",
     "version",
   ]
   pruneopts = "UT"
-  revision = "b7d185716507a401293b9f6c303f6e9798c4cb1b"
-  version = "v41.1.0"
+  revision = "68d483faf640e457e33779443ebc5108b900d3ff"
+  version = "v41.2.0"
 
 [[projects]]
   digest = "1:0c774aa3f3f3ba0a2562b9aa24400dfe12c425efc28b65ebf12d97188f455b8a"
@@ -147,6 +147,17 @@
   version = "v1.26.1"
 
 [[projects]]
+  digest = "1:2e0c853419688609a0179d12464c0178bfd1442fd2fe68d88e3ddfdb3f60a213"
+  name = "github.com/apache/openwhisk-client-go"
+  packages = [
+    "whisk",
+    "wski18n",
+  ]
+  pruneopts = "UT"
+  revision = "716c6f973eb297b39e764938284350050f3d3974"
+  version = "1.0.0"
+
+[[projects]]
   digest = "1:e70d4f2917f69210f71207764621c0f1c6274ed0d608cebca7ad1248c5d8a345"
   name = "github.com/argoproj/argo"
   packages = [
@@ -154,8 +165,8 @@
     "pkg/apis/workflow/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "4d1175eb68f6578ed5d599f877be9b4855d33ce9"
-  version = "v2.7.0"
+  revision = "2a3f59c10ae260a460b6ad97a0cadd8667d4b488"
+  version = "v2.7.1"
 
 [[projects]]
   digest = "1:3eea6d86e7f97daf4f2dfe19c0e0b3db758d013bb59797fb1260db12962bf114"
@@ -199,8 +210,7 @@
   revision = "f46beff7cd548bafc0264b95a4efed645fb1862c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:9bc93ba3e38010ce2c4d59a3a1fe234cd2db5626b96b788ee9d1e9b8ab36c09a"
+  digest = "1:0eb05942b8ea48dffc1adeeeecd1a064dd6b0555acd869f7f69f9073ff5d6a0f"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -245,7 +255,8 @@
     "service/sts/stsiface",
   ]
   pruneopts = "UT"
-  revision = "d232400d94bf267b9f37db55da05bfaa44ea729a"
+  revision = "851d5ffb66720c2540cc68020d4d8708950686c8"
+  version = "v1.30.7"
 
 [[projects]]
   digest = "1:c3f1f1fece710906858d1adfb20ac0519836d151c1e49e45a0d3be41580dfe82"
@@ -269,6 +280,14 @@
   pruneopts = "UT"
   revision = "a29c9e98fc567e992eba32ba5532c180a67a5d63"
   version = "v1.1.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5a73e8b2320070eeb804f6362f0251a21bfc5f3fa808eed185b4ec5fa6b4a152"
+  name = "github.com/cloudfoundry/jibber_jabber"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bcc4c8345a21301bf47c032ff42dd1aae2fe3027"
 
 [[projects]]
   digest = "1:357f4baa5f50bb2a9d9d01600c8dadebf1cb890b59b53a4c810301fc7bf3736c"
@@ -382,6 +401,14 @@
   pruneopts = "UT"
   revision = "78cf029964937ffcb67feaeac1fe23d9cef0d26a"
   version = "v5.0.0"
+
+[[projects]]
+  digest = "1:bde2a1ce1de28312f165a88926c12f4acd19dc4d7da96a445dfa5a29eae07a93"
+  name = "github.com/fatih/color"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "daf2830f2741ebb735b21709a520c5f37d642d85"
+  version = "v1.9.0"
 
 [[projects]]
   branch = "master"
@@ -662,6 +689,14 @@
   version = "v0.5.4"
 
 [[projects]]
+  branch = "master"
+  digest = "1:2a2749aea05caecb22185ca607135b4982597d379ec10381312f85653181fb2c"
+  name = "github.com/hokaccha/go-prettyjson"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "108c894c2c0e4a3236172e3698c14f1e3199548d"
+
+[[projects]]
   digest = "1:af811250c188f2a74c35fb390631d282b669cba8f99532789aeb6d200bebc723"
   name = "github.com/huandu/xstrings"
   packages = ["."]
@@ -764,7 +799,7 @@
   version = "1.0"
 
 [[projects]]
-  digest = "1:a91b999a29bf71efd8671253f77c8854d48d83cef7dc1333bf120fab4c904560"
+  digest = "1:093b96fbb3db40828ecf711043048e8a3c4191fe7a7c10367db736427390f0b2"
   name = "github.com/klauspost/compress"
   packages = [
     "fse",
@@ -774,8 +809,8 @@
     "zstd/internal/xxhash",
   ]
   pruneopts = "UT"
-  revision = "788b7f06fee85b7e1d2aa4a3a86f8dbbbcc771ae"
-  version = "v1.10.3"
+  revision = "e2d2089232ece4911272106ae65a7a06746ea38a"
+  version = "v1.10.4"
 
 [[projects]]
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
@@ -807,6 +842,22 @@
   pruneopts = "UT"
   revision = "8edcc4e51f39ddbd3505a3386aff3f435a7fd028"
   version = "v0.7.1"
+
+[[projects]]
+  digest = "1:0109cf4321a15313ec895f42e723e1f76121c6975ea006abfa20012272ec0937"
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "68e95eba382c972aafde02ead2cd2426a8a92480"
+  version = "v0.1.6"
+
+[[projects]]
+  digest = "1:0c58d31abe2a2ccb429c559b6292e7df89dcda675456fecc282fa90aa08273eb"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7b513a986450394f7bbf1476909911b3aa3a55ce"
+  version = "v0.0.12"
 
 [[projects]]
   digest = "1:88e7456f46448df99fd934c3b90621afbaa14d29172923e36c47f42de386be56"
@@ -920,6 +971,19 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:7157fd3f337f20f9058789e47f3341ae5cb77081fa01c1d678af5a03afea6f3e"
+  name = "github.com/nicksnyder/go-i18n"
+  packages = [
+    "i18n",
+    "i18n/bundle",
+    "i18n/language",
+    "i18n/translation",
+  ]
+  pruneopts = "UT"
+  revision = "3c6ee9071cf061f4b0101e14412f74d6e7a8ada6"
+  version = "v2.0.0"
+
+[[projects]]
   branch = "master"
   digest = "1:8c1ae4f51851e13ae49b19500f8adaca4edded77f6e2dba30d26235470b5cdaa"
   name = "github.com/nlopes/slack"
@@ -940,6 +1004,14 @@
   pruneopts = "UT"
   revision = "d7acddb4babdf3329ad415cc02b605a239011b4b"
   version = "v1.0.8"
+
+[[projects]]
+  digest = "1:1d835d5c3153aceef96c2d58866edde1aa70e25339831cff07b1e47456410e5c"
+  name = "github.com/pelletier/go-toml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "8e8d2a6aad23fcaa64716c5fa6975ec3abbf8281"
+  version = "v1.7.0"
 
 [[projects]]
   digest = "1:45e0ec056a328e0b0fc82d93594c5e594a19561b9a4995ef26dd1373a98c4a78"
@@ -1285,7 +1357,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:239d57da60840aaa8950c4ae6e94cc8849430eaf6e5717adb488f42b53aed4fe"
+  digest = "1:7fb913429e6e73cf3d6ac6bde0a1574f2c95c6748806e4f93dd29668158b5bba"
   name = "golang.org/x/sys"
   packages = [
     "cpu",
@@ -1293,7 +1365,7 @@
     "windows",
   ]
   pruneopts = "UT"
-  revision = "e3b113bbe6a423737ae98f42118ce9366e112e12"
+  revision = "59c9f1ba88faf592b225274f69c5ef1e4ebacf82"
 
 [[projects]]
   digest = "1:66a2f252a58b4fbbad0e4e180e1d85a83c222b6bce09c3dcdef3dc87c72eda7c"
@@ -1331,7 +1403,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4e31b12f10128a771be6f269f0b5eb6f06858318949e52fa86168aea0358fada"
+  digest = "1:f9a7e461bb46848baa738d7973f9750459f2190266d8a8f6e81e210e97bbb15c"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -1355,9 +1427,10 @@
     "internal/gopathwalk",
     "internal/imports",
     "internal/packagesinternal",
+    "internal/telemetry/event",
   ]
   pruneopts = "UT"
-  revision = "066fd1390ee0526e4b0a2855752efb3ea41a6648"
+  revision = "9ee5ef7a2c0d9779e4e0ffb6ea39fd154af06adc"
 
 [[projects]]
   branch = "master"
@@ -1418,7 +1491,7 @@
     "protobuf/field_mask",
   ]
   pruneopts = "UT"
-  revision = "9eb9bb161a06a920f3d66021baea7837c7d3b209"
+  revision = "fbb3ad325eb77e61ccaf0238b02e4c183abbf32b"
 
 [[projects]]
   digest = "1:6ff5d0fc1c8e4c73c1e9f03218fcfb7f2f462ae2ae6e4f9358829814b880f9fc"
@@ -2142,6 +2215,7 @@
     "github.com/Masterminds/sprig",
     "github.com/Shopify/sarama",
     "github.com/Shopify/sarama/mocks",
+    "github.com/apache/openwhisk-client-go/whisk",
     "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1",
     "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1",
     "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1",
