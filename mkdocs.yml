@@ -63,6 +63,7 @@ nav:
       - 'triggers/nats-trigger.md'
       - 'triggers/kafka-trigger.md'
       - 'triggers/k8s-object-trigger.md'
+      - 'triggers/openwhisk-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'

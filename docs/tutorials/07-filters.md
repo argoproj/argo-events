@@ -52,7 +52,7 @@ If data types is bool or float, then you need to pass the exact value.
 
 1. Lets create a webhook sensor with data filter.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filter.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filters.yaml
 
 2. Send a HTTP request to gateway
 

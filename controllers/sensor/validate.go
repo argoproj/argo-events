@@ -98,7 +98,7 @@ func validateTriggers(triggers []v1alpha1.Trigger) error {
 		if err := validateTriggerPolicy(&trigger); err != nil {
 			return err
 		}
-		if err := validateTriggerParameters(&trigger); err != nil {
+		if err := validateTriggerTemplateParameters(&trigger); err != nil {
 			return err
 		}
 	}
@@ -131,11 +131,6 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
-	if template.OpenFaas != nil {
-		if err := validateOpenFaasTrigger(template.OpenFaas); err != nil {
-			return errors.Wrapf(err, "template %s is invalid", template.Name)
-		}
-	}
 	if template.AWSLambda != nil {
 		if err := validateAWSLambdaTrigger(template.AWSLambda); err != nil {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
@@ -153,6 +148,11 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 	}
 	if template.Slack != nil {
 		if err := validateSlackTrigger(template.Slack); err != nil {
+			return errors.Wrapf(err, "template %s is invalid", template.Name)
+		}
+	}
+	if template.OpenWhisk != nil {
+		if err := validateOpenWhiskTrigger(template.OpenWhisk); err != nil {
 			return errors.Wrapf(err, "template %s is invalid", template.Name)
 		}
 	}
@@ -238,26 +238,45 @@ func validateHTTPTrigger(trigger *v1alpha1.HTTPTrigger) error {
 			}
 		}
 	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
+				return errors.Errorf("payload index: %d. err: %+v", i, err)
+			}
+		}
+	}
 	return nil
 }
 
-// validateOpenFaasTrigger validates the OpenFaas trigger
-func validateOpenFaasTrigger(trigger *v1alpha1.OpenFaasTrigger) error {
+// validateOpenWhiskTrigger validates the OpenWhisk trigger
+func validateOpenWhiskTrigger(trigger *v1alpha1.OpenWhiskTrigger) error {
 	if trigger == nil {
-		return errors.New("openfaas trigger for can't be nil")
+		return errors.New("openwhisk trigger for can't be nil")
 	}
-	if trigger.FunctionName == "" {
-		return errors.New("function name is not specified")
+	if trigger.ActionName == "" {
+		return errors.New("action name is not specified")
 	}
-	if trigger.GatewayURL == "" {
-		return errors.New("gateway URL is not specified")
+	if trigger.Host == "" {
+		return errors.New("host URL is not specified")
 	}
-	if trigger.Password != nil && trigger.Namespace == "" {
-		return errors.New("namespace can't be empty when password secret selector is specified")
+	if trigger.AuthToken != nil {
+		if trigger.AuthToken.Name == "" || trigger.AuthToken.Key == "" {
+			return errors.New("auth token key and name must be specified")
+		}
 	}
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
+	}
+	if trigger.Payload == nil {
+		return errors.New("payload parameters are not specified")
+	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
 				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
 			}
 		}
@@ -289,6 +308,13 @@ func validateAWSLambdaTrigger(trigger *v1alpha1.AWSLambdaTrigger) error {
 			}
 		}
 	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
+				return errors.Errorf("payload index: %d. err: %+v", i, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -305,6 +331,13 @@ func validateKafkaTrigger(trigger *v1alpha1.KafkaTrigger) error {
 	}
 	if trigger.Topic == "" {
 		return errors.New("topic must not be empty")
+	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
+				return errors.Errorf("payload index: %d. err: %+v", i, err)
+			}
+		}
 	}
 	return nil
 }
@@ -323,6 +356,13 @@ func validateNATSTrigger(trigger *v1alpha1.NATSTrigger) error {
 	if trigger.Payload == nil {
 		return errors.New("payload can't be nil")
 	}
+	if trigger.Payload != nil {
+		for i, p := range trigger.Payload {
+			if err := validateTriggerParameter(&p); err != nil {
+				return errors.Errorf("payload index: %d. err: %+v", i, err)
+			}
+		}
+	}
 	return nil
 }
 
@@ -333,6 +373,13 @@ func validateSlackTrigger(trigger *v1alpha1.SlackTrigger) error {
 	}
 	if trigger.SlackToken == nil {
 		return errors.New("slack token can't be empty")
+	}
+	if trigger.Parameters != nil {
+		for i, parameter := range trigger.Parameters {
+			if err := validateTriggerParameter(&parameter); err != nil {
+				return errors.Errorf("resource parameter index: %d. err: %+v", i, err)
+			}
+		}
 	}
 	return nil
 }
@@ -364,7 +411,7 @@ func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 }
 
 // validateTriggerParameters validates resource and template parameters if any
-func validateTriggerParameters(trigger *v1alpha1.Trigger) error {
+func validateTriggerTemplateParameters(trigger *v1alpha1.Trigger) error {
 	if trigger.Parameters != nil {
 		for i, parameter := range trigger.Parameters {
 			if err := validateTriggerParameter(&parameter); err != nil {

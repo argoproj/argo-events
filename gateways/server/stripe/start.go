@@ -121,7 +121,7 @@ func (rc *Router) PostActivate() error {
 			})
 		logger.Infoln("registering a new webhook")
 
-		apiKey, err := common.GetSecrets(rc.k8sClient, stripeEventSource.Namespace, stripeEventSource.APIKey)
+		apiKey, err := common.GetSecretValue(rc.k8sClient, stripeEventSource.Namespace, stripeEventSource.APIKey)
 		if err != nil {
 			return err
 		}
