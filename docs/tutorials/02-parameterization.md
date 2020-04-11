@@ -159,6 +159,91 @@ important when the `key` you defined in the parameter doesn't exist in the event
                \    \        __/             
                  \____\______/   
 
+
+<br/>
+
+### Sprig Templates
+
+The [sprig template](https://github.com/Masterminds/sprig) exposed through `contextTemplate` and `dataTemplate` lets you alter the event
+context and event data before it gets applied to the trigger via `parameters`.
+
+Take a look at the example defined [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-with-template.yaml), it contains the parameters
+as follows,
+
+        parameters:
+        # Retrieve the 'message' key from the payload
+        - src:
+            dependencyName: test-dep
+            dataTemplate: "{{ .Input.body.message | title }}"
+          dest: spec.arguments.parameters.0.value
+        # Title case the context subject
+        - src:
+            dependencyName: test-dep
+            contextTemplate: "{{ .Input.subject | title }}"
+          dest: spec.arguments.parameters.1.value
+        # Retrieve the 'name' key from the payload, remove all whitespace and lowercase it.
+        - src:
+            dependencyName: test-dep
+            dataTemplate: "{{ .Input.body.name | nospace | lower }}-"
+          dest: metadata.generateName
+          operation: append
+
+
+Consider the event the sensor received has format like,
+
+        {
+            "context": {
+              "type": "type_of_gateway",
+              "specVersion": "cloud_events_version",
+              "source": "name_of_the_gateway",
+              "eventID": "unique_event_id",
+              "time": "event_time",
+              "dataContentType": "type_of_data",
+              "subject": "name_of_the_event_within_event_source"
+            },
+            "data": {
+              "body": {
+                "name": "foo bar",
+                "message": "hello there!!"
+              },
+            }
+        }
+
+The parameters are transformed as,
+
+1. The first parameter extracts the `body.message` from event data and applies `title` filter which basically
+   capitalizes the first letter and replaces the `spec.arguments.parameters.0.value`.
+1. The second parameter extracts the `subject` from the event context and again applies `title` filter and replaces the
+   `spec.arguments.parameters.1.value`.
+1. The third parameter extracts the `body.name` from the event data, applies `nospace` filter which removes all
+   white spaces and then `lower` filter which lowercases the text and appends it to `metadata.generateName`.
+
+Send a curl request to webhook-gateway as follows,
+
+        curl -d '{"name":"foo bar", "message": "hello there!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
+
+and you will an Argo workflow being sprung with name like `webhook-foobar-xxxxx`.
+
+
+Check the output of workflow, it should print something like,
+
+         ____________________________ 
+        < Hello There!! from Example >
+         ---------------------------- 
+            \
+             \
+              \     
+                            ##        .            
+                      ## ## ##       ==            
+                   ## ## ## ##      ===            
+               /""""""""""""""""___/ ===        
+          ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+               \______ o          __/            
+                \    \        __/             
+                  \____\______/   
+
+<br/>
+
 ### Operations
 Sometimes you need the ability to append or prepend a parameter value to 
 an existing value in trigger resource. This is where the `operation` field within
@@ -194,6 +279,7 @@ a parameter comes handy.
                \______ o          __/            
                 \    \        __/             
                   \____\______/   
+
 
 ## Trigger Template Parameterization
 The parameterization you saw above deals with the trigger resource, but sometimes
