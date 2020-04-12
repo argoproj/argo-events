@@ -47,10 +47,10 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 1. AWS Lambda
 1. NATS Messages
 1. Kafka Messages
-1. Slack Notifications (Coming Soon...)
+1. Slack Notifications
 1. Argo Rollouts
 1. Custom Trigger / Build Your Own Trigger
-1. Apache OpenWhisk (Coming Soon...)
+1. Apache OpenWhisk
 
 
 ## Event Sources
