@@ -9,9 +9,7 @@
 
 #### One Command Installation
 
-1. Deploy Argo Events SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
-
-        kubectl create ns argo-events
+1. Deploy Argo Events Namespace, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
 
@@ -29,10 +27,10 @@
               
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
   
-3. Create the cluster roles
+3. Create the role and rolebinding
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
-        
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-role.yaml
+
 4. Install the sensor custom resource definition
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
