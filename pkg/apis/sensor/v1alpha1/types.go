@@ -597,11 +597,11 @@ type TriggerParameterSource struct {
 	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
 	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,3,opt,name=dataTemplate"`
+	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,4,opt,name=dataTemplate"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
-	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,5,opt,name=value"`
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
