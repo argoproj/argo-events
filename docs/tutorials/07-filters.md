@@ -47,6 +47,23 @@ A data filter has following fields,
             value:
               - list_of_possible_values      
 
+### Comparator
+
+The data filter offers `comparator` “>=”, “>”, “=”, “<”, or “<=”.
+
+e.g.,
+
+              filters:
+                name: data-filter
+                data:
+                  - path: body.value
+                    type: number
+                    comparator: ">"
+                    value:
+                      - "50.0"
+
+<br/>
+
 **Note**: If data type is a `string`, then you can pass either an exact value or a regex.
 If data types is bool or float, then you need to pass the exact value.
 

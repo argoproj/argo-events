@@ -14,6 +14,11 @@ spec:
       # HTTP request method to allow. In this case, only POST requests are accepted
       method: POST
 
+#    example-foo:
+#      port: "12000"
+#      endpoint: /example2
+#      method: POST
+
 # Uncomment to use secure webhook
 #    example-secure:
 #      port: "13000"

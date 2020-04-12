@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: webhook-gateway-multi-subscribers
+  name: webhook-gateway
   labels:
     # gateway controller with instanceId "argo-events" will process this gateway
     gateways.argoproj.io/gateway-controller-instanceid: argo-events
@@ -18,11 +18,11 @@ spec:
     spec:
       containers:
         - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0
+          image: argoproj/gateway-client:v0.14.0
           imagePullPolicy: Always
           command: ["/bin/gateway-client"]
         - name: webhook-events
-          image: argoproj/webhook-gateway:v0.13.0
+          image: argoproj/webhook-gateway:v0.14.0
           imagePullPolicy: Always
           command: ["/bin/webhook-gateway"]
       serviceAccountName: argo-events-sa

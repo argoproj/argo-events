@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: trigger-source-git
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0
+          image: argoproj/sensor:v0.14.0
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /git/argoproj
