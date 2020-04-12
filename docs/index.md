@@ -44,36 +44,15 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 1. AWS Lambda
 1. NATS Messages
 1. Kafka Messages
-1. Slack Notifications (Coming Soon...)
+1. Slack Notifications
 1. Argo Rollouts
 1. Custom Trigger / Build Your Own Trigger
-1. Apache OpenWhisk (Coming Soon...)
+1. Apache OpenWhisk
 
 
 ## Event Sources
 
-1. AMQP
-2. AWS SNS
-3. AWS SQS
-4. Cron Schedules
-5. GCP PubSub
-6. GitHub
-7. GitLab
-8. HDFS
-9. File Based Events
-10. Kafka
-11. Minio
-12. NATS
-13. MQTT
-14. K8s Resources
-15. Slack
-16. NetApp StorageGrid
-17. Webhooks
-18. Stripe
-19. NSQ
-20. Emitter
-21. Redis
-22. Azure Events Hub
+Argo-Events supports 20+ event sources. The complete list of event sources is available [here](https://argoproj.github.io/argo-events/concepts/event_source/).
 
 ## Who uses Argo Events?
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
