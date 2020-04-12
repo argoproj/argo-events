@@ -12,6 +12,5 @@ A Trigger is the resource/workload executed by the sensor once the event depende
 1. Kafka Messages
 1. Slack Notifications
 1. Argo Rollouts CR
-1. Custom Triggers
-
-
+1. Custom / Build Your Own Triggers
+1. Apache OpenWhisk

@@ -83,11 +83,11 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
             spec:
               containers:
                 - name: gateway-client
-                  image: argoproj/gateway-client:v0.13.0
+                  image: argoproj/gateway-client:v0.14.0
                   imagePullPolicy: Always
                   command: ["/bin/gateway-client"]
                 - name: webhook-events
-                  image: argoproj/webhook-gateway:v0.13.0
+                  image: argoproj/webhook-gateway:v0.14.0
                   imagePullPolicy: Always
                   command: ["/bin/webhook-gateway"]
               serviceAccountName: argo-events-sa
@@ -135,7 +135,7 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
             spec:
               containers:
                 - name: sensor
-                  image: argoproj/sensor:v0.13.0
+                  image: argoproj/sensor:v0.14.0
                   imagePullPolicy: Always
               serviceAccountName: argo-events-sa
           dependencies:
@@ -228,11 +228,11 @@ You can easily set up a gateway to send events over both HTTP and NATS,
             spec:
               containers:
                 - name: gateway-client
-                  image: argoproj/gateway-client:v0.13.0
+                  image: argoproj/gateway-client:v0.14.0
                   imagePullPolicy: Always
                   command: ["/bin/gateway-client"]
                 - name: webhook-events
-                  image: argoproj/webhook-gateway:v0.13.0
+                  image: argoproj/webhook-gateway:v0.14.0
                   imagePullPolicy: Always
                   command: ["/bin/webhook-gateway"]
               serviceAccountName: argo-events-sa
@@ -269,7 +269,7 @@ You can easily set up a gateway to send events over both HTTP and NATS,
             spec:
               containers:
                 - name: sensor
-                  image: argoproj/sensor:v0.13.0
+                  image: argoproj/sensor:v0.14.0
                   imagePullPolicy: Always
               serviceAccountName: argo-events-sa
           dependencies:

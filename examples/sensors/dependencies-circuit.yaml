@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor-with-groups
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: sensor
-          image: argoproj/sensor:v0.13.0
+          image: argoproj/sensor:v0.14.0
           imagePullPolicy: Always
       serviceAccountName: argo-events-sa
   # defines list of all events sensor will accept
@@ -17,9 +17,9 @@ spec:
     - name: test-dep
       gatewayName: webhook-gateway
       eventName: example
-    - name: test-dep-secure
+    - name: test-dep-foo
       gatewayName: webhook-gateway
-      eventName: example-secure
+      eventName: example-foo
 
   # group event dependencies
   dependencyGroups:
@@ -28,7 +28,7 @@ spec:
         - test-dep
     - name: group_2
       dependencies:
-        - test-dep-secure
+        - test-dep-foo
 
   # trigger when either group_1 or group_2 resolves
   circuit: "group_1 || group_2"

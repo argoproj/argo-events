@@ -54,30 +54,11 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 
 
 ## Event Sources
-1. AMQP
-2. AWS SNS
-3. AWS SQS
-4. Cron Schedules
-5. GCP PubSub
-6. GitHub
-7. GitLab
-8. HDFS
-9. File Based Events
-10. Kafka
-11. Minio
-12. NATS
-13. MQTT
-14. K8s Resources
-15. Slack
-16. NetApp StorageGrid
-17. Webhooks
-18. Stripe
-19. NSQ
-20. Emitter
-21. Redis
-22. Azure Events Hub
+
+Argo-Events supports 20+ event sources. The complete list of event sources is available [here](https://argoproj.github.io/argo-events/concepts/event_source/).
 
 ## Who uses Argo Events?
+
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
@@ -88,14 +69,17 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Viaduct](https://www.viaduct.ai/)
 
 ## Community Blogs and Presentations
+
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
 * [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
 * TGI Kubernetes with Joe Beda: [CloudEvents and Argo Events](https://www.youtube.com/watch?v=LQbBgQnUs_k&list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&index=2&t=0s)
 
 ## Contribute
+
 Read and abide by the [Argo Events Code of Conduct](https://github.com/argoproj/argo-events/blob/master/CODE_OF_CONDUCT.md).
 
 [Contributions](https://github.com/argoproj/argo-events/issues) are more than welcome, if you are interested please take a look at our [Contributing Guidelines](./CONTRIBUTING.md).
 
 ## License
+
 Apache License Version 2.0, see [LICENSE](./LICENSE)
