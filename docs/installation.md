@@ -75,7 +75,7 @@ Make sure you have helm client installed and Tiller server is running. To instal
         helm repo add argo https://argoproj.github.io/argo-helm
 
 1. The helm chart for argo-events is maintained solely by the community and hence the image version for controllers can go out of sync.
-   Update the image version in values.yaml to v0.13.0.
+   Update the image version in values.yaml to v0.14.0.
 
 1. Install `argo-events` chart
 

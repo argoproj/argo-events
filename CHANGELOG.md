@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.14.0
+
++ Introducing Slack notification trigger. #576
++ Introducing OpenWhisk trigger. #585
++ TLS support for messaging queue gateways. #580
++ Support for list of event types for resource gateway. #561
++ Added label and field selectors for resource gateway. #571
++ Basic Auth for HTTP trigger. #559 
++ Namespace defined in event sources for secret retrieval is optional. #569 
+
 ## v0.13.0
 + Add AWS-SQS Cross Account Queue Monitoring #547
 + Enhanced Data Filter Comparator #544 

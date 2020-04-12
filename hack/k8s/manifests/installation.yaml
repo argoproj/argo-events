@@ -171,7 +171,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
         - name: gateway-controller
-          image: argoproj/gateway-controller:v0.13.0
+          image: argoproj/gateway-controller:v0.14.0
           imagePullPolicy: Always
           env:
             - name: NAMESPACE
@@ -212,7 +212,7 @@ spec:
       serviceAccountName: argo-events-sa
       containers:
         - name: sensor-controller
-          image: argoproj/sensor-controller:v0.13.0
+          image: argoproj/sensor-controller:v0.14.0
           imagePullPolicy: Always
           env:
             - name: NAMESPACE
