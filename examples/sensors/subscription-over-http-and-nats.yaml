@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor-over-http-and-nats
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:

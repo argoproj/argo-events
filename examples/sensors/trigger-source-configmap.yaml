@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: trigger-source-configmap-sensor
+  name: webhook-sensor
   labels:
     sensors.argoproj.io/sensor-controller-instanceid: argo-events
 spec:
@@ -21,7 +21,7 @@ spec:
       eventName: example
   triggers:
     - template:
-        name: minio-workflow-trigger
+        name: workflow-trigger
         k8s:
           group: argoproj.io
           version: v1alpha1
@@ -30,6 +30,8 @@ spec:
           source:
             configmap:
               name: workflow-cm
+              # optional.
+              # Defaults to sensor namespace.
               namespace: argo-events
               # key within configmap whose corresponding value contains the workflow definition
               key: wf
