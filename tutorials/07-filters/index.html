@@ -762,6 +762,19 @@
     Data Filter
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comparator" class="md-nav__link">
+    Comparator
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -807,8 +820,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -905,6 +918,30 @@
   <li class="md-nav__item">
     <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -1018,6 +1055,19 @@
     Data Filter
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comparator" class="md-nav__link">
+    Comparator
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1098,12 +1148,27 @@ data filter on <code>message</code>.</p>
 </code></pre></div>
 
 
+<h3 id="comparator">Comparator<a class="headerlink" href="#comparator" title="Permanent link">&para;</a></h3>
+<p>The data filter offers <code>comparator</code> “&gt;=”, “&gt;”, “=”, “&lt;”, or “&lt;=”.</p>
+<p>e.g.,</p>
+<div class="codehilite"><pre><span></span><code>          <span class="n">filters</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">:</span> <span class="k">data</span><span class="o">-</span><span class="n">filter</span>
+            <span class="k">data</span><span class="p">:</span>
+              <span class="o">-</span> <span class="n">path</span><span class="p">:</span> <span class="n">body</span><span class="p">.</span><span class="n">value</span>
+                <span class="k">type</span><span class="p">:</span> <span class="nb">number</span>
+                <span class="n">comparator</span><span class="p">:</span> <span class="ss">&quot;&gt;&quot;</span>
+                <span class="n">value</span><span class="p">:</span>
+                  <span class="o">-</span> <span class="ss">&quot;50.0&quot;</span>
+</code></pre></div>
+
+
+<p><br/></p>
 <p><strong>Note</strong>: If data type is a <code>string</code>, then you can pass either an exact value or a regex.
 If data types is bool or float, then you need to pass the exact value.</p>
 <ol>
 <li>
 <p>Lets create a webhook sensor with data filter.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tutorials</span><span class="o">/</span><span class="mi">07</span><span class="o">-</span><span class="n">filters</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="k">data</span><span class="o">-</span><span class="n">filter</span><span class="p">.</span><span class="n">yaml</span>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">tutorials</span><span class="o">/</span><span class="mi">07</span><span class="o">-</span><span class="n">filters</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="k">data</span><span class="o">-</span><span class="n">filters</span><span class="p">.</span><span class="n">yaml</span>
 </code></pre></div>
 
 

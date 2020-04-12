@@ -833,8 +833,8 @@
 
 
   <li class="md-nav__item">
-    <a href="tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -931,6 +931,30 @@
   <li class="md-nav__item">
     <a href="triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -1111,8 +1135,7 @@
 <h2 id="what-is-argo-events">What is Argo Events?<a class="headerlink" href="#what-is-argo-events" title="Permanent link">&para;</a></h2>
 <p><strong>Argo Events</strong> is an event-driven workflow automation framework for Kubernetes 
 which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. 
-on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
-https://argoproj.github.io/argo-events/</p>
+on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -1146,45 +1169,24 @@ https://argoproj.github.io/argo-events/</p>
 <li>AWS Lambda</li>
 <li>NATS Messages</li>
 <li>Kafka Messages</li>
-<li>Slack Notifications (Coming Soon...)</li>
+<li>Slack Notifications</li>
 <li>Argo Rollouts</li>
 <li>Custom Trigger / Build Your Own Trigger</li>
-<li>Apache OpenWhisk (Coming Soon...)</li>
+<li>Apache OpenWhisk</li>
 </ol>
 <h2 id="event-sources">Event Sources<a class="headerlink" href="#event-sources" title="Permanent link">&para;</a></h2>
-<ol>
-<li>AMQP</li>
-<li>AWS SNS</li>
-<li>AWS SQS</li>
-<li>Cron Schedules</li>
-<li>GCP PubSub</li>
-<li>GitHub</li>
-<li>GitLab</li>
-<li>HDFS</li>
-<li>File Based Events</li>
-<li>Kafka</li>
-<li>Minio</li>
-<li>NATS</li>
-<li>MQTT</li>
-<li>K8s Resources</li>
-<li>Slack</li>
-<li>NetApp StorageGrid</li>
-<li>Webhooks</li>
-<li>Stripe</li>
-<li>NSQ</li>
-<li>Emitter</li>
-<li>Redis</li>
-<li>Azure Events Hub</li>
-</ol>
+<p>Argo-Events supports 20+ event sources. The complete list of event sources is available <a href="https://argoproj.github.io/argo-events/concepts/event_source/">here</a>.</p>
 <h2 id="who-uses-argo-events">Who uses Argo Events?<a class="headerlink" href="#who-uses-argo-events" title="Permanent link">&para;</a></h2>
-<p>Organizations below are <strong>officially</strong> using Argo Events. Please send a PR with your organization name if you are using Argo Events.
-1. <a href="https://biobox.io">BioBox Analytics</a>
-1. <a href="https://www.blackrock.com/">BlackRock</a>
-1. <a href="https://www.canva.com/">Canva</a>
-1. <a href="https://fairwinds.com/">Fairwinds</a>
-1. <a href="https://www.insideboard.com">InsideBoard</a>
-1. <a href="https://www.intuit.com/">Intuit</a>
-1. <a href="https://www.viaduct.ai/">Viaduct</a></p>
+<p>Organizations below are <strong>officially</strong> using Argo Events. Please send a PR with your organization name if you are using Argo Events.</p>
+<ol>
+<li><a href="https://biobox.io">BioBox Analytics</a></li>
+<li><a href="https://www.blackrock.com/">BlackRock</a></li>
+<li><a href="https://www.canva.com/">Canva</a></li>
+<li><a href="https://fairwinds.com/">Fairwinds</a></li>
+<li><a href="https://www.insideboard.com">InsideBoard</a></li>
+<li><a href="https://www.intuit.com/">Intuit</a></li>
+<li><a href="https://www.viaduct.ai/">Viaduct</a></li>
+</ol>
 <h2 id="community-blogs-and-presentations">Community Blogs and Presentations<a class="headerlink" href="#community-blogs-and-presentations" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="https://www.youtube.com/watch?v=ZK510prml8o">Automating Research Workflows at BlackRock</a></li>

@@ -746,8 +746,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -844,6 +844,30 @@
   <li class="md-nav__item">
     <a href="../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -966,22 +990,45 @@
                 
                 <h1 id="faqs">FAQs<a class="headerlink" href="#faqs" title="Permanent link">&para;</a></h1>
 <p><strong>Q. How to get started with Argo Events?</strong></p>
-<p>**A Recommended way to get started with Argo Events is,
- 1. Read the basic concepts about <a href="https://argoproj.github.io/argo-events/concepts/gateway/">Gateway</a>, <a href="https://argoproj.github.io/argo-events/concepts/sensor/">Sensor</a> and <a href="https://argoproj.github.io/argo-events/concepts/event_source/">Event Source</a>.
- 2. Install the setup as outlined <a href="https://argoproj.github.io/argo-events/installation/">here</a>.
- 3. Read the tutorials available <a href="https://argoproj.github.io/argo-events/tutorials/01-introduction/">here</a>. </p>
+<p><strong>A</strong>. Recommended way to get started with Argo Events is,</p>
+<ol>
+<li>Read the basic concepts about <a href="https://argoproj.github.io/argo-events/concepts/gateway/">Gateway</a>, <a href="https://argoproj.github.io/argo-events/concepts/sensor/">Sensor</a> and <a href="https://argoproj.github.io/argo-events/concepts/event_source/">Event Source</a>.</li>
+<li>Install the setup as outlined <a href="https://argoproj.github.io/argo-events/installation/">here</a>.</li>
+<li>Read the tutorials available <a href="https://argoproj.github.io/argo-events/tutorials/01-introduction/">here</a>. </li>
+</ol>
 <p><strong>Q. Can I deploy gateway and sensor in a namespace different that <code>argo-events</code>?</strong></p>
 <p><strong>A</strong>.   Yes. If you want to deploy the gateway in a different namespace that <code>argo-events</code>, then please update the
 gateway definition with desired namespace and service account. Make sure to grant the service account the necessary roles.
 Also note that the gateway and sensor controllers are configured to process the gateway and sensor resources
 in <code>argo-events</code> namespace with instance-id <code>argo-events</code>. You can change the configuration by updating the
 appropriate controller configmap. </p>
+<p><strong>Q. How to debug Argo-Events.</strong></p>
+<p><strong>A</strong>.</p>
+<ol>
+<li>Make sure you have installed everything as instructed <a href="https://argoproj.github.io/argo-events/installation/">here</a>.</li>
+<li>The gateway and sensor pods must be running. If you see any issue with the pods, check the logs
+   for sensor-controller and gateway-controller.</li>
+<li>If gateway and sensor pods are running, but you are not receiving any events:<ul>
+<li>Make sure you have configured the event source correctly.</li>
+<li>Check the logs for both of the gateway pod's containers.</li>
+</ul>
+</li>
+<li>If the gateway-client displays <code>dispatched event</code> but nothing happens then read following Q and A.   </li>
+</ol>
+<p>Note: You can set environment variable <code>DEBUG_LOG:true</code> in any of the containers to output debug logs.</p>
 <p><strong>Q. Gateway is receiving the events but nothing happens.</strong></p>
-<p><strong>A</strong>. First, check the sensor resource is deployed and a pod is created for the resource.
-       If sensor pod is running, check the <code>subscribers</code> list in the gateway resource. The sensor service url must be
-       registered as a subscriber in order to receive events from gateway. The <code>gateway-client</code> container should also log an error related to this situation.
-       Second, if the gateway was able to send an event to sensor, then check the sensor logs, either the sensor event resolution circuitry has rejected the event or
-       the sensor failed to execute the trigger due to an error.</p>
+<p><strong>A</strong>. </p>
+<ol>
+<li>
+<p>Check the sensor resource is deployed and a pod is created for the resource.
+If sensor pod is running, check the <code>subscribers</code> list in the gateway resource. The sensor service url must be
+registered as a subscriber in order to receive events from gateway. The <code>gateway-client</code> container should also log an error related to this situation.</p>
+</li>
+<li>
+<p>If the gateway was able to send an event to sensor, then check the sensor logs, either the sensor event resolution circuitry has rejected the event or
+the sensor failed to execute the trigger due to an error.</p>
+</li>
+</ol>
 <p><strong>Q. Helm chart installation does not work.</strong></p>
 <p><strong>A.</strong> The helm chart for argo events is maintained by the community and can be out of sync with latest release version. The official installation file is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml">here</a>.
 If you notice the helm chart is outdated, we encourage you to contribute to the <a href="https://github.com/argoproj/argo-helm">argo-helm</a>.</p>
@@ -997,7 +1044,7 @@ raise a PR.</p>
 <p><strong>A.</strong> When it comes to image tags, the golden rule is do not trust the latest tag. Always use the pinned version of the images.
    We will try to keep the <code>latest</code> in sync with the latest release version.</p>
 <p><strong>Q. Where can I find the event structure for a particular gateway?</strong></p>
-<p><strong>A.</strong> Please refer https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/event-data.go to understand the structure of different types of events dispatched by gateways.</p>
+<p><strong>A.</strong> Please refer <a href="https://github.com/argoproj/argo-events/blob/master/pkg/apis/events/event-data.go">this file</a> to understand the structure of different types of events dispatched by gateways.</p>
                 
                   
                 

@@ -734,6 +734,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#sprig-templates" class="md-nav__link">
+    Sprig Templates
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#operations" class="md-nav__link">
     Operations
   </a>
@@ -841,8 +848,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="../09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -939,6 +946,30 @@
   <li class="md-nav__item">
     <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -1079,6 +1110,13 @@
           <li class="md-nav__item">
   <a href="#default-values" class="md-nav__link">
     Default Values
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sprig-templates" class="md-nav__link">
+    Sprig Templates
   </a>
   
 </li>
@@ -1314,6 +1352,87 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 </code></pre></div>
 
 
+<p><br/></p>
+<h3 id="sprig-templates">Sprig Templates<a class="headerlink" href="#sprig-templates" title="Permanent link">&para;</a></h3>
+<p>The <a href="https://github.com/Masterminds/sprig">sprig template</a> exposed through <code>contextTemplate</code> and <code>dataTemplate</code> lets you alter the event
+context and event data before it gets applied to the trigger via <code>parameters</code>.</p>
+<p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
+as follows,</p>
+<div class="codehilite"><pre><span></span><code><span class="x">    parameters:</span>
+<span class="x">    # Retrieve the &#39;message&#39; key from the payload</span>
+<span class="x">    - src:</span>
+<span class="x">        dependencyName: test-dep</span>
+<span class="x">        dataTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.body.message</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x">&quot;</span>
+<span class="x">      dest: spec.arguments.parameters.0.value</span>
+<span class="x">    # Title case the context subject</span>
+<span class="x">    - src:</span>
+<span class="x">        dependencyName: test-dep</span>
+<span class="x">        contextTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.subject</span> <span class="o">|</span> <span class="nf">title</span> <span class="cp">}}</span><span class="x">&quot;</span>
+<span class="x">      dest: spec.arguments.parameters.1.value</span>
+<span class="x">    # Retrieve the &#39;name&#39; key from the payload, remove all whitespace and lowercase it.</span>
+<span class="x">    - src:</span>
+<span class="x">        dependencyName: test-dep</span>
+<span class="x">        dataTemplate: &quot;</span><span class="cp">{{</span> <span class="nv">.Input.body.name</span> <span class="o">|</span> <span class="nf">nospace</span> <span class="o">|</span> <span class="nf">lower</span> <span class="cp">}}</span><span class="x">-&quot;</span>
+<span class="x">      dest: metadata.generateName</span>
+<span class="x">      operation: append</span>
+</code></pre></div>
+
+
+<p>Consider the event the sensor received has format like,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="err">{</span>
+        <span class="ss">&quot;context&quot;</span><span class="p">:</span> <span class="err">{</span>
+          <span class="ss">&quot;type&quot;</span><span class="p">:</span> <span class="ss">&quot;type_of_gateway&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;specVersion&quot;</span><span class="p">:</span> <span class="ss">&quot;cloud_events_version&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;source&quot;</span><span class="p">:</span> <span class="ss">&quot;name_of_the_gateway&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;eventID&quot;</span><span class="p">:</span> <span class="ss">&quot;unique_event_id&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;time&quot;</span><span class="p">:</span> <span class="ss">&quot;event_time&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;dataContentType&quot;</span><span class="p">:</span> <span class="ss">&quot;type_of_data&quot;</span><span class="p">,</span>
+          <span class="ss">&quot;subject&quot;</span><span class="p">:</span> <span class="ss">&quot;name_of_the_event_within_event_source&quot;</span>
+        <span class="err">}</span><span class="p">,</span>
+        <span class="ss">&quot;data&quot;</span><span class="p">:</span> <span class="err">{</span>
+          <span class="ss">&quot;body&quot;</span><span class="p">:</span> <span class="err">{</span>
+            <span class="ss">&quot;name&quot;</span><span class="p">:</span> <span class="ss">&quot;foo bar&quot;</span><span class="p">,</span>
+            <span class="ss">&quot;message&quot;</span><span class="p">:</span> <span class="ss">&quot;hello there!!&quot;</span>
+          <span class="err">}</span><span class="p">,</span>
+        <span class="err">}</span>
+    <span class="err">}</span>
+</code></pre></div>
+
+
+<p>The parameters are transformed as,</p>
+<ol>
+<li>The first parameter extracts the <code>body.message</code> from event data and applies <code>title</code> filter which basically
+   capitalizes the first letter and replaces the <code>spec.arguments.parameters.0.value</code>.</li>
+<li>The second parameter extracts the <code>subject</code> from the event context and again applies <code>title</code> filter and replaces the
+   <code>spec.arguments.parameters.1.value</code>.</li>
+<li>The third parameter extracts the <code>body.name</code> from the event data, applies <code>nospace</code> filter which removes all
+   white spaces and then <code>lower</code> filter which lowercases the text and appends it to <code>metadata.generateName</code>.</li>
+</ol>
+<p>Send a curl request to webhook-gateway as follows,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="n">curl</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;{&quot;name&quot;:&quot;foo bar&quot;, &quot;message&quot;: &quot;hello there!!&quot;}&#39;</span> <span class="o">-</span><span class="n">H</span> <span class="ss">&quot;Content-Type: application/json&quot;</span> <span class="o">-</span><span class="n">X</span> <span class="n">POST</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">12000</span><span class="o">/</span><span class="n">example</span>
+</code></pre></div>
+
+
+<p>and you will an Argo workflow being sprung with name like <code>webhook-foobar-xxxxx</code>.</p>
+<p>Check the output of workflow, it should print something like,</p>
+<div class="codehilite"><pre><span></span><code>     <span class="n">____________________________</span> 
+    <span class="o">&lt;</span> <span class="n">Hello</span> <span class="n">There</span><span class="o">!!</span> <span class="k">from</span> <span class="n">Example</span> <span class="o">&gt;</span>
+     <span class="c1">---------------------------- </span>
+        <span class="err">\</span>
+         <span class="err">\</span>
+          <span class="err">\</span>     
+                        <span class="o">##</span>        <span class="p">.</span>            
+                  <span class="o">##</span> <span class="o">##</span> <span class="o">##</span>       <span class="o">==</span>            
+               <span class="o">##</span> <span class="o">##</span> <span class="o">##</span> <span class="o">##</span>      <span class="o">===</span>            
+           <span class="o">/</span><span class="ss">&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;</span><span class="n">___</span><span class="o">/</span> <span class="o">===</span>        
+      <span class="o">~~~</span> <span class="err">{</span><span class="o">~~</span> <span class="o">~~~~</span> <span class="o">~~~</span> <span class="o">~~~~</span> <span class="o">~~</span> <span class="o">~</span> <span class="o">/</span>  <span class="o">===-</span> <span class="o">~~~</span>   
+           <span class="err">\</span><span class="n">______</span> <span class="n">o</span>          <span class="n">__</span><span class="o">/</span>            
+            <span class="err">\</span>    <span class="err">\</span>        <span class="n">__</span><span class="o">/</span>             
+              <span class="err">\</span><span class="n">____</span><span class="err">\</span><span class="n">______</span><span class="o">/</span>
+</code></pre></div>
+
+
+<p><br/></p>
 <h3 id="operations">Operations<a class="headerlink" href="#operations" title="Permanent link">&para;</a></h3>
 <p>Sometimes you need the ability to append or prepend a parameter value to 
 an existing value in trigger resource. This is where the <code>operation</code> field within

@@ -793,8 +793,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -891,6 +891,30 @@
   <li class="md-nav__item">
     <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -1028,6 +1052,31 @@
                 <h1 id="event-source">Event Source<a class="headerlink" href="#event-source" title="Permanent link">&para;</a></h1>
 <p>Event Sources are the configuration store for gateways. The configuration stored in an Event Source is used by a gateway to consume events from
 external entities like AWS SNS, SQS, GCP PubSub, Webhooks etc.</p>
+<p>Currently supported event sources -</p>
+<ol>
+<li>AMQP</li>
+<li>AWS SNS</li>
+<li>AWS SQS</li>
+<li>Cron Schedules</li>
+<li>GCP PubSub</li>
+<li>GitHub</li>
+<li>GitLab</li>
+<li>HDFS</li>
+<li>File Based Events</li>
+<li>Kafka</li>
+<li>Minio</li>
+<li>NATS</li>
+<li>MQTT</li>
+<li>K8s Resources</li>
+<li>Slack</li>
+<li>NetApp StorageGrid</li>
+<li>Webhooks</li>
+<li>Stripe</li>
+<li>NSQ</li>
+<li>Emitter</li>
+<li>Redis</li>
+<li>Azure Events Hub</li>
+</ol>
 <h2 id="specification">Specification<a class="headerlink" href="#specification" title="Permanent link">&para;</a></h2>
 <p>Complete specification is available <a href="https://github.com/argoproj/argo-events/blob/master/api/event-source.md">here</a>.</p>
 <h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>

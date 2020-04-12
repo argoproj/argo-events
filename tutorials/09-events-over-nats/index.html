@@ -1,0 +1,1497 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.3">
+    
+    
+      
+        <title>Events Over NATS - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application.adb8469c.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-palette.a8b3c06d.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#009688">
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr.86422ebf.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,400i,700%7C&display=fallback">
+        <style>body,input{font-family:"Work Sans","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
+    
+    
+    
+      
+        
+<script>
+  window.ga = window.ga || function() {
+    (ga.q = ga.q || []).push(arguments)
+  }
+  ga.l = +new Date
+  /* Setup integration and send page view */
+  ga("create", "UA-105170809-2", "auto")
+  ga("set", "anonymizeIp", true)
+  ga("send", "pageview")
+  /* Register handler to log search on blur */
+  document.addEventListener("DOMContentLoaded", () => {
+    if (document.forms.search) {
+      var query = document.forms.search.query
+      query.addEventListener("blur", function() {
+        if (this.value) {
+          var path = document.location.pathname;
+          ga("send", "pageview", path + "?q=" + this.value)
+        }
+      })
+    }
+  })
+</script>
+<script async src="https://www.google-analytics.com/analytics.js"></script>
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="teal" data-md-color-accent="">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#events-over-nats" tabindex="0" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" aria-label="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-header-nav__button md-logo">
+          
+            <img alt="logo" src="../../assets/logo.png" width="24" height="24">
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              Argo Events - The Event-Based Dependency Manager for Kubernetes
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Events Over NATS
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" aria-label="search" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+<a href="https://github.com/argoproj/argo-events/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main" role="main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../.." title="Argo Events - The Event-Based Dependency Manager for Kubernetes" class="md-nav__button md-logo">
+      
+        <img alt="logo" src="../../assets/logo.png" width="48" height="48">
+      
+    </a>
+    Argo Events - The Event-Based Dependency Manager for Kubernetes
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+<a href="https://github.com/argoproj/argo-events/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Overview" class="md-nav__link">
+      Overview
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../installation/" title="Installation" class="md-nav__link">
+      Installation
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../quick_start/" title="Getting Started" class="md-nav__link">
+      Getting Started
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      Concepts
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Concepts
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/gateway/" title="Gateway" class="md-nav__link">
+      Gateway
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/sensor/" title="Sensor" class="md-nav__link">
+      Sensor
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/event_source/" title="Event Source" class="md-nav__link">
+      Event Source
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/trigger/" title="Trigger" class="md-nav__link">
+      Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/architecture/" title="Architecture" class="md-nav__link">
+      Architecture
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+    
+    <label class="md-nav__link" for="nav-5">
+      Demo
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        Demo
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../demo/notebooks/" title="Event-Driven Parameterized Jupyter Notebooks" class="md-nav__link">
+      Event-Driven Parameterized Jupyter Notebooks
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-6" type="checkbox" id="nav-6">
+    
+    <label class="md-nav__link" for="nav-6">
+      Setup
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-6">
+        Setup
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/amqp/" title="AMQP" class="md-nav__link">
+      AMQP
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/aws-sns/" title="AWS SNS" class="md-nav__link">
+      AWS SNS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/aws-sqs/" title="AWS SQS" class="md-nav__link">
+      AWS SQS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/calendar/" title="Calendar" class="md-nav__link">
+      Calendar
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/emitter/" title="Emitter" class="md-nav__link">
+      Emitter
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/file/" title="File" class="md-nav__link">
+      File
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/gcp-pub-sub/" title="GCP PubSub" class="md-nav__link">
+      GCP PubSub
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/github/" title="GitHub" class="md-nav__link">
+      GitHub
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/gitlab/" title="GitLab" class="md-nav__link">
+      GitLab
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/kafka/" title="Kafka" class="md-nav__link">
+      Kafka
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/minio/" title="Minio" class="md-nav__link">
+      Minio
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/mqtt/" title="MQTT" class="md-nav__link">
+      MQTT
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/nats/" title="NATS" class="md-nav__link">
+      NATS
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/nsq/" title="NSQ" class="md-nav__link">
+      NSQ
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/redis/" title="Redis" class="md-nav__link">
+      Redis
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/resource/" title="Resource" class="md-nav__link">
+      Resource
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../setup/webhook/" title="Webhook" class="md-nav__link">
+      Webhook
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-7" type="checkbox" id="nav-7" checked>
+    
+    <label class="md-nav__link" for="nav-7">
+      Tutorials
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-7">
+        Tutorials
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../01-introduction/" title="Introduction" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../02-parameterization/" title="Parameterization" class="md-nav__link">
+      Parameterization
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../03-trigger-sources/" title="Trigger Sources" class="md-nav__link">
+      Trigger Sources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../04-standard-k8s-resources/" title="Trigger Standard K8s Resources" class="md-nav__link">
+      Trigger Standard K8s Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../05-trigger-custom-resources/" title="Trigger Custom Resources" class="md-nav__link">
+      Trigger Custom Resources
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../06-circuit-and-switch/" title="Circuit and Switch" class="md-nav__link">
+      Circuit and Switch
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../07-filters/" title="Filters" class="md-nav__link">
+      Filters
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../08-policy/" title="Policy" class="md-nav__link">
+      Policy
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Events Over NATS
+      </label>
+    
+    <a href="./" title="Events Over NATS" class="md-nav__link md-nav__link--active">
+      Events Over NATS
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events-over-http-and-nats" class="md-nav__link">
+    Events over HTTP and NATS
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
+    
+    <label class="md-nav__link" for="nav-8">
+      Triggers
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-8">
+        Triggers
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
+      Argo Workflow Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/aws-lambda/" title="AWS Lambda" class="md-nav__link">
+      AWS Lambda
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/http-trigger/" title="HTTP Trigger" class="md-nav__link">
+      HTTP Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/nats-trigger/" title="NATS Trigger" class="md-nav__link">
+      NATS Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/kafka-trigger/" title="Kafka Trigger" class="md-nav__link">
+      Kafka Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
+      Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../developer_guide/" title="Developer Guide" class="md-nav__link">
+      Developer Guide
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../controllers/" title="Controllers" class="md-nav__link">
+      Controllers
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../FAQ/" title="FAQs" class="md-nav__link">
+      FAQs
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="https://github.com/argoproj/argo-events/releases" title="Releases ⧉" class="md-nav__link">
+      Releases ⧉
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="https://github.com/argoproj/argo-events/milestones" title="Roadmap ⧉" class="md-nav__link">
+      Roadmap ⧉
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="https://blog.argoproj.io/" title="Blog ⧉" class="md-nav__link">
+      Blog ⧉
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup" class="md-nav__link">
+    Setup
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#events-over-http-and-nats" class="md-nav__link">
+    Events over HTTP and NATS
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/tutorials/09-events-over-nats.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                <h1 id="events-over-nats">Events Over NATS<a class="headerlink" href="#events-over-nats" title="Permanent link">&para;</a></h1>
+<p>Up until now, you have seen the gateway dispatch events to sensor over HTTP. In this section, we will see how to dispatch events over <a href="https://docs.nats.io/">NATS</a>.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<ol>
+<li>NATS cluster must be up and running. If you are looking to set up a test cluster,<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">v1</span>
+<span class="n">kind</span><span class="o">:</span> <span class="n">Service</span>
+<span class="n">metadata</span><span class="o">:</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">nats</span>
+  <span class="kd">namespace</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+  <span class="n">labels</span><span class="o">:</span>
+    <span class="n">component</span><span class="o">:</span> <span class="n">nats</span>
+<span class="n">spec</span><span class="o">:</span>
+  <span class="n">selector</span><span class="o">:</span>
+    <span class="n">component</span><span class="o">:</span> <span class="n">nats</span>
+  <span class="n">type</span><span class="o">:</span> <span class="n">ClusterIP</span>
+  <span class="n">ports</span><span class="o">:</span>
+  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">client</span>
+    <span class="n">port</span><span class="o">:</span> <span class="mi">4222</span>
+  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">cluster</span>
+    <span class="n">port</span><span class="o">:</span> <span class="mi">6222</span>
+  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">monitor</span>
+    <span class="n">port</span><span class="o">:</span> <span class="mi">8222</span>
+<span class="o">---</span>
+<span class="n">apiVersion</span><span class="o">:</span> <span class="n">apps</span><span class="o">/</span><span class="n">v1beta1</span>
+<span class="n">kind</span><span class="o">:</span> <span class="n">StatefulSet</span>
+<span class="n">metadata</span><span class="o">:</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">nats</span>
+  <span class="kd">namespace</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+  <span class="n">labels</span><span class="o">:</span>
+    <span class="n">component</span><span class="o">:</span> <span class="n">nats</span>
+<span class="n">spec</span><span class="o">:</span>
+  <span class="n">serviceName</span><span class="o">:</span> <span class="n">nats</span>
+  <span class="n">replicas</span><span class="o">:</span> <span class="mi">1</span>
+  <span class="n">template</span><span class="o">:</span>
+    <span class="n">metadata</span><span class="o">:</span>
+      <span class="n">labels</span><span class="o">:</span>
+        <span class="n">component</span><span class="o">:</span> <span class="n">nats</span>
+    <span class="n">spec</span><span class="o">:</span>
+      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+      <span class="n">containers</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">nats</span>
+        <span class="n">image</span><span class="o">:</span> <span class="n">nats</span><span class="o">:</span><span class="n">latest</span>
+        <span class="n">ports</span><span class="o">:</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="o">:</span> <span class="mi">4222</span>
+          <span class="n">name</span><span class="o">:</span> <span class="n">client</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="o">:</span> <span class="mi">6222</span>
+          <span class="n">name</span><span class="o">:</span> <span class="n">cluster</span>
+        <span class="o">-</span> <span class="n">containerPort</span><span class="o">:</span> <span class="mi">8222</span>
+          <span class="n">name</span><span class="o">:</span> <span class="n">monitor</span>
+        <span class="n">livenessProbe</span><span class="o">:</span>
+          <span class="n">httpGet</span><span class="o">:</span>
+            <span class="n">path</span><span class="o">:</span> <span class="o">/</span>
+            <span class="n">port</span><span class="o">:</span> <span class="mi">8222</span>
+          <span class="n">initialDelaySeconds</span><span class="o">:</span> <span class="mi">10</span>
+          <span class="n">timeoutSeconds</span><span class="o">:</span> <span class="mi">5</span>
+</code></pre></div>
+
+
+</li>
+</ol>
+<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<ol>
+<li>
+<p>Create a webhook gateway as below,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+<span class="n">kind</span><span class="o">:</span> <span class="n">Gateway</span>
+<span class="n">metadata</span><span class="o">:</span>
+  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">subscribers</span>
+  <span class="n">labels</span><span class="o">:</span>
+    <span class="err">#</span> <span class="n">gateway</span> <span class="n">controller</span> <span class="k">with</span> <span class="n">instanceId</span> <span class="s2">&quot;argo-events&quot;</span> <span class="n">will</span> <span class="n">process</span> <span class="k">this</span> <span class="n">gateway</span>
+    <span class="n">gateways</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+<span class="n">spec</span><span class="o">:</span>
+  <span class="n">replica</span><span class="o">:</span> <span class="mi">1</span>
+  <span class="n">type</span><span class="o">:</span> <span class="n">webhook</span>
+  <span class="n">eventSourceRef</span><span class="o">:</span>
+    <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">source</span>
+  <span class="n">template</span><span class="o">:</span>
+    <span class="n">metadata</span><span class="o">:</span>
+      <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">labels</span><span class="o">:</span>
+        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+    <span class="n">spec</span><span class="o">:</span>
+      <span class="n">containers</span><span class="o">:</span>
+        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">gateway</span><span class="o">-</span><span class="n">client</span>
+          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">client</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
+          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
+          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/gateway-client&quot;</span><span class="o">]</span>
+        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
+          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
+          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
+          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/webhook-gateway&quot;</span><span class="o">]</span>
+      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+  <span class="n">service</span><span class="o">:</span>
+    <span class="n">metadata</span><span class="o">:</span>
+      <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">svc</span>
+    <span class="n">spec</span><span class="o">:</span>
+      <span class="n">selector</span><span class="o">:</span>
+        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+      <span class="n">ports</span><span class="o">:</span>
+        <span class="o">-</span> <span class="n">port</span><span class="o">:</span> <span class="mi">12000</span>
+          <span class="n">targetPort</span><span class="o">:</span> <span class="mi">12000</span>
+      <span class="n">type</span><span class="o">:</span> <span class="n">LoadBalancer</span>
+  <span class="n">subscribers</span><span class="o">:</span>
+    <span class="n">nats</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
+        <span class="n">serverURL</span><span class="o">:</span> <span class="n">nats</span><span class="o">://</span><span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
+        <span class="n">subject</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Take a closer look at subscribers. Instead of <code>http</code>, the we have declared <code>nats</code> as protocol for event transmission under <code>subscribers</code>.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">subscribers</span><span class="o">:</span>
+    <span class="n">nats</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
+        <span class="n">serverURL</span><span class="o">:</span> <span class="n">nats</span><span class="o">://</span><span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
+        <span class="n">subject</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="o">-</span><span class="n">subject</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Each subscriber has three keys,</p>
+<div class="codehilite"><pre><span></span><code><span class="mi">1</span>. <span class="nv">name</span>: <span class="nv">a</span> <span class="nv">unique</span> <span class="nv">name</span> <span class="k">for</span> <span class="nv">the</span> <span class="nv">subscriber</span>.
+<span class="mi">2</span>. <span class="nv">serverURL</span>: <span class="nv">NATS</span> <span class="nv">server</span> <span class="nv">URL</span>
+<span class="mi">3</span>. <span class="nv">subject</span>: <span class="nv">name</span> <span class="nv">of</span> <span class="nv">the</span> <span class="nv">NATS</span> <span class="nv">subject</span> <span class="nv">to</span> <span class="nv">publish</span> <span class="nv">events</span>.
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Now, create the sensor as follows,</p>
+<div class="codehilite"><pre><span></span><code><span class="nl">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="nl">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="nl">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="w"></span>
+<span class="w">  </span><span class="nl">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">sensors</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="nl">instanceid</span><span class="p">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nl">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">sensor</span><span class="w"></span>
+<span class="w">          </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">/</span><span class="nl">sensor</span><span class="p">:</span><span class="n">v0</span><span class="mf">.14.0</span><span class="w"></span>
+<span class="w">          </span><span class="nl">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="n">Always</span><span class="w"></span>
+<span class="w">      </span><span class="nl">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span><span class="w"></span>
+<span class="w">  </span><span class="nl">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="nl">gatewayName</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="w"></span>
+<span class="w">      </span><span class="nl">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="nl">subscription</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nl">serverURL</span><span class="p">:</span><span class="w"> </span><span class="nl">nats</span><span class="p">:</span><span class="o">//</span><span class="n">nats</span><span class="p">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="p">.</span><span class="nl">svc</span><span class="p">:</span><span class="mi">4222</span><span class="w"></span>
+<span class="w">      </span><span class="nl">subject</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="w">  </span><span class="nl">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">workflow</span><span class="o">-</span><span class="k">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="nl">k8s</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="k">group</span><span class="err">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"></span>
+<span class="w">          </span><span class="nl">version</span><span class="p">:</span><span class="w"> </span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="w">          </span><span class="nl">resource</span><span class="p">:</span><span class="w"> </span><span class="n">workflows</span><span class="w"></span>
+<span class="w">          </span><span class="k">operation</span><span class="err">:</span><span class="w"> </span><span class="k">create</span><span class="w"></span>
+<span class="w">          </span><span class="nl">source</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nl">resource</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nl">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="w">              </span><span class="nl">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Workflow</span><span class="w"></span>
+<span class="w">              </span><span class="nl">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">generateName</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="w"></span>
+<span class="w">              </span><span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">                </span><span class="nl">arguments</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+<span class="w">                      </span><span class="err">#</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="n">overridden</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                      </span><span class="k">value</span><span class="err">:</span><span class="w"> </span><span class="n">hello</span><span class="w"> </span><span class="n">world</span><span class="w"></span>
+<span class="w">                </span><span class="nl">templates</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">                    </span><span class="nl">inputs</span><span class="p">:</span><span class="w"></span>
+<span class="w">                      </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">                        </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+<span class="w">                    </span><span class="nl">container</span><span class="p">:</span><span class="w"></span>
+<span class="w">                      </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">docker</span><span class="o">/</span><span class="nl">whalesay</span><span class="p">:</span><span class="n">latest</span><span class="w"></span>
+<span class="w">                      </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">cowsay</span><span class="o">]</span><span class="w"></span>
+<span class="w">                      </span><span class="nl">args</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">&quot;{{inputs.parameters.message}}&quot;</span><span class="o">]</span><span class="w"></span>
+<span class="w">          </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nl">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">              </span><span class="nl">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="p">.</span><span class="n">arguments</span><span class="p">.</span><span class="k">parameters</span><span class="mf">.0</span><span class="p">.</span><span class="k">value</span><span class="w"></span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>The <code>subscription</code> under sensor spec defines NATS as protocol for event processing.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">subscription</span><span class="o">:</span>
+    <span class="n">nats</span><span class="o">:</span>
+      <span class="n">serverURL</span><span class="o">:</span> <span class="n">nats</span><span class="o">://</span><span class="n">nats</span><span class="o">.</span><span class="na">argo</span><span class="o">-</span><span class="n">events</span><span class="o">.</span><span class="na">svc</span><span class="o">:</span><span class="mi">4222</span>
+      <span class="n">subject</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Create event source for webhook as follows,</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">apply</span> <span class="o">-</span><span class="n">f</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">raw</span><span class="p">.</span><span class="n">githubusercontent</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">argoproj</span><span class="o">/</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">/</span><span class="n">master</span><span class="o">/</span><span class="n">examples</span><span class="o">/</span><span class="n">event</span><span class="o">-</span><span class="n">sources</span><span class="o">/</span><span class="n">webhook</span><span class="p">.</span><span class="n">yaml</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Expose the gateway pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="n">port</span><span class="o">-</span><span class="k">forward</span> <span class="o">&lt;</span><span class="n">gateway</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span> <span class="mi">12000</span><span class="p">:</span><span class="mi">12000</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
+<div class="codehilite"><pre><span></span><code><span class="n">curl</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;{&quot;message&quot;:&quot;this is my first webhook&quot;}&#39;</span> <span class="o">-</span><span class="n">H</span> <span class="ss">&quot;Content-Type: application/json&quot;</span> <span class="o">-</span><span class="n">X</span> <span class="n">POST</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">12000</span><span class="o">/</span><span class="n">example</span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>You should see an Argo workflow being created.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">kubectl</span> <span class="o">-</span><span class="n">n</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span> <span class="k">get</span> <span class="n">wf</span>
+</code></pre></div>
+
+
+</li>
+</ol>
+<h2 id="events-over-http-and-nats">Events over HTTP and NATS<a class="headerlink" href="#events-over-http-and-nats" title="Permanent link">&para;</a></h2>
+<p>You can easily set up a gateway to send events over both HTTP and NATS,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="n">apiVersion</span><span class="p">:</span> <span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">Gateway</span>
+    <span class="n">metadata</span><span class="p">:</span>
+      <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">subscribers</span>
+      <span class="n">labels</span><span class="p">:</span>
+        <span class="o">#</span> <span class="n">gateway</span> <span class="n">controller</span> <span class="k">with</span> <span class="n">instanceId</span> <span class="ss">&quot;argo-events&quot;</span> <span class="n">will</span> <span class="n">process</span> <span class="n">this</span> <span class="n">gateway</span>
+        <span class="n">gateways</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
+    <span class="n">spec</span><span class="p">:</span>
+      <span class="n">replica</span><span class="p">:</span> <span class="mi">1</span>
+      <span class="k">type</span><span class="p">:</span> <span class="n">webhook</span>
+      <span class="n">eventSourceRef</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="k">source</span>
+      <span class="k">template</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">:</span>
+          <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+          <span class="n">labels</span><span class="p">:</span>
+            <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+        <span class="n">spec</span><span class="p">:</span>
+          <span class="n">containers</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">gateway</span><span class="o">-</span><span class="n">client</span>
+              <span class="n">image</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">client</span><span class="p">:</span><span class="n">v0</span><span class="p">.</span><span class="mi">14</span><span class="p">.</span><span class="mi">0</span>
+              <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">Always</span>
+              <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="ss">&quot;/bin/gateway-client&quot;</span><span class="p">]</span>
+            <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
+              <span class="n">image</span><span class="p">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="p">:</span><span class="n">v0</span><span class="p">.</span><span class="mi">14</span><span class="p">.</span><span class="mi">0</span>
+              <span class="n">imagePullPolicy</span><span class="p">:</span> <span class="n">Always</span>
+              <span class="n">command</span><span class="p">:</span> <span class="p">[</span><span class="ss">&quot;/bin/webhook-gateway&quot;</span><span class="p">]</span>
+          <span class="n">serviceAccountName</span><span class="p">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+      <span class="n">service</span><span class="p">:</span>
+        <span class="n">metadata</span><span class="p">:</span>
+          <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">svc</span>
+        <span class="n">spec</span><span class="p">:</span>
+          <span class="n">selector</span><span class="p">:</span>
+            <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
+          <span class="n">ports</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">port</span><span class="p">:</span> <span class="mi">12000</span>
+              <span class="n">targetPort</span><span class="p">:</span> <span class="mi">12000</span>
+          <span class="k">type</span><span class="p">:</span> <span class="n">LoadBalancer</span>
+      <span class="n">subscribers</span><span class="p">:</span>
+        <span class="n">http</span><span class="p">:</span>
+          <span class="o">-</span> <span class="ss">&quot;http://webhook-time-filter-sensor.argo-events.svc:9300/&quot;</span>
+        <span class="n">nats</span><span class="p">:</span>
+          <span class="o">-</span> <span class="n">name</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
+            <span class="n">serverURL</span><span class="p">:</span> <span class="n">nats</span><span class="p">:</span><span class="o">//</span><span class="n">nats</span><span class="p">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="p">.</span><span class="n">svc</span><span class="p">:</span><span class="mi">4222</span>
+            <span class="n">subject</span><span class="p">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
+</code></pre></div>
+
+
+<ol>
+<li>
+<p>The <code>subscribers</code> list both <code>http</code> and <code>nats</code> subscribers.</p>
+</li>
+<li>
+<p>The sensor can also have both <code>http</code> and <code>nats</code> subscription as follows,</p>
+<div class="codehilite"><pre><span></span><code><span class="nl">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="nl">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Sensor</span><span class="w"></span>
+<span class="nl">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="o">-</span><span class="k">over</span><span class="o">-</span><span class="n">http</span><span class="o">-</span><span class="ow">and</span><span class="o">-</span><span class="n">nats</span><span class="w"></span>
+<span class="w">  </span><span class="nl">labels</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="n">sensors</span><span class="p">.</span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="nl">instanceid</span><span class="p">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nl">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nl">containers</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">sensor</span><span class="w"></span>
+<span class="w">          </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">argoproj</span><span class="o">/</span><span class="nl">sensor</span><span class="p">:</span><span class="n">v0</span><span class="mf">.14.0</span><span class="w"></span>
+<span class="w">          </span><span class="nl">imagePullPolicy</span><span class="p">:</span><span class="w"> </span><span class="n">Always</span><span class="w"></span>
+<span class="w">      </span><span class="nl">serviceAccountName</span><span class="p">:</span><span class="w"> </span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span><span class="w"></span>
+<span class="w">  </span><span class="nl">dependencies</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">      </span><span class="nl">gatewayName</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="w"></span>
+<span class="w">      </span><span class="nl">eventName</span><span class="p">:</span><span class="w"> </span><span class="n">example</span><span class="w"></span>
+<span class="w">  </span><span class="nl">subscription</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">http</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nl">port</span><span class="p">:</span><span class="w"> </span><span class="mi">9300</span><span class="w"></span>
+<span class="w">    </span><span class="nl">nats</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="nl">serverURL</span><span class="p">:</span><span class="w"> </span><span class="nl">nats</span><span class="p">:</span><span class="o">//</span><span class="n">nats</span><span class="p">.</span><span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="p">.</span><span class="nl">svc</span><span class="p">:</span><span class="mi">4222</span><span class="w"></span>
+<span class="w">      </span><span class="nl">subject</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">events</span><span class="w"></span>
+<span class="w">  </span><span class="nl">triggers</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="o">-</span><span class="w"> </span><span class="nl">template</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="n">workflow</span><span class="o">-</span><span class="k">trigger</span><span class="w"></span>
+<span class="w">        </span><span class="nl">k8s</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="k">group</span><span class="err">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="w"></span>
+<span class="w">          </span><span class="nl">version</span><span class="p">:</span><span class="w"> </span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="w">          </span><span class="nl">resource</span><span class="p">:</span><span class="w"> </span><span class="n">workflows</span><span class="w"></span>
+<span class="w">          </span><span class="k">operation</span><span class="err">:</span><span class="w"> </span><span class="k">create</span><span class="w"></span>
+<span class="w">          </span><span class="nl">source</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="nl">resource</span><span class="p">:</span><span class="w"></span>
+<span class="w">              </span><span class="nl">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="n">argoproj</span><span class="p">.</span><span class="n">io</span><span class="o">/</span><span class="n">v1alpha1</span><span class="w"></span>
+<span class="w">              </span><span class="nl">kind</span><span class="p">:</span><span class="w"> </span><span class="n">Workflow</span><span class="w"></span>
+<span class="w">              </span><span class="nl">metadata</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">generateName</span><span class="p">:</span><span class="w"> </span><span class="n">webhook</span><span class="o">-</span><span class="w"></span>
+<span class="w">              </span><span class="nl">spec</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">entrypoint</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">                </span><span class="nl">arguments</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">                    </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+<span class="w">                      </span><span class="err">#</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="k">get</span><span class="w"> </span><span class="n">overridden</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="n">payload</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">                      </span><span class="k">value</span><span class="err">:</span><span class="w"> </span><span class="n">hello</span><span class="w"> </span><span class="n">world</span><span class="w"></span>
+<span class="w">                </span><span class="nl">templates</span><span class="p">:</span><span class="w"></span>
+<span class="w">                  </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">whalesay</span><span class="w"></span>
+<span class="w">                    </span><span class="nl">inputs</span><span class="p">:</span><span class="w"></span>
+<span class="w">                      </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">                        </span><span class="o">-</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">message</span><span class="w"></span>
+<span class="w">                    </span><span class="nl">container</span><span class="p">:</span><span class="w"></span>
+<span class="w">                      </span><span class="nc">image</span><span class="err">:</span><span class="w"> </span><span class="n">docker</span><span class="o">/</span><span class="nl">whalesay</span><span class="p">:</span><span class="n">latest</span><span class="w"></span>
+<span class="w">                      </span><span class="nl">command</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">cowsay</span><span class="o">]</span><span class="w"></span>
+<span class="w">                      </span><span class="nl">args</span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">&quot;{{inputs.parameters.message}}&quot;</span><span class="o">]</span><span class="w"></span>
+<span class="w">          </span><span class="k">parameters</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="o">-</span><span class="w"> </span><span class="nl">src</span><span class="p">:</span><span class="w"></span>
+<span class="w">                </span><span class="nl">dependencyName</span><span class="p">:</span><span class="w"> </span><span class="n">test</span><span class="o">-</span><span class="n">dep</span><span class="w"></span>
+<span class="w">              </span><span class="nl">dest</span><span class="p">:</span><span class="w"> </span><span class="n">spec</span><span class="p">.</span><span class="n">arguments</span><span class="p">.</span><span class="k">parameters</span><span class="mf">.0</span><span class="p">.</span><span class="k">value</span><span class="w"></span>
+</code></pre></div>
+
+
+</li>
+<li>
+<p>Make sure that you don't define same subscriber in both <code>http</code> and <code>nats</code> under gateway subscribers. Otherwise, the gateway will
+   end up dispatching same event twice, once over HTTP and once over NATS.</p>
+</li>
+</ol>
+                
+                  
+                
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../08-policy/" title="Policy" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Policy
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../../triggers/argo-workflow/" title="Argo Workflow Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Argo Workflow Trigger
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs</a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application.c33a9706.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      
+    
+  </body>
+</html>

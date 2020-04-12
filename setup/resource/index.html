@@ -645,6 +645,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-options" class="md-nav__link">
+    List Options
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshoot" class="md-nav__link">
     Troubleshoot
   </a>
@@ -800,8 +807,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../../tutorials/11-special-argo-workflow-trigger/" title="Special Argo Workflow Trigger" class="md-nav__link">
-      Special Argo Workflow Trigger
+    <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-nav__link">
+      Events Over NATS
     </a>
   </li>
 
@@ -898,6 +905,30 @@
   <li class="md-nav__item">
     <a href="../../triggers/k8s-object-trigger/" title="Kubernetes Object Trigger" class="md-nav__link">
       Kubernetes Object Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/openwhisk-trigger/" title="OpenWhisk Trigger" class="md-nav__link">
+      OpenWhisk Trigger
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../triggers/slack-trigger/" title="Slack Trigger" class="md-nav__link">
+      Slack Trigger
     </a>
   </li>
 
@@ -1014,6 +1045,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#list-options" class="md-nav__link">
+    List Options
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#troubleshoot" class="md-nav__link">
     Troubleshoot
   </a>
@@ -1124,6 +1162,47 @@
 <p>Once the <code>my-workflow</code> is created, the sensor will trigger the workflow. Run <code>argo list</code> to list the triggered workflow.</p>
 </li>
 </ol>
+<h2 id="list-options">List Options<a class="headerlink" href="#list-options" title="Permanent link">&para;</a></h2>
+<p>The Resource Event-Source allows to configure the list options through <code>labels</code> and <code>field</code> selectors for setting up a watch on objects.</p>
+<p>In the example above, we had set up the list option as follows,</p>
+<div class="codehilite"><pre><span></span><code>    <span class="nv">filter</span>:
+    # <span class="nv">labels</span> <span class="nv">and</span> <span class="nv">filters</span> <span class="nv">are</span> <span class="nv">meant</span> <span class="nv">to</span> <span class="nv">provide</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">filter</span> <span class="nv">the</span> <span class="nv">object</span> <span class="nv">list</span> <span class="nv">that</span> <span class="nv">are</span> <span class="nv">being</span> <span class="nv">watched</span>.
+    # <span class="nv">Please</span> <span class="nv">read</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">api</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">details</span>.
+
+        # <span class="nv">labels</span> <span class="nv">provide</span> <span class="nv">listing</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">to</span> <span class="nv">watch</span> <span class="nv">objects</span>
+        <span class="nv">labels</span>:
+          <span class="o">-</span> <span class="nv">key</span>: <span class="nv">app</span>
+            # <span class="nv">Supported</span> <span class="nv">operations</span> <span class="nv">like</span> <span class="o">==</span>, <span class="o">!=</span>, <span class="nv">etc</span>.
+            # <span class="nv">Defaults</span> <span class="nv">to</span> <span class="o">==</span>.
+            # <span class="nv">Refer</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">label</span><span class="o">-</span><span class="nv">selectors</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">info</span>.
+            # <span class="nv">optional</span>.
+            <span class="nv">operation</span>: <span class="s2">&quot;</span><span class="s">==</span><span class="s2">&quot;</span>
+            <span class="nv">value</span>: <span class="nv">my</span><span class="o">-</span><span class="nv">workflow</span>
+</code></pre></div>
+
+
+<p>The <code>key-operation-value</code> items under the <code>filter -&gt; labels</code> are used by the gateway to filter the objects
+that are eligible for the watch. So, in the present case, the gateway will set up a watch for those
+objects who have label "app: my-workflow". You can add more <code>key-operation-value</code> items to the list as per your use-case.   </p>
+<p>Similarly, you can pass <code>field</code> selectors to the watch list options, e.g.,</p>
+<div class="codehilite"><pre><span></span><code>  <span class="nv">filter</span>:
+    # <span class="nv">labels</span> <span class="nv">and</span> <span class="nv">filters</span> <span class="nv">are</span> <span class="nv">meant</span> <span class="nv">to</span> <span class="nv">provide</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">filter</span> <span class="nv">the</span> <span class="nv">object</span> <span class="nv">list</span> <span class="nv">that</span> <span class="nv">are</span> <span class="nv">being</span> <span class="nv">watched</span>.
+    # <span class="nv">Please</span> <span class="nv">read</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">labels</span><span class="o">/</span>#<span class="nv">api</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">details</span>.
+
+    # <span class="nv">fields</span> <span class="nv">provide</span> <span class="nv">listing</span> <span class="nv">options</span> <span class="nv">to</span> <span class="nv">K8s</span> <span class="nv">API</span> <span class="nv">to</span> <span class="nv">watch</span> <span class="nv">objects</span>
+    <span class="nv">fields</span>:
+      <span class="o">-</span> <span class="nv">key</span>: <span class="nv">metadata</span>.<span class="nv">name</span>
+        # <span class="nv">Supported</span> <span class="nv">operations</span> <span class="nv">like</span> <span class="o">==</span>, <span class="o">!=</span>, <span class="o">&lt;=</span>, <span class="o">&gt;=</span> <span class="nv">etc</span>.
+        # <span class="nv">Defaults</span> <span class="nv">to</span> <span class="o">==</span>.
+        # <span class="nv">Refer</span> <span class="nv">https</span>:<span class="o">//</span><span class="nv">kubernetes</span>.<span class="nv">io</span><span class="o">/</span><span class="nv">docs</span><span class="o">/</span><span class="nv">concepts</span><span class="o">/</span><span class="nv">overview</span><span class="o">/</span><span class="nv">working</span><span class="o">-</span><span class="nv">with</span><span class="o">-</span><span class="nv">objects</span><span class="o">/</span><span class="nv">field</span><span class="o">-</span><span class="nv">selectors</span><span class="o">/</span> <span class="k">for</span> <span class="nv">more</span> <span class="nv">info</span>.
+        # <span class="nv">optional</span>.
+        <span class="nv">operation</span>: <span class="o">==</span>
+        <span class="nv">value</span>: <span class="nv">my</span><span class="o">-</span><span class="nv">workflow</span>
+</code></pre></div>
+
+
+<p><strong>Note:</strong> The <code>label</code> and <code>fields</code> under <code>filter</code> are used at the time of setting up the watch by the gateway. If you want to filter the objects
+based on the <code>annotations</code> or some other fields, use the <code>Data Filters</code> available in sensor.</p>
 <h2 id="troubleshoot">Troubleshoot<a class="headerlink" href="#troubleshoot" title="Permanent link">&para;</a></h2>
 <p>Please read the <a href="https://argoproj.github.io/argo-events/faq/">FAQ</a>.</p>
                 
