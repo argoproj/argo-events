@@ -222,10 +222,10 @@ Send a curl request to webhook-gateway as follows,
 
         curl -d '{"name":"foo bar", "message": "hello there!!"}' -H "Content-Type: application/json" -X POST http://localhost:12000/example
 
-and you will an Argo workflow being sprung with name like `webhook-foobar-xxxxx`.
+and you will see an Argo workflow being sprung with name like `webhook-foobar-xxxxx`.
 
 
-Check the output of workflow, it should print something like,
+Check the output of the workflow, it should print something like,
 
          ____________________________ 
         < Hello There!! from Example >
