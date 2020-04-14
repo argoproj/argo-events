@@ -17,6 +17,7 @@ package customtrigger
 
 import (
 	"context"
+	"github.com/ghodss/yaml"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -98,13 +99,19 @@ func NewCustomTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger
 
 // FetchResource fetches the trigger resource from external source
 func (ct *CustomTrigger) FetchResource() (interface{}, error) {
+	specBody, err := yaml.Marshal(ct.Trigger.Template.CustomTrigger.Spec)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to parse the custom trigger spec body")
+	}
+
 	resource, err := ct.triggerClient.FetchResource(context.Background(), &triggers.FetchResourceRequest{
-		Resource: []byte(ct.Trigger.Template.CustomTrigger.TriggerBody),
+		Resource: specBody,
 	})
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to fetch the custom trigger resource for %s", ct.Trigger.Template.Name)
 	}
-	return resource, nil
+
+	return resource.Resource, nil
 }
 
 // ApplyResourceParameters applies parameters to the trigger resource
@@ -116,11 +123,11 @@ func (ct *CustomTrigger) ApplyResourceParameters(sensor *v1alpha1.Sensor, resour
 	parameters := ct.Trigger.Template.CustomTrigger.Parameters
 
 	if parameters != nil && len(parameters) > 0 {
-		resource, err := triggers.ApplyParams(obj, ct.Trigger.Template.CustomTrigger.Parameters, triggers.ExtractEvents(sensor, parameters))
+		result, err := triggers.ApplyParams(obj, ct.Trigger.Template.CustomTrigger.Parameters, triggers.ExtractEvents(sensor, parameters))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to apply the parameters to the custom trigger resource for %s", ct.Trigger.Template.Name)
 		}
-		return resource, nil
+		return result, nil
 	}
 
 	return resource, nil
@@ -132,14 +139,19 @@ func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
 	if !ok {
 		return nil, errors.New("failed to interpret the trigger resource for the execution")
 	}
+
 	trigger := ct.Trigger.Template.CustomTrigger
-	if trigger.Payload == nil {
-		return nil, errors.New("payload parameters are not specified")
+
+	var payload []byte
+	var err error
+
+	if trigger.Payload != nil {
+		payload, err = triggers.ConstructPayload(ct.Sensor, trigger.Payload)
+		if err != nil {
+			return nil, err
+		}
 	}
-	payload, err := triggers.ConstructPayload(ct.Sensor, trigger.Payload)
-	if err != nil {
-		return nil, err
-	}
+
 	result, err := ct.triggerClient.Execute(context.Background(), &triggers.ExecuteRequest{
 		Resource: obj,
 		Payload:  payload,
@@ -147,7 +159,7 @@ func (ct *CustomTrigger) Execute(resource interface{}) (interface{}, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to execute the custom trigger resource for %s", ct.Trigger.Template.Name)
 	}
-	return result, nil
+	return result.Response, nil
 }
 
 // ApplyPolicy applies the policy on the trigger

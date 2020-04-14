@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook-sensor
+  labels:
+    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+spec:
+  template:
+    spec:
+      containers:
+        - name: sensor
+          image: metalgearsolid/sensor:v0.15.0
+          imagePullPolicy: Always
+      serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook-gateway
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: webhook-workflow-trigger
+        custom:
+          # the url of the trigger server.
+          serverURL: tekton-trigger.argo-events.svc:9000
+          # spec is map of string->string and it is sent over to trigger server.
+          # the spec can be anything you want as per your use-case, just make sure the trigger server understands the spec map.
+          spec:
+            url: "https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml"
+          # These parameters are applied on resource fetched and returned by the trigger server.
+          # e.g. consider a trigger server which invokes TektonCD pipeline runs, then
+          # the trigger server can return a TektonCD PipelineRun resource.
+          # The parameters are then applied on that PipelineRun resource.
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.namespace
+              dest: metadata.namespace
+      # These parameters ar applied on entire template body.
+      # So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.
+      parameters:
+        - src:
+            dependencyName: test-dep
+            dataKey: body.url
+          dest: custom.spec.url
