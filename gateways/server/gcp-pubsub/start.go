@@ -85,20 +85,31 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Create a new topic with the given name if none exists
 	logger.Infoln("setting up a client to connect to PubSub...")
-	client, err := pubsub.NewClient(ctx, pubsubEventSource.ProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
-	if err != nil {
-		return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
+
+	// Create a new topic with the given name if none exists
+	var client *pubsub.Client
+	var clientErr error
+	if pubsubEventSource.EnableWorkflowIdentity {
+		client, clientErr = pubsub.NewClient(ctx, pubsubEventSource.ProjectID)
+	} else {
+		client, clientErr = pubsub.NewClient(ctx, pubsubEventSource.ProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
+	}
+	if clientErr != nil {
+		return errors.Wrapf(clientErr, "failed to set up client for %s", eventSource.Name)
 	}
 
 	// use same client for topic and subscription by default
 	topicClient := client
 	if pubsubEventSource.TopicProjectID != "" && pubsubEventSource.TopicProjectID != pubsubEventSource.ProjectID {
-		topicClient, err = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
-		if err != nil {
-			return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
+		if pubsubEventSource.EnableWorkflowIdentity {
+			topicClient, clientErr = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID)
+		} else {
+			topicClient, clientErr = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
 		}
+	}
+	if clientErr != nil {
+		return errors.Wrapf(clientErr, "failed to set up client for %s", eventSource.Name)
 	}
 
 	logger.Infoln("getting topic information from PubSub...")
