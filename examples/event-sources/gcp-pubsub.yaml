@@ -3,17 +3,17 @@ kind: EventSource
 metadata:
   name: gcp-pubsub-event-source
 spec:
-  type: "pubsub"
+  type: pubsub
   pubSub:
     example:
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true
       # id of your project
-      projectID: "argo-events-XXXXX"
+      projectID: argo-events-XXXXX
       # (optional) id of project for topic, same as projectID by default
       # topicProjectID: "project-id"
       # topic name
-      topic: "test"
+      topic: test
       # Refers to path of the credential file that is mounted in the gateway pod.
-      credentialsFile: "/creds/key.json"
+      credentialsFile: /creds/key.json

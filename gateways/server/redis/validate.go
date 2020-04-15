@@ -70,5 +70,8 @@ func validate(eventSource *v1alpha1.RedisEventSource) error {
 	if eventSource.Password != nil && eventSource.Namespace == "" {
 		return errors.New("namespace must be defined in order to retrieve the password from the secret")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }

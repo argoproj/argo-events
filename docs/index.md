@@ -1,10 +1,10 @@
 # Argo Events - The Event-driven Workflow Automation Framework
 
 ## What is Argo Events?
+
 **Argo Events** is an event-driven workflow automation framework for Kubernetes 
 which helps you trigger K8s objects, Argo Workflows, Serverless workloads, etc. 
 on events from variety of sources like webhook, s3, schedules, messaging queues, gcp pubsub, sns, sqs, etc.
-https://argoproj.github.io/argo-events/
 
 <br/>
 <br/>
@@ -15,7 +15,8 @@ https://argoproj.github.io/argo-events/
 
 <br/>
 
-## Features 
+## Features
+
 * Supports events from 20+ event sources.
 * Ability to customize business-level constraint logic for workflow automation.
 * Manage everything from simple, linear, real-time to complex, multi-source events.
@@ -28,6 +29,7 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 [![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
 ## Documentation
+
 - [Concepts](https://argoproj.github.io/argo-events/concepts/high_level_architecture/).
 - [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/).
 - [Deploy gateways and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
@@ -41,38 +43,19 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 1. AWS Lambda
 1. NATS Messages
 1. Kafka Messages
-1. Slack Notifications (Coming Soon...)
+1. Slack Notifications
 1. Argo Rollouts
 1. Custom Trigger / Build Your Own Trigger
-1. Apache OpenWhisk (Coming Soon...)
+1. Apache OpenWhisk
 
 
 ## Event Sources
-1. AMQP
-2. AWS SNS
-3. AWS SQS
-4. Cron Schedules
-5. GCP PubSub
-6. GitHub
-7. GitLab
-8. HDFS
-9. File Based Events
-10. Kafka
-11. Minio
-12. NATS
-13. MQTT
-14. K8s Resources
-15. Slack
-16. NetApp StorageGrid
-17. Webhooks
-18. Stripe
-19. NSQ
-20. Emitter
-21. Redis
-22. Azure Events Hub
+
+Argo-Events supports 20+ event sources. The complete list of event sources is available [here](https://argoproj.github.io/argo-events/concepts/event_source/).
 
 ## Who uses Argo Events?
 Organizations below are **officially** using Argo Events. Please send a PR with your organization name if you are using Argo Events.
+
 1. [BioBox Analytics](https://biobox.io)
 1. [BlackRock](https://www.blackrock.com/)
 1. [Canva](https://www.canva.com/)
@@ -82,6 +65,7 @@ Organizations below are **officially** using Argo Events. Please send a PR with 
 1. [Viaduct](https://www.viaduct.ai/)
 
 ## Community Blogs and Presentations
+
 * [Automating Research Workflows at BlackRock](https://www.youtube.com/watch?v=ZK510prml8o)
 * [Designing A Complete CI/CD Pipeline CI/CD Pipeline Using Argo Events, Workflows, and CD](https://www.slideshare.net/JulianMazzitelli/designing-a-complete-ci-cd-pipeline-using-argo-events-workflow-and-cd-products-228452500)
 * TGI Kubernetes with Joe Beda: [CloudEvents and Argo Events](https://www.youtube.com/watch?v=LQbBgQnUs_k&list=PL7bmigfV0EqQzxcNpmcdTJ9eFRPBe-iZa&index=2&t=0s)

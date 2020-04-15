@@ -2,7 +2,9 @@ package store
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -23,7 +25,11 @@ func NewConfigMapReader(kubeClientset kubernetes.Interface, configmapArtifact *v
 }
 
 func (c *ConfigMapReader) Read() (body []byte, err error) {
-	cm, err := c.kubeClientset.CoreV1().ConfigMaps(c.configmapArtifact.Namespace).Get(c.configmapArtifact.Name, metav1.GetOptions{})
+	namespace := os.Getenv(common.EnvVarNamespace)
+	if c.configmapArtifact.Namespace != "" {
+		namespace = c.configmapArtifact.Namespace
+	}
+	cm, err := c.kubeClientset.CoreV1().ConfigMaps(namespace).Get(c.configmapArtifact.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

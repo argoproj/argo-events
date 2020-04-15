@@ -13,14 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package openfaas
+package slack
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -38,16 +37,16 @@ var sensorObj = &v1alpha1.Sensor{
 			{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
-					OpenFaas: &v1alpha1.OpenFaasTrigger{
-						GatewayURL: "http://openfaas-fake.com",
-						Password: &corev1.SecretKeySelector{
+					Slack: &v1alpha1.SlackTrigger{
+						SlackToken: &corev1.SecretKeySelector{
 							LocalObjectReference: corev1.LocalObjectReference{
 								Name: "secret",
 							},
-							Key: "password",
+							Key: "token",
 						},
-						Namespace:    "fake",
-						FunctionName: "fake-function",
+						Namespace: "fake",
+						Channel:   "fake-channel",
+						Message:   "fake-message",
 					},
 				},
 			},
@@ -55,8 +54,8 @@ var sensorObj = &v1alpha1.Sensor{
 	},
 }
 
-func getOpenFaasTrigger() *OpenFaasTrigger {
-	return &OpenFaasTrigger{
+func getSlackTrigger() *SlackTrigger {
+	return &SlackTrigger{
 		K8sClient:  fake.NewSimpleClientset(),
 		Sensor:     sensorObj.DeepCopy(),
 		Trigger:    sensorObj.Spec.Triggers[0].DeepCopy(),
@@ -65,19 +64,20 @@ func getOpenFaasTrigger() *OpenFaasTrigger {
 	}
 }
 
-func TestOpenFaasTrigger_FetchResource(t *testing.T) {
-	trigger := getOpenFaasTrigger()
+func TestSlackTrigger_FetchResource(t *testing.T) {
+	trigger := getSlackTrigger()
 	resource, err := trigger.FetchResource()
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.OpenFaasTrigger)
+	ot, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "fake-function", ot.FunctionName)
+	assert.Equal(t, "fake-channel", ot.Channel)
+	assert.Equal(t, "fake-message", ot.Message)
 }
 
-func TestOpenFaasTrigger_ApplyResourceParameters(t *testing.T) {
-	trigger := getOpenFaasTrigger()
+func TestSlackTrigger_ApplyResourceParameters(t *testing.T) {
+	trigger := getSlackTrigger()
 	id := trigger.Sensor.NodeID("fake-dependency")
 	trigger.Sensor.Status = v1alpha1.SensorStatus{
 		Nodes: map[string]v1alpha1.NodeStatus{
@@ -85,44 +85,44 @@ func TestOpenFaasTrigger_ApplyResourceParameters(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     "1.0",
 						Subject:         "example-1",
 					},
-					Data: []byte(`{"gateway-url": "http://another-fake.com", "function-name": "real-function"}`),
+					Data: []byte(`{"channel": "real-channel", "message": "real-message"}`),
 				},
 			},
 		},
 	}
 
-	trigger.Trigger.Template.OpenFaas.Parameters = []v1alpha1.TriggerParameter{
+	trigger.Trigger.Template.Slack.Parameters = []v1alpha1.TriggerParameter{
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "gateway-url",
+				DataKey:        "channel",
 			},
-			Dest: "gatewayURL",
+			Dest: "channel",
 		},
 		{
 			Src: &v1alpha1.TriggerParameterSource{
 				DependencyName: "fake-dependency",
-				DataKey:        "function-name",
+				DataKey:        "message",
 			},
-			Dest: "functionName",
+			Dest: "message",
 		},
 	}
 
-	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.OpenFaas)
+	resource, err := trigger.ApplyResourceParameters(trigger.Sensor, trigger.Trigger.Template.Slack)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
-	ot, ok := resource.(*v1alpha1.OpenFaasTrigger)
+	ot, ok := resource.(*v1alpha1.SlackTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "real-function", ot.FunctionName)
-	assert.Equal(t, "http://another-fake.com", ot.GatewayURL)
+	assert.Equal(t, "real-channel", ot.Channel)
+	assert.Equal(t, "real-message", ot.Message)
 }

@@ -210,6 +210,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the amqp client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -755,6 +778,29 @@ Backoff holds parameters applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the emitter client.
 
 </p>
 
@@ -2739,6 +2785,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the kafka client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2894,6 +2963,29 @@ will be JSON
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the mqtt client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3022,6 +3114,29 @@ ConnectionBackoff holds backoff applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nats client.
 
 </p>
 
@@ -3180,6 +3295,29 @@ Backoff holds parameters applied to connection.
 
 JSONBody specifies that all event body payload coming from this source
 will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nsq client.
 
 </p>
 
@@ -3553,6 +3691,29 @@ Channels to subscribe to listen events.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the redis client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3792,6 +3953,12 @@ Description
 
 <em>(Optional)</em>
 
+<p>
+
+Prefix filter is applied on the resource name.
+
+</p>
+
 </td>
 
 </tr>
@@ -3808,6 +3975,14 @@ Description
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+Labels provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a>
+for more info.
+
+</p>
 
 </td>
 
@@ -3826,6 +4001,14 @@ Description
 
 <em>(Optional)</em>
 
+<p>
+
+Fields provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>
+for more info.
+
+</p>
+
 </td>
 
 </tr>
@@ -3843,6 +4026,13 @@ Kubernetes meta/v1.Time </a> </em>
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+If resource is created before the specified time then the event is
+treated as valid.
+
+</p>
 
 </td>
 
@@ -4924,11 +5114,132 @@ all types of events will be processed. More info at
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.TLSConfig">
+
+TLSConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
+<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+TLSConfig refers to TLS configuration for a client.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <hr/>
 
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
+<<<<<<< gke-workload-identity
 commit <code>b1925a6</code>. </em>
+=======
+commit <code>81d8555</code>. </em>
+>>>>>>> master
 
 </p>

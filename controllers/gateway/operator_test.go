@@ -106,24 +106,10 @@ func TestPersistUpdates(t *testing.T) {
 	assert.NotNil(t, gateway)
 
 	ctx.gateway = gateway
-	ctx.gateway.Spec.Template.Name = "updated-name"
+	ctx.gateway.Status.Message = "updated-message"
 	gateway, err = PersistUpdates(controller.gatewayClient, ctx.gateway, controller.logger)
 	assert.Nil(t, err)
-	assert.Equal(t, gateway.Spec.Template.Name, "updated-name")
-}
-
-func TestReapplyUpdates(t *testing.T) {
-	controller := newController()
-	ctx := newGatewayContext(gatewayObj.DeepCopy(), controller)
-	gateway, err := controller.gatewayClient.ArgoprojV1alpha1().Gateways(gatewayObj.Namespace).Create(gatewayObj)
-	assert.Nil(t, err)
-	assert.NotNil(t, gateway)
-
-	ctx.gateway = gateway
-	ctx.gateway.Spec.Template.Name = "updated-name"
-	gateway, err = PersistUpdates(controller.gatewayClient, ctx.gateway, controller.logger)
-	assert.Nil(t, err)
-	assert.Equal(t, gateway.Spec.Template.Name, "updated-name")
+	assert.Equal(t, gateway.Status.Message, "updated-message")
 }
 
 func TestOperator_MarkPhase(t *testing.T) {

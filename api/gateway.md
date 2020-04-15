@@ -358,29 +358,6 @@ Port on which the gateway event source processor is running on.
 
 <td>
 
-<code>eventProtocol</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
-
-</td>
-
-<td>
-
-<p>
-
-EventProtocol is the underlying protocol used to send events from
-gateway to watchers(components interested in listening to event from
-this gateway)
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>replica</code></br> <em> int </em>
 
 </td>
@@ -678,29 +655,6 @@ to.
 <p>
 
 Port on which the gateway event source processor is running on.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>eventProtocol</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventProtocol </em>
-
-</td>
-
-<td>
-
-<p>
-
-EventProtocol is the underlying protocol used to send events from
-gateway to watchers(components interested in listening to event from
-this gateway)
 
 </p>
 
@@ -1323,6 +1277,6 @@ NATS refers to the subscribers over NATS protocol.
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>b1925a6</code>. </em>
+commit <code>81d8555</code>. </em>
 
 </p>

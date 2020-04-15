@@ -166,14 +166,14 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 		}
 
 		if basicAuth.Username != nil {
-			username, err = common.GetSecrets(t.K8sClient, basicAuth.Namespace, basicAuth.Username)
+			username, err = common.GetSecretValue(t.K8sClient, basicAuth.Namespace, basicAuth.Username)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to retrieve the username from secret %s and namespace %s", basicAuth.Username.Name, basicAuth.Namespace)
 			}
 		}
 
 		if basicAuth.Password != nil {
-			password, err = common.GetSecrets(t.K8sClient, basicAuth.Namespace, basicAuth.Password)
+			password, err = common.GetSecretValue(t.K8sClient, basicAuth.Namespace, basicAuth.Password)
 			if err != nil {
 				return nil, errors.Wrapf(err, "failed to retrieve the password from secret %s and namespace %s", basicAuth.Password.Name, basicAuth.Namespace)
 			}

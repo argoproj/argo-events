@@ -3,13 +3,13 @@ kind: EventSource
 metadata:
   name: mqtt-event-source
 spec:
-  type: "mqtt"
+  type: mqtt
   mqtt:
     example:
       # mqtt broker url
-      url: "tcp://mqtt.argo-events:1883"
+      url: tcp://mqtt.argo-events:1883
       # name of the popic
-      topic: "bar"
+      topic: bar
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
       jsonBody: true
@@ -26,3 +26,14 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      url: "tcp://mqtt.argo-events:1883"
+#      topic: "bar"
+#      jsonBody: true
+#      clientId: 2345
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
+

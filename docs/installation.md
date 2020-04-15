@@ -1,6 +1,7 @@
 # Installation
 
 ### Requirements
+
 * Kubernetes cluster >v1.9
 * Installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) command-line tool >v1.9.0
 
@@ -8,9 +9,7 @@
 
 #### One Command Installation
 
-1. Deploy Argo Events SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
-
-        kubectl create ns argo-events
+1. Deploy Argo Events Namespace, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
 
         kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
 
@@ -28,10 +27,10 @@
               
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
   
-3. Create the cluster roles
+3. Create the role and rolebinding
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
-        
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-role.yaml
+
 4. Install the sensor custom resource definition
 
         kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
@@ -74,13 +73,14 @@ Make sure you have helm client installed and Tiller server is running. To instal
         helm repo add argo https://argoproj.github.io/argo-helm
 
 1. The helm chart for argo-events is maintained solely by the community and hence the image version for controllers can go out of sync.
-   Update the image version in values.yaml to v0.13.0.
+   Update the image version in values.yaml to v0.14.0.
 
 1. Install `argo-events` chart
 
         helm install argo-events argo/argo-events
 
 ## Deploy at cluster level
+
 To deploy Argo-Events controllers at cluster level where the controllers will be 
 able to process gateway and sensor objects created in any namespace,
 

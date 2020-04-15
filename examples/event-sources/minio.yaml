@@ -3,7 +3,7 @@ kind: EventSource
 metadata:
   name: minio-event-source
 spec:
-  type: "minio"
+  type: minio
   minio:
     example:
       # bucket information

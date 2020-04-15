@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/Shopify/sarama"
+	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
@@ -54,14 +55,16 @@ type SensorContext struct {
 	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients map[string]*grpc.ClientConn
-	// http client to invoke openfaas functions.
-	openfaasHttpClient *http.Client
+	// http client to send slack messages.
+	slackHttpClient *http.Client
 	// kafkaProducers holds references to the active kafka producers
 	kafkaProducers map[string]sarama.AsyncProducer
 	// natsConnections holds the references to the active nats connections.
 	natsConnections map[string]*natslib.Conn
 	// awsLambdaClients holds the references to active AWS Lambda clients.
 	awsLambdaClients map[string]*lambda.Lambda
+	// openwhiskClients holds the references to active OpenWhisk clients.
+	openwhiskClients map[string]*whisk.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -76,11 +79,12 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		ControllerInstanceID: controllerInstanceID,
 		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
-		openfaasHttpClient: &http.Client{
+		slackHttpClient: &http.Client{
 			Timeout: time.Minute * 5,
 		},
 		kafkaProducers:   make(map[string]sarama.AsyncProducer),
 		natsConnections:  make(map[string]*natslib.Conn),
 		awsLambdaClients: make(map[string]*lambda.Lambda),
+		openwhiskClients: make(map[string]*whisk.Client),
 	}
 }

@@ -17,15 +17,13 @@ limitations under the License.
 package types
 
 import (
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	openfaas "github.com/openfaas-incubator/connector-sdk/types"
 )
 
 // Notification to update event dependency's state or the sensor resource
 type Notification struct {
-	// Event is the internal representation of cloud event received from the gateway
-	Event *apicommon.Event
+	// Event is the cloudevent received from the gateway
+	Event *v1alpha1.Event
 	// EventDependency refers to the dependency against the event received from the gateway
 	EventDependency *v1alpha1.EventDependency
 	// Sensor refers to the sensor object
@@ -34,10 +32,4 @@ type Notification struct {
 	Sensor *v1alpha1.Sensor
 	// NotificationType for event notification and state update notification
 	NotificationType v1alpha1.NotificationType
-}
-
-// OpenFaasContext holds the context for the openfaas controller context
-type OpenFaasContext struct {
-	Controller openfaas.Controller
-	ResponseCh chan openfaas.InvokerResponse
 }

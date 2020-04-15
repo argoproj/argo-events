@@ -18,7 +18,8 @@ spec:
       jsonBody: true
 
       # Namespace to use to retrieve the channel key and optional username/password
-      # Optional
+      # Optional.
+      # Defaults to gateway namespace
 #      namespace: argo-events
 
 #      # Username to use to connect to broker
@@ -43,3 +44,14 @@ spec:
         # setting factor > 1 makes the backoff exponential.
         factor: 2
         jitter: 0.2
+
+
+#    example-tls:
+#      broker: tcp://broker.argo-events.svc:4000
+#      channelName: hello
+#      channelKey: channel_key
+#      jsonBody: true
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway

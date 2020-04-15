@@ -17,6 +17,7 @@ There are two components for a gateway,
 Gateway client manages the event source for the gateway.
 
 Its responsibilities are,
+
 1. Monitor and manage the event sources.
 2. Monitor and manage the subscribers.
 3. Convert the events received from the gateway server into CloudEvents.
@@ -26,6 +27,7 @@ Its responsibilities are,
 Gateway server listens to events from event sources.
 
 Its responsibilities are,
+
 1. Validate an event source.
 2. Implement the logic for consuming events from an event source.
 3. Dispatch events to gateway client.

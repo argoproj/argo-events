@@ -54,7 +54,7 @@ func GetCredentials(kubeClient kubernetes.Interface, namespace string, art *v1al
 	return nil, nil
 }
 
-// GetSecrets retrieves the secret value from the secret in namespace with name and key
+// GetSecretValue retrieves the secret value from the secret in namespace with name and key
 func GetSecrets(client kubernetes.Interface, namespace string, name, key string) (string, error) {
 	secretsIf := client.CoreV1().Secrets(namespace)
 	var secret *v1.Secret

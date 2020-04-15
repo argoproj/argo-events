@@ -152,12 +152,18 @@ type ResourceEventSource struct {
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 type ResourceFilter struct {
+	// Prefix filter is applied on the resource name.
 	// +optional
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
+	// Labels provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
 	// +optional
 	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	// Fields provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
 	// +optional
 	Fields []Selector `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
+	// If resource is created before the specified time then the event is treated as valid.
 	// +optional
 	CreatedBy metav1.Time `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
 }
@@ -193,6 +199,9 @@ type AMQPEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,6,opt,name=jsonBody"`
+	// TLS configuration for the amqp client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -205,6 +214,9 @@ type KafkaEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,3,name=topic"`
 	// Backoff holds parameters applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// TLS configuration for the kafka client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -221,6 +233,9 @@ type MQTTEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
+	// TLS configuration for the mqtt client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // NATSEventSource refers to event-source for NATS related events
@@ -235,6 +250,9 @@ type NATSEventsSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,4,opt,name=jsonBody"`
+	// TLS configuration for the nats client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events
@@ -510,6 +528,9 @@ type EmitterEventSource struct {
 	// source will be JSON
 	// +optional
 	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
+	// TLS configuration for the emitter client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,9,opt,name=tls"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -529,6 +550,9 @@ type RedisEventSource struct {
 	// Channels to subscribe to listen events.
 	// +listType=string
 	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`
+	// TLS configuration for the redis client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -546,13 +570,26 @@ type NSQEventSource struct {
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
-	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,9,opt,name=jsonBody"`
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
+	// TLS configuration for the nsq client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 type GenericEventSource struct {
 	// Value of the event source
 	Value string `json:"value" protobuf:"bytes,1,name=value"`
+}
+
+// TLSConfig refers to TLS configuration for a client.
+type TLSConfig struct {
+	// CACertPath refers the file path that contains the CA cert.
+	CACertPath string `json:"caCertPath" protobuf:"bytes,1,name=caCertPath"`
+	// ClientCertPath refers the file path that contains client cert.
+	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,name=clientCertPath"`
+	// ClientKeyPath refers the file path that contains client key.
+	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

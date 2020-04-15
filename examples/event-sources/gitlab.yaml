@@ -4,7 +4,7 @@ kind: EventSource
 metadata:
   name: gitlab-event-source
 spec:
-  type: "gitlab"
+  type: gitlab
   gitlab:
     example:
       # id of the project
@@ -12,18 +12,18 @@ spec:
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
-        endpoint: "/push"
+        endpoint: /push
         # port to run internal HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-        url: "http://url-that-is-reachable-from-GitLab"
+        url: http://url-that-is-reachable-from-GitLab
       # event to listen to
       # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
-      event: "PushEvents"
+      event: PushEvents
 
 #      # Namespace where the api token secret live.
 #      # +Optional. Default to gateway's namespace.
@@ -39,7 +39,7 @@ spec:
       enableSSLVerification: false
       # Gitlab Base url.
       # Change it to your private GitLab instance url if you have one.
-      gitlabBaseURL: "https://gitlab.com"
+      gitlabBaseURL: https://gitlab.com
 
 #    example-secure:
 #      projectId: "2"

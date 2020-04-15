@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
@@ -52,13 +51,12 @@ func TestConstructPayload(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						DataContentType: common.MediaTypeJSON,
 						Subject:         "example-1",
 					},
 					Data: []byte("{\"firstName\": \"fake\"}"),
@@ -68,13 +66,12 @@ func TestConstructPayload(t *testing.T) {
 				Name: "another-fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "2",
 						Type:            "calendar",
 						Source:          "calendar-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						DataContentType: common.MediaTypeJSON,
 						Subject:         "example-1",
 					},
 					Data: []byte("{\"lastName\": \"foo\"}"),
@@ -137,13 +134,12 @@ func TestExtractEvents(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
-						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						DataContentType: common.MediaTypeJSON,
 						Subject:         "example-1",
 					},
 					Data: []byte("{\"name\": \"fake\"}"),
@@ -175,22 +171,21 @@ func TestExtractEvents(t *testing.T) {
 }
 
 func TestResolveParamValue(t *testing.T) {
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
-			DataContentType: "application/json",
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
+			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
-			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
 	eventBody, err := json.Marshal(event)
 	assert.Nil(t, err)
 
-	events := map[string]apicommon.Event{
+	events := map[string]*v1alpha1.Event{
 		"fake-dependency": event,
 	}
 
@@ -306,21 +301,20 @@ func TestResolveParamValue(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result, err := ResolveParamValue(test.source, events)
 			assert.Nil(t, err)
-			assert.Equal(t, test.result, string(result))
+			assert.Equal(t, test.result, result)
 		})
 	}
 }
 
 func TestRenderDataAsJSON(t *testing.T) {
-	event := &apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
-			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
@@ -340,26 +334,26 @@ func TestRenderDataAsJSON(t *testing.T) {
 	assert.Nil(t, err)
 	event.Data = yamlBody
 	event.Context.DataContentType = common.MediaTypeYAML
+	assert.Nil(t, err)
 	body, err = renderEventDataAsJSON(event)
 	assert.Nil(t, err)
 	assert.Equal(t, string(body), "{\"age\":20,\"name\":\"test\"}")
 }
 
 func TestApplyParams(t *testing.T) {
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
-			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
 
-	events := map[string]apicommon.Event{
+	events := map[string]*v1alpha1.Event{
 		"fake-dependency": event,
 	}
 
@@ -444,15 +438,14 @@ func TestApplyResourceParameters(t *testing.T) {
 	obj := sensorObj.DeepCopy()
 	deployment := newUnstructured("apps/v1", "Deployment", "fake-deployment", "fake")
 
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
-			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
@@ -463,7 +456,7 @@ func TestApplyResourceParameters(t *testing.T) {
 	id := obj.NodeID("fake-dependency")
 	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
 		id: {
-			Event: &event,
+			Event: event,
 			ID:    id,
 			Name:  "fake-dependency",
 			Type:  v1alpha1.NodeTypeEventDependency,
@@ -487,22 +480,21 @@ func TestApplyResourceParameters(t *testing.T) {
 
 func TestApplyTemplateParameters(t *testing.T) {
 	obj := sensorObj.DeepCopy()
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
-			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"group\": \"fake\" }"),
 	}
 	id := obj.NodeID("fake-dependency")
 	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
 		id: {
-			Event: &event,
+			Event: event,
 			ID:    id,
 			Name:  "fake-dependency",
 			Type:  v1alpha1.NodeTypeEventDependency,

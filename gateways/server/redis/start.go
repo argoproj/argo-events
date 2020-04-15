@@ -79,12 +79,22 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return err
 	}
 
-	logger.Infoln("setting up a redis client...")
-	client := redis.NewClient(&redis.Options{
+	opt := &redis.Options{
 		Addr:     redisEventSource.HostAddress,
 		Password: password,
 		DB:       redisEventSource.DB,
-	})
+	}
+
+	if redisEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(redisEventSource.TLS.CACertPath, redisEventSource.TLS.ClientCertPath, redisEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		opt.TLSConfig = tlsConfig
+	}
+
+	logger.Infoln("setting up a redis client...")
+	client := redis.NewClient(opt)
 
 	if status := client.Ping(); status.Err() != nil {
 		return errors.Wrapf(status.Err(), "failed to connect to host %s and db %d for event source %s", redisEventSource.HostAddress, redisEventSource.DB, eventSource.Name)
@@ -129,7 +139,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 // getPassword returns the password for authentication
 func (listener *EventListener) getPassword(redisEventSource *v1alpha1.RedisEventSource) (string, error) {
 	if redisEventSource.Password != nil {
-		password, err := common.GetSecrets(listener.K8sClient, redisEventSource.Namespace, redisEventSource.Password)
+		password, err := common.GetSecretValue(listener.K8sClient, redisEventSource.Namespace, redisEventSource.Password)
 		if err != nil {
 			return "", errors.Wrapf(err, "failed to retrieve the password from secret %s within namespace %s", redisEventSource.Password.Name, redisEventSource.Namespace)
 		}

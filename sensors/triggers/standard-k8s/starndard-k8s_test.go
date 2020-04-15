@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -90,15 +89,15 @@ func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	fakeSensor := sensorObj.DeepCopy()
 
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
 			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
@@ -112,7 +111,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 				Name:        dep,
 				DisplayName: dep,
 				Type:        v1alpha1.NodeTypeEventDependency,
-				Event:       &event,
+				Event:       event,
 			},
 		},
 	}

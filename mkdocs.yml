@@ -55,7 +55,7 @@ nav:
       - 'tutorials/06-circuit-and-switch.md'
       - 'tutorials/07-filters.md'
       - 'tutorials/08-policy.md'
-      - 'tutorials/11-special-argo-workflow-trigger.md'
+      - 'tutorials/09-events-over-nats.md'
   - Triggers:
       - 'triggers/argo-workflow.md'
       - 'triggers/aws-lambda.md'
@@ -63,6 +63,8 @@ nav:
       - 'triggers/nats-trigger.md'
       - 'triggers/kafka-trigger.md'
       - 'triggers/k8s-object-trigger.md'
+      - 'triggers/openwhisk-trigger.md'
+      - 'triggers/slack-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'

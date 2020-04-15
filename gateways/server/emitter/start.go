@@ -75,10 +75,17 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	var options []func(client *emitter.Client)
+	if emitterEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS.CACertPath, emitterEventSource.TLS.ClientCertPath, emitterEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		options = append(options, emitter.WithTLSConfig(tlsConfig))
+	}
 	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
 
 	if emitterEventSource.Username != nil {
-		username, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
+		username, err := common.GetSecretValue(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
 		if err != nil {
 			return errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
 		}
@@ -86,7 +93,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	if emitterEventSource.Password != nil {
-		password, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Password)
+		password, err := common.GetSecretValue(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Password)
 		if err != nil {
 			return errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
 		}
