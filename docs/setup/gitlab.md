@@ -54,7 +54,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
           name: gitlab-access
         type: Opaque
         data:
-          access: <base64-encoded-api-token-from-previous-step>
+          token: <base64-encoded-api-token-from-previous-step>
 
 4. Deploy the secret into K8s cluster
 
