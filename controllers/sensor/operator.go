@@ -130,7 +130,7 @@ func (ctx *sensorContext) createSensorResources() error {
 		return err
 	}
 
-	ctx.logger.WithField("name", service.Name).Infoln("generating deployment specification for the sensor")
+	ctx.logger.WithField("name", service.Name).Infoln("creating the service resource for the sensor")
 	service, err = ctx.createService(service)
 	if err != nil {
 		return err
