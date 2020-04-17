@@ -561,7 +561,7 @@ const (
 
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
-	// Src contains a source reference to the value of the parameter from a event event
+	// Src contains a source reference to the value of the parameter from a dependency
 	Src *TriggerParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
