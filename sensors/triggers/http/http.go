@@ -150,7 +150,7 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 		}
 	}
 
-	request, err := http.NewRequest(http.MethodGet, trigger.URL, bytes.NewReader(payload))
+	request, err := http.NewRequest(trigger.Method, trigger.URL, bytes.NewReader(payload))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to construct request for %s", trigger.URL)
 	}
