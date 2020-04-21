@@ -60,6 +60,8 @@ const (
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve controller configuration from.
 	// Content encoding is expected to be YAML.
 	ControllerConfigMapKey = "config"
+	// GatewayTemplatesConfigMapKey is the key in the configmap to retrieve Gateway templates configuration.
+	GatewayTemplatesConfigMapKey = "gateway-templates"
 )
 
 // Sensor constants
@@ -102,6 +104,8 @@ const (
 	LabelOwnerName = "owner-name"
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
+	//LabelGatewayName is the label for gateway name
+	LabelGatewayName = "gateway-name"
 )
 
 // various supported media types

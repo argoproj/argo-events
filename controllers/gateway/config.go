@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
@@ -110,5 +111,15 @@ func (c *Controller) updateConfig(cm *apiv1.ConfigMap) error {
 		return err
 	}
 	c.Config = config
+	templatesConfigStr, ok := cm.Data[common.GatewayTemplatesConfigMapKey]
+	if !ok {
+		return nil
+	}
+	var templatesConfig map[apicommon.EventSourceType]Template
+	err = yaml.Unmarshal([]byte(templatesConfigStr), &templatesConfig)
+	if err != nil {
+		return err
+	}
+	c.TemplatesConfig = templatesConfig
 	return nil
 }

@@ -17,6 +17,8 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
@@ -29,23 +31,51 @@ import (
 
 // buildServiceResource builds a new service that exposes gateway.
 func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
-	if ctx.gateway.Spec.Service == nil {
+	var svc *corev1.Service
+	if template, ok := ctx.controller.TemplatesConfig[ctx.gateway.Spec.Type]; ok {
+		if template.Service != nil {
+			svc = template.Service.DeepCopy()
+		}
+	}
+	if ctx.gateway.Spec.Service != nil {
+		svc = common.CopyServiceSpec(svc, ctx.gateway.Spec.Service)
+	}
+	if svc == nil {
 		return nil, nil
 	}
-	service := ctx.gateway.Spec.Service.DeepCopy()
-	if err := controllerscommon.SetObjectMeta(ctx.gateway, service, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if len(svc.Name) == 0 {
+		svc.Name = fmt.Sprintf("%s-gateway-svc", ctx.gateway.ObjectMeta.Name)
+	}
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
-	return service, nil
+	if svc.Spec.Selector == nil {
+		svc.Spec.Selector = make(map[string]string)
+	}
+	svc.Spec.Selector[common.LabelGatewayName] = ctx.gateway.Name
+	return svc, nil
 }
 
 // buildDeploymentResource builds a deployment resource for the gateway
 func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
-	if ctx.gateway.Spec.Template == nil {
+	var podTemplate *corev1.PodTemplateSpec
+	if template, ok := ctx.controller.TemplatesConfig[ctx.gateway.Spec.Type]; ok {
+		if template.Deployment != nil {
+			podTemplate = template.Deployment.DeepCopy()
+		}
+	}
+	if ctx.gateway.Spec.Template != nil {
+		podTemplate = common.CopyDeploymentSpecTemplate(podTemplate, ctx.gateway.Spec.Template)
+	}
+	if podTemplate == nil {
 		return nil, errors.New("gateway template can't be empty")
 	}
-
-	podTemplate := ctx.gateway.Spec.Template.DeepCopy()
+	// use an unique name to avoid potential conflict with existing deployments, also indicates it is an auto-generated deployment
+	podTemplate.ObjectMeta.GenerateName = fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.ObjectMeta.Name)
+	if podTemplate.Labels == nil {
+		podTemplate.Labels = make(map[string]string)
+	}
+	podTemplate.Labels[common.LabelGatewayName] = ctx.gateway.Name
 
 	replica := int32(ctx.gateway.Spec.Replica)
 	if replica == 0 {

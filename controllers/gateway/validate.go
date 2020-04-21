@@ -23,9 +23,6 @@ import (
 
 // Validate validates the gateway resource.
 func Validate(gatewayObj *v1alpha1.Gateway) error {
-	if gatewayObj.Spec.Template == nil {
-		return errors.New("gateway  pod template is not specified")
-	}
 	if gatewayObj.Spec.Type == "" {
 		return errors.New("gateway type is not specified")
 	}

@@ -23,9 +23,11 @@ import (
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -47,6 +49,12 @@ type ControllerConfig struct {
 	Namespace string
 }
 
+// Template contains the Deployment and Service template for a Gateway type
+type Template struct {
+	Deployment *corev1.PodTemplateSpec
+	Service    *corev1.Service
+}
+
 // Controller listens for new gateways and hands off handling of each gateway controller on the queue to the operator
 type Controller struct {
 	// ConfigMap is the name of the config map in which to derive configuration of the controller
@@ -55,6 +63,8 @@ type Controller struct {
 	Namespace string
 	// Config is the controller's configuration
 	Config ControllerConfig
+	// TemplatesConfig is the deployment/service template for different type of Gateways
+	TemplatesConfig map[apicommon.EventSourceType]Template
 	// logger to logger stuff
 	logger *logrus.Logger
 	// K8s rest config
