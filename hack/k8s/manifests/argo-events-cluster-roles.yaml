@@ -109,6 +109,8 @@ rules:
       - gateways/finalizers
       - sensors
       - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
     verbs:
       - create
       - delete
@@ -133,6 +135,8 @@ rules:
       - gateways/finalizers
       - sensors
       - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
     verbs:
       - create
       - delete
@@ -157,6 +161,8 @@ rules:
       - gateways/finalizers
       - sensors
       - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
     verbs:
       - get
       - list
