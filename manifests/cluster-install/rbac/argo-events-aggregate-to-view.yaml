@@ -1,0 +1,20 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: argo-events-aggregate-to-view
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - gateways
+      - gateways/finalizers
+      - sensors
+      - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
+    verbs:
+      - get
+      - list
+      - watch
