@@ -110,5 +110,15 @@ func (controller *Controller) updateConfig(cm *corev1.ConfigMap) error {
 		return err
 	}
 	controller.Config = config
+	templateSpecStr, ok := cm.Data[common.SensorTemplateConfigKey]
+	if !ok {
+		return nil
+	}
+	var templateSpec *corev1.PodTemplateSpec
+	err = yaml.Unmarshal([]byte(templateSpecStr), &templateSpec)
+	if err != nil {
+		return err
+	}
+	controller.TemplateSpec = templateSpec
 	return nil
 }

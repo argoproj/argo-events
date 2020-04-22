@@ -17,6 +17,8 @@ limitations under the License.
 package sensor
 
 import (
+	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -37,6 +39,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 
 	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("%s-sensor-svc", ctx.sensor.Name),
 			Labels:      ctx.sensor.Spec.ServiceLabels,
 			Annotations: ctx.sensor.Spec.ServiceAnnotations,
 		},
@@ -77,7 +80,20 @@ func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
 // deploymentBuilder builds the deployment specification for the sensor
 func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
 	replicas := int32(1)
-	podTemplateSpec := ctx.sensor.Spec.Template.DeepCopy()
+	var podTemplateSpec *corev1.PodTemplateSpec
+	if ctx.controller.TemplateSpec != nil {
+		podTemplateSpec = ctx.controller.TemplateSpec.DeepCopy()
+	}
+	if ctx.sensor.Spec.Template != nil {
+		podTemplateSpec = common.CopyDeploymentSpecTemplate(podTemplateSpec, ctx.sensor.Spec.Template)
+	}
+	if podTemplateSpec == nil {
+		return nil, errors.New("sensor template can't be empty")
+	}
+
+	// use an unique name to avoid potential conflict with existing deployments
+	podTemplateSpec.ObjectMeta.GenerateName = fmt.Sprintf("%s-sensor-", ctx.sensor.Name)
+
 	if podTemplateSpec.Labels == nil {
 		podTemplateSpec.Labels = map[string]string{}
 	}

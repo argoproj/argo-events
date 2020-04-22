@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -57,6 +58,8 @@ type Controller struct {
 	Namespace string
 	// Config is the controller'sensor configuration
 	Config ControllerConfig
+	// TemplateSpec is the default Sensor pod template spec
+	TemplateSpec *corev1.PodTemplateSpec
 	// logger to logger stuff
 	logger *logrus.Logger
 	// kubeConfig is the rest K8s config
