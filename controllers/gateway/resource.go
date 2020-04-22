@@ -181,6 +181,9 @@ func (ctx *gatewayContext) createGatewayService() (*corev1.Service, error) {
 	if err != nil {
 		return nil, err
 	}
+	if svc == nil {
+		return nil, nil
+	}
 	return ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Create(svc)
 }
 
