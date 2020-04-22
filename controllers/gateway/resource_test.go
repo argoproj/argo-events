@@ -17,6 +17,7 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
@@ -24,7 +25,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
-	apierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -61,9 +61,6 @@ var gatewayObj = &v1alpha1.Gateway{
 			},
 		},
 		Service: &corev1.Service{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "webhook-gateway-svc",
-			},
 			Spec: corev1.ServiceSpec{
 				Type: corev1.ServiceTypeLoadBalancer,
 				Selector: map[string]string{
@@ -84,66 +81,111 @@ var gatewayObj = &v1alpha1.Gateway{
 	},
 }
 
+var gatewayObjNoTemplate = &v1alpha1.Gateway{
+	ObjectMeta: metav1.ObjectMeta{
+		Name:      "fake-gateway",
+		Namespace: common.DefaultControllerNamespace,
+	},
+	Spec: v1alpha1.GatewaySpec{
+		EventSourceRef: &v1alpha1.EventSourceRef{
+			Name: "fake-event-source",
+		},
+		Replica:       1,
+		Type:          apicommon.WebhookEvent,
+		ProcessorPort: "8080",
+		Subscribers: &v1alpha1.Subscribers{
+			HTTP: []string{"http://fake-sensor.fake.svc.cluser.local:8080/"},
+		},
+	},
+}
+
 func TestResource_BuildServiceResource(t *testing.T) {
-	controller := newController()
-	opCtx := newGatewayContext(gatewayObj, controller)
-	svc := opCtx.gateway.Spec.Service.DeepCopy()
-	opCtx.gateway.Spec.Service = nil
+	gwObjs := []*v1alpha1.Gateway{gatewayObj, gatewayObjNoTemplate}
+	for _, gwObj := range gwObjs {
+		controller := newController()
+		opCtx := newGatewayContext(gwObj, controller)
 
-	// If no service is defined
-	service, err := opCtx.buildServiceResource()
-	assert.Nil(t, err)
-	assert.Nil(t, service)
-	opCtx.gateway.Spec.Service = svc
+		service, err := opCtx.buildServiceResource()
+		assert.Nil(t, err)
+		assert.NotNil(t, service)
+		assert.Equal(t, service.Name, gatewayObj.Name+"-gateway-svc")
+		assert.Equal(t, service.Namespace, opCtx.gateway.Namespace)
 
-	// If service is defined
-	service, err = opCtx.buildServiceResource()
-	assert.Nil(t, err)
-	assert.NotNil(t, service)
-
-	opCtx.gateway.Spec.Service.Name = ""
-	opCtx.gateway.Spec.Service.Namespace = ""
-
-	service, err = opCtx.buildServiceResource()
-	assert.Nil(t, err)
-	assert.NotNil(t, service)
-	assert.Equal(t, service.Name, opCtx.gateway.Name)
-	assert.Equal(t, service.Namespace, opCtx.gateway.Namespace)
-
-	newSvc, err := controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
-	assert.Nil(t, err)
-	assert.NotNil(t, newSvc)
-	assert.Equal(t, newSvc.Name, opCtx.gateway.Name)
-	assert.Equal(t, len(newSvc.Spec.Ports), 1)
-	assert.Equal(t, newSvc.Spec.Type, corev1.ServiceTypeLoadBalancer)
+		newSvc, err := controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
+		assert.Nil(t, err)
+		assert.NotNil(t, newSvc)
+		assert.Equal(t, newSvc.Name, service.Name)
+		assert.Equal(t, len(newSvc.Spec.Ports), 1)
+		assert.Equal(t, newSvc.Spec.Type, corev1.ServiceTypeLoadBalancer)
+	}
 }
 
 func TestResource_BuildDeploymentResource(t *testing.T) {
-	controller := newController()
-	ctx := newGatewayContext(gatewayObj, controller)
-	deployment, err := ctx.buildDeploymentResource()
-	assert.Nil(t, err)
-	assert.NotNil(t, deployment)
+	gwObjs := []*v1alpha1.Gateway{gatewayObj, gatewayObjNoTemplate}
+	for _, gwObj := range gwObjs {
+		controller := newController()
+		ctx := newGatewayContext(gwObj, controller)
+		deployment, err := ctx.buildDeploymentResource()
+		assert.Nil(t, err)
+		assert.NotNil(t, deployment)
 
-	for _, container := range deployment.Spec.Template.Spec.Containers {
-		assert.NotNil(t, container.Env)
-		assert.Equal(t, container.Env[0].Name, common.EnvVarNamespace)
-		assert.Equal(t, container.Env[0].Value, ctx.gateway.Namespace)
-		assert.Equal(t, container.Env[1].Name, common.EnvVarEventSource)
-		assert.Equal(t, container.Env[1].Value, ctx.gateway.Spec.EventSourceRef.Name)
-		assert.Equal(t, container.Env[2].Name, common.EnvVarResourceName)
-		assert.Equal(t, container.Env[2].Value, ctx.gateway.Name)
-		assert.Equal(t, container.Env[3].Name, common.EnvVarControllerInstanceID)
-		assert.Equal(t, container.Env[3].Value, ctx.controller.Config.InstanceID)
-		assert.Equal(t, container.Env[4].Name, common.EnvVarGatewayServerPort)
-		assert.Equal(t, container.Env[4].Value, ctx.gateway.Spec.ProcessorPort)
+		for _, container := range deployment.Spec.Template.Spec.Containers {
+			assert.NotNil(t, container.Env)
+			assert.Equal(t, container.Env[0].Name, common.EnvVarNamespace)
+			assert.Equal(t, container.Env[0].Value, ctx.gateway.Namespace)
+			assert.Equal(t, container.Env[1].Name, common.EnvVarEventSource)
+			assert.Equal(t, container.Env[1].Value, ctx.gateway.Spec.EventSourceRef.Name)
+			assert.Equal(t, container.Env[2].Name, common.EnvVarResourceName)
+			assert.Equal(t, container.Env[2].Value, ctx.gateway.Name)
+			assert.Equal(t, container.Env[3].Name, common.EnvVarControllerInstanceID)
+			assert.Equal(t, container.Env[3].Value, ctx.controller.Config.InstanceID)
+			assert.Equal(t, container.Env[4].Name, common.EnvVarGatewayServerPort)
+			assert.Equal(t, container.Env[4].Value, ctx.gateway.Spec.ProcessorPort)
+		}
+
+		newDeployment, err := controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+		assert.Nil(t, err)
+		assert.NotNil(t, newDeployment)
+		assert.Equal(t, newDeployment.Labels[common.LabelOwnerName], ctx.gateway.Name)
+		assert.NotNil(t, newDeployment.Annotations[common.AnnotationResourceSpecHash])
 	}
+}
 
-	newDeployment, err := controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
-	assert.Nil(t, err)
-	assert.NotNil(t, newDeployment)
-	assert.Equal(t, newDeployment.Labels[common.LabelOwnerName], ctx.gateway.Name)
-	assert.NotNil(t, newDeployment.Annotations[common.AnnotationResourceSpecHash])
+func runBuildDeploymentResourceTest(t *testing.T, gatewayObj *v1alpha1.Gateway) {
+
+}
+
+func TestResource_CreateGatewayResourceNoTemplate(t *testing.T) {
+	tests := []struct {
+		name       string
+		updateFunc func(ctx *gatewayContext)
+		testFunc   func(controller *Controller, ctx *gatewayContext, t *testing.T)
+	}{
+		{
+			name:       "gateway without deployment and service",
+			updateFunc: func(ctx *gatewayContext) {},
+			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
+				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
+				serviceMetadata := ctx.gateway.Status.Resources.Service
+				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, deployment)
+				service, err := controller.k8sClient.CoreV1().Services(serviceMetadata.Namespace).Get(serviceMetadata.Name, metav1.GetOptions{})
+				assert.Nil(t, err)
+				assert.NotNil(t, service)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			controller := newController()
+			ctx := newGatewayContext(gatewayObjNoTemplate.DeepCopy(), controller)
+			test.updateFunc(ctx)
+			err := ctx.createGatewayResources()
+			assert.Nil(t, err)
+			test.testFunc(controller, ctx, t)
+		})
+	}
 }
 
 func TestResource_CreateGatewayResource(t *testing.T) {
@@ -189,26 +231,7 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, deployment)
-				assert.Nil(t, ctx.gateway.Status.Resources.Service)
-			},
-		},
-		{
-			name: "gateway with resources in different namespaces",
-			updateFunc: func(ctx *gatewayContext) {
-				ctx.gateway.Spec.Template.Namespace = "new-namespace"
-				ctx.gateway.Spec.Service.Namespace = "new-namespace"
-			},
-			testFunc: func(controller *Controller, ctx *gatewayContext, t *testing.T) {
-				deploymentMetadata := ctx.gateway.Status.Resources.Deployment
-				serviceMetadata := ctx.gateway.Status.Resources.Service
-				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
-				assert.Nil(t, err)
-				assert.NotNil(t, deployment)
-				service, err := controller.k8sClient.CoreV1().Services(serviceMetadata.Namespace).Get(serviceMetadata.Name, metav1.GetOptions{})
-				assert.Nil(t, err)
-				assert.NotNil(t, service)
-				assert.NotEqual(t, ctx.gateway.Namespace, deployment.Namespace)
-				assert.NotEqual(t, ctx.gateway.Namespace, service.Namespace)
+				assert.NotNil(t, ctx.gateway.Status.Resources.Service)
 			},
 		},
 		{
@@ -223,11 +246,12 @@ func TestResource_CreateGatewayResource(t *testing.T) {
 				deployment, err := controller.k8sClient.AppsV1().Deployments(deploymentMetadata.Namespace).Get(deploymentMetadata.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, deployment)
+				// TODO: implmente reactors to test this according to https://github.com/kubernetes/client-go/issues/439
+				// assert.Contains(t, deployment.Name, fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name))
 				service, err := controller.k8sClient.CoreV1().Services(serviceMetadata.Namespace).Get(serviceMetadata.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, service)
-				assert.Equal(t, ctx.gateway.Name, deployment.Name)
-				assert.Equal(t, ctx.gateway.Name, service.Name)
+				assert.Equal(t, service.Name, ctx.gateway.Name+"-gateway-svc")
 			},
 		},
 	}
@@ -274,7 +298,7 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 			},
 		},
 		{
-			name: "delete service resource if gateway service spec is removed",
+			name: "service not deleted if gateway service spec is removed",
 			updateFunc: func() {
 				ctx.gateway.Spec.Service = nil
 			},
@@ -283,12 +307,11 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 				deployment, err := controller.k8sClient.AppsV1().Deployments(currentMetadata.Deployment.Namespace).Get(currentMetadata.Deployment.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, deployment)
-				assert.Equal(t, deployment.Annotations[common.AnnotationResourceSpecHash], oldMetadata.Deployment.Annotations[common.AnnotationResourceSpecHash])
-				assert.Nil(t, ctx.gateway.Status.Resources.Service)
+				assert.NotNil(t, ctx.gateway.Status.Resources.Service)
 				service, err := controller.k8sClient.CoreV1().Services(oldMetadata.Service.Namespace).Get(oldMetadata.Service.Name, metav1.GetOptions{})
-				assert.NotNil(t, err)
-				assert.Equal(t, apierror.IsNotFound(err), true)
-				assert.Nil(t, service)
+				assert.Nil(t, err)
+				assert.NotNil(t, service)
+				assert.Equal(t, service.Name, fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name))
 			},
 		},
 	}
@@ -302,4 +325,5 @@ func TestResource_UpdateGatewayResource(t *testing.T) {
 			test.testFunc(t, metadata)
 		})
 	}
+
 }

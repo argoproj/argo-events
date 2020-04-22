@@ -21,10 +21,13 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
 )
@@ -36,6 +39,38 @@ func newController() *Controller {
 		Config: ControllerConfig{
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
+		},
+		TemplatesConfig: map[apicommon.EventSourceType]Template{
+			apicommon.WebhookEvent: Template{
+				Deployment: &corev1.PodTemplateSpec{
+					Spec: corev1.PodSpec{
+						Containers: []corev1.Container{
+							{
+								Name:            "gateway-client",
+								Image:           "argoproj/gateway-client",
+								ImagePullPolicy: corev1.PullAlways,
+							},
+							{
+								Name:            "gateway-server",
+								ImagePullPolicy: corev1.PullAlways,
+								Image:           "argoproj/webhook-gateway",
+							},
+						},
+					},
+				},
+				Service: &corev1.Service{
+					Spec: corev1.ServiceSpec{
+						Type: corev1.ServiceTypeLoadBalancer,
+						Ports: []corev1.ServicePort{
+							{
+								Name:       "server-port",
+								Port:       12000,
+								TargetPort: intstr.FromInt(12000),
+							},
+						},
+					},
+				},
+			},
 		},
 		k8sClient:     fake.NewSimpleClientset(),
 		gatewayClient: fakegateway.NewSimpleClientset(),
