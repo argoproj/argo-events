@@ -87,40 +87,33 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.Infoln("setting up a client to connect to PubSub...")
 
-	// Create a new topic with the given name if none exists
-	var client *pubsub.Client
-	var clientErr error
-	if pubsubEventSource.EnableWorkflowIdentity {
-		client, clientErr = pubsub.NewClient(ctx, pubsubEventSource.ProjectID)
-	} else {
-		client, clientErr = pubsub.NewClient(ctx, pubsubEventSource.ProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
-	}
-	if clientErr != nil {
-		return errors.Wrapf(clientErr, "failed to set up client for %s", eventSource.Name)
+	var opt []option.ClientOption
+	projectId := pubsubEventSource.ProjectID
+
+	if !pubsubEventSource.EnableWorkflowIdentity {
+		opt = append(opt, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
 	}
 
-	// use same client for topic and subscription by default
-	topicClient := client
+	// Use default ProjectID unless TopicProjectID exists
 	if pubsubEventSource.TopicProjectID != "" && pubsubEventSource.TopicProjectID != pubsubEventSource.ProjectID {
-		if pubsubEventSource.EnableWorkflowIdentity {
-			topicClient, clientErr = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID)
-		} else {
-			topicClient, clientErr = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
-		}
+		projectId = pubsubEventSource.TopicProjectID
 	}
-	if clientErr != nil {
-		return errors.Wrapf(clientErr, "failed to set up client for %s", eventSource.Name)
+
+	// Create a new topic with the given name if none exists
+	client, err := pubsub.NewClient(ctx, projectId, opt...)
+	if err != nil {
+		return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
 	}
 
 	logger.Infoln("getting topic information from PubSub...")
-	topic := topicClient.Topic(pubsubEventSource.Topic)
+	topic := client.Topic(pubsubEventSource.Topic)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get status of the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 	}
 	if !exists {
 		logger.Infoln("topic doesn't exist, creating the PubSub topic...")
-		if _, err := topicClient.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
+		if _, err := client.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
 			return errors.Wrapf(err, "failed to create the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 		}
 	}
