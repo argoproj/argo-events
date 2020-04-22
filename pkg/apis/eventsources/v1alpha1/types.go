@@ -123,6 +123,8 @@ type FileEventSource struct {
 	EventType string `json:"eventType" protobuf:"bytes,1,name=eventType"`
 	// WatchPathConfig contains configuration about the file path to watch
 	WatchPathConfig fsevent.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,name=watchPathConfig"`
+	// Use polling instead of inotify
+	Polling bool `json:"polling,omitempty" protobuf:"bytes,3,opt,name=polling"`
 }
 
 // ResourceEventType is the type of event for the K8s resource mutation
