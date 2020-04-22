@@ -38,6 +38,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger":          schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter":             schema_pkg_apis_sensor_v1alpha1_DataFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup":        schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event":                  schema_pkg_apis_sensor_v1alpha1_Event(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext":           schema_pkg_apis_sensor_v1alpha1_EventContext(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency":        schema_pkg_apis_sensor_v1alpha1_EventDependency(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependencyFilter":  schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact":           schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref),
@@ -51,12 +53,13 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSSubscription":       schema_pkg_apis_sensor_v1alpha1_NATSSubscription(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":            schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":             schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger":        schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":       schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources":        schema_pkg_apis_sensor_v1alpha1_SensorResources(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorSpec":             schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":           schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription":           schema_pkg_apis_sensor_v1alpha1_Subscription(ref),
@@ -554,6 +557,97 @@ func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallbac
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_Event(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Event represents the cloudevent received from a gateway.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"context": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
+						},
+					},
+					"data": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "byte",
+						},
+					},
+				},
+				Required: []string{"context", "data"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "EventContext holds the context of the cloudevent received from a gateway.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"id": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ID of the event; must be non-empty and unique within the scope of the producer.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Source - A URI describing the event producer.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"specversion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SpecVersion - The version of the CloudEvents specification used by the event.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Type - The type of the occurrence which has happened.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"dataContentType": {
+						SchemaProps: spec.SchemaProps{
+							Description: "DataContentType - A MIME (RFC2046) string describing the media type of `data`.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"subject": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subject - The subject of the event in the context of the event producer",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"time": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Time - A Timestamp when the event happened.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+				},
+				Required: []string{"id", "source", "specversion", "type", "dataContentType", "subject", "time"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -620,7 +714,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 					"context": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Context filter constraints",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventContext"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext"),
 						},
 					},
 					"data": {
@@ -646,7 +740,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DataFilter", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventContext", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter"},
 	}
 }
 
@@ -1163,7 +1257,7 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 					},
 					"tls": {
 						SchemaProps: spec.SchemaProps{
-							Description: "TLS configuration for the Kafka producer.",
+							Description: "TLS configuration for the NATS producer.",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig"),
 						},
 					},
@@ -1240,7 +1334,7 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 					"event": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Event stores the last seen event for this node",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.Event"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event"),
 						},
 					},
 					"updatedAt": {
@@ -1260,20 +1354,47 @@ func schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref common.ReferenceCallback) co
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Event", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Event", "k8s.io/apimachinery/pkg/apis/meta/v1.MicroTime"},
 	}
 }
 
-func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "OpenFaasTrigger refers to the trigger type of OpenFass",
+				Description: "OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"gatewayURL": {
+					"host": {
 						SchemaProps: spec.SchemaProps{
-							Description: "GatewayURL refers to the OpenFaas Gateway URL.",
+							Description: "Host URL of the OpenWhisk.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Version for the API. Defaults to v1.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace for the action. Defaults to \"_\".",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"authToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "AuthToken for authentication.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"actionName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the action/function.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1303,7 +1424,7 @@ func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallbac
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -1314,34 +1435,8 @@ func schema_pkg_apis_sensor_v1alpha1_OpenFaasTrigger(ref common.ReferenceCallbac
 							},
 						},
 					},
-					"username": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Username refers to the Kubernetes secret that holds the username required to log into the gateway.",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"password": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Password refers to the Kubernetes secret that holds the password required to log into the gateway.",
-							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace to read the password secret from. This is required if the password secret selector is specified.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"functionName": {
-						SchemaProps: spec.SchemaProps{
-							Description: "FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 				},
-				Required: []string{"gatewayURL", "functionName"},
+				Required: []string{"host", "actionName", "payload"},
 			},
 		},
 		Dependencies: []string{
@@ -1682,6 +1777,67 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 	}
 }
 
+func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SlackTrigger refers to the specification of the slack notification trigger.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"parameters": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "triggerParameters",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
+									},
+								},
+							},
+						},
+					},
+					"slackToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace to read the password secret from. This is required if the password secret selector is specified.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"channel": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Channel refers to which Slack channel to send slack message.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Message refers to the message to send to the Slack channel.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"slackToken"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
 func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1906,7 +2062,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref common.ReferenceCallba
 				Properties: map[string]spec.Schema{
 					"src": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Src contains a source reference to the value of the parameter from a event event",
+							Description: "Src contains a source reference to the value of the parameter from a dependency",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameterSource"),
 						},
 					},
@@ -2105,12 +2261,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger"),
 						},
 					},
-					"openFaas": {
-						SchemaProps: spec.SchemaProps{
-							Description: "OpenFaas refers to the trigger designed to invoke openfaas functions with with on-the-fly constructable payload.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger"),
-						},
-					},
 					"awsLambda": {
 						SchemaProps: spec.SchemaProps{
 							Description: "AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.",
@@ -2135,12 +2285,24 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger"),
 						},
 					},
+					"slack": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Slack refers to the trigger designed to send slack notification message.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger"),
+						},
+					},
+					"openWhisk": {
+						SchemaProps: spec.SchemaProps{
+							Description: "OpenWhisk refers to the trigger designed to invoke OpenWhisk action.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger"),
+						},
+					},
 				},
 				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenFaasTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
 	}
 }
 

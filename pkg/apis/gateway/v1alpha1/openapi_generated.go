@@ -244,12 +244,6 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 							Format:      "",
 						},
 					},
-					"eventProtocol": {
-						SchemaProps: spec.SchemaProps{
-							Description: "EventProtocol is the underlying protocol used to send events from gateway to watchers(components interested in listening to event from this gateway)",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.EventProtocol"),
-						},
-					},
 					"replica": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Replica is the gateway deployment replicas",
@@ -258,11 +252,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"template", "type", "processorPort", "eventProtocol"},
+				Required: []string{"template", "type", "processorPort"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.EventProtocol", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
 	}
 }
 
