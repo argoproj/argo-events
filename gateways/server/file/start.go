@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -164,7 +165,7 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 	}
 
 	// create new fs watcher
-	logger.Infoln("setting up a new file watcher...")
+	logger.Infoln("setting up a new file polling watcher...")
 	watcher := watcher.New()
 	defer watcher.Close()
 
@@ -184,52 +185,59 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 		}
 	}
 
-	logger.Info("listening to file notifications...")
-	for {
-		select {
-		case event, ok := <-watcher.Event:
-			if !ok {
-				logger.Info("fs watcher has stopped")
-				// watcher stopped watching file events
-				return errors.Errorf("fs watcher stopped for %s", eventSource.Name)
-			}
-			// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
-			matched := false
-			relPath := strings.TrimPrefix(event.Name(), fileEventSource.WatchPathConfig.Directory)
-			if fileEventSource.WatchPathConfig.Path != "" && fileEventSource.WatchPathConfig.Path == relPath {
-				matched = true
-			} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
-				matched = true
-			}
-			if matched && fileEventSource.EventType == event.Op.String() {
-				logger.WithFields(
-					map[string]interface{}{
-						"event-type":      event.Op.String(),
-						"descriptor-name": event.Name,
-					},
-				).Infoln("file event")
-
-				// Assume fsnotify event has the same Op spec of our file event
-				fileEvent := fsevent.Event{Name: event.Name(), Op: fsevent.NewOp(event.Op.String())}
-				payload, err := json.Marshal(fileEvent)
-				if err != nil {
-					logger.WithError(err).Errorln("failed to marshal the event to the fs event")
-					continue
+	go func() error {
+		logger.Info("listening to file notifications...")
+		for {
+			select {
+			case event, ok := <-watcher.Event:
+				if !ok {
+					logger.Info("fs watcher has stopped")
+					// watcher stopped watching file events
+					return errors.Errorf("fs watcher stopped for %s", eventSource.Name)
 				}
-				logger.WithFields(
-					map[string]interface{}{
-						"event-type":      event.Op.String(),
-						"descriptor-name": event.Name,
-					},
-				).Infoln("dispatching file event on data channel...")
-				channels.Data <- payload
+				// fwc.Path == event.Name is required because we don't want to send event when .swp files are created
+				matched := false
+				relPath := strings.TrimPrefix(event.Name(), fileEventSource.WatchPathConfig.Directory)
+				if fileEventSource.WatchPathConfig.Path != "" && fileEventSource.WatchPathConfig.Path == relPath {
+					matched = true
+				} else if pathRegexp != nil && pathRegexp.MatchString(relPath) {
+					matched = true
+				}
+				if matched && fileEventSource.EventType == event.Op.String() {
+					logger.WithFields(
+						map[string]interface{}{
+							"event-type":      event.Op.String(),
+							"descriptor-name": event.Name,
+						},
+					).Infoln("file event")
+
+					// Assume fsnotify event has the same Op spec of our file event
+					fileEvent := fsevent.Event{Name: event.Name(), Op: fsevent.NewOp(event.Op.String())}
+					payload, err := json.Marshal(fileEvent)
+					if err != nil {
+						logger.WithError(err).Errorln("failed to marshal the event to the fs event")
+						continue
+					}
+					logger.WithFields(
+						map[string]interface{}{
+							"event-type":      event.Op.String(),
+							"descriptor-name": event.Name,
+						},
+					).Infoln("dispatching file event on data channel...")
+					channels.Data <- payload
+				}
+			case err := <-watcher.Error:
+				return errors.Wrapf(err, "failed to process %s", eventSource.Name)
+			case <-channels.Done:
+				logger.Infoln("event source has been stopped")
+				return nil
 			}
-		case err := <-watcher.Error:
-			return errors.Wrapf(err, "failed to process %s", eventSource.Name)
-		case <-channels.Done:
-			logger.Infoln("event source has been stopped")
-			return nil
 		}
+	}() 
+	logger.Info("Starting watcher...")
+	if err = watcher.Start(time.Millisecond * 100); err != nil {
+		return errors.Wrapf(err, "Failed to start watcher for %s", eventSource.Name)
 	}
+	return nil
 }
 
