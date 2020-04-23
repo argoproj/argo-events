@@ -20,7 +20,7 @@ Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster.
 ### Requirements
 - Golang 1.12
 - Docker
-- dep
+- [dep](https://golang.github.io/dep/docs/installation.html)
 
 ### Installation & Setup
 
@@ -32,6 +32,7 @@ cd $GOPATH/src/github.com/argoproj/argo-events
 
 #### 2. Vendor dependencies
 ```
+GO111MODULE=on go get github.com/cloudevents/sdk-go
 dep ensure -vendor-only
 ```
 
