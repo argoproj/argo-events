@@ -85,6 +85,10 @@ required = [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/radovskyb/watcher"
+  branch = "master"
+
+[[constraint]]
   name = "github.com/Knetic/govaluate"
   branch = "master"
 
