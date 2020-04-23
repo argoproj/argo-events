@@ -66,5 +66,8 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource.Topic == "" {
 		return fmt.Errorf("must specify topic")
 	}
+	if !eventSource.EnableWorkflowIdentity && eventSource.CredentialsFile == "" {
+		return fmt.Errorf("must specify credentials file path if not using Workflow Identity")
+	}
 	return nil
 }
