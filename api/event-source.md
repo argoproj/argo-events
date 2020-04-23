@@ -3462,6 +3462,31 @@ for GCP
 
 <td>
 
+<code>enableWorkflowIdentity</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+EnableWorkflowIdentity determines if your project authenticates to GCP
+with WorkflowIdentity or CredentialsFile. If true, authentication is
+done with WorkflowIdentity. If false or omited, authentication is done
+with CredentialsFile.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>deleteSubscriptionOnFinish</code></br> <em> bool </em>
 
 </td>
