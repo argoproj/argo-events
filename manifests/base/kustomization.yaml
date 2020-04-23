@@ -8,3 +8,9 @@ bases:
 
 resources:
   - argo-events-sa.yaml
+
+images:
+- name: argoproj/gateway-controller
+  newTag: v0.14.0
+- name: argoproj/sensor-controller
+  newTag: v0.14.0
