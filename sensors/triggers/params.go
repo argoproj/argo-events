@@ -35,7 +35,7 @@ import (
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
-	payload := make(map[string]string)
+	var payload []byte
 
 	events := ExtractEvents(sensor, parameters)
 	if events == nil {
@@ -47,10 +47,14 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 		if err != nil {
 			return nil, err
 		}
-		payload[parameter.Dest] = value
+		tmp, err := sjson.SetBytes(payload, parameter.Dest, value)
+		if err != nil {
+			return nil, err
+		}
+		payload = tmp
 	}
 
-	return json.Marshal(payload)
+	return payload, nil
 }
 
 // ApplyTemplateParameters applies parameters to trigger template
