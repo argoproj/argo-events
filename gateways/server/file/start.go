@@ -207,7 +207,7 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 					logger.WithFields(
 						map[string]interface{}{
 							"event-type":      event.Op.String(),
-							"descriptor-name": event.Name,
+							"descriptor-name": event.Name(),
 						},
 					).Infoln("file event")
 
@@ -221,7 +221,7 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 					logger.WithFields(
 						map[string]interface{}{
 							"event-type":      event.Op.String(),
-							"descriptor-name": event.Name,
+							"descriptor-name": event.Name(),
 						},
 					).Infoln("dispatching file event on data channel...")
 					channels.Data <- payload
