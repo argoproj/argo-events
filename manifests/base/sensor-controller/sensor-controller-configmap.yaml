@@ -1,0 +1,13 @@
+# When installed as cluster-wide, the controller watches all namespaces by default.
+# To watch sensors created in a specific namespace only, add following key:
+# data:
+#  config: |
+#    instanceID: argo-events
+#    namespace: <your_namespace>
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sensor-controller-configmap
+data:
+  config: |
+    instanceID: argo-events
