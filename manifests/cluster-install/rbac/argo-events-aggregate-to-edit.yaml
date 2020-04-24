@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  name: argo-events-aggregate-to-edit
+rules:
+  - apiGroups:
+      - argoproj.io
+    resources:
+      - gateways
+      - gateways/finalizers
+      - sensors
+      - sensors/finalizers
+      - eventsources
+      - eventsources/finalizers
+    verbs:
+      - create
+      - delete
+      - deletecollection
+      - get
+      - list
+      - patch
+      - update
+      - watch
