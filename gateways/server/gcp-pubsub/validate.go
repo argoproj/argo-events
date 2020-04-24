@@ -19,6 +19,7 @@ package pubsub
 import (
 	"context"
 	"fmt"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -65,8 +66,8 @@ func validate(eventSource *v1alpha1.PubSubEventSource) error {
 	if eventSource.Topic == "" {
 		return fmt.Errorf("must specify topic")
 	}
-	if eventSource.CredentialsFile == "" {
-		return fmt.Errorf("must specify credentials file path")
+	if !eventSource.EnableWorkflowIdentity && eventSource.CredentialsFile == "" {
+		return fmt.Errorf("must specify credentials file path if not using Workflow Identity")
 	}
 	return nil
 }
