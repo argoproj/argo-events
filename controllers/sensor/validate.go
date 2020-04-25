@@ -428,7 +428,7 @@ func validateTriggerParameter(parameter *v1alpha1.TriggerParameter) error {
 		return errors.Errorf("parameter source can't be empty")
 	}
 	if parameter.Src.DependencyName == "" {
-		return errors.Errorf("parameter source event can't be empty")
+		return errors.Errorf("parameter dependency name can't be empty")
 	}
 	if parameter.Dest == "" {
 		return errors.Errorf("parameter destination can't be empty")
@@ -549,7 +549,7 @@ func validateK8sTriggerPolicy(policy *v1alpha1.K8sResourcePolicy) error {
 	return nil
 }
 
-// validateStatusPolicy  validates a http trigger policy
+// validateStatusPolicy validates a http trigger policy
 func validateStatusPolicy(policy *v1alpha1.StatusPolicy) error {
 	if policy == nil {
 		return nil

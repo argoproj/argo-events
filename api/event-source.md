@@ -1491,7 +1491,8 @@ Generic event source
 
 <td>
 
-<code>type</code></br> <em> Argo Events common.EventSourceType </em>
+<code>type</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.EventSourceType </em>
 
 </td>
 
@@ -3461,6 +3462,31 @@ for GCP
 
 <td>
 
+<code>enableWorkflowIdentity</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+EnableWorkflowIdentity determines if your project authenticates to GCP
+with WorkflowIdentity or CredentialsFile. If true, authentication is
+done with WorkflowIdentity. If false or omited, authentication is done
+with CredentialsFile.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>deleteSubscriptionOnFinish</code></br> <em> bool </em>
 
 </td>
@@ -5210,6 +5236,6 @@ ClientKeyPath refers the file path that contains client key.
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>4559972</code>. </em>
+commit <code>9f73feb</code>. </em>
 
 </p>

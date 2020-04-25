@@ -224,7 +224,7 @@ Kubernetes meta/v1.GroupVersionResource
 <td>
 <code>s3</code></br>
 <em>
-Argo Events common.S3Artifact
+github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
 </em>
 </td>
 <td>
@@ -550,17 +550,13 @@ string
 </tr>
 <tr>
 <td>
-<code>spec</code></br>
+<code>triggerBody</code></br>
 <em>
-map[string]string
+string
 </em>
 </td>
 <td>
-<p>Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.</p>
-<br/>
-<br/>
-<table>
-</table>
+<p>TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.</p>
 </td>
 </tr>
 <tr>
@@ -2933,7 +2929,7 @@ TriggerParameterSource
 </em>
 </td>
 <td>
-<p>Src contains a source reference to the value of the parameter from a event event</p>
+<p>Src contains a source reference to the value of the parameter from a dependency</p>
 </td>
 </tr>
 <tr>
@@ -3375,5 +3371,5 @@ bool
 <hr/>
 <p><em>
 Generated with <code>gen-crd-api-reference-docs</code>
-on git commit <code>4559972</code>.
+on git commit <code>9f73feb</code>.
 </em></p>

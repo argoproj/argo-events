@@ -52,10 +52,12 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceFilter":            schema_pkg_apis_eventsources_v1alpha1_ResourceFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource":            schema_pkg_apis_eventsources_v1alpha1_SNSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource":            schema_pkg_apis_eventsources_v1alpha1_SQSEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Selector":                  schema_pkg_apis_eventsources_v1alpha1_Selector(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource":          schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource":    schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter":         schema_pkg_apis_eventsources_v1alpha1_StorageGridFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource":         schema_pkg_apis_eventsources_v1alpha1_StripeEventSource(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig":                 schema_pkg_apis_eventsources_v1alpha1_TLSConfig(ref),
 	}
 }
 
@@ -107,12 +109,18 @@ func schema_pkg_apis_eventsources_v1alpha1_AMQPEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the amqp client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "exchangeName", "exchangeType", "routingKey"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -157,7 +165,7 @@ func schema_pkg_apis_eventsources_v1alpha1_AzureEventsHubEventSource(ref common.
 						},
 					},
 				},
-				Required: []string{"fqdn", "sharedAccessKeyName", "sharedAccessKey", "hubName", "namespace"},
+				Required: []string{"fqdn", "sharedAccessKeyName", "sharedAccessKey", "hubName"},
 			},
 		},
 		Dependencies: []string{
@@ -286,12 +294,18 @@ func schema_pkg_apis_eventsources_v1alpha1_EmitterEventSource(ref common.Referen
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the emitter client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
-				Required: []string{"broker", "channelKey", "channelName", "namespace"},
+				Required: []string{"broker", "channelKey", "channelName"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff", "k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -922,7 +936,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"id", "webhook", "owner", "repository", "events", "apiToken", "namespace"},
+				Required: []string{"id", "webhook", "owner", "repository", "events", "apiToken"},
 			},
 		},
 		Dependencies: []string{
@@ -999,7 +1013,7 @@ func schema_pkg_apis_eventsources_v1alpha1_GitlabEventSource(ref common.Referenc
 						},
 					},
 				},
-				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL", "namespace"},
+				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{
@@ -1122,7 +1136,7 @@ func schema_pkg_apis_eventsources_v1alpha1_HDFSEventSource(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"directory", "type", "addresses", "namespace"},
+				Required: []string{"directory", "type", "addresses"},
 			},
 		},
 		Dependencies: []string{
@@ -1164,12 +1178,18 @@ func schema_pkg_apis_eventsources_v1alpha1_KafkaEventSource(ref common.Reference
 							Ref:         ref("github.com/argoproj/argo-events/common.Backoff"),
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the kafka client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "partition", "topic"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1214,12 +1234,18 @@ func schema_pkg_apis_eventsources_v1alpha1_MQTTEventSource(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the mqtt client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "topic", "clientId"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1257,12 +1283,18 @@ func schema_pkg_apis_eventsources_v1alpha1_NATSEventsSource(ref common.Reference
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the nats client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"url", "subject"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1307,12 +1339,18 @@ func schema_pkg_apis_eventsources_v1alpha1_NSQEventSource(ref common.ReferenceCa
 							Format:      "",
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the nsq client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"hostAddress", "topic", "channel"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/common.Backoff"},
+			"github.com/argoproj/argo-events/common.Backoff", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"},
 	}
 }
 
@@ -1425,12 +1463,18 @@ func schema_pkg_apis_eventsources_v1alpha1_RedisEventSource(ref common.Reference
 							},
 						},
 					},
+					"tls": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TLS configuration for the redis client.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig"),
+						},
+					},
 				},
 				Required: []string{"hostAddress", "channels"},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.SecretKeySelector"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.TLSConfig", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -1504,19 +1548,19 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceFilter(ref common.ReferenceCa
 				Properties: map[string]spec.Schema{
 					"prefix": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Prefix filter is applied on the resource name.",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"labels": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Description: "Labels provide listing options to K8s API to watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Selector"),
 									},
 								},
 							},
@@ -1524,13 +1568,12 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceFilter(ref common.ReferenceCa
 					},
 					"fields": {
 						SchemaProps: spec.SchemaProps{
-							Type: []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
+							Description: "Fields provide listing options to K8s API to watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Selector"),
 									},
 								},
 							},
@@ -1538,14 +1581,15 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceFilter(ref common.ReferenceCa
 					},
 					"createdBy": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+							Description: "If resource is created before the specified time then the event is treated as valid.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.Selector", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -1688,6 +1732,41 @@ func schema_pkg_apis_eventsources_v1alpha1_SQSEventSource(ref common.ReferenceCa
 	}
 }
 
+func schema_pkg_apis_eventsources_v1alpha1_Selector(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Selector represents conditional operation to select K8s objects.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"key": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Key name",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"operation": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Supported operations like ==, !=, <=, >= etc. Defaults to ==. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"value": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Value",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"key", "value"},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -1721,7 +1800,7 @@ func schema_pkg_apis_eventsources_v1alpha1_SlackEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook", "namespace"},
+				Required: []string{"webhook"},
 			},
 		},
 		Dependencies: []string{
@@ -1860,5 +1939,40 @@ func schema_pkg_apis_eventsources_v1alpha1_StripeEventSource(ref common.Referenc
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_eventsources_v1alpha1_TLSConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "TLSConfig refers to TLS configuration for a client.",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"caCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "CACertPath refers the file path that contains the CA cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientCertPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientCertPath refers the file path that contains client cert.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"clientKeyPath": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ClientKeyPath refers the file path that contains client key.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
+			},
+		},
 	}
 }

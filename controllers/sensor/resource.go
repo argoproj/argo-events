@@ -135,7 +135,7 @@ func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
 
 	currentMetadata := ctx.sensor.Status.Resources.Deployment
 	if currentMetadata == nil {
-		return nil, errors.New("deployment metadata is expected to be set in gateway object")
+		return nil, errors.New("deployment metadata is expected to be set in sensor object")
 	}
 
 	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
