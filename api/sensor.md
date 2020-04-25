@@ -470,8 +470,7 @@ Description
 
 <td>
 
-<code>s3</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
+<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
 
 </td>
 
@@ -1132,7 +1131,7 @@ trigger gRPC server.
 
 <td>
 
-<code>triggerBody</code></br> <em> string </em>
+<code>spec</code></br> <em> map\[string\]string </em>
 
 </td>
 
@@ -1140,10 +1139,16 @@ trigger gRPC server.
 
 <p>
 
-TriggerBody is the custom trigger resource specification that custom
-trigger gRPC server knows how to interpret.
+Spec is the custom trigger resource specification that custom trigger
+gRPC server knows how to interpret.
 
 </p>
+
+<br/> <br/>
+
+<table>
+
+</table>
 
 </td>
 
@@ -6699,6 +6704,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>9f73feb</code>. </em>
+commit <code>2bedd9d</code>. </em>
 
 </p>
