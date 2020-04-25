@@ -38,7 +38,7 @@ spec:
                 dependencyName: test-dep
                 dataKey: body.namespace
               dest: metadata.namespace
-      # These parameters ar applied on entire template body.
+      # These parameters are applied on entire template body.
       # So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.
       parameters:
         - src:
