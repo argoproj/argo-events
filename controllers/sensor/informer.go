@@ -18,7 +18,6 @@ package sensor
 
 import (
 	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
-	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
@@ -29,9 +28,10 @@ func (controller *Controller) instanceIDReq() (*labels.Requirement, error) {
 	var instanceIDReq *labels.Requirement
 	var err error
 	if controller.Config.InstanceID == "" {
-		return nil, errors.New("controller instance id must be specified")
+		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.DoesNotExist, nil)
+	} else {
+		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{controller.Config.InstanceID})
 	}
-	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{controller.Config.InstanceID})
 	if err != nil {
 		panic(err)
 	}

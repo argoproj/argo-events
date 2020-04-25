@@ -136,7 +136,6 @@ subjects:
 apiVersion: v1
 data:
   config: |
-    instanceID: argo-events
     namespace: argo-events
 kind: ConfigMap
 metadata:
@@ -145,7 +144,6 @@ metadata:
 apiVersion: v1
 data:
   config: |
-    instanceID: argo-events
     namespace: argo-events
 kind: ConfigMap
 metadata:
