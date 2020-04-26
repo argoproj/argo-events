@@ -316,8 +316,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#one-command-installation" title="One Command Installation" class="md-nav__link">
-    One Command Installation
+  <a href="#cluster-wide-installation" title="Cluster-wide Installation" class="md-nav__link">
+    Cluster-wide Installation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#namespace-installation" title="Namespace Installation" class="md-nav__link">
+    Namespace Installation
   </a>
   
 </li>
@@ -335,15 +342,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-helm-chart" title="Using Helm Chart" class="md-nav__link">
-    Using Helm Chart
+  <a href="#using-kustomize" title="Using Kustomize" class="md-nav__link">
+    Using Kustomize
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#deploy-at-cluster-level" title="Deploy at cluster level" class="md-nav__link">
-    Deploy at cluster level
+  <a href="#using-helm-chart" title="Using Helm Chart" class="md-nav__link">
+    Using Helm Chart
   </a>
   
 </li>
@@ -1079,8 +1086,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#one-command-installation" title="One Command Installation" class="md-nav__link">
-    One Command Installation
+  <a href="#cluster-wide-installation" title="Cluster-wide Installation" class="md-nav__link">
+    Cluster-wide Installation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#namespace-installation" title="Namespace Installation" class="md-nav__link">
+    Namespace Installation
   </a>
   
 </li>
@@ -1098,15 +1112,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#using-helm-chart" title="Using Helm Chart" class="md-nav__link">
-    Using Helm Chart
+  <a href="#using-kustomize" title="Using Kustomize" class="md-nav__link">
+    Using Kustomize
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#deploy-at-cluster-level" title="Deploy at cluster level" class="md-nav__link">
-    Deploy at cluster level
+  <a href="#using-helm-chart" title="Using Helm Chart" class="md-nav__link">
+    Using Helm Chart
   </a>
   
 </li>
@@ -1133,19 +1147,50 @@
                 <h1 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h1>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Kubernetes cluster &gt;v1.9</li>
-<li>Installed the <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a> command-line tool &gt;v1.9.0</li>
+<li>Kubernetes cluster &gt;=v1.16</li>
+<li>Installed the <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">kubectl</a> command-line tool &gt;v1.16.0</li>
 </ul>
 <h3 id="using-kubectl">Using kubectl<a class="headerlink" href="#using-kubectl" title="Permanent link">&para;</a></h3>
-<h4 id="one-command-installation">One Command Installation<a class="headerlink" href="#one-command-installation" title="Permanent link">&para;</a></h4>
+<h4 id="cluster-wide-installation">Cluster-wide Installation<a class="headerlink" href="#cluster-wide-installation" title="Permanent link">&para;</a></h4>
 <ol>
-<li>Deploy Argo Events Namespace, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml
+<li>
+<p>Create the namespace</p>
+<div class="codehilite"><pre><span></span>kubectl create namespace argo-events
+</pre></div>
+
+
+</li>
+<li>
+<p>Deploy Argo Events, SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller</p>
+<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/install.yaml
 </pre></div>
 
 
 </li>
 </ol>
-<p>NOTE: On GKE, you may need to grant your account the ability to create new clusterroles</p>
+<p>NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles</p>
+<div class="codehilite"><pre><span></span>    kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
+</pre></div>
+
+
+<h4 id="namespace-installation">Namespace Installation<a class="headerlink" href="#namespace-installation" title="Permanent link">&para;</a></h4>
+<ol>
+<li>
+<p>Create the namespace</p>
+<div class="codehilite"><pre><span></span>kubectl create namespace argo-events
+</pre></div>
+
+
+</li>
+<li>
+<p>Deploy Argo Events, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller</p>
+<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install.yaml
+</pre></div>
+
+
+</li>
+</ol>
+<p>NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions</p>
 <div class="codehilite"><pre><span></span>    kubectl create clusterrolebinding YOURNAME-cluster-admin-binding --clusterrole=cluster-admin --user=YOUREMAIL@gmail.com
 </pre></div>
 
@@ -1161,68 +1206,113 @@
 </li>
 <li>
 <p>Create the service account</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-sa.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/argo-events-sa.yaml
 </pre></div>
 
 
 </li>
 <li>
-<p>Create the role and rolebinding</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-role.yaml
+<p>Create the role</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role.yaml
+</pre></div>
+
+
+</li>
+<li>
+<p>Create the rolebinding</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role-binding.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the sensor custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/sensor-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the gateway custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/gateway-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
-<p>Install the event source custom resource definition            </p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/event-source-crd.yaml
+<p>Install the event source custom resource definition</p>
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/event-source-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the confimap for sensor controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-configmap.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-configmap.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the configmap for gateway controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-configmap.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-configmap.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Deploy the sensor controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/sensor-controller-deployment.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-deployment.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Deploy the gateway controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/gateway-controller-deployment.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-deployment.yaml
 </pre></div>
 
 
 </li>
 </ol>
+<h3 id="using-kustomize">Using Kustomize<a class="headerlink" href="#using-kustomize" title="Permanent link">&para;</a></h3>
+<p>Use either <a href="https://github.com/argoproj/argo-events/tree/master/manifests/cluster-install"><code>cluster-install</code></a> or <a href="https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
+<p><code>kustomization.yaml</code>:</p>
+<div class="codehilite"><pre><span></span>bases:
+  - github.com/argoproj/argo-events/manifests/cluster-install
+  # OR
+  - github.com/argoproj/argo-events/manifests/namespace-install
+</pre></div>
+
+
+<p>To make Argo events watch a specific namespace, define similar overlays as shown in <a href="https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install/overlays"><code>namespace-install/overlays</code></a>.</p>
+<p><code>kustomization.yaml</code>:</p>
+<div class="codehilite"><pre><span></span>patchesJson6902:
+ - path: ./overlays/argo-events-configmap.yaml
+   target:
+     group: &quot;&quot;
+     kind: ConfigMap
+     name: gateway-controller-configmap
+     version: v1
+ - path: ./overlays/argo-events-configmap.yaml
+   target:
+     group: &quot;&quot;
+     kind: ConfigMap
+     name: sensor-controller-configmap
+     version: v1
+</pre></div>
+
+
+<p><code>overlays/argo-events-configmap.yaml</code>:</p>
+<div class="codehilite"><pre><span></span>- op: replace
+  path: /data
+  value:
+    config: |
+      instanceID: argo-events
+      namespace: YOUR_NAMESPACE
+</pre></div>
+
+
 <h3 id="using-helm-chart">Using Helm Chart<a class="headerlink" href="#using-helm-chart" title="Permanent link">&para;</a></h3>
 <p>Note: This method does not work with Helm 3, only Helm 2.</p>
 <p>Make sure you have helm client installed and Tiller server is running. To install helm, follow <a href="https://docs.helm.sh/using_helm/">the link.</a></p>
@@ -1247,24 +1337,6 @@
 </pre></div>
 
 
-</li>
-</ol>
-<h2 id="deploy-at-cluster-level">Deploy at cluster level<a class="headerlink" href="#deploy-at-cluster-level" title="Permanent link">&para;</a></h2>
-<p>To deploy Argo-Events controllers at cluster level where the controllers will be 
-able to process gateway and sensor objects created in any namespace,</p>
-<ol>
-<li>
-<p>Make sure to apply cluster role and binding to the service account,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/argo-events-cluster-roles.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Update the configmap for both gateway and sensor and remove the <code>namespace</code> key from it.</p>
-</li>
-<li>
-<p>Deploy both gateway and sensor controllers and watch the magic.</p>
 </li>
 </ol>
                 
