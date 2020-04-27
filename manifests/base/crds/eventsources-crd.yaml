@@ -1,15 +1,1688 @@
-apiVersion: apiextensions.k8s.io/v1beta1
+
+---
+apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: (unknown)
+  creationTimestamp: null
   name: eventsources.argoproj.io
 spec:
   group: argoproj.io
   names:
     kind: EventSource
+    listKind: EventSourceList
     plural: eventsources
     singular: eventsource
-    listKind: EventSourceList
-    shortNames:
-      - es
   scope: Namespaced
-  version: "v1alpha1"
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: EventSource is the definition of a eventsource resource
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: EventSourceSpec refers to specification of event-source resource
+            properties:
+              amqp:
+                additionalProperties:
+                  description: AMQPEventSource refers to an event-source for AMQP
+                    stream events
+                  properties:
+                    connectionBackoff:
+                      description: Backoff holds parameters applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    exchangeName:
+                      description: ExchangeName is the exchange name For more information,
+                        visit https://www.rabbitmq.com/tutorials/amqp-concepts.html
+                      type: string
+                    exchangeType:
+                      description: ExchangeType is rabbitmq exchange type
+                      type: string
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    routingKey:
+                      description: Routing key for bindings
+                      type: string
+                    tls:
+                      description: TLS configuration for the amqp client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    url:
+                      description: URL for rabbitmq service
+                      type: string
+                  required:
+                  - exchangeName
+                  - exchangeType
+                  - routingKey
+                  - url
+                  type: object
+                description: AMQP event sources
+                type: object
+              azureEventsHub:
+                additionalProperties:
+                  description: AzureEventsHubEventSource describes the event source
+                    for azure events hub More info at https://docs.microsoft.com/en-us/azure/event-hubs/
+                  properties:
+                    fqdn:
+                      description: FQDN of the EventHubs namespace you created More
+                        info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
+                      type: string
+                    hubName:
+                      description: Event Hub path/name
+                      type: string
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace which
+                        is used to retrieve the shared access key and name from.
+                      type: string
+                    sharedAccessKey:
+                      description: SharedAccessKey is the the generated value of the
+                        key
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    sharedAccessKeyName:
+                      description: SharedAccessKeyName is the name you chose for your
+                        application's SAS keys
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                  required:
+                  - fqdn
+                  - hubName
+                  - sharedAccessKey
+                  - sharedAccessKeyName
+                  type: object
+                description: AzureEventsHub event sources
+                type: object
+              calendar:
+                additionalProperties:
+                  description: CalendarEventSource describes a time based dependency.
+                    One of the fields (schedule, interval, or recurrence) must be
+                    passed. Schedule takes precedence over interval; interval takes
+                    precedence over recurrence
+                  properties:
+                    exclusionDates:
+                      description: ExclusionDates defines the list of DATE-TIME exceptions
+                        for recurring events.
+                      items:
+                        type: string
+                      type: array
+                    interval:
+                      description: Interval is a string that describes an interval
+                        duration, e.g. 1s, 30m, 2h...
+                      type: string
+                    schedule:
+                      description: 'Schedule is a cron-like expression. For reference,
+                        see: https://en.wikipedia.org/wiki/Cron'
+                      type: string
+                    timezone:
+                      description: Timezone in which to run the schedule
+                      type: string
+                    userPayload:
+                      description: UserPayload will be sent to sensor as extra data
+                        once the event is triggered
+                      format: byte
+                      type: string
+                  required:
+                  - interval
+                  - schedule
+                  type: object
+                description: Calendar event sources
+                type: object
+              emitter:
+                additionalProperties:
+                  description: EmitterEventSource describes the event source for emitter
+                    More info at https://emitter.io/develop/getting-started/
+                  properties:
+                    broker:
+                      description: Broker URI to connect to.
+                      type: string
+                    channelKey:
+                      description: ChannelKey refers to the channel key
+                      type: string
+                    channelName:
+                      description: ChannelName refers to the channel name
+                      type: string
+                    connectionBackoff:
+                      description: Backoff holds parameters applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    namespace:
+                      description: Namespace to use to retrieve the channel key and
+                        optional username/password
+                      type: string
+                    password:
+                      description: Password to use to connect to broker
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    tls:
+                      description: TLS configuration for the emitter client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    username:
+                      description: Username to use to connect to broker
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                  required:
+                  - broker
+                  - channelKey
+                  - channelName
+                  type: object
+                description: Emitter event source
+                type: object
+              file:
+                additionalProperties:
+                  description: FileEventSource describes an event-source for file
+                    related events.
+                  properties:
+                    eventType:
+                      description: Type of file operations to watch Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go
+                        for more information
+                      type: string
+                    watchPathConfig:
+                      description: WatchPathConfig contains configuration about the
+                        file path to watch
+                      properties:
+                        directory:
+                          description: Directory to watch for events
+                          type: string
+                        path:
+                          description: Path is relative path of object to watch with
+                            respect to the directory
+                          type: string
+                        pathRegexp:
+                          description: PathRegexp is regexp of relative path of object
+                            to watch with respect to the directory
+                          type: string
+                      required:
+                      - directory
+                      type: object
+                  required:
+                  - eventType
+                  - watchPathConfig
+                  type: object
+                description: File event sources
+                type: object
+              generic:
+                additionalProperties:
+                  description: GenericEventSource refers to a generic event source.
+                    It can be used to implement a custom event source.
+                  properties:
+                    value:
+                      description: Value of the event source
+                      type: string
+                  required:
+                  - value
+                  type: object
+                description: Generic event source
+                type: object
+              github:
+                additionalProperties:
+                  description: GithubEventSource refers to event-source for github
+                    related events
+                  properties:
+                    active:
+                      description: Active refers to status of the webhook for event
+                        deliveries. https://developer.github.com/webhooks/creating/#active
+                      type: boolean
+                    apiToken:
+                      description: APIToken refers to a K8s secret containing github
+                        api token
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    contentType:
+                      description: ContentType of the event delivery
+                      type: string
+                    deleteHookOnFinish:
+                      description: DeleteHookOnFinish determines whether to delete
+                        the GitHub hook for the repository once the event source is
+                        stopped.
+                      type: boolean
+                    events:
+                      description: Events refer to Github events to subscribe to which
+                        the gateway will subscribe
+                      items:
+                        type: string
+                      type: array
+                    githubBaseURL:
+                      description: GitHub base URL (for GitHub Enterprise)
+                      type: string
+                    githubUploadURL:
+                      description: GitHub upload URL (for GitHub Enterprise)
+                      type: string
+                    id:
+                      description: Id is the webhook's id
+                      format: int64
+                      type: integer
+                    insecure:
+                      description: Insecure tls verification
+                      type: boolean
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace which
+                        is used to retrieve webhook secret and api token from.
+                      type: string
+                    owner:
+                      description: Owner refers to GitHub owner name i.e. argoproj
+                      type: string
+                    repository:
+                      description: Repository refers to GitHub repo name i.e. argo-events
+                      type: string
+                    webhook:
+                      description: Webhook refers to the configuration required to
+                        run a http server
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                    webhookSecret:
+                      description: WebhookSecret refers to K8s secret containing GitHub
+                        webhook secret https://developer.github.com/webhooks/securing/
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                  required:
+                  - apiToken
+                  - events
+                  - id
+                  - owner
+                  - repository
+                  - webhook
+                  type: object
+                description: Github event sources
+                type: object
+              gitlab:
+                additionalProperties:
+                  description: GitlabEventSource refers to event-source related to
+                    Gitlab events
+                  properties:
+                    accessToken:
+                      description: AccessToken is reference to k8 secret which holds
+                        the gitlab api access information
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    allowDuplicate:
+                      description: AllowDuplicate allows the gateway to register the
+                        same webhook integrations for multiple event source configurations.
+                        Defaults to false.
+                      type: boolean
+                    deleteHookOnFinish:
+                      description: DeleteHookOnFinish determines whether to delete
+                        the GitLab hook for the project once the event source is stopped.
+                      type: boolean
+                    enableSSLVerification:
+                      description: EnableSSLVerification to enable ssl verification
+                      type: boolean
+                    event:
+                      description: Event is a gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
+                      type: string
+                    gitlabBaseURL:
+                      description: GitlabBaseURL is the base URL for API requests
+                        to a custom endpoint
+                      type: string
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace which
+                        is used to retrieve access token from.
+                      type: string
+                    projectId:
+                      description: ProjectId is the id of project for which integration
+                        needs to setup
+                      type: string
+                    webhook:
+                      description: Webhook holds configuration to run a http server
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - accessToken
+                  - event
+                  - gitlabBaseURL
+                  - projectId
+                  - webhook
+                  type: object
+                description: Gitlab event sources
+                type: object
+              hdfs:
+                additionalProperties:
+                  description: HDFSEventSource refers to event-source for HDFS related
+                    events
+                  properties:
+                    addresses:
+                      description: Addresses is accessible addresses of HDFS name
+                        nodes
+                      items:
+                        type: string
+                      type: array
+                    checkInterval:
+                      description: CheckInterval is a string that describes an interval
+                        duration to check the directory state, e.g. 1s, 30m, 2h...
+                        (defaults to 1m)
+                      type: string
+                    directory:
+                      description: Directory to watch for events
+                      type: string
+                    hdfsUser:
+                      description: HDFSUser is the user to access HDFS file system.
+                        It is ignored if either ccache or keytab is used.
+                      type: string
+                    krbCCacheSecret:
+                      description: KrbCCacheSecret is the secret selector for Kerberos
+                        ccache Either ccache or keytab can be set to use Kerberos.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    krbConfigConfigMap:
+                      description: KrbConfig is the configmap selector for Kerberos
+                        config as string It must be set if either ccache or keytab
+                        is used.
+                      properties:
+                        key:
+                          description: The key to select.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the ConfigMap or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    krbKeytabSecret:
+                      description: KrbKeytabSecret is the secret selector for Kerberos
+                        keytab Either ccache or keytab can be set to use Kerberos.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    krbRealm:
+                      description: KrbRealm is the Kerberos realm used with Kerberos
+                        keytab It must be set if keytab is used.
+                      type: string
+                    krbServicePrincipalName:
+                      description: KrbServicePrincipalName is the principal name of
+                        Kerberos service It must be set if either ccache or keytab
+                        is used.
+                      type: string
+                    krbUsername:
+                      description: KrbUsername is the Kerberos username used with
+                        Kerberos keytab It must be set if keytab is used.
+                      type: string
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace which
+                        is used to retrieve cache secret and ket tab secret from.
+                      type: string
+                    path:
+                      description: Path is relative path of object to watch with respect
+                        to the directory
+                      type: string
+                    pathRegexp:
+                      description: PathRegexp is regexp of relative path of object
+                        to watch with respect to the directory
+                      type: string
+                    type:
+                      description: Type of file operations to watch
+                      type: string
+                  required:
+                  - addresses
+                  - directory
+                  - type
+                  type: object
+                description: HDFS event sources
+                type: object
+              kafka:
+                additionalProperties:
+                  description: KafkaEventSource refers to event-source for Kafka related
+                    events
+                  properties:
+                    connectionBackoff:
+                      description: Backoff holds parameters applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    partition:
+                      description: Partition name
+                      type: string
+                    tls:
+                      description: TLS configuration for the kafka client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    topic:
+                      description: Topic name
+                      type: string
+                    url:
+                      description: URL to kafka cluster
+                      type: string
+                  required:
+                  - partition
+                  - topic
+                  - url
+                  type: object
+                description: Kafka event sources
+                type: object
+              minio:
+                additionalProperties:
+                  description: S3Artifact contains information about an S3 connection
+                    and bucket
+                  properties:
+                    accessKey:
+                      description: SecretKeySelector selects a key of a Secret.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    bucket:
+                      description: S3Bucket contains information to describe an S3
+                        Bucket
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    endpoint:
+                      type: string
+                    events:
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      description: S3Filter represents filters to apply to bucket
+                        nofifications for specifying constraints on objects
+                      properties:
+                        prefix:
+                          type: string
+                        suffix:
+                          type: string
+                      required:
+                      - prefix
+                      - suffix
+                      type: object
+                    insecure:
+                      type: boolean
+                    region:
+                      type: string
+                    secretKey:
+                      description: SecretKeySelector selects a key of a Secret.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                  required:
+                  - accessKey
+                  - bucket
+                  - endpoint
+                  - secretKey
+                  type: object
+                description: Minio event sources
+                type: object
+              mqtt:
+                additionalProperties:
+                  description: MQTTEventSource refers to event-source for MQTT related
+                    events
+                  properties:
+                    clientId:
+                      description: ClientID is the id of the client
+                      type: string
+                    connectionBackoff:
+                      description: ConnectionBackoff holds backoff applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    tls:
+                      description: TLS configuration for the mqtt client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    topic:
+                      description: Topic name
+                      type: string
+                    url:
+                      description: URL to connect to broker
+                      type: string
+                  required:
+                  - clientId
+                  - topic
+                  - url
+                  type: object
+                description: MQTT event sources
+                type: object
+              nats:
+                additionalProperties:
+                  description: NATSEventSource refers to event-source for NATS related
+                    events
+                  properties:
+                    connectionBackoff:
+                      description: ConnectionBackoff holds backoff applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    subject:
+                      description: Subject holds the name of the subject onto which
+                        messages are published
+                      type: string
+                    tls:
+                      description: TLS configuration for the nats client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    url:
+                      description: URL to connect to NATS cluster
+                      type: string
+                  required:
+                  - subject
+                  - url
+                  type: object
+                description: NATS event sources
+                type: object
+              nsq:
+                additionalProperties:
+                  description: NSQEventSource describes the event source for NSQ PubSub
+                    More info at https://godoc.org/github.com/nsqio/go-nsq
+                  properties:
+                    channel:
+                      description: Channel used for subscription
+                      type: string
+                    connectionBackoff:
+                      description: Backoff holds parameters applied to connection.
+                      properties:
+                        duration:
+                          description: A Duration represents the elapsed time between
+                            two instants as an int64 nanosecond count. The representation
+                            limits the largest representable duration to approximately
+                            290 years.
+                          format: int64
+                          type: integer
+                        factor: {}
+                        jitter: {}
+                        steps:
+                          type: integer
+                      required:
+                      - duration
+                      - factor
+                      - jitter
+                      - steps
+                      type: object
+                    hostAddress:
+                      description: HostAddress is the address of the host for NSQ
+                        lookup
+                      type: string
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    tls:
+                      description: TLS configuration for the nsq client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                    topic:
+                      description: Topic to subscribe to.
+                      type: string
+                  required:
+                  - channel
+                  - hostAddress
+                  - topic
+                  type: object
+                description: NSQ event source
+                type: object
+              pubSub:
+                additionalProperties:
+                  description: PubSubEventSource refers to event-source for GCP PubSub
+                    related events.
+                  properties:
+                    credentialsFile:
+                      description: CredentialsFile is the file that contains credentials
+                        to authenticate for GCP
+                      type: string
+                    deleteSubscriptionOnFinish:
+                      description: DeleteSubscriptionOnFinish determines whether to
+                        delete the GCP PubSub subscription once the event source is
+                        stopped.
+                      type: boolean
+                    enableWorkflowIdentity:
+                      description: EnableWorkflowIdentity determines if your project
+                        authenticates to GCP with WorkflowIdentity or CredentialsFile.
+                        If true, authentication is done with WorkflowIdentity. If
+                        false or omited, authentication is done with CredentialsFile.
+                      type: boolean
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    projectID:
+                      description: ProjectID is the unique identifier for your project
+                        on GCP
+                      type: string
+                    topic:
+                      description: Topic on which a subscription will be created
+                      type: string
+                    topicProjectID:
+                      description: TopicProjectID identifies the project where the
+                        topic should exist or be created (assumed to be the same as
+                        ProjectID by default)
+                      type: string
+                  required:
+                  - credentialsFile
+                  - projectID
+                  - topic
+                  - topicProjectID
+                  type: object
+                description: PubSub eevnt sources
+                type: object
+              redis:
+                additionalProperties:
+                  description: RedisEventSource describes an event source for the
+                    Redis PubSub. More info at https://godoc.org/github.com/go-redis/redis#example-PubSub
+                  properties:
+                    channels:
+                      description: Channels to subscribe to listen events.
+                      items:
+                        type: string
+                      type: array
+                    db:
+                      description: DB to use. If not specified, default DB 0 will
+                        be used.
+                      type: integer
+                    hostAddress:
+                      description: HostAddress refers to the address of the Redis
+                        host/server
+                      type: string
+                    namespace:
+                      description: Namespace to use to retrieve the password from.
+                        It should only be specified if password is declared
+                      type: string
+                    password:
+                      description: Password required for authentication if any.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    tls:
+                      description: TLS configuration for the redis client.
+                      properties:
+                        caCertPath:
+                          description: CACertPath refers the file path that contains
+                            the CA cert.
+                          type: string
+                        clientCertPath:
+                          description: ClientCertPath refers the file path that contains
+                            client cert.
+                          type: string
+                        clientKeyPath:
+                          description: ClientKeyPath refers the file path that contains
+                            client key.
+                          type: string
+                      required:
+                      - caCertPath
+                      - clientCertPath
+                      - clientKeyPath
+                      type: object
+                  required:
+                  - channels
+                  - hostAddress
+                  type: object
+                description: Redis event source
+                type: object
+              resource:
+                additionalProperties:
+                  description: ResourceEventSource refers to a event-source for K8s
+                    resource related events.
+                  properties:
+                    eventTypes:
+                      description: EventTypes is the list of event type to watch.
+                        Possible values are - ADD, UPDATE and DELETE.
+                      items:
+                        description: ResourceEventType is the type of event for the
+                          K8s resource mutation
+                        type: string
+                      type: array
+                    filter:
+                      description: Filter is applied on the metadata of the resource
+                        If you apply filter, then the internal event informer will
+                        only monitor objects that pass the filter.
+                      properties:
+                        createdBy:
+                          description: If resource is created before the specified
+                            time then the event is treated as valid.
+                          format: date-time
+                          type: string
+                        fields:
+                          description: Fields provide listing options to K8s API to
+                            watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/
+                            for more info.
+                          items:
+                            description: Selector represents conditional operation
+                              to select K8s objects.
+                            properties:
+                              key:
+                                description: Key name
+                                type: string
+                              operation:
+                                description: Supported operations like ==, !=, <=,
+                                  >= etc. Defaults to ==. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+                                  for more info.
+                                type: string
+                              value:
+                                description: Value
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        labels:
+                          description: Labels provide listing options to K8s API to
+                            watch resource/s. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/
+                            for more info.
+                          items:
+                            description: Selector represents conditional operation
+                              to select K8s objects.
+                            properties:
+                              key:
+                                description: Key name
+                                type: string
+                              operation:
+                                description: Supported operations like ==, !=, <=,
+                                  >= etc. Defaults to ==. Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+                                  for more info.
+                                type: string
+                              value:
+                                description: Value
+                                type: string
+                            required:
+                            - key
+                            - value
+                            type: object
+                          type: array
+                        prefix:
+                          description: Prefix filter is applied on the resource name.
+                          type: string
+                      type: object
+                    group:
+                      type: string
+                    namespace:
+                      description: Namespace where resource is deployed
+                      type: string
+                    resource:
+                      type: string
+                    version:
+                      type: string
+                  required:
+                  - eventTypes
+                  - group
+                  - namespace
+                  - resource
+                  - version
+                  type: object
+                description: Resource event sources
+                type: object
+              slack:
+                additionalProperties:
+                  description: SlackEventSource refers to event-source for Slack related
+                    events
+                  properties:
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace which
+                        is used to retrieve token and signing secret from.
+                      type: string
+                    signingSecret:
+                      description: Slack App signing secret
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    token:
+                      description: Token for URL verification handshake
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    webhook:
+                      description: Webhook holds configuration for a REST endpoint
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - webhook
+                  type: object
+                description: Slack event sources
+                type: object
+              sns:
+                additionalProperties:
+                  description: SNSEventSource refers to event-source for AWS SNS related
+                    events
+                  properties:
+                    accessKey:
+                      description: AccessKey refers K8 secret containing aws access
+                        key
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace to read
+                        access related secret from.
+                      type: string
+                    region:
+                      description: Region is AWS region
+                      type: string
+                    roleARN:
+                      description: RoleARN is the Amazon Resource Name (ARN) of the
+                        role to assume.
+                      type: string
+                    secretKey:
+                      description: SecretKey refers K8 secret containing aws secret
+                        key
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    topicArn:
+                      description: TopicArn
+                      type: string
+                    webhook:
+                      description: Webhook configuration for http server
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - region
+                  - topicArn
+                  - webhook
+                  type: object
+                description: SNS event sources
+                type: object
+              sqs:
+                additionalProperties:
+                  description: SQSEventSource refers to event-source for AWS SQS related
+                    events
+                  properties:
+                    accessKey:
+                      description: AccessKey refers K8 secret containing aws access
+                        key
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    jsonBody:
+                      description: JSONBody specifies that all event body payload
+                        coming from this source will be JSON
+                      type: boolean
+                    namespace:
+                      description: Namespace refers to Kubernetes namespace to read
+                        access related secret from.
+                      type: string
+                    queue:
+                      description: Queue is AWS SQS queue to listen to for messages
+                      type: string
+                    queueAccountId:
+                      description: QueueAccountId is the ID of the account that created
+                        the queue to monitor
+                      type: string
+                    region:
+                      description: Region is AWS region
+                      type: string
+                    roleARN:
+                      description: RoleARN is the Amazon Resource Name (ARN) of the
+                        role to assume.
+                      type: string
+                    secretKey:
+                      description: SecretKey refers K8 secret containing aws secret
+                        key
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    waitTimeSeconds:
+                      description: WaitTimeSeconds is The duration (in seconds) for
+                        which the call waits for a message to arrive in the queue
+                        before returning.
+                      format: int64
+                      type: integer
+                  required:
+                  - queue
+                  - region
+                  - waitTimeSeconds
+                  type: object
+                description: SQS event sources
+                type: object
+              storageGrid:
+                additionalProperties:
+                  description: StorageGridEventSource refers to event-source for StorageGrid
+                    related events
+                  properties:
+                    events:
+                      description: Events are s3 bucket notification events. For more
+                        information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
+                        Note that storage grid notifications do not contain `s3:`
+                      items:
+                        type: string
+                      type: array
+                    filter:
+                      description: Filter on object key which caused the notification.
+                      properties:
+                        prefix:
+                          type: string
+                        suffix:
+                          type: string
+                      required:
+                      - prefix
+                      - suffix
+                      type: object
+                    webhook:
+                      description: Webhook holds configuration for a REST endpoint
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - webhook
+                  type: object
+                description: StorageGrid event sources
+                type: object
+              stripe:
+                additionalProperties:
+                  description: StripeEventSource describes the event source for stripe
+                    webhook notifications More info at https://stripe.com/docs/webhooks
+                  properties:
+                    apiKey:
+                      description: APIKey refers to K8s secret that holds Stripe API
+                        key. Used only if CreateWebhook is enabled.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    createWebhook:
+                      description: CreateWebhook if specified creates a new webhook
+                        programmatically.
+                      type: boolean
+                    eventFilter:
+                      description: EventFilter describes the type of events to listen
+                        to. If not specified, all types of events will be processed.
+                        More info at https://stripe.com/docs/api/events/list
+                      items:
+                        type: string
+                      type: array
+                    namespace:
+                      description: Namespace to retrieve the APIKey secret from. Must
+                        be specified in order to read API key from APIKey K8s secret.
+                      type: string
+                    webhook:
+                      description: Webhook holds configuration for a REST endpoint
+                      properties:
+                        endpoint:
+                          description: REST API endpoint
+                          type: string
+                        method:
+                          description: 'Method is HTTP request method that indicates
+                            the desired action to be performed for a given resource.
+                            See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics
+                            and Content'
+                          type: string
+                        port:
+                          description: Port on which HTTP server is listening for
+                            incoming events.
+                          type: string
+                        serverCertPath:
+                          description: ServerCertPath refers the file that contains
+                            the cert.
+                          type: string
+                        serverKeyPath:
+                          description: ServerKeyPath refers the file that contains
+                            private key
+                          type: string
+                        url:
+                          description: URL is the url of the server.
+                          type: string
+                      required:
+                      - endpoint
+                      - method
+                      - port
+                      - url
+                      type: object
+                  required:
+                  - webhook
+                  type: object
+                description: Stripe event sources
+                type: object
+              type:
+                description: Type of the event source
+                type: string
+              webhook:
+                additionalProperties:
+                  description: Context holds a general purpose REST API context
+                  properties:
+                    endpoint:
+                      description: REST API endpoint
+                      type: string
+                    method:
+                      description: 'Method is HTTP request method that indicates the
+                        desired action to be performed for a given resource. See RFC7231
+                        Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content'
+                      type: string
+                    port:
+                      description: Port on which HTTP server is listening for incoming
+                        events.
+                      type: string
+                    serverCertPath:
+                      description: ServerCertPath refers the file that contains the
+                        cert.
+                      type: string
+                    serverKeyPath:
+                      description: ServerKeyPath refers the file that contains private
+                        key
+                      type: string
+                    url:
+                      description: URL is the url of the server.
+                      type: string
+                  required:
+                  - endpoint
+                  - method
+                  - port
+                  - url
+                  type: object
+                description: Webhook event sources
+                type: object
+            required:
+            - type
+            type: object
+          status:
+            description: EventSourceStatus holds the status of the event-source resource
+            properties:
+              createdAt:
+                format: date-time
+                type: string
+            type: object
+        required:
+        - metadata
+        - spec
+        - status
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
