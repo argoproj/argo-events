@@ -19,6 +19,8 @@ package sensor
 import (
 	"fmt"
 
+	"github.com/imdario/mergo"
+
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
@@ -85,7 +87,10 @@ func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
 		podTemplateSpec = ctx.controller.TemplateSpec.DeepCopy()
 	}
 	if ctx.sensor.Spec.Template != nil {
-		podTemplateSpec = common.CopyDeploymentSpecTemplate(podTemplateSpec, ctx.sensor.Spec.Template)
+		err := mergo.MergeWithOverwrite(podTemplateSpec, *ctx.sensor.Spec.Template)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if podTemplateSpec == nil {
 		return nil, errors.New("sensor template can't be empty")
