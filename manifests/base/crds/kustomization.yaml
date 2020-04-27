@@ -2,6 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - event-source-crd.yaml
+  - eventsources-crd.yaml
   - gateway-crd.yaml
   - sensor-crd.yaml
