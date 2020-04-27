@@ -46,8 +46,6 @@ Let's look at the following sensor,
         kind: Sensor
         metadata:
           name: webhook-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:

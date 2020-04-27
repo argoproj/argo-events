@@ -28,8 +28,6 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
         kind: Sensor
         metadata:
           name: webhook-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:

@@ -19,8 +19,6 @@ The Kafka trigger specification is available [here](https://github.com/argoproj/
         kind: Sensor
         metadata:
           name: minio-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:
