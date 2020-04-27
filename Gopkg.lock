@@ -475,6 +475,14 @@
   version = "v6.15.7"
 
 [[projects]]
+  digest = "1:eec9b9a9f07a9b0de09431545481e22c233181b1af40170d0bc1f50b83690738"
+  name = "github.com/gobuffalo/flect"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "7a04ff140e0fd2ea77adfd5b8bd2b0c80ab739a9"
+  version = "v0.2.1"
+
+[[projects]]
   digest = "1:e5e45557e1871c967a6ccaa5b95d1233a2c01ab00615621825d1aca7383dc022"
   name = "github.com/gobwas/glob"
   packages = [
@@ -711,6 +719,14 @@
   pruneopts = "UT"
   revision = "66f88b4ae75f5edcc556623b96ff32c06360fbb7"
   version = "v0.3.9"
+
+[[projects]]
+  digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
+  name = "github.com/inconshreveable/mousetrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+  version = "v1.0"
 
 [[projects]]
   branch = "master"
@@ -1096,6 +1112,14 @@
   pruneopts = "UT"
   revision = "505e419363375c0dc132d3ac02632a4ee32199ca"
   version = "v1.6.4"
+
+[[projects]]
+  digest = "1:f6adcf4df6c030a53a14a8fdbb3fade7cac3d014ff78a4e0de500b4c0cf5154f"
+  name = "github.com/spf13/cobra"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "a684a6d7f5e37385d954dd3b5a14fc6912c6ab9d"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:524b71991fc7d9246cc7dc2d9e0886ccb97648091c63e30eef619e6862c955dd"
@@ -1762,6 +1786,14 @@
   version = "v2.2.8"
 
 [[projects]]
+  branch = "v3"
+  digest = "1:55d59c3399c684c4e3edc6c404e5dc85b072363918bf2a2c6b0e6e4807ea73bf"
+  name = "gopkg.in/yaml.v3"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9f266ea9e77c4c7aab4cf02650570e7c7b3031a5"
+
+[[projects]]
   digest = "1:735ae15b76858155230553ed0845ba4cc1dbb7c2ca665ab33bfd2eb1509b219c"
   name = "honnef.co/go/tools"
   packages = [
@@ -1849,9 +1881,22 @@
   version = "v0.17.4"
 
 [[projects]]
+  digest = "1:c448c1f26c05377507a4e6ec87d0bfb92e93d49532982670ecaac68100e02c2b"
+  name = "k8s.io/apiextensions-apiserver"
+  packages = [
+    "pkg/apis/apiextensions",
+    "pkg/apis/apiextensions/v1",
+    "pkg/apis/apiextensions/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "6846325a18868b06d3566963cf87e399f38721fd"
+  version = "v0.18.2"
+
+[[projects]]
   digest = "1:4403949d51282e512c2d479be84a75abd7187e067a50ab7872ba8618cf4fdf15"
   name = "k8s.io/apimachinery"
   packages = [
+    "pkg/api/equality",
     "pkg/api/errors",
     "pkg/api/meta",
     "pkg/api/resource",
@@ -2176,11 +2221,12 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:2d3f59daa4b479ff4e100a2e1d8fea6780040fdadc177869531fe4cc29407f55"
+  digest = "1:73ab611e5de3af57d3571909942beadbfd5a8902e49a2366506a1c881dc517d8"
   name = "k8s.io/utils"
   packages = [
     "buffer",
     "integer",
+    "pointer",
     "trace",
   ]
   pruneopts = "UT"
@@ -2196,6 +2242,29 @@
   pruneopts = "UT"
   revision = "86a6a1998f1d2bf63262718644c1ef3a77fa8d28"
   version = "v0.12.5"
+
+[[projects]]
+  digest = "1:0f4b57df86c8e727bb629baac796b0a22353c2343977d9fef981c4d6b668e1d6"
+  name = "sigs.k8s.io/controller-tools"
+  packages = [
+    "cmd/controller-gen",
+    "pkg/crd",
+    "pkg/crd/markers",
+    "pkg/deepcopy",
+    "pkg/genall",
+    "pkg/genall/help",
+    "pkg/genall/help/pretty",
+    "pkg/loader",
+    "pkg/markers",
+    "pkg/rbac",
+    "pkg/schemapatcher",
+    "pkg/schemapatcher/internal/yaml",
+    "pkg/version",
+    "pkg/webhook",
+  ]
+  pruneopts = "UT"
+  revision = "44656d3c15ecaef499d9157825afd843415cbfea"
+  version = "v0.3.0"
 
 [[projects]]
   digest = "1:36d2b2cb1fa6e4a731e38c3582c203213cdbc52c5f202af07db6dc6eeaec88dc"
@@ -2311,6 +2380,7 @@
     "k8s.io/gengo/examples/deepcopy-gen",
     "k8s.io/kube-openapi/cmd/openapi-gen",
     "k8s.io/kube-openapi/pkg/common",
+    "sigs.k8s.io/controller-tools/cmd/controller-gen",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

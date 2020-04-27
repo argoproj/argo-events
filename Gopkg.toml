@@ -2,6 +2,7 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/kube-openapi/cmd/openapi-gen",
   "k8s.io/gengo/examples/deepcopy-gen",
+  "sigs.k8s.io/controller-tools/cmd/controller-gen",
   "github.com/golang/protobuf/protoc-gen-go",
   "github.com/gogo/protobuf/protoc-gen-gofast",
   "github.com/gogo/protobuf/protoc-gen-gogofast",
