@@ -389,7 +389,7 @@ func validateCustomTrigger(trigger *v1alpha1.CustomTrigger) error {
 	if trigger.ServerURL == "" {
 		return errors.New("custom trigger gRPC server url is not defined")
 	}
-	if trigger.TriggerBody == "" {
+	if trigger.Spec == nil {
 		return errors.New("trigger body can't be empty")
 	}
 	if trigger.Secure {

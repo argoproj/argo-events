@@ -1,0 +1,204 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: eventsources.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventSource
+    listKind: EventSourceList
+    plural: eventsources
+    shortNames:
+    - es
+    singular: eventsource
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: gateways.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Gateway
+    listKind: GatewayList
+    plural: gateways
+    shortNames:
+    - gw
+    singular: gateway
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: sensors.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Sensor
+    listKind: SensorList
+    plural: sensors
+    shortNames:
+    - sn
+    singular: sensor
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-events-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-events-role
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  - workflows/finalizers
+  - workflowtemplates
+  - workflowtemplates/finalizers
+  - gateways
+  - gateways/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - configmaps
+  - secrets
+  - services
+  - events
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-events-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argo-events-role
+subjects:
+- kind: ServiceAccount
+  name: argo-events-sa
+---
+apiVersion: v1
+data:
+  config: |
+    instanceID: argo-events
+    namespace: argo-events
+kind: ConfigMap
+metadata:
+  name: gateway-controller-configmap
+---
+apiVersion: v1
+data:
+  config: |
+    instanceID: argo-events
+    namespace: argo-events
+kind: ConfigMap
+metadata:
+  name: sensor-controller-configmap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-controller
+  template:
+    metadata:
+      labels:
+        app: gateway-controller
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONTROLLER_CONFIG_MAP
+          value: gateway-controller-configmap
+        image: argoproj/gateway-controller:v0.14.0
+        name: gateway-controller
+      serviceAccountName: argo-events-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-controller
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONTROLLER_CONFIG_MAP
+          value: sensor-controller-configmap
+        image: argoproj/sensor-controller:v0.14.0
+        name: sensor-controller
+      serviceAccountName: argo-events-sa

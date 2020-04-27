@@ -411,11 +411,19 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 							Format:      "",
 						},
 					},
-					"triggerBody": {
+					"spec": {
 						SchemaProps: spec.SchemaProps{
-							Description: "TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.",
+							Type:        []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 					"parameters": {
@@ -455,7 +463,7 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 						},
 					},
 				},
-				Required: []string{"serverURL", "secure", "triggerBody", "payload"},
+				Required: []string{"serverURL", "secure", "spec", "payload"},
 			},
 		},
 		Dependencies: []string{

@@ -486,8 +486,8 @@ type CustomTrigger struct {
 	CertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,3,opt,name=certFilePath"`
 	// ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
 	ServerNameOverride string `json:"serverNameOverride,omitempty" protobuf:"bytes,4,opt,name=serverNameOverride"`
-	// TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
-	TriggerBody string `json:"triggerBody" protobuf:"bytes,5,name=triggerBody"`
+	// Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
+	Spec map[string]string `json:"spec" protobuf:"bytes,5,name=spec"`
 	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
