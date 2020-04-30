@@ -55,7 +55,7 @@ func main() {
 	}
 	gatewayImageVersion, ok := os.LookupEnv(common.EnvVarImageVersion)
 	if !ok {
-		gatewayImageRegistry = "latest"
+		gatewayImageVersion = "latest"
 	}
 	gatewayImages := getGatewayImages(gatewayImageRegistry, gatewayImageVersion)
 	// create new gateway controller
