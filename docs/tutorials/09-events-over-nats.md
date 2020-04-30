@@ -67,9 +67,6 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
         kind: Gateway
         metadata:
           name: webhook-gateway-multi-subscribers
-          labels:
-            # gateway controller with instanceId "argo-events" will process this gateway
-            gateways.argoproj.io/gateway-controller-instanceid: argo-events
         spec:
           replica: 1
           type: webhook
@@ -128,8 +125,6 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
         kind: Sensor
         metadata:
           name: webhook-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:
@@ -212,9 +207,6 @@ You can easily set up a gateway to send events over both HTTP and NATS,
         kind: Gateway
         metadata:
           name: webhook-gateway-multi-subscribers
-          labels:
-            # gateway controller with instanceId "argo-events" will process this gateway
-            gateways.argoproj.io/gateway-controller-instanceid: argo-events
         spec:
           replica: 1
           type: webhook
@@ -262,8 +254,6 @@ You can easily set up a gateway to send events over both HTTP and NATS,
         kind: Sensor
         metadata:
           name: webhook-sensor-over-http-and-nats
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:

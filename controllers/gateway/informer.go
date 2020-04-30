@@ -25,12 +25,15 @@ import (
 )
 
 func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
-	if c.Config.InstanceID == "" {
-		panic("instance id is required")
+	var instanceIDReq *labels.Requirement
+	var err error
+	if c.Config.InstanceID != "" {
+		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+	} else {
+		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.DoesNotExist, nil)
 	}
-	instanceIDReq, err := labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	c.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
 	return instanceIDReq, nil
