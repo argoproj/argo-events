@@ -2,5 +2,4 @@
    path: /data
    value:
     config: |
-      instanceID: argo-events
       namespace: argo-events
