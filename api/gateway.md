@@ -225,17 +225,17 @@ GatewaySpec </a> </em>
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template is the pod specification for the gateway Refer
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+Template is the pod specification for the gateway
 
 </p>
 
@@ -291,18 +291,18 @@ Type is the type of gateway. Used as metadata.
 
 <td>
 
-<code>service</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core">
-Kubernetes core/v1.Service </a> </em>
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Service is the specifications of the service to expose the gateway Refer
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#service-v1-core</a>
+Service is the specifications of the service to expose the gateway
 
 </p>
 
@@ -533,17 +533,17 @@ Description
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template is the pod specification for the gateway Refer
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>
+Template is the pod specification for the gateway
 
 </p>
 
@@ -599,18 +599,18 @@ Type is the type of gateway. Used as metadata.
 
 <td>
 
-<code>service</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core">
-Kubernetes core/v1.Service </a> </em>
+<code>service</code></br> <em> <a href="#argoproj.io/v1alpha1.Service">
+Service </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Service is the specifications of the service to expose the gateway Refer
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#service-v1-core</a>
+Service is the specifications of the service to expose the gateway
 
 </p>
 
@@ -1181,6 +1181,79 @@ UpdateTime is the time when node(gateway configuration) was updated
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Service">
+
+Service
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Service holds the service information gateway exposes
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>ports</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#serviceport-v1-core">
+\[\]Kubernetes core/v1.ServicePort </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+The list of ports that are exposed by this service.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.Subscribers">
 
 Subscribers
@@ -1272,11 +1345,161 @@ NATS refers to the subscribers over NATS protocol.
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Template">
+
+Template
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.GatewaySpec">GatewaySpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Template holds the information of a Gateway deployment template
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serviceAccountName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ServiceAccountName is the name of the ServiceAccount to use to run
+gateway pod. More info:
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>container</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+Kubernetes core/v1.Container </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Container is the main container image to run in the gateway pod
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumes</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+\[\]Kubernetes core/v1.Volume </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Volumes is a list of volumes that can be mounted by containers in a
+workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <hr/>
 
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>8c611e5</code>. </em>
+commit <code>5172d79</code>. </em>
 
 </p>

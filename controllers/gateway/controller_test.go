@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	fakegateway "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
@@ -37,6 +38,8 @@ func newController() *Controller {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: "argo-events",
 		},
+		clientImage:   "argoproj/gateway-client",
+		gatewayImages: map[apicommon.EventSourceType]string{apicommon.WebhookEvent: "argoproj/webhook-gateway"},
 		k8sClient:     fake.NewSimpleClientset(),
 		gatewayClient: fakegateway.NewSimpleClientset(),
 		queue:         workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),

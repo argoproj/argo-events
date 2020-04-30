@@ -57,15 +57,15 @@ type GatewayList struct {
 // GatewaySpec represents gateway specifications
 type GatewaySpec struct {
 	// Template is the pod specification for the gateway
-	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core
-	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,1,opt,name=template"`
+	// +optional
+	Template Template `json:"template,omitempty" protobuf:"bytes,1,opt,name=template"`
 	// EventSourceRef refers to event-source that stores event source configurations for the gateway
 	EventSourceRef *EventSourceRef `json:"eventSourceRef,omitempty" protobuf:"bytes,2,opt,name=eventSourceRef"`
 	// Type is the type of gateway. Used as metadata.
 	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// Service is the specifications of the service to expose the gateway
-	// Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core
-	Service *corev1.Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
+	// +optional
+	Service *Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
 	// Subscribers holds the contexts of the subscribers/sinks to send events to.
 	// +listType=subscribers
 	// +optional
@@ -74,6 +74,37 @@ type GatewaySpec struct {
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
 	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
+}
+
+// Template holds the information of a Gateway deployment template
+type Template struct {
+	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	// Container is the main container image to run in the gateway pod
+	// +optional
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	// Volumes is a list of volumes that can be mounted by containers in a workflow.
+	// +patchStrategy=merge
+	// +patchMergeKey=name
+	// +optional
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,opt,name=volumes"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
+	// +optional
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+}
+
+// Service holds the service information gateway exposes
+type Service struct {
+	// The list of ports that are exposed by this service.
+	// +patchMergeKey=port
+	// +patchStrategy=merge
+	// +listType=map
+	// +listMapKey=port
+	// +listMapKey=protocol
+	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,1,rep,name=ports"`
 }
 
 type Subscribers struct {

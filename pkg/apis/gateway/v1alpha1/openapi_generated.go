@@ -37,7 +37,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":   schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber":  schema_pkg_apis_gateway_v1alpha1_NATSSubscriber(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":      schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service":         schema_pkg_apis_gateway_v1alpha1_Service(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers":     schema_pkg_apis_gateway_v1alpha1_Subscribers(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template":        schema_pkg_apis_gateway_v1alpha1_Template(ref),
 	}
 }
 
@@ -203,8 +205,8 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
+							Description: "Template is the pod specification for the gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template"),
 						},
 					},
 					"eventSourceRef": {
@@ -222,8 +224,8 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 					},
 					"service": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-							Ref:         ref("k8s.io/api/core/v1.Service"),
+							Description: "Service is the specifications of the service to expose the gateway",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service"),
 						},
 					},
 					"subscribers": {
@@ -252,11 +254,11 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"template", "type", "processorPort"},
+				Required: []string{"type", "processorPort"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers", "k8s.io/api/core/v1.PodTemplateSpec", "k8s.io/api/core/v1.Service"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.EventSourceRef", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Subscribers", "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Template"},
 	}
 }
 
@@ -408,6 +410,45 @@ func schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref common.ReferenceCallback) c
 	}
 }
 
+func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Service holds the service information gateway exposes",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"ports": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-map-keys": []interface{}{
+									"port",
+									"protocol",
+								},
+								"x-kubernetes-list-type":       "map",
+								"x-kubernetes-patch-merge-key": "port",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "The list of ports that are exposed by this service.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.ServicePort"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.ServicePort"},
+	}
+}
+
 func schema_pkg_apis_gateway_v1alpha1_Subscribers(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -456,5 +497,58 @@ func schema_pkg_apis_gateway_v1alpha1_Subscribers(ref common.ReferenceCallback) 
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber"},
+	}
+}
+
+func schema_pkg_apis_gateway_v1alpha1_Template(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Template holds the information of a Gateway deployment template",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"serviceAccountName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"container": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Container is the main container image to run in the gateway pod",
+							Ref:         ref("k8s.io/api/core/v1.Container"),
+						},
+					},
+					"volumes": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "name",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.Volume"),
+									},
+								},
+							},
+						},
+					},
+					"securityContext": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+							Ref:         ref("k8s.io/api/core/v1.PodSecurityContext"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Volume"},
 	}
 }

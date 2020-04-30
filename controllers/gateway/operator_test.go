@@ -61,7 +61,7 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 		{
 			name: "process a updated gateway object",
 			updateStateFunc: func() {
-				ctx.gateway.Spec.Template.Spec.Containers[0].Name = "new-name"
+				ctx.gateway.Spec.Template.ServiceAccountName = "new-sa"
 			},
 			testFunc: func(oldMetadata *v1alpha1.GatewayResource) {
 				currentMetadata := ctx.gateway.Status.Resources.DeepCopy()
@@ -73,7 +73,6 @@ func TestGatewayOperateLifecycle(t *testing.T) {
 			name: "process a gateway object in error",
 			updateStateFunc: func() {
 				ctx.gateway.Status.Phase = v1alpha1.NodePhaseError
-				ctx.gateway.Spec.Template.Spec.Containers[0].Name = "fixed-name"
 			},
 			testFunc: func(oldMetadata *v1alpha1.GatewayResource) {
 				currentMetadata := ctx.gateway.Status.Resources.DeepCopy()
