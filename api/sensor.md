@@ -470,7 +470,8 @@ Description
 
 <td>
 
-<code>s3</code></br> <em> Argo Events common.S3Artifact </em>
+<code>s3</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 </td>
 
@@ -4152,17 +4153,17 @@ outputs from this sensor.
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
+Template is the pod specification for the sensor
 
 </p>
 
@@ -4517,17 +4518,17 @@ outputs from this sensor.
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
+Template is the pod specification for the sensor
 
 </p>
 
@@ -5507,6 +5508,156 @@ ClientCertPath refers the file path that contains client cert.
 <p>
 
 ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Template">
+
+Template
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Template holds the information of a sensor deployment template
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serviceAccountName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ServiceAccountName is the name of the ServiceAccount to use to run
+gateway pod. More info:
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>container</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+Kubernetes core/v1.Container </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Container is the main container image to run in the gateway pod
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumes</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+\[\]Kubernetes core/v1.Volume </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Volumes is a list of volumes that can be mounted by containers in a
+workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
 
 </p>
 
@@ -6704,6 +6855,6 @@ VerifyCert decides whether the connection is secure or not
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>2bedd9d</code>. </em>
+commit <code>8c611e5</code>. </em>
 
 </p>

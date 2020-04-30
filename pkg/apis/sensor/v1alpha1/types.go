@@ -132,9 +132,9 @@ type SensorSpec struct {
 	// +listType=triggers
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
-	// Template contains sensor pod specification. For more information,
-	// read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.
-	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
+	// Template is the pod specification for the sensor
+	// +optional
+	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
 	// Subscription refers to the modes of events subscriptions for the sensor.
 	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
 	Subscription *Subscription `json:"subscription" protobuf:"bytes,4,name=subscription"`
@@ -151,6 +151,26 @@ type SensorSpec struct {
 	// ServiceAnnotations refers to annotations to be set
 	// for the service generated
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
+}
+
+// Template holds the information of a sensor deployment template
+type Template struct {
+	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	// Container is the main container image to run in the gateway pod
+	// +optional
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	// Volumes is a list of volumes that can be mounted by containers in a workflow.
+	// +patchStrategy=merge
+	// +patchMergeKey=name
+	// +optional
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,opt,name=volumes"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
+	// +optional
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.

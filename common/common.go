@@ -48,6 +48,8 @@ const (
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
+	// EnvVarSensorImage refers to the default sensor image
+	EnvVarSensorImage = "SENSOR_IMAGE"
 )
 
 // Controller labels

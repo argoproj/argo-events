@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
@@ -43,8 +44,13 @@ func main() {
 		namespace = common.DefaultControllerNamespace
 	}
 
+	sensorImage, ok := os.LookupEnv(common.EnvVarSensorImage)
+	if !ok {
+		panic(fmt.Sprintf("Env var %s for sensor image is not provided", common.EnvVarSensorImage))
+	}
+
 	// create a new sensor controller
-	controller := sensor.NewController(restConfig, configMap, namespace)
+	controller := sensor.NewController(restConfig, configMap, namespace, sensorImage)
 	// watch updates to sensor controller configuration
 	err = controller.ResyncConfig(namespace)
 	if err != nil {
