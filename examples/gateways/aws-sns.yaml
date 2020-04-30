@@ -7,31 +7,11 @@ spec:
   eventSourceRef:
     name: aws-sns-event-source
   template:
-    metadata:
-      name: aws-sns-gateway
-      labels:
-        gateway-name: aws-sns-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: aws-sns-events
-          image: argoproj/aws-sns-gateway:v0.13.0
-          imagePullPolicy: Always
-          command: ["/bin/aws-sns-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: aws-sns-gateway-svc
-    spec:
-      selector:
-        gateway-name: aws-sns-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
       - "http://aws-sns-sensor.argo-events.svc:9300/"

@@ -279,6 +279,12 @@ spec:
               fieldPath: metadata.namespace
         - name: CONTROLLER_CONFIG_MAP
           value: gateway-controller-configmap
+        - name: GATEWAY_CLIENT_IMAGE
+          value: argoproj/gateway-client:v0.14.0
+        - name: GATEWAY_IMAGE_REGISTRY
+          value: docker.io
+        - name: GATEWAY_IMAGE_VERSION
+          value: v0.14.0
         image: argoproj/gateway-controller:v0.14.0
         name: gateway-controller
       serviceAccountName: argo-events-sa
@@ -305,6 +311,8 @@ spec:
               fieldPath: metadata.namespace
         - name: CONTROLLER_CONFIG_MAP
           value: sensor-controller-configmap
+        - name: SENSOR_IMAGE
+          value: argoproj/sensor:v0.14.0
         image: argoproj/sensor-controller:v0.14.0
         name: sensor-controller
       serviceAccountName: argo-events-sa

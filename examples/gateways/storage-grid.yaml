@@ -7,30 +7,11 @@ spec:
   eventSourceRef:
     name: storage-grid-event-source
   template:
-    metadata:
-      name: storage-grid-gateway
-      labels:
-        gateway-name: storage-grid-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: storage-grid-events
-          image: argoproj/storage-grid-gateway:v0.14.0
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: storage-grid-gateway-svc
-    spec:
-      selector:
-        gateway-name: storage-grid-gateway
-      ports:
-        - port: 8080
-          targetPort: 8080
-      type: LoadBalancer
+    ports:
+      - port: 8080
+        targetPort: 8080
   subscribers:
     http:
       - "http://storage-grid-watcher-sensor.argo-events.svc:9300/"

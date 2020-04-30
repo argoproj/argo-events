@@ -4,19 +4,15 @@ metadata:
   name: webhook-sensor
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.14.0
-          imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: /workflows/hello_world.yaml
-              name: workflow-file
-      volumes:
-        - name: workflow-file
-          configMap:
-            name: configmap-that-contains-the-workflow-definition
-      serviceAccountName: argo-events-sa
+    container:
+      volumeMounts:
+        - mountPath: /workflows/hello_world.yaml
+          name: workflow-file
+    volumes:
+      - name: workflow-file
+        configMap:
+          name: configmap-that-contains-the-workflow-definition
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       gatewayName: webhook-gateway

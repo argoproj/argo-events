@@ -7,21 +7,7 @@ spec:
   eventSourceRef:
     name: nsq-event-source
   template:
-    metadata:
-      name: nsq-gateway
-      labels:
-        gateway-name: nsq-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: nsq-events
-          image: argoproj/nsq-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/nsq-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://nsq-sensor.argo-events.svc:9300/"

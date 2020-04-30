@@ -7,20 +7,7 @@ spec:
   eventSourceRef:
     name: minio-event-source
   template:
-    metadata:
-      name: minio-gateway
-      labels:
-        gateway-name: minio-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: minio-events
-          image: argoproj/artifact-gateway:v0.14.0
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://minio-sensor.argo-events.svc:9300/"

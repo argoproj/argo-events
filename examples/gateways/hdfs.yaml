@@ -3,26 +3,11 @@ kind: Gateway
 metadata:
   name: hdfs-gateway
 spec:
-  replica: 1
   type: hdfs
   eventSourceRef:
     name: hdfs-event-source
   template:
-    metadata:
-      name: hdfs-gateway
-      labels:
-        gateway-name: hdfs-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: hdfs-events
-          image: argoproj/hdfs-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/hdfs-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   watchers:
     http:
       - "http://hdfs-sensor.argo-events.svc:9300/"

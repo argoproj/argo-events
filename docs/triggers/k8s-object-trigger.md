@@ -33,12 +33,7 @@ set up event-driven pipelines for existing workloads.
           name: webhook-sensor
         spec:
           template:
-            spec:
-              containers:
-                - name: sensor
-                  image: argoproj/sensor:v0.13.0
-                  imagePullPolicy: Always
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               gatewayName: webhook-gateway

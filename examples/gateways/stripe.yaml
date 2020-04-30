@@ -7,21 +7,7 @@ spec:
   eventSourceRef:
     name: stripe-event-source
   template:
-    metadata:
-      name: stripe-gateway
-      labels:
-        gateway-name: stripe-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: stripe-events
-          image: argoproj/stripe-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/stripe-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://stripe-sensor.argo-events.svc:9300/"
