@@ -58,7 +58,7 @@ func TestOperate(t *testing.T) {
 		{
 			name: "process a sensor object update",
 			updateFunc: func() {
-				ctx.sensor.Spec.Template.Spec.Containers[0].Name = "updated-name"
+				ctx.sensor.Spec.Template.ServiceAccountName = "updated-name"
 			},
 			testFunc: func(oldMetadata *v1alpha1.SensorResources) {
 				assert.NotNil(t, ctx.sensor.Status.Resources)
@@ -67,7 +67,7 @@ func TestOperate(t *testing.T) {
 				assert.Nil(t, err)
 				assert.NotNil(t, deployment)
 				assert.NotEqual(t, oldMetadata.Deployment.Annotations[common.AnnotationResourceSpecHash], deployment.Annotations[common.AnnotationResourceSpecHash])
-				assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Name, "updated-name")
+				assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Name, "main")
 				service, err := controller.k8sClient.CoreV1().Services(metadata.Service.Namespace).Get(metadata.Service.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, service)
@@ -81,7 +81,7 @@ func TestOperate(t *testing.T) {
 			updateFunc: func() {
 				ctx.sensor.Status.Phase = v1alpha1.NodePhaseError
 				ctx.sensor.Status.Message = "sensor is in error state"
-				ctx.sensor.Spec.Template.Spec.Containers[0].Name = "revert-name"
+				ctx.sensor.Spec.Template.ServiceAccountName = "revert-name"
 			},
 			testFunc: func(oldMetadata *v1alpha1.SensorResources) {
 				assert.Equal(t, v1alpha1.NodePhaseActive, ctx.sensor.Status.Phase)

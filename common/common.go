@@ -54,6 +54,8 @@ const (
 	EnvVarImageRegistry = "GATEWAY_IMAGE_REGISTRY"
 	// EnvVarImageVersion refers to the version of the gateway images
 	EnvVarImageVersion = "GATEWAY_IMAGE_VERSION"
+	// EnvVarSensorImage refers to the default sensor image
+	EnvVarSensorImage = "SENSOR_IMAGE"
 )
 
 // Controller labels

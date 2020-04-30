@@ -24,6 +24,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/util/workqueue"
@@ -43,6 +44,19 @@ func getController() *Controller {
 			Namespace:  common.DefaultControllerNamespace,
 			InstanceID: SensorControllerInstanceID,
 		},
+		TemplateSpec: &corev1.PodTemplateSpec{
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
+					{
+						Name:            "sensor",
+						Image:           "argoproj/sensor",
+						ImagePullPolicy: corev1.PullAlways,
+					},
+				},
+				ServiceAccountName: "fake-sa",
+			},
+		},
+		sensorImage:  "sensor-image",
 		k8sClient:    clientset,
 		sensorClient: fakesensor.NewSimpleClientset(),
 		queue:        workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
