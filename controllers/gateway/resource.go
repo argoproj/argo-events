@@ -17,6 +17,10 @@ limitations under the License.
 package gateway
 
 import (
+	"fmt"
+
+	"github.com/imdario/mergo"
+
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
@@ -24,53 +28,110 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // buildServiceResource builds a new service that exposes gateway.
 func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
-	if ctx.gateway.Spec.Service == nil {
+	if ctx.gateway.Spec.Service == nil || len(ctx.gateway.Spec.Service.Ports) == 0 {
 		return nil, nil
 	}
-	service := ctx.gateway.Spec.Service.DeepCopy()
-	if err := controllerscommon.SetObjectMeta(ctx.gateway, service, v1alpha1.SchemaGroupVersionKind); err != nil {
+	labels := map[string]string{
+		common.LabelObjectName:  ctx.gateway.Name,
+		common.LabelGatewayName: ctx.gateway.Name,
+	}
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+		},
+		Spec: corev1.ServiceSpec{
+			Ports:    ctx.gateway.Spec.Service.Ports,
+			Type:     corev1.ServiceTypeClusterIP,
+			Selector: labels,
+		},
+	}
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
-	return service, nil
+	return svc, nil
+}
+
+func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
+	replicas := int32(ctx.gateway.Spec.Replica)
+	if replicas == 0 {
+		replicas = 1
+	}
+	defaultGatewayImage, ok := ctx.controller.gatewayImages[ctx.gateway.Spec.Type]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("default image can not found for gateway type %s", ctx.gateway.Spec.Type))
+	}
+
+	labels := map[string]string{
+		common.LabelGatewayName: ctx.gateway.Name,
+		common.LabelObjectName:  ctx.gateway.Name,
+	}
+
+	eventContainer := corev1.Container{
+		Name:            "main",
+		Image:           defaultGatewayImage,
+		ImagePullPolicy: corev1.PullAlways,
+	}
+
+	if ctx.gateway.Spec.Template.Container != nil {
+		mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride)
+	}
+
+	return &appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: ctx.gateway.Spec.Template.ServiceAccountName,
+				Containers: []corev1.Container{
+					{
+						Name:            "gateway-client",
+						Image:           ctx.controller.clientImage,
+						ImagePullPolicy: corev1.PullAlways,
+						Resources: corev1.ResourceRequirements{
+							Requests: corev1.ResourceList{
+								corev1.ResourceCPU:    apiresource.MustParse("50m"),
+								corev1.ResourceMemory: apiresource.MustParse("64Mi"),
+							},
+							Limits: corev1.ResourceList{
+								corev1.ResourceCPU:    apiresource.MustParse("500m"),
+								corev1.ResourceMemory: apiresource.MustParse("128Mi"),
+							},
+						},
+					},
+					eventContainer,
+				},
+				Volumes:         ctx.gateway.Spec.Template.Volumes,
+				SecurityContext: ctx.gateway.Spec.Template.SecurityContext,
+			},
+		},
+	}, nil
 }
 
 // buildDeploymentResource builds a deployment resource for the gateway
 func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
-	if ctx.gateway.Spec.Template == nil {
-		return nil, errors.New("gateway template can't be empty")
+	deploymentSpec, err := ctx.makeDeploymentSpec()
+	if err != nil {
+		return nil, err
 	}
-
-	podTemplate := ctx.gateway.Spec.Template.DeepCopy()
-
-	replica := int32(ctx.gateway.Spec.Replica)
-	if replica == 0 {
-		replica = 1
-	}
-
 	deployment := &appv1.Deployment{
-		ObjectMeta: podTemplate.ObjectMeta,
-		Spec: appv1.DeploymentSpec{
-			Replicas: &replica,
-			Template: *podTemplate,
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    ctx.gateway.Namespace,
+			GenerateName: fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name),
+			Labels:       deploymentSpec.Template.Labels,
 		},
+		Spec: *deploymentSpec,
 	}
-
-	if deployment.Spec.Template.Labels == nil {
-		deployment.Spec.Template.Labels = map[string]string{}
-	}
-	deployment.Spec.Template.Labels[common.LabelObjectName] = ctx.gateway.Name
-
-	if deployment.Spec.Selector == nil {
-		deployment.Spec.Selector = &metav1.LabelSelector{
-			MatchLabels: map[string]string{},
-		}
-	}
-	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = ctx.gateway.Name
 
 	processorPort := ctx.gateway.Spec.ProcessorPort
 	if processorPort == "" {
@@ -125,14 +186,15 @@ func (ctx *gatewayContext) createGatewayResources() error {
 	ctx.gateway.Status.Resources.Deployment = &deployment.ObjectMeta
 	ctx.logger.WithField("name", deployment.Name).WithField("namespace", deployment.Namespace).Infoln("gateway deployment is created")
 
-	if ctx.gateway.Spec.Service != nil {
-		service, err := ctx.createGatewayService()
-		if err != nil {
-			return err
-		}
-		ctx.gateway.Status.Resources.Service = &service.ObjectMeta
-		ctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is created")
+	service, err := ctx.createGatewayService()
+	if err != nil {
+		return err
 	}
+	if service == nil {
+		return nil
+	}
+	ctx.gateway.Status.Resources.Service = &service.ObjectMeta
+	ctx.logger.WithField("name", service.Name).WithField("namespace", service.Namespace).Infoln("gateway service is created")
 
 	return nil
 }
@@ -143,7 +205,7 @@ func (ctx *gatewayContext) createGatewayDeployment() (*appv1.Deployment, error) 
 	if err != nil {
 		return nil, err
 	}
-	return ctx.controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+	return ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Create(deployment)
 }
 
 // createGatewayService creates a service for the gateway
@@ -152,7 +214,10 @@ func (ctx *gatewayContext) createGatewayService() (*corev1.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ctx.controller.k8sClient.CoreV1().Services(svc.Namespace).Create(svc)
+	if svc == nil {
+		return nil, nil
+	}
+	return ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Create(svc)
 }
 
 // updateGatewayResources updates gateway deployment and service
@@ -191,21 +256,20 @@ func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) 
 		return nil, errors.New("deployment metadata is expected to be set in gateway object")
 	}
 
-	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierr.IsNotFound(err) {
 			ctx.updated = true
-			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+			return ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Create(newDeployment)
 		}
 		return nil, err
 	}
 
 	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
 		ctx.updated = true
-		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
-			return nil, err
-		}
-		return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+		currentDeployment.Spec = newDeployment.Spec
+		currentDeployment.Annotations[common.AnnotationResourceSpecHash] = newDeployment.Annotations[common.AnnotationResourceSpecHash]
+		return ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Update(currentDeployment)
 	}
 
 	return nil, nil
@@ -219,7 +283,7 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 	}
 	if newService == nil && ctx.gateway.Status.Resources.Service != nil {
 		ctx.updated = true
-		if err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Status.Resources.Service.Namespace).Delete(ctx.gateway.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
+		if err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Delete(ctx.gateway.Status.Resources.Service.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
 		return nil, nil
@@ -231,14 +295,14 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 
 	if ctx.gateway.Status.Resources.Service == nil {
 		ctx.updated = true
-		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+		return ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Create(newService)
 	}
 
 	currentMetadata := ctx.gateway.Status.Resources.Service
-	currentService, err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	currentService, err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		ctx.updated = true
-		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
+		return ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Create(newService)
 	}
 
 	if currentMetadata == nil {
@@ -247,12 +311,10 @@ func (ctx *gatewayContext) updateGatewayService() (*corev1.Service, error) {
 
 	if currentService.Annotations != nil && currentService.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
 		ctx.updated = true
-		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
+		if err := ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
 			return nil, err
 		}
-		if ctx.gateway.Spec.Service != nil {
-			return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
-		}
+		return ctx.controller.k8sClient.CoreV1().Services(ctx.gateway.Namespace).Create(newService)
 	}
 
 	return currentService, nil

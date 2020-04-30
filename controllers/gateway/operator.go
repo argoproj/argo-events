@@ -181,6 +181,5 @@ func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus
 		log.WithError(err).Warn("error updating the gateway")
 		return nil, err
 	}
-
 	return obj, nil
 }

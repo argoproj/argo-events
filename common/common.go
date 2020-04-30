@@ -48,6 +48,12 @@ const (
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
+	// EnvVarClientImage refers to the env var for gateway client image
+	EnvVarClientImage = "GATEWAY_CLIENT_IMAGE"
+	// EnvVarImageRegistry refers to the default image registry of gateway images
+	EnvVarImageRegistry = "GATEWAY_IMAGE_REGISTRY"
+	// EnvVarImageVersion refers to the version of the gateway images
+	EnvVarImageVersion = "GATEWAY_IMAGE_VERSION"
 	// EnvVarSensorImage refers to the default sensor image
 	EnvVarSensorImage = "SENSOR_IMAGE"
 )
@@ -104,6 +110,8 @@ const (
 	LabelOwnerName = "owner-name"
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
+	//LabelGatewayName is the label for gateway name
+	LabelGatewayName = "gateway-name"
 )
 
 // various supported media types

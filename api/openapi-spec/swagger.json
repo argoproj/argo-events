@@ -767,7 +767,6 @@
       "description": "GatewaySpec represents gateway specifications",
       "type": "object",
       "required": [
-        "template",
         "type",
         "processorPort"
       ],
@@ -786,8 +785,8 @@
           "format": "int32"
         },
         "service": {
-          "description": "Service is the specifications of the service to expose the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#service-v1-core",
-          "$ref": "#/definitions/io.k8s.api.core.v1.Service"
+          "description": "Service is the specifications of the service to expose the gateway",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Service"
         },
         "subscribers": {
           "description": "Subscribers holds the contexts of the subscribers/sinks to send events to.",
@@ -795,8 +794,8 @@
           "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Subscribers"
         },
         "template": {
-          "description": "Template is the pod specification for the gateway Refer https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core",
-          "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
+          "description": "Template is the pod specification for the gateway",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Template"
         },
         "type": {
           "description": "Type is the type of gateway. Used as metadata.",
@@ -896,6 +895,26 @@
         }
       }
     },
+    "io.argoproj.gateway.v1alpha1.Service": {
+      "description": "Service holds the service information gateway exposes",
+      "type": "object",
+      "properties": {
+        "ports": {
+          "description": "The list of ports that are exposed by this service.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.ServicePort"
+          },
+          "x-kubernetes-list-map-keys": [
+            "port",
+            "protocol"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "port",
+          "x-kubernetes-patch-strategy": "merge"
+        }
+      }
+    },
     "io.argoproj.gateway.v1alpha1.Subscribers": {
       "type": "object",
       "properties": {
@@ -914,6 +933,33 @@
             "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NATSSubscriber"
           },
           "x-kubernetes-list-type": "NATSSubscriber"
+        }
+      }
+    },
+    "io.argoproj.gateway.v1alpha1.Template": {
+      "description": "Template holds the information of a Gateway deployment template",
+      "type": "object",
+      "properties": {
+        "container": {
+          "description": "Container is the main container image to run in the gateway pod",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "securityContext": {
+          "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext"
+        },
+        "serviceAccountName": {
+          "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+          "type": "string"
+        },
+        "volumes": {
+          "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Volume"
+          },
+          "x-kubernetes-patch-merge-key": "name",
+          "x-kubernetes-patch-strategy": "merge"
         }
       }
     },
