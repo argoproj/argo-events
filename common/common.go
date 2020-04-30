@@ -66,8 +66,6 @@ const (
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve controller configuration from.
 	// Content encoding is expected to be YAML.
 	ControllerConfigMapKey = "config"
-	// GatewayTemplatesConfigMapKey is the key in the configmap to retrieve Gateway templates configuration.
-	GatewayTemplatesConfigMapKey = "gateway-templates"
 )
 
 // Sensor constants
