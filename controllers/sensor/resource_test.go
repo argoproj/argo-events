@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -32,17 +33,21 @@ var sensorObj = &v1alpha1.Sensor{
 		Namespace: "faker",
 	},
 	Spec: v1alpha1.SensorSpec{
-		Template: &corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "fake-sensor",
-				Namespace: "faker",
-			},
-			Spec: corev1.PodSpec{
-				Containers: []corev1.Container{
+		Template: v1alpha1.Template{
+			ServiceAccountName: "fake-sa",
+			Container: &corev1.Container{
+				VolumeMounts: []corev1.VolumeMount{
 					{
-						Name:            "fake-sensor",
-						ImagePullPolicy: corev1.PullAlways,
-						Image:           "argoproj/sensor",
+						MountPath: "/test-data",
+						Name:      "test-data",
+					},
+				},
+			},
+			Volumes: []corev1.Volume{
+				{
+					Name: "test-data",
+					VolumeSource: corev1.VolumeSource{
+						EmptyDir: &corev1.EmptyDirVolumeSource{},
 					},
 				},
 			},
@@ -192,10 +197,7 @@ func TestResource_UpdateResources(t *testing.T) {
 			{
 				name: "update deployment when sensor template is updated",
 				updateFunc: func() {
-					if ctx.sensor.Spec.Template == nil {
-						ctx.sensor.Spec.Template = &corev1.PodTemplateSpec{}
-					}
-					ctx.sensor.Spec.Template.Spec.ServiceAccountName = "updated-sa-name"
+					ctx.sensor.Spec.Template.ServiceAccountName = "updated-sa-name"
 				},
 				testFunc: func(t *testing.T, oldResources *v1alpha1.SensorResources) {
 					oldDeployment := oldResources.Deployment

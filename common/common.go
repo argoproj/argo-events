@@ -48,6 +48,8 @@ const (
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
+	// EnvVarSensorImage refers to the default sensor image
+	EnvVarSensorImage = "SENSOR_IMAGE"
 )
 
 // Controller labels
@@ -60,8 +62,6 @@ const (
 	// GatewayControllerConfigMapKey is the key in the configmap to retrieve controller configuration from.
 	// Content encoding is expected to be YAML.
 	ControllerConfigMapKey = "config"
-	// SensorTemplateConfigKey is the key in the configmap to retrieve Sensor deployment template spec.
-	SensorTemplateConfigKey = "sensor-template"
 )
 
 // Sensor constants

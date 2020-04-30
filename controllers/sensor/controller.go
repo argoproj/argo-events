@@ -60,6 +60,8 @@ type Controller struct {
 	Config ControllerConfig
 	// TemplateSpec is the default Sensor pod template spec
 	TemplateSpec *corev1.PodTemplateSpec
+	// sensorImage is the image for sensor deployment
+	sensorImage string
 	// logger to logger stuff
 	logger *logrus.Logger
 	// kubeConfig is the rest K8s config
@@ -75,11 +77,12 @@ type Controller struct {
 }
 
 // NewController creates a new Controller
-func NewController(rest *rest.Config, configMap, namespace string) *Controller {
+func NewController(rest *rest.Config, configMap, namespace, sensorImage string) *Controller {
 	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &Controller{
 		ConfigMap:    configMap,
 		Namespace:    namespace,
+		sensorImage:  sensorImage,
 		kubeConfig:   rest,
 		k8sClient:    kubernetes.NewForConfigOrDie(rest),
 		sensorClient: clientset.NewForConfigOrDie(rest),

@@ -1804,7 +1804,6 @@
       "required": [
         "dependencies",
         "triggers",
-        "template",
         "subscription"
       ],
       "properties": {
@@ -1851,8 +1850,8 @@
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Subscription"
         },
         "template": {
-          "description": "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.",
-          "$ref": "#/definitions/io.k8s.api.core.v1.PodTemplateSpec"
+          "description": "Template is the pod specification for the sensor",
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Template"
         },
         "triggers": {
           "description": "Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.",
@@ -2026,6 +2025,33 @@
         "clientKeyPath": {
           "description": "ClientKeyPath refers the file path that contains client key.",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.Template": {
+      "description": "Template holds the information of a sensor deployment template",
+      "type": "object",
+      "properties": {
+        "container": {
+          "description": "Container is the main container image to run in the gateway pod",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "securityContext": {
+          "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext"
+        },
+        "serviceAccountName": {
+          "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+          "type": "string"
+        },
+        "volumes": {
+          "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Volume"
+          },
+          "x-kubernetes-patch-merge-key": "name",
+          "x-kubernetes-patch-strategy": "merge"
         }
       }
     },

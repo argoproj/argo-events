@@ -79,39 +79,50 @@ func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
 	return service, nil
 }
 
-// deploymentBuilder builds the deployment specification for the sensor
-func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
+func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
 	replicas := int32(1)
-	var podTemplateSpec *corev1.PodTemplateSpec
-	if ctx.controller.TemplateSpec != nil {
-		podTemplateSpec = ctx.controller.TemplateSpec.DeepCopy()
+	labels := map[string]string{
+		common.LabelObjectName: ctx.sensor.Name,
 	}
-	if ctx.sensor.Spec.Template != nil {
-		err := mergo.MergeWithOverwrite(podTemplateSpec, *ctx.sensor.Spec.Template)
-		if err != nil {
-			return nil, err
-		}
+	sensorContainer := corev1.Container{
+		Image:           ctx.controller.sensorImage,
+		ImagePullPolicy: corev1.PullAlways,
 	}
-	if podTemplateSpec == nil {
-		return nil, errors.New("sensor template can't be empty")
+	if ctx.sensor.Spec.Template.Container != nil {
+		mergo.Merge(&sensorContainer, ctx.sensor.Spec.Template.Container, mergo.WithOverride)
 	}
-
-	// use an unique name to avoid potential conflict with existing deployments
-	podTemplateSpec.ObjectMeta.GenerateName = fmt.Sprintf("%s-sensor-", ctx.sensor.Name)
-
-	if podTemplateSpec.Labels == nil {
-		podTemplateSpec.Labels = map[string]string{}
-	}
-	podTemplateSpec.Labels[common.LabelOwnerName] = ctx.sensor.Name
-	deployment := &appv1.Deployment{
-		ObjectMeta: podTemplateSpec.ObjectMeta,
-		Spec: appv1.DeploymentSpec{
-			Template: *podTemplateSpec,
-			Replicas: &replicas,
-			Selector: &metav1.LabelSelector{
-				MatchLabels: podTemplateSpec.Labels,
+	sensorContainer.Name = "main"
+	return appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: ctx.sensor.Spec.Template.ServiceAccountName,
+				Containers: []corev1.Container{
+					sensorContainer,
+				},
+				Volumes:         ctx.sensor.Spec.Template.Volumes,
+				SecurityContext: ctx.sensor.Spec.Template.SecurityContext,
 			},
 		},
+	}
+}
+
+// deploymentBuilder builds the deployment specification for the sensor
+func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
+	deploymentSpec := ctx.makeDeploymentSpec()
+	deployment := &appv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    ctx.sensor.Namespace,
+			GenerateName: fmt.Sprintf("%s-sensor-", ctx.sensor.Name),
+			Labels:       deploymentSpec.Template.Labels,
+		},
+		Spec: deploymentSpec,
 	}
 	envVars := []corev1.EnvVar{
 		{
@@ -139,12 +150,12 @@ func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
 
 // createDeployment creates a deployment for the sensor
 func (ctx *sensorContext) createDeployment(deployment *appv1.Deployment) (*appv1.Deployment, error) {
-	return ctx.controller.k8sClient.AppsV1().Deployments(deployment.Namespace).Create(deployment)
+	return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Create(deployment)
 }
 
 // createService creates a service for the sensor
 func (ctx *sensorContext) createService(service *corev1.Service) (*corev1.Service, error) {
-	return ctx.controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
+	return ctx.controller.k8sClient.CoreV1().Services(ctx.sensor.Namespace).Create(service)
 }
 
 // updateDeployment updates the deployment for the sensor
@@ -159,21 +170,20 @@ func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
 		return nil, errors.New("deployment metadata is expected to be set in sensor object")
 	}
 
-	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierror.IsNotFound(err) {
 			ctx.updated = true
-			return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+			return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Create(newDeployment)
 		}
 		return nil, err
 	}
 
 	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
 		ctx.updated = true
-		if err := ctx.controller.k8sClient.AppsV1().Deployments(currentDeployment.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
-			return nil, err
-		}
-		return ctx.controller.k8sClient.AppsV1().Deployments(newDeployment.Namespace).Create(newDeployment)
+		currentDeployment.Spec = newDeployment.Spec
+		currentDeployment.Annotations[common.AnnotationResourceSpecHash] = newDeployment.Annotations[common.AnnotationResourceSpecHash]
+		return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Update(currentDeployment)
 	}
 	return currentDeployment, nil
 }

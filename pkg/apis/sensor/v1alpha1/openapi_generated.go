@@ -64,6 +64,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription":           schema_pkg_apis_sensor_v1alpha1_Subscription(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig":              schema_pkg_apis_sensor_v1alpha1_TLSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template":               schema_pkg_apis_sensor_v1alpha1_Template(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TimeFilter":             schema_pkg_apis_sensor_v1alpha1_TimeFilter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger":                schema_pkg_apis_sensor_v1alpha1_Trigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter":       schema_pkg_apis_sensor_v1alpha1_TriggerParameter(ref),
@@ -1622,8 +1623,8 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"template": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Template contains sensor pod specification. For more information, read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.",
-							Ref:         ref("k8s.io/api/core/v1.PodTemplateSpec"),
+							Description: "Template is the pod specification for the sensor",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template"),
 						},
 					},
 					"subscription": {
@@ -1695,11 +1696,11 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"dependencies", "triggers", "template", "subscription"},
+				Required: []string{"dependencies", "triggers", "subscription"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger", "k8s.io/api/core/v1.PodTemplateSpec"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.DependencyGroup", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.EventDependency", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Trigger"},
 	}
 }
 
@@ -1985,6 +1986,59 @@ func schema_pkg_apis_sensor_v1alpha1_TLSConfig(ref common.ReferenceCallback) com
 				Required: []string{"caCertPath", "clientCertPath", "clientKeyPath"},
 			},
 		},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Template holds the information of a sensor deployment template",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"serviceAccountName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"container": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Container is the main container image to run in the gateway pod",
+							Ref:         ref("k8s.io/api/core/v1.Container"),
+						},
+					},
+					"volumes": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "name",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Description: "Volumes is a list of volumes that can be mounted by containers in a workflow.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.Volume"),
+									},
+								},
+							},
+						},
+					},
+					"securityContext": {
+						SchemaProps: spec.SchemaProps{
+							Description: "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
+							Ref:         ref("k8s.io/api/core/v1.PodSecurityContext"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Volume"},
 	}
 }
 

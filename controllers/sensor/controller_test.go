@@ -56,6 +56,7 @@ func getController() *Controller {
 				ServiceAccountName: "fake-sa",
 			},
 		},
+		sensorImage:  "sensor-image",
 		k8sClient:    clientset,
 		sensorClient: fakesensor.NewSimpleClientset(),
 		queue:        workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter()),
