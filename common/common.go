@@ -48,6 +48,12 @@ const (
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
+	// EnvVarClientImage refers to the env var for gateway client image
+	EnvVarClientImage = "GATEWAY_CLIENT_IMAGE"
+	// EnvVarImageRegistry refers to the default image registry of gateway images
+	EnvVarImageRegistry = "GATEWAY_IMAGE_REGISTRY"
+	// EnvVarImageVersion refers to the version of the gateway images
+	EnvVarImageVersion = "GATEWAY_IMAGE_VERSION"
 )
 
 // Controller labels

@@ -19,6 +19,8 @@ package gateway
 import (
 	"fmt"
 
+	"github.com/imdario/mergo"
+
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
@@ -31,74 +33,94 @@ import (
 
 // buildServiceResource builds a new service that exposes gateway.
 func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
-	var svc *corev1.Service
-	if template, ok := ctx.controller.TemplatesConfig[ctx.gateway.Spec.Type]; ok {
-		if template.Service != nil {
-			svc = template.Service.DeepCopy()
-		}
-	}
-	if ctx.gateway.Spec.Service != nil {
-		svc = common.CopyServiceSpec(svc, ctx.gateway.Spec.Service)
-	}
-	if svc == nil {
+	if ctx.gateway.Spec.Service == nil || len(ctx.gateway.Spec.Service.Ports) == 0 {
 		return nil, nil
 	}
-	svc.Name = fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name)
-	if svc.Spec.Selector == nil {
-		svc.Spec.Selector = make(map[string]string)
+	labels := map[string]string{
+		common.LabelObjectName:  ctx.gateway.Name,
+		common.LabelGatewayName: ctx.gateway.Name,
 	}
-	svc.Spec.Selector[common.LabelGatewayName] = ctx.gateway.Name
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+		},
+		Spec: corev1.ServiceSpec{
+			Ports:    ctx.gateway.Spec.Service.Ports,
+			Type:     corev1.ServiceTypeClusterIP,
+			Selector: labels,
+		},
+	}
 	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return svc, nil
 }
 
+func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
+	replicas := int32(ctx.gateway.Spec.Replica)
+	if replicas == 0 {
+		replicas = 1
+	}
+	defaultGatewayImage, ok := ctx.controller.gatewayImages[ctx.gateway.Spec.Type]
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("default image can not found for gateway type %s", ctx.gateway.Spec.Type))
+	}
+
+	labels := map[string]string{
+		common.LabelGatewayName: ctx.gateway.Name,
+		common.LabelObjectName:  ctx.gateway.Name,
+	}
+
+	eventContainer := corev1.Container{
+		Name:            "main",
+		Image:           defaultGatewayImage,
+		ImagePullPolicy: corev1.PullAlways,
+	}
+
+	if ctx.gateway.Spec.Template.Container != nil {
+		mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride)
+	}
+
+	return &appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: ctx.gateway.Spec.Template.ServiceAccountName,
+				Containers: []corev1.Container{
+					{
+						Name:            "gateway-client",
+						Image:           ctx.controller.clientImage,
+						ImagePullPolicy: corev1.PullAlways,
+					},
+					eventContainer,
+				},
+				Volumes:         ctx.gateway.Spec.Template.Volumes,
+				SecurityContext: ctx.gateway.Spec.Template.SecurityContext,
+			},
+		},
+	}, nil
+}
+
 // buildDeploymentResource builds a deployment resource for the gateway
 func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) {
-	var podTemplate *corev1.PodTemplateSpec
-	if template, ok := ctx.controller.TemplatesConfig[ctx.gateway.Spec.Type]; ok {
-		if template.Deployment != nil {
-			podTemplate = template.Deployment.DeepCopy()
-		}
+	deploymentSpec, err := ctx.makeDeploymentSpec()
+	if err != nil {
+		return nil, err
 	}
-	if ctx.gateway.Spec.Template != nil {
-		podTemplate = common.CopyDeploymentSpecTemplate(podTemplate, ctx.gateway.Spec.Template)
-	}
-	if podTemplate == nil {
-		return nil, errors.New("gateway template can't be empty")
-	}
-	// use an unique name to avoid potential conflict with existing deployments, also indicates it is an auto-generated deployment
-	podTemplate.ObjectMeta.GenerateName = fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name)
-	if podTemplate.Labels == nil {
-		podTemplate.Labels = make(map[string]string)
-	}
-	podTemplate.Labels[common.LabelGatewayName] = ctx.gateway.Name
-
-	replica := int32(ctx.gateway.Spec.Replica)
-	if replica == 0 {
-		replica = 1
-	}
-
 	deployment := &appv1.Deployment{
-		ObjectMeta: podTemplate.ObjectMeta,
-		Spec: appv1.DeploymentSpec{
-			Replicas: &replica,
-			Template: *podTemplate,
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace:    ctx.gateway.Namespace,
+			GenerateName: fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name),
+			Labels:       deploymentSpec.Template.Labels,
 		},
+		Spec: *deploymentSpec,
 	}
-
-	if deployment.Spec.Template.Labels == nil {
-		deployment.Spec.Template.Labels = map[string]string{}
-	}
-	deployment.Spec.Template.Labels[common.LabelObjectName] = ctx.gateway.Name
-
-	if deployment.Spec.Selector == nil {
-		deployment.Spec.Selector = &metav1.LabelSelector{
-			MatchLabels: map[string]string{},
-		}
-	}
-	deployment.Spec.Selector.MatchLabels[common.LabelObjectName] = ctx.gateway.Name
 
 	processorPort := ctx.gateway.Spec.ProcessorPort
 	if processorPort == "" {
@@ -234,10 +256,9 @@ func (ctx *gatewayContext) updateGatewayDeployment() (*appv1.Deployment, error) 
 
 	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
 		ctx.updated = true
-		if err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Delete(currentDeployment.Name, &metav1.DeleteOptions{}); err != nil {
-			return nil, err
-		}
-		return ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Create(newDeployment)
+		currentDeployment.Spec = newDeployment.Spec
+		currentDeployment.Annotations[common.AnnotationResourceSpecHash] = newDeployment.Annotations[common.AnnotationResourceSpecHash]
+		return ctx.controller.k8sClient.AppsV1().Deployments(ctx.gateway.Namespace).Update(currentDeployment)
 	}
 
 	return nil, nil
