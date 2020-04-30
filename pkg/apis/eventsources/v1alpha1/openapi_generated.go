@@ -1389,6 +1389,13 @@ func schema_pkg_apis_eventsources_v1alpha1_PubSubEventSource(ref common.Referenc
 							Format:      "",
 						},
 					},
+					"enableWorkflowIdentity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 					"deleteSubscriptionOnFinish": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.",

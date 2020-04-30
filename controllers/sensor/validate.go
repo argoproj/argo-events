@@ -39,9 +39,6 @@ func ValidateSensor(s *v1alpha1.Sensor) error {
 	if err != nil {
 		return err
 	}
-	if s.Spec.Template == nil {
-		return errors.Errorf("sensor pod template not defined")
-	}
 	if s.Spec.Subscription == nil {
 		return errors.New("at least one subscription must be specified")
 	}
