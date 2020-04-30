@@ -28,6 +28,7 @@ import (
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -97,6 +98,16 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 						Name:            "gateway-client",
 						Image:           ctx.controller.clientImage,
 						ImagePullPolicy: corev1.PullAlways,
+						Resources: corev1.ResourceRequirements{
+							Requests: corev1.ResourceList{
+								corev1.ResourceCPU:    apiresource.MustParse("50m"),
+								corev1.ResourceMemory: apiresource.MustParse("64Mi"),
+							},
+							Limits: corev1.ResourceList{
+								corev1.ResourceCPU:    apiresource.MustParse("500m"),
+								corev1.ResourceMemory: apiresource.MustParse("128Mi"),
+							},
+						},
 					},
 					eventContainer,
 				},
