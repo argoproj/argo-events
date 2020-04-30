@@ -31,8 +31,6 @@ set up event-driven pipelines for existing workloads.
         kind: Sensor
         metadata:
           name: webhook-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:

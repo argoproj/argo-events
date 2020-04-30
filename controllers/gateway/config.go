@@ -21,7 +21,6 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/ghodss/yaml"
-	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -102,7 +101,7 @@ func (c *Controller) ResyncConfig(namespace string) error {
 func (c *Controller) updateConfig(cm *apiv1.ConfigMap) error {
 	configStr, ok := cm.Data[common.ControllerConfigMapKey]
 	if !ok {
-		return errors.Errorf("configMap '%s' does not have key '%s'", c.ConfigMap, common.ControllerConfigMapKey)
+		return nil
 	}
 	var config ControllerConfig
 	err := yaml.Unmarshal([]byte(configStr), &config)

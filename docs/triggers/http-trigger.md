@@ -183,8 +183,6 @@ to invoke OpenFaas function.
         kind: Sensor
         metadata:
           name: redis-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:
@@ -242,8 +240,6 @@ Similar to REST API calls, you can easily invoke Kubeless functions using HTTP t
         kind: Sensor
         metadata:
           name: nats-sensor
-          labels:
-            sensors.argoproj.io/sensor-controller-instanceid: argo-events
         spec:
           template:
             spec:
