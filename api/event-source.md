@@ -5235,7 +5235,6 @@ ClientKeyPath refers the file path that contains client key.
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>fb46335</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code>. </em>
 
 </p>

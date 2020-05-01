@@ -6883,7 +6883,6 @@ VerifyCert decides whether the connection is secure or not
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>fb46335</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code>. </em>
 
 </p>
