@@ -80,6 +80,12 @@ func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
 }
 
 func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
+	// Deprecated spec, will be unsupported soon.
+	if ctx.sensor.Spec.Template.Spec != nil {
+		ctx.logger.WithField("name", ctx.sensor.Name).WithField("namespace", ctx.sensor.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
+		return ctx.makeLegacyDeploymentSpec()
+	}
+
 	replicas := int32(1)
 	labels := map[string]string{
 		common.LabelObjectName: ctx.sensor.Name,
@@ -109,6 +115,26 @@ func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
 				Volumes:         ctx.sensor.Spec.Template.Volumes,
 				SecurityContext: ctx.sensor.Spec.Template.SecurityContext,
 			},
+		},
+	}
+}
+
+// makeLegacyDeploymentSpec is deprecated, will be unsupported soon.
+func (ctx *sensorContext) makeLegacyDeploymentSpec() appv1.DeploymentSpec {
+	replicas := int32(1)
+	labels := map[string]string{
+		common.LabelObjectName: ctx.sensor.Name,
+	}
+	return appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: *ctx.sensor.Spec.Template.Spec,
 		},
 	}
 }
