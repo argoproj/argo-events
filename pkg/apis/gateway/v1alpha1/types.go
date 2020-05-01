@@ -94,6 +94,9 @@ type Template struct {
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	// Spec holds the gateway deployment spec.
+	// DEPRECATED: Use Container instead.
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
 }
 
 // Service holds the service information gateway exposes
@@ -105,6 +108,9 @@ type Service struct {
 	// +listMapKey=port
 	// +listMapKey=protocol
 	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,1,rep,name=ports"`
+	// Spec holds the gateway service spec.
+	// DEPRECATED: Use Ports to declare the ports to be exposed.
+	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
 }
 
 type Subscribers struct {

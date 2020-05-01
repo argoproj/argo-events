@@ -1250,6 +1250,35 @@ The list of ports that are exposed by this service.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>spec</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#servicespec-v1-core">
+Kubernetes core/v1.ServiceSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Spec holds the gateway service spec. DEPRECATED: Use Ports to declare
+the ports to be exposed.
+
+</p>
+
+<br/> <br/>
+
+<table>
+
+</table>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1491,6 +1520,35 @@ values of each field.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>spec</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core">
+Kubernetes core/v1.PodSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Spec holds the gateway deployment spec. DEPRECATED: Use Container
+instead.
+
+</p>
+
+<br/> <br/>
+
+<table>
+
+</table>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1500,6 +1558,6 @@ values of each field.
 <p>
 
 <em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>5172d79</code>. </em>
+commit <code>fb46335</code>. </em>
 
 </p>

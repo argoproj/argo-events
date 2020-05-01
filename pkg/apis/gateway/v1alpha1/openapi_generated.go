@@ -441,11 +441,17 @@ func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) comm
 							},
 						},
 					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec holds the gateway service spec. DEPRECATED: Use Ports to declare the ports to be exposed.",
+							Ref:         ref("k8s.io/api/core/v1.ServiceSpec"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.ServicePort"},
+			"k8s.io/api/core/v1.ServicePort", "k8s.io/api/core/v1.ServiceSpec"},
 	}
 }
 
@@ -545,10 +551,16 @@ func schema_pkg_apis_gateway_v1alpha1_Template(ref common.ReferenceCallback) com
 							Ref:         ref("k8s.io/api/core/v1.PodSecurityContext"),
 						},
 					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec holds the gateway deployment spec. DEPRECATED: Use Container instead.",
+							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Volume"},
+			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.Volume"},
 	}
 }
