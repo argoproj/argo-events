@@ -171,6 +171,9 @@ type Template struct {
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	// Spec holds the sensor deployment spec.
+	// DEPRECATED: Use Container instead.
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.

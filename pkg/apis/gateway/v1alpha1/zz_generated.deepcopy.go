@@ -232,6 +232,11 @@ func (in *Service) DeepCopyInto(out *Service) {
 		*out = make([]corev1.ServicePort, len(*in))
 		copy(*out, *in)
 	}
+	if in.Spec != nil {
+		in, out := &in.Spec, &out.Spec
+		*out = new(corev1.ServiceSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
@@ -289,6 +294,11 @@ func (in *Template) DeepCopyInto(out *Template) {
 	if in.SecurityContext != nil {
 		in, out := &in.SecurityContext, &out.SecurityContext
 		*out = new(corev1.PodSecurityContext)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Spec != nil {
+		in, out := &in.Spec, &out.Spec
+		*out = new(corev1.PodSpec)
 		(*in).DeepCopyInto(*out)
 	}
 	return

@@ -1018,6 +1018,11 @@ func (in *Template) DeepCopyInto(out *Template) {
 		*out = new(v1.PodSecurityContext)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Spec != nil {
+		in, out := &in.Spec, &out.Spec
+		*out = new(v1.PodSpec)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

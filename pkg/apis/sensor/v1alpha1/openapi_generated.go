@@ -2034,11 +2034,17 @@ func schema_pkg_apis_sensor_v1alpha1_Template(ref common.ReferenceCallback) comm
 							Ref:         ref("k8s.io/api/core/v1.PodSecurityContext"),
 						},
 					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Spec holds the sensor deployment spec. DEPRECATED: Use Container instead.",
+							Ref:         ref("k8s.io/api/core/v1.PodSpec"),
+						},
+					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.Volume"},
+			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.Volume"},
 	}
 }
 
