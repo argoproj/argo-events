@@ -34,7 +34,15 @@ import (
 
 // buildServiceResource builds a new service that exposes gateway.
 func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
-	if ctx.gateway.Spec.Service == nil || len(ctx.gateway.Spec.Service.Ports) == 0 {
+	if ctx.gateway.Spec.Service == nil {
+		return nil, nil
+	}
+	if ctx.gateway.Spec.Service.Spec != nil {
+		// Deprecated spec, will be unsupported soon.
+		ctx.logger.WithField("name", ctx.gateway.Name).WithField("namespace", ctx.gateway.Namespace).Warn("spec.service.spec is DEPRECATED, it will be unsupported soon, please use spec.service.ports")
+		return ctx.buildLegacyServiceResource()
+	}
+	if len(ctx.gateway.Spec.Service.Ports) == 0 {
 		return nil, nil
 	}
 	labels := map[string]string{
@@ -57,7 +65,32 @@ func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
 	return svc, nil
 }
 
+// buildLegacyServiceResource is deprecated, will be unsupported soon.
+func (ctx *gatewayContext) buildLegacyServiceResource() (*corev1.Service, error) {
+	labels := map[string]string{
+		common.LabelObjectName:  ctx.gateway.Name,
+		common.LabelGatewayName: ctx.gateway.Name,
+	}
+	svc := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+		},
+		Spec: *ctx.gateway.Spec.Service.Spec,
+	}
+	svc.Spec.Selector = labels
+	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+	return svc, nil
+}
+
 func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
+	// Deprecated spec, will be unsupported soon.
+	if ctx.gateway.Spec.Template.Spec != nil {
+		ctx.logger.WithField("name", ctx.gateway.Name).WithField("namespace", ctx.gateway.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
+		return ctx.makeLegacyDeploymentSpec()
+	}
+
 	replicas := int32(ctx.gateway.Spec.Replica)
 	if replicas == 0 {
 		replicas = 1
@@ -100,7 +133,7 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 						ImagePullPolicy: corev1.PullAlways,
 						Resources: corev1.ResourceRequirements{
 							Requests: corev1.ResourceList{
-								corev1.ResourceCPU:    apiresource.MustParse("50m"),
+								corev1.ResourceCPU:    apiresource.MustParse("10m"),
 								corev1.ResourceMemory: apiresource.MustParse("64Mi"),
 							},
 							Limits: corev1.ResourceList{
@@ -114,6 +147,31 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 				Volumes:         ctx.gateway.Spec.Template.Volumes,
 				SecurityContext: ctx.gateway.Spec.Template.SecurityContext,
 			},
+		},
+	}, nil
+}
+
+// makeLegacyDeploymentSpec is deprecated, will be unsupported soon.
+func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, error) {
+	replicas := int32(ctx.gateway.Spec.Replica)
+	if replicas == 0 {
+		replicas = 1
+	}
+	labels := map[string]string{
+		common.LabelGatewayName: ctx.gateway.Name,
+		common.LabelObjectName:  ctx.gateway.Name,
+	}
+
+	return &appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: *ctx.gateway.Spec.Template.Spec,
 		},
 	}, nil
 }
