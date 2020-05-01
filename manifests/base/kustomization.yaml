@@ -17,6 +17,8 @@ images:
   - name: argoproj/sensor-controller
     newTag: v0.14.0
 
+namespace: argo-events
+
 patchesStrategicMerge:
   - |-
     apiVersion: apps/v1

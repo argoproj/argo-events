@@ -50,6 +50,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argo-events-sa
+  namespace: argo-events
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -238,6 +239,7 @@ data:
 kind: ConfigMap
 metadata:
   name: gateway-controller-configmap
+  namespace: argo-events
 ---
 apiVersion: v1
 data:
@@ -256,11 +258,13 @@ data:
 kind: ConfigMap
 metadata:
   name: sensor-controller-configmap
+  namespace: argo-events
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-controller
+  namespace: argo-events
 spec:
   replicas: 1
   selector:
@@ -293,6 +297,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sensor-controller
+  namespace: argo-events
 spec:
   replicas: 1
   selector:
