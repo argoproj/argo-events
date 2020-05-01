@@ -912,6 +912,10 @@
           "x-kubernetes-list-type": "map",
           "x-kubernetes-patch-merge-key": "port",
           "x-kubernetes-patch-strategy": "merge"
+        },
+        "spec": {
+          "description": "Spec holds the gateway service spec. DEPRECATED: Use Ports to declare the ports to be exposed.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.ServiceSpec"
         }
       }
     },
@@ -951,6 +955,10 @@
         "serviceAccountName": {
           "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
           "type": "string"
+        },
+        "spec": {
+          "description": "Spec holds the gateway deployment spec. DEPRECATED: Use Container instead.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSpec"
         },
         "volumes": {
           "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
@@ -2089,6 +2097,10 @@
         "serviceAccountName": {
           "description": "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
           "type": "string"
+        },
+        "spec": {
+          "description": "Spec holds the sensor deployment spec. DEPRECATED: Use Container instead.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSpec"
         },
         "volumes": {
           "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",

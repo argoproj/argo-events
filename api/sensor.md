@@ -5665,6 +5665,35 @@ values of each field.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>spec</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core">
+Kubernetes core/v1.PodSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Spec holds the sensor deployment spec. DEPRECATED: Use Container
+instead.
+
+</p>
+
+<br/> <br/>
+
+<table>
+
+</table>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
