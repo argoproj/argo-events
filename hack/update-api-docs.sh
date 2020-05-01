@@ -11,21 +11,21 @@ ${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference
  -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1" \
  -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/event-source.html" \
- -template-dir "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/template"
+ -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
 
 # Gateway
 ${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference-docs \
  -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1" \
  -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/gateway.html" \
- -template-dir "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/template"
+ -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
 
 # Sensor
 ${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference-docs \
  -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1" \
  -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/sensor.html" \
- -template-dir "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/template"
+ -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
 
 # Setup at https://pandoc.org/installing.html
 
