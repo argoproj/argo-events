@@ -55,15 +55,15 @@
 
 5. Install the sensor custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/sensor-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/sensor-crd.yaml
 
 6. Install the gateway custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/gateway-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/gateway-crd.yaml
 
 7. Install the event source custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/event-source-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/eventsources-crd.yaml
 
 8. Create the confimap for sensor controller
 
