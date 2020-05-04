@@ -12,6 +12,7 @@ require (
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/Masterminds/sprig v2.22.0+incompatible
 	github.com/Shopify/sarama v1.26.1
+	github.com/ahmetb/gen-crd-api-reference-docs v0.2.0
 	github.com/apache/openwhisk-client-go v0.0.0-20190915054138-716c6f973eb2
 	github.com/argoproj/argo v2.5.2+incompatible
 	github.com/argoproj/argo-cd v1.5.1
@@ -97,6 +98,8 @@ require (
 	k8s.io/api v0.17.5
 	k8s.io/apimachinery v0.17.5
 	k8s.io/client-go v0.17.5
+	k8s.io/code-generator v0.17.5
+	k8s.io/gengo v0.0.0-20190822140433-26a664648505
 	k8s.io/kube-openapi v0.0.0-20200316234421-82d701f24f9d
 	k8s.io/kubernetes v1.17.5 // indirect
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
@@ -118,8 +121,6 @@ replace k8s.io/client-go => k8s.io/client-go v0.17.5
 replace k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.5
 
 replace k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.5
-
-replace k8s.io/code-generator => k8s.io/code-generator v0.17.6-beta.0
 
 replace k8s.io/component-base => k8s.io/component-base v0.17.5
 
@@ -152,3 +153,5 @@ replace k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.17.5
 replace k8s.io/sample-controller => k8s.io/sample-controller v0.17.5
 
 replace github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.3+incompatible
+
+replace k8s.io/code-generator => k8s.io/code-generator v0.17.5

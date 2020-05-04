@@ -6,29 +6,31 @@ set -o pipefail
 
 # Setup at https://github.com/ahmetb/gen-crd-api-reference-docs
 
+readonly SCRIPT_ROOT="$(git rev-parse --show-toplevel)"
+
 # Event Source
-${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference-docs \
- -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
+go run ${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
+ -config "${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1" \
- -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/event-source.html" \
- -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
+ -out-file "${SCRIPT_ROOT}/api/event-source.html" \
+ -template-dir "${SCRIPT_ROOT}/hack/api-docs-template"
 
 # Gateway
-${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference-docs \
- -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
+go run ${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
+ -config "${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1" \
- -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/gateway.html" \
- -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
+ -out-file "${SCRIPT_ROOT}/api/gateway.html" \
+ -template-dir "${SCRIPT_ROOT}/hack/api-docs-template"
 
 # Sensor
-${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/gen-crd-api-reference-docs \
- -config "${GOPATH}/src/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
+go run ${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
+ -config "${SCRIPT_ROOT}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
  -api-dir "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1" \
- -out-file "${GOPATH}/src/github.com/argoproj/argo-events/api/sensor.html" \
- -template-dir "${GOPATH}/src/github.com/argoproj/argo-events/hack/api-docs-template"
+ -out-file "${SCRIPT_ROOT}/api/sensor.html" \
+ -template-dir "${SCRIPT_ROOT}/hack/api-docs-template"
 
 # Setup at https://pandoc.org/installing.html
 
-pandoc --from markdown --to gfm ${GOPATH}/src/github.com/argoproj/argo-events/api/event-source.html > ${GOPATH}/src/github.com/argoproj/argo-events/api/event-source.md
-pandoc --from markdown --to gfm ${GOPATH}/src/github.com/argoproj/argo-events/api/gateway.html > ${GOPATH}/src/github.com/argoproj/argo-events/api/gateway.md
-pandoc --from markdown --to gfm ${GOPATH}/src/github.com/argoproj/argo-events/api/sensor.html > ${GOPATH}/src/github.com/argoproj/argo-events/api/sensor.md
+pandoc --from markdown --to gfm ${SCRIPT_ROOT}/api/event-source.html > ${SCRIPT_ROOT}/api/event-source.md
+pandoc --from markdown --to gfm ${SCRIPT_ROOT}/api/gateway.html > ${SCRIPT_ROOT}/api/gateway.md
+pandoc --from markdown --to gfm ${SCRIPT_ROOT}/api/sensor.html > ${SCRIPT_ROOT}/api/sensor.md
