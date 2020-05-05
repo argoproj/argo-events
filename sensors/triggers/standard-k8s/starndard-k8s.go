@@ -116,11 +116,6 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 	}
 	obj.SetNamespace(namespace)
 
-	op := v1alpha1.Update
-	if trigger.Template.K8s.Operation != "" {
-		op = trigger.Template.K8s.Operation
-	}
-
 	// If object not found, create the object. No need to have a separate `Create` switch case.
 	oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
 	if err != nil {
@@ -128,6 +123,11 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 			return nil, err
 		}
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+	}
+
+	op := v1alpha1.Update
+	if trigger.Template.K8s.Operation != "" && trigger.Template.K8s.Operation != v1alpha1.Create {
+		op = trigger.Template.K8s.Operation
 	}
 
 	switch op {
