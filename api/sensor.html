@@ -2648,6 +2648,24 @@ Default value is Create.</p>
 <p>Parameters is the list of parameters that is applied to resolved K8s trigger object.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>patchStrategy</code></br>
+<em>
+k8s.io/apimachinery/pkg/types.PatchType
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
+possible values:
+&ldquo;application/json-patch+json&rdquo;
+&ldquo;application/merge-patch+json&rdquo;
+&ldquo;application/strategic-merge-patch+json&rdquo;
+&ldquo;application/apply-patch+yaml&rdquo;.
+Defaults to &ldquo;application/merge-patch+json&rdquo;</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.StatusPolicy">StatusPolicy
