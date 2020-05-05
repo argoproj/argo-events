@@ -35,3 +35,7 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --output-package github.com/argoproj/argo-events/pkg/apis/eventsources/${VERSION} \
     --output-base ${output_dir} \
     $@
+
+cp -r ${output_dir}/github.com/argoproj/argo-events/* ${SCRIPT_ROOT}/
+rm -rf ${output_dir}
+

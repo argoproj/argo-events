@@ -34,4 +34,4 @@ before_cache:
 script:
   - make test
   - make all
-  - make test coverage
+  - make coverage
