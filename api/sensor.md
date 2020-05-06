@@ -2779,6 +2779,28 @@ BasicAuth configuration for the http request.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>headers</code></br> <em> map\[string\]\[\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Headers for the HTTP request.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
