@@ -17,6 +17,7 @@ limitations under the License.
 package standard_k8s
 
 import (
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"testing"
 	"time"
 
@@ -64,6 +65,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 				"labels": map[string]interface{}{
 					"name": name,
 				},
+			},
+			"spec": map[string]interface{}{
+				"replica": "1",
 			},
 		},
 	}
@@ -161,13 +165,33 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
 
+	labels := uObj.GetLabels()
+	labels["update"] = "ok"
+	uObj.SetLabels(labels)
+
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
-	resource, err = impl.Execute(deployment)
+	resource, err = impl.Execute(uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
 	uObj, ok = resource.(*unstructured.Unstructured)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
+	assert.Equal(t, "ok", uObj.GetLabels()["update"])
+
+	labels = uObj.GetLabels()
+	labels["foo"] = "bar"
+	uObj.SetLabels(labels)
+
+	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Patch
+	sensorObj.Spec.Triggers[0].Template.K8s.PatchStrategy = k8stypes.MergePatchType
+
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	resource, err = impl.Execute(uObj)
+	assert.Nil(t, err)
+	assert.NotNil(t, resource)
+	uObj, ok = resource.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "bar", uObj.GetLabels()["foo"])
 }

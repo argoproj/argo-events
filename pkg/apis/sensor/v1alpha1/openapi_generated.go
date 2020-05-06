@@ -1885,6 +1885,13 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCall
 							},
 						},
 					},
+					"patchStrategy": {
+						SchemaProps: spec.SchemaProps{
+							Description: "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"source"},
 			},

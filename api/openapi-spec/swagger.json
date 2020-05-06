@@ -2021,6 +2021,10 @@
           },
           "x-kubernetes-list-type": "triggerParameters"
         },
+        "patchStrategy": {
+          "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
+          "type": "string"
+        },
         "source": {
           "description": "Source of the K8 resource file(s)",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ArtifactLocation"
