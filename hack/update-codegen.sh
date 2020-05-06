@@ -4,6 +4,10 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+# Expected performance drop after moving to go mod
+# see https://github.com/kubernetes/code-generator/issues/69
+# TODO: fix it
+
 serial=`date "+%Y%m%d%H%M%S"`
 output_dir="/tmp/${serial}"
 mkdir -p ${output_dir}

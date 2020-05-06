@@ -36,6 +36,6 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --output-base ${output_dir} \
     $@
 
-cp -r ${output_dir}/github.com/argoproj/argo-events/* ${SCRIPT_ROOT}/
+cp -r ${output_dir}/github.com/argoproj/argo-events/* ${PROJECT_ROOT}/
 rm -rf ${output_dir}
 
