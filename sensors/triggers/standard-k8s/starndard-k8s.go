@@ -132,7 +132,7 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 
 	switch op {
 	case v1alpha1.Update:
-		if err := mergo.Merge(oldObj, obj); err != nil {
+		if err := mergo.Merge(oldObj, obj, mergo.WithOverride); err != nil {
 			return nil, errors.Errorf("failed to update the object. err: %+v\n", err)
 		}
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(oldObj, metav1.UpdateOptions{})
