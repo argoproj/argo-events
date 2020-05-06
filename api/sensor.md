@@ -5228,6 +5228,34 @@ trigger object.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>patchStrategy</code></br> <em>
+k8s.io/apimachinery/pkg/types.PatchType </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+PatchStrategy controls the K8s object patching strategy when the trigger
+operation is specified as patch. possible values:
+“application/json-patch+json” “application/merge-patch+json”
+“application/strategic-merge-patch+json”
+“application/apply-patch+yaml”. Defaults to
+“application/merge-patch+json”
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -75,8 +76,10 @@ type KubernetesResourceOperation string
 
 // possible values for KubernetesResourceOperation
 const (
-	Create KubernetesResourceOperation = "create" // creates the resource
+	// deprecate create.
+	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
+	Patch  KubernetesResourceOperation = "patch"  // patch resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
@@ -354,6 +357,15 @@ type StandardK8sTrigger struct {
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
+	// possible values:
+	// "application/json-patch+json"
+	// "application/merge-patch+json"
+	// "application/strategic-merge-patch+json"
+	// "application/apply-patch+yaml".
+	// Defaults to "application/merge-patch+json"
+	// +optional
+	PatchStrategy k8stypes.PatchType `json:"patchStrategy,omitempty" protobuf:"bytes,5,opt,name=patchStrategy"`
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
