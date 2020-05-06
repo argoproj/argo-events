@@ -2779,6 +2779,28 @@ BasicAuth configuration for the http request.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>headers</code></br> <em> map\[string\]\[\]string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Headers for the HTTP request.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -5221,6 +5243,34 @@ Default value is Create.
 
 Parameters is the list of parameters that is applied to resolved K8s
 trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>patchStrategy</code></br> <em>
+k8s.io/apimachinery/pkg/types.PatchType </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+PatchStrategy controls the K8s object patching strategy when the trigger
+operation is specified as patch. possible values:
+“application/json-patch+json” “application/merge-patch+json”
+“application/strategic-merge-patch+json”
+“application/apply-patch+yaml”. Defaults to
+“application/merge-patch+json”
 
 </p>
 

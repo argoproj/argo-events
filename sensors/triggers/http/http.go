@@ -155,6 +155,10 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 		return nil, errors.Wrapf(err, "failed to construct request for %s", trigger.URL)
 	}
 
+	if trigger.Headers != nil {
+		request.Header = trigger.Headers
+	}
+
 	basicAuth := trigger.BasicAuth
 
 	if basicAuth != nil {
