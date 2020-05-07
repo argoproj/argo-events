@@ -73,31 +73,11 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
           eventSourceRef:
             name: webhook-event-source
           template:
-            metadata:
-              name: webhook-gateway
-              labels:
-                gateway-name: webhook-gateway
-            spec:
-              containers:
-                - name: gateway-client
-                  image: argoproj/gateway-client:v0.14.0
-                  imagePullPolicy: Always
-                  command: ["/bin/gateway-client"]
-                - name: webhook-events
-                  image: argoproj/webhook-gateway:v0.14.0
-                  imagePullPolicy: Always
-                  command: ["/bin/webhook-gateway"]
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           service:
-            metadata:
-              name: webhook-gateway-svc
-            spec:
-              selector:
-                gateway-name: webhook-gateway
-              ports:
-                - port: 12000
-                  targetPort: 12000
-              type: LoadBalancer
+            ports:
+              - port: 12000
+                targetPort: 12000
           subscribers:
             nats:
               - name: webhook-sensor
@@ -127,12 +107,7 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
           name: webhook-sensor
         spec:
           template:
-            spec:
-              containers:
-                - name: sensor
-                  image: argoproj/sensor:v0.14.0
-                  imagePullPolicy: Always
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               gatewayName: webhook-gateway
@@ -213,31 +188,11 @@ You can easily set up a gateway to send events over both HTTP and NATS,
           eventSourceRef:
             name: webhook-event-source
           template:
-            metadata:
-              name: webhook-gateway
-              labels:
-                gateway-name: webhook-gateway
-            spec:
-              containers:
-                - name: gateway-client
-                  image: argoproj/gateway-client:v0.14.0
-                  imagePullPolicy: Always
-                  command: ["/bin/gateway-client"]
-                - name: webhook-events
-                  image: argoproj/webhook-gateway:v0.14.0
-                  imagePullPolicy: Always
-                  command: ["/bin/webhook-gateway"]
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           service:
-            metadata:
-              name: webhook-gateway-svc
-            spec:
-              selector:
-                gateway-name: webhook-gateway
-              ports:
-                - port: 12000
-                  targetPort: 12000
-              type: LoadBalancer
+            ports:
+              - port: 12000
+                targetPort: 12000
           subscribers:
             http:
               - "http://webhook-time-filter-sensor.argo-events.svc:9300/"
@@ -256,12 +211,7 @@ You can easily set up a gateway to send events over both HTTP and NATS,
           name: webhook-sensor-over-http-and-nats
         spec:
           template:
-            spec:
-              containers:
-                - name: sensor
-                  image: argoproj/sensor:v0.14.0
-                  imagePullPolicy: Always
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               gatewayName: webhook-gateway

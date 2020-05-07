@@ -91,12 +91,7 @@ In this demo, we are going to set up an image processing pipeline using 2 notebo
           name: webhook-sensor
         spec:
           template:
-            spec:
-              containers:
-                - name: sensor
-                  image: argoproj/sensor:v0.13.0-rc
-                  imagePullPolicy: Always
-              serviceAccountName: argo-events-sa
+            serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
               gatewayName: webhook-gateway

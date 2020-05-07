@@ -1,18 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor
+  name: webhook
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.14.0
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook-gateway
+      gatewayName: webhook
       eventName: example
   subscription:
     nats:

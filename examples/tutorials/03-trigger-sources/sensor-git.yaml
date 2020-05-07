@@ -4,31 +4,27 @@ metadata:
   name: webhook-sensor
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.13.0
-          imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: /git/argoproj
-              name: argoproj
-            - mountPath: /secret
-              name: sshkey
-            - mountPath: /etc/ssh
-              name: known-hosts
-      volumes:
-        - name: argoproj
-          emptyDir: {}
-        - name: sshkey
-          secret:
-            secretName: git-ssh
-        # The name of the key in the secret must be "ssh_known_hosts"
-        # Make sure you have your git provider added in the known hosts
-        # e.g. create the secret by running, kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
-        - name: known-hosts
-          secret:
-            secretName: git-known-hosts
-      serviceAccountName: argo-events-sa
+    container:
+      volumeMounts:
+        - mountPath: /git/argoproj
+          name: argoproj
+        - mountPath: /secret
+          name: sshkey
+        - mountPath: /etc/ssh
+          name: known-hosts
+    volumes:
+      - name: argoproj
+        emptyDir: {}
+      - name: sshkey
+        secret:
+          secretName: git-ssh
+      # The name of the key in the secret must be "ssh_known_hosts"
+      # Make sure you have your git provider added in the known hosts
+      # e.g. create the secret by running, kubectl -n argo-events create secret generic git-known-hosts --from-file=ssh_known_hosts=.ssh/known_hosts
+      - name: known-hosts
+        secret:
+          secretName: git-known-hosts
+    serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
       gatewayName: webhook-gateway
