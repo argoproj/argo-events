@@ -34,7 +34,7 @@ Follow these [instruction](https://argoproj.github.io/argo-events/installation/)
 [![asciicast](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza.png)](https://asciinema.org/a/AKkYwzEakSUsLqH8mMORA4kza)
 
 ## Documentation
-- [Concepts](https://argoproj.github.io/argo-events/concepts/high_level_architecture/).
+- [Concepts](https://argoproj.github.io/argo-events/concepts/architecture/).
 - [Argo Events in action](https://argoproj.github.io/argo-events/quick_start/).
 - [Deploy gateways and sensors](https://argoproj.github.io/argo-events/setup/webhook/).
 - [Deep dive into Argo Events](https://argoproj.github.io/argo-events/tutorials/01-introduction/).  
