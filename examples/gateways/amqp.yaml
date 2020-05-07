@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: amqp-gateway
+  name: amqp
 spec:
   type: amqp
   eventSourceRef:

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: aws-sqs-sensor
+  name: aws-sqs
 spec:
   template:
     serviceAccountName: argo-events-sa
@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: aws-sqs-gateway
+      gatewayName: aws-sqs
       eventName: example
   triggers:
     - template:

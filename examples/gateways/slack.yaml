@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: slack-gateway
+  name: slack
 spec:
   type: slack
   eventSourceRef:

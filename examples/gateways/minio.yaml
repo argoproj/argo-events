@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: minio-gateway
+  name: minio
 spec:
   type: minio
   eventSourceRef:

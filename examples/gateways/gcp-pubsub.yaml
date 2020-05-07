@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: gcp-pubsub-gateway
+  name: gcp-pubsub
 spec:
   type: pubsub
   eventSourceRef:

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: github-sensor
+  name: github
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: github-gateway
+      gatewayName: github
       eventName: example
   subscription:
     http:

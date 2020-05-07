@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: file-sensor
+  name: file
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: file-gateway
+      gatewayName: file
       eventName: example
   subscription:
     http:

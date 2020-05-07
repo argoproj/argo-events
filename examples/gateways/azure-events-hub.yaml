@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: azure-events-hub-gateway
+  name: azure-events-hub
 spec:
   type: azureEventsHub
   eventSourceRef:

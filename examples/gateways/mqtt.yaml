@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: mqtt-gateway
+  name: mqtt
 spec:
   type: mqtt
   eventSourceRef:

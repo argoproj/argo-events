@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: calendar-sensor
+  name: calendar
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: calendar-gateway
+      gatewayName: calendar
       eventName: example-with-interval
   subscription:
     http:

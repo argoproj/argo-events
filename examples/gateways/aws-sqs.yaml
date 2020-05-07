@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: aws-sqs-gateway
+  name: aws-sqs
 spec:
   type: sqs
   eventSourceRef:

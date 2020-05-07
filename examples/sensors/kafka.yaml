@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: kafka-sensor
+  name: kafka
 spec:
   template:
     serviceAccountName: argo-events-sa
@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: kafka-gateway
+      gatewayName: kafka
       eventName: example
   triggers:
     - template:

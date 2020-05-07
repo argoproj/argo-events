@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: storage-grid-watcher-sensor
+  name: storage-grid-watcher
 spec:
   template:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: storage-grid-gateway
+      gatewayName: storage-grid
       eventName: example
   subscription:
     http:

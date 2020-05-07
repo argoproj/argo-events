@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: aws-sns-gateway
+  name: aws-sns
 spec:
   type: sns
   eventSourceRef:

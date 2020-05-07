@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: webhook-sensor
+  name: webhook
 spec:
   template:
     serviceAccountName: argo-events-sa
   # defines list of all events sensor will accept
   dependencies:
     - name: test-dep
-      gatewayName: webhook-gateway
+      gatewayName: webhook
       eventName: example
     - name: test-dep-foo
-      gatewayName: webhook-gateway
+      gatewayName: webhook
       eventName: example-foo
 
   # group event dependencies
