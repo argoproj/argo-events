@@ -41,7 +41,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 
 	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-svc", ctx.sensor.Name),
+			Name:        fmt.Sprintf("%s-sensor-svc", ctx.sensor.Name),
 			Labels:      ctx.sensor.Spec.ServiceLabels,
 			Annotations: ctx.sensor.Spec.ServiceAnnotations,
 		},
@@ -150,7 +150,7 @@ func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ctx.sensor.Namespace,
-			GenerateName: fmt.Sprintf("%s-", ctx.sensor.Name),
+			GenerateName: fmt.Sprintf("%s-sensor-", ctx.sensor.Name),
 			Labels:       deploymentSpec.Template.Labels,
 		},
 		Spec: *deploymentSpec,

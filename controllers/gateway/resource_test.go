@@ -97,7 +97,7 @@ func TestResource_BuildServiceResource(t *testing.T) {
 		service, err := opCtx.buildServiceResource()
 		assert.Nil(t, err)
 		assert.NotNil(t, service)
-		assert.Equal(t, service.Name, gatewayObj.Name+"-svc")
+		assert.Equal(t, service.Name, gatewayObj.Name+"-gateway-svc")
 		assert.Equal(t, service.Namespace, opCtx.gateway.Namespace)
 
 		newSvc, err := controller.k8sClient.CoreV1().Services(service.Namespace).Create(service)
