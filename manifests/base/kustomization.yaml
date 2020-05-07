@@ -15,9 +15,9 @@ resources:
 
 images:
   - name: argoproj/gateway-controller
-    newTag: v0.14.0
+    newTag: v0.15.0
   - name: argoproj/sensor-controller
-    newTag: v0.14.0
+    newTag: v0.15.0
 
 patchesStrategicMerge:
   - |-
@@ -32,9 +32,9 @@ patchesStrategicMerge:
             - name: gateway-controller
               env:
                 - name: GATEWAY_CLIENT_IMAGE
-                  value: argoproj/gateway-client:v0.14.0
+                  value: argoproj/gateway-client:v0.15.0
                 - name: GATEWAY_IMAGE_VERSION
-                  value: v0.14.0
+                  value: v0.15.0
   - |-
     apiVersion: apps/v1
     kind: Deployment
@@ -47,4 +47,4 @@ patchesStrategicMerge:
             - name: sensor-controller
               env:
                 - name: SENSOR_IMAGE
-                  value: argoproj/sensor:v0.14.0
+                  value: argoproj/sensor:v0.15.0
