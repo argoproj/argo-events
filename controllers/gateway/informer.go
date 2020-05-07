@@ -27,13 +27,18 @@ import (
 func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
 	var instanceIDReq *labels.Requirement
 	var err error
+	var values []string
+
+	op := selection.DoesNotExist
+
 	if c.Config.InstanceID != "" {
-		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
-	} else {
-		instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.DoesNotExist, nil)
+		op = selection.Equals
+		values = []string{c.Config.InstanceID}
 	}
+
+	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, op, values)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	c.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
 	return instanceIDReq, nil
