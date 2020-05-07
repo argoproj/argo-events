@@ -112,7 +112,9 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 	}
 
 	if ctx.gateway.Spec.Template.Container != nil {
-		mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride)
+		if err := mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
 	}
 
 	return &appv1.DeploymentSpec{
@@ -185,7 +187,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ctx.gateway.Namespace,
-			GenerateName: fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name),
+			GenerateName: fmt.Sprintf("%s-gateway-", ctx.gateway.Name),
 			Labels:       deploymentSpec.Template.Labels,
 		},
 		Spec: *deploymentSpec,

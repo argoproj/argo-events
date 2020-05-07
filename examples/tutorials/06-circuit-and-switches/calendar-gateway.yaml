@@ -7,21 +7,7 @@ spec:
   eventSourceRef:
     name: calendar-event-source
   template:
-    metadata:
-      name: calendar-gateway
-      labels:
-        gateway-name: calendar-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: calendar-events
-          image: argoproj/calendar-gateway:v0.13.0
-          imagePullPolicy: Always
-          command: ["/bin/calendar-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://circuit-sensor.argo-events:9300/"

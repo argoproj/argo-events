@@ -23,3 +23,5 @@ spec:
                   fieldPath: metadata.namespace
             - name: CONTROLLER_CONFIG_MAP
               value: sensor-controller-configmap
+            - name: SENSOR_IMAGE
+              value: argoproj/sensor:latest

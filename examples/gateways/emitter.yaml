@@ -1,27 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: emitter-gateway
+  name: emitter
 spec:
   type: emitter
   eventSourceRef:
     name: emitter-event-source
   template:
-    metadata:
-      name: emitter-gateway
-      labels:
-        gateway-name: emitter-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: emitter-events
-          image: argoproj/emitter-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/emitter-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://emitter-sensor.argo-events.svc:9300/"
