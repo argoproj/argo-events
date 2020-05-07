@@ -1,32 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: file-gateway
+  name: file
 spec:
   type: file
   eventSourceRef:
     name: file-event-source
   template:
-    metadata:
-      name: file-gateway
-      labels:
-        gateway-name: file-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: file-events
-          image: argoproj/file-gateway:v0.13.0
-          imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: /test-data
-              name: test-data
-      volumes:
-        - name: test-data
-          emptyDir: {}
-      serviceAccountName: argo-events-sa
+    container:
+      volumeMounts:
+        - mountPath: /test-data
+          name: test-data
+    volumes:
+      - name: test-data
+        emptyDir: {}
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://file-sensor.argo-events.svc:9300/"
