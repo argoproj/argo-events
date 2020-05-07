@@ -41,7 +41,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 
 	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-sensor-svc", ctx.sensor.Name),
+			Name:        fmt.Sprintf("%s-svc", ctx.sensor.Name),
 			Labels:      ctx.sensor.Spec.ServiceLabels,
 			Annotations: ctx.sensor.Spec.ServiceAnnotations,
 		},
@@ -79,11 +79,11 @@ func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
 	return service, nil
 }
 
-func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
+func (ctx *sensorContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 	// Deprecated spec, will be unsupported soon.
 	if ctx.sensor.Spec.Template.Spec != nil {
 		ctx.logger.WithField("name", ctx.sensor.Name).WithField("namespace", ctx.sensor.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
-		return ctx.makeLegacyDeploymentSpec()
+		return ctx.makeLegacyDeploymentSpec(), nil
 	}
 
 	replicas := int32(1)
@@ -95,10 +95,12 @@ func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
 		ImagePullPolicy: corev1.PullAlways,
 	}
 	if ctx.sensor.Spec.Template.Container != nil {
-		mergo.Merge(&sensorContainer, ctx.sensor.Spec.Template.Container, mergo.WithOverride)
+		if err := mergo.Merge(&sensorContainer, ctx.sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
 	}
 	sensorContainer.Name = "main"
-	return appv1.DeploymentSpec{
+	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: labels,
 		},
@@ -116,16 +118,16 @@ func (ctx *sensorContext) makeDeploymentSpec() appv1.DeploymentSpec {
 				SecurityContext: ctx.sensor.Spec.Template.SecurityContext,
 			},
 		},
-	}
+	}, nil
 }
 
 // makeLegacyDeploymentSpec is deprecated, will be unsupported soon.
-func (ctx *sensorContext) makeLegacyDeploymentSpec() appv1.DeploymentSpec {
+func (ctx *sensorContext) makeLegacyDeploymentSpec() *appv1.DeploymentSpec {
 	replicas := int32(1)
 	labels := map[string]string{
 		common.LabelObjectName: ctx.sensor.Name,
 	}
-	return appv1.DeploymentSpec{
+	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: labels,
 		},
@@ -141,14 +143,17 @@ func (ctx *sensorContext) makeLegacyDeploymentSpec() appv1.DeploymentSpec {
 
 // deploymentBuilder builds the deployment specification for the sensor
 func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
-	deploymentSpec := ctx.makeDeploymentSpec()
+	deploymentSpec, err := ctx.makeDeploymentSpec()
+	if err != nil {
+		return nil, err
+	}
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ctx.sensor.Namespace,
-			GenerateName: fmt.Sprintf("%s-sensor-", ctx.sensor.Name),
+			GenerateName: fmt.Sprintf("%s-", ctx.sensor.Name),
 			Labels:       deploymentSpec.Template.Labels,
 		},
-		Spec: deploymentSpec,
+		Spec: *deploymentSpec,
 	}
 	envVars := []corev1.EnvVar{
 		{

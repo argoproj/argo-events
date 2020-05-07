@@ -51,7 +51,7 @@ func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
 	}
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+			Name: fmt.Sprintf("%s-svc", ctx.gateway.Name),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:    ctx.gateway.Spec.Service.Ports,
@@ -73,7 +73,7 @@ func (ctx *gatewayContext) buildLegacyServiceResource() (*corev1.Service, error)
 	}
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+			Name: fmt.Sprintf("%s-svc", ctx.gateway.Name),
 		},
 		Spec: *ctx.gateway.Spec.Service.Spec,
 	}
@@ -112,7 +112,9 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 	}
 
 	if ctx.gateway.Spec.Template.Container != nil {
-		mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride)
+		if err := mergo.Merge(&eventContainer, ctx.gateway.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
 	}
 
 	return &appv1.DeploymentSpec{
@@ -185,7 +187,7 @@ func (ctx *gatewayContext) buildDeploymentResource() (*appv1.Deployment, error) 
 	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:    ctx.gateway.Namespace,
-			GenerateName: fmt.Sprintf("%s-gateway-%s-", ctx.gateway.Spec.Type, ctx.gateway.Name),
+			GenerateName: fmt.Sprintf("%s-", ctx.gateway.Name),
 			Labels:       deploymentSpec.Template.Labels,
 		},
 		Spec: *deploymentSpec,
