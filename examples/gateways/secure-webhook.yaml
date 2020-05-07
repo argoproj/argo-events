@@ -1,46 +1,27 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: webhook-gateway
+  name: webhook
 spec:
   type: webhook
   eventSourceRef:
     name: webhook-event-source
   template:
-    metadata:
-      name: webhook-gateway
-      labels:
-        gateway-name: webhook-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: webhook-events
-          image: argoproj/webhook-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/webhook-gateway"]
-          # `cert` and `key` files path
-          volumeMounts:
-            - name: secret-volume
-              mountPath: /etc/secret-volume
-      # make sure to create the secret with two keys- cert and key
-      volumes:
+    container:
+      # `cert` and `key` files path
+      volumeMounts:
         - name: secret-volume
-          secret:
-            secretName: cert-and-key-secret
-      serviceAccountName: argo-events-sa
+          mountPath: /etc/secret-volume
+    # make sure to create the secret with two keys- cert and key
+    volumes:
+      - name: secret-volume
+        secret:
+          secretName: cert-and-key-secret
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: webhook-gateway-svc
-    spec:
-      selector:
-        gateway-name: webhook-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
       - "http://webhook-sensor.argo-events.svc:9300/"

@@ -1,27 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: redis-gateway
+  name: redis
 spec:
   type: redis
   eventSourceRef:
     name: redis-event-source
   template:
-    metadata:
-      name: redis-gateway
-      labels:
-        gateway-name: redis-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: redis-events
-          image: argoproj/redis-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/redis-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://redis-sensor.argo-events.svc:9300/"

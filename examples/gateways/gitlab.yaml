@@ -1,38 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: gitlab-gateway
+  name: gitlab
 spec:
   replica: 1
   type: gitlab
   eventSourceRef:
     name: gitlab-event-source
   template:
-    metadata:
-      name: gitlab-gateway
-      labels:
-        gateway-name: gitlab-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: gitlab-events
-          image: argoproj/gitlab-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gitlab-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: gitlab-gateway-svc
-    spec:
-      selector:
-        gateway-name: gitlab-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
       - "http://gitlab-sensor.argo-events.svc:9300/"

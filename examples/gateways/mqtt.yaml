@@ -1,27 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: mqtt-gateway
+  name: mqtt
 spec:
   type: mqtt
   eventSourceRef:
     name: mqtt-event-source
   template:
-    metadata:
-      name: mqtt-gateway
-      labels:
-        gateway-name: mqtt-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: mqtt-events
-          image: argoproj/mqtt-gateway:v0.14.0
-          imagePullPolicy: Always
-          command: ["/bin/mqtt-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://mqtt-sensor.argo-events.svc:9300/"
