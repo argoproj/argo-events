@@ -95,10 +95,6 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 	if replicas == 0 {
 		replicas = 1
 	}
-	defaultGatewayImage, ok := ctx.controller.gatewayImages[ctx.gateway.Spec.Type]
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("default image can not found for gateway type %s", ctx.gateway.Spec.Type))
-	}
 
 	labels := map[string]string{
 		common.LabelGatewayName: ctx.gateway.Name,
@@ -107,8 +103,10 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 
 	eventContainer := corev1.Container{
 		Name:            "main",
-		Image:           defaultGatewayImage,
+		Image:           ctx.controller.serverImage,
 		ImagePullPolicy: corev1.PullAlways,
+		Command:         []string{"/bin/gateway-server"},
+		Args:            []string{string(ctx.gateway.Spec.Type)},
 	}
 
 	if ctx.gateway.Spec.Template.Container != nil {
