@@ -1494,6 +1494,16 @@
           "description": "BasicAuth configuration for the http request.",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.BasicAuth"
         },
+        "headers": {
+          "description": "Headers for the HTTP request.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
         "method": {
           "description": "Method refers to the type of the HTTP request. Refer https://golang.org/src/net/http/method.go for more info. Default value is POST.",
           "type": "string"
@@ -1504,7 +1514,7 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           },
-          "x-kubernetes-list-type": "triggerParameters"
+          "x-kubernetes-list-type": "atomic"
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.",
@@ -1512,7 +1522,7 @@
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           },
-          "x-kubernetes-list-type": "payloadParameters"
+          "x-kubernetes-list-type": "atomic"
         },
         "timeout": {
           "description": "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
@@ -2020,6 +2030,10 @@
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
           },
           "x-kubernetes-list-type": "triggerParameters"
+        },
+        "patchStrategy": {
+          "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
+          "type": "string"
         },
         "source": {
           "description": "Source of the K8 resource file(s)",

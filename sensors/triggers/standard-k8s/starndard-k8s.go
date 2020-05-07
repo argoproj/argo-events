@@ -21,12 +21,13 @@ import (
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
 	"github.com/argoproj/argo-events/store"
+	"github.com/imdario/mergo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	apierr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -121,15 +122,37 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 
 	switch op {
 	case v1alpha1.Create:
+		k8sTrigger.Logger.Infoln("creating the object...")
 		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+
 	case v1alpha1.Update:
-		if _, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{}); err != nil {
-			if !apierr.IsNotFound(err) {
-				return nil, err
-			}
-			return k8sTrigger.namespableDynamicClient.Namespace(namespace).Create(obj, metav1.CreateOptions{})
+		k8sTrigger.Logger.Infoln("updating the object...")
+
+		oldObj, err := k8sTrigger.namespableDynamicClient.Namespace(namespace).Get(obj.GetName(), metav1.GetOptions{})
+		if err != nil {
+			return nil, err
 		}
-		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(obj, metav1.UpdateOptions{})
+
+		if err := mergo.Merge(oldObj, obj, mergo.WithOverride); err != nil {
+			return nil, errors.Errorf("failed to update the object. err: %+v\n", err)
+		}
+
+		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Update(oldObj, metav1.UpdateOptions{})
+
+	case v1alpha1.Patch:
+		k8sTrigger.Logger.Infoln("patching the object...")
+
+		if k8sTrigger.Trigger.Template.K8s.PatchStrategy == "" {
+			k8sTrigger.Trigger.Template.K8s.PatchStrategy = k8stypes.MergePatchType
+		}
+
+		body, err := obj.MarshalJSON()
+		if err != nil {
+			return nil, errors.Errorf("failed to marshal object into JSON schema. err: %+v\n", err)
+		}
+
+		return k8sTrigger.namespableDynamicClient.Namespace(namespace).Patch(obj.GetName(), k8sTrigger.Trigger.Template.K8s.PatchStrategy, body, metav1.PatchOptions{})
+
 	default:
 		return nil, errors.Errorf("unknown operation type %s", string(op))
 	}

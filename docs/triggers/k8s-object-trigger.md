@@ -112,6 +112,18 @@ set up event-driven pipelines for existing workloads.
                 \____\______/   
 
 
+## Operation
+
+You can specify the operation for the trigger using the `operation` key under triggers->template->k8s.
+
+Operation can be either,
+
+1. `create`: Creates the object if not available in K8s cluster.
+2. `update`: Updates the object.
+3. `patch`: Patches the object using given patch strategy.
+
+More info available at [here](https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger).
+
 ## Parameterization
 
 Similar to other type of triggers, sensor offers parameterization for the K8s trigger. Parameterization is specially useful when

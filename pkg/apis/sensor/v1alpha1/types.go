@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
@@ -75,8 +76,10 @@ type KubernetesResourceOperation string
 
 // possible values for KubernetesResourceOperation
 const (
-	Create KubernetesResourceOperation = "create" // creates the resource
+	// deprecate create.
+	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
+	Patch  KubernetesResourceOperation = "patch"  // patch resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
@@ -354,6 +357,15 @@ type StandardK8sTrigger struct {
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
+	// possible values:
+	// "application/json-patch+json"
+	// "application/merge-patch+json"
+	// "application/strategic-merge-patch+json"
+	// "application/apply-patch+yaml".
+	// Defaults to "application/merge-patch+json"
+	// +optional
+	PatchStrategy k8stypes.PatchType `json:"patchStrategy,omitempty" protobuf:"bytes,5,opt,name=patchStrategy"`
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
@@ -376,7 +388,7 @@ type HTTPTrigger struct {
 	// URL refers to the URL to send HTTP request to.
 	URL string `json:"url" protobuf:"bytes,1,name=url"`
 	// Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
-	// +listType=payloadParameters
+	// +listType=atomic
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
@@ -388,7 +400,7 @@ type HTTPTrigger struct {
 	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
-	// +listType=triggerParameters
+	// +listType=atomic
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
 	// Default value is 60 seconds.
@@ -397,6 +409,10 @@ type HTTPTrigger struct {
 	// BasicAuth configuration for the http request.
 	// +optional
 	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
+	// Headers for the HTTP request.
+	// +mapType=granular
+	// +optional
+	Headers map[string][]string `json:"headers,omitempty" protobuf:"bytes,8,opt,name=headers"`
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client
