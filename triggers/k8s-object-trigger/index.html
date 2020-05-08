@@ -893,6 +893,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#operation" title="Operation" class="md-nav__link">
+    Operation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parameterization" title="Parameterization" class="md-nav__link">
     Parameterization
   </a>
@@ -1046,6 +1053,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#operation" title="Operation" class="md-nav__link">
+    Operation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#parameterization" title="Parameterization" class="md-nav__link">
     Parameterization
   </a>
@@ -1110,16 +1124,9 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">sensor</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">13.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
@@ -1214,6 +1221,15 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 
 </li>
 </ol>
+<h2 id="operation">Operation<a class="headerlink" href="#operation" title="Permanent link">&para;</a></h2>
+<p>You can specify the operation for the trigger using the <code>operation</code> key under triggers-&gt;template-&gt;k8s.</p>
+<p>Operation can be either,</p>
+<ol>
+<li><code>create</code>: Creates the object if not available in K8s cluster.</li>
+<li><code>update</code>: Updates the object.</li>
+<li><code>patch</code>: Patches the object using given patch strategy.</li>
+</ol>
+<p>More info available at <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#argoproj.io/v1alpha1.StandardK8sTrigger">here</a>.</p>
 <h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
 <p>Similar to other type of triggers, sensor offers parameterization for the K8s trigger. Parameterization is specially useful when
 you want to define a generic trigger template in the sensor and populate the K8s object values on the fly.</p>

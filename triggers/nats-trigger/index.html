@@ -1084,16 +1084,9 @@
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">sensor</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">sensor</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">13.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">gatewayName</span><span class="o">:</span> <span class="n">minio</span><span class="o">-</span><span class="n">gateway</span>

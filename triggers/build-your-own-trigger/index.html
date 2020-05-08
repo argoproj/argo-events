@@ -36,7 +36,7 @@
     
     
       
-        <title>Argo Workflow Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
+        <title>Build Your Own Trigger - Argo Events - The Event-Based Dependency Manager for Kubernetes</title>
       
     
     
@@ -127,7 +127,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#argo-workflow-trigger" tabindex="1" class="md-skip">
+      <a href="#build-your-own-trigger" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -152,7 +152,7 @@
               Argo Events - The Event-Based Dependency Manager for Kubernetes
             </span>
             <span class="md-header-nav__topic">
-              Argo Workflow Trigger
+              Build Your Own Trigger
             </span>
           
         </div>
@@ -776,12 +776,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-8" type="checkbox" id="nav-8">
     
     <label class="md-nav__link" for="nav-8">
       Triggers
@@ -797,70 +795,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Argo Workflow Trigger
-      </label>
-    
-    <a href="./" title="Argo Workflow Trigger" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../argo-workflow/" title="Argo Workflow Trigger" class="md-nav__link">
       Argo Workflow Trigger
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#trigger-a-workflow" title="Trigger a workflow" class="md-nav__link">
-    Trigger a workflow
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy" title="Policy" class="md-nav__link">
-    Policy
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#argo-cli" title="Argo CLI" class="md-nav__link">
-    Argo CLI
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -1046,29 +985,35 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#trigger-a-workflow" title="Trigger a workflow" class="md-nav__link">
-    Trigger a workflow
+  <a href="#custom-trigger" title="Custom Trigger" class="md-nav__link">
+    Custom Trigger
   </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface" title="Interface" class="md-nav__link">
+    Interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-to-define-the-custom-trigger-in-a-sensor" title="How to define the Custom Trigger in a sensor?" class="md-nav__link">
+    How to define the Custom Trigger in a sensor?
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameterization" title="Parameterization" class="md-nav__link">
-    Parameterization
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy" title="Policy" class="md-nav__link">
-    Policy
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#argo-cli" title="Argo CLI" class="md-nav__link">
-    Argo CLI
+  <a href="#custom-trigger-in-action" title="Custom Trigger in Action" class="md-nav__link">
+    Custom Trigger in Action
   </a>
   
 </li>
@@ -1089,140 +1034,119 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/argo-workflow.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/argoproj/argo-events/edit/master/docs/triggers/build-your-own-trigger.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="argo-workflow-trigger">Argo Workflow Trigger<a class="headerlink" href="#argo-workflow-trigger" title="Permanent link">&para;</a></h1>
-<p>Argo workflow is K8s custom resource which help orchestrating parallel jobs on Kubernetes. </p>
-<p><br/>
-<br/></p>
-<p align="center">
-  <img src="https://github.com/argoproj/argo-events/blob/master/docs/assets/argo-workflow-trigger.png?raw=true" alt="Argo Workflow Trigger"/>
-</p>
+                <h1 id="build-your-own-trigger">Build Your Own Trigger<a class="headerlink" href="#build-your-own-trigger" title="Permanent link">&para;</a></h1>
+<p>Argo Events supports a variety of triggers out of box like Argo Workflow, K8s Objects, AWS Lambda, HTTP Requests etc., but you may want to write your own logic to trigger a pipeline or create an object in K8s cluster. An example would be to trigger
+TektonCD or AirFlow pipelines on GitHub events.</p>
+<h2 id="custom-trigger">Custom Trigger<a class="headerlink" href="#custom-trigger" title="Permanent link">&para;</a></h2>
+<p>In order to plug your own implementation for a trigger with Argo Events Sensor, you need to 
+run a gRPC server that implements the interface that the sensor expects.</p>
+<h3 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">&para;</a></h3>
+<p>The interface exposed via proto file,</p>
+<div class="codehilite"><pre><span></span>    // Trigger offers services to build a custom trigger
+    service Trigger {
+        // FetchResource fetches the resource to be triggered.
+        rpc FetchResource(FetchResourceRequest) returns (FetchResourceResponse);
+        // Execute executes the requested trigger resource.
+        rpc Execute(ExecuteRequest) returns (ExecuteResponse);
+        // ApplyPolicy applies policies on the trigger execution result.
+        rpc ApplyPolicy(ApplyPolicyRequest) returns (ApplyPolicyResponse);
+    }
+</pre></div>
 
-<p><br/>
-<br/></p>
-<h2 id="trigger-a-workflow">Trigger a workflow<a class="headerlink" href="#trigger-a-workflow" title="Permanent link">&para;</a></h2>
+
+<p>The complete proto file is available <a href="https://github.com/argoproj/argo-events/blob/master/sensors/triggers/trigger.proto">here</a>.</p>
+<p>Let's walk through the contract,</p>
 <ol>
 <li>
-<p>We will use webhook gateway and sensor to trigger an Argo workflow.</p>
+<p><code>FetchResource</code>: If the trigger server needs to fetch a resource from external sources like S3, Git or a URL, this is the
+    place to do so. e.g. if the trigger server aims to invoke a TektonCD pipeline and the <code>PipelineRun</code> resource lives on Git, then
+    trigger server can first fetch it from Git and return it back to sensor.</p>
 </li>
 <li>
-<p>Lets set up a webhook gateway and event source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
-
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
-</pre></div>
-
-
+<p><code>Execute</code>: In this method, the trigger server executes/invokes the trigger. e.g. TektonCD pipeline resource being
+    created in K8s cluster.</p>
 </li>
 <li>
-<p>To trigger a workflow, we need to create a sensor as defined below,</p>
-<div class="codehilite"><pre><span></span><span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-<span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
-<span class="n">metadata</span><span class="o">:</span>
-  <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
-<span class="n">spec</span><span class="o">:</span>
-  <span class="n">template</span><span class="o">:</span>
-    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-  <span class="n">dependencies</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-      <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-      <span class="n">eventName</span><span class="o">:</span> <span class="n">example</span>
-  <span class="n">subscription</span><span class="o">:</span>
-    <span class="n">http</span><span class="o">:</span>
-      <span class="n">port</span><span class="o">:</span> <span class="mi">9300</span>
-  <span class="n">triggers</span><span class="o">:</span>
-    <span class="o">-</span> <span class="n">template</span><span class="o">:</span>
-        <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">workflow</span><span class="o">-</span><span class="n">trigger</span>
-        <span class="n">k8s</span><span class="o">:</span>
-          <span class="n">group</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span>
-          <span class="n">version</span><span class="o">:</span> <span class="n">v1alpha1</span>
-          <span class="n">resource</span><span class="o">:</span> <span class="n">workflows</span>
-          <span class="n">operation</span><span class="o">:</span> <span class="n">create</span>
-          <span class="n">source</span><span class="o">:</span>
-            <span class="n">resource</span><span class="o">:</span>
-              <span class="n">apiVersion</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">v1alpha1</span>
-              <span class="n">kind</span><span class="o">:</span> <span class="n">Workflow</span>
-              <span class="n">metadata</span><span class="o">:</span>
-                <span class="n">generateName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span>
-              <span class="n">spec</span><span class="o">:</span>
-                <span class="n">entrypoint</span><span class="o">:</span> <span class="n">whalesay</span>
-                <span class="k">arguments</span><span class="o">:</span>
-                  <span class="n">parameters</span><span class="o">:</span>
-                  <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">message</span>
-                    <span class="err">#</span> <span class="n">the</span> <span class="n">value</span> <span class="n">will</span> <span class="kd">get</span> <span class="n">overridden</span> <span class="n">by</span> <span class="n">event</span> <span class="n">payload</span> <span class="n">from</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-                    <span class="n">value</span><span class="o">:</span> <span class="n">hello</span> <span class="n">world</span>
-                <span class="n">templates</span><span class="o">:</span>
-                <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">whalesay</span>
-                  <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
-                  <span class="n">inputs</span><span class="o">:</span>
-                    <span class="n">parameters</span><span class="o">:</span>
-                    <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">message</span>
-                  <span class="n">container</span><span class="o">:</span>
-                    <span class="n">image</span><span class="o">:</span> <span class="n">docker</span><span class="o">/</span><span class="n">whalesay</span><span class="o">:</span><span class="n">latest</span>
-                    <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="n">cowsay</span><span class="o">]</span>
-                    <span class="n">args</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;{{inputs.parameters.message}}&quot;</span><span class="o">]</span>
-          <span class="n">parameters</span><span class="o">:</span>
-            <span class="o">-</span> <span class="n">src</span><span class="o">:</span>
-                <span class="n">dependencyName</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
-              <span class="n">dest</span><span class="o">:</span> <span class="n">spec</span><span class="o">.</span><span class="na">arguments</span><span class="o">.</span><span class="na">parameters</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="na">value</span>
-</pre></div>
-
-
-</li>
-<li>
-<p>Create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
-</pre></div>
-
-
-</li>
-<li>
-<p>Lets expose the webhook gateway using <code>port-forward</code> so that we can make a request to it.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events port-forward &lt;name-of-gateway-pod&gt; 12000:12000
-</pre></div>
-
-
-</li>
-<li>
-<p>Use either Curl or Postman to send a post request to the <code>http://localhost:12000/example</code></p>
-<div class="codehilite"><pre><span></span>curl -d &#39;{&quot;message&quot;:&quot;ok&quot;}&#39; -H &quot;Content-Type: application/json&quot; -X POST http://localhost:12000/example
-</pre></div>
-
-
-</li>
-<li>
-<p>List the workflow using <code>argo list</code>.</p>
+<p><code>ApplyPolicy</code>: This is where your trigger implementation can check whether the triggered resource transitioned into the success state.
+   Depending upon the response from the trigger server, the sensor will either stop processing subsequent triggers, or it will continue to
+   process them.</p>
 </li>
 </ol>
-<h2 id="parameterization">Parameterization<a class="headerlink" href="#parameterization" title="Permanent link">&para;</a></h2>
-<p>Similar to other type of triggers, sensor offers parameterization for the Argo workflow trigger. Parameterization is specially useful when
-you want to define a generic trigger template in the sensor and populate the workflow object values on the fly.</p>
-<p>You can learn more about trigger parameterization <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
-<h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
-<p>Trigger policy helps you determine the status of the triggered Argo workflow object and decide whether to stop or continue sensor. </p>
-<p>Take a look at <a href="https://argoproj.github.io/argo-events/triggers/k8s-object-trigger/#policy">K8s Trigger Policy</a>.</p>
-<h2 id="argo-cli">Argo CLI<a class="headerlink" href="#argo-cli" title="Permanent link">&para;</a></h2>
-<p>Although the sensor defined above lets you trigger an Argo workflow, it doesn't have the ability to leverage the functionality 
-provided by the Argo CLI such as,</p>
+<h3 id="how-to-define-the-custom-trigger-in-a-sensor">How to define the Custom Trigger in a sensor?<a class="headerlink" href="#how-to-define-the-custom-trigger-in-a-sensor" title="Permanent link">&para;</a></h3>
+<p>Let's look at the following sensor,</p>
+<div class="codehilite"><pre><span></span>    apiVersion: argoproj.io/v1alpha1
+    kind: Sensor
+    metadata:
+      name: webhook-sensor
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sensor
+              image: metalgearsolid/sensor:v0.15.0
+              imagePullPolicy: Always
+          serviceAccountName: argo-events-sa
+      dependencies:
+        - name: test-dep
+          gatewayName: webhook-gateway
+          eventName: example
+      subscription:
+        http:
+          port: 9300
+      triggers:
+        - template:
+            name: webhook-workflow-trigger
+            custom:
+              # the url of the trigger server.
+              serverURL: tekton-trigger.argo-events.svc:9000
+              # spec is map of string-&gt;string and it is sent over to trigger server.
+              # the spec can be anything you want as per your use-case, just make sure the trigger server understands the spec map.
+              spec:
+                url: &quot;https://raw.githubusercontent.com/VaibhavPage/tekton-cd-trigger/master/example.yaml&quot;
+              # These parameters are applied on resource fetched and returned by the trigger server.
+              # e.g. consider a trigger server which invokes TektonCD pipeline runs, then
+              # the trigger server can return a TektonCD PipelineRun resource.
+              # The parameters are then applied on that PipelineRun resource.
+              parameters:
+                - src:
+                    dependencyName: test-dep
+                    dataKey: body.namespace
+                  dest: metadata.namespace
+          # These parameters are applied on entire template body.
+          # So that you can parameterize anything under `custom` key such as `serverURL`, `spec` etc.
+          parameters:
+            - src:
+                dependencyName: test-dep
+                dataKey: body.url
+              dest: custom.spec.url
+</pre></div>
+
+
+<p>The sensor definition should look familiar to you. The only difference is the <code>custom</code> key under <code>triggers -&gt; template</code>.
+The specification under <code>custom</code> key defines the custom trigger.</p>
+<p>The most important fields are,</p>
 <ol>
-<li>Submit</li>
-<li>Resubmit</li>
-<li>Resume</li>
-<li>Retry</li>
-<li>Suspend</li>
+<li>
+<p><code>serverURL</code>: This is the URL of the trigger gRPC server.</p>
+</li>
+<li>
+<p><code>spec</code>: It is a map of string -&gt; string. The spec can be anything you want as per your use-case. The sensor sends
+    the spec to trigger server, and it is upto the trigger gRPC server to interpret the spec.</p>
+</li>
+<li>
+<p><code>parameters</code>: The parameters override the resource that is fetched by the trigger server.
+    Read more info on parameters <a href="https://argoproj.github.io/argo-events/tutorials/02-parameterization/">here</a>.</p>
+</li>
+<li>
+<p><code>payload</code>: Payload to send to the trigger server. Read more on payload <a href="https://argoproj.github.io/argo-events/triggers/http-trigger/#request-payload">here</a>.</p>
+</li>
 </ol>
-<p>To make use of Argo CLI operations, The sensor provides the <code>argoWorkflow</code> trigger template,</p>
-<div class="codehilite"><pre><span></span>    argoWorkflow:
-      group: argoproj.io
-      version: v1alpha1
-      resource: workflows
-      operation: submit  # submit, resubmit, resume, retry or suspend
-</pre></div>
-
-
-<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/special-workflow-trigger.yaml">here</a>.</p>
+<p>The complete spec for the custom trigger is available <a href="https://github.com/argoproj/argo-events/blob/master/api/sensor.md#customtrigger">here</a>.</p>
+<h2 id="custom-trigger-in-action">Custom Trigger in Action<a class="headerlink" href="#custom-trigger-in-action" title="Permanent link">&para;</a></h2>
+<p>Refer to a sample <a href="https://github.com/VaibhavPage/tekton-cd-trigger">trigger server</a> that invokes TektonCD pipeline on events.</p>
                 
                   
                 
@@ -1239,41 +1163,6 @@ provided by the Argo CLI such as,</p>
       
         
 <footer class="md-footer">
-  
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
-        
-          <a href="../../tutorials/09-events-over-nats/" title="Events Over NATS" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
-            </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                Events Over NATS
-              </span>
-            </div>
-          </a>
-        
-        
-          <a href="../aws-lambda/" title="AWS Lambda" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                AWS Lambda
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

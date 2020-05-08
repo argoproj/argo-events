@@ -1227,21 +1227,21 @@
 </li>
 <li>
 <p>Install the sensor custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/sensor-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/sensor-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the gateway custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/gateway-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/gateway-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the event source custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/cdrs/event-source-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/eventsources-crd.yaml
 </pre></div>
 
 
@@ -1329,7 +1329,7 @@
 </li>
 <li>
 <p>The helm chart for argo-events is maintained solely by the community and hence the image version for controllers can go out of sync.
-   Update the image version in values.yaml to v0.14.0.</p>
+   Update the image version in values.yaml to v0.15.0.</p>
 </li>
 <li>
 <p>Install <code>argo-events</code> chart</p>

@@ -1146,40 +1146,17 @@
 <span class="n">kind</span><span class="o">:</span> <span class="n">Gateway</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">multi</span><span class="o">-</span><span class="n">subscribers</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="err">#</span> <span class="n">gateway</span> <span class="n">controller</span> <span class="k">with</span> <span class="n">instanceId</span> <span class="s2">&quot;argo-events&quot;</span> <span class="n">will</span> <span class="n">process</span> <span class="k">this</span> <span class="n">gateway</span>
-    <span class="n">gateways</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">replica</span><span class="o">:</span> <span class="mi">1</span>
   <span class="n">type</span><span class="o">:</span> <span class="n">webhook</span>
   <span class="n">eventSourceRef</span><span class="o">:</span>
     <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">event</span><span class="o">-</span><span class="n">source</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">metadata</span><span class="o">:</span>
-      <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-      <span class="n">labels</span><span class="o">:</span>
-        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">gateway</span><span class="o">-</span><span class="n">client</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">gateway</span><span class="o">-</span><span class="n">client</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/gateway-client&quot;</span><span class="o">]</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">events</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-          <span class="n">command</span><span class="o">:</span> <span class="o">[</span><span class="s2">&quot;/bin/webhook-gateway&quot;</span><span class="o">]</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">service</span><span class="o">:</span>
-    <span class="n">metadata</span><span class="o">:</span>
-      <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span><span class="o">-</span><span class="n">svc</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">selector</span><span class="o">:</span>
-        <span class="n">gateway</span><span class="o">-</span><span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
-      <span class="n">ports</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">port</span><span class="o">:</span> <span class="mi">12000</span>
-          <span class="n">targetPort</span><span class="o">:</span> <span class="mi">12000</span>
-      <span class="n">type</span><span class="o">:</span> <span class="n">LoadBalancer</span>
+    <span class="n">ports</span><span class="o">:</span>
+      <span class="o">-</span> <span class="n">port</span><span class="o">:</span> <span class="mi">12000</span>
+        <span class="n">targetPort</span><span class="o">:</span> <span class="mi">12000</span>
   <span class="n">subscribers</span><span class="o">:</span>
     <span class="n">nats</span><span class="o">:</span>
       <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
@@ -1215,16 +1192,9 @@
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">sensor</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
@@ -1316,40 +1286,17 @@
     kind: Gateway
     metadata:
       name: webhook-gateway-multi-subscribers
-      labels:
-        # gateway controller with instanceId &quot;argo-events&quot; will process this gateway
-        gateways.argoproj.io/gateway-controller-instanceid: argo-events
     spec:
       replica: 1
       type: webhook
       eventSourceRef:
         name: webhook-event-source
       template:
-        metadata:
-          name: webhook-gateway
-          labels:
-            gateway-name: webhook-gateway
-        spec:
-          containers:
-            - name: gateway-client
-              image: argoproj/gateway-client:v0.14.0
-              imagePullPolicy: Always
-              command: [&quot;/bin/gateway-client&quot;]
-            - name: webhook-events
-              image: argoproj/webhook-gateway:v0.14.0
-              imagePullPolicy: Always
-              command: [&quot;/bin/webhook-gateway&quot;]
-          serviceAccountName: argo-events-sa
+        serviceAccountName: argo-events-sa
       service:
-        metadata:
-          name: webhook-gateway-svc
-        spec:
-          selector:
-            gateway-name: webhook-gateway
-          ports:
-            - port: 12000
-              targetPort: 12000
-          type: LoadBalancer
+        ports:
+          - port: 12000
+            targetPort: 12000
       subscribers:
         http:
           - &quot;http://webhook-time-filter-sensor.argo-events.svc:9300/&quot;
@@ -1370,16 +1317,9 @@
 <span class="n">kind</span><span class="o">:</span> <span class="n">Sensor</span>
 <span class="n">metadata</span><span class="o">:</span>
   <span class="n">name</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">sensor</span><span class="o">-</span><span class="n">over</span><span class="o">-</span><span class="n">http</span><span class="o">-</span><span class="n">and</span><span class="o">-</span><span class="n">nats</span>
-  <span class="n">labels</span><span class="o">:</span>
-    <span class="n">sensors</span><span class="o">.</span><span class="na">argoproj</span><span class="o">.</span><span class="na">io</span><span class="o">/</span><span class="n">sensor</span><span class="o">-</span><span class="n">controller</span><span class="o">-</span><span class="n">instanceid</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span>
 <span class="n">spec</span><span class="o">:</span>
   <span class="n">template</span><span class="o">:</span>
-    <span class="n">spec</span><span class="o">:</span>
-      <span class="n">containers</span><span class="o">:</span>
-        <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">sensor</span>
-          <span class="n">image</span><span class="o">:</span> <span class="n">argoproj</span><span class="o">/</span><span class="n">sensor</span><span class="o">:</span><span class="n">v0</span><span class="o">.</span><span class="mf">14.0</span>
-          <span class="n">imagePullPolicy</span><span class="o">:</span> <span class="n">Always</span>
-      <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
+    <span class="n">serviceAccountName</span><span class="o">:</span> <span class="n">argo</span><span class="o">-</span><span class="n">events</span><span class="o">-</span><span class="n">sa</span>
   <span class="n">dependencies</span><span class="o">:</span>
     <span class="o">-</span> <span class="n">name</span><span class="o">:</span> <span class="n">test</span><span class="o">-</span><span class="n">dep</span>
       <span class="n">gatewayName</span><span class="o">:</span> <span class="n">webhook</span><span class="o">-</span><span class="n">gateway</span>
