@@ -41,7 +41,7 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 
 	serviceSpec := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-sensor-svc", ctx.sensor.Name),
+			Name:        fmt.Sprintf("%s-sensor", ctx.sensor.Name),
 			Labels:      ctx.sensor.Spec.ServiceLabels,
 			Annotations: ctx.sensor.Spec.ServiceAnnotations,
 		},
