@@ -51,7 +51,7 @@ func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
 	}
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+			Name: fmt.Sprintf("%s-gateway", ctx.gateway.Name),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports:    ctx.gateway.Spec.Service.Ports,
@@ -73,7 +73,7 @@ func (ctx *gatewayContext) buildLegacyServiceResource() (*corev1.Service, error)
 	}
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s-gateway-svc", ctx.gateway.Name),
+			Name: fmt.Sprintf("%s-gateway", ctx.gateway.Name),
 		},
 		Spec: *ctx.gateway.Spec.Service.Spec,
 	}
