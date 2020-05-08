@@ -19,7 +19,7 @@ package github
 import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v31/github"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 )
