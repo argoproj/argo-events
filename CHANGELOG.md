@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.15.0
+
++ Made deployment/Service template optional in Gateway #598
++ Made deployment/Service template optional in Sensor #599
++ Support K8s Trigger Patch Operation #643
++ Support headers for HTTP trigger #642
++ Introduced Custom Triggers #620
++ Enabled workflow identity for GCP PubSub gateway #593
+
 ## v0.14.0
 
 + Introducing Slack notification trigger. #576
