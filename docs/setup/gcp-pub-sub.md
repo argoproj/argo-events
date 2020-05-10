@@ -53,17 +53,17 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 3. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/gcp-pubsub.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/gcp-pubsub.yaml
 
 4. Create the event source by running the following command.
    
-           kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/gcp-pubsub.yaml
+           kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/gcp-pubsub.yaml
 
 5. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the topic specified in the event source to consume messages.
 
 6. Create the sensor by running the following command,
    
-           kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/gcp-pubsub.yaml
+           kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/gcp-pubsub.yaml
 
 7. Publish a message from GCP PubSub console.
 

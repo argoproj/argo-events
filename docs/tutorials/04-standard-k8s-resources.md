@@ -20,7 +20,7 @@ create the Kubernetes resource of your choice.
    You will notice that the `group` key is empty, that means we want to use `core` group.
    For any other groups, you need to specify the `group` key.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 
 2. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
@@ -61,7 +61,7 @@ create the Kubernetes resource of your choice.
 ## Deployment
 1. Lets create a sensor with a K8s deployment as trigger.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
 
 2. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 

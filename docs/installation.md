@@ -15,7 +15,7 @@
 
 2. Deploy Argo Events, SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller
 
-        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/install.yaml
+        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 
    NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions and clusterroles
 
@@ -29,7 +29,7 @@
 
 2. Deploy Argo Events, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller
 
-        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install.yaml
+        kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 
    NOTE: On GKE, you may need to grant your account the ability to create new custom resource definitions
 
@@ -43,48 +43,48 @@
 
 2. Create the service account
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/argo-events-sa.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/argo-events-sa.yaml
 
 3. Create the role
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role.yaml
 
 4. Create the rolebinding
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role-binding.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role-binding.yaml
 
 5. Install the sensor custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/sensor-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/sensor-crd.yaml
 
 6. Install the gateway custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/gateway-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/gateway-crd.yaml
 
 7. Install the event source custom resource definition
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/eventsources-crd.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/eventsources-crd.yaml
 
 8. Create the confimap for sensor controller
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-configmap.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-configmap.yaml
 
 8. Create the configmap for gateway controller
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-configmap.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-configmap.yaml
 
 9. Deploy the sensor controller
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-deployment.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
 
 10. Deploy the gateway controller
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-deployment.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-deployment.yaml
 
 
 ### Using Kustomize
 
-Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/master/manifests/cluster-install) or [`namespace-install`](https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install) folder as your base for Kustomize.
+Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install) or [`namespace-install`](https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install) folder as your base for Kustomize.
 
 `kustomization.yaml`:
 
@@ -93,7 +93,7 @@ Use either [`cluster-install`](https://github.com/argoproj/argo-events/tree/mast
       # OR
       - github.com/argoproj/argo-events/manifests/namespace-install
 
-To make Argo events watch a specific namespace, define similar overlays as shown in [`namespace-install/overlays`](https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install/overlays).
+To make Argo events watch a specific namespace, define similar overlays as shown in [`namespace-install/overlays`](https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install/overlays).
 
 `kustomization.yaml`:
 

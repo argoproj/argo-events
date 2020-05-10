@@ -71,13 +71,13 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 
 6. If you inspect the gateway resource definition, you will notice that it refers to the event source `minio-event-source`. Lets install event source in the `argo-events` namespace,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/minio.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 
 7. Always make sure to first create a bucket on Minio and then refer it in event source.
 
 8. Install gateway in the `argo-events` namespace using following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/minio.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/minio.yaml
 
    Once the gateway resource is created, the gateway controller will process it and create a pod.
    
@@ -88,7 +88,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 
 10. Lets create the sensor,
    
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/minio.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml   
 
 11. Create a file named and `hello-world.txt` and upload it onto to the `input` bucket. This will trigger the argo workflow.
 

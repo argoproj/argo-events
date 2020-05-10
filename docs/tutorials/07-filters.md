@@ -69,7 +69,7 @@ If data types is bool or float, then you need to pass the exact value.
 
 1. Lets create a webhook sensor with data filter.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-data-filters.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/07-filters/sensor-data-filters.yaml
 
 2. Send a HTTP request to gateway
 
@@ -91,7 +91,7 @@ Change the subscriber in the webhook gateway to point it to `context-filter` sen
 
 1. Lets create a webhook sensor with context filter.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/07-filters/sensor-context-filter.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/07-filters/sensor-context-filter.yaml
 
 2. Send a HTTP request to gateway
 

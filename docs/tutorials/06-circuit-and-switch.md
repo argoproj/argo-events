@@ -27,16 +27,16 @@ but, another workflow if it receives an event from the `Minio` gateway.
 1. Create the webhook event source and gateway. The gateway listens to HTTP requests
    on port `12000`
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
 
 2. Create the minio event source and gateway. The gateway listens to events of type
    `PUT` and `DELETE` for objects in bucket `test`.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
 
 Make sure there are no errors in any of the gateways and all event sources are active.
 
@@ -46,7 +46,7 @@ Make sure there are no errors in any of the gateways and all event sources are a
    is only one group under `all` in both trigger templates. So, as soon as the group is resolved, the
    corresponding trigger will be executed.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
    
 4. Send a HTTP request to Webhook gateway,
 
@@ -93,7 +93,7 @@ Make sure there are no errors in any of the gateways and all event sources are a
 5. Great!! You have now learned how to use a `circuit` and `switch`. Lets update the sensor with a trigger
    that waits for both groups to resolve. This is the normal sensor behavior if circuit is not defined.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
 
    Send a HTTP request and perform a file drop on Minio bucket as done above. You should following output,
   
