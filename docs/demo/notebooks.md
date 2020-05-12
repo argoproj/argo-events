@@ -6,7 +6,7 @@ Tools like [papermill](https://papermill.readthedocs.io/en/latest/) makes it eas
 to set up **event-driven** parameterized notebooks.
 
 # Prerequisites
-1. Install [Argo Workflows](https://github.com/argoproj/argo/blob/master/docs/getting-started.md).
+1. Install [Argo Workflows](https://github.com/argoproj/argo/blob/stable/docs/getting-started.md).
 1. Install [Argo Events](https://argoproj.github.io/argo-events/installation/).
 1. Install NATS,
     

@@ -95,17 +95,17 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 2. Create the event source by running the following command.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/nats.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/nats.yaml
 
 3. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/nats.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/nats.yaml
 
 4. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the subject specified in the event source to consume messages.
 
 5. Create the sensor by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/nats.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/nats.yaml
 
 7. If you are running NATS on local K8s cluster, make sure to `port-forward` to pod,
 

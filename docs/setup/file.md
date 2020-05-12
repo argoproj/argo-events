@@ -40,17 +40,17 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 1. Create the event source by running the following command.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/file.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/file.yaml
 
 2. The event source has configuration to listen to file system events for `test-data` directory and file called `x.txt`.
 
 3. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/file.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/file.yaml
 
 4. Create the sensor by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/file.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/file.yaml
 
 5. Make sure there are no errors in either gateway or sensor pod.
 

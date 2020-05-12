@@ -7,19 +7,19 @@ Note: You will need to have [Argo Workflows](https://argoproj.github.io/docs/arg
 
 1. First, we need to setup event sources for gateway to listen.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
    The event-source drives the configuration required for a gateway to consume events from external sources.
 
 1. Create webhook gateway, 
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
    After running above command, gateway controller will create corresponding a pod and service.
 
 1. Create webhook sensor,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
    Once sensor object is created, sensor controller will create corresponding pod and service. 
 

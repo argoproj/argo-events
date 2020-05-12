@@ -7,11 +7,11 @@ Have a Slack workspace setup you wish to send a message to. Set up the webhook g
 
 1. Set up a simple webhook gateway.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
 2. Create a webhook event source.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 3. Set up port-forwarding to expose the http server. We will
    use port-forwarding here.
@@ -53,7 +53,7 @@ We will set up a basic slack trigger and send a default message, and then a dyna
 
 1. Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/slack-trigger.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/slack-trigger.yaml
 
 2. Send a http request to the newly setup gateway to fire the Slack trigger. 
 

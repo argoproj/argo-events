@@ -52,11 +52,11 @@ We will set up a basic go http server and connect it with the minio events.
 
 2. Deploy the HTTP server,
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
 
 3. Create a service to expose the http server
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server-svc.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
 
 4. Either use Ingress, OpenShift Route or port-forwarding to expose the http server..
 
@@ -68,7 +68,7 @@ We will set up a basic go http server and connect it with the minio events.
 
 6. Create a sensor as follows,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/http-trigger.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
 
 7. Now, drop a file onto `input` bucket in Minio server.
 

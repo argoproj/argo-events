@@ -39,7 +39,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 1. Install gateway in the `argo-events` namespace using following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
    Once the gateway resource is created, the gateway controller will process it and create a pod and a service.
    
@@ -49,14 +49,14 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 2. If you inspect the gateway resource definition, you will notice it points to the event source called
    `webhook-event-source`. Lets install event source in the `argo-events` namespace,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
    
 3. Check the gateway logs to make sure the gateway has processed the event source.
 
 4. The gateway is now listening for HTTP requests on port `12000` and endpoint `/example`.
     Its time to create the sensor,
     
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml   
 
 5. Once the sensor pod is in running state, test the setup by sending a POST request to gateway service.
 

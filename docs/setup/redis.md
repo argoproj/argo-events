@@ -42,17 +42,17 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 2. Create the event source by running the following command.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/redis.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/redis.yaml
 
 3. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/redis.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/redis.yaml
 
 4. Inspect the gateway pod logs to make sure the gateway was able to subscribe to the channel specified in the event source to consume messages.
 
 5. Create the sensor by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/redis.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/redis.yaml
 
 6. Log into redis pod using `kubectl`,
 
