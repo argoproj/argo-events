@@ -21,9 +21,9 @@ set up event-driven pipelines for existing workloads.
 
 1. Lets set up a webhook gateway and event source to process incoming requests.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
         
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1. To trigger a pod, we need to create a sensor as defined below,
 
@@ -73,7 +73,7 @@ set up event-driven pipelines for existing workloads.
 
 1. Create the sensor,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/trigger-standard-k8s-resource.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 
 1. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
   
@@ -159,4 +159,4 @@ The `Resource Labels` holds a list of labels which are checked against the trigg
                     # defaults to false
                     errorOnBackoffTimeout: true
 
-Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/trigger-with-policy.yaml). 
+Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml). 

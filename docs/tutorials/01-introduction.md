@@ -18,17 +18,17 @@ HTTP and executes an Argo workflow.
 
 * Create the webhook event source.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
   
   
 * Create the webhook gateway.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
 
 * Create the webhook sensor.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
   
 If the commands are executed successfully, the gateway and sensor pods will get created. You will
 also notice that a service is created for both the gateway and sensor. 

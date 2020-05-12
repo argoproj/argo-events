@@ -29,7 +29,7 @@ The specification for the Git source is available [here](https://github.com/argo
 5. Create a sensor with the git trigger source and refer it to the `hello world` workflow stored
    on the Argo Git project
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml 
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml 
 
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
@@ -56,7 +56,7 @@ For this tutorial, lets set up a minio server which is S3 compliant store.
 
 5. Create the sensor with trigger source as S3.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
 
 6. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
@@ -71,11 +71,11 @@ K8s configmap can be treated as trigger source if needed.
 
 1. Lets create a configmap called `trigger-store`.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
    
 2. Create a sensor with trigger source as configmap and refer it to the `trigger-store`.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
    
 3. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 

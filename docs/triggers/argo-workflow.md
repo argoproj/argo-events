@@ -18,9 +18,9 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
 
 1. Lets set up a webhook gateway and event source to process incoming requests.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
         
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 1.  To trigger a workflow, we need to create a sensor as defined below,
 
@@ -76,7 +76,7 @@ Argo workflow is K8s custom resource which help orchestrating parallel jobs on K
 
 1. Create the sensor,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 
 1. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
   
@@ -120,4 +120,4 @@ To make use of Argo CLI operations, The sensor provides the `argoWorkflow` trigg
           resource: workflows
           operation: submit  # submit, resubmit, resume, retry or suspend 
 
-Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/special-workflow-trigger.yaml).
+Complete example is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger.yaml).

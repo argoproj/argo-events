@@ -43,7 +43,7 @@ the sensor failed to execute the trigger due to an error.
 
 **Q. Helm chart installation does not work.**
 
-**A.** The helm chart for argo events is maintained by the community and can be out of sync with latest release version. The official installation file is available [here](https://raw.githubusercontent.com/argoproj/argo-events/master/hack/k8s/manifests/installation.yaml).
+**A.** The helm chart for argo events is maintained by the community and can be out of sync with latest release version. The official installation file is available [here](https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml).
 If you notice the helm chart is outdated, we encourage you to contribute to the [argo-helm](https://github.com/argoproj/argo-helm).
 
 **Q. Kustomization file doesn't have a `X` resource.**

@@ -42,9 +42,9 @@ that are not native to AWS.
 
 5. Lets set up webhook gateway to invoke the lambda over http requests.
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
         
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 
 6. Lets expose the webhook gateway using `port-forward` so that we can make a request to it.
 
@@ -52,7 +52,7 @@ that are not native to AWS.
 
 7. Deploy the webhook sensor with AWS Lambda trigger
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/aws-lambda-trigger.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-lambda-trigger.yaml
 
 8. Once the sensor pod is in running state, make a `curl` request to webhook gateway,
 

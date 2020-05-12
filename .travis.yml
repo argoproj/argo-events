@@ -1,6 +1,6 @@
 language: go
 go:
-  - 1.x
+  - "1.13"
 
 services:
   - docker
@@ -30,12 +30,8 @@ before_cache:
   - >
     mkdir -p $HOME/docker && docker images -a --filter='dangling=false' --format '{{.Repository}}:{{.Tag}} {{.ID}}'
     | xargs -n 2 -t sh -c 'test -e $HOME/docker/$1.tar.gz || docker save $0 | gzip -2 > $HOME/docker/$1.tar.gz'
-install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep version
-  - dep ensure -vendor-only
 
 script:
   - make test
   - make all
-  - make test coverage
+  - make coverage
