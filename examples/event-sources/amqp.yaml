@@ -10,7 +10,7 @@ spec:
       url: amqp://rabbitmq.argo-events:5672
       # jsonBody specifies that all event body payload coming from this
       # source will be JSON
-      jsonBody: false
+      jsonBody: true
       # name of the exchange.
       exchangeName: test
       # exchange type. more info at https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges
