@@ -48,12 +48,10 @@ const (
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
-	// EnvVarClientImage refers to the env var for gateway client image
-	EnvVarClientImage = "GATEWAY_CLIENT_IMAGE"
-	// EnvVarImageRegistry refers to the default image registry of gateway images
-	EnvVarImageRegistry = "GATEWAY_IMAGE_REGISTRY"
-	// EnvVarImageVersion refers to the version of the gateway images
-	EnvVarImageVersion = "GATEWAY_IMAGE_VERSION"
+	// EnvVarGatewayClientImage refers to the env var for gateway client image
+	EnvVarGatewayClientImage = "GATEWAY_CLIENT_IMAGE"
+	// EnvVarGatewayServerImage refers to the default gateway server image
+	EnvVarGatewayServerImage = "GATEWAY_SERVER_IMAGE"
 	// EnvVarSensorImage refers to the default sensor image
 	EnvVarSensorImage = "SENSOR_IMAGE"
 )
