@@ -896,18 +896,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1020,7 +1008,7 @@
 to trigger an Argo workflow upon a HTTP Post request.</p>
 <p>Note: You will need to have <a href="https://argoproj.github.io/docs/argo/readme.html">Argo Workflows</a> installed to make this work.</p>
 <ol>
-<li>First, we need to setup event sources for gateway to listen.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+<li>First, we need to setup event sources for gateway to listen.<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1028,7 +1016,7 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
 </ol>
 <p>The event-source drives the configuration required for a gateway to consume events from external sources.</p>
 <ol>
-<li>Create webhook gateway, <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+<li>Create webhook gateway, <div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 </pre></div>
 
 
@@ -1036,7 +1024,7 @@ to trigger an Argo workflow upon a HTTP Post request.</p>
 </ol>
 <p>After running above command, gateway controller will create corresponding a pod and service.</p>
 <ol>
-<li>Create webhook sensor,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+<li>Create webhook sensor,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 </pre></div>
 
 

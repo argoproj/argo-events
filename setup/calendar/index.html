@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1123,7 +1111,7 @@
 <p><br/></p>
 <h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
 <ol>
-<li>Install gateway in the <code>argo-events</code> namespace using following command,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar.yaml
+<li>Install gateway in the <code>argo-events</code> namespace using following command,<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/calendar.yaml
 </pre></div>
 
 
@@ -1136,7 +1124,7 @@
 <li>
 <p>If you inspect the gateway resource definition, you will notice it points to the event source called
    <code>calendar-event-source</code>. Lets install event source in the <code>argo-events</code> namespace,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/calendar.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/calendar.yaml
 </pre></div>
 
 
@@ -1146,7 +1134,7 @@
 </li>
 <li>
 <p>The gateway will generate events at every 10 seconds. Lets create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/calendar.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml
 </pre></div>
 
 

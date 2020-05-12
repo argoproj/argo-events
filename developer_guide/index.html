@@ -887,18 +887,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -967,22 +955,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-vendor-dependencies" title="2. Vendor dependencies" class="md-nav__link">
-    2. Vendor dependencies
+  <a href="#2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="2. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
+    2. Start Minikube and point Docker Client to Minikube's Docker Daemon
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="3. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
-    3. Start Minikube and point Docker Client to Minikube's Docker Daemon
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-build-the-project" title="5. Build the project" class="md-nav__link">
-    5. Build the project
+  <a href="#3-build-the-project" title="3. Build the project" class="md-nav__link">
+    3. Build the project
   </a>
   
 </li>
@@ -1153,22 +1134,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-vendor-dependencies" title="2. Vendor dependencies" class="md-nav__link">
-    2. Vendor dependencies
+  <a href="#2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="2. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
+    2. Start Minikube and point Docker Client to Minikube's Docker Daemon
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="3. Start Minikube and point Docker Client to Minikube's Docker Daemon" class="md-nav__link">
-    3. Start Minikube and point Docker Client to Minikube's Docker Daemon
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-build-the-project" title="5. Build the project" class="md-nav__link">
-    5. Build the project
+  <a href="#3-build-the-project" title="3. Build the project" class="md-nav__link">
+    3. Build the project
   </a>
   
 </li>
@@ -1238,45 +1212,43 @@
                 
                 <h1 id="developer-guide">Developer Guide<a class="headerlink" href="#developer-guide" title="Permanent link">&para;</a></h1>
 <h2 id="setup-your-dev-environment">Setup your DEV environment<a class="headerlink" href="#setup-your-dev-environment" title="Permanent link">&para;</a></h2>
-<p>Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for <code>Minikube</code> for local development, but if you have another cluster you can ignore the Minikube specific step 3.</p>
+<p>Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster.
+This guide includes steps for <code>Minikube</code> for local development, but if you have
+another cluster you can ignore the Minikube specific step 3.</p>
 <h3 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h3>
 <ul>
-<li>Golang 1.11</li>
+<li>Golang 1.13</li>
 <li>Docker</li>
-<li>dep</li>
 </ul>
 <h3 id="installation-setup">Installation &amp; Setup<a class="headerlink" href="#installation-setup" title="Permanent link">&para;</a></h3>
 <h4 id="1-get-the-project">1. Get the project<a class="headerlink" href="#1-get-the-project" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span>go get github.com/argoproj/argo-events
-cd $GOPATH/src/github.com/argoproj/argo-events
+<div class="codehilite"><pre><span></span>git clone git@github.com:argoproj/argo-events
+cd argo-events
 </pre></div>
 
 
-<h4 id="2-vendor-dependencies">2. Vendor dependencies<a class="headerlink" href="#2-vendor-dependencies" title="Permanent link">&para;</a></h4>
-<div class="codehilite"><pre><span></span>dep ensure -vendor-only
-</pre></div>
-
-
-<h4 id="3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon">3. Start Minikube and point Docker Client to Minikube's Docker Daemon<a class="headerlink" href="#3-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="Permanent link">&para;</a></h4>
+<h4 id="2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon">2. Start Minikube and point Docker Client to Minikube's Docker Daemon<a class="headerlink" href="#2-start-minikube-and-point-docker-client-to-minikubes-docker-daemon" title="Permanent link">&para;</a></h4>
 <div class="codehilite"><pre><span></span>minikube start
 eval $(minikube docker-env)
 </pre></div>
 
 
-<h4 id="5-build-the-project">5. Build the project<a class="headerlink" href="#5-build-the-project" title="Permanent link">&para;</a></h4>
+<h4 id="3-build-the-project">3. Build the project<a class="headerlink" href="#3-build-the-project" title="Permanent link">&para;</a></h4>
 <div class="codehilite"><pre><span></span>make all
 </pre></div>
 
 
 <h3 id="changing-types">Changing Types<a class="headerlink" href="#changing-types" title="Permanent link">&para;</a></h3>
-<p>If you're making a change to the <code>pkg/apis</code>  package, please ensure you re-run the K8 code-generator scripts found in the <code>/hack</code> folder. First, ensure you have the <code>generate-groups.sh</code> script at the path: <code>vendor/k8s.io/code-generator/</code>. Next run the following commands in order:</p>
+<p>If you're making a change to the <code>pkg/apis</code> package, please ensure you re-run
+following command for code reneration.</p>
 <div class="codehilite"><pre><span></span>$ make codegen
 </pre></div>
 
 
 <h2 id="how-to-write-a-custom-gateway">How to write a custom gateway?<a class="headerlink" href="#how-to-write-a-custom-gateway" title="Permanent link">&para;</a></h2>
-<p>To implement a custom gateway, you need to create a gRPC server and implement the service defined below.
-The framework code acts as a gRPC client consuming event stream from gateway server.</p>
+<p>To implement a custom gateway, you need to create a gRPC server and implement
+the service defined below. The framework code acts as a gRPC client consuming
+event stream from gateway server.</p>
 <p><br/>
 <br/></p>
 <p align="center">
@@ -1287,13 +1259,17 @@ The framework code acts as a gRPC client consuming event stream from gateway ser
 <h3 id="proto-definition">Proto Definition<a class="headerlink" href="#proto-definition" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>The proto file is located <a href="https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto">here</a> </p>
+<p>The proto file is located
+    <a href="https://github.com/argoproj/argo-events/blob/master/gateways/eventing.proto">here</a></p>
 </li>
 <li>
-<p>If you choose to implement the gateway in <code>Go</code>, then you can find generated client stubs <a href="https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go">here</a></p>
+<p>If you choose to implement the gateway in <code>Go</code>, then you can find generated
+    client stubs
+    <a href="https://github.com/argoproj/argo-events/blob/master/gateways/eventing.pb.go">here</a></p>
 </li>
 <li>
-<p>To create stubs in other languages, head over to <a href="https://grpc.io/">gRPC website</a></p>
+<p>To create stubs in other languages, head over to
+    <a href="https://grpc.io/">gRPC website</a></p>
 </li>
 <li>
 <p>Service,</p>
@@ -1366,7 +1342,7 @@ service<span class="w"> </span>Eventing<span class="w"> </span><span class="err"
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../triggers/slack-trigger/" title="Slack Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1375,7 +1351,7 @@ service<span class="w"> </span>Eventing<span class="w"> </span><span class="err"
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Build Your Own Trigger
+                Slack Trigger
               </span>
             </div>
           </a>

@@ -975,18 +975,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1207,14 +1195,14 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 </li>
 <li>
 <p>Deploy the HTTP server,</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create a service to expose the http server</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/09-http-trigger/http-server-svc.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/09-http-trigger/http-server-svc.yaml
 </pre></div>
 
 
@@ -1233,7 +1221,7 @@ can hel. The HTTP trigger takes the task of consuming events from event-sources 
 </li>
 <li>
 <p>Create a sensor as follows,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/http-trigger.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/http-trigger.yaml
 </pre></div>
 
 

@@ -955,18 +955,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1155,7 +1143,7 @@ will explore other trigger sources.</p>
 <li>
 <p>Create a sensor with the git trigger source and refer it to the <code>hello world</code> workflow stored
    on the Argo Git project</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-git.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-git.yaml
 </pre></div>
 
 
@@ -1195,7 +1183,7 @@ will explore other trigger sources.</p>
 </li>
 <li>
 <p>Create the sensor with trigger source as S3.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-minio.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-minio.yaml
 </pre></div>
 
 
@@ -1220,14 +1208,14 @@ will explore other trigger sources.</p>
 <ol>
 <li>
 <p>Lets create a configmap called <code>trigger-store</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/trigger-store.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/trigger-store.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create a sensor with trigger source as configmap and refer it to the <code>trigger-store</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-trigger-sources/sensor-cm.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/03-trigger-sources/sensor-cm.yaml
 </pre></div>
 
 

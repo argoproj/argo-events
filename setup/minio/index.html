@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1171,7 +1159,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 </li>
 <li>
 <p>If you inspect the gateway resource definition, you will notice that it refers to the event source <code>minio-event-source</code>. Lets install event source in the <code>argo-events</code> namespace,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/minio.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/minio.yaml
 </pre></div>
 
 
@@ -1181,7 +1169,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 </li>
 <li>
 <p>Install gateway in the <code>argo-events</code> namespace using following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/minio.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/minio.yaml
 </pre></div>
 
 
@@ -1196,7 +1184,7 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 </li>
 <li>
 <p>Lets create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/minio.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/minio.yaml
 </pre></div>
 
 

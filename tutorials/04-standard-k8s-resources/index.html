@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1109,7 +1097,7 @@ create the Kubernetes resource of your choice.</li>
 </ol>
 <p>You will notice that the <code>group</code> key is empty, that means we want to use <code>core</code> group.
    For any other groups, you need to specify the <code>group</code> key.</p>
-<div class="codehilite"><pre><span></span>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
+<div class="codehilite"><pre><span></span>    kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 </pre></div>
 
 
@@ -1162,7 +1150,7 @@ create the Kubernetes resource of your choice.</li>
 <ol>
 <li>
 <p>Lets create a sensor with a K8s deployment as trigger.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
 </pre></div>
 
 

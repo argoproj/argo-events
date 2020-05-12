@@ -989,18 +989,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1245,7 +1233,7 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>contextKey</code> for the parameter at index 0.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-01.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-01.yaml
 </pre></div>
 
 
@@ -1292,7 +1280,7 @@ print the message.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>dataKey</code> in the parameter at index 0.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-02.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-02.yaml
 </pre></div>
 
 
@@ -1341,7 +1329,7 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>value</code> for the parameter at index 0.
    We will also update the <code>dataKey</code> to an unknown event key.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-03.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-03.yaml
 </pre></div>
 
 
@@ -1383,7 +1371,7 @@ important when the <code>key</code> you defined in the parameter doesn't exist i
 <h3 id="sprig-templates">Sprig Templates<a class="headerlink" href="#sprig-templates" title="Permanent link">&para;</a></h3>
 <p>The <a href="https://github.com/Masterminds/sprig">sprig template</a> exposed through <code>contextTemplate</code> and <code>dataTemplate</code> lets you alter the event
 context and event data before it gets applied to the trigger via <code>parameters</code>.</p>
-<p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
+<p>Take a look at the example defined <a href="https://github.com/argoproj/argo-events/blob/stable/examples/sensors/trigger-with-template.yaml">here</a>, it contains the parameters
 as follows,</p>
 <div class="codehilite"><pre><span></span><span class="x">    parameters:</span>
 <span class="x">    # Retrieve the &#39;message&#39; key from the payload</span>
@@ -1468,7 +1456,7 @@ a parameter comes handy.</p>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add the <code>operation</code> in the parameter at index 0.
    We will prepend the message to an existing value.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-04.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
 </pre></div>
 
 
@@ -1519,7 +1507,7 @@ applying a parameter at the trigger template level.</p>
 <ol>
 <li>
 <p>Update the <code>Webhook Sensor</code> and add parameters at trigger level.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-05.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-05.yaml
 </pre></div>
 
 

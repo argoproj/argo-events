@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1156,7 +1144,7 @@
 </li>
 <li>
 <p>Create the gateway by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/github.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/github.yaml
 </pre></div>
 
 
@@ -1169,7 +1157,7 @@
    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
-<p>Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/github.yaml</p>
+<p>Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/github.yaml</p>
 </li>
 <li>
 <p>Change the <code>url</code> under <code>webhook</code> to your gateway service url created in a previous step. Make sure this url is reachable from GitHub.</p>
@@ -1187,7 +1175,7 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/github.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
 </pre></div>
 
 

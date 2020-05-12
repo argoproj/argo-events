@@ -973,18 +973,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1174,7 +1162,7 @@
 </li>
 <li>
 <p>Deploy Argo Events, SA, ClusterRoles, ConfigMap, Sensor Controller and Gateway Controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/install.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/install.yaml
 </pre></div>
 
 
@@ -1196,7 +1184,7 @@
 </li>
 <li>
 <p>Deploy Argo Events, SA, Roles, ConfigMap, Sensor Controller and Gateway Controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install.yaml
 </pre></div>
 
 
@@ -1218,77 +1206,77 @@
 </li>
 <li>
 <p>Create the service account</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/argo-events-sa.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/argo-events-sa.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the role</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the rolebinding</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/namespace-install/rbac/argo-events-role-binding.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/namespace-install/rbac/argo-events-role-binding.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the sensor custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/sensor-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/sensor-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the gateway custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/gateway-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/gateway-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Install the event source custom resource definition</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/crds/eventsources-crd.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/crds/eventsources-crd.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the confimap for sensor controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-configmap.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-configmap.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create the configmap for gateway controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-configmap.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-configmap.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Deploy the sensor controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/sensor-controller/sensor-controller-deployment.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/sensor-controller/sensor-controller-deployment.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Deploy the gateway controller</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/manifests/base/gateway-controller/gateway-controller-deployment.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/manifests/base/gateway-controller/gateway-controller-deployment.yaml
 </pre></div>
 
 
 </li>
 </ol>
 <h3 id="using-kustomize">Using Kustomize<a class="headerlink" href="#using-kustomize" title="Permanent link">&para;</a></h3>
-<p>Use either <a href="https://github.com/argoproj/argo-events/tree/master/manifests/cluster-install"><code>cluster-install</code></a> or <a href="https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
+<p>Use either <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/cluster-install"><code>cluster-install</code></a> or <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install"><code>namespace-install</code></a> folder as your base for Kustomize.</p>
 <p><code>kustomization.yaml</code>:</p>
 <div class="codehilite"><pre><span></span>bases:
   - github.com/argoproj/argo-events/manifests/cluster-install
@@ -1297,7 +1285,7 @@
 </pre></div>
 
 
-<p>To make Argo events watch a specific namespace, define similar overlays as shown in <a href="https://github.com/argoproj/argo-events/tree/master/manifests/namespace-install/overlays"><code>namespace-install/overlays</code></a>.</p>
+<p>To make Argo events watch a specific namespace, define similar overlays as shown in <a href="https://github.com/argoproj/argo-events/tree/stable/manifests/namespace-install/overlays"><code>namespace-install/overlays</code></a>.</p>
 <p><code>kustomization.yaml</code>:</p>
 <div class="codehilite"><pre><span></span>patchesJson6902:
  - path: ./overlays/argo-events-configmap.yaml

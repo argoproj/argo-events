@@ -948,18 +948,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1111,14 +1099,14 @@
 <ol>
 <li>
 <p>Set up a simple webhook gateway.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 </pre></div>
 
 
 </li>
 <li>
 <p>Create a webhook event source.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1182,7 +1170,7 @@
 <ol>
 <li>
 <p>Create a sensor with Slack trigger. We will discuss the trigger details in the following sections.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/slack-trigger.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/slack-trigger.yaml
 </pre></div>
 
 
@@ -1273,13 +1261,13 @@ generate complex event payloads, take a look at <a href="https://github.com/tidw
           </a>
         
         
-          <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../developer_guide/" title="Developer Guide" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Build Your Own Trigger
+                Developer Guide
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

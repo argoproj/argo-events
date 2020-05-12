@@ -948,18 +948,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1121,9 +1109,9 @@
 </li>
 <li>
 <p>Lets set up a webhook gateway and event source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1185,7 +1173,7 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 </li>
 <li>
 <p>Create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/webhook.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/webhook.yaml
 </pre></div>
 
 
@@ -1234,7 +1222,7 @@ provided by the Argo CLI such as,</p>
 </pre></div>
 
 
-<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/special-workflow-trigger.yaml">here</a>.</p>
+<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/special-workflow-trigger.yaml">here</a>.</p>
                 
                   
                 

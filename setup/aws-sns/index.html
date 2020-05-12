@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1151,7 +1139,7 @@
 </li>
 <li>
 <p>Create the gateway by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/aws-sns.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/aws-sns.yaml
 </pre></div>
 
 
@@ -1164,7 +1152,7 @@
    You can find more information on Ingress or Route online.</p>
 </li>
 <li>
-<p>Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/aws-sns.yaml</p>
+<p>Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/aws-sns.yaml</p>
 </li>
 <li>
 <p>Change the <code>topicArn</code> and <code>url</code> under <code>webhook</code> to your gateway service url created in a previous step. Make sure this url is reachable from AWS.</p>
@@ -1182,7 +1170,7 @@
 </li>
 <li>
 <p>Create the sensor by running the following command,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/aws-sns.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/aws-sns.yaml
 </pre></div>
 
 

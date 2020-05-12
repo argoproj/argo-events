@@ -941,18 +941,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../triggers/build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1114,9 +1102,9 @@ but, another workflow if it receives an event from the <code>Minio</code> gatewa
 <li>
 <p>Create the webhook event source and gateway. The gateway listens to HTTP requests
    on port <code>12000</code></p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-event-source.yaml
 
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/webhook-gateway.yaml
 </pre></div>
 
 
@@ -1124,9 +1112,9 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
 <li>
 <p>Create the minio event source and gateway. The gateway listens to events of type
    <code>PUT</code> and <code>DELETE</code> for objects in bucket <code>test</code>.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-event-source.yaml
 
-kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
+kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/05-circuit-and-switches/minio-gateway.yaml
 </pre></div>
 
 
@@ -1140,7 +1128,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
    when every group defined in <code>all</code> is resolved. In the sensor definition, there
    is only one group under <code>all</code> in both trigger templates. So, as soon as the group is resolved, the
    corresponding trigger will be executed.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-circuit-and-switches/sensor-01.yaml
 </pre></div>
 
 
@@ -1197,7 +1185,7 @@ kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-
 <li>
 <p>Great!! You have now learned how to use a <code>circuit</code> and <code>switch</code>. Lets update the sensor with a trigger
    that waits for both groups to resolve. This is the normal sensor behavior if circuit is not defined.</p>
-<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
+<div class="codehilite"><pre><span></span>kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/06-circuit-and-switches/sensor-02.yaml
 </pre></div>
 
 

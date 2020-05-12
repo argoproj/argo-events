@@ -948,18 +948,6 @@
   </li>
 
         
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../build-your-own-trigger/" title="Build Your Own Trigger" class="md-nav__link">
-      Build Your Own Trigger
-    </a>
-  </li>
-
-        
       </ul>
     </nav>
   </li>
@@ -1123,9 +1111,9 @@ set up event-driven pipelines for existing workloads.</p>
 </li>
 <li>
 <p>Lets set up a webhook gateway and event source to process incoming requests.</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/webhook.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/webhook.yaml
 
-kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
 </pre></div>
 
 
@@ -1182,7 +1170,7 @@ kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-
 </li>
 <li>
 <p>Create the sensor,</p>
-<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/trigger-standard-k8s-resource.yaml
+<div class="codehilite"><pre><span></span>kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-standard-k8s-resource.yaml
 </pre></div>
 
 
@@ -1273,7 +1261,7 @@ The <code>Resource Labels</code> holds a list of labels which are checked agains
 </pre></div>
 
 
-<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/trigger-with-policy.yaml">here</a>. </p>
+<p>Complete example is available <a href="https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/trigger-with-policy.yaml">here</a>. </p>
                 
                   
                 
