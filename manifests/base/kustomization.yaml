@@ -33,8 +33,8 @@ patchesStrategicMerge:
               env:
                 - name: GATEWAY_CLIENT_IMAGE
                   value: argoproj/gateway-client:v0.15.0
-                - name: GATEWAY_IMAGE_VERSION
-                  value: v0.15.0
+                - name: GATEWAY_SERVER_IMAGE
+                  value: argoproj/gateway-server:v0.15.0
   - |-
     apiVersion: apps/v1
     kind: Deployment

@@ -45,33 +45,3 @@ var (
 	NSQEvent         EventSourceType = "nsq"
 	GenericEvent     EventSourceType = "generic"
 )
-
-// GetGatewayImageNameMapping returns eventTyp -> imageName mapping
-// TODO: temporarily solution, need to figure out a better way
-func GetGatewayImageNameMapping() map[EventSourceType]string {
-	return map[EventSourceType]string{
-		MinioEvent:       "argoproj/artifact-gateway",
-		CalendarEvent:    "argoproj/calendar-gateway",
-		FileEvent:        "argoproj/file-gateway",
-		ResourceEvent:    "argoproj/resource-gateway",
-		WebhookEvent:     "argoproj/webhook-gateway",
-		AMQPEvent:        "argoproj/amqp-gateway",
-		KafkaEvent:       "argoproj/kafka-gateway",
-		MQTTEvent:        "argoproj/mqtt-gateway",
-		NATSEvent:        "argoproj/nats-gateway",
-		SNSEvent:         "argoproj/aws-sns-gateway",
-		SQSEvent:         "argoproj/aws-sqs-gateway",
-		PubSubEvent:      "argoproj/gcp-pubsub-gateway",
-		GitHubEvent:      "argoproj/github-gateway",
-		GitLabEvent:      "argoproj/gitlab-gateway",
-		HDFSEvent:        "argoproj/hdfs-gateway",
-		SlackEvent:       "argoproj/slack-gateway",
-		StorageGridEvent: "argoproj/storage-grid-gateway",
-		AzureEventsHub:   "argoproj/azure-events-hub-gateway",
-		StripeEvent:      "argoproj/stripe-gateway",
-		EmitterEvent:     "argoproj/emitter-gateway",
-		RedisEvent:       "argoproj/redis-gateway",
-		NSQEvent:         "argoproj/nsq-gateway",
-		//GenericEvent:     "",
-	}
-}
