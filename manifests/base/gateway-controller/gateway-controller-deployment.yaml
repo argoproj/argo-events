@@ -25,7 +25,5 @@ spec:
               value: gateway-controller-configmap
             - name: GATEWAY_CLIENT_IMAGE
               value: argoproj/gateway-client:latest
-            - name: GATEWAY_IMAGE_REGISTRY
-              value: docker.io
-            - name: GATEWAY_IMAGE_VERSION
-              value: latest
+            - name: GATEWAY_SERVER_IMAGE
+              value: argoproj/gateway-server:latest
