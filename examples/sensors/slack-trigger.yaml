@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: slack-trigger
+        slack:
+          channel: general
+          message: hello world
+          slackToken:
+            key: token
+            name: slack-secret
+          namespace: argo-events
+      parameters:
+        - src:
+            dependencyName: test-dep
+            dataKey: body.channel
+          dest: slack.channel
+        - src:
+            dependencyName: test-dep
+            dataKey: body.message
+          dest: slack.message

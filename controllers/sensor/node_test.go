@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	fakesensor "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
@@ -62,17 +61,12 @@ func TestSensorState(t *testing.T) {
 		{
 			name: "mark node state to active",
 			testFunc: func(t *testing.T) {
-				status := MarkNodePhase(fakeSensor, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, &apicommon.Event{
-					Data: []byte("test payload"),
-				}, logger)
+				event := &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{},
+					Data:    []byte("test payload"),
+				}
+				status := MarkNodePhase(fakeSensor, "first_node", v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseActive, event, logger, "phase is active")
 				assert.Equal(t, status.Phase, v1alpha1.NodePhaseActive)
-			},
-		},
-		{
-			name: "reapply the update",
-			testFunc: func(t *testing.T) {
-				err := ReapplyUpdate(fakeSensorClient, fakeSensor)
-				assert.Nil(t, err)
 			},
 		},
 		{
@@ -124,7 +118,7 @@ func TestIsDependencyResolved(t *testing.T) {
 	assert.Equal(t, true, resolved)
 
 	dep3 := InitializeNode(fakeSensor, "dep3", v1alpha1.NodeTypeEventDependency, logger)
-	MarkNodePhase(fakeSensor, dep3.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger)
+	MarkNodePhase(fakeSensor, dep3.Name, v1alpha1.NodeTypeEventDependency, v1alpha1.NodePhaseComplete, nil, logger, "phase is complete")
 	resolved = IsDependencyResolved(fakeSensor, dep3.Name)
 	assert.Equal(t, true, resolved)
 }

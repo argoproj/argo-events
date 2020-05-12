@@ -19,9 +19,7 @@ package common
 import (
 	"github.com/argoproj/argo-events/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/selection"
 )
 
 // SetObjectMeta sets ObjectMeta of child resource
@@ -58,13 +56,4 @@ func SetObjectMeta(owner, obj metav1.Object, gvk schema.GroupVersionKind) error 
 	obj.SetAnnotations(annotations)
 
 	return nil
-}
-
-// OwnerLabelSelector returns label selector for a K8s resource by it's owner
-func OwnerLabelSelector(ownerName string) (labels.Selector, error) {
-	req, err := labels.NewRequirement(common.LabelResourceName, selection.Equals, []string{ownerName})
-	if err != nil {
-		return nil, err
-	}
-	return labels.NewSelector().Add(*req), nil
 }

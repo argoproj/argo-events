@@ -1,8 +1,8 @@
-# Standard K8s Resources
+# Trigger Standard K8s Resources
 In the previous sections, you saw how to trigger the Argo workflows. In this tutorial, you 
-will see how to trigger Pod and Deployment.
+will see how to trigger Pod and Deployment. 
 
-Similarly you can trigger any standard Kubernetes resources.
+**Note:** You can trigger any standard Kubernetes object.
 
 Having the ability to trigger standard Kubernetes resources is quite powerful as provides an avenue to
 set up pipelines for existing workloads.
@@ -20,7 +20,7 @@ create the Kubernetes resource of your choice.
    You will notice that the `group` key is empty, that means we want to use `core` group.
    For any other groups, you need to specify the `group` key.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-pod.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-pod.yaml
 
 2. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 
@@ -61,7 +61,7 @@ create the Kubernetes resource of your choice.
 ## Deployment
 1. Lets create a sensor with a K8s deployment as trigger.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/03-standard-k8s-resources/sensor-deployment.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/04-standard-k8s-resources/sensor-deployment.yaml
 
 2. Use either Curl or Postman to send a post request to the `http://localhost:12000/example`
 

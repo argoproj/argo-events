@@ -15,9 +15,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	namespace, ok := os.LookupEnv(common.EnvVarNamespace)
+	if !ok {
+		panic("namespace is not provided")
+	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
 	server.StartGateway(&hdfs.EventListener{
 		Logger:    common.NewArgoEventsLogger(),
 		K8sClient: clientset,
+		Namespace: namespace,
 	})
 }

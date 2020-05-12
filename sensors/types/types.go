@@ -17,14 +17,13 @@ limitations under the License.
 package types
 
 import (
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // Notification to update event dependency's state or the sensor resource
 type Notification struct {
-	// Event is the internal representation of cloud event received from the gateway
-	Event *apicommon.Event
+	// Event is the cloudevent received from the gateway
+	Event *v1alpha1.Event
 	// EventDependency refers to the dependency against the event received from the gateway
 	EventDependency *v1alpha1.EventDependency
 	// Sensor refers to the sensor object

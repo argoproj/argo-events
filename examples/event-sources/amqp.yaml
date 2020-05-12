@@ -5,12 +5,20 @@ metadata:
 spec:
   type: amqp
   amqp:
-    # retry after each backoff to set up a successful connection
     example:
-      url: "amqp://amqp.argo-events:5672"
-      exchangeName: "name of the exchange"
-      exchangeType: "fanout"
-      routingKey: "routing key"
+      # amqp server url
+      url: amqp://rabbitmq-service.argo-events:5672
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+      # name of the exchange.
+      exchangeName: test
+      # exchange type. more info at https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges
+      exchangeType: fanout
+      # routing key
+      routingKey: hello
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000
@@ -20,3 +28,33 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+
+#    example-tls:
+#      # amqp server url
+#      url: "amqp://rabbitmq-service.argo-events:5672"
+#      # jsonBody specifies that all event body payload coming from this
+#      # source will be JSON
+#      jsonBody: true
+#      # name of the exchange.
+#      exchangeName: "test"
+#      # exchange type. more info at https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges
+#      exchangeType: "fanout"
+#      # routing key
+#      routingKey: "hello"
+#      # optional backoff time for connection retries.
+#      # if not provided, default connection backoff time will be used.
+#      connectionBackoff:
+#        # duration in nanoseconds. following value is 10 seconds
+#        duration: 10000000000
+#        # how many backoffs
+#        steps: 5
+#        # factor to increase on each step.
+#        # setting factor > 1 makes backoff exponential.
+#        factor: 2
+#        jitter: 0.2
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
+#

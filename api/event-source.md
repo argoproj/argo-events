@@ -187,6 +187,52 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the amqp client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -335,6 +381,8 @@ Event Hub path/name
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -584,9 +632,7 @@ Broker URI to connect to.
 
 <td>
 
-<code>channelKey</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
+<code>channelKey</code></br> <em> string </em>
 
 </td>
 
@@ -631,6 +677,8 @@ ChannelName refers to the channel name
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -707,6 +755,52 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 Backoff holds parameters applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the emitter client.
 
 </p>
 
@@ -1966,6 +2060,8 @@ GitHub upload URL (for GitHub Enterprise)
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace refers to Kubernetes namespace which is used to retrieve
@@ -2189,6 +2285,8 @@ GitlabBaseURL is the base URL for API requests to a custom endpoint
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace refers to Kubernetes namespace which is used to retrieve
@@ -2216,6 +2314,28 @@ access token from.
 
 DeleteHookOnFinish determines whether to delete the GitLab hook for the
 project once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>allowDuplicate</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+AllowDuplicate allows the gateway to register the same webhook
+integrations for multiple event source configurations. Defaults to
+false.
 
 </p>
 
@@ -2520,6 +2640,8 @@ must be set if either ccache or keytab is used.
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
 Namespace refers to Kubernetes namespace which is used to retrieve cache
@@ -2663,6 +2785,29 @@ Backoff holds parameters applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the kafka client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2795,6 +2940,52 @@ ConnectionBackoff holds backoff applied to connection.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the mqtt client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -2900,6 +3091,52 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 ConnectionBackoff holds backoff applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nats client.
 
 </p>
 
@@ -3035,6 +3272,52 @@ github.com/argoproj/argo-events/common.Backoff </em>
 <p>
 
 Backoff holds parameters applied to connection.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the nsq client.
 
 </p>
 
@@ -3179,6 +3462,31 @@ for GCP
 
 <td>
 
+<code>enableWorkflowIdentity</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+EnableWorkflowIdentity determines if your project authenticates to GCP
+with WorkflowIdentity or CredentialsFile. If true, authentication is
+done with WorkflowIdentity. If false or omited, authentication is done
+with CredentialsFile.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>deleteSubscriptionOnFinish</code></br> <em> bool </em>
 
 </td>
@@ -3191,6 +3499,29 @@ for GCP
 
 DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub
 subscription once the event source is stopped.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
 
 </p>
 
@@ -3360,6 +3691,29 @@ Channels to subscribe to listen events.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the redis client.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -3448,7 +3802,9 @@ Namespace where resource is deployed
 
 <p>
 
-Filter is applied on the metadata of the resource
+Filter is applied on the metadata of the resource If you apply filter,
+then the internal event informer will only monitor objects that pass the
+filter.
 
 </p>
 
@@ -3489,20 +3845,18 @@ Group of the resource
 
 <td>
 
-<code>eventType</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ResourceEventType"> ResourceEventType
+<code>eventTypes</code></br> <em>
+<a href="#argoproj.io/v1alpha1.ResourceEventType"> \[\]ResourceEventType
 </a> </em>
 
 </td>
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
-Type is the event type. If not provided, the gateway will watch all
-events for a resource.
+EventTypes is the list of event type to watch. Possible values are -
+ADD, UPDATE and DELETE.
 
 </p>
 
@@ -3599,21 +3953,11 @@ Description
 
 <em>(Optional)</em>
 
-</td>
+<p>
 
-</tr>
+Prefix filter is applied on the resource name.
 
-<tr>
-
-<td>
-
-<code>labels</code></br> <em> map\[string\]string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
+</p>
 
 </td>
 
@@ -3623,13 +3967,47 @@ Description
 
 <td>
 
-<code>fields</code></br> <em> map\[string\]string </em>
+<code>labels</code></br> <em> <a href="#argoproj.io/v1alpha1.Selector">
+\[\]Selector </a> </em>
 
 </td>
 
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+Labels provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/</a>
+for more info.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>fields</code></br> <em> <a href="#argoproj.io/v1alpha1.Selector">
+\[\]Selector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Fields provide listing options to K8s API to watch resource/s. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/">https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/</a>
+for more info.
+
+</p>
 
 </td>
 
@@ -3648,6 +4026,13 @@ Kubernetes meta/v1.Time </a> </em>
 <td>
 
 <em>(Optional)</em>
+
+<p>
+
+If resource is created before the specified time then the event is
+treated as valid.
+
+</p>
 
 </td>
 
@@ -3826,6 +4211,28 @@ from.
 <p>
 
 Region is AWS region
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>roleARN</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 
 </p>
 
@@ -4012,6 +4419,189 @@ from.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>roleARN</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+RoleARN is the Amazon Resource Name (ARN) of the role to assume.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>jsonBody</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+JSONBody specifies that all event body payload coming from this source
+will be JSON
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>queueAccountId</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+QueueAccountId is the ID of the account that created the queue to
+monitor
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Selector">
+
+Selector
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ResourceFilter">ResourceFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Selector represents conditional operation to select K8s objects.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>key</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Key name
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>operation</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Supported operations like ==, \!=, \<=, \>= etc. Defaults to ==. Refer
+<a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors">https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/\#label-selectors</a>
+for more info.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>value</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Value
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -4138,6 +4728,8 @@ Webhook holds configuration for a REST endpoint
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 <p>
 
@@ -4522,11 +5114,127 @@ all types of events will be processed. More info at
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.TLSConfig">
+
+TLSConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.AMQPEventSource">AMQPEventSource</a>,
+<a href="#argoproj.io/v1alpha1.EmitterEventSource">EmitterEventSource</a>,
+<a href="#argoproj.io/v1alpha1.KafkaEventSource">KafkaEventSource</a>,
+<a href="#argoproj.io/v1alpha1.MQTTEventSource">MQTTEventSource</a>,
+<a href="#argoproj.io/v1alpha1.NATSEventsSource">NATSEventsSource</a>,
+<a href="#argoproj.io/v1alpha1.NSQEventSource">NSQEventSource</a>,
+<a href="#argoproj.io/v1alpha1.RedisEventSource">RedisEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+TLSConfig refers to TLS configuration for a client.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <hr/>
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>95e393b</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code>. </em>
 
 </p>

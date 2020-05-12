@@ -71,7 +71,17 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger.Infoln("connecting to nats cluster...")
 	if err := server.Connect(common.GetConnectionBackoff(natsEventSource.ConnectionBackoff), func() error {
 		var err error
-		if conn, err = natslib.Connect(natsEventSource.URL); err != nil {
+		var opt []natslib.Option
+
+		if natsEventSource.TLS != nil {
+			tlsConfig, err := common.GetTLSConfig(natsEventSource.TLS.CACertPath, natsEventSource.TLS.ClientCertPath, natsEventSource.TLS.ClientKeyPath)
+			if err != nil {
+				return errors.Wrap(err, "failed to get the tls configuration")
+			}
+			opt = append(opt, natslib.Secure(tlsConfig))
+		}
+
+		if conn, err = natslib.Connect(natsEventSource.URL, opt...); err != nil {
 			return err
 		}
 		return nil
@@ -79,12 +89,21 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to connect to the nats server for event source %s", eventSource.Name)
 	}
 
+	if natsEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Info("subscribing to messages on the queue...")
 	_, err := conn.Subscribe(natsEventSource.Subject, func(msg *natslib.Msg) {
 		eventData := &events.NATSEventData{
 			Subject: msg.Subject,
-			Body:    msg.Data,
 		}
+		if natsEventSource.JSONBody {
+			eventData.Body = (*json.RawMessage)(&msg.Data)
+		} else {
+			eventData.Body = msg.Data
+		}
+
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")

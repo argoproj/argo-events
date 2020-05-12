@@ -19,8 +19,10 @@ package store
 import (
 	"fmt"
 
+	cd_v1alpha1 "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	gw_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	ss_v1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	rollouts_v1alpha1 "github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
 	wf_v1alpha1 "github.com/argoproj/argo/pkg/apis/workflow/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -39,6 +41,12 @@ func init() {
 		panic(err)
 	}
 	if err := gw_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+		panic(err)
+	}
+	if err := rollouts_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
+		panic(err)
+	}
+	if err := cd_v1alpha1.AddToScheme(scheme.Scheme); err != nil {
 		panic(err)
 	}
 }

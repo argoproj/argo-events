@@ -26,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -35,7 +36,7 @@ import (
 
 // informer constants
 const (
-	sensorResyncPeriod   = 20 * time.Minute
+	sensorResyncPeriod   = 10 * time.Minute
 	rateLimiterBaseDelay = 5 * time.Second
 	rateLimiterMaxDelay  = 1000 * time.Second
 )
@@ -57,6 +58,10 @@ type Controller struct {
 	Namespace string
 	// Config is the controller'sensor configuration
 	Config ControllerConfig
+	// TemplateSpec is the default Sensor pod template spec
+	TemplateSpec *corev1.PodTemplateSpec
+	// sensorImage is the image for sensor deployment
+	sensorImage string
 	// logger to logger stuff
 	logger *logrus.Logger
 	// kubeConfig is the rest K8s config
@@ -72,11 +77,12 @@ type Controller struct {
 }
 
 // NewController creates a new Controller
-func NewController(rest *rest.Config, configMap, namespace string) *Controller {
+func NewController(rest *rest.Config, configMap, namespace, sensorImage string) *Controller {
 	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &Controller{
 		ConfigMap:    configMap,
 		Namespace:    namespace,
+		sensorImage:  sensorImage,
 		kubeConfig:   rest,
 		k8sClient:    kubernetes.NewForConfigOrDie(rest),
 		sensorClient: clientset.NewForConfigOrDie(rest),

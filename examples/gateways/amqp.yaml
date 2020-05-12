@@ -1,30 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: amqp-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: amqp
 spec:
   type: amqp
   eventSourceRef:
     name: amqp-event-source
   template:
-    metadata:
-      name: amqp-gateway
-      labels:
-        gateway-name: amqp-gateway
-    spec:
-      containers:
-        - name: gateway-client:v0.13.0-rc
-          image: argoproj/gateway-client
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: amqp-events
-          image: argoproj/amqp-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/amqp-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://amqp-sensor.argo-events.svc:9300/"

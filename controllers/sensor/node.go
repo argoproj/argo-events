@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,7 +37,7 @@ func GetNodeByName(sensor *v1alpha1.Sensor, nodeName string) *v1alpha1.NodeStatu
 }
 
 // create a new node
-func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, logger *logrus.Logger, messages ...string) *v1alpha1.NodeStatus {
+func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, logger *logrus.Logger) *v1alpha1.NodeStatus {
 	if sensor.Status.Nodes == nil {
 		sensor.Status.Nodes = make(map[string]v1alpha1.NodeStatus)
 	}
@@ -55,37 +54,42 @@ func InitializeNode(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.
 		Type:        nodeType,
 		Phase:       v1alpha1.NodePhaseNew,
 		StartedAt:   metav1.MicroTime{Time: time.Now().UTC()},
-	}
-	if len(messages) > 0 {
-		node.Message = messages[0]
+		Message:     "node is initialized",
 	}
 	sensor.Status.Nodes[nodeID] = node
 	logger.WithFields(
 		map[string]interface{}{
-			common.LabelNodeType: string(node.Type),
-			common.LabelNodeName: node.DisplayName,
-			"node-message":       node.Message,
+			common.LabelNodeType:    string(node.Type),
+			common.LabelNodeName:    node.DisplayName,
+			common.LabelNodeMessage: node.Message,
 		},
 	).Infoln("node is initialized")
 	return &node
 }
 
 // MarkNodePhase marks the node with a phase, returns the node
-func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *apicommon.Event, logger *logrus.Logger, message ...string) *v1alpha1.NodeStatus {
+func MarkNodePhase(sensor *v1alpha1.Sensor, nodeName string, nodeType v1alpha1.NodeType, phase v1alpha1.NodePhase, event *v1alpha1.Event, logger *logrus.Logger, message string) *v1alpha1.NodeStatus {
 	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		logger.WithField("node-name", nodeName).Infoln("node is empty, this should not happen. initializing the node...")
+		InitializeNode(sensor, nodeName, nodeType, logger)
+		return nil
+	}
+
+	if message != "" {
+		node.Message = message
+	}
+
 	if node.Phase != phase {
 		logger.WithFields(
 			map[string]interface{}{
-				common.LabelNodeType: string(node.Type),
-				common.LabelNodeName: node.Name,
-				common.LabelPhase:    string(node.Phase),
+				common.LabelNodeType:    string(node.Type),
+				common.LabelNodeName:    node.Name,
+				common.LabelPhase:       string(node.Phase),
+				common.LabelNodeMessage: node.Message,
 			},
 		).Infoln("marking node phase")
 		node.Phase = phase
-	}
-
-	if len(message) > 0 {
-		node.Message = message[0]
 	}
 
 	if nodeType == v1alpha1.NodeTypeEventDependency && event != nil {
@@ -121,6 +125,9 @@ func AreAllDependenciesResolved(sensor *v1alpha1.Sensor) bool {
 // IsDependencyResolved checks whether a dependency is resolved.
 func IsDependencyResolved(sensor *v1alpha1.Sensor, nodeName string) bool {
 	node := GetNodeByName(sensor, nodeName)
+	if node == nil {
+		return true
+	}
 	if node.Phase == v1alpha1.NodePhaseError {
 		return false
 	}

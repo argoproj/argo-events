@@ -1,23 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: resource-sensor
-  labels:
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+  name: resource
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscription:
     http:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: resource-gateway
+      gatewayName: resource
       eventName: example
   triggers:
     - template:
@@ -33,6 +26,8 @@ spec:
               kind: Workflow
               metadata:
                 generateName: resource-workflow-
+                labels:
+                  app: resource-workflow
               spec:
                 entrypoint: whalesay
                 arguments:

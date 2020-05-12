@@ -22,8 +22,6 @@ import (
 
 // Defaults
 const (
-	// ErrorResponse for http request
-	ErrorResponse = "Error"
 	// StandardTimeFormat is time format reference for golang
 	StandardTimeFormat = "2006-01-02 15:04:05"
 	// StandardYYYYMMDDFormat formats date in yyyy-mm-dd format
@@ -46,20 +44,24 @@ const (
 	EnvVarControllerConfigMap = "CONTROLLER_CONFIG_MAP"
 	// EnvVarControllerInstanceID is used to get controller instance id
 	EnvVarControllerInstanceID = "CONTROLLER_INSTANCE_ID"
-	// EnvVarControllerName is used to get name of the controller
-	EnvVarControllerName = "CONTROLLER_NAME"
 	// EnvVarResourceName refers env var for name of the resource
 	EnvVarResourceName = "NAME"
 	// EnvVarNamespace refers to a K8s namespace
 	EnvVarNamespace = "NAMESPACE"
+	// EnvVarClientImage refers to the env var for gateway client image
+	EnvVarClientImage = "GATEWAY_CLIENT_IMAGE"
+	// EnvVarImageRegistry refers to the default image registry of gateway images
+	EnvVarImageRegistry = "GATEWAY_IMAGE_REGISTRY"
+	// EnvVarImageVersion refers to the version of the gateway images
+	EnvVarImageVersion = "GATEWAY_IMAGE_VERSION"
+	// EnvVarSensorImage refers to the default sensor image
+	EnvVarSensorImage = "SENSOR_IMAGE"
 )
 
 // Controller labels
 const (
 	// LabelGatewayName is the label for the K8s resource name
 	LabelResourceName = "resource-name"
-	// LabelControllerName is th label for the controller name
-	LabelControllerName = "controller-name"
 )
 
 const (
@@ -70,8 +72,6 @@ const (
 
 // Sensor constants
 const (
-	// SensorServiceEndpoint is the endpoint to dispatch the event to
-	SensorServiceEndpoint = "/"
 	// SensorName refers env var for name of sensor
 	SensorName = "SENSOR_NAME"
 	// SensorNamespace is used to get namespace where sensors are deployed
@@ -85,12 +85,8 @@ const (
 // Gateway constants
 const (
 	// LabelEventSourceName is the label for a event source in gateway
-	LabelEventSourceName = "event-source-name"
-	// LabelEventSourceID is the label for gateway configuration ID
-	LabelEventSourceID      = "event-source-id"
+	LabelEventSourceName    = "event-source-name"
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
-	// Server Connection Timeout, 10 seconds
-	ServerConnTimeout = 10
 	// ProcessorPort is the default port for the gateway event processor server to run on.
 	GatewayProcessorPort = "9300"
 )
@@ -108,19 +104,18 @@ var (
 
 // Miscellaneous Labels
 const (
-	// LabelOperation is a label for an operation in framework
-	LabelOperation = "operation"
 	// LabelEventSource is label for event name
 	LabelEventSource = "event-source"
 	// LabelOwnerName is the label for resource owner name
 	LabelOwnerName = "owner-name"
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
+	//LabelGatewayName is the label for gateway name
+	LabelGatewayName = "gateway-name"
 )
 
 // various supported media types
 const (
 	MediaTypeJSON string = "application/json"
-	MediaTypeXML  string = "application/xml"
 	MediaTypeYAML string = "application/yaml"
 )

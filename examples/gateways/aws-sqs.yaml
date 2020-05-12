@@ -1,31 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: aws-sqs-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: aws-sqs
 spec:
-  replica: 1
   type: sqs
   eventSourceRef:
     name: aws-sqs-event-source
   template:
-    metadata:
-      name: aws-sqs-gateway
-      labels:
-        gateway-name: aws-sqs-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: aws-sqs-events
-          image: argoproj/aws-sqs-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/aws-sqs-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://aws-sqs-sensor.argo-events.svc:9300/"

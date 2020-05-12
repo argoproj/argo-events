@@ -1,30 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: nats-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: nats
 spec:
   type: nats
   eventSourceRef:
     name: nats-event-source
   template:
-    metadata:
-      name: nats-gateway
-      labels:
-        gateway-name: nats-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: nats-events
-          image: argoproj/nats-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/nats-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://nats-sensor.argo-events.svc:9300/"

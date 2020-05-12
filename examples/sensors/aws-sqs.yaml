@@ -1,24 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: aws-sqs-sensor
-  labels:
-    # sensor controller with instanceId "argo-events" will process this sensor
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+  name: aws-sqs
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscription:
     http:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: aws-sqs-gateway
+      gatewayName: aws-sqs
       eventName: example
   triggers:
     - template:
@@ -35,6 +27,7 @@ spec:
               metadata:
                 generateName: aws-sqs-workflow-
               spec:
+                serviceAccountName: argo-events-sa
                 entrypoint: whalesay
                 arguments:
                   parameters:

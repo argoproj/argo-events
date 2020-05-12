@@ -23,7 +23,6 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwclient "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 )
@@ -157,39 +156,30 @@ func (ctx *gatewayContext) markGatewayPhase(phase v1alpha1.NodePhase, message st
 	ctx.updated = true
 }
 
-// PersistUpdates of the gateway resource
+// PersistUpdates persists the updates for the gateway object.
 func PersistUpdates(client gwclient.Interface, gw *v1alpha1.Gateway, log *logrus.Logger) (*v1alpha1.Gateway, error) {
 	gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.ObjectMeta.Namespace)
 
-	updatedGateway, err := gatewayClient.Update(gw)
+	obj, err := gatewayClient.Get(gw.Name, metav1.GetOptions{})
 	if err != nil {
-		log.WithError(err).Warn("error updating gateway")
-		if errors.IsConflict(err) {
-			return nil, err
-		}
-		log.Info("re-applying updates on latest version and retrying update")
-		err = ReapplyUpdates(client, gw)
-		if err != nil {
-			log.WithError(err).Error("failed to re-apply update")
-			return nil, err
-		}
+		obj = gw.DeepCopy()
 	}
-	log.WithField(common.LabelPhase, string(updatedGateway.Status.Phase)).Info("gateway state updated successfully")
-	return updatedGateway, nil
-}
 
-// ReapplyUpdates to gateway resource
-func ReapplyUpdates(client gwclient.Interface, gw *v1alpha1.Gateway) error {
-	return wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
-		gatewayClient := client.ArgoprojV1alpha1().Gateways(gw.Namespace)
-		g, err := gatewayClient.Update(gw)
+	obj.Status = *gw.Status.DeepCopy()
+
+	if err = wait.ExponentialBackoff(common.DefaultRetry, func() (bool, error) {
+		g, err := gatewayClient.Update(obj)
 		if err != nil {
 			if !common.IsRetryableKubeAPIError(err) {
 				return false, err
 			}
 			return false, nil
 		}
-		gw = g
+		obj = g.DeepCopy()
 		return true, nil
-	})
+	}); err != nil {
+		log.WithError(err).Warn("error updating the gateway")
+		return nil, err
+	}
+	return obj, nil
 }

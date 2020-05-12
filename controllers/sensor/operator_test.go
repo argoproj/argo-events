@@ -18,11 +18,12 @@ package sensor
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"testing"
 )
 
 func TestOperate(t *testing.T) {
@@ -57,7 +58,7 @@ func TestOperate(t *testing.T) {
 		{
 			name: "process a sensor object update",
 			updateFunc: func() {
-				ctx.sensor.Spec.Template.Spec.Containers[0].Name = "updated-name"
+				ctx.sensor.Spec.Template.ServiceAccountName = "updated-name"
 			},
 			testFunc: func(oldMetadata *v1alpha1.SensorResources) {
 				assert.NotNil(t, ctx.sensor.Status.Resources)
@@ -66,7 +67,7 @@ func TestOperate(t *testing.T) {
 				assert.Nil(t, err)
 				assert.NotNil(t, deployment)
 				assert.NotEqual(t, oldMetadata.Deployment.Annotations[common.AnnotationResourceSpecHash], deployment.Annotations[common.AnnotationResourceSpecHash])
-				assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Name, "updated-name")
+				assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Name, "main")
 				service, err := controller.k8sClient.CoreV1().Services(metadata.Service.Namespace).Get(metadata.Service.Name, metav1.GetOptions{})
 				assert.Nil(t, err)
 				assert.NotNil(t, service)
@@ -80,7 +81,7 @@ func TestOperate(t *testing.T) {
 			updateFunc: func() {
 				ctx.sensor.Status.Phase = v1alpha1.NodePhaseError
 				ctx.sensor.Status.Message = "sensor is in error state"
-				ctx.sensor.Spec.Template.Spec.Containers[0].Name = "revert-name"
+				ctx.sensor.Spec.Template.ServiceAccountName = "revert-name"
 			},
 			testFunc: func(oldMetadata *v1alpha1.SensorResources) {
 				assert.Equal(t, v1alpha1.NodePhaseActive, ctx.sensor.Status.Phase)
@@ -156,9 +157,8 @@ func TestPersistUpdates(t *testing.T) {
 	sensor, err := controller.sensorClient.ArgoprojV1alpha1().Sensors(sensorObj.Namespace).Create(sensorObj)
 	assert.Nil(t, err)
 	ctx.sensor = sensor.DeepCopy()
-	ctx.sensor.Spec.Circuit = "fake-group"
+	ctx.sensor.Status.Message = "updated-message"
 	sensor, err = PersistUpdates(controller.sensorClient, ctx.sensor.DeepCopy(), ctx.logger)
 	assert.Nil(t, err)
-	assert.Equal(t, "fake-group", sensor.Spec.Circuit)
-	assert.Equal(t, "fake-group", ctx.sensor.Spec.Circuit)
+	assert.Equal(t, "updated-message", sensor.Status.Message)
 }

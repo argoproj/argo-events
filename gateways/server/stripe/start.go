@@ -121,7 +121,7 @@ func (rc *Router) PostActivate() error {
 			})
 		logger.Infoln("registering a new webhook")
 
-		apiKey, err := common.GetSecrets(rc.k8sClient, stripeEventSource.Namespace, stripeEventSource.APIKey)
+		apiKey, err := common.GetSecretValue(rc.k8sClient, stripeEventSource.Namespace, stripeEventSource.APIKey)
 		if err != nil {
 			return err
 		}
@@ -176,6 +176,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 	if err := yaml.Unmarshal(eventSource.Value, &stripeEventSource); err != nil {
 		logger.WithError(err).Errorln("failed to parse the event source")
 		return err
+	}
+
+	if stripeEventSource.Namespace == "" {
+		stripeEventSource.Namespace = listener.Namespace
 	}
 
 	route := webhook.NewRoute(stripeEventSource.Webhook, listener.Logger, eventSource)

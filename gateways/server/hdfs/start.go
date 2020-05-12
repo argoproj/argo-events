@@ -27,6 +27,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 // WatchableHDFS wraps hdfs.Client for naivewatcher
@@ -75,6 +76,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var hdfsEventSource *v1alpha1.HDFSEventSource
 	if err := yaml.Unmarshal(eventSource.Value, &hdfsEventSource); err != nil {
 		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
+	}
+
+	if hdfsEventSource.Namespace == "" {
+		hdfsEventSource.Namespace = listener.Namespace
 	}
 
 	logger.Infoln("setting up HDFS configuration...")

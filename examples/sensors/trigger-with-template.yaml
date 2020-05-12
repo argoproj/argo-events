@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: webhook
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: webhook
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: templated-workflow-trigger
+        k8s:
+          group: argoproj.io
+          version: v1alpha1
+          resource: workflows
+          operation: create
+          source:
+            resource:
+              apiVersion: argoproj.io/v1alpha1
+              kind: Workflow
+              metadata:
+                generateName: webhook-
+              spec:
+                entrypoint: whalesay
+                arguments:
+                  parameters:
+                  - name: message
+                  - name: subject
+                templates:
+                - name: whalesay
+                  serviceAccountName: argo-events-sa
+                  inputs:
+                    parameters:
+                    - name: message
+                    - name: subject
+                  container:
+                    image: docker/whalesay:latest
+                    command: [cowsay]
+                    args: ["{{inputs.parameters.message}} from {{inputs.parameters.subject}}"]
+          parameters:
+            # Retrieve the 'message' key from the payload
+            - src:
+                dependencyName: test-dep
+                dataTemplate: "{{ .Input.body.message | title }}"
+              dest: spec.arguments.parameters.0.value
+            # Title case the context subject
+            - src:
+                dependencyName: test-dep
+                contextTemplate: "{{ .Input.subject | title }}"
+              dest: spec.arguments.parameters.1.value
+            # Retrieve the 'name' key from the payload, remove all whitespace and lowercase it.
+            - src:
+                dependencyName: test-dep
+                dataTemplate: "{{ .Input.body.name | nospace | lower }}-"
+              dest: metadata.generateName
+              operation: append

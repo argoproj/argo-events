@@ -20,8 +20,8 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -37,9 +37,9 @@ var sensorObj = &v1alpha1.Sensor{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					HTTP: &v1alpha1.HTTPTrigger{
-						ServerURL: "http://fake.com:12000",
-						Method:    "POST",
-						Timeout:   10,
+						URL:     "http://fake.com:12000",
+						Method:  "POST",
+						Timeout: 10,
 					},
 				},
 			},
@@ -48,7 +48,13 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getFakeHTTPTrigger() *HTTPTrigger {
-	return NewHTTPTrigger(sensorObj.DeepCopy(), sensorObj.Spec.Triggers[0].DeepCopy(), common.NewArgoEventsLogger())
+	return &HTTPTrigger{
+		Client:    nil,
+		K8sClient: nil,
+		Sensor:    sensorObj.DeepCopy(),
+		Trigger:   sensorObj.Spec.Triggers[0].DeepCopy(),
+		Logger:    common.NewArgoEventsLogger(),
+	}
 }
 
 func TestHTTPTrigger_FetchResource(t *testing.T) {
@@ -58,7 +64,7 @@ func TestHTTPTrigger_FetchResource(t *testing.T) {
 	assert.NotNil(t, obj)
 	trigger1, ok := obj.(*v1alpha1.HTTPTrigger)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, trigger.Trigger.Template.HTTP.ServerURL, trigger1.ServerURL)
+	assert.Equal(t, trigger.Trigger.Template.HTTP.URL, trigger1.URL)
 }
 
 func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
@@ -70,13 +76,13 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     cloudevents.VersionV1,
 						Subject:         "example-1",
 					},
 					Data: []byte(`{"url": "http://another-fake.com", "method": "GET"}`),
@@ -115,7 +121,7 @@ func TestHTTPTrigger_ApplyResourceParameters(t *testing.T) {
 	updatedTrigger, ok := resource.(*v1alpha1.HTTPTrigger)
 	assert.Nil(t, err)
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "http://another-fake.com", updatedTrigger.ServerURL)
+	assert.Equal(t, "http://fake.com:12000", updatedTrigger.URL)
 	assert.Equal(t, http.MethodGet, updatedTrigger.Method)
 }
 

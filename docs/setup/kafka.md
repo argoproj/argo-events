@@ -58,7 +58,3 @@ for installation instructions.
 
 ## Troubleshoot
 Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
-
-
-
-

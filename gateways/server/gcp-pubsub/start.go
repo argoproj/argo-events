@@ -77,35 +77,43 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
+	if pubsubEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger = logger.WithField("topic", pubsubEventSource.Topic)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Create a new topic with the given name if none exists
 	logger.Infoln("setting up a client to connect to PubSub...")
-	client, err := pubsub.NewClient(ctx, pubsubEventSource.ProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
+
+	var opt []option.ClientOption
+	projectId := pubsubEventSource.ProjectID
+
+	if !pubsubEventSource.EnableWorkflowIdentity {
+		opt = append(opt, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
+	}
+
+	// Use default ProjectID unless TopicProjectID exists
+	if pubsubEventSource.TopicProjectID != "" && pubsubEventSource.TopicProjectID != pubsubEventSource.ProjectID {
+		projectId = pubsubEventSource.TopicProjectID
+	}
+
+	// Create a new topic with the given name if none exists
+	client, err := pubsub.NewClient(ctx, projectId, opt...)
 	if err != nil {
 		return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
 	}
 
-	// use same client for topic and subscription by default
-	topicClient := client
-	if pubsubEventSource.TopicProjectID != "" && pubsubEventSource.TopicProjectID != pubsubEventSource.ProjectID {
-		topicClient, err = pubsub.NewClient(ctx, pubsubEventSource.TopicProjectID, option.WithCredentialsFile(pubsubEventSource.CredentialsFile))
-		if err != nil {
-			return errors.Wrapf(err, "failed to set up client for %s", eventSource.Name)
-		}
-	}
-
 	logger.Infoln("getting topic information from PubSub...")
-	topic := topicClient.Topic(pubsubEventSource.Topic)
+	topic := client.Topic(pubsubEventSource.Topic)
 	exists, err := topic.Exists(ctx)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get status of the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 	}
 	if !exists {
 		logger.Infoln("topic doesn't exist, creating the PubSub topic...")
-		if _, err := topicClient.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
+		if _, err := client.CreateTopic(ctx, pubsubEventSource.Topic); err != nil {
 			return errors.Wrapf(err, "failed to create the topic %s for %s", pubsubEventSource.Topic, eventSource.Name)
 		}
 	}
@@ -137,6 +145,9 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			Body:        m.Data,
 			Attributes:  m.Attributes,
 			PublishTime: m.PublishTime.String(),
+		}
+		if pubsubEventSource.JSONBody {
+			eventData.Body = (*json.RawMessage)(&m.Data)
 		}
 		eventBytes, err := json.Marshal(eventData)
 		if err != nil {

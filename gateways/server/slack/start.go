@@ -247,6 +247,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if slackEventSource.Namespace == "" {
+		slackEventSource.Namespace = listener.Namespace
+	}
+
 	logger.Infoln("retrieving the slack token...")
 	token, err := store.GetSecrets(listener.K8sClient, slackEventSource.Namespace, slackEventSource.Token.Name, slackEventSource.Token.Key)
 	if err != nil {

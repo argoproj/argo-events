@@ -71,5 +71,8 @@ func validate(eventSource *v1alpha1.MQTTEventSource) error {
 	if eventSource.ClientId == "" {
 		return fmt.Errorf("client id must be specified")
 	}
+	if eventSource.TLS != nil {
+		return v1alpha1.ValidateTLSConfig(eventSource.TLS)
+	}
 	return nil
 }

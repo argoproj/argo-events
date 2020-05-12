@@ -5,6 +5,7 @@
 * Sensor and Gateway are Kubernetes Custom Resources. For more information on K8 CRDs visit [here.](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
 
 ### Controller Configmap
+
 Defines the `instance-id` and the `namespace` for the controller.
 e.g. 
 ```yaml

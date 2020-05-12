@@ -3,11 +3,11 @@ kind: EventSource
 metadata:
   name: hdfs-event-source
 spec:
-  type: "hdfs"
+  type: hdfs
   hdfs:
     example:
       directory: "/tmp/"
-      type: "CREATE"
+      type: CREATE
       path: x.txt
       addresses:
         - my-hdfs-namenode-0.my-hdfs-namenode.default.svc.cluster.local:8020

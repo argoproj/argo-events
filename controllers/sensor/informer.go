@@ -18,9 +18,7 @@ package sensor
 
 import (
 	sensorinformers "github.com/argoproj/argo-events/pkg/client/sensor/informers/externalversions"
-	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
@@ -29,13 +27,20 @@ import (
 func (controller *Controller) instanceIDReq() (*labels.Requirement, error) {
 	var instanceIDReq *labels.Requirement
 	var err error
-	if controller.Config.InstanceID == "" {
-		return nil, errors.New("controller instance id must be specified")
+	var values []string
+
+	op := selection.DoesNotExist
+
+	if controller.Config.InstanceID != "" {
+		op = selection.Equals
+		values = []string{controller.Config.InstanceID}
 	}
-	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{controller.Config.InstanceID})
+
+	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, op, values)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
+	controller.logger.WithField("instance-id", instanceIDReq.String()).Infoln("instance id requirement")
 	return instanceIDReq, nil
 }
 
@@ -51,7 +56,6 @@ func (controller *Controller) newSensorInformer() (cache.SharedIndexInformer, er
 		sensorResyncPeriod,
 		sensorinformers.WithNamespace(controller.Config.Namespace),
 		sensorinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
-			options.FieldSelector = fields.Everything().String()
 			options.LabelSelector = labelSelector.String()
 		}),
 	)

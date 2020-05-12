@@ -3,75 +3,96 @@ kind: EventSource
 metadata:
   name: resource-event-source
 spec:
-  type: "resource"
+  type: resource
   resource:
-    # watch workflows that are in successful state
     example:
       # namespace to listen events within
-      namespace: "argo-events"
+      namespace: argo-events
       # resource group
-      group: "argoproj.io"
+      group: argoproj.io
       # resource version
-      version: "v1alpha1"
+      version: v1alpha1
       # resource kind
-      resource: "workflows"
-      # type of event
+      resource: workflows
+      # type of events
       # possible values are ADD, DELETE, UPDATE
       # Optional
-      type: ADD
-      # Filters to apply on watched object
-      # Optional
+      eventTypes:
+        - ADD
+      # optional.
       filter:
+        # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
+        # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
+
+        # labels provide listing options to K8s API to watch objects
         labels:
-          workflows.argoproj.io/phase: Succeeded
-          name: "my-workflow"
+          - key: app
+            # Supported operations like ==, !=, etc.
+            # Defaults to ==.
+            # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
+            # optional.
+            operation: "=="
+            value: my-workflow
 
-    # watch all namespace related events
-    example-with-all-types-and-no-filter:
-      namespace: "argo-events"
-      group: ""
-      version: "v1"
-      resource: "namespaces"
+#        # fields provide listing options to K8s API to watch objects
+#        fields:
+#          - key: metadata.name
+#            # Supported operations like ==, !=, <=, >= etc.
+#            # Defaults to ==.
+#            # Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
+#            # optional.
+#            operation: ==
+#            value: my-workflow
 
-    # create event if workflow with prefix "my-workflow" gets modified
-    example-with-prefix-filter:
-      namespace: "argo-events"
-      group: argoproj.io
-      version: v1alpha1
-      resource: workflows
-      type: UPDATE
-      filter:
-        prefix: "my-workflow"
 
-    # create event when a pod is created before 2019-03-27T010:52:32Z
-    example-with-created-by-filter:
-      namespace: "argo-events"
-      group: argoproj.io
-      version: v1alpha1
-      resource: workflows
-      type: ADDED
-      filter:
-        createdBy: "2019-04-06T12:52:11Z"
-
-    example-with-multi-filters:
-      namespace: "argo-events"
-      group: ""
-      version: v1
-      resource: pods
-      type: ADDED
-      filter:
-        createdBy: "2019-04-06T12:52:11Z"
-        labels:
-          workflows.argoproj.io/completed: "true"
-        prefix: "hello"
-
-    # watch for completed workflows in any namespace
-    example-without-namespace:
-      # namespace: (omitted to match any namespace)
-      group: "k8s.io"
-      version: v1
-      resource: workflows
-      type: ADDED
-      filter:
-        labels:
-          workflows.argoproj.io/completed: "true"
+#    # create event if workflow with prefix "my-workflow" gets modified
+#    example-with-prefix-filter:
+#      namespace: "argo-events"
+#      group: argoproj.io
+#      version: v1alpha1
+#      resource: workflows
+#      eventTypes:
+#        - UPDATE
+#        - ADD
+#      filter:
+#        prefix: "my-workflow"
+#
+#    # create event when a pod is created before 2019-03-27T010:52:32Z
+#    example-with-created-by-filter:
+#      namespace: "argo-events"
+#      group: argoproj.io
+#      version: v1alpha1
+#      resource: workflows
+#      eventTypes:
+#        - ADD
+#      filter:
+#        createdBy: "2019-04-06T12:52:11Z"
+#
+#    example-with-multi-filters:
+#      namespace: "argo-events"
+#      group: ""
+#      version: v1
+#      resource: pods
+#      eventTypes:
+#        - ADD
+#      filter:
+#        createdBy: "2019-04-06T12:52:11Z"
+#        labels:
+#          - key: workflows.argoproj.io/completed
+#            operation: ==
+#            value: "true"
+#        prefix: "hello"
+#
+#    # watch for completed workflows in any namespace
+#    example-without-namespace:
+#      # namespace: (omitted to match any namespace)
+#      group: "k8s.io"
+#      version: v1
+#      resource: workflows
+#      eventTypes:
+#        - ADD
+#      filter:
+#        labels:
+#          - key: workflows.argoproj.io/completed
+#            operation: ==
+#            value: "true"

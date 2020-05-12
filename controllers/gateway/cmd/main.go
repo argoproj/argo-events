@@ -18,10 +18,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/controllers/gateway"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 func main() {
@@ -43,8 +45,21 @@ func main() {
 		namespace = common.DefaultControllerNamespace
 	}
 
+	clientImage, ok := os.LookupEnv(common.EnvVarClientImage)
+	if !ok {
+		panic(fmt.Sprintf("Env var %s for gateway client image is not provided", common.EnvVarClientImage))
+	}
+	gatewayImageRegistry, ok := os.LookupEnv(common.EnvVarImageRegistry)
+	if !ok {
+		gatewayImageRegistry = "docker.io"
+	}
+	gatewayImageVersion, ok := os.LookupEnv(common.EnvVarImageVersion)
+	if !ok {
+		gatewayImageVersion = "latest"
+	}
+	gatewayImages := getGatewayImages(gatewayImageRegistry, gatewayImageVersion)
 	// create new gateway controller
-	controller := gateway.NewGatewayController(restConfig, configMap, namespace)
+	controller := gateway.NewGatewayController(restConfig, configMap, namespace, clientImage, gatewayImages)
 	// watch for configuration updates for the controller
 	err = controller.ResyncConfig(namespace)
 	if err != nil {
@@ -53,4 +68,14 @@ func main() {
 
 	go controller.Run(context.Background(), 1)
 	select {}
+}
+
+// getGatewayImages is used to get the gateway image mapping
+// TODO: temporarily solution, need to figure out a better way
+func getGatewayImages(gatewayImageRegistry, gatewayImageVersion string) map[apicommon.EventSourceType]string {
+	var result = make(map[apicommon.EventSourceType]string)
+	for k, v := range apicommon.GetGatewayImageNameMapping() {
+		result[k] = fmt.Sprintf("%s/%s:%s", gatewayImageRegistry, v, gatewayImageVersion)
+	}
+	return result
 }

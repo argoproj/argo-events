@@ -1,31 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: hdfs-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: hdfs
 spec:
-  replica: 1
   type: hdfs
   eventSourceRef:
     name: hdfs-event-source
   template:
-    metadata:
-      name: hdfs-gateway
-      labels:
-        gateway-name: hdfs-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: hdfs-events
-          image: argoproj/hdfs-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/hdfs-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   watchers:
     http:
       - "http://hdfs-sensor.argo-events.svc:9300/"

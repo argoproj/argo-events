@@ -25,6 +25,7 @@ import (
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/selection"
 )
 
 // ValidateEventSource validates a resource event source
@@ -67,6 +68,36 @@ func validate(eventSource *v1alpha1.ResourceEventSource) error {
 	}
 	if eventSource.Resource == "" {
 		return fmt.Errorf("resource must be specified")
+	}
+	if eventSource.EventTypes == nil {
+		return fmt.Errorf("event types must be specified")
+	}
+	if eventSource.Filter != nil {
+		if eventSource.Filter.Labels != nil {
+			if err := validateSelectors(eventSource.Filter.Labels); err != nil {
+				return err
+			}
+		}
+		if eventSource.Filter.Fields != nil {
+			if err := validateSelectors(eventSource.Filter.Fields); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func validateSelectors(selectors []v1alpha1.Selector) error {
+	for _, sel := range selectors {
+		if sel.Key == "" {
+			return fmt.Errorf("key can't be empty for selector")
+		}
+		if sel.Operation == "" {
+			continue
+		}
+		if selection.Operator(sel.Operation) == "" {
+			return fmt.Errorf("unknown selection operation %s", sel.Operation)
+		}
 	}
 	return nil
 }

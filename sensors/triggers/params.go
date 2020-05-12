@@ -17,12 +17,14 @@ limitations under the License.
 package triggers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"text/template"
 
+	"github.com/Masterminds/sprig"
 	"github.com/argoproj/argo-events/common"
 	snctrl "github.com/argoproj/argo-events/controllers/sensor"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -33,7 +35,7 @@ import (
 
 // ConstructPayload constructs a payload for operations involving request and responses like HTTP request.
 func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerParameter) ([]byte, error) {
-	payload := make(map[string]string)
+	var payload []byte
 
 	events := ExtractEvents(sensor, parameters)
 	if events == nil {
@@ -45,10 +47,14 @@ func ConstructPayload(sensor *v1alpha1.Sensor, parameters []v1alpha1.TriggerPara
 		if err != nil {
 			return nil, err
 		}
-		payload[parameter.Dest] = value
+		tmp, err := sjson.SetBytes(payload, parameter.Dest, value)
+		if err != nil {
+			return nil, err
+		}
+		payload = tmp
 	}
 
-	return json.Marshal(payload)
+	return payload, nil
 }
 
 // ApplyTemplateParameters applies parameters to trigger template
@@ -62,11 +68,11 @@ func ApplyTemplateParameters(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger)
 		if err != nil {
 			return err
 		}
-		template := &v1alpha1.TriggerTemplate{}
-		if err = json.Unmarshal(tObj, template); err != nil {
+		tmplt := &v1alpha1.TriggerTemplate{}
+		if err = json.Unmarshal(tObj, tmplt); err != nil {
 			return err
 		}
-		trigger.Template = template
+		trigger.Template = tmplt
 	}
 	return nil
 }
@@ -91,7 +97,7 @@ func ApplyResourceParameters(sensor *v1alpha1.Sensor, parameters []v1alpha1.Trig
 }
 
 // ApplyParams applies the params to the resource json object
-func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]apicommon.Event) ([]byte, error) {
+func ApplyParams(jsonObj []byte, params []v1alpha1.TriggerParameter, events map[string]*v1alpha1.Event) ([]byte, error) {
 	for _, param := range params {
 		// let's grab the param value
 		v, err := ResolveParamValue(param.Src, events)
@@ -134,7 +140,7 @@ func isJSON(b []byte) bool {
 
 // util method to render an event's data as a JSON []byte
 // json is a subset of yaml so this should work...
-func renderEventDataAsJSON(event *apicommon.Event) ([]byte, error) {
+func renderEventDataAsJSON(event *v1alpha1.Event) ([]byte, error) {
 	if event == nil {
 		return nil, fmt.Errorf("event is nil")
 	}
@@ -158,24 +164,27 @@ func renderEventDataAsJSON(event *apicommon.Event) ([]byte, error) {
 
 // helper method to resolve the parameter's value from the src
 // returns an error if the Path is invalid/not found and the default value is nil OR if the eventDependency event doesn't exist and default value is nil
-func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]apicommon.Event) (string, error) {
+func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]*v1alpha1.Event) (string, error) {
 	var err error
 	var value []byte
 	var key string
+	var tmplt string
 	if event, ok := events[src.DependencyName]; ok {
 		// If context or data keys are not set, return the event payload as is
-		if src.ContextKey == "" && src.DataKey == "" {
+		if src.ContextKey == "" && src.DataKey == "" && src.DataTemplate == "" && src.ContextTemplate == "" {
 			value, err = json.Marshal(&event)
 		}
 		// Get the context bytes
-		if src.ContextKey != "" {
+		if src.ContextKey != "" || src.ContextTemplate != "" {
 			key = src.ContextKey
+			tmplt = src.ContextTemplate
 			value, err = json.Marshal(&event.Context)
 		}
 		// Get the payload bytes
-		if src.DataKey != "" {
+		if src.DataKey != "" || src.DataTemplate != "" {
 			key = src.DataKey
-			value, err = renderEventDataAsJSON(&event)
+			tmplt = src.DataTemplate
+			value, err = renderEventDataAsJSON(event)
 		}
 	}
 	if err != nil && src.Value != nil {
@@ -184,12 +193,19 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 	}
 	// Get the value corresponding to specified key within JSON object
 	if value != nil {
-		if key != "" {
-			res := gjson.GetBytes(value, key)
-			if res.Exists() {
-				return res.String(), nil
+		if tmplt != "" {
+			out, err := getValueWithTemplate(value, tmplt)
+			if err == nil {
+				return out, nil
 			}
-			fmt.Printf("key %s does not exist to in the event object\n", key)
+			fmt.Printf("failed to execute the src event template, falling back to key or value. err: %+v\n", err)
+		}
+		if key != "" {
+			res, err := getValueByKey(value, key)
+			if err == nil {
+				return res, nil
+			}
+			fmt.Printf("Failed to get value by key: %+v\n", err)
 		}
 		if src.Value != nil {
 			return *src.Value, nil
@@ -201,8 +217,8 @@ func ResolveParamValue(src *v1alpha1.TriggerParameterSource, events map[string]a
 
 // ExtractEvents is a helper method to extract the events from the event dependencies nodes associated with the resource params
 // returns a map of the events keyed by the event dependency name
-func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]apicommon.Event {
-	events := make(map[string]apicommon.Event)
+func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) map[string]*v1alpha1.Event {
+	events := make(map[string]*v1alpha1.Event)
 	for _, param := range params {
 		if param.Src != nil {
 			node := snctrl.GetNodeByName(sensor, param.Src.DependencyName)
@@ -212,8 +228,39 @@ func ExtractEvents(sensor *v1alpha1.Sensor, params []v1alpha1.TriggerParameter) 
 			if node.Event == nil {
 				continue
 			}
-			events[param.Src.DependencyName] = *node.Event
+			events[param.Src.DependencyName] = node.Event
 		}
 	}
 	return events
+}
+
+// getValueWithTemplate will attempt to execute the provided template against
+// the raw json bytes and then returns the result or any error
+func getValueWithTemplate(value []byte, templString string) (string, error) {
+	res := gjson.ParseBytes(value)
+	tpl, err := template.New("param").Funcs(sprig.HermeticTxtFuncMap()).Parse(templString)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := tpl.Execute(&buf, map[string]interface{}{
+		"Input": res.Value(),
+	}); err != nil {
+		return "", err
+	}
+	out := buf.String()
+	if out == "" || out == "<no value>" {
+		return "", fmt.Errorf("template evaluated to empty string or no value: %s", templString)
+	}
+	return out, nil
+}
+
+// getValueByKey will return the value in the raw json bytes at the provided key,
+// or an error if it does not exist.
+func getValueByKey(value []byte, key string) (string, error) {
+	res := gjson.GetBytes(value, key)
+	if res.Exists() {
+		return res.String(), nil
+	}
+	return "", fmt.Errorf("key %s does not exist to in the event object\n", key)
 }

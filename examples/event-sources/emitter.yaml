@@ -7,27 +7,34 @@ spec:
   emitter:
     example:
       # Broker URI to connect to.
-      broker: http://emitter.argo-events.svc:8080
+      broker: tcp://broker.argo-events.svc:4000
       # ChannelName refers to the channel name
-      channelName: channel_name
+      channelName: hello
+
+      # ChannelKey is the key for the channel
+      channelKey: channel_key
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
+
       # Namespace to use to retrieve the channel key and optional username/password
-      namespace: argo-events
-      # ChannelKey is the K8s secret selector for the channel key
-      channelKey:
-        name: name_of_the_secret_that_containing_channel_key
-        key: key_that_holds_value_of_channel_key
-      # Username to use to connect to broker
-      # +optional
-      username:
-        name: name_of_the_secret_that_containing_username
-        key: name_of_the_secret_that_containing_username
-      # Password to use to connect to broker
-      # +optional
-      password:
-        name: name_of_the_secret_that_containing_password
-        key: name_of_the_secret_that_containing_password
-      # Backoff holds parameters applied to connection.
-      # +optional
+      # Optional.
+      # Defaults to gateway namespace
+#      namespace: argo-events
+
+#      # Username to use to connect to broker
+#      # +optional
+#      username:
+#        name: name_of_the_secret_that_containing_username
+#        key: name_of_the_secret_that_containing_username
+#      # Password to use to connect to broker
+#      # +optional
+#      password:
+#        name: name_of_the_secret_that_containing_password
+#        key: name_of_the_secret_that_containing_password
+
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds.
         duration: 10000000000
@@ -38,3 +45,13 @@ spec:
         factor: 2
         jitter: 0.2
 
+
+#    example-tls:
+#      broker: tcp://broker.argo-events.svc:4000
+#      channelName: hello
+#      channelKey: channel_key
+#      jsonBody: true
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway

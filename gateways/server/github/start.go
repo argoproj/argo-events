@@ -19,10 +19,12 @@ package github
 import (
 	"context"
 	"encoding/json"
-	"github.com/argoproj/argo-events/gateways/server"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/server"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -30,7 +32,7 @@ import (
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
-	gh "github.com/google/go-github/github"
+	gh "github.com/google/go-github/v31/github"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -105,8 +107,20 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	event := &events.GithubEventData{
+		Headers: request.Header,
+		Body:    (*json.RawMessage)(&body),
+	}
+
+	eventBody, err := json.Marshal(event)
+	if err != nil {
+		logger.Info("failed to marshal event")
+		common.SendErrorResponse(writer, "invalid event")
+		return
+	}
+
 	logger.Infoln("dispatching event on route's data channel")
-	route.DataCh <- body
+	route.DataCh <- eventBody
 	logger.Info("request successfully processed")
 
 	common.SendSuccessResponse(writer, "success")
@@ -141,9 +155,9 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("configuring GitHub hook...")
-	formattedUrl := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
+	formattedURL := common.FormattedURL(githubEventSource.Webhook.URL, githubEventSource.Webhook.Endpoint)
 	hookConfig := map[string]interface{}{
-		"url": &formattedUrl,
+		"url": &formattedURL,
 	}
 
 	if githubEventSource.ContentType != "" {
@@ -216,7 +230,7 @@ func (router *Router) PostActivate() error {
 			return errors.Errorf("failed to list existing webhooks. err: %+v", err)
 		}
 
-		hook = getHook(hooks, formattedUrl, githubEventSource.Events)
+		hook = getHook(hooks, formattedURL, githubEventSource.Events)
 		if hook == nil {
 			return errors.New("failed to find existing webhook")
 		}
@@ -267,6 +281,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 	if err := yaml.Unmarshal(eventSource.Value, &githubEventSource); err != nil {
 		listener.Logger.WithError(err).WithField(common.LabelEventSource, eventSource.Name).Infoln("failed to parse the event source")
 		return err
+	}
+
+	if githubEventSource.Namespace == "" {
+		githubEventSource.Namespace = listener.Namespace
 	}
 
 	route := webhook.NewRoute(githubEventSource.Webhook, listener.Logger, eventSource)

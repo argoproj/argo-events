@@ -1,38 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: gcp-pubsub-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: gcp-pubsub
 spec:
-  replica: 1
   type: pubsub
   eventSourceRef:
     name: gcp-pubsub-event-source
   template:
-    metadata:
-      name: gcp-pubsub-gateway
-      labels:
-        gateway-name: gcp-pubsub-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: gcp-pubsub-events
-          image: argoproj/gcp-pubsub-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gcp-pubsub-gateway"]
-          volumeMounts:
-            - mountPath: /gcp-pubsub-creds-dir
-              name: gcp-pubsub-data
-      volumes:
-        - name: gcp-pubsub-data
-          secret:
-            secretName: gcp-pubsub
-      serviceAccountName: argo-events-sa
+    container:
+      volumeMounts:
+        - mountPath: /gcp-pubsub-creds-dir
+          name: gcp-pubsub-data
+    volumes:
+      - name: gcp-pubsub-data
+        secret:
+          secretName: gcp-pubsub
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://gcp-pubsub-sensor.argo-events.svc:9300/"

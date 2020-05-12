@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: minio
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+    - name: test-dep
+      gatewayName: minio
+      eventName: example
+  subscription:
+    http:
+      port: 9300
+  triggers:
+    - template:
+        name: nats-trigger
+        nats:
+          url: nats.argo-events.svc:4222
+          subject: minio-events
+          payload:
+            - src:
+                dependencyName: test-dep
+                dataKey: notification.0.s3.object.key
+              dest: fileName
+            - src:
+                dependencyName: test-dep
+                dataKey: notification.0.s3.bucket.name
+              dest: bucket

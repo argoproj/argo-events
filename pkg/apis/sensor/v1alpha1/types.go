@@ -21,12 +21,12 @@ import (
 	"hash/fnv"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
-
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	k8stypes "k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -76,8 +76,10 @@ type KubernetesResourceOperation string
 
 // possible values for KubernetesResourceOperation
 const (
-	Create KubernetesResourceOperation = "create" // creates the resource
+	// deprecate create.
+	Create KubernetesResourceOperation = "create" // create the resource
 	Update KubernetesResourceOperation = "update" // updates the resource
+	Patch  KubernetesResourceOperation = "patch"  // patch resource
 )
 
 // ArgoWorkflowOperation refers to the type of the operation performed on the Argo Workflow
@@ -90,6 +92,18 @@ const (
 	Resubmit ArgoWorkflowOperation = "resubmit" // resubmit a workflow
 	Retry    ArgoWorkflowOperation = "retry"    // retry a workflow
 	Resume   ArgoWorkflowOperation = "resume"   // resume a workflow
+)
+
+// Comparator refers to the comparator operator for a data filter
+type Comparator string
+
+const (
+	GreaterThanOrEqualTo Comparator = ">=" // Greater than or equal to value provided in data filter
+	GreaterThan          Comparator = ">"  // Greater than value provided in data filter
+	EqualTo              Comparator = "="  // Equal to value provided in data filter
+	LessThan             Comparator = "<"  // Less than value provided in data filter
+	LessThanOrEqualTo    Comparator = "<=" // Less than or equal to value provided in data filter
+	EmptyComparator                 = ""   // Equal to value provided in data filter
 )
 
 // Sensor is the definition of a sensor resource
@@ -121,9 +135,9 @@ type SensorSpec struct {
 	// +listType=triggers
 	// Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
 	Triggers []Trigger `json:"triggers" protobuf:"bytes,2,rep,name=triggers"`
-	// Template contains sensor pod specification. For more information,
-	// read https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core.
-	Template *corev1.PodTemplateSpec `json:"template" protobuf:"bytes,3,name=template"`
+	// Template is the pod specification for the sensor
+	// +optional
+	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
 	// Subscription refers to the modes of events subscriptions for the sensor.
 	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
 	Subscription *Subscription `json:"subscription" protobuf:"bytes,4,name=subscription"`
@@ -140,6 +154,29 @@ type SensorSpec struct {
 	// ServiceAnnotations refers to annotations to be set
 	// for the service generated
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
+}
+
+// Template holds the information of a sensor deployment template
+type Template struct {
+	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
+	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+	// +optional
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	// Container is the main container image to run in the gateway pod
+	// +optional
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	// Volumes is a list of volumes that can be mounted by containers in a workflow.
+	// +patchStrategy=merge
+	// +patchMergeKey=name
+	// +optional
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,opt,name=volumes"`
+	// SecurityContext holds pod-level security attributes and common container settings.
+	// Optional: Defaults to empty.  See type description for default values of each field.
+	// +optional
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	// Spec holds the sensor deployment spec.
+	// DEPRECATED: Use Container instead.
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.
@@ -194,7 +231,7 @@ type EventDependencyFilter struct {
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 	// Context filter constraints
-	Context *apicommon.EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
+	Context *EventContext `json:"context,omitempty" protobuf:"bytes,3,opt,name=context"`
 	// +listType=data
 	// Data filter constraints with escalation
 	Data []DataFilter `json:"data,omitempty" protobuf:"bytes,4,opt,name=data"`
@@ -243,6 +280,10 @@ type DataFilter struct {
 	// Strings are taken as is
 	// Nils this value is ignored
 	Value []string `json:"value" protobuf:"bytes,3,rep,name=value"`
+	// Comparator compares the event data with a user given value.
+	// Can be ">=", ">", "=", "<", or "<=".
+	// Is optional, and if left blank treated as equality "=".
+	Comparator Comparator `json:"comparator,omitempty" protobuf:"bytes,4,opt,name=comparator"`
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
@@ -272,15 +313,24 @@ type TriggerTemplate struct {
 	// HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.
 	// +optional
 	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,4,opt,name=http"`
-	// OpenFaas refers to the trigger designed to invoke openfaas functions with with on-the-fly constructable payload.
-	// +optional
-	OpenFaas *OpenFaasTrigger `json:"openFaas,omitempty" protobuf:"bytes,5,opt,name=openFaas"`
 	// AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
 	// +optional
 	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`
 	// CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.
 	// +optional
-	CustomTrigger *CustomTrigger `json:"customTrigger,omitempty" protobuf:"bytes,7,opt,name=customTrigger"`
+	CustomTrigger *CustomTrigger `json:"custom,omitempty" protobuf:"bytes,7,opt,name=custom"`
+	// Kafka refers to the trigger designed to place messages on Kafka topic.
+	// +optional.
+	Kafka *KafkaTrigger `json:"kafka,omitempty" protobuf:"bytes,8,opt,name=kafka"`
+	// NATS refers to the trigger designed to place message on NATS subject.
+	// +optional.
+	NATS *NATSTrigger `json:"nats,omitempty" protobuf:"bytes,9,opt,name=nats"`
+	// Slack refers to the trigger designed to send slack notification message.
+	// +optional
+	Slack *SlackTrigger `json:"slack,omitempty" protobuf:"bytes,10,opt,name=slack"`
+	// OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
+	// +optional
+	OpenWhisk *OpenWhiskTrigger `json:"openWhisk,omitempty" protobuf:"bytes,11,opt,name=openWhisk"`
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -307,6 +357,15 @@ type StandardK8sTrigger struct {
 	// Parameters is the list of parameters that is applied to resolved K8s trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
+	// possible values:
+	// "application/json-patch+json"
+	// "application/merge-patch+json"
+	// "application/strategic-merge-patch+json"
+	// "application/apply-patch+yaml".
+	// Defaults to "application/merge-patch+json"
+	// +optional
+	PatchStrategy k8stypes.PatchType `json:"patchStrategy,omitempty" protobuf:"bytes,5,opt,name=patchStrategy"`
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
@@ -326,14 +385,14 @@ type ArgoWorkflowTrigger struct {
 
 // HTTPTrigger is the trigger for the HTTP request
 type HTTPTrigger struct {
-	// ServerURL refers to the URL to send HTTP request to.
-	ServerURL string `json:"serverURL" protobuf:"bytes,1,name=serverURL"`
+	// URL refers to the URL to send HTTP request to.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
 	// Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
-	// +listType=payloadParameters
+	// +listType=atomic
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
 	// TLS configuration for the HTTP client.
 	// +optional
-	TLS *HTTPTriggerTLS `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,3,opt,name=tls"`
 	// Method refers to the type of the HTTP request.
 	// Refer https://golang.org/src/net/http/method.go for more info.
 	// Default value is POST.
@@ -341,16 +400,23 @@ type HTTPTrigger struct {
 	Method string `json:"method,omitempty" protobuf:"bytes,4,opt,name=method"`
 	// Parameters is the list of key-value extracted from event's payload that are applied to
 	// the HTTP trigger resource.
-	// +listType=triggerParameters
+	// +listType=atomic
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,5,rep,name=parameters"`
 	// Timeout refers to the HTTP request timeout in seconds.
-	// Default value is 10 seconds
+	// Default value is 60 seconds.
 	// +optional
 	Timeout int `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
+	// BasicAuth configuration for the http request.
+	// +optional
+	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
+	// Headers for the HTTP request.
+	// +mapType=granular
+	// +optional
+	Headers map[string][]string `json:"headers,omitempty" protobuf:"bytes,8,opt,name=headers"`
 }
 
-// HTTPTriggerTLS refers to TLS configuration for the HTTP client
-type HTTPTriggerTLS struct {
+// TLSConfig refers to TLS configuration for the HTTP client
+type TLSConfig struct {
 	// CACertPath refers the file path that contains the CA cert.
 	CACertPath string `json:"caCertPath" protobuf:"bytes,1,name=caCertPath"`
 	// ClientCertPath refers the file path that contains client cert.
@@ -359,28 +425,16 @@ type HTTPTriggerTLS struct {
 	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
 }
 
-// OpenFaasTrigger refers to the trigger type of OpenFass
-type OpenFaasTrigger struct {
-	// GatewayURL refers to the OpenFaas Gateway URL.
-	GatewayURL string `json:"gatewayURL" protobuf:"bytes,1,name=gatewayURL"`
-	// Payload is the list of key-value extracted from an event payload to construct the request payload.
-	// +listType=payloadParameters
+// BasicAuth contains the reference to K8s secrets that holds the username and password
+type BasicAuth struct {
+	// Username refers to the Kubernetes secret that holds the username required for basic auth.
+	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	// Password refers to the Kubernetes secret that holds the password required for basic auth.
+	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,2,opt,name=password"`
+	// Namespace to read the secrets from.
+	// Defaults to sensor's namespace.
 	// +optional
-	Payload []TriggerParameter `json:"payload" protobuf:"bytes,2,rep,name=payload"`
-	// Parameters is the list of key-value extracted from event's payload that are applied to
-	// the HTTP trigger resource.
-	// +listType=triggerParameters
-	// +optional
-	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
-	// Password refers to the Kubernetes secret that holds the password required to log into the gateway.
-	// +optional
-	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,4,opt,name=password"`
-	// Namespace to read the password secret from.
-	// This is required if the password secret selector is specified.
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
-	// FunctionName refers to the name of OpenFaas function that will be invoked once the trigger executes
-	FunctionName string `json:"functionName" protobuf:"bytes,6,name=functionName"`
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
 }
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
@@ -392,8 +446,8 @@ type AWSLambdaTrigger struct {
 	// SecretKey refers K8 secret containing aws secret key
 	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,3,opt,name=secretKey"`
 	// Namespace refers to Kubernetes namespace to read access related secret from.
-	// Must be defined if either accesskey or secretkey secret selector is specified.
-	// +optional
+	// Defaults to sensor's namespace.
+	// +optional.
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,5,name=region"`
@@ -407,6 +461,60 @@ type AWSLambdaTrigger struct {
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
+// KafkaTrigger refers to the specification of the Kafka trigger.
+type KafkaTrigger struct {
+	// URL of the Kafka broker.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Name of the topic.
+	// More info at https://kafka.apache.org/documentation/#intro_topics
+	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
+	// Partition to write data to.
+	Partition int `json:"partition" protobuf:"bytes,3,name=partition"`
+	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// RequiredAcks used in producer to tell the broker how many replica acknowledgements
+	// Defaults to 1 (Only wait for the leader to ack).
+	// +optional.
+	RequiredAcks int `json:"requiredAcks,omitempty" protobuf:"bytes,5,opt,name=requiredAcks"`
+	// Compress determines whether to compress message or not.
+	// Defaults to false.
+	// If set to true, compresses message using snappy compression.
+	// +optional
+	Compress bool `json:"compress,omitempty" protobuf:"bytes,6,opt,name=compress"`
+	// FlushFrequency refers to the frequency in milliseconds to flush batches.
+	// Defaults to 500 milliseconds.
+	// +optional
+	FlushFrequency int `json:"flushFrequency,omitempty" protobuf:"bytes,7,opt,name=flushFrequency"`
+	// TLS configuration for the Kafka producer.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,9,rep,name=payload"`
+	// The partitioning key for the messages put on the Kafka topic.
+	// Defaults to broker url.
+	// +optional.
+	PartitioningKey string `json:"partitioningKey,omitempty" protobuf:"bytes,10,opt,name=partitioningKey"`
+}
+
+// NATSTrigger refers to the specification of the NATS trigger.
+type NATSTrigger struct {
+	// URL of the NATS cluster.
+	URL string `json:"url" protobuf:"bytes,1,name=url"`
+	// Name of the subject to put message on.
+	Subject string `json:"subject" protobuf:"bytes,2,name=subject"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,3,rep,name=payload"`
+	// Parameters is the list of parameters that is applied to resolved NATS trigger object.
+	// +listType=triggerParameters
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
+	// TLS configuration for the NATS producer.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
+}
+
 // CustomTrigger refers to the specification of the custom trigger.
 type CustomTrigger struct {
 	// ServerURL is the url of the gRPC server that executes custom trigger
@@ -417,14 +525,62 @@ type CustomTrigger struct {
 	CertFilePath string `json:"certFilePath,omitempty" protobuf:"bytes,3,opt,name=certFilePath"`
 	// ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
 	ServerNameOverride string `json:"serverNameOverride,omitempty" protobuf:"bytes,4,opt,name=serverNameOverride"`
-	// TriggerBody is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
-	TriggerBody string `json:"triggerBody" protobuf:"bytes,5,name=triggerBody"`
+	// Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
+	Spec map[string]string `json:"spec" protobuf:"bytes,5,name=spec"`
 	// Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,6,rep,name=parameters"`
 	// Payload is the list of key-value extracted from an event payload to construct the request payload.
 	// +listType=payloadParameters
 	Payload []TriggerParameter `json:"payload" protobuf:"bytes,7,rep,name=payload"`
+}
+
+// SlackTrigger refers to the specification of the slack notification trigger.
+type SlackTrigger struct {
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
+	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
+	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,name=slackToken"`
+	// Namespace to read the password secret from.
+	// This is required if the password secret selector is specified.
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// Channel refers to which Slack channel to send slack message.
+	// +optional
+	Channel string `json:"channel,omitempty" protobuf:"bytes,4,opt,name=channel"`
+	// Message refers to the message to send to the Slack channel.
+	// +optional
+	Message string `json:"message,omitempty" protobuf:"bytes,5,opt,name=message"`
+}
+
+// OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
+type OpenWhiskTrigger struct {
+	// Host URL of the OpenWhisk.
+	Host string `json:"host" protobuf:"bytes,1,name=host"`
+	// Version for the API.
+	// Defaults to v1.
+	// +optional
+	Version string `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	// Namespace for the action.
+	// Defaults to "_".
+	// +optional.
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+	// AuthToken for authentication.
+	// +optional
+	AuthToken *corev1.SecretKeySelector `json:"authToken,omitempty" protobuf:"bytes,4,opt,name=authToken"`
+	// Name of the action/function.
+	ActionName string `json:"actionName" protobuf:"bytes,5,name=actionName"`
+	// Payload is the list of key-value extracted from an event payload to construct the request payload.
+	// +listType=payloadParameters
+	Payload []TriggerParameter `json:"payload" protobuf:"bytes,6,rep,name=payload"`
+	// Parameters is the list of key-value extracted from event's payload that are applied to
+	// the trigger resource.
+	// +listType=triggerParameters
+	// +optional
+	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,7,rep,name=parameters"`
 }
 
 // TriggerParameterOperation represents how to set a trigger destination
@@ -444,7 +600,7 @@ const (
 
 // TriggerParameter indicates a passed parameter to a service template
 type TriggerParameter struct {
-	// Src contains a source reference to the value of the parameter from a event event
+	// Src contains a source reference to the value of the parameter from a dependency
 	Src *TriggerParameterSource `json:"src" protobuf:"bytes,1,name=src"`
 	// Dest is the JSONPath of a resource key.
 	// A path is a series of keys separated by a dot. The colon character can be escaped with '.'
@@ -466,15 +622,25 @@ type TriggerParameterSource struct {
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	ContextKey string `json:"contextKey,omitempty" protobuf:"bytes,2,opt,name=contextKey"`
+	// ContextTemplate is a go-template for extracting a string from the event's context.
+	// If a ContextTemplate is provided with a ContextKey, the template will be evaluated first and fallback to the ContextKey.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	ContextTemplate string `json:"contextTemplate,omitempty" protobuf:"bytes,3,opt,name=contextTemplate"`
 	// DataKey is the JSONPath of the event's (JSON decoded) data key
 	// DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
 	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
+	// DataTemplate is a go-template for extracting a string from the event's data.
+	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
+	// The templating follows the standard go-template syntax as well as sprig's extra functions.
+	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
+	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,4,opt,name=dataTemplate"`
 	// Value is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
-	Value *string `json:"value,omitempty" protobuf:"bytes,3,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,5,opt,name=value"`
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
@@ -569,7 +735,7 @@ type NodeStatus struct {
 	// store data or something to save for event notifications or trigger events
 	Message string `json:"message,omitempty" protobuf:"bytes,8,opt,name=message"`
 	// Event stores the last seen event for this node
-	Event *apicommon.Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
+	Event *Event `json:"event,omitempty" protobuf:"bytes,9,opt,name=event"`
 	// UpdatedAt refers to the time at which the node was updated.
 	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,10,opt,name=updatedAt"`
 	// ResolvedAt refers to the time at which the node was resolved.
@@ -666,6 +832,30 @@ type GitRemoteConfig struct {
 type GitCreds struct {
 	Username *corev1.SecretKeySelector `json:"username" protobuf:"bytes,1,opt,name=username"`
 	Password *corev1.SecretKeySelector `json:"password" protobuf:"bytes,2,opt,name=password"`
+}
+
+// Event represents the cloudevent received from a gateway.
+type Event struct {
+	Context *EventContext `json:"context" protobuf:"bytes,1,name=context"`
+	Data    []byte        `json:"data" protobuf:"bytes,2,name=data"`
+}
+
+// EventContext holds the context of the cloudevent received from a gateway.
+type EventContext struct {
+	// ID of the event; must be non-empty and unique within the scope of the producer.
+	ID string `json:"id" protobuf:"bytes,1,name=id"`
+	// Source - A URI describing the event producer.
+	Source string `json:"source" protobuf:"bytes,2,name=source"`
+	// SpecVersion - The version of the CloudEvents specification used by the event.
+	SpecVersion string `json:"specversion" protobuf:"bytes,3,name=specVersion"`
+	// Type - The type of the occurrence which has happened.
+	Type string `json:"type" protobuf:"bytes,4,name=type"`
+	// DataContentType - A MIME (RFC2046) string describing the media type of `data`.
+	DataContentType string `json:"dataContentType" protobuf:"bytes,5,name=dataContentType"`
+	// Subject - The subject of the event in the context of the event producer
+	Subject string `json:"subject" protobuf:"bytes,6,name=subject"`
+	// Time - A Timestamp when the event happened.
+	Time metav1.Time `json:"time" protobuf:"bytes,7,name=time"`
 }
 
 // HasLocation whether or not an minio has a location defined

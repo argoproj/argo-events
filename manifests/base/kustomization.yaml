@@ -1,0 +1,50 @@
+#
+# Update the versions in this file.
+#
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argo-events
+
+resources:
+  - crds
+  - gateway-controller
+  - sensor-controller
+  - argo-events-sa.yaml
+
+images:
+  - name: argoproj/gateway-controller
+    newTag: v0.15.0
+  - name: argoproj/sensor-controller
+    newTag: v0.15.0
+
+patchesStrategicMerge:
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: gateway-controller
+    spec:
+      template:
+        spec:
+          containers:
+            - name: gateway-controller
+              env:
+                - name: GATEWAY_CLIENT_IMAGE
+                  value: argoproj/gateway-client:v0.15.0
+                - name: GATEWAY_IMAGE_VERSION
+                  value: v0.15.0
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: sensor-controller
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sensor-controller
+              env:
+                - name: SENSOR_IMAGE
+                  value: argoproj/sensor:v0.15.0

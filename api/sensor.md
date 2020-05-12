@@ -158,13 +158,10 @@ SecretKey refers K8 secret containing aws secret key
 
 <td>
 
-<em>(Optional)</em>
-
 <p>
 
 Namespace refers to Kubernetes namespace to read access related secret
-from. Must be defined if either accesskey or secretkey secret selector
-is specified.
+from. Defaults to sensor’s namespace.
 
 </p>
 
@@ -745,6 +742,151 @@ Exit with error after this many steps
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.BasicAuth">
+
+BasicAuth
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+BasicAuth contains the reference to K8s secrets that holds the username
+and password
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>username</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Username refers to the Kubernetes secret that holds the username
+required for basic auth.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>password</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Password refers to the Kubernetes secret that holds the password
+required for basic auth.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the secrets from. Defaults to sensor’s namespace.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Comparator">
+
+Comparator (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.DataFilter">DataFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Comparator refers to the comparator operator for a data filter
+
+</p>
+
+</p>
+
 <h3 id="argoproj.io/v1alpha1.ConfigmapArtifact">
 
 ConfigmapArtifact
@@ -990,7 +1132,7 @@ trigger gRPC server.
 
 <td>
 
-<code>triggerBody</code></br> <em> string </em>
+<code>spec</code></br> <em> map\[string\]string </em>
 
 </td>
 
@@ -998,10 +1140,16 @@ trigger gRPC server.
 
 <p>
 
-TriggerBody is the custom trigger resource specification that custom
-trigger gRPC server knows how to interpret.
+Spec is the custom trigger resource specification that custom trigger
+gRPC server knows how to interpret.
 
 </p>
+
+<br/> <br/>
+
+<table>
+
+</table>
 
 </td>
 
@@ -1175,6 +1323,29 @@ strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>comparator</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Comparator"> Comparator </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Comparator compares the event data with a user given value. Can be
+“\>=”, “\>”, “=”, “\<”, or “\<=”. Is optional, and if left blank
+treated as equality “=”.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -1259,6 +1430,283 @@ Name of the group
 <p>
 
 Dependencies of events
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Event">
+
+Event
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NodeStatus">NodeStatus</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Event represents the cloudevent received from a gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>context</code></br> <em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>data</code></br> <em> \[\]byte </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.EventContext">
+
+EventContext
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em> <a href="#argoproj.io/v1alpha1.Event">Event</a>,
+<a href="#argoproj.io/v1alpha1.EventDependencyFilter">EventDependencyFilter</a>)
+
+</p>
+
+<p>
+
+<p>
+
+EventContext holds the context of the cloudevent received from a
+gateway.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>id</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ID of the event; must be non-empty and unique within the scope of the
+producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>source</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Source - A URI describing the event producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>specversion</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+SpecVersion - The version of the CloudEvents specification used by the
+event.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>type</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Type - The type of the occurrence which has happened.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dataContentType</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DataContentType - A MIME (RFC2046) string describing the media type of
+<code>data</code>.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Subject - The subject of the event in the context of the event producer
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>time</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#time-v1-meta">
+Kubernetes meta/v1.Time </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Time - A Timestamp when the event happened.
 
 </p>
 
@@ -1497,7 +1945,7 @@ Time filter on the event with escalation
 <td>
 
 <code>context</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.EventContext </em>
+<a href="#argoproj.io/v1alpha1.EventContext"> EventContext </a> </em>
 
 </td>
 
@@ -2176,7 +2624,7 @@ Description
 
 <td>
 
-<code>serverURL</code></br> <em> string </em>
+<code>url</code></br> <em> string </em>
 
 </td>
 
@@ -2184,7 +2632,7 @@ Description
 
 <p>
 
-ServerURL refers to the URL to send HTTP request to.
+URL refers to the URL to send HTTP request to.
 
 </p>
 
@@ -2219,9 +2667,8 @@ construct the HTTP request payload.
 
 <td>
 
-<code>tls</code></br> <em>
-<a href="#argoproj.io/v1alpha1.HTTPTriggerTLS"> HTTPTriggerTLS </a>
-</em>
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
 
 </td>
 
@@ -2301,78 +2748,7 @@ are applied to the HTTP trigger resource.
 <p>
 
 Timeout refers to the HTTP request timeout in seconds. Default value is
-10 seconds
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.HTTPTriggerTLS">
-
-HTTPTriggerTLS
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
-
-</p>
-
-<p>
-
-<p>
-
-HTTPTriggerTLS refers to TLS configuration for the HTTP client
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>caCertPath</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-CACertPath refers the file path that contains the CA cert.
+60 seconds.
 
 </p>
 
@@ -2384,15 +2760,18 @@ CACertPath refers the file path that contains the CA cert.
 
 <td>
 
-<code>clientCertPath</code></br> <em> string </em>
+<code>basicAuth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.BasicAuth"> BasicAuth </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-ClientCertPath refers the file path that contains client cert.
+BasicAuth configuration for the http request.
 
 </p>
 
@@ -2404,15 +2783,17 @@ ClientCertPath refers the file path that contains client cert.
 
 <td>
 
-<code>clientKeyPath</code></br> <em> string </em>
+<code>headers</code></br> <em> map\[string\]\[\]string </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-ClientKeyPath refers the file path that contains client key.
+Headers for the HTTP request.
 
 </p>
 
@@ -2564,6 +2945,275 @@ the resource
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.KafkaTrigger">
+
+KafkaTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+KafkaTrigger refers to the specification of the Kafka trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL of the Kafka broker.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>topic</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the topic. More info at
+<a href="https://kafka.apache.org/documentation/#intro_topics">https://kafka.apache.org/documentation/\#intro\_topics</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>partition</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+Partition to write data to.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved Kafka
+trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>requiredAcks</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<p>
+
+RequiredAcks used in producer to tell the broker how many replica
+acknowledgements Defaults to 1 (Only wait for the leader to ack).
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>compress</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Compress determines whether to compress message or not. Defaults to
+false. If set to true, compresses message using snappy compression.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>flushFrequency</code></br> <em> int </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+FlushFrequency refers to the frequency in milliseconds to flush batches.
+Defaults to 500 milliseconds.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the Kafka producer.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>partitioningKey</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+The partitioning key for the messages put on the Kafka topic. Defaults
+to broker url.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.KubernetesResourceOperation">
 
 KubernetesResourceOperation (<code>string</code> alias)
@@ -2671,6 +3321,166 @@ ServerURL refers to NATS server url.
 <p>
 
 Subject refers to NATS subject name.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.NATSTrigger">
+
+NATSTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+NATSTrigger refers to the specification of the NATS trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL of the NATS cluster.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>subject</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the subject to put message on.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>payload</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Payload is the list of key-value extracted from an event payload to
+construct the request payload.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Parameters is the list of parameters that is applied to resolved NATS
+trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tls</code></br> <em> <a href="#argoproj.io/v1alpha1.TLSConfig">
+TLSConfig </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+TLS configuration for the NATS producer.
 
 </p>
 
@@ -2928,8 +3738,8 @@ events
 
 <td>
 
-<code>event</code></br> <em>
-github.com/argoproj/argo-events/pkg/apis/common.Event </em>
+<code>event</code></br> <em> <a href="#argoproj.io/v1alpha1.Event">
+Event </a> </em>
 
 </td>
 
@@ -3037,9 +3847,9 @@ sensor
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.OpenFaasTrigger">
+<h3 id="argoproj.io/v1alpha1.OpenWhiskTrigger">
 
-OpenFaasTrigger
+OpenWhiskTrigger
 
 </h3>
 
@@ -3054,7 +3864,7 @@ OpenFaasTrigger
 
 <p>
 
-OpenFaasTrigger refers to the trigger type of OpenFass
+OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
 
 </p>
 
@@ -3088,7 +3898,7 @@ Description
 
 <td>
 
-<code>gatewayURL</code></br> <em> string </em>
+<code>host</code></br> <em> string </em>
 
 </td>
 
@@ -3096,7 +3906,93 @@ Description
 
 <p>
 
-GatewayURL refers to the OpenFaas Gateway URL.
+Host URL of the OpenWhisk.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>version</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Version for the API. Defaults to v1.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Namespace for the action. Defaults to “\_”.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>authToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+AuthToken for authentication.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>actionName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Name of the action/function.
 
 </p>
 
@@ -3115,8 +4011,6 @@ GatewayURL refers to the OpenFaas Gateway URL.
 </td>
 
 <td>
-
-<em>(Optional)</em>
 
 <p>
 
@@ -3146,76 +4040,7 @@ construct the request payload.
 <p>
 
 Parameters is the list of key-value extracted from event’s payload that
-are applied to the HTTP trigger resource.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>password</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
-Kubernetes core/v1.SecretKeySelector </a> </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Password refers to the Kubernetes secret that holds the password
-required to log into the gateway.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace to read the password secret from. This is required if the
-password secret selector is specified.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>functionName</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<p>
-
-FunctionName refers to the name of OpenFaas function that will be
-invoked once the trigger executes
+are applied to the trigger resource.
 
 </p>
 
@@ -3350,17 +4175,17 @@ outputs from this sensor.
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
+Template is the pod specification for the sensor
 
 </p>
 
@@ -3715,17 +4540,17 @@ outputs from this sensor.
 <td>
 
 <code>template</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podtemplatespec-v1-core">
-Kubernetes core/v1.PodTemplateSpec </a> </em>
+<a href="#argoproj.io/v1alpha1.Template"> Template </a> </em>
 
 </td>
 
 <td>
 
+<em>(Optional)</em>
+
 <p>
 
-Template contains sensor pod specification. For more information, read
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/#pod-v1-core">https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.11/\#pod-v1-core</a>.
+Template is the pod specification for the sensor
 
 </p>
 
@@ -4111,6 +4936,173 @@ Resources refers to metadata of the resources created for the sensor
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.SlackTrigger">
+
+SlackTrigger
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
+
+</p>
+
+<p>
+
+<p>
+
+SlackTrigger refers to the specification of the slack notification
+trigger.
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>parameters</code></br> <em>
+<a href="#argoproj.io/v1alpha1.TriggerParameter"> \[\]TriggerParameter
+</a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Parameters is the list of key-value extracted from event’s payload that
+are applied to the trigger resource.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>slackToken</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+SlackToken refers to the Kubernetes secret that holds the slack token
+required to send messages.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>namespace</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Namespace to read the password secret from. This is required if the
+password secret selector is specified.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>channel</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Channel refers to which Slack channel to send slack message.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>message</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Message refers to the message to send to the Slack channel.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
 
 StandardK8sTrigger
@@ -4251,6 +5243,34 @@ Default value is Create.
 
 Parameters is the list of parameters that is applied to resolved K8s
 trigger object.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>patchStrategy</code></br> <em>
+k8s.io/apimachinery/pkg/types.PatchType </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+PatchStrategy controls the K8s object patching strategy when the trigger
+operation is specified as patch. possible values:
+“application/json-patch+json” “application/merge-patch+json”
+“application/strategic-merge-patch+json”
+“application/apply-patch+yaml”. Defaults to
+“application/merge-patch+json”
 
 </p>
 
@@ -4427,6 +5447,298 @@ HTTP refers to the HTTP subscription of events for the sensor.
 NATS refers to the NATS subscription of events for the sensor
 
 </p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.TLSConfig">
+
+TLSConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
+<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
+<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>)
+
+</p>
+
+<p>
+
+<p>
+
+TLSConfig refers to TLS configuration for the HTTP client
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>caCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+CACertPath refers the file path that contains the CA cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientCertPath refers the file path that contains client cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clientKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Template">
+
+Template
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.SensorSpec">SensorSpec</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Template holds the information of a sensor deployment template
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>serviceAccountName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+ServiceAccountName is the name of the ServiceAccount to use to run
+gateway pod. More info:
+<a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>container</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#container-v1-core">
+Kubernetes core/v1.Container </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Container is the main container image to run in the gateway pod
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>volumes</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#volume-v1-core">
+\[\]Kubernetes core/v1.Volume </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Volumes is a list of volumes that can be mounted by containers in a
+workflow.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>securityContext</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podsecuritycontext-v1-core">
+Kubernetes core/v1.PodSecurityContext </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+SecurityContext holds pod-level security attributes and common container
+settings. Optional: Defaults to empty. See type description for default
+values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>spec</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core">
+Kubernetes core/v1.PodSpec </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Spec holds the sensor deployment spec. DEPRECATED: Use Container
+instead.
+
+</p>
+
+<br/> <br/>
+
+<table>
+
+</table>
 
 </td>
 
@@ -4687,7 +5999,10 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
 <a href="#argoproj.io/v1alpha1.CustomTrigger">CustomTrigger</a>,
 <a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>,
-<a href="#argoproj.io/v1alpha1.OpenFaasTrigger">OpenFaasTrigger</a>,
+<a href="#argoproj.io/v1alpha1.KafkaTrigger">KafkaTrigger</a>,
+<a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
+<a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
+<a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
@@ -4742,7 +6057,7 @@ TriggerParameterSource </a> </em>
 <p>
 
 Src contains a source reference to the value of the parameter from a
-event event
+dependency
 
 </p>
 
@@ -4928,6 +6243,33 @@ for more information on how to use this.
 
 <td>
 
+<code>contextTemplate</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ContextTemplate is a go-template for extracting a string from the
+event’s context. If a ContextTemplate is provided with a ContextKey,
+the template will be evaluated first and fallback to the ContextKey. The
+templating follows the standard go-template syntax as well as sprig’s
+extra functions. See
+<a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
+and
+<a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>dataKey</code></br> <em> string </em>
 
 </td>
@@ -4942,6 +6284,32 @@ characters ‘\*’ and ‘?’. To access an array value use the index as the
 key. The dot and wildcard characters can be escaped with ‘\&rsquo;. See
 <a href="https://github.com/tidwall/gjson#path-syntax">https://github.com/tidwall/gjson\#path-syntax</a>
 for more information on how to use this.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>dataTemplate</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+DataTemplate is a go-template for extracting a string from the event’s
+data. If a DataTemplate is provided with a DataKey, the template will be
+evaluated first and fallback to the DataKey. The templating follows the
+standard go-template syntax as well as sprig’s extra functions. See
+<a href="https://pkg.go.dev/text/template">https://pkg.go.dev/text/template</a>
+and
+<a href="https://masterminds.github.io/sprig/">https://masterminds.github.io/sprig/</a>
 
 </p>
 
@@ -5332,31 +6700,6 @@ on-the-fly constructable payload.
 
 <td>
 
-<code>openFaas</code></br> <em>
-<a href="#argoproj.io/v1alpha1.OpenFaasTrigger"> OpenFaasTrigger </a>
-</em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-OpenFaas refers to the trigger designed to invoke openfaas functions
-with with on-the-fly constructable payload.
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
 <code>awsLambda</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AWSLambdaTrigger"> AWSLambdaTrigger </a>
 </em>
@@ -5382,7 +6725,7 @@ with with on-the-fly constructable payload.
 
 <td>
 
-<code>customTrigger</code></br> <em>
+<code>custom</code></br> <em>
 <a href="#argoproj.io/v1alpha1.CustomTrigger"> CustomTrigger </a> </em>
 
 </td>
@@ -5395,6 +6738,95 @@ with with on-the-fly constructable payload.
 
 CustomTrigger refers to the trigger designed to connect to a gRPC
 trigger server and execute a custom trigger.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>kafka</code></br> <em>
+<a href="#argoproj.io/v1alpha1.KafkaTrigger"> KafkaTrigger </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Kafka refers to the trigger designed to place messages on Kafka topic.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>nats</code></br> <em> <a href="#argoproj.io/v1alpha1.NATSTrigger">
+NATSTrigger </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+NATS refers to the trigger designed to place message on NATS subject.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>slack</code></br> <em>
+<a href="#argoproj.io/v1alpha1.SlackTrigger"> SlackTrigger </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Slack refers to the trigger designed to send slack notification message.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>openWhisk</code></br> <em>
+<a href="#argoproj.io/v1alpha1.OpenWhiskTrigger"> OpenWhiskTrigger </a>
+</em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
 
 </p>
 
@@ -5501,7 +6933,6 @@ VerifyCert decides whether the connection is secure or not
 
 <p>
 
-<em> Generated with <code>gen-crd-api-reference-docs</code> on git
-commit <code>95e393b</code>. </em>
+<em> Generated with <code>gen-crd-api-reference-docs</code>. </em>
 
 </p>

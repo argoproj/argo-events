@@ -17,6 +17,7 @@ limitations under the License.
 package gitlab
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -25,6 +26,7 @@ import (
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
@@ -91,8 +93,20 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	event := &events.GitLabEventData{
+		Headers: request.Header,
+		Body:    (*json.RawMessage)(&body),
+	}
+
+	eventBody, err := json.Marshal(event)
+	if err != nil {
+		logger.Info("failed to marshal event")
+		common.SendErrorResponse(writer, "invalid event")
+		return
+	}
+
 	logger.Infoln("dispatching event on route's data channel")
-	route.DataCh <- body
+	route.DataCh <- eventBody
 
 	logger.Info("request successfully processed")
 	common.SendSuccessResponse(writer, "success")
@@ -122,12 +136,33 @@ func (router *Router) PostActivate() error {
 	}
 
 	logger.Infoln("setting up the client to connect to GitLab...")
-	router.gitlabClient = gitlab.NewClient(nil, c.token)
-	if err = router.gitlabClient.SetBaseURL(gitlabEventSource.GitlabBaseURL); err != nil {
-		return errors.Errorf("failed to set gitlab base url, err: %+v", err)
+	router.gitlabClient, err = gitlab.NewClient(c.token, gitlab.WithBaseURL(gitlabEventSource.GitlabBaseURL))
+	if err != nil {
+		return errors.Wrapf(err, "failed to initialize client")
 	}
 
 	formattedUrl := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
+
+	// Get existing webhooks and check if the integration for same url and event type is already available
+	if !gitlabEventSource.AllowDuplicate {
+		hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(router.gitlabEventSource.ProjectId, &gitlab.ListProjectHooksOptions{})
+		if err != nil {
+			return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectId)
+		}
+
+		for _, hook := range hooks {
+			elem := reflect.ValueOf(hook).Elem().FieldByName(router.gitlabEventSource.Event)
+			if ok := elem.IsValid(); !ok {
+				return errors.Errorf("unknown event %s", router.gitlabEventSource.Event)
+			}
+			value := elem.Bool()
+
+			if value && hook.URL == formattedUrl {
+				logger.Infoln("webhook already exists, won't register it...")
+				return nil
+			}
+		}
+	}
 
 	opt := &gitlab.AddProjectHookOptions{
 		URL:                   &formattedUrl,
@@ -190,6 +225,10 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 	if err := yaml.Unmarshal(eventSource.Value, &gitlabEventSource); err != nil {
 		logger.WithError(err).Error("failed to parse the event source")
 		return err
+	}
+
+	if gitlabEventSource.Namespace == "" {
+		gitlabEventSource.Namespace = listener.Namespace
 	}
 
 	route := webhook.NewRoute(gitlabEventSource.Webhook, listener.Logger, eventSource)

@@ -1,31 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: kafka-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: kafka
 spec:
-  replica: 1
   type: kafka
   eventSourceRef:
     name: kafka-event-source
   template:
-    metadata:
-      name: kafka-gateway
-      labels:
-        gateway-name: kafka-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: kafka-events
-          image: argoproj/kafka-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/kafka-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscribers:
     http:
       - "http://kafka-sensor.argo-events.svc:9300/"

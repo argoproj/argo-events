@@ -1,28 +1,20 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: multi-dependencies-sensor
-  labels:
-    # sensor controller with instanceId "argo-events" will process this sensor
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+  name: multi-dependencies
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscription:
     http:
       port: 9300
   # waits for both test-dependency-webhook and test-dependency-calendar to resolve
   dependencies:
     - name: test-dependency-webhook
-      gatewayName: webhook-gateway
+      gatewayName: webhook
       eventName: example
     - name: test-dependency-calendar
-      gatewayName: calendar-gateway
+      gatewayName: calendar
       eventName: example-with-interval
   triggers:
     - template:

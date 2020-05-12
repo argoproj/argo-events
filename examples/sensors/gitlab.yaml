@@ -1,24 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Sensor
 metadata:
-  name: gitlab-sensor
-  labels:
-    # sensor controller with instanceId "argo-events" will process this sensor
-    sensors.argoproj.io/sensor-controller-instanceid: argo-events
+  name: gitlab
 spec:
   template:
-    spec:
-      containers:
-        - name: sensor
-          image: argoproj/sensor:v0.13.0-rc
-          imagePullPolicy: Always
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   subscription:
     http:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: gitlab-gateway
+      gatewayName: gitlab
       eventName: example
   triggers:
     - template:
@@ -43,6 +35,7 @@ spec:
                     value: hello world
                 templates:
                 - name: whalesay
+                  serviceAccountName: argo-events-sa
                   inputs:
                     parameters:
                     - name: message

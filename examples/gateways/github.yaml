@@ -1,40 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: github-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: github
 spec:
   type: github
   eventSourceRef:
     name: github-event-source
   template:
-    metadata:
-      name: github-gateway
-      labels:
-        gateway-name: github-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: github-events
-          image: argoproj/github-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/github-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: github-gateway-svc
-    spec:
-      selector:
-        gateway-name: github-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
       - "http://github-sensor.argo-events.svc:9300/"

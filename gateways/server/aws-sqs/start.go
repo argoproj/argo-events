@@ -18,7 +18,6 @@ package aws_sqs
 
 import (
 	"encoding/json"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -39,6 +38,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 // StartEventSource starts an event source
@@ -70,6 +70,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
+	if sqsEventSource.Namespace == "" {
+		sqsEventSource.Namespace = listener.Namespace
+	}
+
 	logger.Infoln("setting up aws session...")
 
 	var awsSession *session.Session
@@ -83,11 +87,20 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	sqsClient := sqslib.New(awsSession)
 
 	logger.Infoln("fetching queue url...")
-	queueURL, err := sqsClient.GetQueueUrl(&sqslib.GetQueueUrlInput{
+	getQueueUrlInput:= &sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
-	})
+	}
+	if sqsEventSource.QueueAccountId != "" {
+	getQueueUrlInput = getQueueUrlInput.SetQueueOwnerAWSAccountId(sqsEventSource.QueueAccountId)
+	}
+
+	queueURL, err := sqsClient.GetQueueUrl(getQueueUrlInput)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the queue url for %s", eventSource.Name)
+	}
+
+	if sqsEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
 	}
 
 	logger.Infoln("listening for messages on the queue...")
@@ -113,7 +126,12 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				data := &events.SQSEventData{
 					MessageId:         *message.MessageId,
 					MessageAttributes: message.MessageAttributes,
-					Body:              []byte(*message.Body),
+				}
+				if sqsEventSource.JSONBody {
+					body := []byte(*message.Body)
+					data.Body = (*json.RawMessage)(&body)
+				} else {
+					data.Body = []byte(*message.Body)
 				}
 
 				eventBytes, err := json.Marshal(data)

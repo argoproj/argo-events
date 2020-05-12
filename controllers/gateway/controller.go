@@ -23,6 +23,7 @@ import (
 
 	base "github.com/argoproj/argo-events"
 	"github.com/argoproj/argo-events/common"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	clientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/sirupsen/logrus"
@@ -34,7 +35,7 @@ import (
 )
 
 const (
-	gatewayResyncPeriod  = 20 * time.Minute
+	gatewayResyncPeriod  = 10 * time.Minute
 	rateLimiterBaseDelay = 5 * time.Second
 	rateLimiterMaxDelay  = 1000 * time.Second
 )
@@ -55,6 +56,10 @@ type Controller struct {
 	Namespace string
 	// Config is the controller's configuration
 	Config ControllerConfig
+	// clientImage is the image of gatewayClient
+	clientImage string
+	// gatewayImages is the map to store different types of gateway adapter images
+	gatewayImages map[apicommon.EventSourceType]string
 	// logger to logger stuff
 	logger *logrus.Logger
 	// K8s rest config
@@ -69,11 +74,13 @@ type Controller struct {
 }
 
 // NewGatewayController creates a new controller
-func NewGatewayController(rest *rest.Config, configMap, namespace string) *Controller {
+func NewGatewayController(rest *rest.Config, configMap, namespace, clientImage string, gatewayImages map[apicommon.EventSourceType]string) *Controller {
 	rateLimiter := workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay)
 	return &Controller{
 		ConfigMap:     configMap,
 		Namespace:     namespace,
+		clientImage:   clientImage,
+		gatewayImages: gatewayImages,
 		kubeConfig:    rest,
 		logger:        common.NewArgoEventsLogger(),
 		k8sClient:     kubernetes.NewForConfigOrDie(rest),

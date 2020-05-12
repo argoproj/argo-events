@@ -3,15 +3,32 @@ kind: EventSource
 metadata:
   name: gcp-pubsub-event-source
 spec:
-  type: "pubsub"
+  type: pubsub
   pubSub:
-    example-event-source:
+    example:
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
       # id of your project
-      projectID: "my-fake-project-id"
+      projectID: argo-events-XXXXX
       # (optional) id of project for topic, same as projectID by default
-      # topicProjectID: "my-fake-topic-project-id"
+      # topicProjectID: "project-id"
       # topic name
-      topic: "my-fake-topic"
-      # Refers to the credential file that is mounted in the gateway pod.
-      # ./validate.go is just a placeholder to make tests pass. Please place the path to actual credentials file :)
-      credentialsFile: "./validate.go"
+      topic: test
+      # Refers to path of the credential file that is mounted in the gateway pod.
+      credentialsFile: /creds/key.json
+
+#    example-workload-identity:
+#      # jsonBody specifies that all event body payload coming from this
+#      # source will be JSON
+#      jsonBody: true
+#      # id of your project
+#      projectID: argo-events-XXXXX
+#      # (optional) id of project for topic, same as projectID by default
+#      # topicProjectID: "project-id"
+#      # topic name
+#      topic: test
+#      # Empty credentials file when using Workflow Identity
+#      credentialsFile: ""
+#      # If enableWorkflowIdentity is true, the projects uses Workflow Identity for authentication
+#      enableWorkflowIdentity: true

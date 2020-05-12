@@ -66,6 +66,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
 	}
 
+	if mqttEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
+	}
+
 	logger.Infoln("setting up the message handler...")
 	handler := func(c mqttlib.Client, msg mqttlib.Message) {
 		eventData := &events.MQTTEventData{
@@ -73,6 +77,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 			MessageId: int(msg.MessageID()),
 			Body:      msg.Payload(),
 		}
+		if mqttEventSource.JSONBody {
+			body := msg.Payload()
+			eventData.Body = (*json.RawMessage)(&body)
+		} else {
+			eventData.Body = msg.Payload()
+		}
+
 		eventBody, err := json.Marshal(eventData)
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data, rejecting the event...")
@@ -84,6 +95,13 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.Infoln("setting up the mqtt broker client...")
 	opts := mqttlib.NewClientOptions().AddBroker(mqttEventSource.URL).SetClientID(mqttEventSource.ClientId)
+	if mqttEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(mqttEventSource.TLS.CACertPath, mqttEventSource.TLS.ClientCertPath, mqttEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		opts.TLSConfig = tlsConfig
+	}
 
 	var client mqttlib.Client
 

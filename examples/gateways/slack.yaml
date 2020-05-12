@@ -1,40 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: slack-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: slack
 spec:
   type: slack
   eventSourceRef:
     name: slack-event-source
   template:
-    metadata:
-      name: slack-gateway
-      labels:
-        gateway-name: slack-gateway
-    spec:
-      containers:
-        - name: gateway-client
-          image: argoproj/gateway-client:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: slack-events
-          image: argoproj/slack-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/slack-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: slack-gateway-svc
-    spec:
-      selector:
-        gateway-name: slack-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
       - "http://slack-sensor.argo-events.svc:9300/"

@@ -36,7 +36,8 @@ type EventListener struct {
 	// K8sClient is the kubernetes client
 	K8sClient kubernetes.Interface
 	// Logger to log stuff
-	Logger *logrus.Logger
+	Logger    *logrus.Logger
+	Namespace string
 }
 
 // StartEventSource starts an event source
@@ -69,17 +70,22 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parse the event source %s", eventSource.Name)
 	}
 
-	var options []func(client *emitter.Client)
-	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
-
-	logger.WithField("secret-name", emitterEventSource.ChannelKey.Name).Infoln("retrieving the channel key")
-	channelKey, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.ChannelKey)
-	if err != nil {
-		return errors.Wrapf(err, "failed to retrieve the channel key from %s", emitterEventSource.ChannelKey.Name)
+	if emitterEventSource.Namespace == "" {
+		emitterEventSource.Namespace = listener.Namespace
 	}
 
+	var options []func(client *emitter.Client)
+	if emitterEventSource.TLS != nil {
+		tlsConfig, err := common.GetTLSConfig(emitterEventSource.TLS.CACertPath, emitterEventSource.TLS.ClientCertPath, emitterEventSource.TLS.ClientKeyPath)
+		if err != nil {
+			return errors.Wrap(err, "failed to get the tls configuration")
+		}
+		options = append(options, emitter.WithTLSConfig(tlsConfig))
+	}
+	options = append(options, emitter.WithBrokers(emitterEventSource.Broker), emitter.WithAutoReconnect(true))
+
 	if emitterEventSource.Username != nil {
-		username, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
+		username, err := common.GetSecretValue(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Username)
 		if err != nil {
 			return errors.Wrapf(err, "failed to retrieve the username from %s", emitterEventSource.Username.Name)
 		}
@@ -87,11 +93,15 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	}
 
 	if emitterEventSource.Password != nil {
-		password, err := common.GetSecrets(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Password)
+		password, err := common.GetSecretValue(listener.K8sClient, emitterEventSource.Namespace, emitterEventSource.Password)
 		if err != nil {
 			return errors.Wrapf(err, "failed to retrieve the password from %s", emitterEventSource.Password.Name)
 		}
 		options = append(options, emitter.WithPassword(password))
+	}
+
+	if emitterEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
 	}
 
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("creating a client")
@@ -106,11 +116,17 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to connect to %s", emitterEventSource.Broker)
 	}
 
-	if err := client.Subscribe(channelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
-		eventBytes, err := json.Marshal(&events.EmitterEventData{
+	if err := client.Subscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName, func(_ *emitter.Client, message emitter.Message) {
+		body := message.Payload()
+		event := &events.EmitterEventData{
 			Topic: message.Topic(),
-			Body:  message.Payload(),
-		})
+			Body:  body,
+		}
+		if emitterEventSource.JSONBody {
+			event.Body = (*json.RawMessage)(&body)
+		}
+		eventBytes, err := json.Marshal(event)
+
 		if err != nil {
 			logger.WithError(err).Errorln("failed to marshal the event data")
 			return
@@ -126,7 +142,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	logger.WithField("channel-name", emitterEventSource.ChannelName).Infoln("event source stopped, unsubscribe the channel")
 
-	if err := client.Unsubscribe(channelKey, emitterEventSource.ChannelName); err != nil {
+	if err := client.Unsubscribe(emitterEventSource.ChannelKey, emitterEventSource.ChannelName); err != nil {
 		logger.WithError(err).WithField("channel-name", emitterEventSource.ChannelName).Errorln("failed to unsubscribe")
 	}
 

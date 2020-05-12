@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-controller
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      serviceAccountName: argo-events-sa
+      containers:
+        - name: sensor-controller
+          image: argoproj/sensor-controller:latest
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: CONTROLLER_CONFIG_MAP
+              value: sensor-controller-configmap
+            - name: SENSOR_IMAGE
+              value: argoproj/sensor:latest

@@ -70,7 +70,15 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	var conn *amqplib.Connection
 	if err := server.Connect(backoff, func() error {
 		var err error
-		conn, err = amqplib.Dial(amqpEventSource.URL)
+		if amqpEventSource.TLS != nil {
+			tlsConfig, err := common.GetTLSConfig(amqpEventSource.TLS.CACertPath, amqpEventSource.TLS.ClientCertPath, amqpEventSource.TLS.ClientKeyPath)
+			if err != nil {
+				return errors.Wrap(err, "failed to get the tls configuration")
+			}
+			conn, err = amqplib.DialTLS(amqpEventSource.URL, tlsConfig)
+		} else {
+			conn, err = amqplib.Dial(amqpEventSource.URL)
+		}
 		if err != nil {
 			return err
 		}
@@ -89,6 +97,10 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	delivery, err := getDelivery(ch, amqpEventSource)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get the delivery for the event source %s", eventSource.Name)
+	}
+
+	if amqpEventSource.JSONBody {
+		logger.Infoln("assuming all events have a json body...")
 	}
 
 	logger.Info("listening to messages on channel...")
@@ -110,7 +122,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 				AppId:           msg.AppId,
 				Exchange:        msg.Exchange,
 				RoutingKey:      msg.RoutingKey,
-				Body:            msg.Body,
+			}
+			if amqpEventSource.JSONBody {
+				body.Body = (*json.RawMessage)(&msg.Body)
+			} else {
+				body.Body = msg.Body
 			}
 
 			bodyBytes, err := json.Marshal(body)

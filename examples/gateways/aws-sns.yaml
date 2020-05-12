@@ -1,40 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Gateway
 metadata:
-  name: aws-sns-gateway
-  labels:
-    # gateway controller with instanceId "argo-events" will process this gateway
-    gateways.argoproj.io/gateway-controller-instanceid: argo-events
+  name: aws-sns
 spec:
   type: sns
   eventSourceRef:
     name: aws-sns-event-source
   template:
-    metadata:
-      name: aws-sns-gateway
-      labels:
-        gateway-name: aws-sns-gateway
-    spec:
-      containers:
-        - name: gateway-client:v0.13.0-rc
-          image: argoproj/gateway-client
-          imagePullPolicy: Always
-          command: ["/bin/gateway-client"]
-        - name: aws-sns-events
-          image: argoproj/aws-sns-gateway:v0.13.0-rc
-          imagePullPolicy: Always
-          command: ["/bin/aws-sns-gateway"]
-      serviceAccountName: argo-events-sa
+    serviceAccountName: argo-events-sa
   service:
-    metadata:
-      name: aws-sns-gateway-svc
-    spec:
-      selector:
-        gateway-name: aws-sns-gateway
-      ports:
-        - port: 12000
-          targetPort: 12000
-      type: LoadBalancer
+    ports:
+      - port: 12000
+        targetPort: 12000
   subscribers:
     http:
-      - "https://aws-sns-sensor.argo-events.svc:9300/"
+      - "http://aws-sns-sensor.argo-events.svc:9300/"

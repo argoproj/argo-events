@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-controller-configmap
+data:
+  _example: |
+    #
+    # This is not real configuration but an example.
+    # Copy this block out of "_example" and unindent it 
+    # under "data" to make it functional.
+    #
+    config: |
+      # instanceID is a label selector to limit the controller's watch to a specific instance. It
+      # contains an arbitrary value that is carried forward into its pod labels, under the key
+      # gateways.argoproj.io/gateway-controller-instanceid, for the purposes of date segregation.
+      # This enables a controller to only watch the gateway that it is interested about,
+      # in order to support multiple controllers in a single cluster, and ultimately allows the
+      # controller itself to be bundled as part of a higher level application. If omitted, the
+      # controller watches gateways that *are not* labeled with an instance id.
+      instanceID: <instanceID>
+
+      # namespace is used for namespaced installation, if it is specified, the controller only 
+      # watches gateways in this namespace.
+      namespace: <your_namespace>

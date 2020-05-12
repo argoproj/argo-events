@@ -17,20 +17,26 @@ limitations under the License.
 package gateway
 
 import (
+	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 	"k8s.io/client-go/tools/cache"
-
-	gatewayinformers "github.com/argoproj/argo-events/pkg/client/gateway/informers/externalversions"
 )
 
 func (c *Controller) instanceIDReq() (*labels.Requirement, error) {
-	if c.Config.InstanceID == "" {
-		panic("instance id is required")
+	var instanceIDReq *labels.Requirement
+	var err error
+	var values []string
+
+	op := selection.DoesNotExist
+
+	if c.Config.InstanceID != "" {
+		op = selection.Equals
+		values = []string{c.Config.InstanceID}
 	}
-	instanceIDReq, err := labels.NewRequirement(LabelControllerInstanceID, selection.Equals, []string{c.Config.InstanceID})
+
+	instanceIDReq, err = labels.NewRequirement(LabelControllerInstanceID, op, values)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +55,6 @@ func (c *Controller) newGatewayInformer() (cache.SharedIndexInformer, error) {
 		gatewayResyncPeriod,
 		gatewayinformers.WithNamespace(c.Config.Namespace),
 		gatewayinformers.WithTweakListOptions(func(options *metav1.ListOptions) {
-			options.FieldSelector = fields.Everything().String()
 			options.LabelSelector = labelSelector.String()
 		}),
 	)

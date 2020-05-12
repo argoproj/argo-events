@@ -1,0 +1,323 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: eventsources.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventSource
+    listKind: EventSourceList
+    plural: eventsources
+    shortNames:
+    - es
+    singular: eventsource
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: gateways.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Gateway
+    listKind: GatewayList
+    plural: gateways
+    shortNames:
+    - gw
+    singular: gateway
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: sensors.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: Sensor
+    listKind: SensorList
+    plural: sensors
+    shortNames:
+    - sn
+    singular: sensor
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argo-events-sa
+  namespace: argo-events
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: argo-events-aggregate-to-admin
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - gateways
+  - gateways/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  name: argo-events-aggregate-to-edit
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - gateways
+  - gateways/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: argo-events-aggregate-to-view
+rules:
+- apiGroups:
+  - argoproj.io
+  resources:
+  - gateways
+  - gateways/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argo-events-role
+rules:
+- apiGroups:
+  - apiextensions.k8s.io
+  - apiextensions.k8s.io/v1beta1
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - argoproj.io
+  resources:
+  - workflows
+  - workflows/finalizers
+  - workflowtemplates
+  - workflowtemplates/finalizers
+  - gateways
+  - gateways/finalizers
+  - sensors
+  - sensors/finalizers
+  - eventsources
+  - eventsources/finalizers
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/exec
+  - configmaps
+  - secrets
+  - services
+  - events
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argo-events-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-events-role
+subjects:
+- kind: ServiceAccount
+  name: argo-events-sa
+  namespace: argo-events
+---
+apiVersion: v1
+data:
+  _example: "#\n# This is not real configuration but an example.\n# Copy this block
+    out of \"_example\" and unindent it \n# under \"data\" to make it functional.\n#\nconfig:
+    |\n  # instanceID is a label selector to limit the controller's watch to a specific
+    instance. It\n  # contains an arbitrary value that is carried forward into its
+    pod labels, under the key\n  # gateways.argoproj.io/gateway-controller-instanceid,
+    for the purposes of date segregation.\n  # This enables a controller to only watch
+    the gateway that it is interested about,\n  # in order to support multiple controllers
+    in a single cluster, and ultimately allows the\n  # controller itself to be bundled
+    as part of a higher level application. If omitted, the\n  # controller watches
+    gateways that *are not* labeled with an instance id.\n  instanceID: <instanceID>\n\n
+    \ # namespace is used for namespaced installation, if it is specified, the controller
+    only \n  # watches gateways in this namespace.\n  namespace: <your_namespace>\n"
+kind: ConfigMap
+metadata:
+  name: gateway-controller-configmap
+  namespace: argo-events
+---
+apiVersion: v1
+data:
+  _example: "#\n# This is not real configuration but an example.\n# Copy this block
+    out of \"_example\" and unindent it\n# under \"data\" to make it functional.\n#
+    \   \nconfig: |\n  # instanceID is a label selector to limit the controller's
+    watch to a specific instance. It\n  # contains an arbitrary value that is carried
+    forward into its pod labels, under the key\n  # sensors.argoproj.io/sensor-controller-instanceid,
+    for the purposes of date segregation.\n  # This enables a controller to only watch
+    the sensor that it is interested about,\n  # in order to support multiple controllers
+    in a single cluster, and ultimately allows the\n  # controller itself to be bundled
+    as part of a higher level application. If omitted, the\n  # controller watches
+    sensors that *are not* labeled with an instance id.\n  instanceID: <instanceID>\n\n
+    \ # namespace is used for namespaced installation, if it is specified, the controller
+    only\n  # watches sensors in this namespace.\n  namespace: <your_namespace>\n"
+kind: ConfigMap
+metadata:
+  name: sensor-controller-configmap
+  namespace: argo-events
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-controller
+  template:
+    metadata:
+      labels:
+        app: gateway-controller
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONTROLLER_CONFIG_MAP
+          value: gateway-controller-configmap
+        - name: GATEWAY_CLIENT_IMAGE
+          value: argoproj/gateway-client:v0.15.0
+        - name: GATEWAY_IMAGE_REGISTRY
+          value: docker.io
+        - name: GATEWAY_IMAGE_VERSION
+          value: v0.15.0
+        image: argoproj/gateway-controller:v0.15.0
+        name: gateway-controller
+      serviceAccountName: argo-events-sa
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sensor-controller
+  template:
+    metadata:
+      labels:
+        app: sensor-controller
+    spec:
+      containers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CONTROLLER_CONFIG_MAP
+          value: sensor-controller-configmap
+        - name: SENSOR_IMAGE
+          value: argoproj/sensor:v0.15.0
+        image: argoproj/sensor-controller:v0.15.0
+        name: sensor-controller
+      serviceAccountName: argo-events-sa

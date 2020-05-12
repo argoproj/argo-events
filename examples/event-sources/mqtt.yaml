@@ -3,13 +3,20 @@ kind: EventSource
 metadata:
   name: mqtt-event-source
 spec:
-  type: "mqtt"
+  type: mqtt
   mqtt:
-    example-with-retry:
-      url: "tcp://mqtt.argo-events:1883"
-      topic: "bar"
+    example:
+      # mqtt broker url
+      url: tcp://mqtt.argo-events:1883
+      # name of the popic
+      topic: bar
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
       # client id
       clientId: 2345
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000
@@ -19,3 +26,14 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      url: "tcp://mqtt.argo-events:1883"
+#      topic: "bar"
+#      jsonBody: true
+#      clientId: 2345
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
+

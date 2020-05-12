@@ -3,13 +3,18 @@ kind: EventSource
 metadata:
   name: nats-event-source
 spec:
-  type: "nats"
+  type: nats
   nats:
-    example-with-retry:
+    example:
       # url of the nats service
-      url: "nats://nats.argo-events:4222"
+      url: nats://nats.argo-events.svc:4222
+      # jsonBody specifies that all event body payload coming from this
+      # source will be JSON
+      jsonBody: true
       # subject name
-      subject: "foo"
+      subject: foo
+      # optional backoff time for connection retries.
+      # if not provided, default connection backoff time will be used.
       connectionBackoff:
         # duration in nanoseconds. following value is 10 seconds
         duration: 10000000000
@@ -19,3 +24,14 @@ spec:
         # setting factor > 1 makes backoff exponential.
         factor: 2
         jitter: 0.2
+
+#    example-tls:
+#      url: nats://nats.argo-events.svc:4222
+#      jsonBody: true
+#      subject: "foo"
+#      tls:
+#        caCertPath: path-to-ca-cert-key-mounted-in-gateway
+#        clientCertPath: path-to-client-cert-mounted-in-gateway
+#        clientKeyPath: path-to-client-key-mounted-in-gateway
+
+

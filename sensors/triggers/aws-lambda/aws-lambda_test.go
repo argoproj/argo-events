@@ -19,9 +19,9 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/aws/aws-sdk-go/service/lambda"
+	cloudevents "github.com/cloudevents/sdk-go"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,7 +62,13 @@ var sensorObj = &v1alpha1.Sensor{
 }
 
 func getAWSTrigger() *AWSLambdaTrigger {
-	return NewAWSLambdaTrigger(fake.NewSimpleClientset(), sensorObj.DeepCopy(), &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	return &AWSLambdaTrigger{
+		LambdaClient: nil,
+		K8sClient:    fake.NewSimpleClientset(),
+		Sensor:       sensorObj.DeepCopy(),
+		Trigger:      &sensorObj.Spec.Triggers[0],
+		Logger:       common.NewArgoEventsLogger(),
+	}
 }
 
 func TestAWSLambdaTrigger_FetchResource(t *testing.T) {
@@ -86,13 +92,13 @@ func TestAWSLambdaTrigger_ApplyResourceParameters(t *testing.T) {
 				Name: "fake-dependency",
 				Type: v1alpha1.NodeTypeEventDependency,
 				ID:   id,
-				Event: &apicommon.Event{
-					Context: apicommon.EventContext{
+				Event: &v1alpha1.Event{
+					Context: &v1alpha1.EventContext{
 						ID:              "1",
 						Type:            "webhook",
 						Source:          "webhook-gateway",
 						DataContentType: "application/json",
-						SpecVersion:     "0.3",
+						SpecVersion:     cloudevents.VersionV1,
 						Subject:         "example-1",
 					},
 					Data: []byte(`{"function": "real-function"}`),

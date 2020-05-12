@@ -13,14 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package sensors
 
 import (
+	"net/http"
+	"time"
+
+	"github.com/Shopify/sarama"
+	"github.com/apache/openwhisk-client-go/whisk"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	sensorclientset "github.com/argoproj/argo-events/pkg/client/sensor/clientset/versioned"
 	"github.com/argoproj/argo-events/sensors/types"
+	"github.com/aws/aws-sdk-go/service/lambda"
+	natslib "github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"k8s.io/client-go/dynamic"
@@ -45,8 +51,20 @@ type SensorContext struct {
 	ControllerInstanceID string
 	// Updated indicates update to Sensor resource
 	Updated bool
+	// httpClients holds the reference to HTTP clients for HTTP triggers.
+	httpClients map[string]*http.Client
 	// customTriggerClients holds the references to the gRPC clients for the custom trigger servers
 	customTriggerClients map[string]*grpc.ClientConn
+	// http client to send slack messages.
+	slackHttpClient *http.Client
+	// kafkaProducers holds references to the active kafka producers
+	kafkaProducers map[string]sarama.AsyncProducer
+	// natsConnections holds the references to the active nats connections.
+	natsConnections map[string]*natslib.Conn
+	// awsLambdaClients holds the references to active AWS Lambda clients.
+	awsLambdaClients map[string]*lambda.Lambda
+	// openwhiskClients holds the references to active OpenWhisk clients.
+	openwhiskClients map[string]*whisk.Client
 }
 
 // NewSensorContext returns a new sensor execution context.
@@ -59,6 +77,14 @@ func NewSensorContext(sensorClient sensorclientset.Interface, kubeClient kuberne
 		Logger:               common.NewArgoEventsLogger().WithField(common.LabelSensorName, sensor.Name).Logger,
 		NotificationQueue:    make(chan *types.Notification),
 		ControllerInstanceID: controllerInstanceID,
+		httpClients:          make(map[string]*http.Client),
 		customTriggerClients: make(map[string]*grpc.ClientConn),
+		slackHttpClient: &http.Client{
+			Timeout: time.Minute * 5,
+		},
+		kafkaProducers:   make(map[string]sarama.AsyncProducer),
+		natsConnections:  make(map[string]*natslib.Conn),
+		awsLambdaClients: make(map[string]*lambda.Lambda),
+		openwhiskClients: make(map[string]*whisk.Client),
 	}
 }

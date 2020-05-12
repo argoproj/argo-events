@@ -142,26 +142,45 @@ type ResourceEventSource struct {
 	// Namespace where resource is deployed
 	Namespace string `json:"namespace" protobuf:"bytes,1,name=namespace"`
 	// Filter is applied on the metadata of the resource
+	// If you apply filter, then the internal event informer will only monitor objects that pass the filter.
 	// +optional
 	Filter *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	// Group of the resource
 	metav1.GroupVersionResource `json:",inline"`
-	// Type is the event type.
-	// If not provided, the gateway will watch all events for a resource.
-	// +optional
-	EventType ResourceEventType `json:"eventType,omitempty" protobuf:"bytes,3,opt,name=eventType"`
+	// EventTypes is the list of event type to watch.
+	// Possible values are - ADD, UPDATE and DELETE.
+	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,3,name=eventTypes"`
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 type ResourceFilter struct {
+	// Prefix filter is applied on the resource name.
 	// +optional
 	Prefix string `json:"prefix,omitempty" protobuf:"bytes,1,opt,name=prefix"`
+	// Labels provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
 	// +optional
-	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	Labels []Selector `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
+	// Fields provide listing options to K8s API to watch resource/s.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
 	// +optional
-	Fields map[string]string `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
+	Fields []Selector `json:"fields,omitempty" protobuf:"bytes,3,opt,name=fields"`
+	// If resource is created before the specified time then the event is treated as valid.
 	// +optional
 	CreatedBy metav1.Time `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+}
+
+// Selector represents conditional operation to select K8s objects.
+type Selector struct {
+	// Key name
+	Key string `json:"key" protobuf:"bytes,1,name=key"`
+	// Supported operations like ==, !=, <=, >= etc.
+	// Defaults to ==.
+	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
+	// +optional
+	Operation string `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
+	// Value
+	Value string `json:"value" protobuf:"bytes,3,name=value"`
 }
 
 // AMQPEventSource refers to an event-source for AMQP stream events
@@ -178,6 +197,13 @@ type AMQPEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,5,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,6,opt,name=jsonBody"`
+	// TLS configuration for the amqp client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,7,opt,name=tls"`
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
@@ -190,6 +216,9 @@ type KafkaEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,3,name=topic"`
 	// Backoff holds parameters applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// TLS configuration for the kafka client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
@@ -202,6 +231,13 @@ type MQTTEventSource struct {
 	ClientId string `json:"clientId" protobuf:"bytes,3,name=clientId"`
 	// ConnectionBackoff holds backoff applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
+	// TLS configuration for the mqtt client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // NATSEventSource refers to event-source for NATS related events
@@ -212,6 +248,13 @@ type NATSEventsSource struct {
 	Subject string `json:"subject" protobuf:"bytes,2,name=2"`
 	// ConnectionBackoff holds backoff applied to connection.
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,3,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,4,opt,name=jsonBody"`
+	// TLS configuration for the nats client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events
@@ -232,7 +275,6 @@ type SNSEventSource struct {
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
 	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
-
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
@@ -253,7 +295,14 @@ type SQSEventSource struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,6,opt,name=namespace"`
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
-	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,7,opt,name=roleARN"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
+	// QueueAccountId is the ID of the account that created the queue to monitor
+	// +optional
+	QueueAccountId string `json:"queueAccountId,omitempty" protobuf:"bytes,9,opt,name=queueAccountId"`
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
@@ -267,9 +316,17 @@ type PubSubEventSource struct {
 	Topic string `json:"topic" protobuf:"bytes,3,name=topic"`
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
 	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,name=credentialsFile"`
+	// EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile.
+	// If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.
+	// +optional
+	EnableWorkflowIdentity bool `json:"enableWorkflowIdentity,omitempty" protobuf:"bytes,5,opt,name=enableWorkflowIdentity"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
 	// +optional
-	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"bytes,1,opt,name=deleteSubscriptionOnFinish"`
+	DeleteSubscriptionOnFinish bool `json:"deleteSubscriptionOnFinish,omitempty" protobuf:"bytes,6,opt,name=deleteSubscriptionOnFinish"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
 }
 
 // GithubEventSource refers to event-source for github related events
@@ -306,7 +363,8 @@ type GithubEventSource struct {
 	// +optional
 	GithubUploadURL string `json:"githubUploadURL,omitempty" protobuf:"bytes,12,opt,name=githubUploadURL"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
-	Namespace string `json:"namespace" protobuf:"bytes,13,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,13.opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,14,opt,name=deleteHookOnFinish"`
@@ -329,10 +387,15 @@ type GitlabEventSource struct {
 	// GitlabBaseURL is the base URL for API requests to a custom endpoint
 	GitlabBaseURL string `json:"gitlabBaseURL" protobuf:"bytes,6,name=gitlabBaseURL"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve access token from.
-	Namespace string `json:"namespace" protobuf:"bytes,7,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,7,opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,8,opt,name=deleteHookOnFinish"`
+	// AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations.
+	// Defaults to false.
+	// +optional.
+	AllowDuplicate bool `json:"allowDuplicate,omitempty" protobuf:"bytes,9,opt,name=allowDuplicate"`
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
@@ -367,7 +430,8 @@ type HDFSEventSource struct {
 	// It must be set if either ccache or keytab is used.
 	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
-	Namespace string `json:"namespace" protobuf:"bytes,1,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
 }
 
 // SlackEventSource refers to event-source for Slack related events
@@ -379,7 +443,8 @@ type SlackEventSource struct {
 	// Webhook holds configuration for a REST endpoint
 	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
-	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4.opt,name=namespace"`
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
@@ -415,7 +480,8 @@ type AzureEventsHubEventSource struct {
 	// Event Hub path/name
 	HubName string `json:"hubName" protobuf:"bytes,4,name=hubName"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
-	Namespace string `json:"namespace" protobuf:"bytes,5,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,5,opt,name=namespace"`
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications
@@ -445,11 +511,12 @@ type EmitterEventSource struct {
 	// Broker URI to connect to.
 	Broker string `json:"broker" protobuf:"bytes,1,name=broker"`
 	// ChannelKey refers to the channel key
-	ChannelKey *corev1.SecretKeySelector `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
+	ChannelKey string `json:"channelKey" protobuf:"bytes,2,name=channelKey"`
 	// ChannelName refers to the channel name
 	ChannelName string `json:"channelName" protobuf:"bytes,3,name=channelName"`
 	// Namespace to use to retrieve the channel key and optional username/password
-	Namespace string `json:"namespace" protobuf:"bytes,4,name=namespace"`
+	// +optional
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 	// Username to use to connect to broker
 	// +optional
 	Username *corev1.SecretKeySelector `json:"username,omitempty" protobuf:"bytes,5,opt,name=username"`
@@ -459,6 +526,13 @@ type EmitterEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,8,opt,name=jsonBody"`
+	// TLS configuration for the emitter client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,9,opt,name=tls"`
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
@@ -478,6 +552,9 @@ type RedisEventSource struct {
 	// Channels to subscribe to listen events.
 	// +listType=string
 	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`
+	// TLS configuration for the redis client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
@@ -492,12 +569,29 @@ type NSQEventSource struct {
 	// Backoff holds parameters applied to connection.
 	// +optional
 	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	// JSONBody specifies that all event body payload coming from this
+	// source will be JSON
+	// +optional
+	JSONBody bool `json:"jsonBody,omitempty" protobuf:"bytes,5,opt,name=jsonBody"`
+	// TLS configuration for the nsq client.
+	// +optional
+	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,6,opt,name=tls"`
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 type GenericEventSource struct {
 	// Value of the event source
 	Value string `json:"value" protobuf:"bytes,1,name=value"`
+}
+
+// TLSConfig refers to TLS configuration for a client.
+type TLSConfig struct {
+	// CACertPath refers the file path that contains the CA cert.
+	CACertPath string `json:"caCertPath" protobuf:"bytes,1,name=caCertPath"`
+	// ClientCertPath refers the file path that contains client cert.
+	ClientCertPath string `json:"clientCertPath" protobuf:"bytes,2,name=clientCertPath"`
+	// ClientKeyPath refers the file path that contains client key.
+	ClientKeyPath string `json:"clientKeyPath" protobuf:"bytes,3,name=clientKeyPath"`
 }
 
 // EventSourceStatus holds the status of the event-source resource

@@ -18,9 +18,9 @@ Open an issue. Please include descriptions of the following:
 Argo Events is native to Kubernetes so you'll need a running Kubernetes cluster. This guide includes steps for `Minikube` for local development, but if you have another cluster you can ignore the Minikube specific step 3.
 
 ### Requirements
-- Golang 1.11
+- Golang 1.12
 - Docker
-- dep
+- [dep](https://golang.github.io/dep/docs/installation.html)
 
 ### Installation & Setup
 
@@ -32,6 +32,7 @@ cd $GOPATH/src/github.com/argoproj/argo-events
 
 #### 2. Vendor dependencies
 ```
+GO111MODULE=on go get github.com/cloudevents/sdk-go
 dep ensure -vendor-only
 ```
 
@@ -49,7 +50,21 @@ make all
 Follow [README](README.md#install) to install components.
 
 ## Changing Types
-If you're making a change to the `pkg/apis`  package, please ensure you re-run the K8 code-generator scripts found in the `/hack` folder. First, ensure you have the `generate-groups.sh` script at the path: `vendor/k8s.io/code-generator/`. Next run the following commands in order:
+If you're making a change to the `pkg/apis`  package, please ensure you re-run the K8 code-generator scripts found in the `/hack` folder.
+
+* Ensure you have the `generate-groups.sh` script at the path: `vendor/k8s.io/code-generator/`.
+* Install `gen-crd-api-reference-docs`
+
 ```
-$ make codegen
+go get github.com/ahmetb/gen-crd-api-reference-docs
+cd $GOPATH/github.com/ahmetb/gen-crd-api-reference-docs
+go build
+```
+
+* [install pandoc](https://pandoc.org/installing.html)
+
+* Regenerate the code and documentation
+
+```
+make codegen
 ```

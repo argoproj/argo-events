@@ -37,6 +37,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 // Router contains information for a route

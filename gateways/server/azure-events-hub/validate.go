@@ -72,8 +72,5 @@ func validate(eventSource *v1alpha1.AzureEventsHubEventSource) error {
 	if eventSource.SharedAccessKeyName == nil {
 		return errors.New("SharedAccessKeyName is not specified")
 	}
-	if eventSource.Namespace == "" {
-		return errors.New("namespace to retrieve the SharedAccessKey and SharedAccessKeyName secret info is not specified")
-	}
 	return nil
 }

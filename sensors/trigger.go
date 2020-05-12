@@ -21,7 +21,9 @@ import (
 	awslambda "github.com/argoproj/argo-events/sensors/triggers/aws-lambda"
 	customtrigger "github.com/argoproj/argo-events/sensors/triggers/custom-trigger"
 	"github.com/argoproj/argo-events/sensors/triggers/http"
-	"github.com/argoproj/argo-events/sensors/triggers/openfaas"
+	"github.com/argoproj/argo-events/sensors/triggers/kafka"
+	"github.com/argoproj/argo-events/sensors/triggers/nats"
+	"github.com/argoproj/argo-events/sensors/triggers/slack"
 	standardk8s "github.com/argoproj/argo-events/sensors/triggers/standard-k8s"
 )
 
@@ -42,18 +44,56 @@ func (sensorCtx *SensorContext) GetTrigger(trigger *v1alpha1.Trigger) Trigger {
 	if trigger.Template.K8s != nil {
 		return standardk8s.NewStandardK8sTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
+
 	if trigger.Template.ArgoWorkflow != nil {
 		return argoworkflow.NewArgoWorkflowTrigger(sensorCtx.KubeClient, sensorCtx.DynamicClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
 	}
-	if trigger.Template.OpenFaas != nil {
-		return openfaas.NewOpenFaasTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
-	}
+
 	if trigger.Template.HTTP != nil {
-		return http.NewHTTPTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := http.NewHTTPTrigger(sensorCtx.httpClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
 	}
+
 	if trigger.Template.AWSLambda != nil {
-		return awslambda.NewAWSLambdaTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		result, err := awslambda.NewAWSLambdaTrigger(sensorCtx.awsLambdaClients, sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
 	}
+
+	if trigger.Template.Kafka != nil {
+		result, err := kafka.NewKafkaTrigger(sensorCtx.Sensor, trigger, sensorCtx.kafkaProducers, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.NATS != nil {
+		result, err := nats.NewNATSTrigger(sensorCtx.Sensor, trigger, sensorCtx.natsConnections, sensorCtx.Logger)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
+	}
+
+	if trigger.Template.Slack != nil {
+		result, err := slack.NewSlackTrigger(sensorCtx.KubeClient, sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.slackHttpClient)
+		if err != nil {
+			sensorCtx.Logger.WithError(err).WithField("trigger", trigger.Template.Name).Errorln("failed to invoke the trigger")
+			return nil
+		}
+		return result
+	}
+
 	if trigger.Template.CustomTrigger != nil {
 		result, err := customtrigger.NewCustomTrigger(sensorCtx.Sensor, trigger, sensorCtx.Logger, sensorCtx.customTriggerClients)
 		if err != nil {

@@ -17,11 +17,11 @@ limitations under the License.
 package standard_k8s
 
 import (
+	k8stypes "k8s.io/apimachinery/pkg/types"
 	"testing"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,6 +66,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 					"name": name,
 				},
 			},
+			"spec": map[string]interface{}{
+				"replica": "1",
+			},
 		},
 	}
 }
@@ -90,15 +93,15 @@ func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	fakeSensor := sensorObj.DeepCopy()
 
-	event := apicommon.Event{
-		Context: apicommon.EventContext{
+	event := &v1alpha1.Event{
+		Context: &v1alpha1.EventContext{
 			DataContentType: common.MediaTypeJSON,
 			Subject:         "example-1",
 			SpecVersion:     "0.3",
 			Source:          "webhook-gateway",
 			Type:            "webhook",
 			ID:              "1",
-			Time:            metav1.MicroTime{Time: time.Now()},
+			Time:            metav1.Time{Time: time.Now().UTC()},
 		},
 		Data: []byte("{\"name\": {\"first\": \"fake\", \"last\": \"user\"} }"),
 	}
@@ -112,7 +115,7 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 				Name:        dep,
 				DisplayName: dep,
 				Type:        v1alpha1.NodeTypeEventDependency,
-				Event:       &event,
+				Event:       event,
 			},
 		},
 	}
@@ -162,13 +165,33 @@ func TestStandardK8sTrigger_Execute(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
 
+	labels := uObj.GetLabels()
+	labels["update"] = "ok"
+	uObj.SetLabels(labels)
+
 	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Update
 	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
-	resource, err = impl.Execute(deployment)
+	resource, err = impl.Execute(uObj)
 	assert.Nil(t, err)
 	assert.NotNil(t, resource)
 
 	uObj, ok = resource.(*unstructured.Unstructured)
 	assert.Equal(t, true, ok)
 	assert.Equal(t, deployment.GetName(), uObj.GetName())
+	assert.Equal(t, "ok", uObj.GetLabels()["update"])
+
+	labels = uObj.GetLabels()
+	labels["foo"] = "bar"
+	uObj.SetLabels(labels)
+
+	sensorObj.Spec.Triggers[0].Template.K8s.Operation = v1alpha1.Patch
+	sensorObj.Spec.Triggers[0].Template.K8s.PatchStrategy = k8stypes.MergePatchType
+
+	impl = NewStandardK8sTrigger(fake.NewSimpleClientset(), client, sensorObj, &sensorObj.Spec.Triggers[0], common.NewArgoEventsLogger())
+	resource, err = impl.Execute(uObj)
+	assert.Nil(t, err)
+	assert.NotNil(t, resource)
+	uObj, ok = resource.(*unstructured.Unstructured)
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "bar", uObj.GetLabels()["foo"])
 }

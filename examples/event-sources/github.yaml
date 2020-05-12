@@ -4,70 +4,79 @@ kind: EventSource
 metadata:
   name: github-event-source
 spec:
-  type: "github"
+  type: github
   github:
     example:
       # owner of the repo
-      owner: "argoproj"
+      owner: argoproj
       # repository name
-      repository: "argo-events"
+      repository: argo-events
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
-        endpoint: "/push"
+        endpoint: /push
         # port to run internal HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-        url: "http://myfakeurl.fake"
+        url: http://url-that-is-reachable-from-GitHub
       # type of events to listen to.
       # following listens to everything, hence *
       # You can find more info on https://developer.github.com/v3/activity/events/types/
       events:
         - "*"
+
+#      # Namespace where the api token and webhook secret live.
+#      # +Optional. Default to gateway's namespace.
+#      namespace: "argo-events"
+
       # apiToken refers to K8s secret that stores the github api token
       apiToken:
         # Name of the K8s secret that contains the access token
         name: github-access
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
         key: token
-      # webhookSecret refers to K8s secret that stores the github hook secret
-      webhookSecret:
-        # Name of the K8s secret that contains the hook secret
-        name: github-access
-        # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
-        key: secret
-      # type of the connection between gateway and Github
-      insecure: false
+
+#      # webhookSecret refers to K8s secret that stores the github hook secret
+#      # +optional
+#      webhookSecret:
+#        # Name of the K8s secret that contains the hook secret
+#        name: github-access
+#        # Key within the K8s secret whose corresponding value (must be base64 encoded) is hook secret
+#        key: secret
+
+      # type of the connection between gateway and Github.
+      # You should set it to false to avoid man-in-the-middle and other attacks.
+      insecure: true
       # Determines if notifications are sent when the webhook is triggered
       active: true
       # The media type used to serialize the payloads
-      contentType: "json"
+      contentType: json
 
-    example-with-secure-connection:
-      owner: "argoproj"
-      repository: "argo"
-      webhook:
-        endpoint: "/push"
-        port: "13000"
-        method: "POST"
-        url: "http://myargofakeurl.fake"
-        # path to file that is mounted in gateway pod which contains certs
-        serverCertPath: "some path in pod"
-        # path to file that is mounted in gateway pod which contains private key
-        serverKeyPath: "some path in pod"
-      events:
-        - "push"
-        - "delete"
-      apiToken:
-        name: github-access
-        key: token
-      webhookSecret:
-        name: github-access
-        key: secret
-      insecure: true
-      active: true
-      contentType: "json"
+#    example-with-secure-connection:
+#      owner: "argoproj"
+#      repository: "argo"
+#      webhook:
+#        endpoint: "/push"
+#        port: "13000"
+#        method: "POST"
+#        url: "http://myargofakeurl.fake"
+#        # path to file that is mounted in gateway pod which contains certs
+#        serverCertPath: "some path in pod"
+#        # path to file that is mounted in gateway pod which contains private key
+#        serverKeyPath: "some path in pod"
+#      events:
+#        - "push"
+#        - "delete"
+#      apiToken:
+#        name: github-access
+#        key: token
+#      webhookSecret:
+#        name: github-access
+#        key: secret
+#      insecure: true
+#      active: true
+#      contentType: "json"

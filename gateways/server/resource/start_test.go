@@ -38,9 +38,17 @@ func TestFilter(t *testing.T) {
 				Version:  "v1",
 			},
 			Filter: &v1alpha1.ResourceFilter{
-				Labels: map[string]string{
-					"workflows.argoproj.io/phase": "Succeeded",
-					"name":                        "my-workflow",
+				Labels: []v1alpha1.Selector{
+					{
+						Key:       "workflows.argoproj.io/phase",
+						Operation: "==",
+						Value:     "Succeeded",
+					},
+					{
+						Key:       "name",
+						Operation: "==",
+						Value:     "my-workflow",
+					},
 				},
 			},
 		}
@@ -64,13 +72,7 @@ func TestFilter(t *testing.T) {
 		err = passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter, v1alpha1.ADD)
+		}, resourceEventSource.Filter)
 		convey.So(err, convey.ShouldBeNil)
-
-		err = passFilters(&InformerEvent{
-			Obj:  &unstructured.Unstructured{Object: outmap},
-			Type: "ADD",
-		}, resourceEventSource.Filter, v1alpha1.UPDATE)
-		convey.So(err, convey.ShouldNotBeNil)
 	})
 }

@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	eventhub "github.com/Azure/azure-event-hubs-go"
+	eventhub "github.com/Azure/azure-event-hubs-go/v3"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
@@ -38,6 +38,7 @@ type EventListener struct {
 	Logger *logrus.Logger
 	// k8sClient is kubernetes client
 	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 func (listener *EventListener) StartEventSource(eventSource *gateways.EventSource, eventStream gateways.Eventing_StartEventSourceServer) error {
@@ -67,14 +68,18 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 		return errors.Wrapf(err, "failed to parsed the event source %s", eventSource.Name)
 	}
 
+	if hubEventSource.Namespace == "" {
+		hubEventSource.Namespace = listener.Namespace
+	}
+
 	logger.Infoln("retrieving the shared access key name...")
-	sharedAccessKeyName, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKeyName)
+	sharedAccessKeyName, err := common.GetSecretValue(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKeyName)
 	if err != nil {
 		return errors.Wrapf(err, "failed to retrieve the shared access key name from secret %s", hubEventSource.SharedAccessKeyName.Name)
 	}
 
 	logger.Infoln("retrieving the shared access key...")
-	sharedAccessKey, err := common.GetSecrets(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKey)
+	sharedAccessKey, err := common.GetSecretValue(listener.K8sClient, hubEventSource.Namespace, hubEventSource.SharedAccessKey)
 	if err != nil {
 		return errors.Wrapf(err, "failed to retrieve the shared access key from secret %s", hubEventSource.SharedAccessKey.Name)
 	}

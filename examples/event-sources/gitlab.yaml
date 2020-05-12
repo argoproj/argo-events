@@ -4,7 +4,7 @@ kind: EventSource
 metadata:
   name: gitlab-event-source
 spec:
-  type: "gitlab"
+  type: gitlab
   gitlab:
     example:
       # id of the project
@@ -12,43 +12,49 @@ spec:
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on
-        endpoint: "/push"
+        endpoint: /push
         # port to run internal HTTP server on
         port: "12000"
         # HTTP request method to allow. In this case, only POST requests are accepted
-        method: "POST"
+        method: POST
         # url the gateway will use to register at Github.
         # This url must be reachable from outside the cluster.
         # The gateway pod is backed by the service defined in the gateway spec. So get the URL for that service Github can reach to.
-        url: "http://myfakeurl.fake"
+        url: http://url-that-is-reachable-from-GitLab
       # event to listen to
       # Visit https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#events
-      event: "PushEvents"
+      event: PushEvents
+
+#      # Namespace where the api token secret live.
+#      # +Optional. Default to gateway's namespace.
+#      namespace: "argo-events"
+
       # accessToken refers to K8s secret that stores the gitlab api token
       accessToken:
         # Key within the K8s secret whose corresponding value (must be base64 encoded) is access token
-        key: accesskey
+        key: token
         # Name of the K8s secret that contains the access token
         name: gitlab-access
       # Do SSL verification when triggering the hook
       enableSSLVerification: false
-      # Gitlab Base url
-      gitlabBaseURL: "YOUR_GITLAB_URL"
+      # Gitlab Base url.
+      # Change it to your private GitLab instance url if you have one.
+      gitlabBaseURL: https://gitlab.com
 
-    example-secure:
-      projectId: "2"
-      webhook:
-        endpoint: "/push"
-        port: "13000"
-        method: "POST"
-        url: "http://mysecondfakeurl.fake"
-        # path to file that is mounted in gateway pod which contains certs
-        serverCertPath: "some path in pod"
-        # path to file that is mounted in gateway pod which contains private key
-        serverKeyPath: "some path in pod"
-      event: "PushEvents"
-      accessToken:
-        key: accesskey
-        name: gitlab-access
-      enableSSLVerification: true
-      gitlabBaseURL: "YOUR_GITLAB_URL"
+#    example-secure:
+#      projectId: "2"
+#      webhook:
+#        endpoint: "/push"
+#        port: "13000"
+#        method: "POST"
+#        url: "http://mysecondfakeurl.fake"
+#        # path to file that is mounted in gateway pod which contains certs
+#        serverCertPath: "some path in pod"
+#        # path to file that is mounted in gateway pod which contains private key
+#        serverKeyPath: "some path in pod"
+#      event: "PushEvents"
+#      accessToken:
+#        key: accesskey
+#        name: gitlab-access
+#      enableSSLVerification: true
+#      gitlabBaseURL: "YOUR_GITLAB_URL"

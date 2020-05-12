@@ -17,7 +17,7 @@ override LDFLAGS += \
 #  docker image publishing options
 DOCKER_PUSH?=true
 IMAGE_NAMESPACE?=argoproj
-IMAGE_TAG?=v0.13.0-rc
+IMAGE_TAG?=v0.15.0
 BUILD_BINARY?=true
 
 ifeq (${DOCKER_PUSH},true)
@@ -358,21 +358,17 @@ coverage:
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
 
-.PHONY: clientgen
-clientgen:
-	./hack/update-codegen.sh
+.PHONY: codegen
+codegen:
+	go mod vendor
 
-.PHONY: openapigen
-openapi-gen:
+	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
 	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
-
-.PHONY: api-docs
-api-docs:
 	./hack/update-api-docs.sh
 
-.PHONY: codegen
-codegen: clientgen openapigen api-docs
+	rm -rf ./vendor
+	go mod tidy
 
 .PHONY: e2e
 e2e:
