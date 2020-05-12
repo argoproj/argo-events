@@ -59,14 +59,14 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 5. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/github.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/github.yaml
 
 6. Wait for gateway pod to get into the running state.
 
 7. Create an Ingress or Openshift Route for the gateway service to that it can be reached from GitHub.
    You can find more information on Ingress or Route online.
 
-8. Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/github.yaml
+8. Get the event source stored at https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/github.yaml
 
 9. Change the `url` under `webhook` to your gateway service url created in a previous step. Make sure this url is reachable from GitHub.
 
@@ -79,7 +79,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
     
 12. Create the sensor by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/github.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/github.yaml
 
 13. Make a change to one of your project files and commit. It will trigger an argo workflow.
 

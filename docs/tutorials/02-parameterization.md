@@ -54,7 +54,7 @@ the gateway, lets see how we can use the event context to parameterize the Argo 
 
 1. Update the `Webhook Sensor` and add the `contextKey` for the parameter at index 0.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-01.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-01.yaml
 
 2. Send a HTTP request to the gateway.
 
@@ -91,7 +91,7 @@ print the message.
 
 1. Update the `Webhook Sensor` and add the `dataKey` in the parameter at index 0.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-02.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-02.yaml
 
 2. Send a HTTP request to the gateway.
 
@@ -132,7 +132,7 @@ important when the `key` you defined in the parameter doesn't exist in the event
 1. Update the `Webhook Sensor` and add the `value` for the parameter at index 0.
    We will also update the `dataKey` to an unknown event key.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-03.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-03.yaml
 
 2. Send a HTTP request to the gateway.
 
@@ -167,7 +167,7 @@ important when the `key` you defined in the parameter doesn't exist in the event
 The [sprig template](https://github.com/Masterminds/sprig) exposed through `contextTemplate` and `dataTemplate` lets you alter the event
 context and event data before it gets applied to the trigger via `parameters`.
 
-Take a look at the example defined [here](https://github.com/argoproj/argo-events/blob/master/examples/sensors/trigger-with-template.yaml), it contains the parameters
+Take a look at the example defined [here](https://github.com/argoproj/argo-events/blob/stable/examples/sensors/trigger-with-template.yaml), it contains the parameters
 as follows,
 
         parameters:
@@ -252,7 +252,7 @@ a parameter comes handy.
 1. Update the `Webhook Sensor` and add the `operation` in the parameter at index 0.
    We will prepend the message to an existing value.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-04.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-04.yaml
 
 
 2. Send a HTTP request to the gateway.
@@ -297,7 +297,7 @@ applying a parameter at the trigger template level.
 
 1. Update the `Webhook Sensor` and add parameters at trigger level.
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/tutorials/02-parameterization/sensor-05.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/tutorials/02-parameterization/sensor-05.yaml
 
 2. Send a HTTP request to the gateway.
 

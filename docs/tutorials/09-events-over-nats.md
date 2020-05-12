@@ -160,7 +160,7 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
 
 1. Create event source for webhook as follows,
 
-        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/webhook.yaml
+        kubectl -n argo-events apply -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/webhook.yaml
         
 1. Expose the gateway pod via Ingress, OpenShift Route or port forward to consume requests over HTTP.
 

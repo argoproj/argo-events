@@ -39,15 +39,15 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 ## Setup
 1. Create the event source by running the following command. 
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/resource.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/resource.yaml
 
 2. Create the gateway by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/resource.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/resource.yaml
 
 3. Create the sensor by running the following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/resource.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/resource.yaml
 
 4. The event source we created in step 1 contains configuration which makes the gateway listen to 
    Argo workflows marked with label `app: my-workflow`.

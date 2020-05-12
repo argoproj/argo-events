@@ -38,7 +38,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 
 1. Install gateway in the `argo-events` namespace using following command,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/gateways/calendar.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/gateways/calendar.yaml
 
    Once the gateway resource is created, the gateway controller will process it and create a pod.
    
@@ -48,13 +48,13 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 2. If you inspect the gateway resource definition, you will notice it points to the event source called
    `calendar-event-source`. Lets install event source in the `argo-events` namespace,
 
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/event-sources/calendar.yaml
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/event-sources/calendar.yaml
    
 3. Check the gateway logs to make sure the gateway has processed the event source.
 
 4. The gateway will generate events at every 10 seconds. Lets create the sensor,
     
-        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/master/examples/sensors/calendar.yaml   
+        kubectl apply -n argo-events -f https://raw.githubusercontent.com/argoproj/argo-events/stable/examples/sensors/calendar.yaml   
 
 5. Once the sensor pod is in running state, wait for next interval to occur.
 
