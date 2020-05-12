@@ -14,7 +14,7 @@ spec:
       # name of the exchange.
       exchangeName: test
       # exchange type. more info at https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges
-      exchangeType: fanout
+      exchangeType: topic
       # routing key
       routingKey: hello
       # optional backoff time for connection retries.
