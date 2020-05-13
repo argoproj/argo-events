@@ -65,6 +65,7 @@ nav:
       - 'triggers/k8s-object-trigger.md'
       - 'triggers/openwhisk-trigger.md'
       - 'triggers/slack-trigger.md'
+      - 'triggers/build-your-own-trigger.md'
   - 'developer_guide.md'
   - 'controllers.md'
   - 'FAQ.md'
