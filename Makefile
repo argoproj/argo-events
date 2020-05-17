@@ -36,11 +36,11 @@ endif
 
 # Build the project images
 .DELETE_ON_ERROR:
-all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux gateway-server-linux
+all: sensor-linux sensor-controller-linux gateway-controller-linux gateway-client-linux gateway-server-linux eventbus-controller-linux
 
-all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image
+all-images: sensor-image sensor-controller-image gateway-controller-image gateway-client-image gateway-server-image eventbus-controller-image
 
-all-controller-images: sensor-controller-image gateway-controller-image
+all-controller-images: sensor-controller-image gateway-controller-image eventbus-controller-image
 
 .PHONY: all clean test
 
@@ -80,6 +80,17 @@ gateway-controller-image:
 	docker build -t $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) -f ./controllers/gateway/Dockerfile .
 	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)gateway-controller:$(IMAGE_TAG) ; fi
 
+# EventBus controller
+eventbus-controller:
+	go build -v -ldflags '${LDFLAGS}' -o ${DIST_DIR}/eventbus-controller ./controllers/eventbus/cmd
+
+eventbus-controller-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make eventbus-controller
+
+eventbus-controller-image:
+	@if [ "$(BUILD_BINARY)" = "true" ]; then make eventbus-controller-linux; fi
+	docker build -t $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) -f ./controllers/eventbus/Dockerfile .
+	@if [ "$(DOCKER_PUSH)" = "true" ] ; then  docker push $(IMAGE_PREFIX)eventbus-controller:$(IMAGE_TAG) ; fi
 
 # Gateway client binary
 gateway-client:

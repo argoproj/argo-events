@@ -6,10 +6,7 @@ set -o pipefail
 
 source $(dirname $0)/library.sh
 
-if [ ! -d "${REPO_ROOT}/vendor" ]; then
-  go mod vendor
-fi
-
+ensure_vendor
 make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"
@@ -32,6 +29,11 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/argoproj/argo-events/pkg/client/eventsources github.com/argoproj/argo-events/pkg/apis \
   "eventsources:v1alpha1" \
+  --go-header-file hack/custom-boilerplate.go.txt
+
+bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
+  github.com/argoproj/argo-events/pkg/client/eventbus github.com/argoproj/argo-events/pkg/apis \
+  "eventbus:v1alpha1" \
   --go-header-file hack/custom-boilerplate.go.txt
 
 go run $FAKE_REPOPATH/vendor/k8s.io/gengo/examples/deepcopy-gen/main.go -i github.com/argoproj/argo-events/pkg/apis/common -p github.com/argoproj/argo-events/pkg/apis/common \

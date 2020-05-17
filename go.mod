@@ -69,6 +69,7 @@ require (
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/radovskyb/watcher v1.0.7
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.1.0 // indirect
@@ -103,6 +104,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20200316234421-82d701f24f9d
 	k8s.io/kubernetes v1.17.5 // indirect
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
+	sigs.k8s.io/controller-runtime v0.5.4
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 
