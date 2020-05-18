@@ -87,11 +87,11 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	sqsClient := sqslib.New(awsSession)
 
 	logger.Infoln("fetching queue url...")
-	getQueueUrlInput:= &sqslib.GetQueueUrlInput{
+	getQueueUrlInput := &sqslib.GetQueueUrlInput{
 		QueueName: &sqsEventSource.Queue,
 	}
 	if sqsEventSource.QueueAccountId != "" {
-	getQueueUrlInput = getQueueUrlInput.SetQueueOwnerAWSAccountId(sqsEventSource.QueueAccountId)
+		getQueueUrlInput = getQueueUrlInput.SetQueueOwnerAWSAccountId(sqsEventSource.QueueAccountId)
 	}
 
 	queueURL, err := sqsClient.GetQueueUrl(getQueueUrlInput)
