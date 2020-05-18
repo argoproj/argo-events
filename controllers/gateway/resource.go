@@ -54,9 +54,10 @@ func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
 			Name: fmt.Sprintf("%s-gateway", ctx.gateway.Name),
 		},
 		Spec: corev1.ServiceSpec{
-			Ports:    ctx.gateway.Spec.Service.Ports,
-			Type:     corev1.ServiceTypeClusterIP,
-			Selector: labels,
+			Ports:     ctx.gateway.Spec.Service.Ports,
+			Type:      corev1.ServiceTypeClusterIP,
+			ClusterIP: ctx.gateway.Spec.Service.ClusterIP,
+			Selector:  labels,
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
@@ -144,6 +145,8 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 					},
 					eventContainer,
 				},
+				Affinity:        ctx.gateway.Spec.Template.Affinity,
+				Tolerations:     ctx.gateway.Spec.Template.Tolerations,
 				Volumes:         ctx.gateway.Spec.Template.Volumes,
 				SecurityContext: ctx.gateway.Spec.Template.SecurityContext,
 			},
