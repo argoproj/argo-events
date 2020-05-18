@@ -102,7 +102,7 @@ type Template struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,6,opt,name=tolerations"`
 	// Spec holds the gateway deployment spec.
 	// DEPRECATED: Use Container instead.
-	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,7,opt,name=spec"`
 }
 
 // Service holds the service information gateway exposes
