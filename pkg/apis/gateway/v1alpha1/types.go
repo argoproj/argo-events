@@ -94,6 +94,12 @@ type Template struct {
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
 	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	// If specified, the pod's scheduling constraints
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,5,opt,name=affinity"`
+	// If specified, the pod's tolerations.
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,6,opt,name=tolerations"`
 	// Spec holds the gateway deployment spec.
 	// DEPRECATED: Use Container instead.
 	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
@@ -101,16 +107,25 @@ type Template struct {
 
 // Service holds the service information gateway exposes
 type Service struct {
-	// The list of ports that are exposed by this service.
+	// The list of ports that are exposed by this ClusterIP service.
 	// +patchMergeKey=port
 	// +patchStrategy=merge
 	// +listType=map
 	// +listMapKey=port
 	// +listMapKey=protocol
 	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,1,rep,name=ports"`
+	// clusterIP is the IP address of the service and is usually assigned
+	// randomly by the master. If an address is specified manually and is not in
+	// use by others, it will be allocated to the service; otherwise, creation
+	// of the service will fail. This field can not be changed through updates.
+	// Valid values are "None", empty string (""), or a valid IP address. "None"
+	// can be specified for headless services when proxying is not required.
+	// More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+	// +optional
+	ClusterIP string `json:"clusterIP,omitempty" protobuf:"bytes,2,opt,name=clusterIP"`
 	// Spec holds the gateway service spec.
 	// DEPRECATED: Use Ports to declare the ports to be exposed.
-	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,3,opt,name=spec"`
 }
 
 type Subscribers struct {
