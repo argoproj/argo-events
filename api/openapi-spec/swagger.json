@@ -899,8 +899,12 @@
       "description": "Service holds the service information gateway exposes",
       "type": "object",
       "properties": {
+        "clusterIP": {
+          "description": "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+          "type": "string"
+        },
         "ports": {
-          "description": "The list of ports that are exposed by this service.",
+          "description": "The list of ports that are exposed by this ClusterIP service.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.k8s.api.core.v1.ServicePort"
@@ -944,6 +948,10 @@
       "description": "Template holds the information of a Gateway deployment template",
       "type": "object",
       "properties": {
+        "affinity": {
+          "description": "If specified, the pod's scheduling constraints",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
+        },
         "container": {
           "description": "Container is the main container image to run in the gateway pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
@@ -959,6 +967,13 @@
         "spec": {
           "description": "Spec holds the gateway deployment spec. DEPRECATED: Use Container instead.",
           "$ref": "#/definitions/io.k8s.api.core.v1.PodSpec"
+        },
+        "tolerations": {
+          "description": "If specified, the pod's tolerations.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Toleration"
+          }
         },
         "volumes": {
           "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
