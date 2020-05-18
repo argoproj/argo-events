@@ -10,7 +10,7 @@ go mod vendor
 
 export GO111MODULE="off"
 
-# fake being in a gopath
+# fake gopath
 FAKE_GOPATH="$(mktemp -d)"
 trap 'rm -rf ${FAKE_GOPATH}' EXIT
 
