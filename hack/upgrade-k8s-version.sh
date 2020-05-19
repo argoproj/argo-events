@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# This script is used to upgrade k8s dependencies versioin in go.mod.
+# This script is used to upgrade k8s dependencies version in go.mod.
 #
 
 set -euo pipefail
