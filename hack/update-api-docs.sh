@@ -6,20 +6,18 @@ set -o pipefail
 
 # Setup at https://github.com/ahmetb/gen-crd-api-reference-docs
 
-readonly SCRIPT_ROOT="$(git rev-parse --show-toplevel)"
-export GO111MODULE="on"
-go mod vendor
+source $(dirname $0)/library.sh
 
-export GO111MODULE="off"
+if [ ! -d "${REPO_ROOT}/vendor" ]; then
+  export GO111MODULE="on"
+  go mod vendor
+fi
 
-# fake gopath
-FAKE_GOPATH="$(mktemp -d)"
-trap 'rm -rf ${FAKE_GOPATH}' EXIT
-
-FAKE_REPOPATH="${FAKE_GOPATH}/src/github.com/argoproj/argo-events"
-mkdir -p "$(dirname "${FAKE_REPOPATH}")" && ln -s "${SCRIPT_ROOT}" "${FAKE_REPOPATH}"
+make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"
+export GO111MODULE="off"
+
 cd "${FAKE_REPOPATH}"
 
 # Event Source

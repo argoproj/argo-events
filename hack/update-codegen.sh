@@ -4,20 +4,18 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-REPO_ROOT="${REPO_ROOT:-$(git rev-parse --show-toplevel)}"
-export GO111MODULE="on"
-go mod vendor
+source $(dirname $0)/library.sh
 
-export GO111MODULE="off"
+if [ ! -d "${REPO_ROOT}/vendor" ]; then
+  export GO111MODULE="on"
+  go mod vendor
+fi
 
-# fake gopath
-FAKE_GOPATH="$(mktemp -d)"
-trap 'rm -rf ${FAKE_GOPATH}' EXIT
-
-FAKE_REPOPATH="${FAKE_GOPATH}/src/github.com/argoproj/argo-events"
-mkdir -p "$(dirname "${FAKE_REPOPATH}")" && ln -s "${REPO_ROOT}" "${FAKE_REPOPATH}"
+make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"
+export GO111MODULE="off"
+
 cd "${FAKE_REPOPATH}"
 
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd "${FAKE_REPOPATH}"; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ../code-generator)}
