@@ -8,6 +8,8 @@ set -o pipefail
 
 source $(dirname $0)/library.sh
 
+ensure_pandoc
+
 if [ ! -d "${REPO_ROOT}/vendor" ]; then
   export GO111MODULE="on"
   go mod vendor

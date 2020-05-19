@@ -32,6 +32,11 @@ function make_fake_paths() {
   trap 'rm -rf ${FAKE_GOPATH}' EXIT
   FAKE_REPOPATH="${FAKE_GOPATH}/src/github.com/argoproj/argo-events"
   mkdir -p "$(dirname "${FAKE_REPOPATH}")" && ln -s "${REPO_ROOT}" "${FAKE_REPOPATH}"
-  GOPATH="${FAKE_GOPATH}"
 }
 
+ensure_pandoc() {
+  if [ "`command -v pandoc`" = "" ]; then
+    warning "Please install pandoc with - brew install pandoc"
+    exit 1
+  fi
+}
