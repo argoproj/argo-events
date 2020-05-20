@@ -101,6 +101,13 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 		common.LabelGatewayName: ctx.gateway.Name,
 		common.LabelObjectName:  ctx.gateway.Name,
 	}
+	podTemplateLabels := make(map[string]string)
+	if len(ctx.gateway.Spec.Template.Metadata.Labels) > 0 {
+		podTemplateLabels = ctx.gateway.Spec.Template.Metadata.Labels
+	}
+	for k, v := range labels {
+		podTemplateLabels[k] = v
+	}
 
 	eventContainer := corev1.Container{
 		Name:            "main",
@@ -123,7 +130,8 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
+				Labels:      podTemplateLabels,
+				Annotations: ctx.gateway.Spec.Template.Metadata.Annotations,
 			},
 			Spec: corev1.PodSpec{
 				ServiceAccountName: ctx.gateway.Spec.Template.ServiceAccountName,
@@ -164,6 +172,13 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 		common.LabelGatewayName: ctx.gateway.Name,
 		common.LabelObjectName:  ctx.gateway.Name,
 	}
+	podTemplateLabels := make(map[string]string)
+	if len(ctx.gateway.Spec.Template.Metadata.Labels) > 0 {
+		podTemplateLabels = ctx.gateway.Spec.Template.Metadata.Labels
+	}
+	for k, v := range labels {
+		podTemplateLabels[k] = v
+	}
 
 	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
@@ -172,7 +187,8 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
+				Labels:      podTemplateLabels,
+				Annotations: ctx.gateway.Spec.Template.Metadata.Annotations,
 			},
 			Spec: *ctx.gateway.Spec.Template.Spec,
 		},
