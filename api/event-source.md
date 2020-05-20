@@ -1670,6 +1670,26 @@ WatchPathConfig contains configuration about the file path to watch
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>polling</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<p>
+
+Use polling instead of inotify
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
