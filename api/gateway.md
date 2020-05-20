@@ -846,6 +846,85 @@ Resources refers to the metadata about the gateway resources
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Metadata">
+
+Metadata
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Template">Template</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Metadata holds the annotations and labels of a gateway pod
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>annotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>labels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.NATSSubscriber">
 
 NATSSubscriber
@@ -1449,6 +1528,27 @@ Description
 </thead>
 
 <tbody>
+
+<tr>
+
+<td>
+
+<code>metadata</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Metadata"> Metadata </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
 
 <tr>
 

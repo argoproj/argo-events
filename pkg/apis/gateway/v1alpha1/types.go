@@ -78,31 +78,39 @@ type GatewaySpec struct {
 
 // Template holds the information of a Gateway deployment template
 type Template struct {
+	// Metdata sets the pods's metadata, i.e. annotations and labels
+	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,2,opt,name=serviceAccountName"`
 	// Container is the main container image to run in the gateway pod
 	// +optional
-	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
 	// Volumes is a list of volumes that can be mounted by containers in a workflow.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional
-	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,opt,name=volumes"`
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,4,opt,name=volumes"`
 	// SecurityContext holds pod-level security attributes and common container settings.
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
-	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,5,opt,name=securityContext"`
 	// If specified, the pod's scheduling constraints
 	// +optional
-	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,5,opt,name=affinity"`
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,6,opt,name=affinity"`
 	// If specified, the pod's tolerations.
 	// +optional
-	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,6,opt,name=tolerations"`
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,opt,name=tolerations"`
 	// Spec holds the gateway deployment spec.
 	// DEPRECATED: Use Container instead.
-	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,7,opt,name=spec"`
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,8,opt,name=spec"`
+}
+
+// Metadata holds the annotations and labels of a gateway pod
+type Metadata struct {
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,opt,name=annotations"`
+	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
 }
 
 // Service holds the service information gateway exposes

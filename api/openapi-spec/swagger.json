@@ -836,6 +836,24 @@
         }
       }
     },
+    "io.argoproj.gateway.v1alpha1.Metadata": {
+      "description": "Metadata holds the annotations and labels of a gateway pod",
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "io.argoproj.gateway.v1alpha1.NATSSubscriber": {
       "description": "NATSSubscriber holds the context of subscriber over NATS.",
       "type": "object",
@@ -955,6 +973,10 @@
         "container": {
           "description": "Container is the main container image to run in the gateway pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "metadata": {
+          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Metadata"
         },
         "securityContext": {
           "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
