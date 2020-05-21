@@ -2678,6 +2678,23 @@ possible values:
 Defaults to &ldquo;application/merge-patch+json&rdquo;</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>liveObject</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>LiveObject specifies whether the resource should be directly fetched from K8s instead
+of being marshaled from the resource artifact. If set to true, the resource artifact
+must contain the information required to uniquely identify the resource in the cluster,
+that is, you must specify &ldquo;apiVersion&rdquo;, &ldquo;kind&rdquo; as well as &ldquo;name&rdquo; and &ldquo;namespace&rdquo; meta
+data.
+Only valid for operation type <code>update</code></p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.StatusPolicy">StatusPolicy

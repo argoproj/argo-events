@@ -5278,6 +5278,33 @@ operation is specified as patch. possible values:
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>liveObject</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+LiveObject specifies whether the resource should be directly fetched
+from K8s instead of being marshaled from the resource artifact. If set
+to true, the resource artifact must contain the information required to
+uniquely identify the resource in the cluster, that is, you must specify
+“apiVersion”, “kind” as well as “name” and “namespace” meta data. Only
+valid for operation type <code>update</code>
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
