@@ -145,6 +145,15 @@ func (k8sTrigger *StandardK8sTrigger) Execute(resource interface{}) (interface{}
 		op = trigger.Template.K8s.Operation
 	}
 
+	// We might have a client from FetchResource() already, or we might not have one yet.
+	if k8sTrigger.namespableDynamicClient == nil {
+		k8sTrigger.namespableDynamicClient = k8sTrigger.DynamicClient.Resource(schema.GroupVersionResource{
+			Group:    trigger.Template.K8s.GroupVersionResource.Group,
+			Version:  trigger.Template.K8s.GroupVersionResource.Version,
+			Resource: trigger.Template.K8s.GroupVersionResource.Resource,
+		})
+	}
+
 	switch op {
 	case v1alpha1.Create:
 		k8sTrigger.Logger.Infoln("creating the object...")
