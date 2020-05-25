@@ -1914,6 +1914,13 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCall
 							Format:      "",
 						},
 					},
+					"liveObject": {
+						SchemaProps: spec.SchemaProps{
+							Description: "LiveObject specifies whether the resource should be directly fetched from K8s instead of being marshaled from the resource artifact. If set to true, the resource artifact must contain the information required to uniquely identify the resource in the cluster, that is, you must specify \"apiVersion\", \"kind\" as well as \"name\" and \"namespace\" meta data. Only valid for operation type `update`",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"source"},
 			},
