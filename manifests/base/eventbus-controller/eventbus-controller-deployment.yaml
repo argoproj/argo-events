@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventbus-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventbus-controller
+  template:
+    metadata:
+      labels:
+        app: eventbus-controller
+    spec:
+      serviceAccountName: argo-events-sa
+      containers:
+        - name: eventbus-controller
+          image: argoproj/eventbus-controller:latest
+          imagePullPolicy: Always
+          env:
+            - name: NATS_IMAGE
+              value: nats:2.1.7

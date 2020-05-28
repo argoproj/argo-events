@@ -1,6 +1,22 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  name: eventbuses.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventBus
+    listKind: EventBusList
+    plural: eventbuses
+    shortNames:
+    - eb
+    singular: eventbus
+  scope: Namespaced
+  version: v1alpha1
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
   name: eventsources.argoproj.io
 spec:
   group: argoproj.io
@@ -68,6 +84,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
+  - eventbuses
+  - eventbuses/finalizers
   verbs:
   - create
   - delete
@@ -94,6 +112,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
+  - eventbuses
+  - eventbuses/finalizers
   verbs:
   - create
   - delete
@@ -120,6 +140,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
+  - eventbuses
+  - eventbuses/finalizers
   verbs:
   - get
   - list
@@ -157,6 +179,8 @@ rules:
   - sensors/finalizers
   - eventsources
   - eventsources/finalizers
+  - eventbuses
+  - eventbuses/finalizers
   verbs:
   - create
   - delete
@@ -200,6 +224,7 @@ rules:
   - apps
   resources:
   - deployments
+  - statefulsets
   verbs:
   - create
   - get
@@ -259,6 +284,30 @@ kind: ConfigMap
 metadata:
   name: sensor-controller-configmap
   namespace: argo-events
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventbus-controller
+  namespace: argo-events
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventbus-controller
+  template:
+    metadata:
+      labels:
+        app: eventbus-controller
+    spec:
+      containers:
+      - env:
+        - name: NATS_IMAGE
+          value: nats:2.1.7
+        image: argoproj/eventbus-controller:v0.15.0
+        imagePullPolicy: Always
+        name: eventbus-controller
+      serviceAccountName: argo-events-sa
 ---
 apiVersion: apps/v1
 kind: Deployment
