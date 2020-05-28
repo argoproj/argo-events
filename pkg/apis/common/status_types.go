@@ -145,3 +145,26 @@ func (s *Status) MarkFalse(t ConditionType, reason, message string) {
 func (s *Status) MarkUnknown(t ConditionType, reason, message string) {
 	s.markTypeStatus(t, corev1.ConditionUnknown, reason, message)
 }
+
+// GetCondition returns the condition of a condtion type
+func (s *Status) GetCondition(t ConditionType) *Condition {
+	for _, c := range s.Conditions {
+		if c.Type == t {
+			return &c
+		}
+	}
+	return nil
+}
+
+// IsReady returns true when all the conditions are true
+func (s *Status) IsReady() bool {
+	if len(s.Conditions) == 0 {
+		return false
+	}
+	for _, c := range s.Conditions {
+		if !c.IsTrue() {
+			return false
+		}
+	}
+	return true
+}

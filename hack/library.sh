@@ -46,3 +46,11 @@ ensure_pandoc() {
     exit 1
   fi
 }
+
+ensure_mockery() {
+  if [ "`command -v mockery`" = "" ]; then
+    warning "Please install mockery with - brew install vektra/tap/mockery"
+    exit 1
+  fi
+}
+
