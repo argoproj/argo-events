@@ -70,4 +70,4 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 9. For real-world use cases, you should use PersistentVolume and PersistentVolumeClaim.
                                                                   
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/). 
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/). 
