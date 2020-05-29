@@ -122,7 +122,7 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 10. As soon as you publish a message, sensor will trigger an Argo workflow. Run `argo list` to find the workflow. 
                                                                             
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
 
 
 
