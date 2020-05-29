@@ -22,7 +22,7 @@ const (
 	natsImageEnvVar = "NATS_IMAGE"
 )
 
-var log = ctrl.Log.WithName("eventbus-controller")
+var log = ctrl.Log.WithName(eventbus.ControllerName)
 
 func main() {
 	ctrl.SetLogger(zap.Logger(false))

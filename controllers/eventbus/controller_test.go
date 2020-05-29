@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -21,51 +23,19 @@ const (
 	testNATSImage = "test-image"
 	testNamespace = "testNamespace"
 	testUID       = "12341-asdf-2fees"
+	testURL       = "http://test"
 )
 
 var (
-	deleteTimestamp = metav1.Now().Rfc3339Copy()
-)
-
-func init() {
-	v1alpha1.AddToScheme(scheme.Scheme)
-	appv1.AddToScheme(scheme.Scheme)
-	corev1.AddToScheme(scheme.Scheme)
-}
-
-func TestReconcile(t *testing.T) {
-	tests := []struct {
-		name    string
-		initObj *v1alpha1.EventBus
-		expect  *v1alpha1.EventBus
-	}{}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			fakeClient := fake.NewFakeClient(test.initObj)
-			r := &reconciler{
-				client: fakeClient,
-				scheme: scheme.Scheme,
-				images: map[apicommon.EventBusType]string{
-					apicommon.EventBusNATS: testNATSImage,
-				},
-				logger: ctrl.Log.WithName("test"),
-			}
-			err := r.reconcile(context.TODO(), test.initObj)
-			if err != nil {
-				t.Error(err)
-			}
-		})
-	}
-}
-
-func fakeEventBus() *v1alpha1.EventBus {
-	bus := &v1alpha1.EventBus{
+	nativeBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 			Kind:       "EventBus",
 		},
-		ObjectMeta: fakeMetadata(testNamespace, testBusName),
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testBusName,
+		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
@@ -74,53 +44,86 @@ func fakeEventBus() *v1alpha1.EventBus {
 			},
 		},
 	}
-	bus.ObjectMeta.SelfLink = ""
-	return bus
-}
 
-func fakeMetadata(namespace, name string) metav1.ObjectMeta {
-	return metav1.ObjectMeta{
-		Namespace: namespace,
-		Name:      name,
-		SelfLink:  fmt.Sprintf("/apis/argoproj.io/v1alpha1/namespaces/%s/eventbuses/%s", namespace, name),
-		UID:       testUID,
+	exoticBus = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testBusName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Exotic: &v1alpha1.NATSConfig{
+					URL: testURL,
+				},
+			},
+		},
 	}
+)
+
+func init() {
+	v1alpha1.AddToScheme(scheme.Scheme)
+	appv1.AddToScheme(scheme.Scheme)
+	corev1.AddToScheme(scheme.Scheme)
 }
 
-func getDeletingBusWithoutFinalizer() *v1alpha1.EventBus {
-	bus := fakeEventBus()
-	bus.DeletionTimestamp = &deleteTimestamp
-	return bus
+func TestReconcileNative(t *testing.T) {
+	t.Run("native nats installation", func(t *testing.T) {
+		obj := nativeBus.DeepCopyObject()
+		testBus := obj.(*v1alpha1.EventBus)
+		ctx := context.TODO()
+		cl := fake.NewFakeClient(testBus)
+		r := &reconciler{
+			client: cl,
+			scheme: scheme.Scheme,
+			images: map[apicommon.EventBusType]string{
+				apicommon.EventBusNATS: testNATSImage,
+			},
+			logger: ctrl.Log.WithName("test"),
+		}
+		err := r.reconcile(ctx, testBus)
+		assert.NoError(t, err)
+		svcList := &corev1.ServiceList{}
+		err = cl.List(ctx, svcList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(svcList.Items))
+		svc := svcList.Items[0]
+		assert.Equal(t, fmt.Sprintf("eventbus-%s-svc", testBusName), svc.Name)
+		ssList := &appv1.StatefulSetList{}
+		err = cl.List(ctx, ssList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(ssList.Items))
+		ss := ssList.Items[0]
+		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s", testBusName), ss.Name)
+		assert.NotNil(t, testBus.Status.Config.NATS)
+		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
+	})
 }
 
-func getDeletingBus() *v1alpha1.EventBus {
-	bus := getDeletingBusWithoutFinalizer()
-	bus.Finalizers = []string{finalizerName}
-	return bus
-}
-
-func getBusWithFinalizer() *v1alpha1.EventBus {
-	bus := fakeEventBus()
-	bus.Finalizers = []string{finalizerName}
-	bus.Status.InitConditions()
-	return bus
-}
-
-func getBusWithFinalizerAndServiceCreated() *v1alpha1.EventBus {
-	bus := getBusWithFinalizer()
-	bus.Status.MarkServiceCreated("Succeeded", "test")
-	return bus
-}
-
-func getBusWithFinalizerAndServiceNotCreated() *v1alpha1.EventBus {
-	bus := getBusWithFinalizer()
-	bus.Status.MarkServiceNotCreated("Failed", "test")
-	return bus
-}
-
-func getReadyBus() *v1alpha1.EventBus {
-	bus := getBusWithFinalizerAndServiceCreated()
-	bus.Status.MarkDeployed("Done", "test")
-	bus.Status.MarkConfigured()
-	return bus
+func TestReconcileExotic(t *testing.T) {
+	t.Run("native nats exotic", func(t *testing.T) {
+		obj := exoticBus.DeepCopyObject()
+		testBus := obj.(*v1alpha1.EventBus)
+		ctx := context.TODO()
+		cl := fake.NewFakeClient(testBus)
+		r := &reconciler{
+			client: cl,
+			scheme: scheme.Scheme,
+			images: map[apicommon.EventBusType]string{
+				apicommon.EventBusNATS: testNATSImage,
+			},
+			logger: ctrl.Log.WithName("test"),
+		}
+		err := r.reconcile(ctx, testBus)
+		assert.NoError(t, err)
+		assert.NotNil(t, testBus.Status.Config.NATS)
+		assert.Equal(t, testURL, testBus.Status.Config.NATS.URL)
+	})
 }

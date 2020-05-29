@@ -2,10 +2,10 @@ package eventbus
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"k8s.io/apimachinery/pkg/api/equality"
-	"k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -43,7 +43,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
-		if errors.IsNotFound(err) {
+		if apierrors.IsNotFound(err) {
 			r.logger.Error(nil, "can not find EventBus", "request", req)
 			return reconcile.Result{}, nil
 		}
@@ -54,7 +54,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	obj := eventBus.DeepCopyObject()
 	busCopy, ok := obj.(*v1alpha1.EventBus)
 	if !ok {
-		return ctrl.Result{}, fmt.Errorf("convert error")
+		return ctrl.Result{}, errors.New("convert error")
 	}
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
@@ -92,7 +92,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 		} else if nats.Native != nil {
 			image, ok := r.images[common.EventBusNATS]
 			if !ok {
-				return fmt.Errorf("nats image not found")
+				return errors.New("nats image not found")
 			}
 			ins := installer.NewNATSInstaller(r.client, eventBus, image, getLabels(eventBus), log)
 			busConfig, err := ins.Install()
@@ -103,7 +103,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 			eventBus.Status.Config = *busConfig
 		}
 	} else {
-		return fmt.Errorf("invalid eventbus spec")
+		return errors.New("invalid eventbus spec")
 	}
 	return nil
 }
