@@ -5,6 +5,7 @@ set -o nounset
 set -o pipefail
 
 source $(dirname $0)/library.sh
+header "updating open-apis"
 
 ensure_vendor
 make_fake_paths

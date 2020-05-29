@@ -28,6 +28,7 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/go-logr/logr v0.1.0
 	github.com/go-openapi/spec v0.19.7
 	github.com/go-openapi/swag v0.19.8 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible

@@ -14,7 +14,7 @@ function make_banner() {
 # Simple header for logging purposes.
 function header() {
   local upper="$(echo $1 | tr a-z A-Z)"
-  make_banner "=" "${upper}"
+  make_banner "+" "${upper}"
 }
 
 # Simple subheader for logging purposes.

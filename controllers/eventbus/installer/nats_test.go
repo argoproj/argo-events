@@ -10,9 +10,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -36,9 +36,7 @@ var (
 		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
-				Native: &v1alpha1.NativeStrategy{
-					Size: 1,
-				},
+				Native: &v1alpha1.NativeStrategy{},
 			},
 		},
 	}
@@ -142,6 +140,6 @@ func getInstaller() *natsInstaller {
 		eventBus: testEventBus,
 		image:    testImage,
 		labels:   testLabels,
-		logger:   common.NewArgoEventsLogger(),
+		logger:   ctrl.Log.WithName("test"),
 	}
 }

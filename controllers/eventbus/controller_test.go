@@ -9,9 +9,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	"github.com/argoproj/argo-events/common"
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
@@ -49,7 +49,7 @@ func TestReconcile(t *testing.T) {
 				images: map[apicommon.EventBusType]string{
 					apicommon.EventBusNATS: testNATSImage,
 				},
-				logger: common.NewArgoEventsLogger(),
+				logger: ctrl.Log.WithName("test"),
 			}
 			err := r.reconcile(context.TODO(), test.initObj)
 			if err != nil {

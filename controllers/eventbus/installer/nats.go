@@ -17,7 +17,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/sirupsen/logrus"
+
+	"github.com/go-logr/logr"
 )
 
 const (
@@ -32,11 +33,11 @@ type natsInstaller struct {
 	eventBus *v1alpha1.EventBus
 	image    string
 	labels   map[string]string
-	logger   *logrus.Logger
+	logger   logr.Logger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, image string, labels map[string]string, logger *logrus.Logger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, image string, labels map[string]string, logger logr.Logger) Installer {
 	return &natsInstaller{
 		client:   client,
 		eventBus: eventBus,
@@ -48,18 +49,18 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, image s
 
 // Install creats a StatefulSet and a Service for NATS
 func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
+	log := i.logger
 	ctx := context.Background()
-	log := i.logger.WithField("namespace", i.eventBus.Namespace).WithField("eventbus", i.eventBus.Name)
 	svc, err := i.getService(ctx)
 	if err != nil && !errors.IsNotFound(err) {
 		i.eventBus.Status.MarkServiceNotCreated("GetServiceFailed", "Get existing service failed")
-		log.WithError(err).Errorln("error getting existing service")
+		log.Error(err, "error getting existing service")
 		return nil, err
 	}
 	expectedSvc, err := i.makeService()
 	if err != nil {
 		i.eventBus.Status.MarkServiceNotCreated("MakeServiceFailed", "Failed to build a service spec")
-		log.WithError(err).Errorln("error building service spec")
+		log.Error(err, "error building service spec")
 		return nil, err
 	}
 	if svc != nil {
@@ -71,32 +72,32 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 			err = i.client.Update(ctx, svc)
 			if err != nil {
 				i.eventBus.Status.MarkServiceNotCreated("UpdateServiceFailed", "Failed to update existing service")
-				log.WithError(err).Errorln("error updating existing service")
+				log.Error(err, "error updating existing service")
 				return nil, err
 			}
-			log.Infof("service %s is updated", expectedSvc.Name)
+			log.Info("service is updated", "serviceName", expectedSvc.Name)
 		}
 	} else {
 		err = i.client.Create(ctx, expectedSvc)
 		if err != nil {
 			i.eventBus.Status.MarkServiceNotCreated("CreateFailed", "Failed to create service")
-			log.WithError(err).Errorln("error creating a service")
+			log.Error(err, "error creating a service")
 			return nil, err
 		}
-		log.Infof("service %s is created", expectedSvc.Name)
+		log.Info("service is created", "serviceName", expectedSvc.Name)
 	}
 	i.eventBus.Status.MarkServiceCreated("Succeeded", "Succeed to sync the service")
 
 	ss, err := i.getStatefulSet(ctx)
 	if err != nil && !errors.IsNotFound(err) {
 		i.eventBus.Status.MarkDeployFailed("GetStatefulSetFailed", "Failed to get existing statefulset")
-		log.WithError(err).Errorln("error getting existing statefulset")
+		log.Error(err, "error getting existing statefulset")
 		return nil, err
 	}
 	expectedSs, err := i.makeStatefulSet()
 	if err != nil {
 		i.eventBus.Status.MarkDeployFailed("MakeStatefulSetFailed", "Failed to build a statefulset spec")
-		log.WithError(err).Errorln("error building statefulset spec")
+		log.Error(err, "error building statefulset spec")
 		return nil, err
 	}
 	if ss != nil {
@@ -108,19 +109,19 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 			err := i.client.Update(ctx, ss)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update existing statefulset")
-				log.WithError(err).Errorln("error updating statefulset")
+				log.Error(err, "error updating statefulset")
 				return nil, err
 			}
-			log.Infof("statefulset %s is updated", ss.Name)
+			log.Info("statefulset is updated", "statefulsetName", ss.Name)
 		}
 	} else {
 		err := i.client.Create(ctx, expectedSs)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("CreateStatefulSetFailed", "Failed to create a statefulset")
-			log.WithError(err).Errorln("error creating a statefulset")
+			log.Error(err, "error creating a statefulset")
 			return nil, err
 		}
-		log.Infof("statefulset %s is created", expectedSs.Name)
+		log.Info("statefulset is created", "statefulsetName", expectedSs.Name)
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "StatefulSet is synced")
 	i.eventBus.Status.MarkConfigured()

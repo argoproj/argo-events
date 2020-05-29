@@ -7,6 +7,7 @@ set -o pipefail
 # Setup at https://github.com/ahmetb/gen-crd-api-reference-docs
 
 source $(dirname $0)/library.sh
+header "updating api docs"
 
 ensure_pandoc
 ensure_vendor

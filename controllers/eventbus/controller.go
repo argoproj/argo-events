@@ -15,7 +15,8 @@ import (
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-	"github.com/sirupsen/logrus"
+
+	"github.com/go-logr/logr"
 )
 
 const (
@@ -30,12 +31,11 @@ type reconciler struct {
 	scheme *runtime.Scheme
 
 	images map[common.EventBusType]string
-	// logger to logger stuff
-	logger *logrus.Logger
+	logger logr.Logger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, images map[common.EventBusType]string, logger *logrus.Logger) reconcile.Reconciler {
+func NewReconciler(client client.Client, scheme *runtime.Scheme, images map[common.EventBusType]string, logger logr.Logger) reconcile.Reconciler {
 	return &reconciler{client: client, scheme: scheme, images: images, logger: logger}
 }
 
@@ -44,13 +44,13 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if errors.IsNotFound(err) {
-			r.logger.Errorf("can not find EventBus %v\n", req)
+			r.logger.Error(nil, "can not find EventBus", "request", req)
 			return reconcile.Result{}, nil
 		}
-		r.logger.WithError(err).Errorln("unable to get eventbus ctl")
+		r.logger.Error(err, "unable to get eventbus ctl", "request", req)
 		return ctrl.Result{}, err
 	}
-	log := r.logger.WithField("namespace", eventBus.Namespace).WithField("eventbus", eventBus.Name)
+	log := r.logger.WithValues("namespace", eventBus.Namespace).WithValues("eventbus", eventBus.Name)
 	obj := eventBus.DeepCopyObject()
 	busCopy, ok := obj.(*v1alpha1.EventBus)
 	if !ok {
@@ -58,7 +58,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	}
 	reconcileErr := r.reconcile(ctx, busCopy)
 	if reconcileErr != nil {
-		log.WithError(reconcileErr).Errorln("reconcile error")
+		log.Error(reconcileErr, "reconcile error")
 	}
 	if r.needsUpdate(ctx, eventBus, busCopy) {
 		if err := r.client.Update(ctx, busCopy); err != nil {
@@ -70,7 +70,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 // reconcile does the real logic
 func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus) error {
-	log := r.logger.WithField("namespace", eventBus.Namespace).WithField("eventbus", eventBus.Name)
+	log := r.logger.WithValues("namespace", eventBus.Namespace).WithValues("eventbus", eventBus.Name)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		// Finalizer logic should be added here.
@@ -94,10 +94,10 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 			if !ok {
 				return fmt.Errorf("nats image not found")
 			}
-			ins := installer.NewNATSInstaller(r.client, eventBus, image, getLabels(eventBus), r.logger)
+			ins := installer.NewNATSInstaller(r.client, eventBus, image, getLabels(eventBus), log)
 			busConfig, err := ins.Install()
 			if err != nil {
-				log.WithError(err).Errorln("NATS installation error")
+				log.Error(err, "NATS installation error")
 				return err
 			}
 			eventBus.Status.Config = *busConfig
