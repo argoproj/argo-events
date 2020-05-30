@@ -97,4 +97,4 @@ is available at https://github.com/minio/minio/blob/master/docs/orchestration/ku
 <br/>
 
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

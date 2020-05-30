@@ -117,4 +117,4 @@ Similarly, you can pass `field` selectors to the watch list options, e.g.,
 based on the `annotations` or some other fields, use the `Data Filters` available in sensor.
 
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).
