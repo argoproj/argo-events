@@ -14,7 +14,8 @@ declare -a interfaces=(
 #
 # Format - "relative-dir:interface"
 #
-"controllers/eventbus/installer:Installer" 
+
+#"controllers/eventbus/installer:Installer" 
 )
 
 for i in "${interfaces[@]}"

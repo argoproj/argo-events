@@ -2,7 +2,6 @@ package installer
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -86,18 +85,21 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "StatefulSet is synced")
 	i.eventBus.Status.MarkConfigured()
-	return &v1alpha1.BusConfig{
+	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
 			URL:  fmt.Sprintf("nats://%s:%s", generateServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
 			Auth: authStrategy,
-			AccessSecret: corev1.SecretKeySelector{
-				Key: clientAuthSecretKey,
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: clientAuthSecret.Name,
-				},
-			},
 		},
-	}, nil
+	}
+	if authStrategy != v1alpha1.AuthStrategyNone {
+		busConfig.NATS.AccessSecret = corev1.SecretKeySelector{
+			Key: clientAuthSecretKey,
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: clientAuthSecret.Name,
+			},
+		}
+	}
+	return busConfig, nil
 }
 
 // Create a service
@@ -196,26 +198,73 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		log.Error(err, "error getting existing client auth secret")
 		return nil, nil, err
 	}
-	if sSecret != nil && cSecret != nil && sSecret.Annotations != nil && cSecret.Annotations != nil {
-		if sSecret.Annotations[authStrategyAnnoKey] == string(strategy) && cSecret.Annotations[authStrategyAnnoKey] == string(strategy) {
-			// If the secrets are already existing, and strategy didn't change, reuse them without updating.
-			return sSecret, cSecret, nil
+	if strategy != v1alpha1.AuthStrategyNone { // Do not checkout AuthStrategyNone because it only has server auth secret
+		if sSecret != nil && cSecret != nil && sSecret.Annotations != nil && cSecret.Annotations != nil {
+			if sSecret.Annotations[authStrategyAnnoKey] == string(strategy) && cSecret.Annotations[authStrategyAnnoKey] == string(strategy) {
+				// If the secrets are already existing, and strategy didn't change, reuse them without updating.
+				return sSecret, cSecret, nil
+			}
 		}
 	}
+
 	switch strategy {
+	case v1alpha1.AuthStrategyNone:
+		// Clean up client auth secret if existing
+		if cSecret != nil {
+			err = i.client.Delete(ctx, cSecret)
+			if err != nil {
+				i.eventBus.Status.MarkDeployFailed("DeleteClientAuthSecretFailed", "Failed to delete the client auth secret")
+				log.Error(err, "error deleting client auth secret")
+				return nil, nil, err
+			}
+			log.Info("deleted server auth secret")
+		}
+		if sSecret != nil && sSecret.Annotations != nil && sSecret.Annotations[authStrategyAnnoKey] == string(strategy) && len(sSecret.Data[serverAuthSecretKey]) == 0 {
+			// If the server auth secret is already existing, strategy didn't change, and the secret is empty string, reuse it without updating.
+			return sSecret, nil, nil
+		}
+		// Only create an empty server auth secret
+		expectedSSecret, err := i.buildServerAuthSecret(strategy, "")
+		if err != nil {
+			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to build a server auth secret spec")
+			log.Error(err, "error building server auth secret spec")
+			return nil, nil, err
+		}
+		if sSecret != nil {
+			sSecret.ObjectMeta.Labels = expectedSSecret.Labels
+			sSecret.ObjectMeta.Annotations = expectedSSecret.Annotations
+			sSecret.Data = expectedSSecret.Data
+			err = i.client.Update(ctx, sSecret)
+			if err != nil {
+				i.eventBus.Status.MarkDeployFailed("UpdateServerAuthSecretFailed", "Failed to update the server auth secret")
+				log.Error(err, "error updating server auth secret")
+				return nil, nil, err
+			}
+			log.Info("updated server auth secret", "serverAuthSecretName", sSecret.Name)
+			return sSecret, nil, nil
+		}
+		err = i.client.Create(ctx, expectedSSecret)
+		if err != nil {
+			i.eventBus.Status.MarkDeployFailed("CreateServerAuthSecretFailed", "Failed to create a server auth secret")
+			log.Error(err, "error creating server auth secret")
+			return nil, nil, err
+		}
+		log.Info("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
+		return expectedSSecret, nil, nil
 	case v1alpha1.AuthStrategyToken:
 		token := generateToken(64)
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
 		clientAuthText := fmt.Sprintf("token=%s", token)
-
+		// Create server auth secret
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, serverAuthText)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("BuildServerAuthSecretFailed", "Failed to build a server auth secret spec")
 			log.Error(err, "error building server auth secret spec")
 			return nil, nil, err
 		}
+		returnedSSecret := expectedSSecret
 		if sSecret == nil {
 			err = i.client.Create(ctx, expectedSSecret)
 			if err != nil {
@@ -226,6 +275,8 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 			log.Info("created server auth secret", "serverAuthSecretName", expectedSSecret.Name)
 		} else {
 			sSecret.Data = expectedSSecret.Data
+			sSecret.ObjectMeta.Labels = expectedSSecret.Labels
+			sSecret.ObjectMeta.Annotations = expectedSSecret.Annotations
 			err = i.client.Update(ctx, sSecret)
 			if err != nil {
 				i.eventBus.Status.MarkDeployFailed("UpdateServerAuthSecretFailed", "Failed to update the server auth secret")
@@ -233,14 +284,16 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 				return nil, nil, err
 			}
 			log.Info("updated server auth secret", "serverAuthSecretName", sSecret.Name)
+			returnedSSecret = sSecret
 		}
-
+		// create client auth secret
 		expectedCSecret, err := i.buildClientAuthSecret(strategy, clientAuthText)
 		if err != nil {
 			i.eventBus.Status.MarkDeployFailed("BuildClientAuthSecretFailed", "Failed to build a client auth secret spec")
 			log.Error(err, "error building client auth secret spec")
 			return nil, nil, err
 		}
+		returnedCSecret := expectedCSecret
 		if cSecret == nil {
 			err = i.client.Create(ctx, expectedCSecret)
 			if err != nil {
@@ -258,8 +311,9 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 				return nil, nil, err
 			}
 			log.Info("updated client auth secret", "clientAuthSecretName", cSecret.Name)
+			returnedCSecret = cSecret
 		}
-		return expectedSSecret, expectedCSecret, nil
+		return returnedSSecret, returnedCSecret, nil
 	default:
 		i.eventBus.Status.MarkDeployFailed("UnsupportedAuthStrategy", "Unsupported auth strategy")
 		return nil, nil, errors.New("unsupported auth strategy")
@@ -345,15 +399,16 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 		routes += fmt.Sprintf("\n    nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, i.eventBus.Namespace, strconv.Itoa(int(clusterPort)))
 	}
 	conf := fmt.Sprintf(`pid_file: "/var/run/nats/nats.pid"
-http: %s
+port: %s
+monitor_port: %s
+include ./auth.conf
 cluster {
   port: %s
-  include ./auth.conf
   routes: [%s
   ]
   cluster_advertise: $CLUSTER_ADVERTISE
   connect_retries: 30
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), routes)
+}`, strconv.Itoa(int(clientPort)), strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), routes)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
@@ -379,7 +434,6 @@ cluster {
 //   token: "abcd1234"
 // }
 func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy, secret string) (*corev1.Secret, error) {
-	encodedAuthConf := base64.StdEncoding.EncodeToString([]byte(secret))
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   i.eventBus.Namespace,
@@ -389,7 +443,7 @@ func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			serverAuthSecretKey: []byte(encodedAuthConf),
+			serverAuthSecretKey: []byte(secret),
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.SchemaGroupVersionKind); err != nil {
@@ -400,7 +454,6 @@ func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy
 
 // buildClientAuthSecret builds a secret for NATS client auth
 func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy, secret string) (*corev1.Secret, error) {
-	encodedAuthConf := base64.StdEncoding.EncodeToString([]byte(secret))
 	s := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   i.eventBus.Namespace,
@@ -410,7 +463,7 @@ func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy
 		},
 		Type: corev1.SecretTypeOpaque,
 		Data: map[string][]byte{
-			clientAuthSecretKey: []byte(encodedAuthConf),
+			clientAuthSecretKey: []byte(secret),
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, s, v1alpha1.SchemaGroupVersionKind); err != nil {

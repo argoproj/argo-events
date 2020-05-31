@@ -41,6 +41,23 @@ var (
 			},
 		},
 	}
+	testEventBusAuthNone = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Native: &v1alpha1.NativeStrategy{
+					Auth: v1alpha1.AuthStrategyNone,
+				},
+			},
+		},
+	}
 	testEventBusBad = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -74,8 +91,8 @@ func TestBadInstallation(t *testing.T) {
 	})
 }
 
-func TestGoodInstallation(t *testing.T) {
-	t.Run("good installation", func(t *testing.T) {
+func TestInstallationAuthtoken(t *testing.T) {
+	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
 		installer := &natsInstaller{
 			client:   cl,
@@ -118,6 +135,61 @@ func TestGoodInstallation(t *testing.T) {
 		for _, s := range secretList.Items {
 			assert.True(t, strings.Contains(s.Name, "server") || strings.Contains(s.Name, "client"))
 		}
+
+		ssList := &appv1.StatefulSetList{}
+		err = cl.List(ctx, ssList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(ssList.Items))
+		ss := ssList.Items[0]
+		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s", testName), ss.Name)
+	})
+}
+
+func TestInstallationAuthNone(t *testing.T) {
+	t.Run("auth none installation", func(t *testing.T) {
+		cl := fake.NewFakeClient(testEventBusAuthNone)
+		installer := &natsInstaller{
+			client:   cl,
+			eventBus: testEventBusAuthNone,
+			image:    testImage,
+			labels:   testLabels,
+			logger:   ctrl.Log.WithName("test"),
+		}
+		busconf, err := installer.Install()
+		assert.NoError(t, err)
+		assert.NotNil(t, busconf.NATS)
+		assert.NotEmpty(t, busconf.NATS.URL)
+		assert.Equal(t, busconf.NATS.Auth, v1alpha1.AuthStrategyNone)
+
+		ctx := context.TODO()
+		svcList := &corev1.ServiceList{}
+		err = cl.List(ctx, svcList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(svcList.Items))
+		svc := svcList.Items[0]
+		assert.Equal(t, fmt.Sprintf("eventbus-%s-svc", testName), svc.Name)
+
+		cmList := &corev1.ConfigMapList{}
+		err = cl.List(ctx, cmList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(cmList.Items))
+		cm := cmList.Items[0]
+		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s-configmap", testName), cm.Name)
+
+		secretList := &corev1.SecretList{}
+		err = cl.List(ctx, secretList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(secretList.Items))
+		assert.True(t, strings.Contains(secretList.Items[0].Name, "server"))
+		assert.True(t, len(secretList.Items[0].Data[serverAuthSecretKey]) == 0)
 
 		ssList := &appv1.StatefulSetList{}
 		err = cl.List(ctx, ssList, &client.ListOptions{

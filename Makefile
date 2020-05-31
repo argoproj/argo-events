@@ -132,7 +132,6 @@ codegen:
 	go mod vendor
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
-	./hack/update-mocks.sh
 	go run ./hack/gen-openapi-spec/main.go ${VERSION} > ${CURRENT_DIR}/api/openapi-spec/swagger.json
 	./hack/update-api-docs.sh
 	rm -rf ./vendor

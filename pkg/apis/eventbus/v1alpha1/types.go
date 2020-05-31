@@ -52,6 +52,7 @@ type AuthStrategy string
 
 // possible auth strategies
 var (
+	AuthStrategyNone  AuthStrategy = "none"
 	AuthStrategyToken AuthStrategy = "token"
 )
 

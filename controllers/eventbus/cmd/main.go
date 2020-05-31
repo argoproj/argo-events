@@ -30,7 +30,7 @@ const (
 var log = ctrl.Log.WithName(eventbus.ControllerName)
 
 func main() {
-	ctrl.SetLogger(zap.Logger(false))
+	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
 	mainLog := log.WithName("main")
 	natsImage, defined := os.LookupEnv(natsImageEnvVar)
 	if !defined {
