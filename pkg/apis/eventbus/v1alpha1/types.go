@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	"github.com/argoproj/argo-events/pkg/apis/common"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,10 +47,19 @@ type NATSBus struct {
 	Exotic *NATSConfig `json:"exotic,omitempty" protobuf:"bytes,2,opt,name=exotic"`
 }
 
+// AuthStrategy is the auth strategy of native nats installaion
+type AuthStrategy string
+
+// possible auth strategies
+var (
+	AuthStrategyToken AuthStrategy = "token"
+)
+
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size int `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Size int          `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Auth AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -59,7 +69,9 @@ type BusConfig struct {
 
 // NATSConfig holds the config of NATS
 type NATSConfig struct {
-	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	URL          string                   `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	Auth         AuthStrategy             `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	AccessSecret corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,3,opt,name=accessSecret"`
 }
 
 const (

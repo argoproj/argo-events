@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -20,6 +22,9 @@ import (
 
 const (
 	natsImageEnvVar = "NATS_IMAGE"
+
+	rateLimiterBaseDelay = 5 * time.Second
+	rateLimiterMaxDelay  = 1000 * time.Second
 )
 
 var log = ctrl.Log.WithName(eventbus.ControllerName)
@@ -42,7 +47,9 @@ func main() {
 		panic(err)
 	}
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), images, log.WithName("reconciler")),
+		MaxConcurrentReconciles: 1,
+		RateLimiter:             workqueue.NewItemExponentialFailureRateLimiter(rateLimiterBaseDelay, rateLimiterMaxDelay),
+		Reconciler:              eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), images, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")
@@ -52,6 +59,18 @@ func main() {
 	// Watch EventBus and enqueue EventBus object key
 	if err := c.Watch(&source.Kind{Type: &v1alpha1.EventBus{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		mainLog.Error(err, "unable to watch EventBuses")
+		panic(err)
+	}
+
+	// Watch ConfigMaps and enqueue owning EventBus key
+	if err := c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}); err != nil {
+		mainLog.Error(err, "unable to watch ConfigMaps")
+		panic(err)
+	}
+
+	// Watch Secrets and enqueue owning EventBus key
+	if err := c.Watch(&source.Kind{Type: &corev1.Secret{}}, &handler.EnqueueRequestForOwner{OwnerType: &v1alpha1.EventBus{}, IsController: true}); err != nil {
+		mainLog.Error(err, "unable to watch Secrets")
 		panic(err)
 	}
 

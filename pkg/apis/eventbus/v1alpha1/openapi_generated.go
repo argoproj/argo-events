@@ -244,9 +244,22 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref common.ReferenceCallback) 
 							Format: "",
 						},
 					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"accessSecret": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 
@@ -262,6 +275,12 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Description: "Size is the NATS StatefulSet size",
 							Type:        []string{"integer"},
 							Format:      "int32",
+						},
+					},
+					"auth": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 				},

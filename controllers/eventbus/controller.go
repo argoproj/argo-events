@@ -60,7 +60,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "reconcile error")
 	}
-	if r.needsUpdate(ctx, eventBus, busCopy) {
+	if r.needsUpdate(eventBus, busCopy) {
 		if err := r.client.Update(ctx, busCopy); err != nil {
 			return reconcile.Result{}, err
 		}
@@ -120,7 +120,7 @@ func (r *reconciler) removeFinalizer(s *v1alpha1.EventBus) {
 	s.Finalizers = finalizers.List()
 }
 
-func (r *reconciler) needsUpdate(ctx context.Context, old, new *v1alpha1.EventBus) bool {
+func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
 	if old == nil {
 		return true
 	}

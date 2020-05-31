@@ -36,6 +36,32 @@ Resource Types:
 
 </ul>
 
+<h3 id="argoproj.io/v1alpha1.AuthStrategy">
+
+AuthStrategy (<code>string</code> alias)
+
+</p>
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NATSConfig">NATSConfig</a>,
+<a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+AuthStrategy is the auth strategy of native nats installaion
+
+</p>
+
+</p>
+
 <h3 id="argoproj.io/v1alpha1.BusConfig">
 
 BusConfig
@@ -538,6 +564,37 @@ Description
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>auth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AuthStrategy"> AuthStrategy </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>accessSecret</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector </a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
@@ -604,6 +661,21 @@ Description
 Size is the NATS StatefulSet size
 
 </p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>auth</code></br> <em>
+<a href="#argoproj.io/v1alpha1.AuthStrategy"> AuthStrategy </a> </em>
+
+</td>
+
+<td>
 
 </td>
 
