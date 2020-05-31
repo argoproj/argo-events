@@ -19,5 +19,9 @@ spec:
           image: argoproj/eventbus-controller:latest
           imagePullPolicy: Always
           env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
             - name: NATS_IMAGE
               value: nats:2.1.7
