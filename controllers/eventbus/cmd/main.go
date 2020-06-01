@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	uzap "go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -25,7 +27,10 @@ const (
 var log = ctrl.Log.WithName(eventbus.ControllerName)
 
 func main() {
-	ctrl.SetLogger(zap.New(zap.UseDevMode(false)))
+	ecfg := uzap.NewProductionEncoderConfig()
+	ecfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoder := zapcore.NewConsoleEncoder(ecfg)
+	ctrl.SetLogger(zap.New(zap.UseDevMode(false), zap.WriteTo(os.Stdout), zap.Encoder(encoder)))
 	mainLog := log.WithName("main")
 	natsImage, defined := os.LookupEnv(natsImageEnvVar)
 	if !defined {

@@ -44,7 +44,7 @@ func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	eventBus := &v1alpha1.EventBus{}
 	if err := r.client.Get(ctx, req.NamespacedName, eventBus); err != nil {
 		if apierrors.IsNotFound(err) {
-			r.logger.Error(nil, "can not find EventBus", "request", req)
+			r.logger.Info("WARNING: eventbus not found", "request", req)
 			return reconcile.Result{}, nil
 		}
 		r.logger.Error(err, "unable to get eventbus ctl", "request", req)
