@@ -76,11 +76,8 @@ type NATSConfig struct {
 }
 
 const (
-	// EventBusConditionServiceCreated has the status True when the
-	// EventBus has its Service created.
-	EventBusConditionServiceCreated common.ConditionType = "ServiceCreated"
 	// EventBusConditionDeployed has the status True when the EventBus
-	// has its RestfulSet/Deployment created.
+	// has its RestfulSet/Deployment ans service created.
 	EventBusConditionDeployed common.ConditionType = "Deployed"
 	// EventBusConditionConfigured has the status True when the EventBus
 	// has its configuration ready.
@@ -89,22 +86,7 @@ const (
 
 // InitConditions sets conditions to Unknown state.
 func (s *EventBusStatus) InitConditions() {
-	s.Status.InitConditions(EventBusConditionServiceCreated, EventBusConditionDeployed, EventBusConditionConfigured)
-}
-
-// MarkServiceCreated set the bus has craeted a Service.
-func (s *EventBusStatus) MarkServiceCreated(reason, message string) {
-	s.Status.MarkTrueWithReason(EventBusConditionServiceCreated, reason, message)
-}
-
-// MarkServiceCreating set the bus is creating a Service.
-func (s *EventBusStatus) MarkServiceCreating(reason, message string) {
-	s.Status.MarkUnknown(EventBusConditionServiceCreated, reason, message)
-}
-
-// MarkServiceNotCreated set the bus failed to create a Service.
-func (s *EventBusStatus) MarkServiceNotCreated(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionServiceCreated, reason, message)
+	s.Status.InitConditions(EventBusConditionDeployed, EventBusConditionConfigured)
 }
 
 // MarkDeployed set the bus has been deployed.

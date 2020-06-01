@@ -85,7 +85,6 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 			eventBus.Status.Config = v1alpha1.BusConfig{
 				NATS: nats.Exotic,
 			}
-			eventBus.Status.MarkServiceCreated("Skipped", "Skip creating a Service because of using exotic config.")
 			eventBus.Status.MarkDeployed("Skipped", "Skip deployment because of using exotic config.")
 			eventBus.Status.MarkConfigured()
 			log.Info("use exotic config")

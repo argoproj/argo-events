@@ -7,4 +7,5 @@ import (
 // Installer is an interface for event bus installation
 type Installer interface {
 	Install() (*v1alpha1.BusConfig, error)
+	Uninstall() error
 }

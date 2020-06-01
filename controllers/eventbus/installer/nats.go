@@ -46,12 +46,19 @@ type natsInstaller struct {
 
 // NewNATSInstaller returns a new NATS installer
 func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, image string, labels map[string]string, logger logr.Logger) Installer {
+	l := make(map[string]string)
+	if len(labels) > 0 {
+		for k, v := range labels {
+			l[k] = v
+		}
+	}
+	l["installer"] = "nats"
 	return &natsInstaller{
 		client:   client,
 		eventBus: eventBus,
 		image:    image,
-		labels:   labels,
-		logger:   logger,
+		labels:   l,
+		logger:   logger.WithName("nats-installer"),
 	}
 }
 
@@ -66,7 +73,6 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	i.eventBus.Status.MarkServiceCreated("Succeeded", "Succeed to sync the service")
 	cm, err := i.createServerAuthConfigMap(ctx)
 	if err != nil {
 		return nil, err
@@ -102,18 +108,84 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	return busConfig, nil
 }
 
+func (i *natsInstaller) Uninstall() error {
+	ctx := context.Background()
+	log := i.logger
+	ss, err := i.getStatefulSet(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		log.Error(err, "failed to get statefulset when uninstalling")
+		return err
+	}
+	if ss != nil {
+		err = i.client.Delete(ctx, ss)
+		if err != nil {
+			log.Error(err, "failed to delete statefulset when uninstalling")
+			return err
+		}
+	}
+	svc, err := i.getService(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		log.Error(err, "failed to get service when uninstalling")
+		return err
+	}
+	if svc != nil {
+		err = i.client.Delete(ctx, svc)
+		if err != nil {
+			log.Error(err, "failed to delete service when uninstalling")
+			return err
+		}
+	}
+	cm, err := i.getConfigMap(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		log.Error(err, "failed to get configmap when uninstalling")
+		return err
+	}
+	if cm != nil {
+		err = i.client.Delete(ctx, cm)
+		if err != nil {
+			log.Error(err, "failed to delete configmap when uninstalling")
+			return err
+		}
+	}
+	sAuthSecret, err := i.getServerAuthSecret(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		log.Error(err, "failed to get server auth secret when uninstalling")
+		return err
+	}
+	if sAuthSecret != nil {
+		err = i.client.Delete(ctx, sAuthSecret)
+		if err != nil {
+			log.Error(err, "failed to delete server auth secret when uninstalling")
+			return err
+		}
+	}
+	cAuthSecret, err := i.getClientAuthSecret(ctx)
+	if err != nil && !apierrors.IsNotFound(err) {
+		log.Error(err, "failed to get client auth secret when uninstalling")
+		return err
+	}
+	if cAuthSecret != nil {
+		err = i.client.Delete(ctx, cAuthSecret)
+		if err != nil {
+			log.Error(err, "failed to delete client auth secret when uninstalling")
+			return err
+		}
+	}
+	return nil
+}
+
 // Create a service
 func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, error) {
 	log := i.logger
 	svc, err := i.getService(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkServiceNotCreated("GetServiceFailed", "Get existing service failed")
+		i.eventBus.Status.MarkDeployFailed("GetServiceFailed", "Get existing service failed")
 		log.Error(err, "error getting existing service")
 		return nil, err
 	}
 	expectedSvc, err := i.buildService()
 	if err != nil {
-		i.eventBus.Status.MarkServiceNotCreated("BuildServiceFailed", "Failed to build a service spec")
+		i.eventBus.Status.MarkDeployFailed("BuildServiceFailed", "Failed to build a service spec")
 		log.Error(err, "error building service spec")
 		return nil, err
 	}
@@ -125,7 +197,7 @@ func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, err
 			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
-				i.eventBus.Status.MarkServiceNotCreated("UpdateServiceFailed", "Failed to update existing service")
+				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
 				log.Error(err, "error updating existing service")
 				return nil, err
 			}
@@ -135,7 +207,7 @@ func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, err
 	}
 	err = i.client.Create(ctx, expectedSvc)
 	if err != nil {
-		i.eventBus.Status.MarkServiceNotCreated("CreateFailed", "Failed to create service")
+		i.eventBus.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create service")
 		log.Error(err, "error creating a service")
 		return nil, err
 	}
@@ -175,7 +247,7 @@ func (i *natsInstaller) createServerAuthConfigMap(ctx context.Context) (*corev1.
 	}
 	err = i.client.Create(ctx, expectedCm)
 	if err != nil {
-		i.eventBus.Status.MarkServiceNotCreated("CreateConfigMapFailed", "Failed to create configmap")
+		i.eventBus.Status.MarkDeployFailed("CreateConfigMapFailed", "Failed to create configmap")
 		log.Error(err, "error creating a configmap")
 		return nil, err
 	}

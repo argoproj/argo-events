@@ -94,13 +94,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := &natsInstaller{
-			client:   cl,
-			eventBus: testEventBus,
-			image:    testImage,
-			labels:   testLabels,
-			logger:   ctrl.Log.WithName("test"),
-		}
+		installer := NewNATSInstaller(cl, testEventBus, testImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -150,13 +144,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBusAuthNone)
-		installer := &natsInstaller{
-			client:   cl,
-			eventBus: testEventBusAuthNone,
-			image:    testImage,
-			labels:   testLabels,
-			logger:   ctrl.Log.WithName("test"),
-		}
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, testImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -199,5 +187,44 @@ func TestInstallationAuthNone(t *testing.T) {
 		assert.Equal(t, 1, len(ssList.Items))
 		ss := ssList.Items[0]
 		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s", testName), ss.Name)
+	})
+}
+
+func TestUninstall(t *testing.T) {
+	t.Run("test uninstallation", func(t *testing.T) {
+		cl := fake.NewFakeClient(testEventBus)
+		installer := natsInstaller{client: cl, eventBus: testEventBus, image: testImage, labels: testLabels, logger: ctrl.Log.WithName("test")}
+		_, err := installer.Install()
+		assert.NoError(t, err)
+
+		ctx := context.TODO()
+		svc, err := installer.getService(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, svc)
+		ss, err := installer.getStatefulSet(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, ss)
+		cm, err := installer.getConfigMap(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, cm)
+		sAuth, err := installer.getServerAuthSecret(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, sAuth)
+		cAuth, err := installer.getClientAuthSecret(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, cAuth)
+
+		err = installer.Uninstall()
+		assert.NoError(t, err)
+		_, err = installer.getService(ctx)
+		assert.Error(t, err)
+		_, err = installer.getStatefulSet(ctx)
+		assert.Error(t, err)
+		_, err = installer.getConfigMap(ctx)
+		assert.Error(t, err)
+		_, err = installer.getServerAuthSecret(ctx)
+		assert.Error(t, err)
+		_, err = installer.getClientAuthSecret(ctx)
+		assert.Error(t, err)
 	})
 }

@@ -34,33 +34,11 @@ func TestEventBusStatusIsReady(t *testing.T) {
 			expect: false,
 		},
 		{
-			name: "mark service created",
+			name: "mark deployed",
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkServiceCreated("test", "test")
-				return s
-			}(),
-			expect: false,
-		},
-		{
-			name: "mark service created and deployed",
-			s: func() *EventBusStatus {
-				s := &EventBusStatus{}
-				s.InitConditions()
-				s.MarkServiceCreated("test", "test")
 				s.MarkDeployed("test", "test")
-				return s
-			}(),
-			expect: false,
-		},
-		{
-			name: "mark service created and configured",
-			s: func() *EventBusStatus {
-				s := &EventBusStatus{}
-				s.InitConditions()
-				s.MarkServiceCreated("test", "test")
-				s.MarkConfigured()
 				return s
 			}(),
 			expect: false,
@@ -70,7 +48,6 @@ func TestEventBusStatusIsReady(t *testing.T) {
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
-				s.MarkServiceCreated("test", "test")
 				s.MarkDeployed("test", "test")
 				s.MarkConfigured()
 				return s
@@ -98,36 +75,20 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 		{
 			name:       "uninitialized",
 			s:          &EventBusStatus{},
-			qCondition: EventBusConditionServiceCreated,
+			qCondition: EventBusConditionDeployed,
 			expect:     nil,
 		},
 		{
-			name: "uninitialized",
+			name: "initialized",
 			s: func() *EventBusStatus {
 				s := &EventBusStatus{}
 				s.InitConditions()
 				return s
 			}(),
-			qCondition: EventBusConditionServiceCreated,
+			qCondition: EventBusConditionDeployed,
 			expect: &common.Condition{
 				Status: corev1.ConditionUnknown,
-				Type:   EventBusConditionServiceCreated,
-			},
-		},
-		{
-			name: "mark service created",
-			s: func() *EventBusStatus {
-				s := &EventBusStatus{}
-				s.InitConditions()
-				s.MarkServiceCreated("test", "test")
-				return s
-			}(),
-			qCondition: EventBusConditionServiceCreated,
-			expect: &common.Condition{
-				Status:  corev1.ConditionTrue,
-				Type:    EventBusConditionServiceCreated,
-				Reason:  "test",
-				Message: "test",
+				Type:   EventBusConditionDeployed,
 			},
 		},
 		{
