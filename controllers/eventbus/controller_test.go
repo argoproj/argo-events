@@ -12,16 +12,16 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 const (
-	testBusName   = "test-bus"
-	testNATSImage = "test-image"
-	testNamespace = "testNamespace"
-	testUID       = "12341-asdf-2fees"
-	testURL       = "http://test"
+	testBusName        = "test-bus"
+	testNATSImage      = "test-image"
+	testStreamingImage = "test-steaming-image"
+	testNamespace      = "testNamespace"
+	testUID            = "12341-asdf-2fees"
+	testURL            = "http://test"
 )
 
 var (
@@ -38,7 +38,7 @@ var (
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
 					Size: 1,
-					Auth: v1alpha1.AuthStrategyToken,
+					Auth: &v1alpha1.AuthStrategyToken,
 				},
 			},
 		},
@@ -76,12 +76,11 @@ func TestReconcileNative(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			images: map[apicommon.EventBusType]string{
-				apicommon.EventBusNATS: testNATSImage,
-			},
-			logger: ctrl.Log.WithName("test"),
+			client:             cl,
+			scheme:             scheme.Scheme,
+			natsImage:          testNATSImage,
+			natsStreamingImage: testStreamingImage,
+			logger:             ctrl.Log.WithName("test"),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -98,12 +97,11 @@ func TestReconcileExotic(t *testing.T) {
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			images: map[apicommon.EventBusType]string{
-				apicommon.EventBusNATS: testNATSImage,
-			},
-			logger: ctrl.Log.WithName("test"),
+			client:             cl,
+			scheme:             scheme.Scheme,
+			natsImage:          testNATSImage,
+			natsStreamingImage: testStreamingImage,
+			logger:             ctrl.Log.WithName("test"),
 		}
 		err := r.reconcile(ctx, testBus)
 		assert.NoError(t, err)
@@ -118,12 +116,11 @@ func TestNeedsUpdate(t *testing.T) {
 		testBus := obj.(*v1alpha1.EventBus)
 		cl := fake.NewFakeClient(testBus)
 		r := &reconciler{
-			client: cl,
-			scheme: scheme.Scheme,
-			images: map[apicommon.EventBusType]string{
-				apicommon.EventBusNATS: testNATSImage,
-			},
-			logger: ctrl.Log.WithName("test"),
+			client:             cl,
+			scheme:             scheme.Scheme,
+			natsImage:          testNATSImage,
+			natsStreamingImage: testStreamingImage,
+			logger:             ctrl.Log.WithName("test"),
 		}
 		assert.False(t, r.needsUpdate(nativeBus, testBus))
 		r.addFinalizer(testBus)

@@ -568,6 +568,20 @@ Description
 
 <td>
 
+<code>clusterID</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>auth</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AuthStrategy"> AuthStrategy </a> </em>
 
@@ -681,9 +695,48 @@ Size is the NATS StatefulSet size
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>persistence</code></br> <em>
+<a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
+</a> </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
+
+<h3 id="argoproj.io/v1alpha1.PersistenceStrategy">
+
+PersistenceStrategy
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.NativeStrategy">NativeStrategy</a>)
+
+</p>
+
+<p>
+
+<p>
+
+PersistenceStrategy defines the strategy of persistence
+
+</p>
+
+</p>
 
 <hr/>
 

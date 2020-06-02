@@ -194,6 +194,8 @@ spec:
               fieldPath: metadata.namespace
         - name: NATS_IMAGE
           value: nats:2.1.7
+        - name: NATS_STREAMING_IMAGE
+          value: nats-streaming:0.17.0
         image: argoproj/eventbus-controller:v0.15.0
         imagePullPolicy: Always
         name: eventbus-controller

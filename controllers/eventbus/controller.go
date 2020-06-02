@@ -13,7 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/argoproj/argo-events/controllers/eventbus/installer"
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 
 	"github.com/go-logr/logr"
@@ -30,13 +29,14 @@ type reconciler struct {
 	client client.Client
 	scheme *runtime.Scheme
 
-	images map[common.EventBusType]string
-	logger logr.Logger
+	natsImage          string
+	natsStreamingImage string
+	logger             logr.Logger
 }
 
 // NewReconciler returns a new reconciler
-func NewReconciler(client client.Client, scheme *runtime.Scheme, images map[common.EventBusType]string, logger logr.Logger) reconcile.Reconciler {
-	return &reconciler{client: client, scheme: scheme, images: images, logger: logger}
+func NewReconciler(client client.Client, scheme *runtime.Scheme, natsImage, natsStreamingImage string, logger logr.Logger) reconcile.Reconciler {
+	return &reconciler{client: client, scheme: scheme, natsImage: natsImage, natsStreamingImage: natsStreamingImage, logger: logger}
 }
 
 func (r *reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
@@ -89,11 +89,7 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 			eventBus.Status.MarkConfigured()
 			log.Info("use exotic config")
 		} else if nats.Native != nil {
-			image, ok := r.images[common.EventBusNATS]
-			if !ok {
-				return errors.New("nats image not found")
-			}
-			ins := installer.NewNATSInstaller(r.client, eventBus, image, getLabels(eventBus), log)
+			ins := installer.NewNATSInstaller(r.client, eventBus, r.natsImage, r.natsStreamingImage, getLabels(eventBus), log)
 			busConfig, err := ins.Install()
 			if err != nil {
 				log.Error(err, "NATS installation error")

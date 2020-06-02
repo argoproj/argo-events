@@ -29,14 +29,15 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig":      schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus":       schema_pkg_apis_eventbus_v1alpha1_EventBus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":   schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":   schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus": schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus":        schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig":     schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NativeStrategy": schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig":           schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus":            schema_pkg_apis_eventbus_v1alpha1_EventBus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":        schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":        schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusStatus":      schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSBus":             schema_pkg_apis_eventbus_v1alpha1_NATSBus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig":          schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NativeStrategy":      schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy": schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref),
 	}
 }
 
@@ -244,6 +245,12 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref common.ReferenceCallback) 
 							Format: "",
 						},
 					},
+					"clusterID": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 					"auth": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -283,7 +290,25 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format: "",
 						},
 					},
+					"persistence": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"),
+						},
+					},
 				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "PersistenceStrategy defines the strategy of persistence",
+				Type:        []string{"object"},
 			},
 		},
 	}

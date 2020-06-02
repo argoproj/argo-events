@@ -59,8 +59,13 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size int          `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
-	Auth AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	Size        int                  `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Auth        *AuthStrategy        `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,3,opt,name=persistence"`
+}
+
+// PersistenceStrategy defines the strategy of persistence
+type PersistenceStrategy struct {
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -71,6 +76,7 @@ type BusConfig struct {
 // NATSConfig holds the config of NATS
 type NATSConfig struct {
 	URL          string                   `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	ClusterID    string                   `json:"clusterID,omitempty" protobuf:"bytes,1,opt,name=clusterID"`
 	Auth         AuthStrategy             `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
 	AccessSecret corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,3,opt,name=accessSecret"`
 }

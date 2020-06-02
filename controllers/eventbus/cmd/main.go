@@ -16,12 +16,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	"github.com/argoproj/argo-events/controllers/eventbus"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 const (
-	natsImageEnvVar = "NATS_IMAGE"
+	natsImageEnvVar     = "NATS_IMAGE"
+	natsStreamingEnvVar = "NATS_STREAMING_IMAGE"
 )
 
 var log = ctrl.Log.WithName(eventbus.ControllerName)
@@ -36,7 +36,10 @@ func main() {
 	if !defined {
 		panic(fmt.Errorf("required environment variable '%s' not defined", natsImageEnvVar))
 	}
-	images := map[apicommon.EventBusType]string{apicommon.EventBusNATS: natsImage}
+	streamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
+	if !defined {
+		panic(fmt.Errorf("required environment variable '%s' not defined", natsStreamingEnvVar))
+	}
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{})
 	if err != nil {
 		panic(err)
@@ -48,7 +51,7 @@ func main() {
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), images, log.WithName("reconciler")),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsImage, streamingImage, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")

@@ -19,9 +19,10 @@ import (
 )
 
 const (
-	testNamespace = "test-ns"
-	testName      = "test-name"
-	testImage     = "test-image"
+	testNamespace      = "test-ns"
+	testName           = "test-name"
+	testNATSImage      = "test-image"
+	testStreamingImage = "test-s-image"
 )
 
 var (
@@ -53,7 +54,7 @@ var (
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
 				Native: &v1alpha1.NativeStrategy{
-					Auth: v1alpha1.AuthStrategyNone,
+					Auth: &v1alpha1.AuthStrategyNone,
 				},
 			},
 		},
@@ -80,11 +81,12 @@ func init() {
 func TestBadInstallation(t *testing.T) {
 	t.Run("bad installation", func(t *testing.T) {
 		installer := &natsInstaller{
-			client:   fake.NewFakeClient(testEventBusBad),
-			eventBus: testEventBusBad,
-			image:    testImage,
-			labels:   testLabels,
-			logger:   ctrl.Log.WithName("test"),
+			client:         fake.NewFakeClient(testEventBusBad),
+			eventBus:       testEventBusBad,
+			natsImage:      testNATSImage,
+			streamingImage: testStreamingImage,
+			labels:         testLabels,
+			logger:         ctrl.Log.WithName("test"),
 		}
 		_, err := installer.Install()
 		assert.Error(t, err)
@@ -94,7 +96,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := NewNATSInstaller(cl, testEventBus, testImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBus, testNATSImage, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -118,7 +120,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		cm := cmList.Items[0]
-		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s-configmap", testName), cm.Name)
+		assert.Equal(t, fmt.Sprintf("eventbus-%s-configmap", testName), cm.Name)
 
 		secretList := &corev1.SecretList{}
 		err = cl.List(ctx, secretList, &client.ListOptions{
@@ -137,14 +139,14 @@ func TestInstallationAuthtoken(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(ssList.Items))
 		ss := ssList.Items[0]
-		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s", testName), ss.Name)
+		assert.Equal(t, fmt.Sprintf("eventbus-%s", testName), ss.Name)
 	})
 }
 
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBusAuthNone)
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, testImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, testNATSImage, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -168,7 +170,7 @@ func TestInstallationAuthNone(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(cmList.Items))
 		cm := cmList.Items[0]
-		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s-configmap", testName), cm.Name)
+		assert.Equal(t, fmt.Sprintf("eventbus-%s-configmap", testName), cm.Name)
 
 		secretList := &corev1.SecretList{}
 		err = cl.List(ctx, secretList, &client.ListOptions{
@@ -186,25 +188,25 @@ func TestInstallationAuthNone(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(ssList.Items))
 		ss := ssList.Items[0]
-		assert.Equal(t, fmt.Sprintf("eventbus-nats-%s", testName), ss.Name)
+		assert.Equal(t, fmt.Sprintf("eventbus-%s", testName), ss.Name)
 	})
 }
 
 func TestUninstall(t *testing.T) {
 	t.Run("test uninstallation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := natsInstaller{client: cl, eventBus: testEventBus, image: testImage, labels: testLabels, logger: ctrl.Log.WithName("test")}
+		installer := natsInstaller{client: cl, eventBus: testEventBus, natsImage: testNATSImage, streamingImage: testStreamingImage, labels: testLabels, logger: ctrl.Log.WithName("test")}
 		_, err := installer.Install()
 		assert.NoError(t, err)
 
 		ctx := context.TODO()
-		svc, err := installer.getService(ctx)
+		svc, err := installer.getServerService(ctx)
 		assert.NoError(t, err)
 		assert.NotNil(t, svc)
-		ss, err := installer.getStatefulSet(ctx)
+		ss, err := installer.getServerStatefulSet(ctx)
 		assert.NoError(t, err)
 		assert.NotNil(t, ss)
-		cm, err := installer.getConfigMap(ctx)
+		cm, err := installer.getServerConfigMap(ctx)
 		assert.NoError(t, err)
 		assert.NotNil(t, cm)
 		sAuth, err := installer.getServerAuthSecret(ctx)
@@ -216,11 +218,11 @@ func TestUninstall(t *testing.T) {
 
 		err = installer.Uninstall()
 		assert.NoError(t, err)
-		_, err = installer.getService(ctx)
+		_, err = installer.getServerService(ctx)
 		assert.Error(t, err)
-		_, err = installer.getStatefulSet(ctx)
+		_, err = installer.getServerStatefulSet(ctx)
 		assert.Error(t, err)
-		_, err = installer.getConfigMap(ctx)
+		_, err = installer.getServerConfigMap(ctx)
 		assert.Error(t, err)
 		_, err = installer.getServerAuthSecret(ctx)
 		assert.Error(t, err)
