@@ -74,33 +74,18 @@ func (r *reconciler) reconcile(ctx context.Context, eventBus *v1alpha1.EventBus)
 	if !eventBus.DeletionTimestamp.IsZero() {
 		log.Info("deleting eventbus")
 		// Finalizer logic should be added here.
+		err := installer.Uninstall(eventBus, r.client, r.natsImage, r.natsStreamingImage, log)
+		if err != nil {
+			log.Error(err, "failed to uninstall")
+			return nil
+		}
 		r.removeFinalizer(eventBus)
 		return nil
 	}
 	r.addFinalizer(eventBus)
 
 	eventBus.Status.InitConditions()
-	if nats := eventBus.Spec.NATS; nats != nil {
-		if nats.Exotic != nil {
-			eventBus.Status.Config = v1alpha1.BusConfig{
-				NATS: nats.Exotic,
-			}
-			eventBus.Status.MarkDeployed("Skipped", "Skip deployment because of using exotic config.")
-			eventBus.Status.MarkConfigured()
-			log.Info("use exotic config")
-		} else if nats.Native != nil {
-			ins := installer.NewNATSInstaller(r.client, eventBus, r.natsImage, r.natsStreamingImage, getLabels(eventBus), log)
-			busConfig, err := ins.Install()
-			if err != nil {
-				log.Error(err, "NATS installation error")
-				return err
-			}
-			eventBus.Status.Config = *busConfig
-		}
-	} else {
-		return errors.New("invalid eventbus spec")
-	}
-	return nil
+	return installer.Install(eventBus, r.client, r.natsImage, r.natsStreamingImage, log)
 }
 
 func (r *reconciler) addFinalizer(s *v1alpha1.EventBus) {
@@ -126,11 +111,4 @@ func (r *reconciler) needsUpdate(old, new *v1alpha1.EventBus) bool {
 		return true
 	}
 	return false
-}
-
-func getLabels(bus *v1alpha1.EventBus) map[string]string {
-	return map[string]string{
-		"controller":    ControllerName,
-		"eventbus-name": bus.Name,
-	}
 }

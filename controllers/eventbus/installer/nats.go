@@ -26,8 +26,6 @@ import (
 )
 
 const (
-	installerName = "nats"
-
 	clientPort  = int32(4222)
 	clusterPort = int32(6222)
 	monitorPort = int32(8222)
@@ -70,7 +68,7 @@ func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, natsIma
 		natsImage:      natsImage,
 		streamingImage: streamingImage,
 		labels:         labels,
-		logger:         logger.WithName(installerName),
+		logger:         logger.WithName("nats"),
 	}
 }
 
@@ -143,75 +141,10 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	return busConfig, nil
 }
 
+// Uninstall deletes those objects not handeled by cascade deletion.
 func (i *natsInstaller) Uninstall() error {
 	ctx := context.Background()
-	log := i.logger
-	ss, err := i.getServerStatefulSet(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get server statefulset when uninstalling")
-		return err
-	}
-	if ss != nil {
-		err = i.client.Delete(ctx, ss)
-		if err != nil {
-			log.Error(err, "failed to delete server statefulset when uninstalling")
-			return err
-		}
-		log.Info("server statefuleset is deleted")
-	}
-	svc, err := i.getServerService(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get server service when uninstalling")
-		return err
-	}
-	if svc != nil {
-		err = i.client.Delete(ctx, svc)
-		if err != nil {
-			log.Error(err, "failed to delete server service when uninstalling")
-			return err
-		}
-		log.Info("server service is deleted")
-	}
-	cm, err := i.getServerConfigMap(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get nats server configmap when uninstalling")
-		return err
-	}
-	if cm != nil {
-		err = i.client.Delete(ctx, cm)
-		if err != nil {
-			log.Error(err, "failed to delete server configmap when uninstalling")
-			return err
-		}
-		log.Info("server configmap is deleted")
-	}
-	sAuthSecret, err := i.getServerAuthSecret(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get server auth secret when uninstalling")
-		return err
-	}
-	if sAuthSecret != nil {
-		err = i.client.Delete(ctx, sAuthSecret)
-		if err != nil {
-			log.Error(err, "failed to delete server auth secret when uninstalling")
-			return err
-		}
-		log.Info("server auth secret is deleted")
-	}
-	cAuthSecret, err := i.getClientAuthSecret(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get client auth secret when uninstalling")
-		return err
-	}
-	if cAuthSecret != nil {
-		err = i.client.Delete(ctx, cAuthSecret)
-		if err != nil {
-			log.Error(err, "failed to delete client auth secret when uninstalling")
-			return err
-		}
-		log.Info("client auth secret is deleted")
-	}
-	return i.uninstallStreamingComponents(ctx)
+	return i.uninstallPVCs(ctx)
 }
 
 func (i *natsInstaller) uninstallStreamingComponents(ctx context.Context) error {
@@ -254,6 +187,26 @@ func (i *natsInstaller) uninstallStreamingComponents(ctx context.Context) error 
 			return err
 		}
 		log.Info("streaming configmap is deleted")
+	}
+	return i.uninstallPVCs(ctx)
+}
+
+func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
+	// StatefulSet doens't clean up PVC, needs to do it separately
+	// https://github.com/kubernetes/kubernetes/issues/55045
+	log := i.logger
+	pvcs, err := i.getPVCs(ctx, i.componentLabels(componentStreaming))
+	if err != nil {
+		log.Error(err, "failed to get PVCs created by nats streaming statefulset when uninstalling")
+		return err
+	}
+	for _, pvc := range pvcs {
+		err = i.client.Delete(ctx, &pvc)
+		if err != nil {
+			log.Error(err, "failed to delete pvc when uninstalling", "pvcName", pvc.Name)
+			return err
+		}
+		log.Info("pvc deleted", "pvcName", pvc.Name)
 	}
 	return nil
 }
@@ -961,7 +914,7 @@ func (i *natsInstaller) buildStreamingStatefulSet(serviceName, configmapName str
 func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName string) appv1.StatefulSetSpec {
 	// Alway use minimal size 3.
 	replicas := int32(3)
-	pvcName := fmt.Sprintf("stan-%s-vol", i.eventBus.Name)
+	pvcName := generatePVCName(i.eventBus)
 	l := i.componentLabels(componentStreaming)
 	volMode := corev1.PersistentVolumeFilesystem
 	return appv1.StatefulSetSpec{
@@ -1166,6 +1119,20 @@ func (i *natsInstaller) getStatefulSet(ctx context.Context, labels map[string]st
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
+// get PVCs created by streaming statefulset
+// they have same labels as the statefulset
+func (i *natsInstaller) getPVCs(ctx context.Context, labels map[string]string) ([]corev1.PersistentVolumeClaim, error) {
+	pvcl := &corev1.PersistentVolumeClaimList{}
+	err := i.client.List(ctx, pvcl, &client.ListOptions{
+		Namespace:     i.eventBus.Namespace,
+		LabelSelector: labelSelector(labels),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return pvcl.Items, nil
+}
+
 func (i *natsInstaller) componentLabels(c component) map[string]string {
 	result := make(map[string]string)
 	for k, v := range i.labels {
@@ -1219,7 +1186,7 @@ func generateServerConfigMapName(eventBus *v1alpha1.EventBus) string {
 }
 
 func generateStreamingConfigMapName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-stan-%s-configmap", eventBus.Name)
+	return fmt.Sprintf("eventbus-%s-stan-configmap", eventBus.Name)
 }
 
 func generateServerAuthSecretName(eventBus *v1alpha1.EventBus) string {
@@ -1235,9 +1202,19 @@ func generateServerStatefulSetName(eventBus *v1alpha1.EventBus) string {
 }
 
 func generateStreamingStatefulSetName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-stan-%s", eventBus.Name)
+	return fmt.Sprintf("eventbus-%s-stan", eventBus.Name)
 }
 
 func generateStreamingClusterID(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus_%s", eventBus.Name)
+}
+
+// PVC name used in streaming statefulset
+func generatePVCName(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("stan-%s-vol", eventBus.Name)
+}
+
+// Final PVC name prefix
+func getFinalizedPVCNamePrefix(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("%s-%s-", generatePVCName(eventBus), generateStreamingStatefulSetName(eventBus))
 }

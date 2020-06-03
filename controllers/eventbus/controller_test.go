@@ -44,6 +44,26 @@ var (
 		},
 	}
 
+	nativeBusPersist = &v1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testBusName,
+		},
+		Spec: v1alpha1.EventBusSpec{
+			NATS: &v1alpha1.NATSBus{
+				Native: &v1alpha1.NativeStrategy{
+					Size:        1,
+					Auth:        &v1alpha1.AuthStrategyNone,
+					Persistence: &v1alpha1.PersistenceStrategy{},
+				},
+			},
+		},
+	}
+
 	exoticBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -69,7 +89,7 @@ func init() {
 	corev1.AddToScheme(scheme.Scheme)
 }
 
-func TestReconcileNative(t *testing.T) {
+func TestReconcileNativeNonPersist(t *testing.T) {
 	t.Run("native nats installation", func(t *testing.T) {
 		obj := nativeBus.DeepCopyObject()
 		testBus := obj.(*v1alpha1.EventBus)
@@ -87,6 +107,29 @@ func TestReconcileNative(t *testing.T) {
 		assert.True(t, testBus.Status.Status.IsReady())
 		assert.NotNil(t, testBus.Status.Config.NATS)
 		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
+		assert.Empty(t, testBus.Status.Config.NATS.ClusterID)
+	})
+}
+
+func TestReconcileNativePersis(t *testing.T) {
+	t.Run("native nats installation", func(t *testing.T) {
+		obj := nativeBusPersist.DeepCopyObject()
+		testBus := obj.(*v1alpha1.EventBus)
+		ctx := context.TODO()
+		cl := fake.NewFakeClient(testBus)
+		r := &reconciler{
+			client:             cl,
+			scheme:             scheme.Scheme,
+			natsImage:          testNATSImage,
+			natsStreamingImage: testStreamingImage,
+			logger:             ctrl.Log.WithName("test"),
+		}
+		err := r.reconcile(ctx, testBus)
+		assert.NoError(t, err)
+		assert.True(t, testBus.Status.Status.IsReady())
+		assert.NotNil(t, testBus.Status.Config.NATS)
+		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
+		assert.NotEmpty(t, testBus.Status.Config.NATS.ClusterID)
 	})
 }
 
