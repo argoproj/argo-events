@@ -290,6 +290,12 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format: "",
 						},
 					},
+					"affinity": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
 					"persistence": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.PersistenceStrategy"),
@@ -309,6 +315,15 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 			SchemaProps: spec.SchemaProps{
 				Description: "PersistenceStrategy defines the strategy of persistence",
 				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"storageClassName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
 			},
 		},
 	}

@@ -699,6 +699,20 @@ Size is the NATS StatefulSet size
 
 <td>
 
+<code>affinity</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>persistence</code></br> <em>
 <a href="#argoproj.io/v1alpha1.PersistenceStrategy"> PersistenceStrategy
 </a> </em>
@@ -706,6 +720,8 @@ Size is the NATS StatefulSet size
 </td>
 
 <td>
+
+<em>(Optional)</em>
 
 </td>
 
@@ -737,6 +753,57 @@ PersistenceStrategy defines the strategy of persistence
 </p>
 
 </p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>storageClassName</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Name of the StorageClass required by the claim. More info:
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1">https://kubernetes.io/docs/concepts/storage/persistent-volumes\#class-1</a>
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 <hr/>
 

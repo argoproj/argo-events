@@ -100,43 +100,34 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	if err := i.createServerStatefulSet(ctx, svc.Name, cm.Name, serverAuthSecret.Name); err != nil {
 		return nil, err
 	}
-	if natsObj.Native.Persistence != nil {
-		// Install nats steaming
-		streamingSvc, err := i.createStreamingService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		streamingCm, err := i.createStreamingConfigMap(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if err := i.createStreamingStatefulSet(ctx, streamingSvc.Name, streamingCm.Name); err != nil {
-			return nil, err
-		}
-	} else {
-		err = i.uninstallStreamingComponents(ctx)
-		if err != nil {
-			return nil, err
-		}
+	// Install nats steaming
+	streamingSvc, err := i.createStreamingService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	streamingCm, err := i.createStreamingConfigMap(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := i.createStreamingStatefulSet(ctx, streamingSvc.Name, streamingCm.Name); err != nil {
+		return nil, err
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "NATS is deployed")
 	i.eventBus.Status.MarkConfigured()
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
-			URL:  fmt.Sprintf("nats://%s:%s", generateServerServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
-			Auth: *authStrategy,
+			URL:       fmt.Sprintf("nats://%s:%s", generateServerServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
+			ClusterID: generateStreamingClusterID(i.eventBus),
+			Auth:      *authStrategy,
 		},
 	}
 	if *authStrategy != v1alpha1.AuthStrategyNone {
-		busConfig.NATS.AccessSecret = corev1.SecretKeySelector{
+		busConfig.NATS.AccessSecret = &corev1.SecretKeySelector{
 			Key: clientAuthSecretKey,
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: clientAuthSecret.Name,
 			},
 		}
-	}
-	if natsObj.Native.Persistence != nil {
-		busConfig.NATS.ClusterID = generateStreamingClusterID(i.eventBus)
 	}
 	return busConfig, nil
 }
@@ -144,50 +135,6 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 // Uninstall deletes those objects not handeled by cascade deletion.
 func (i *natsInstaller) Uninstall() error {
 	ctx := context.Background()
-	return i.uninstallPVCs(ctx)
-}
-
-func (i *natsInstaller) uninstallStreamingComponents(ctx context.Context) error {
-	log := i.logger
-	ss, err := i.getStreamingStatefulSet(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get streaming statefulset when uninstalling")
-		return err
-	}
-	if ss != nil {
-		err = i.client.Delete(ctx, ss)
-		if err != nil {
-			log.Error(err, "failed to delete streaming statefulset when uninstalling")
-			return err
-		}
-		log.Info("streaming statefuleset is deleted")
-	}
-	svc, err := i.getStreamingService(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get streaming service when uninstalling")
-		return err
-	}
-	if svc != nil {
-		err = i.client.Delete(ctx, svc)
-		if err != nil {
-			log.Error(err, "failed to delete streaming service when uninstalling")
-			return err
-		}
-		log.Info("streaming service is deleted")
-	}
-	cm, err := i.getStreamingConfigMap(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		log.Error(err, "failed to get nats streaming configmap when uninstalling")
-		return err
-	}
-	if cm != nil {
-		err = i.client.Delete(ctx, cm)
-		if err != nil {
-			log.Error(err, "failed to delete streaming configmap when uninstalling")
-			return err
-		}
-		log.Info("streaming configmap is deleted")
-	}
 	return i.uninstallPVCs(ctx)
 }
 
@@ -785,7 +732,7 @@ func (i *natsInstaller) buildServerStatefulSetSpec(serviceName, configmapName, a
 	}
 	l := i.componentLabels(componentServer)
 	terminationGracePeriodSeconds := int64(60)
-	return appv1.StatefulSetSpec{
+	spec := appv1.StatefulSetSpec{
 		Replicas:    &size,
 		ServiceName: serviceName,
 		Selector: &metav1.LabelSelector{
@@ -891,6 +838,21 @@ func (i *natsInstaller) buildServerStatefulSetSpec(serviceName, configmapName, a
 			},
 		},
 	}
+	if i.eventBus.Spec.NATS.Native.Affinity {
+		spec.Template.Spec.Affinity = &corev1.Affinity{
+			PodAntiAffinity: &corev1.PodAntiAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					{
+						TopologyKey: "kubernetes.io/hostname",
+						LabelSelector: &metav1.LabelSelector{
+							MatchLabels: l,
+						},
+					},
+				},
+			},
+		}
+	}
+	return spec
 }
 
 // buildStreamingStatefulSet builds a StatefulSet for nats streaming
@@ -912,34 +874,17 @@ func (i *natsInstaller) buildStreamingStatefulSet(serviceName, configmapName str
 }
 
 func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName string) appv1.StatefulSetSpec {
-	// Alway use minimal size 3.
-	replicas := int32(3)
-	pvcName := generatePVCName(i.eventBus)
+	// Streaming requires minimal size 3.
+	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
+	if replicas < 3 {
+		replicas = 3
+	}
 	l := i.componentLabels(componentStreaming)
-	volMode := corev1.PersistentVolumeFilesystem
-	return appv1.StatefulSetSpec{
+	spec := appv1.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: serviceName,
 		Selector: &metav1.LabelSelector{
 			MatchLabels: l,
-		},
-		VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: pvcName,
-				},
-				Spec: corev1.PersistentVolumeClaimSpec{
-					AccessModes: []corev1.PersistentVolumeAccessMode{
-						corev1.ReadWriteOnce,
-					},
-					VolumeMode: &volMode,
-					Resources: corev1.ResourceRequirements{
-						Requests: corev1.ResourceList{
-							corev1.ResourceStorage: apiresource.MustParse("1Gi"),
-						},
-					},
-				},
-			},
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
@@ -979,7 +924,6 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/stan-config"},
-							{Name: pvcName, MountPath: "/data/stan"},
 						},
 						Resources: corev1.ResourceRequirements{
 							Requests: corev1.ResourceList{
@@ -1011,6 +955,47 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 			},
 		},
 	}
+	if i.eventBus.Spec.NATS.Native.Persistence != nil {
+		volMode := corev1.PersistentVolumeFilesystem
+		pvcName := generatePVCName(i.eventBus)
+		spec.VolumeClaimTemplates = []corev1.PersistentVolumeClaim{
+			{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: pvcName,
+				},
+				Spec: corev1.PersistentVolumeClaimSpec{
+					AccessModes: []corev1.PersistentVolumeAccessMode{
+						corev1.ReadWriteOnce,
+					},
+					VolumeMode:       &volMode,
+					StorageClassName: i.eventBus.Spec.NATS.Native.Persistence.StorageClassName,
+					Resources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceStorage: apiresource.MustParse("1Gi"),
+						},
+					},
+				},
+			},
+		}
+		volumes := spec.Template.Spec.Containers[0].VolumeMounts
+		volumes = append(volumes, corev1.VolumeMount{Name: pvcName, MountPath: "/data/stan"})
+		spec.Template.Spec.Containers[0].VolumeMounts = volumes
+	}
+	if i.eventBus.Spec.NATS.Native.Affinity {
+		spec.Template.Spec.Affinity = &corev1.Affinity{
+			PodAntiAffinity: &corev1.PodAntiAffinity{
+				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
+					{
+						TopologyKey: "kubernetes.io/hostname",
+						LabelSelector: &metav1.LabelSelector{
+							MatchLabels: l,
+						},
+					},
+				},
+			},
+		}
+	}
+	return spec
 }
 
 func (i *natsInstaller) getServerService(ctx context.Context) (*corev1.Service, error) {
