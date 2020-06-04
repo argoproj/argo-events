@@ -39,6 +39,8 @@ rules:
       - sensors/finalizers
       - eventsources
       - eventsources/finalizers
+      - eventbuses
+      - eventbuses/finalizers
   - apiGroups:
       - ""
     resources:
@@ -73,6 +75,7 @@ rules:
       - "apps"
     resources:
       - deployments
+      - statefulsets
     verbs:
       - create
       - get

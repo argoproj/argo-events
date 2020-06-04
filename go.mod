@@ -28,12 +28,14 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
+	github.com/go-logr/logr v0.1.0
 	github.com/go-openapi/spec v0.19.7
 	github.com/go-openapi/swag v0.19.8 // indirect
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/gobwas/glob v0.2.4-0.20181002190808-e7a84e9525fe
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.5
+	github.com/google/go-cmp v0.4.0
 	github.com/google/go-github/v31 v31.0.0
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
@@ -69,6 +71,7 @@ require (
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/pierrec/lz4 v2.5.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/radovskyb/watcher v1.0.7
 	github.com/rcrowley/go-metrics v0.0.0-20200313005456-10cdbea86bc0 // indirect
 	github.com/robfig/cron v1.2.0
 	github.com/sergi/go-diff v1.1.0 // indirect
@@ -84,7 +87,7 @@ require (
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/yudai/pp v2.0.1+incompatible // indirect
-	go.uber.org/zap v1.14.1 // indirect
+	go.uber.org/zap v1.14.1
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/net v0.0.0-20200501053045-e0ff5e5a1de5 // indirect
 	golang.org/x/sys v0.0.0-20200409092240-59c9f1ba88fa // indirect
@@ -103,6 +106,7 @@ require (
 	k8s.io/kube-openapi v0.0.0-20200316234421-82d701f24f9d
 	k8s.io/kubernetes v1.17.5 // indirect
 	k8s.io/utils v0.0.0-20200327001022-6496210b90e8 // indirect
+	sigs.k8s.io/controller-runtime v0.5.4
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
 

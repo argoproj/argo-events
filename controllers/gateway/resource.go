@@ -142,11 +142,11 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 						ImagePullPolicy: corev1.PullAlways,
 						Resources: corev1.ResourceRequirements{
 							Requests: corev1.ResourceList{
-								corev1.ResourceCPU:    apiresource.MustParse("10m"),
-								corev1.ResourceMemory: apiresource.MustParse("64Mi"),
+								corev1.ResourceCPU:    apiresource.MustParse("5m"),
+								corev1.ResourceMemory: apiresource.MustParse("10Mi"),
 							},
 							Limits: corev1.ResourceList{
-								corev1.ResourceCPU:    apiresource.MustParse("500m"),
+								corev1.ResourceCPU:    apiresource.MustParse("50m"),
 								corev1.ResourceMemory: apiresource.MustParse("128Mi"),
 							},
 						},

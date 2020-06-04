@@ -14,7 +14,7 @@ function make_banner() {
 # Simple header for logging purposes.
 function header() {
   local upper="$(echo $1 | tr a-z A-Z)"
-  make_banner "=" "${upper}"
+  make_banner "+" "${upper}"
 }
 
 # Simple subheader for logging purposes.
@@ -34,9 +34,23 @@ function make_fake_paths() {
   mkdir -p "$(dirname "${FAKE_REPOPATH}")" && ln -s "${REPO_ROOT}" "${FAKE_REPOPATH}"
 }
 
+ensure_vendor() {
+  if [ ! -d "${REPO_ROOT}/vendor" ]; then
+    go mod vendor
+  fi
+}
+
 ensure_pandoc() {
   if [ "`command -v pandoc`" = "" ]; then
     warning "Please install pandoc with - brew install pandoc"
     exit 1
   fi
 }
+
+ensure_mockery() {
+  if [ "`command -v mockery`" = "" ]; then
+    warning "Please install mockery with - brew install vektra/tap/mockery"
+    exit 1
+  fi
+}
+

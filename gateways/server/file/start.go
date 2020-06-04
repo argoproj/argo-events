@@ -28,9 +28,9 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/common/fsevent"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/fsnotify/fsnotify"
-	"github.com/radovskyb/watcher"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/radovskyb/watcher"
 	"github.com/sirupsen/logrus"
 )
 
@@ -233,11 +233,10 @@ func (listener *EventListener) listenEventsPolling(eventSource *gateways.EventSo
 				return nil
 			}
 		}
-	}() 
+	}()
 	logger.Info("Starting watcher...")
 	if err = watcher.Start(time.Millisecond * 100); err != nil {
 		return errors.Wrapf(err, "Failed to start watcher for %s", eventSource.Name)
 	}
 	return nil
 }
-
