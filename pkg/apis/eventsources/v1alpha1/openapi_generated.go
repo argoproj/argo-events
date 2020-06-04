@@ -791,6 +791,13 @@ func schema_pkg_apis_eventsources_v1alpha1_FileEventSource(ref common.ReferenceC
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig"),
 						},
 					},
+					"polling": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Use polling instead of inotify",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 				Required: []string{"eventType", "watchPathConfig"},
 			},

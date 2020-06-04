@@ -5,11 +5,9 @@ set -o nounset
 set -o pipefail
 
 source $(dirname $0)/library.sh
+header "updating open-apis"
 
-if [ ! -d "${REPO_ROOT}/vendor" ]; then
-  go mod vendor
-fi
-
+ensure_vendor
 make_fake_paths
 
 export GOPATH="${FAKE_GOPATH}"
@@ -39,5 +37,12 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
     --input-dirs github.com/argoproj/argo-events/pkg/apis/eventsources/${VERSION} \
     --output-package github.com/argoproj/argo-events/pkg/apis/eventsources/${VERSION} \
+    $@
+
+# EventBus
+go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
+    --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
+    --input-dirs github.com/argoproj/argo-events/pkg/apis/eventbus/${VERSION} \
+    --output-package github.com/argoproj/argo-events/pkg/apis/eventbus/${VERSION} \
     $@
 
