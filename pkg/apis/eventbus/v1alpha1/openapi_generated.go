@@ -323,8 +323,16 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"size": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Volume size, e.g. 10Gi",
+							Ref:         ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),
+						},
+					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/api/resource.Quantity"},
 	}
 }

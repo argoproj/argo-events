@@ -958,6 +958,12 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 	if i.eventBus.Spec.NATS.Native.Persistence != nil {
 		volMode := corev1.PersistentVolumeFilesystem
 		pvcName := generatePVCName(i.eventBus)
+		// Default volume size
+		volSize := apiresource.MustParse("5Gi")
+		if i.eventBus.Spec.NATS.Native.Persistence.Size != nil {
+			volSize = *i.eventBus.Spec.NATS.Native.Persistence.Size
+		}
+		// Default volume size
 		spec.VolumeClaimTemplates = []corev1.PersistentVolumeClaim{
 			{
 				ObjectMeta: metav1.ObjectMeta{
@@ -971,7 +977,7 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 					StorageClassName: i.eventBus.Spec.NATS.Native.Persistence.StorageClassName,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
-							corev1.ResourceStorage: apiresource.MustParse("1Gi"),
+							corev1.ResourceStorage: volSize,
 						},
 					},
 				},

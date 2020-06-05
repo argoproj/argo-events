@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -25,6 +26,8 @@ const (
 )
 
 var (
+	volumeSize = apiresource.MustParse("5Gi")
+
 	nativeBus = &v1alpha1.EventBus{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -39,26 +42,9 @@ var (
 				Native: &v1alpha1.NativeStrategy{
 					Size: 1,
 					Auth: &v1alpha1.AuthStrategyToken,
-				},
-			},
-		},
-	}
-
-	nativeBusPersist = &v1alpha1.EventBus{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: v1alpha1.SchemeGroupVersion.String(),
-			Kind:       "EventBus",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: testNamespace,
-			Name:      testBusName,
-		},
-		Spec: v1alpha1.EventBusSpec{
-			NATS: &v1alpha1.NATSBus{
-				Native: &v1alpha1.NativeStrategy{
-					Size:        1,
-					Auth:        &v1alpha1.AuthStrategyNone,
-					Persistence: &v1alpha1.PersistenceStrategy{},
+					Persistence: &v1alpha1.PersistenceStrategy{
+						Size: &volumeSize,
+					},
 				},
 			},
 		},
@@ -89,31 +75,9 @@ func init() {
 	corev1.AddToScheme(scheme.Scheme)
 }
 
-func TestReconcileNativeNonPersist(t *testing.T) {
+func TestReconcileNative(t *testing.T) {
 	t.Run("native nats installation", func(t *testing.T) {
 		obj := nativeBus.DeepCopyObject()
-		testBus := obj.(*v1alpha1.EventBus)
-		ctx := context.TODO()
-		cl := fake.NewFakeClient(testBus)
-		r := &reconciler{
-			client:             cl,
-			scheme:             scheme.Scheme,
-			natsImage:          testNATSImage,
-			natsStreamingImage: testStreamingImage,
-			logger:             ctrl.Log.WithName("test"),
-		}
-		err := r.reconcile(ctx, testBus)
-		assert.NoError(t, err)
-		assert.True(t, testBus.Status.Status.IsReady())
-		assert.NotNil(t, testBus.Status.Config.NATS)
-		assert.NotEmpty(t, testBus.Status.Config.NATS.URL)
-		assert.Empty(t, testBus.Status.Config.NATS.ClusterID)
-	})
-}
-
-func TestReconcileNativePersis(t *testing.T) {
-	t.Run("native nats installation", func(t *testing.T) {
-		obj := nativeBusPersist.DeepCopyObject()
 		testBus := obj.(*v1alpha1.EventBus)
 		ctx := context.TODO()
 		cl := fake.NewFakeClient(testBus)

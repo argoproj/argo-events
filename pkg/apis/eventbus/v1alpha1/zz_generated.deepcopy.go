@@ -227,6 +227,11 @@ func (in *PersistenceStrategy) DeepCopyInto(out *PersistenceStrategy) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Size != nil {
+		in, out := &in.Size, &out.Size
+		x := (*in).DeepCopy()
+		*out = &x
+	}
 	return
 }
 

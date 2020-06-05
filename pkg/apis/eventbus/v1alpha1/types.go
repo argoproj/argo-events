@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -72,6 +73,8 @@ type PersistenceStrategy struct {
 	// More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
 	// +optional
 	StorageClassName *string `json:"storageClassName,omitempty" protobuf:"bytes,1,opt,name=storageClassName"`
+	// Volume size, e.g. 10Gi
+	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,2,opt,name=size"`
 }
 
 // BusConfig has the finalized configuration for EventBus

@@ -801,6 +801,27 @@ Name of the StorageClass required by the claim. More info:
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>size</code></br> <em>
+k8s.io/apimachinery/pkg/api/resource.Quantity </em>
+
+</td>
+
+<td>
+
+<p>
+
+Volume size, e.g. 10Gi
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>
