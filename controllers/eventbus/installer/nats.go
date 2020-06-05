@@ -34,38 +34,25 @@ const (
 	// annotation key on serverAuthSecret and clientAuthsecret
 	authStrategyAnnoKey = "strategy"
 
-	// label key on each component object
-	componentLabelKey = "component"
-
-	clientAuthSecretKey   = "client-auth"
-	serverAuthSecretKey   = "auth"
-	serverConfigMapKey    = "nats-server-config"
-	streamingConfigMapKey = "stan-config"
-)
-
-type component string
-
-var (
-	componentServer    component = "nats-server"
-	componentStreaming component = "nats-streaming"
+	clientAuthSecretKey = "client-auth"
+	serverAuthSecretKey = "auth"
+	configMapKey        = "stan-config"
 )
 
 // natsInstaller is used create a NATS installation.
 type natsInstaller struct {
 	client         client.Client
 	eventBus       *v1alpha1.EventBus
-	natsImage      string
 	streamingImage string
 	labels         map[string]string
 	logger         logr.Logger
 }
 
 // NewNATSInstaller returns a new NATS installer
-func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, natsImage, streamingImage string, labels map[string]string, logger logr.Logger) Installer {
+func NewNATSInstaller(client client.Client, eventBus *v1alpha1.EventBus, streamingImage string, labels map[string]string, logger logr.Logger) Installer {
 	return &natsInstaller{
 		client:         client,
 		eventBus:       eventBus,
-		natsImage:      natsImage,
 		streamingImage: streamingImage,
 		labels:         labels,
 		logger:         logger.WithName("nats"),
@@ -79,11 +66,12 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 		return nil, errors.New("invalid request")
 	}
 	ctx := context.Background()
-	svc, err := i.createServerService(ctx)
+
+	svc, err := i.createService(ctx)
 	if err != nil {
 		return nil, err
 	}
-	cm, err := i.createServerConfigMap(ctx)
+	cm, err := i.createConfigMap(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -97,27 +85,16 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := i.createServerStatefulSet(ctx, svc.Name, cm.Name, serverAuthSecret.Name); err != nil {
-		return nil, err
-	}
-	// Install nats steaming
-	streamingSvc, err := i.createStreamingService(ctx)
-	if err != nil {
-		return nil, err
-	}
-	streamingCm, err := i.createStreamingConfigMap(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if err := i.createStreamingStatefulSet(ctx, streamingSvc.Name, streamingCm.Name); err != nil {
+
+	if err := i.createStatefulSet(ctx, svc.Name, cm.Name, serverAuthSecret.Name); err != nil {
 		return nil, err
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "NATS is deployed")
 	i.eventBus.Status.MarkConfigured()
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
-			URL:       fmt.Sprintf("nats://%s:%s", generateServerServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
-			ClusterID: generateStreamingClusterID(i.eventBus),
+			URL:       fmt.Sprintf("nats://%s:%s", generateServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
+			ClusterID: generateClusterID(i.eventBus),
 			Auth:      *authStrategy,
 		},
 	}
@@ -142,7 +119,7 @@ func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
 	// StatefulSet doens't clean up PVC, needs to do it separately
 	// https://github.com/kubernetes/kubernetes/issues/55045
 	log := i.logger
-	pvcs, err := i.getPVCs(ctx, i.componentLabels(componentStreaming))
+	pvcs, err := i.getPVCs(ctx, i.labels)
 	if err != nil {
 		log.Error(err, "failed to get PVCs created by nats streaming statefulset when uninstalling")
 		return err
@@ -158,60 +135,19 @@ func (i *natsInstaller) uninstallPVCs(ctx context.Context) error {
 	return nil
 }
 
-// Create a service for nats server
-func (i *natsInstaller) createServerService(ctx context.Context) (*corev1.Service, error) {
-	log := i.logger
-	svc, err := i.getServerService(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetServerServiceFailed", "Get existing server service failed")
-		log.Error(err, "error getting existing server service")
-		return nil, err
-	}
-	expectedSvc, err := i.buildServerService()
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildServerServiceFailed", "Failed to build a server service spec")
-		log.Error(err, "error building server service spec")
-		return nil, err
-	}
-	if svc != nil {
-		// TODO: potential issue here - if service spec is updated manually, reconciler will not change it back.
-		// Revisit it later to see if it is needed to compare the spec.
-		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedSvc.Annotations[common.AnnotationResourceSpecHash] {
-			svc.Spec = expectedSvc.Spec
-			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
-			err = i.client.Update(ctx, svc)
-			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateServerServiceFailed", "Failed to update existing server service")
-				log.Error(err, "error updating existing server service")
-				return nil, err
-			}
-			log.Info("server service is updated", "serviceName", svc.Name)
-		}
-		return svc, nil
-	}
-	err = i.client.Create(ctx, expectedSvc)
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("CreateServerServiceFailed", "Failed to create server service")
-		log.Error(err, "error creating a server service")
-		return nil, err
-	}
-	log.Info("server service is created", "serviceName", expectedSvc.Name)
-	return expectedSvc, nil
-}
-
 // Create a service for nats streaming
-func (i *natsInstaller) createStreamingService(ctx context.Context) (*corev1.Service, error) {
+func (i *natsInstaller) createService(ctx context.Context) (*corev1.Service, error) {
 	log := i.logger
-	svc, err := i.getStreamingService(ctx)
+	svc, err := i.getService(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetStreamingServiceFailed", "Get existing streaming service failed")
-		log.Error(err, "error getting existing streaming service")
+		i.eventBus.Status.MarkDeployFailed("GetServiceFailed", "Get existing service failed")
+		log.Error(err, "error getting existing service")
 		return nil, err
 	}
-	expectedSvc, err := i.buildStreamingService()
+	expectedSvc, err := i.buildService()
 	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildStreamingServiceFailed", "Failed to build a streaming service spec")
-		log.Error(err, "error building streaming service spec")
+		i.eventBus.Status.MarkDeployFailed("BuildServiceFailed", "Failed to build a service spec")
+		log.Error(err, "error building service spec")
 		return nil, err
 	}
 	if svc != nil {
@@ -222,37 +158,37 @@ func (i *natsInstaller) createStreamingService(ctx context.Context) (*corev1.Ser
 			svc.Annotations[common.AnnotationResourceSpecHash] = expectedSvc.Annotations[common.AnnotationResourceSpecHash]
 			err = i.client.Update(ctx, svc)
 			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateStreamingServiceFailed", "Failed to update existing streaming service")
-				log.Error(err, "error updating existing streaming service")
+				i.eventBus.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
+				log.Error(err, "error updating existing service")
 				return nil, err
 			}
-			log.Info("streaming service is updated", "serviceName", svc.Name)
+			log.Info("service is updated", "serviceName", svc.Name)
 		}
 		return svc, nil
 	}
 	err = i.client.Create(ctx, expectedSvc)
 	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("CreateStreamingServiceFailed", "Failed to create a streaming service")
-		log.Error(err, "error creating a streaming service")
+		i.eventBus.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create a service")
+		log.Error(err, "error creating a service")
 		return nil, err
 	}
-	log.Info("streaming service is created", "serviceName", expectedSvc.Name)
+	log.Info("service is created", "serviceName", expectedSvc.Name)
 	return expectedSvc, nil
 }
 
 //Create a Configmap for NATS config
-func (i *natsInstaller) createServerConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
+func (i *natsInstaller) createConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
 	log := i.logger
-	cm, err := i.getServerConfigMap(ctx)
+	cm, err := i.getConfigMap(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetServerConfigMapFailed", "Failed to get existing server configmap")
-		log.Error(err, "error getting existing server configmap")
+		i.eventBus.Status.MarkDeployFailed("GetConfigMapFailed", "Failed to get existing configmap")
+		log.Error(err, "error getting existing configmap")
 		return nil, err
 	}
-	expectedCm, err := i.buildServerConfigMap()
+	expectedCm, err := i.buildConfigMap()
 	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildServerConfigMapFailed", "Failed to build a server configmap spec")
-		log.Error(err, "error building server configmap spec")
+		i.eventBus.Status.MarkDeployFailed("BuildConfigMapFailed", "Failed to build a configmap spec")
+		log.Error(err, "error building configmap spec")
 		return nil, err
 	}
 	if cm != nil {
@@ -262,61 +198,21 @@ func (i *natsInstaller) createServerConfigMap(ctx context.Context) (*corev1.Conf
 			cm.Annotations[common.AnnotationResourceSpecHash] = expectedCm.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, cm)
 			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateServerConfigMapFailed", "Failed to update existing server configmap")
-				log.Error(err, "error updating  server configmap")
+				i.eventBus.Status.MarkDeployFailed("UpdateConfigMapFailed", "Failed to update existing configmap")
+				log.Error(err, "error updating configmap")
 				return nil, err
 			}
-			log.Info("updated server configmap", "configmapName", cm.Name)
+			log.Info("updated configmap", "configmapName", cm.Name)
 		}
 		return cm, nil
 	}
 	err = i.client.Create(ctx, expectedCm)
 	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("CreateServerConfigMapFailed", "Failed to create server configmap")
-		log.Error(err, "error creating a server configmap")
+		i.eventBus.Status.MarkDeployFailed("CreateConfigMapFailed", "Failed to create configmap")
+		log.Error(err, "error creating a configmap")
 		return nil, err
 	}
-	log.Info("created server configmap", "configmapName", expectedCm.Name)
-	return expectedCm, nil
-}
-
-//Create a Configmap for NATS streaming config
-func (i *natsInstaller) createStreamingConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
-	log := i.logger
-	cm, err := i.getStreamingConfigMap(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetStreamingConfigMapFailed", "Failed to get existing streaming configmap")
-		log.Error(err, "error getting existing streaming configmap")
-		return nil, err
-	}
-	expectedCm, err := i.buildStreamingConfigMap()
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildStreamingConfigMapFailed", "Failed to build a streaming configmap spec")
-		log.Error(err, "error building streaming configmap spec")
-		return nil, err
-	}
-	if cm != nil {
-		// TODO: Potential issue about comparing hash
-		if cm.Annotations != nil && cm.Annotations[common.AnnotationResourceSpecHash] != expectedCm.Annotations[common.AnnotationResourceSpecHash] {
-			cm.Data = expectedCm.Data
-			cm.Annotations[common.AnnotationResourceSpecHash] = expectedCm.Annotations[common.AnnotationResourceSpecHash]
-			err := i.client.Update(ctx, cm)
-			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateStreamingConfigMapFailed", "Failed to update existing streaming configmap")
-				log.Error(err, "error updating streaming configmap")
-				return nil, err
-			}
-			log.Info("updated streaming configmap", "configmapName", cm.Name)
-		}
-		return cm, nil
-	}
-	err = i.client.Create(ctx, expectedCm)
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("CreateStreamingConfigMapFailed", "Failed to create streaming configmap")
-		log.Error(err, "error creating a streaming configmap")
-		return nil, err
-	}
-	log.Info("created streaming configmap", "configmapName", expectedCm.Name)
+	log.Info("created configmap", "configmapName", expectedCm.Name)
 	return expectedCm, nil
 }
 
@@ -457,19 +353,19 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 	}
 }
 
-// Create a server StatefulSet
-func (i *natsInstaller) createServerStatefulSet(ctx context.Context, serviceName, configmapName, authSecretName string) error {
+// Create a StatefulSet
+func (i *natsInstaller) createStatefulSet(ctx context.Context, serviceName, configmapName, authSecretName string) error {
 	log := i.logger
-	ss, err := i.getServerStatefulSet(ctx)
+	ss, err := i.getStatefulSet(ctx)
 	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetServerStatefulSetFailed", "Failed to get existing server statefulset")
-		log.Error(err, "error getting existing server statefulset")
+		i.eventBus.Status.MarkDeployFailed("GetStatefulSetFailed", "Failed to get existing statefulset")
+		log.Error(err, "error getting existing statefulset")
 		return err
 	}
-	expectedSs, err := i.buildServerStatefulSet(serviceName, configmapName, authSecretName)
+	expectedSs, err := i.buildStatefulSet(serviceName, configmapName, authSecretName)
 	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildServerStatefulSetFailed", "Failed to build a server statefulset spec")
-		log.Error(err, "error building server statefulset spec")
+		i.eventBus.Status.MarkDeployFailed("BuildStatefulSetFailed", "Failed to build a statefulset spec")
+		log.Error(err, "error building statefulset spec")
 		return err
 	}
 	if ss != nil {
@@ -480,72 +376,31 @@ func (i *natsInstaller) createServerStatefulSet(ctx context.Context, serviceName
 			ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
 			err := i.client.Update(ctx, ss)
 			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateServerStatefulSetFailed", "Failed to update existing server statefulset")
+				i.eventBus.Status.MarkDeployFailed("UpdateStatefulSetFailed", "Failed to update existing statefulset")
 				log.Error(err, "error updating statefulset")
 				return err
 			}
-			log.Info("server statefulset is updated", "statefulsetName", ss.Name)
+			log.Info("statefulset is updated", "statefulsetName", ss.Name)
 		}
 	} else {
 		err := i.client.Create(ctx, expectedSs)
 		if err != nil {
-			i.eventBus.Status.MarkDeployFailed("CreateServerStatefulSetFailed", "Failed to create a server statefulset")
-			log.Error(err, "error creating a server statefulset")
+			i.eventBus.Status.MarkDeployFailed("CreateStatefulSetFailed", "Failed to create a statefulset")
+			log.Error(err, "error creating a statefulset")
 			return err
 		}
-		log.Info("server statefulset is created", "statefulsetName", expectedSs.Name)
+		log.Info("statefulset is created", "statefulsetName", expectedSs.Name)
 	}
 	return nil
 }
 
-// Create a streaming StatefulSet
-func (i *natsInstaller) createStreamingStatefulSet(ctx context.Context, serviceName, configmapName string) error {
-	log := i.logger
-	ss, err := i.getStreamingStatefulSet(ctx)
-	if err != nil && !apierrors.IsNotFound(err) {
-		i.eventBus.Status.MarkDeployFailed("GetStreamingStatefulSetFailed", "Failed to get existing streaming statefulset")
-		log.Error(err, "error getting existing streaming statefulset")
-		return err
-	}
-	expectedSs, err := i.buildStreamingStatefulSet(serviceName, configmapName)
-	if err != nil {
-		i.eventBus.Status.MarkDeployFailed("BuildStreamingStatefulSetFailed", "Failed to build a streaming statefulset spec")
-		log.Error(err, "error building streaming statefulset spec")
-		return err
-	}
-	if ss != nil {
-		// TODO: Potential issue here - if statefulset spec is updated manually, reconciler will not change it back.
-		// Revisit it later to see if it is needed to compare the spec.
-		if ss.Annotations != nil && ss.Annotations[common.AnnotationResourceSpecHash] != expectedSs.Annotations[common.AnnotationResourceSpecHash] {
-			ss.Spec = expectedSs.Spec
-			ss.Annotations[common.AnnotationResourceSpecHash] = expectedSs.Annotations[common.AnnotationResourceSpecHash]
-			err := i.client.Update(ctx, ss)
-			if err != nil {
-				i.eventBus.Status.MarkDeployFailed("UpdateStreamingStatefulSetFailed", "Failed to update existing streaming statefulset")
-				log.Error(err, "error updating streaming statefulset")
-				return err
-			}
-			log.Info("streaming statefulset is updated", "statefulsetName", ss.Name)
-		}
-	} else {
-		err := i.client.Create(ctx, expectedSs)
-		if err != nil {
-			i.eventBus.Status.MarkDeployFailed("CreateStreamingStatefulSetFailed", "Failed to create a streaming statefulset")
-			log.Error(err, "error creating a streaming statefulset")
-			return err
-		}
-		log.Info("streaming statefulset is created", "statefulsetName", expectedSs.Name)
-	}
-	return nil
-}
-
-// buildServerService builds a Service for NATS server
-func (i *natsInstaller) buildServerService() (*corev1.Service, error) {
+// buildService builds a Service for NATS streaming
+func (i *natsInstaller) buildService() (*corev1.Service, error) {
 	svc := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      generateServerServiceName(i.eventBus),
+			Name:      generateServiceName(i.eventBus),
 			Namespace: i.eventBus.Namespace,
-			Labels:    i.componentLabels(componentServer),
+			Labels:    i.labels,
 		},
 		Spec: corev1.ServiceSpec{
 			ClusterIP: corev1.ClusterIPNone,
@@ -555,7 +410,7 @@ func (i *natsInstaller) buildServerService() (*corev1.Service, error) {
 				{Name: "monitor", Port: monitorPort},
 			},
 			Type:     corev1.ServiceTypeClusterIP,
-			Selector: i.componentLabels(componentServer),
+			Selector: i.labels,
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
@@ -564,94 +419,34 @@ func (i *natsInstaller) buildServerService() (*corev1.Service, error) {
 	return svc, nil
 }
 
-// buildStreamingService builds a Service for NATS streaming
-func (i *natsInstaller) buildStreamingService() (*corev1.Service, error) {
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      generateStreamingServiceName(i.eventBus),
-			Namespace: i.eventBus.Namespace,
-			Labels:    i.componentLabels(componentStreaming),
-		},
-		Spec: corev1.ServiceSpec{
-			ClusterIP: corev1.ClusterIPNone,
-			Ports: []corev1.ServicePort{
-				{Name: "metrics", Port: metricsPort},
-			},
-			Type:     corev1.ServiceTypeClusterIP,
-			Selector: i.componentLabels(componentStreaming),
-		},
-	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return svc, nil
-}
-
-// buildServerConfigMap builds a ConfigMap for NATS server configuration
-func (i *natsInstaller) buildServerConfigMap() (*corev1.ConfigMap, error) {
-	routes := ""
-	size := i.eventBus.Spec.NATS.Native.Size
-	if size <= 0 {
-		size = 1
-	}
-	ssName := generateServerStatefulSetName(i.eventBus)
-	svcName := generateServerServiceName(i.eventBus)
-	for j := 0; j < size; j++ {
-		routes += fmt.Sprintf("\n    nats://%s-%s.%s.%s.svc:%s", ssName, strconv.Itoa(j), svcName, i.eventBus.Namespace, strconv.Itoa(int(clusterPort)))
-	}
-	conf := fmt.Sprintf(`pid_file: "/var/run/nats/nats.pid"
-port: %s
-monitor_port: %s
+// buildConfigMap builds a ConfigMap for NATS streaming
+func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
+	clusterID := generateClusterID(i.eventBus)
+	svcName := generateServiceName(i.eventBus)
+	conf := fmt.Sprintf(`http: %s
 include ./auth.conf
 cluster {
   port: %s
-  routes: [%s
+  routes [
+   nats://%s:%s
   ]
   cluster_advertise: $CLUSTER_ADVERTISE
-  connect_retries: 30
-}`, strconv.Itoa(int(clientPort)), strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), routes)
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: i.eventBus.Namespace,
-			Name:      generateServerConfigMapName(i.eventBus),
-			Labels:    i.componentLabels(componentServer),
-		},
-		Data: map[string]string{
-			serverConfigMapKey: conf,
-		},
-	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, cm, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return cm, nil
+  connect_retries: 10
 }
-
-// buildStreamingConfigMap builds a ConfigMap for NATS streaming
-func (i *natsInstaller) buildStreamingConfigMap() (*corev1.ConfigMap, error) {
-	clusterID := generateStreamingClusterID(i.eventBus)
-	ssName := generateStreamingStatefulSetName(i.eventBus)
-	svcName := generateServerServiceName(i.eventBus)
-	peers := fmt.Sprintf("[\"%s-0\", \"%s-1\", \"%s-2\"]", ssName, ssName, ssName)
-	conf := fmt.Sprintf(`port: %s
-monitor_port: %s
 streaming {
-  cluster_id: %s
-  nats_server_url: "nats://%s:%s"
+  id: %s
   store: file
   dir: /data/stan/store
-  cluster {
-	node_id: $POD_NAME
-	peers: %s
-  }
-}`, strconv.Itoa(int(clientPort)), strconv.Itoa(int(monitorPort)), clusterID, svcName, strconv.Itoa(int(clientPort)), peers)
+  ft_group_name: "%s"
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, clusterID)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
-			Name:      generateStreamingConfigMapName(i.eventBus),
-			Labels:    i.componentLabels(componentStreaming),
+			Name:      generateConfigMapName(i.eventBus),
+			Labels:    i.labels,
 		},
 		Data: map[string]string{
-			streamingConfigMapKey: conf,
+			configMapKey: conf,
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, cm, v1alpha1.SchemaGroupVersionKind); err != nil {
@@ -673,7 +468,7 @@ func (i *natsInstaller) buildServerAuthSecret(authStrategy v1alpha1.AuthStrategy
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   i.eventBus.Namespace,
 			Name:        generateServerAuthSecretName(i.eventBus),
-			Labels:      serverAuthSecretLabels(i.componentLabels(componentServer)),
+			Labels:      serverAuthSecretLabels(i.labels),
 			Annotations: map[string]string{authStrategyAnnoKey: string(authStrategy)},
 		},
 		Type: corev1.SecretTypeOpaque,
@@ -693,7 +488,7 @@ func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace:   i.eventBus.Namespace,
 			Name:        generateClientAuthSecretName(i.eventBus),
-			Labels:      clientAuthSecretLabels(i.componentLabels(componentServer)),
+			Labels:      clientAuthSecretLabels(i.labels),
 			Annotations: map[string]string{authStrategyAnnoKey: string(authStrategy)},
 		},
 		Type: corev1.SecretTypeOpaque,
@@ -707,17 +502,17 @@ func (i *natsInstaller) buildClientAuthSecret(authStrategy v1alpha1.AuthStrategy
 	return s, nil
 }
 
-// buildServerStatefulSet builds a StatefulSet for NATS server
-func (i *natsInstaller) buildServerStatefulSet(serviceName, configmapName, authSecretName string) (*appv1.StatefulSet, error) {
+// buildStatefulSet builds a StatefulSet for nats streaming
+func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretName string) (*appv1.StatefulSet, error) {
 	ss := &appv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
-			Name:      generateServerStatefulSetName(i.eventBus),
-			Labels:    i.componentLabels(componentServer),
+			Name:      generateStatefulSetName(i.eventBus),
+			Labels:    i.labels,
 		},
-		// Use provided serviceName, configMapName and secretName to build the spec
+		// Use provided serviceName, configMapName to build the spec
 		// to avoid issues when naming convention changes
-		Spec: i.buildServerStatefulSetSpec(serviceName, configmapName, authSecretName),
+		Spec: i.buildStatefulSetSpec(serviceName, configmapName, authSecretName),
 	}
 	if err := controllerscommon.SetObjectMeta(i.eventBus, ss, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
@@ -725,22 +520,21 @@ func (i *natsInstaller) buildServerStatefulSet(serviceName, configmapName, authS
 	return ss, nil
 }
 
-func (i *natsInstaller) buildServerStatefulSetSpec(serviceName, configmapName, authSecretName string) appv1.StatefulSetSpec {
-	size := int32(i.eventBus.Spec.NATS.Native.Size)
-	if size == 0 {
-		size = 1
+func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) appv1.StatefulSetSpec {
+	// Streaming requires minimal size 3.
+	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
+	if replicas < 3 {
+		replicas = 3
 	}
-	l := i.componentLabels(componentServer)
-	terminationGracePeriodSeconds := int64(60)
 	spec := appv1.StatefulSetSpec{
-		Replicas:    &size,
+		Replicas:    &replicas,
 		ServiceName: serviceName,
 		Selector: &metav1.LabelSelector{
-			MatchLabels: l,
+			MatchLabels: i.labels,
 		},
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: l,
+				Labels: i.labels,
 			},
 			Spec: corev1.PodSpec{
 				Volumes: []corev1.Volume{
@@ -756,8 +550,8 @@ func (i *natsInstaller) buildServerStatefulSetSpec(serviceName, configmapName, a
 											},
 											Items: []corev1.KeyToPath{
 												{
-													Key:  serverConfigMapKey,
-													Path: "nats.conf",
+													Key:  configMapKey,
+													Path: "stan.conf",
 												},
 											},
 										},
@@ -779,148 +573,21 @@ func (i *natsInstaller) buildServerStatefulSetSpec(serviceName, configmapName, a
 							},
 						},
 					},
-					{
-						Name: "pid",
-						VolumeSource: corev1.VolumeSource{
-							EmptyDir: &corev1.EmptyDirVolumeSource{},
-						},
-					},
-				},
-				TerminationGracePeriodSeconds: &terminationGracePeriodSeconds,
-				Containers: []corev1.Container{
-					{
-						Name:  "nats",
-						Image: i.natsImage,
-						Ports: []corev1.ContainerPort{
-							{Name: "client", ContainerPort: clientPort},
-							{Name: "cluster", ContainerPort: clusterPort},
-							{Name: "monitor", ContainerPort: monitorPort},
-						},
-						Command: []string{"/nats-server", "--config", "/etc/nats-config/nats.conf"},
-						Env: []corev1.EnvVar{
-							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
-							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
-							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateServerServiceName(i.eventBus) + ".$(POD_NAMESPACE).svc"},
-						},
-						VolumeMounts: []corev1.VolumeMount{
-							{Name: "config-volume", MountPath: "/etc/nats-config"},
-							{Name: "pid", MountPath: "/var/run/nats"},
-						},
-						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path: "/",
-									Port: intstr.FromInt(int(monitorPort)),
-								},
-							},
-							InitialDelaySeconds: 10,
-							TimeoutSeconds:      5,
-						},
-						ReadinessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path: "/",
-									Port: intstr.FromInt(int(monitorPort)),
-								},
-							},
-							InitialDelaySeconds: 10,
-							TimeoutSeconds:      5,
-						},
-						Lifecycle: &corev1.Lifecycle{
-							PreStop: &corev1.Handler{
-								Exec: &corev1.ExecAction{
-									Command: []string{"/bin/sh", "-c", "/nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep 60"},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-	if i.eventBus.Spec.NATS.Native.Affinity {
-		spec.Template.Spec.Affinity = &corev1.Affinity{
-			PodAntiAffinity: &corev1.PodAntiAffinity{
-				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-					{
-						TopologyKey: "kubernetes.io/hostname",
-						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: l,
-						},
-					},
-				},
-			},
-		}
-	}
-	return spec
-}
-
-// buildStreamingStatefulSet builds a StatefulSet for nats streaming
-func (i *natsInstaller) buildStreamingStatefulSet(serviceName, configmapName string) (*appv1.StatefulSet, error) {
-	ss := &appv1.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace: i.eventBus.Namespace,
-			Name:      generateStreamingStatefulSetName(i.eventBus),
-			Labels:    i.componentLabels(componentStreaming),
-		},
-		// Use provided serviceName, configMapName to build the spec
-		// to avoid issues when naming convention changes
-		Spec: i.buildStreamingStatefulSetSpec(serviceName, configmapName),
-	}
-	if err := controllerscommon.SetObjectMeta(i.eventBus, ss, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return ss, nil
-}
-
-func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName string) appv1.StatefulSetSpec {
-	// Streaming requires minimal size 3.
-	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
-	if replicas < 3 {
-		replicas = 3
-	}
-	l := i.componentLabels(componentStreaming)
-	spec := appv1.StatefulSetSpec{
-		Replicas:    &replicas,
-		ServiceName: serviceName,
-		Selector: &metav1.LabelSelector{
-			MatchLabels: l,
-		},
-		Template: corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: l,
-			},
-			Spec: corev1.PodSpec{
-				Volumes: []corev1.Volume{
-					{
-						Name: "config-volume",
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: configmapName,
-								},
-								Items: []corev1.KeyToPath{
-									{
-										Key:  streamingConfigMapKey,
-										Path: "stan.conf",
-									},
-								},
-							},
-						},
-					},
 				},
 				Containers: []corev1.Container{
 					{
 						Name:  "stan",
 						Image: i.streamingImage,
 						Ports: []corev1.ContainerPort{
+							{Name: "client", ContainerPort: clientPort},
+							{Name: "cluster", ContainerPort: clusterPort},
 							{Name: "monitor", ContainerPort: monitorPort},
-							{Name: "metrics", ContainerPort: metricsPort},
 						},
 						Command: []string{"/nats-streaming-server", "-sc", "/etc/stan-config/stan.conf"},
 						Env: []corev1.EnvVar{
 							{Name: "POD_NAME", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.name"}}},
 							{Name: "POD_NAMESPACE", ValueFrom: &corev1.EnvVarSource{FieldRef: &corev1.ObjectFieldSelector{FieldPath: "metadata.namespace"}}},
+							{Name: "CLUSTER_ADVERTISE", Value: "$(POD_NAME)." + generateServiceName(i.eventBus) + ".$(POD_NAMESPACE).svc"},
 						},
 						VolumeMounts: []corev1.VolumeMount{
 							{Name: "config-volume", MountPath: "/etc/stan-config"},
@@ -931,16 +598,6 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 							},
 						},
 						LivenessProbe: &corev1.Probe{
-							Handler: corev1.Handler{
-								HTTPGet: &corev1.HTTPGetAction{
-									Path: "/",
-									Port: intstr.FromInt(int(monitorPort)),
-								},
-							},
-							InitialDelaySeconds: 10,
-							TimeoutSeconds:      5,
-						},
-						ReadinessProbe: &corev1.Probe{
 							Handler: corev1.Handler{
 								HTTPGet: &corev1.HTTPGetAction{
 									Path: "/",
@@ -994,7 +651,7 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 					{
 						TopologyKey: "kubernetes.io/hostname",
 						LabelSelector: &metav1.LabelSelector{
-							MatchLabels: l,
+							MatchLabels: i.labels,
 						},
 					},
 				},
@@ -1004,21 +661,13 @@ func (i *natsInstaller) buildStreamingStatefulSetSpec(serviceName, configmapName
 	return spec
 }
 
-func (i *natsInstaller) getServerService(ctx context.Context) (*corev1.Service, error) {
-	return i.getService(ctx, i.componentLabels(componentServer))
-}
-
-func (i *natsInstaller) getStreamingService(ctx context.Context) (*corev1.Service, error) {
-	return i.getService(ctx, i.componentLabels(componentStreaming))
-}
-
-func (i *natsInstaller) getService(ctx context.Context, labels map[string]string) (*corev1.Service, error) {
+func (i *natsInstaller) getService(ctx context.Context) (*corev1.Service, error) {
 	// Why not using getByName()?
 	// Naming convention might be changed.
 	sl := &corev1.ServiceList{}
 	err := i.client.List(ctx, sl, &client.ListOptions{
 		Namespace:     i.eventBus.Namespace,
-		LabelSelector: labelSelector(labels),
+		LabelSelector: labelSelector(i.labels),
 	})
 	if err != nil {
 		return nil, err
@@ -1031,19 +680,11 @@ func (i *natsInstaller) getService(ctx context.Context, labels map[string]string
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func (i *natsInstaller) getServerConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
-	return i.getConfigMap(ctx, i.componentLabels(componentServer))
-}
-
-func (i *natsInstaller) getStreamingConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
-	return i.getConfigMap(ctx, i.componentLabels(componentStreaming))
-}
-
-func (i *natsInstaller) getConfigMap(ctx context.Context, labels map[string]string) (*corev1.ConfigMap, error) {
+func (i *natsInstaller) getConfigMap(ctx context.Context) (*corev1.ConfigMap, error) {
 	cml := &corev1.ConfigMapList{}
 	err := i.client.List(ctx, cml, &client.ListOptions{
 		Namespace:     i.eventBus.Namespace,
-		LabelSelector: labelSelector(labels),
+		LabelSelector: labelSelector(i.labels),
 	})
 	if err != nil {
 		return nil, err
@@ -1058,12 +699,12 @@ func (i *natsInstaller) getConfigMap(ctx context.Context, labels map[string]stri
 
 // get server auth secret
 func (i *natsInstaller) getServerAuthSecret(ctx context.Context) (*corev1.Secret, error) {
-	return i.getSecret(ctx, serverAuthSecretLabels(i.componentLabels(componentServer)))
+	return i.getSecret(ctx, serverAuthSecretLabels(i.labels))
 }
 
 // get client auth secret
 func (i *natsInstaller) getClientAuthSecret(ctx context.Context) (*corev1.Secret, error) {
-	return i.getSecret(ctx, clientAuthSecretLabels(i.componentLabels(componentServer)))
+	return i.getSecret(ctx, clientAuthSecretLabels(i.labels))
 }
 
 func (i *natsInstaller) getSecret(ctx context.Context, labels map[string]string) (*corev1.Secret, error) {
@@ -1083,21 +724,13 @@ func (i *natsInstaller) getSecret(ctx context.Context, labels map[string]string)
 	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-func (i *natsInstaller) getServerStatefulSet(ctx context.Context) (*appv1.StatefulSet, error) {
-	return i.getStatefulSet(ctx, i.componentLabels(componentServer))
-}
-
-func (i *natsInstaller) getStreamingStatefulSet(ctx context.Context) (*appv1.StatefulSet, error) {
-	return i.getStatefulSet(ctx, i.componentLabels(componentStreaming))
-}
-
-func (i *natsInstaller) getStatefulSet(ctx context.Context, labels map[string]string) (*appv1.StatefulSet, error) {
+func (i *natsInstaller) getStatefulSet(ctx context.Context) (*appv1.StatefulSet, error) {
 	// Why not using getByName()?
 	// Naming convention might be changed.
 	ssl := &appv1.StatefulSetList{}
 	err := i.client.List(ctx, ssl, &client.ListOptions{
 		Namespace:     i.eventBus.Namespace,
-		LabelSelector: labelSelector(labels),
+		LabelSelector: labelSelector(i.labels),
 	})
 	if err != nil {
 		return nil, err
@@ -1122,15 +755,6 @@ func (i *natsInstaller) getPVCs(ctx context.Context, labels map[string]string) (
 		return nil, err
 	}
 	return pvcl.Items, nil
-}
-
-func (i *natsInstaller) componentLabels(c component) map[string]string {
-	result := make(map[string]string)
-	for k, v := range i.labels {
-		result[k] = v
-	}
-	result[componentLabelKey] = string(c)
-	return result
 }
 
 // generate a random string as token with given length
@@ -1164,19 +788,11 @@ func labelSelector(labelMap map[string]string) labels.Selector {
 	return labels.SelectorFromSet(labelMap)
 }
 
-func generateServerServiceName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-svc", eventBus.Name)
-}
-
-func generateStreamingServiceName(eventBus *v1alpha1.EventBus) string {
+func generateServiceName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan-svc", eventBus.Name)
 }
 
-func generateServerConfigMapName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s-configmap", eventBus.Name)
-}
-
-func generateStreamingConfigMapName(eventBus *v1alpha1.EventBus) string {
+func generateConfigMapName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan-configmap", eventBus.Name)
 }
 
@@ -1188,16 +804,12 @@ func generateClientAuthSecretName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-client", eventBus.Name)
 }
 
-func generateServerStatefulSetName(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus-%s", eventBus.Name)
-}
-
-func generateStreamingStatefulSetName(eventBus *v1alpha1.EventBus) string {
+func generateStatefulSetName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("eventbus-%s-stan", eventBus.Name)
 }
 
-func generateStreamingClusterID(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("eventbus_%s", eventBus.Name)
+func generateClusterID(eventBus *v1alpha1.EventBus) string {
+	return fmt.Sprintf("eventbus-%s", eventBus.Name)
 }
 
 // PVC name used in streaming statefulset
@@ -1207,5 +819,5 @@ func generatePVCName(eventBus *v1alpha1.EventBus) string {
 
 // Final PVC name prefix
 func getFinalizedPVCNamePrefix(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("%s-%s-", generatePVCName(eventBus), generateStreamingStatefulSetName(eventBus))
+	return fmt.Sprintf("%s-%s-", generatePVCName(eventBus), generateStatefulSetName(eventBus))
 }

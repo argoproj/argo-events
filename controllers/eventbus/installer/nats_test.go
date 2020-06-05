@@ -21,7 +21,6 @@ import (
 const (
 	testNamespace      = "test-ns"
 	testName           = "test-name"
-	testNATSImage      = "test-image"
 	testStreamingImage = "test-s-image"
 )
 
@@ -104,7 +103,6 @@ func TestBadInstallation(t *testing.T) {
 		installer := &natsInstaller{
 			client:         fake.NewFakeClient(testEventBusBad),
 			eventBus:       testEventBusBad,
-			natsImage:      testNATSImage,
 			streamingImage: testStreamingImage,
 			labels:         testLabels,
 			logger:         ctrl.Log.WithName("test"),
@@ -117,7 +115,7 @@ func TestBadInstallation(t *testing.T) {
 func TestInstallationAuthtoken(t *testing.T) {
 	t.Run("auth token installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBus)
-		installer := NewNATSInstaller(cl, testEventBus, testNATSImage, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBus, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -130,33 +128,25 @@ func TestInstallationAuthtoken(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(svcList.Items))
-		possibleNames := []string{fmt.Sprintf("eventbus-%s-svc", testName), fmt.Sprintf("eventbus-%s-stan-svc", testName)}
-		for _, svc := range svcList.Items {
-			assert.True(t, contains(possibleNames, svc.Name))
-		}
+		assert.Equal(t, 1, len(svcList.Items))
+		assert.Equal(t, svcList.Items[0].Name, fmt.Sprintf("eventbus-%s-stan-svc", testName))
 
 		cmList := &corev1.ConfigMapList{}
 		err = cl.List(ctx, cmList, &client.ListOptions{
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(cmList.Items))
-		possibleCMNames := []string{fmt.Sprintf("eventbus-%s-stan-configmap", testName), fmt.Sprintf("eventbus-%s-configmap", testName)}
-		for _, cm := range cmList.Items {
-			assert.True(t, contains(possibleCMNames, cm.Name))
-		}
+		assert.Equal(t, 1, len(cmList.Items))
+		assert.Equal(t, cmList.Items[0].Name, fmt.Sprintf("eventbus-%s-stan-configmap", testName))
 
 		ssList := &appv1.StatefulSetList{}
 		err = cl.List(ctx, ssList, &client.ListOptions{
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(ssList.Items))
-		possibleSSNames := []string{fmt.Sprintf("eventbus-%s", testName), fmt.Sprintf("eventbus-%s-stan", testName)}
-		for _, ss := range ssList.Items {
-			assert.True(t, contains(possibleSSNames, ss.Name))
-		}
+		assert.Equal(t, 1, len(ssList.Items))
+		assert.Equal(t, ssList.Items[0].Name, fmt.Sprintf("eventbus-%s-stan", testName))
+
 		secretList := &corev1.SecretList{}
 		err = cl.List(ctx, secretList, &client.ListOptions{
 			Namespace: testNamespace,
@@ -172,7 +162,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 func TestInstallationAuthNone(t *testing.T) {
 	t.Run("auth none installation", func(t *testing.T) {
 		cl := fake.NewFakeClient(testEventBusAuthNone)
-		installer := NewNATSInstaller(cl, testEventBusAuthNone, testNATSImage, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
+		installer := NewNATSInstaller(cl, testEventBusAuthNone, testStreamingImage, testLabels, ctrl.Log.WithName("test"))
 		busconf, err := installer.Install()
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
@@ -185,14 +175,14 @@ func TestInstallationAuthNone(t *testing.T) {
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(svcList.Items))
+		assert.Equal(t, 1, len(svcList.Items))
 
 		cmList := &corev1.ConfigMapList{}
 		err = cl.List(ctx, cmList, &client.ListOptions{
 			Namespace: testNamespace,
 		})
 		assert.NoError(t, err)
-		assert.Equal(t, 2, len(cmList.Items))
+		assert.Equal(t, 1, len(cmList.Items))
 
 		secretList := &corev1.SecretList{}
 		err = cl.List(ctx, secretList, &client.ListOptions{
@@ -211,12 +201,11 @@ func TestBuildPersistStatefulSetSpec(t *testing.T) {
 		installer := &natsInstaller{
 			client:         cl,
 			eventBus:       testEventBusPersist,
-			natsImage:      testNATSImage,
 			streamingImage: testStreamingImage,
 			labels:         testLabels,
 			logger:         ctrl.Log.WithName("test"),
 		}
-		ss, err := installer.buildStreamingStatefulSet("svcName", "cmName")
+		ss, err := installer.buildStatefulSet("svcName", "cmName", "secretName")
 		assert.NoError(t, err)
 		assert.True(t, len(ss.Spec.VolumeClaimTemplates) > 0)
 	})

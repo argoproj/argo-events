@@ -84,7 +84,6 @@ func TestReconcileNative(t *testing.T) {
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,
-			natsImage:          testNATSImage,
 			natsStreamingImage: testStreamingImage,
 			logger:             ctrl.Log.WithName("test"),
 		}
@@ -106,7 +105,6 @@ func TestReconcileExotic(t *testing.T) {
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,
-			natsImage:          testNATSImage,
 			natsStreamingImage: testStreamingImage,
 			logger:             ctrl.Log.WithName("test"),
 		}
@@ -125,7 +123,6 @@ func TestNeedsUpdate(t *testing.T) {
 		r := &reconciler{
 			client:             cl,
 			scheme:             scheme.Scheme,
-			natsImage:          testNATSImage,
 			natsStreamingImage: testStreamingImage,
 			logger:             ctrl.Log.WithName("test"),
 		}
