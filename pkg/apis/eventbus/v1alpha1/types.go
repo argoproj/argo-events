@@ -89,9 +89,9 @@ type BusConfig struct {
 // NATSConfig holds the config of NATS
 type NATSConfig struct {
 	URL          string                    `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	ClusterID    string                    `json:"clusterID,omitempty" protobuf:"bytes,1,opt,name=clusterID"`
-	Auth         AuthStrategy              `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,3,opt,name=accessSecret"`
+	ClusterID    string                    `json:"clusterID,omitempty" protobuf:"bytes,2,opt,name=clusterID"`
+	Auth         AuthStrategy              `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
+	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,4,opt,name=accessSecret"`
 }
 
 const (
