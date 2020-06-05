@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	appv1 "k8s.io/api/apps/v1"
@@ -423,6 +424,15 @@ func (i *natsInstaller) buildService() (*corev1.Service, error) {
 func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	clusterID := generateClusterID(i.eventBus)
 	svcName := generateServiceName(i.eventBus)
+	ssName := generateStatefulSetName(i.eventBus)
+	size := i.eventBus.Spec.NATS.Native.Size
+	if size < 3 {
+		size = 3
+	}
+	peers := []string{}
+	for j := 0; j < size; j++ {
+		peers = append(peers, fmt.Sprintf("\"%s-%s\"", ssName, strconv.Itoa(j)))
+	}
 	conf := fmt.Sprintf(`http: %s
 include ./auth.conf
 cluster {
@@ -437,11 +447,14 @@ streaming {
   id: %s
   store: file
   dir: /data/stan/store
-  ft_group_name: "%s"
+  cluster {
+	node_id: $POD_NAME
+	peers: [%s]
+  }
   store_limits {
     max_age: 24h
   }
-}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, clusterID)
+}`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, strings.Join(peers, ","))
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: i.eventBus.Namespace,
