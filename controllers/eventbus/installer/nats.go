@@ -33,10 +33,12 @@ const (
 
 	// annotation key on serverAuthSecret and clientAuthsecret
 	authStrategyAnnoKey = "strategy"
-
+	// key of client auth secret
 	clientAuthSecretKey = "client-auth"
+	// key of server auth secret
 	serverAuthSecretKey = "auth"
-	configMapKey        = "stan-config"
+	// key of stan.conf in the configmap
+	configMapKey = "stan-config"
 )
 
 // natsInstaller is used create a NATS installation.
