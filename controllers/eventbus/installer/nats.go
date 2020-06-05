@@ -30,7 +30,6 @@ const (
 	clientPort  = int32(4222)
 	clusterPort = int32(6222)
 	monitorPort = int32(8222)
-	metricsPort = int32(7777)
 
 	// annotation key on serverAuthSecret and clientAuthsecret
 	authStrategyAnnoKey = "strategy"
