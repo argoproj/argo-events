@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -23,7 +24,18 @@ const (
 	natsStreamingEnvVar = "NATS_STREAMING_IMAGE"
 )
 
-var log = ctrl.Log.WithName(eventbus.ControllerName)
+var (
+	log = ctrl.Log.WithName(eventbus.ControllerName)
+
+	namespaced       bool
+	managedNamespace string
+)
+
+func init() {
+	flag.BoolVar(&namespaced, "namespaced", false, "run the controller as namespaced mode")
+	flag.StringVar(&managedNamespace, "managed-namespace", os.Getenv("NAMESPACE"), "namespace that controller watches, default to the installation namespace")
+	flag.Parse()
+}
 
 func main() {
 	ecfg := uzap.NewProductionEncoderConfig()
@@ -35,7 +47,11 @@ func main() {
 	if !defined {
 		panic(fmt.Errorf("required environment variable '%s' not defined", natsStreamingEnvVar))
 	}
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{})
+	opts := ctrl.Options{}
+	if namespaced {
+		opts.Namespace = managedNamespace
+	}
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), opts)
 	if err != nil {
 		panic(err)
 	}

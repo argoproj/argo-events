@@ -187,7 +187,9 @@ spec:
         app: eventbus-controller
     spec:
       containers:
-      - env:
+      - args:
+        - --namespaced
+        env:
         - name: NAMESPACE
           valueFrom:
             fieldRef:
