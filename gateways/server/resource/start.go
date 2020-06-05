@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
@@ -129,6 +130,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 
 	informerEventCh := make(chan *InformerEvent)
 	stopCh := make(chan struct{})
+	startTime := time.Now()
 
 	go func() {
 		logger.Infoln("listening to resource events...")
@@ -153,7 +155,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 					logger.WithError(err).Errorln("failed to marshal the event. rejecting the event...")
 					continue
 				}
-				if err := passFilters(event, resourceEventSource.Filter); err != nil {
+				if err := passFilters(event, resourceEventSource.Filter, startTime); err != nil {
 					logger.WithError(err).Warnln("failed to apply the filter, rejecting the event...")
 					continue
 				}
@@ -261,7 +263,7 @@ func FieldSelector(selectors []v1alpha1.Selector) (fields.Selector, error) {
 }
 
 // helper method to check if the object passed the user defined filters
-func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter) error {
+func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTime time.Time) error {
 	uObj := event.Obj.(*unstructured.Unstructured)
 	// no filters are applied.
 	if filter == nil {
@@ -273,6 +275,9 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter) error {
 	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
 		return errors.Errorf("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
+	}
+	if filter.AfterStart && created.UTC().Before(startTime.UTC()) {
+		return errors.Errorf("resource is created before start time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), startTime.UTC().String())
 	}
 	return nil
 }
