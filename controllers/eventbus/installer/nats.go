@@ -651,7 +651,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		volumes = append(volumes, corev1.VolumeMount{Name: pvcName, MountPath: "/data/stan"})
 		spec.Template.Spec.Containers[0].VolumeMounts = volumes
 	}
-	if i.eventBus.Spec.NATS.Native.Affinity {
+	if i.eventBus.Spec.NATS.Native.AntiAffinity {
 		spec.Template.Spec.Affinity = &corev1.Affinity{
 			PodAntiAffinity: &corev1.PodAntiAffinity{
 				RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{

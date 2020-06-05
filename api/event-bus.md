@@ -699,7 +699,7 @@ Size is the NATS StatefulSet size
 
 <td>
 
-<code>affinity</code></br> <em> bool </em>
+<code>antiAffinity</code></br> <em> bool </em>
 
 </td>
 

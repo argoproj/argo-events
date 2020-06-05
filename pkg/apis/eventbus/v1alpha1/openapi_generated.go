@@ -290,7 +290,7 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 							Format: "",
 						},
 					},
-					"affinity": {
+					"antiAffinity": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"boolean"},
 							Format: "",

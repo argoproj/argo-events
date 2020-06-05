@@ -60,9 +60,9 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size     int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
-	Auth     *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-	Affinity bool          `json:"affinity,omitempty" protobuf:"bytes,3,opt,name=affinity"`
+	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
 	// +optional
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
 }
