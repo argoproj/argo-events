@@ -73,8 +73,12 @@ type PersistenceStrategy struct {
 	// More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
 	// +optional
 	StorageClassName *string `json:"storageClassName,omitempty" protobuf:"bytes,1,opt,name=storageClassName"`
+	// Available access modes such as ReadWriteOnce, ReadWriteMany
+	// https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+	// +optional
+	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
 	// Volume size, e.g. 10Gi
-	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,2,opt,name=size"`
+	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
 }
 
 // BusConfig has the finalized configuration for EventBus

@@ -438,6 +438,9 @@ streaming {
   store: file
   dir: /data/stan/store
   ft_group_name: "%s"
+  store_limits {
+    max_age: 24h
+  }
 }`, strconv.Itoa(int(monitorPort)), strconv.Itoa(int(clusterPort)), svcName, strconv.Itoa(int(clusterPort)), clusterID, clusterID)
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -620,7 +623,11 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		if i.eventBus.Spec.NATS.Native.Persistence.Size != nil {
 			volSize = *i.eventBus.Spec.NATS.Native.Persistence.Size
 		}
-		// Default volume size
+		// Default to ReadWriteOnce
+		accessMode := corev1.ReadWriteOnce
+		if i.eventBus.Spec.NATS.Native.Persistence.AccessMode != nil {
+			accessMode = *i.eventBus.Spec.NATS.Native.Persistence.AccessMode
+		}
 		spec.VolumeClaimTemplates = []corev1.PersistentVolumeClaim{
 			{
 				ObjectMeta: metav1.ObjectMeta{
@@ -628,7 +635,7 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 				},
 				Spec: corev1.PersistentVolumeClaimSpec{
 					AccessModes: []corev1.PersistentVolumeAccessMode{
-						corev1.ReadWriteOnce,
+						accessMode,
 					},
 					VolumeMode:       &volMode,
 					StorageClassName: i.eventBus.Spec.NATS.Native.Persistence.StorageClassName,

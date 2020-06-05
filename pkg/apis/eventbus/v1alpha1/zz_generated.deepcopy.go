@@ -227,6 +227,11 @@ func (in *PersistenceStrategy) DeepCopyInto(out *PersistenceStrategy) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.AccessMode != nil {
+		in, out := &in.AccessMode, &out.AccessMode
+		*out = new(v1.PersistentVolumeAccessMode)
+		**out = **in
+	}
 	if in.Size != nil {
 		in, out := &in.Size, &out.Size
 		x := (*in).DeepCopy()

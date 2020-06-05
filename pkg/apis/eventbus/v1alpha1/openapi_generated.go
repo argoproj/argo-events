@@ -323,6 +323,13 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 							Format:      "",
 						},
 					},
+					"accessMode": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Available access modes such as ReadWriteOnce, ReadWriteMany https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"size": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Volume size, e.g. 10Gi",

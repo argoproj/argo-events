@@ -805,6 +805,31 @@ Name of the StorageClass required by the claim. More info:
 
 <td>
 
+<code>accessMode</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#persistentvolumeaccessmode-v1-core">
+Kubernetes core/v1.PersistentVolumeAccessMode </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+Available access modes such as ReadWriteOnce, ReadWriteMany
+<a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes">https://kubernetes.io/docs/concepts/storage/persistent-volumes/\#access-modes</a>
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>size</code></br> <em>
 k8s.io/apimachinery/pkg/api/resource.Quantity </em>
 
