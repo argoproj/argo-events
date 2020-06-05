@@ -18,6 +18,7 @@ package resource
 
 import (
 	"testing"
+	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/mitchellh/mapstructure"
@@ -72,7 +73,7 @@ func TestFilter(t *testing.T) {
 		err = passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter)
+		}, resourceEventSource.Filter, time.Now())
 		convey.So(err, convey.ShouldBeNil)
 	})
 }
