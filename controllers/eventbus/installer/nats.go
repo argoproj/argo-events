@@ -1213,8 +1213,3 @@ func generateStreamingClusterID(eventBus *v1alpha1.EventBus) string {
 func generatePVCName(eventBus *v1alpha1.EventBus) string {
 	return fmt.Sprintf("stan-%s-vol", eventBus.Name)
 }
-
-// Final PVC name prefix
-func getFinalizedPVCNamePrefix(eventBus *v1alpha1.EventBus) string {
-	return fmt.Sprintf("%s-%s-", generatePVCName(eventBus), generateStreamingStatefulSetName(eventBus))
-}

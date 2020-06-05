@@ -42,8 +42,7 @@ type EventSource struct {
 type EventSourceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=eventsource
-	Items []EventSource `json:"items" protobuf:"bytes,2,opt,name=items"`
+	Items           []EventSource `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
 // EventSourceSpec refers to specification of event-source resource
@@ -106,7 +105,6 @@ type CalendarEventSource struct {
 	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
 	Interval string `json:"interval" protobuf:"bytes,2,name=interval"`
 	// ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
-	// +listType=string
 	ExclusionDates []string `json:"exclusionDates,omitempty" protobuf:"bytes,3,opt,name=exclusionDates"`
 	// Timezone in which to run the schedule
 	// +optional
@@ -317,7 +315,7 @@ type PubSubEventSource struct {
 	// CredentialsFile is the file that contains credentials to authenticate for GCP
 	CredentialsFile string `json:"credentialsFile" protobuf:"bytes,4,name=credentialsFile"`
 	// EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile.
-	// If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.
+	// If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.
 	// +optional
 	EnableWorkflowIdentity bool `json:"enableWorkflowIdentity,omitempty" protobuf:"bytes,5,opt,name=enableWorkflowIdentity"`
 	// DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
@@ -340,7 +338,6 @@ type GithubEventSource struct {
 	// Repository refers to GitHub repo name i.e. argo-events
 	Repository string `json:"repository" protobuf:"bytes,4,name=repository"`
 	// Events refer to Github events to subscribe to which the gateway will subscribe
-	// +listType=string
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
 	APIToken *corev1.SecretKeySelector `json:"apiToken"`
@@ -406,7 +403,6 @@ type HDFSEventSource struct {
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
 	CheckInterval string `json:"checkInterval,omitempty"`
 	// Addresses is accessible addresses of HDFS name nodes
-	// +listType=string
 	Addresses []string `json:"addresses"`
 	// HDFSUser is the user to access HDFS file system.
 	// It is ignored if either ccache or keytab is used.
@@ -454,7 +450,6 @@ type StorageGridEventSource struct {
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`
-	// +listType=string
 	Events []string `json:"events,omitempty" protobuf:"bytes,2,opt,name=events"`
 	// Filter on object key which caused the notification.
 	Filter *StorageGridFilter `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
@@ -501,7 +496,6 @@ type StripeEventSource struct {
 	// EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
 	// More info at https://stripe.com/docs/api/events/list
 	// +optional
-	// +listType=string
 	EventFilter []string `json:"eventFilter,omitempty" protobuf:"bytes,5,rep,name=eventFilter"`
 }
 
@@ -550,7 +544,6 @@ type RedisEventSource struct {
 	// +optional
 	DB int `json:"db,omitempty" protobuf:"bytes,4,opt,name=db"`
 	// Channels to subscribe to listen events.
-	// +listType=string
 	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`
 	// TLS configuration for the redis client.
 	// +optional

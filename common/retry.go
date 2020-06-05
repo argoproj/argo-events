@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"strconv"
 	"time"
 
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -26,9 +27,25 @@ import (
 // Backoff defines an operational backoff
 type Backoff struct {
 	Duration time.Duration `json:"duration"` // the base duration
-	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
-	Jitter   float64       `json:"jitter"`   // The amount of jitter applied each iteration
+	Factor   string        `json:"factor"`   // Duration is multiplied by factor each iteration
+	Jitter   string        `json:"jitter"`   // The amount of jitter applied each iteration
 	Steps    int           `json:"steps"`    // Exit with error after this many steps
+}
+
+func (b Backoff) GetFactor() float64 {
+	value, err := strconv.ParseFloat(b.Factor, 10)
+	if err != nil {
+		return 0
+	}
+	return value
+}
+
+func (b Backoff) GetJitter() float64 {
+	value, err := strconv.ParseFloat(b.Jitter, 10)
+	if err != nil {
+		return 0
+	}
+	return value
 }
 
 // DefaultRetry is a default retry backoff settings when retrying API calls
@@ -62,11 +79,11 @@ func GetConnectionBackoff(backoff *Backoff) *wait.Backoff {
 	if &backoff.Duration != nil {
 		result.Duration = backoff.Duration
 	}
-	if backoff.Factor != 0 {
-		result.Factor = backoff.Factor
+	if backoff.Factor != "" {
+		result.Factor = backoff.GetFactor()
 	}
-	if backoff.Jitter != 0 {
-		result.Jitter = backoff.Jitter
+	if backoff.Jitter != "" {
+		result.Jitter = backoff.GetJitter()
 	}
 	if backoff.Steps != 0 {
 		result.Steps = backoff.Steps

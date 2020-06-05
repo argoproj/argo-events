@@ -18,6 +18,7 @@ package aws_sqs
 
 import (
 	"encoding/json"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"

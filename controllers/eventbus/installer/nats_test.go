@@ -94,9 +94,9 @@ var (
 )
 
 func init() {
-	v1alpha1.AddToScheme(scheme.Scheme)
-	appv1.AddToScheme(scheme.Scheme)
-	corev1.AddToScheme(scheme.Scheme)
+	_ = v1alpha1.AddToScheme(scheme.Scheme)
+	_ = appv1.AddToScheme(scheme.Scheme)
+	_ = corev1.AddToScheme(scheme.Scheme)
 }
 
 func TestBadInstallation(t *testing.T) {

@@ -312,6 +312,10 @@ Kubernetes meta/v1/unstructured.Unstructured
 <h3 id="argoproj.io/v1alpha1.Backoff">Backoff
 </h3>
 <p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.K8sResourcePolicy">K8sResourcePolicy</a>)
+</p>
+<p>
 <p>Backoff for an operation</p>
 </p>
 <table>
@@ -337,7 +341,7 @@ time.Duration
 <td>
 <code>factor</code></br>
 <em>
-float64
+string
 </em>
 </td>
 <td>
@@ -348,7 +352,7 @@ float64
 <td>
 <code>jitter</code></br>
 <em>
-float64
+string
 </em>
 </td>
 <td>
@@ -1437,7 +1441,9 @@ map[string]string
 <td>
 <code>backoff</code></br>
 <em>
-k8s.io/apimachinery/pkg/util/wait.Backoff
+<a href="#argoproj.io/v1alpha1.Backoff">
+Backoff
+</a>
 </em>
 </td>
 <td>

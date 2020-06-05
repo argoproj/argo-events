@@ -17,9 +17,10 @@ limitations under the License.
 package store
 
 import (
+	"testing"
+
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"testing"
 )
 
 func TestNewResourceReader(t *testing.T) {

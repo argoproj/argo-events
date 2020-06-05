@@ -71,11 +71,11 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				Labels: map[string]string{
 					"complete": "true",
 				},
-				Backoff: wait.Backoff{
+				Backoff: v1alpha1.Backoff{
 					Steps:    2,
 					Duration: time.Second * 1,
-					Factor:   2,
-					Jitter:   0.5,
+					Factor:   "2",
+					Jitter:   "0.5",
 				},
 			},
 		},

@@ -15,20 +15,14 @@ run:
     - "pkg/apis/eventsources/v1alpha1/zz_generated.deepcopy.go"
 linters:
   enable:
-    - bodyclose
     - deadcode
     - depguard
     - dogsled
-    - dupl
-    - errcheck
     - goconst
     - gocritic
-    - gocyclo
     - gofmt
     - goimports
-    - golint
     - goprintffuncname
-    - gosec
     - gosimple
     - govet
     - ineffassign
@@ -36,13 +30,10 @@ linters:
     - misspell
     - nakedret
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
-    - stylecheck
     - typecheck
     - unconvert
-    - unparam
     - unused
     - varcheck
     - whitespace

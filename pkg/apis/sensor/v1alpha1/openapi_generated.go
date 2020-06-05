@@ -117,11 +117,6 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "payloadParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
@@ -135,11 +130,6 @@ func schema_pkg_apis_sensor_v1alpha1_AWSLambdaTrigger(ref common.ReferenceCallba
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
 							Type:        []string{"array"},
@@ -182,11 +172,6 @@ func schema_pkg_apis_sensor_v1alpha1_ArgoWorkflowTrigger(ref common.ReferenceCal
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters to pass to resolved Argo Workflow object",
 							Type:        []string{"array"},
@@ -283,15 +268,15 @@ func schema_pkg_apis_sensor_v1alpha1_Backoff(ref common.ReferenceCallback) commo
 					"factor": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Duration is multiplied by factor each iteration",
-							Type:        []string{"number"},
-							Format:      "double",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"jitter": {
 						SchemaProps: spec.SchemaProps{
 							Description: "The amount of jitter applied each iteration",
-							Type:        []string{"number"},
-							Format:      "double",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"steps": {
@@ -428,11 +413,6 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters that is applied to resolved custom trigger trigger object.",
 							Type:        []string{"array"},
@@ -446,11 +426,6 @@ func schema_pkg_apis_sensor_v1alpha1_CustomTrigger(ref common.ReferenceCallback)
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "payloadParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
@@ -494,11 +469,6 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 						},
 					},
 					"value": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "value",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
 							Type:        []string{"array"},
@@ -541,11 +511,6 @@ func schema_pkg_apis_sensor_v1alpha1_DependencyGroup(ref common.ReferenceCallbac
 						},
 					},
 					"dependencies": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "dependencies",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Dependencies of events",
 							Type:        []string{"array"},
@@ -727,11 +692,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 						},
 					},
 					"data": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "data",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Data filter constraints with escalation",
 							Type:        []string{"array"},
@@ -897,11 +857,6 @@ func schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref common.ReferenceCallbac
 						},
 					},
 					"urls": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "urls",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "URLs the URLs of a remote repository. It must be non-empty. Fetch will always use the first URL, while push will use all of them.",
 							Type:        []string{"array"},
@@ -958,11 +913,6 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "atomic",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.",
 							Type:        []string{"array"},
@@ -989,11 +939,6 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "atomic",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the HTTP trigger resource.",
 							Type:        []string{"array"},
@@ -1075,7 +1020,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref common.ReferenceCallb
 					"backoff": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Backoff before checking resource state",
-							Ref:         ref("k8s.io/apimachinery/pkg/util/wait.Backoff"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"),
 						},
 					},
 					"errorOnBackoffTimeout": {
@@ -1090,7 +1035,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref common.ReferenceCallb
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/apimachinery/pkg/util/wait.Backoff"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"},
 	}
 }
 
@@ -1123,11 +1068,6 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters that is applied to resolved Kafka trigger object.",
 							Type:        []string{"array"},
@@ -1168,11 +1108,6 @@ func schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref common.ReferenceCallback) 
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "payloadParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
@@ -1251,11 +1186,6 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "payloadParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
@@ -1269,11 +1199,6 @@ func schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref common.ReferenceCallback) c
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters that is applied to resolved NATS trigger object.",
 							Type:        []string{"array"},
@@ -1431,11 +1356,6 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 						},
 					},
 					"payload": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "payloadParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Payload is the list of key-value extracted from an event payload to construct the request payload.",
 							Type:        []string{"array"},
@@ -1449,11 +1369,6 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
 							Type:        []string{"array"},
@@ -1547,11 +1462,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorList(ref common.ReferenceCallback) co
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "items",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -1608,11 +1518,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"dependencies": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "dependencies",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Dependencies is a list of the events that this sensor is dependent on.",
 							Type:        []string{"array"},
@@ -1626,11 +1531,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 					"triggers": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggers",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.",
 							Type:        []string{"array"},
@@ -1663,11 +1563,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 						},
 					},
 					"dependencyGroups": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "dependencyGroups",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "DependencyGroups is a list of the groups of events.",
 							Type:        []string{"array"},
@@ -1816,11 +1711,6 @@ func schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref common.ReferenceCallback) 
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of key-value extracted from event's payload that are applied to the trigger resource.",
 							Type:        []string{"array"},
@@ -1890,11 +1780,6 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCall
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters that is applied to resolved K8s trigger object.",
 							Type:        []string{"array"},
@@ -1938,11 +1823,6 @@ func schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref common.ReferenceCallback) 
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"allow": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "allowedStatuses",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list, the trigger will marked as successful else it will result in trigger failure.",
 							Type:        []string{"array"},
@@ -2125,11 +2005,6 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						},
 					},
 					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "templateParameters",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Parameters is the list of parameters applied to the trigger template definition",
 							Type:        []string{"array"},
@@ -2284,11 +2159,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"any": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "any",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Any acts as a OR operator between dependencies",
 							Type:        []string{"array"},
@@ -2303,11 +2173,6 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerSwitch(ref common.ReferenceCallback)
 						},
 					},
 					"all": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "all",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "All acts as a AND operator between dependencies",
 							Type:        []string{"array"},

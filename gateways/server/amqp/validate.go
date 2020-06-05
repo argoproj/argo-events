@@ -18,6 +18,7 @@ package amqp
 
 import (
 	"context"
+
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 
 	"github.com/argoproj/argo-events/common"

@@ -22,8 +22,7 @@ type EventBus struct {
 type EventBusList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	// +listType=eventbus
-	Items []EventBus `json:"items" protobuf:"bytes,2,opt,name=items"`
+	Items           []EventBus `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
 // EventBusSpec refers to specification of eventbus resource

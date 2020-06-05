@@ -133,11 +133,6 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref common.ReferenceCallback
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "eventbus",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{

@@ -734,8 +734,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Gateway"
-          },
-          "x-kubernetes-list-type": "items"
+          }
         },
         "kind": {
           "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
@@ -790,7 +789,6 @@
         },
         "subscribers": {
           "description": "Subscribers holds the contexts of the subscribers/sinks to send events to.",
-          "x-kubernetes-list-type": "subscribers",
           "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Subscribers"
         },
         "template": {
@@ -949,16 +947,14 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "string"
+          }
         },
         "nats": {
           "description": "NATS refers to the subscribers over NATS protocol.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.NATSSubscriber"
-          },
-          "x-kubernetes-list-type": "NATSSubscriber"
+          }
         }
       }
     },
@@ -1034,16 +1030,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "region": {
           "description": "Region is AWS region",
@@ -1071,8 +1065,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "source": {
           "description": "Source of the K8 resource file(s)",
@@ -1131,13 +1124,11 @@
         },
         "factor": {
           "description": "Duration is multiplied by factor each iteration",
-          "type": "number",
-          "format": "double"
+          "type": "string"
         },
         "jitter": {
           "description": "The amount of jitter applied each iteration",
-          "type": "number",
-          "format": "double"
+          "type": "string"
         },
         "steps": {
           "description": "Exit with error after this many steps",
@@ -1206,16 +1197,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "secure": {
           "description": "Secure refers to type of the connection between sensor to custom trigger gRPC",
@@ -1264,8 +1253,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "value"
+          }
         }
       }
     },
@@ -1282,8 +1270,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "dependencies"
+          }
         },
         "name": {
           "description": "Name of the group",
@@ -1394,8 +1381,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DataFilter"
-          },
-          "x-kubernetes-list-type": "data"
+          }
         },
         "name": {
           "description": "Name is the name of event filter",
@@ -1500,8 +1486,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "urls"
+          }
         }
       }
     },
@@ -1550,16 +1535,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "atomic"
+          }
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "atomic"
+          }
         },
         "timeout": {
           "description": "Timeout refers to the HTTP request timeout in seconds. Default value is 60 seconds.",
@@ -1587,7 +1570,7 @@
       "properties": {
         "backoff": {
           "description": "Backoff before checking resource state",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.util.wait.Backoff"
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Backoff"
         },
         "errorOnBackoffTimeout": {
           "description": "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
@@ -1626,8 +1609,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "partition": {
           "description": "Partition to write data to.",
@@ -1643,8 +1625,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "requiredAcks": {
           "description": "RequiredAcks used in producer to tell the broker how many replica acknowledgements Defaults to 1 (Only wait for the leader to ack).",
@@ -1697,16 +1678,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "subject": {
           "description": "Name of the subject to put message on.",
@@ -1809,16 +1788,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "payload": {
           "description": "Payload is the list of key-value extracted from an event payload to construct the request payload.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "payloadParameters"
+          }
         },
         "version": {
           "description": "Version for the API. Defaults to v1.",
@@ -1870,8 +1847,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Sensor"
-          },
-          "x-kubernetes-list-type": "items"
+          }
         },
         "kind": {
           "description": "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
@@ -1917,16 +1893,14 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependency"
-          },
-          "x-kubernetes-list-type": "dependencies"
+          }
         },
         "dependencyGroups": {
           "description": "DependencyGroups is a list of the groups of events.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.DependencyGroup"
-          },
-          "x-kubernetes-list-type": "dependencyGroups"
+          }
         },
         "errorOnFailedRound": {
           "description": "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
@@ -1959,8 +1933,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Trigger"
-          },
-          "x-kubernetes-list-type": "triggers"
+          }
         }
       }
     },
@@ -2040,8 +2013,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "slackToken": {
           "description": "SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.",
@@ -2069,8 +2041,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "triggerParameters"
+          }
         },
         "patchStrategy": {
           "description": "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
@@ -2095,8 +2066,7 @@
           "items": {
             "type": "integer",
             "format": "int32"
-          },
-          "x-kubernetes-list-type": "allowedStatuses"
+          }
         }
       }
     },
@@ -2195,8 +2165,7 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.TriggerParameter"
-          },
-          "x-kubernetes-list-type": "templateParameters"
+          }
         },
         "policy": {
           "description": "Policy to configure backoff and execution criteria for the trigger",
@@ -2286,16 +2255,14 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "all"
+          }
         },
         "any": {
           "description": "Any acts as a OR operator between dependencies",
           "type": "array",
           "items": {
             "type": "string"
-          },
-          "x-kubernetes-list-type": "any"
+          }
         }
       }
     },

@@ -626,6 +626,13 @@ Backoff
 
 <p>
 
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.K8sResourcePolicy">K8sResourcePolicy</a>)
+
+</p>
+
+<p>
+
 <p>
 
 Backoff for an operation
@@ -682,7 +689,7 @@ Duration is the duration in nanoseconds
 
 <td>
 
-<code>factor</code></br> <em> float64 </em>
+<code>factor</code></br> <em> string </em>
 
 </td>
 
@@ -702,7 +709,7 @@ Duration is multiplied by factor each iteration
 
 <td>
 
-<code>jitter</code></br> <em> float64 </em>
+<code>jitter</code></br> <em> string </em>
 
 </td>
 
@@ -2902,8 +2909,8 @@ Labels required to identify whether a resource is in success state
 
 <td>
 
-<code>backoff</code></br> <em> k8s.io/apimachinery/pkg/util/wait.Backoff
-</em>
+<code>backoff</code></br> <em> <a href="#argoproj.io/v1alpha1.Backoff">
+Backoff </a> </em>
 
 </td>
 

@@ -1,0 +1,125 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.8
+  creationTimestamp: null
+  name: eventbus.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventBus
+    listKind: EventBusList
+    plural: eventbus
+    singular: eventbus
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            nats:
+              properties:
+                exotic:
+                  properties:
+                    accessSecret:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    auth:
+                      type: string
+                    clusterID:
+                      type: string
+                    url:
+                      type: string
+                  type: object
+                native:
+                  properties:
+                    auth:
+                      type: string
+                    persistence:
+                      type: object
+                    size:
+                      type: integer
+                  type: object
+              type: object
+          type: object
+        status:
+          properties:
+            config:
+              properties:
+                nats:
+                  properties:
+                    accessSecret:
+                      properties:
+                        key:
+                          type: string
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                    auth:
+                      type: string
+                    clusterID:
+                      type: string
+                    url:
+                      type: string
+                  type: object
+              type: object
+            status:
+              properties:
+                conditions:
+                  items:
+                    properties:
+                      lastTransitionTime:
+                        format: date-time
+                        type: string
+                      message:
+                        type: string
+                      reason:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - status
+                    - type
+                    type: object
+                  type: array
+              type: object
+          type: object
+      required:
+      - metadata
+      - spec
+      - status
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

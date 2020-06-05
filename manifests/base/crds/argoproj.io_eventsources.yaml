@@ -1,0 +1,1102 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.8
+  creationTimestamp: null
+  name: eventsources.argoproj.io
+spec:
+  group: argoproj.io
+  names:
+    kind: EventSource
+    listKind: EventSourceList
+    plural: eventsources
+    singular: eventsource
+  scope: Namespaced
+  validation:
+    openAPIV3Schema:
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          type: object
+        spec:
+          properties:
+            amqp:
+              additionalProperties:
+                properties:
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  exchangeName:
+                    type: string
+                  exchangeType:
+                    type: string
+                  jsonBody:
+                    type: boolean
+                  routingKey:
+                    type: string
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  url:
+                    type: string
+                required:
+                - exchangeName
+                - exchangeType
+                - routingKey
+                - url
+                type: object
+              type: object
+            azureEventsHub:
+              additionalProperties:
+                properties:
+                  fqdn:
+                    type: string
+                  hubName:
+                    type: string
+                  namespace:
+                    type: string
+                  sharedAccessKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  sharedAccessKeyName:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                required:
+                - fqdn
+                - hubName
+                - sharedAccessKey
+                - sharedAccessKeyName
+                type: object
+              type: object
+            calendar:
+              additionalProperties:
+                properties:
+                  exclusionDates:
+                    items:
+                      type: string
+                    type: array
+                  interval:
+                    type: string
+                  schedule:
+                    type: string
+                  timezone:
+                    type: string
+                  userPayload:
+                    format: byte
+                    type: string
+                required:
+                - interval
+                - schedule
+                type: object
+              type: object
+            emitter:
+              additionalProperties:
+                properties:
+                  broker:
+                    type: string
+                  channelKey:
+                    type: string
+                  channelName:
+                    type: string
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  jsonBody:
+                    type: boolean
+                  namespace:
+                    type: string
+                  password:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  username:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                required:
+                - broker
+                - channelKey
+                - channelName
+                type: object
+              type: object
+            file:
+              additionalProperties:
+                properties:
+                  eventType:
+                    type: string
+                  polling:
+                    type: boolean
+                  watchPathConfig:
+                    properties:
+                      directory:
+                        type: string
+                      path:
+                        type: string
+                      pathRegexp:
+                        type: string
+                    required:
+                    - directory
+                    type: object
+                required:
+                - eventType
+                - watchPathConfig
+                type: object
+              type: object
+            generic:
+              additionalProperties:
+                properties:
+                  value:
+                    type: string
+                required:
+                - value
+                type: object
+              type: object
+            github:
+              additionalProperties:
+                properties:
+                  active:
+                    type: boolean
+                  apiToken:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  contentType:
+                    type: string
+                  deleteHookOnFinish:
+                    type: boolean
+                  events:
+                    items:
+                      type: string
+                    type: array
+                  githubBaseURL:
+                    type: string
+                  githubUploadURL:
+                    type: string
+                  id:
+                    format: int64
+                    type: integer
+                  insecure:
+                    type: boolean
+                  namespace:
+                    type: string
+                  owner:
+                    type: string
+                  repository:
+                    type: string
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                  webhookSecret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                required:
+                - apiToken
+                - events
+                - id
+                - owner
+                - repository
+                - webhook
+                type: object
+              type: object
+            gitlab:
+              additionalProperties:
+                properties:
+                  accessToken:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  allowDuplicate:
+                    type: boolean
+                  deleteHookOnFinish:
+                    type: boolean
+                  enableSSLVerification:
+                    type: boolean
+                  event:
+                    type: string
+                  gitlabBaseURL:
+                    type: string
+                  namespace:
+                    type: string
+                  projectId:
+                    type: string
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                required:
+                - accessToken
+                - event
+                - gitlabBaseURL
+                - projectId
+                - webhook
+                type: object
+              type: object
+            hdfs:
+              additionalProperties:
+                properties:
+                  addresses:
+                    items:
+                      type: string
+                    type: array
+                  checkInterval:
+                    type: string
+                  directory:
+                    type: string
+                  hdfsUser:
+                    type: string
+                  krbCCacheSecret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  krbConfigConfigMap:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  krbKeytabSecret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  krbRealm:
+                    type: string
+                  krbServicePrincipalName:
+                    type: string
+                  krbUsername:
+                    type: string
+                  namespace:
+                    type: string
+                  path:
+                    type: string
+                  pathRegexp:
+                    type: string
+                  type:
+                    type: string
+                required:
+                - addresses
+                - directory
+                - type
+                type: object
+              type: object
+            kafka:
+              additionalProperties:
+                properties:
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  partition:
+                    type: string
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  topic:
+                    type: string
+                  url:
+                    type: string
+                required:
+                - partition
+                - topic
+                - url
+                type: object
+              type: object
+            minio:
+              additionalProperties:
+                properties:
+                  accessKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  bucket:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  endpoint:
+                    type: string
+                  events:
+                    items:
+                      type: string
+                    type: array
+                  filter:
+                    properties:
+                      prefix:
+                        type: string
+                      suffix:
+                        type: string
+                    required:
+                    - prefix
+                    - suffix
+                    type: object
+                  insecure:
+                    type: boolean
+                  region:
+                    type: string
+                  secretKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                required:
+                - accessKey
+                - bucket
+                - endpoint
+                - secretKey
+                type: object
+              type: object
+            mqtt:
+              additionalProperties:
+                properties:
+                  clientId:
+                    type: string
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  jsonBody:
+                    type: boolean
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  topic:
+                    type: string
+                  url:
+                    type: string
+                required:
+                - clientId
+                - topic
+                - url
+                type: object
+              type: object
+            nats:
+              additionalProperties:
+                properties:
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  jsonBody:
+                    type: boolean
+                  subject:
+                    type: string
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  url:
+                    type: string
+                required:
+                - subject
+                - url
+                type: object
+              type: object
+            nsq:
+              additionalProperties:
+                properties:
+                  channel:
+                    type: string
+                  connectionBackoff:
+                    properties:
+                      duration:
+                        format: int64
+                        type: integer
+                      factor:
+                        type: string
+                      jitter:
+                        type: string
+                      steps:
+                        type: integer
+                    required:
+                    - duration
+                    - factor
+                    - jitter
+                    - steps
+                    type: object
+                  hostAddress:
+                    type: string
+                  jsonBody:
+                    type: boolean
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                  topic:
+                    type: string
+                required:
+                - channel
+                - hostAddress
+                - topic
+                type: object
+              type: object
+            pubSub:
+              additionalProperties:
+                properties:
+                  credentialsFile:
+                    type: string
+                  deleteSubscriptionOnFinish:
+                    type: boolean
+                  enableWorkflowIdentity:
+                    type: boolean
+                  jsonBody:
+                    type: boolean
+                  projectID:
+                    type: string
+                  topic:
+                    type: string
+                  topicProjectID:
+                    type: string
+                required:
+                - credentialsFile
+                - projectID
+                - topic
+                - topicProjectID
+                type: object
+              type: object
+            redis:
+              additionalProperties:
+                properties:
+                  channels:
+                    items:
+                      type: string
+                    type: array
+                  db:
+                    type: integer
+                  hostAddress:
+                    type: string
+                  namespace:
+                    type: string
+                  password:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  tls:
+                    properties:
+                      caCertPath:
+                        type: string
+                      clientCertPath:
+                        type: string
+                      clientKeyPath:
+                        type: string
+                    required:
+                    - caCertPath
+                    - clientCertPath
+                    - clientKeyPath
+                    type: object
+                required:
+                - channels
+                - hostAddress
+                type: object
+              type: object
+            resource:
+              additionalProperties:
+                properties:
+                  eventTypes:
+                    items:
+                      type: string
+                    type: array
+                  filter:
+                    properties:
+                      createdBy:
+                        format: date-time
+                        type: string
+                      fields:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operation:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - key
+                          - value
+                          type: object
+                        type: array
+                      labels:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operation:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - key
+                          - value
+                          type: object
+                        type: array
+                      prefix:
+                        type: string
+                    type: object
+                  group:
+                    type: string
+                  namespace:
+                    type: string
+                  resource:
+                    type: string
+                  version:
+                    type: string
+                required:
+                - eventTypes
+                - group
+                - namespace
+                - resource
+                - version
+                type: object
+              type: object
+            slack:
+              additionalProperties:
+                properties:
+                  namespace:
+                    type: string
+                  signingSecret:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  token:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                required:
+                - webhook
+                type: object
+              type: object
+            sns:
+              additionalProperties:
+                properties:
+                  accessKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  namespace:
+                    type: string
+                  region:
+                    type: string
+                  roleARN:
+                    type: string
+                  secretKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  topicArn:
+                    type: string
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                required:
+                - region
+                - topicArn
+                - webhook
+                type: object
+              type: object
+            sqs:
+              additionalProperties:
+                properties:
+                  accessKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  jsonBody:
+                    type: boolean
+                  namespace:
+                    type: string
+                  queue:
+                    type: string
+                  queueAccountId:
+                    type: string
+                  region:
+                    type: string
+                  roleARN:
+                    type: string
+                  secretKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  waitTimeSeconds:
+                    format: int64
+                    type: integer
+                required:
+                - queue
+                - region
+                - waitTimeSeconds
+                type: object
+              type: object
+            storageGrid:
+              additionalProperties:
+                properties:
+                  events:
+                    items:
+                      type: string
+                    type: array
+                  filter:
+                    properties:
+                      prefix:
+                        type: string
+                      suffix:
+                        type: string
+                    required:
+                    - prefix
+                    - suffix
+                    type: object
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                required:
+                - webhook
+                type: object
+              type: object
+            stripe:
+              additionalProperties:
+                properties:
+                  apiKey:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                      optional:
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                  createWebhook:
+                    type: boolean
+                  eventFilter:
+                    items:
+                      type: string
+                    type: array
+                  namespace:
+                    type: string
+                  webhook:
+                    properties:
+                      endpoint:
+                        type: string
+                      method:
+                        type: string
+                      port:
+                        type: string
+                      serverCertPath:
+                        type: string
+                      serverKeyPath:
+                        type: string
+                      url:
+                        type: string
+                    required:
+                    - endpoint
+                    - method
+                    - port
+                    - url
+                    type: object
+                required:
+                - webhook
+                type: object
+              type: object
+            type:
+              type: string
+            webhook:
+              additionalProperties:
+                properties:
+                  endpoint:
+                    type: string
+                  method:
+                    type: string
+                  port:
+                    type: string
+                  serverCertPath:
+                    type: string
+                  serverKeyPath:
+                    type: string
+                  url:
+                    type: string
+                required:
+                - endpoint
+                - method
+                - port
+                - url
+                type: object
+              type: object
+          required:
+          - type
+          type: object
+        status:
+          properties:
+            createdAt:
+              format: date-time
+              type: string
+          type: object
+      required:
+      - metadata
+      - spec
+      - status
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

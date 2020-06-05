@@ -17,7 +17,6 @@ spec:
       containers:
         - name: eventbus-controller
           image: argoproj/eventbus-controller:latest
-          imagePullPolicy: Always
           env:
             - name: NAMESPACE
               valueFrom:

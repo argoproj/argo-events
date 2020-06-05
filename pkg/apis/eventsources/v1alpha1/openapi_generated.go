@@ -195,11 +195,6 @@ func schema_pkg_apis_eventsources_v1alpha1_CalendarEventSource(ref common.Refere
 						},
 					},
 					"exclusionDates": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "ExclusionDates defines the list of DATE-TIME exceptions for recurring events.",
 							Type:        []string{"array"},
@@ -381,11 +376,6 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSourceList(ref common.ReferenceC
 						},
 					},
 					"items": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "eventsource",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
@@ -863,11 +853,6 @@ func schema_pkg_apis_eventsources_v1alpha1_GithubEventSource(ref common.Referenc
 						},
 					},
 					"events": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Events refer to Github events to subscribe to which the gateway will subscribe",
 							Type:        []string{"array"},
@@ -1071,11 +1056,6 @@ func schema_pkg_apis_eventsources_v1alpha1_HDFSEventSource(ref common.ReferenceC
 						},
 					},
 					"addresses": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Addresses is accessible addresses of HDFS name nodes",
 							Type:        []string{"array"},
@@ -1459,11 +1439,6 @@ func schema_pkg_apis_eventsources_v1alpha1_RedisEventSource(ref common.Reference
 						},
 					},
 					"channels": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Channels to subscribe to listen events.",
 							Type:        []string{"array"},
@@ -1836,11 +1811,6 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 						},
 					},
 					"events": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "Events are s3 bucket notification events. For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations Note that storage grid notifications do not contain `s3:`",
 							Type:        []string{"array"},
@@ -1929,11 +1899,6 @@ func schema_pkg_apis_eventsources_v1alpha1_StripeEventSource(ref common.Referenc
 						},
 					},
 					"eventFilter": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
 						SchemaProps: spec.SchemaProps{
 							Description: "EventFilter describes the type of events to listen to. If not specified, all types of events will be processed. More info at https://stripe.com/docs/api/events/list",
 							Type:        []string{"array"},
