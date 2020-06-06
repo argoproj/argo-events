@@ -63,4 +63,4 @@ The structure of an event dispatched by the gateway to the sensor looks like fol
 <br/>
 
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

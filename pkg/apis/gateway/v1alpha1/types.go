@@ -78,39 +78,62 @@ type GatewaySpec struct {
 
 // Template holds the information of a Gateway deployment template
 type Template struct {
+	// Metdata sets the pods's metadata, i.e. annotations and labels
+	Metadata Metadata `json:"metadata,omitempty" protobuf:"bytes,1,opt,name=metadata"`
 	// ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
 	// More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 	// +optional
-	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,1,opt,name=serviceAccountName"`
+	ServiceAccountName string `json:"serviceAccountName,omitempty" protobuf:"bytes,2,opt,name=serviceAccountName"`
 	// Container is the main container image to run in the gateway pod
 	// +optional
-	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,2,opt,name=container"`
+	Container *corev1.Container `json:"container,omitempty" protobuf:"bytes,3,opt,name=container"`
 	// Volumes is a list of volumes that can be mounted by containers in a workflow.
 	// +patchStrategy=merge
 	// +patchMergeKey=name
 	// +optional
-	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,3,opt,name=volumes"`
+	Volumes []corev1.Volume `json:"volumes,omitempty" patchStrategy:"merge" patchMergeKey:"name" protobuf:"bytes,4,opt,name=volumes"`
 	// SecurityContext holds pod-level security attributes and common container settings.
 	// Optional: Defaults to empty.  See type description for default values of each field.
 	// +optional
-	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,4,opt,name=securityContext"`
+	SecurityContext *corev1.PodSecurityContext `json:"securityContext,omitempty" protobuf:"bytes,5,opt,name=securityContext"`
+	// If specified, the pod's scheduling constraints
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,6,opt,name=affinity"`
+	// If specified, the pod's tolerations.
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,7,opt,name=tolerations"`
 	// Spec holds the gateway deployment spec.
 	// DEPRECATED: Use Container instead.
-	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,5,opt,name=spec"`
+	Spec *corev1.PodSpec `json:"spec,omitempty" protobuf:"bytes,8,opt,name=spec"`
+}
+
+// Metadata holds the annotations and labels of a gateway pod
+type Metadata struct {
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,1,opt,name=annotations"`
+	Labels      map[string]string `json:"labels,omitempty" protobuf:"bytes,2,opt,name=labels"`
 }
 
 // Service holds the service information gateway exposes
 type Service struct {
-	// The list of ports that are exposed by this service.
+	// The list of ports that are exposed by this ClusterIP service.
 	// +patchMergeKey=port
 	// +patchStrategy=merge
 	// +listType=map
 	// +listMapKey=port
 	// +listMapKey=protocol
 	Ports []corev1.ServicePort `json:"ports,omitempty" patchStrategy:"merge" patchMergeKey:"port" protobuf:"bytes,1,rep,name=ports"`
+	// clusterIP is the IP address of the service and is usually assigned
+	// randomly by the master. If an address is specified manually and is not in
+	// use by others, it will be allocated to the service; otherwise, creation
+	// of the service will fail. This field can not be changed through updates.
+	// Valid values are "None", empty string (""), or a valid IP address. "None"
+	// can be specified for headless services when proxying is not required.
+	// More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+	// +optional
+	ClusterIP string `json:"clusterIP,omitempty" protobuf:"bytes,2,opt,name=clusterIP"`
 	// Spec holds the gateway service spec.
 	// DEPRECATED: Use Ports to declare the ports to be exposed.
-	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,2,opt,name=spec"`
+	Spec *corev1.ServiceSpec `json:"spec,omitempty" protobuf:"bytes,3,opt,name=spec"`
 }
 
 type Subscribers struct {

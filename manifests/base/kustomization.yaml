@@ -9,14 +9,17 @@ namespace: argo-events
 
 resources:
   - crds
+  - argo-events-sa.yaml
   - gateway-controller
   - sensor-controller
-  - argo-events-sa.yaml
+  - eventbus-controller
 
 images:
   - name: argoproj/gateway-controller
     newTag: v0.15.0
   - name: argoproj/sensor-controller
+    newTag: v0.15.0
+  - name: argoproj/eventbus-controller
     newTag: v0.15.0
 
 patchesStrategicMerge:

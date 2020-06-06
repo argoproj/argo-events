@@ -836,6 +836,24 @@
         }
       }
     },
+    "io.argoproj.gateway.v1alpha1.Metadata": {
+      "description": "Metadata holds the annotations and labels of a gateway pod",
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "io.argoproj.gateway.v1alpha1.NATSSubscriber": {
       "description": "NATSSubscriber holds the context of subscriber over NATS.",
       "type": "object",
@@ -899,8 +917,12 @@
       "description": "Service holds the service information gateway exposes",
       "type": "object",
       "properties": {
+        "clusterIP": {
+          "description": "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+          "type": "string"
+        },
         "ports": {
-          "description": "The list of ports that are exposed by this service.",
+          "description": "The list of ports that are exposed by this ClusterIP service.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/io.k8s.api.core.v1.ServicePort"
@@ -944,9 +966,17 @@
       "description": "Template holds the information of a Gateway deployment template",
       "type": "object",
       "properties": {
+        "affinity": {
+          "description": "If specified, the pod's scheduling constraints",
+          "$ref": "#/definitions/io.k8s.api.core.v1.Affinity"
+        },
         "container": {
           "description": "Container is the main container image to run in the gateway pod",
           "$ref": "#/definitions/io.k8s.api.core.v1.Container"
+        },
+        "metadata": {
+          "description": "Metdata sets the pods's metadata, i.e. annotations and labels",
+          "$ref": "#/definitions/io.argoproj.gateway.v1alpha1.Metadata"
         },
         "securityContext": {
           "description": "SecurityContext holds pod-level security attributes and common container settings. Optional: Defaults to empty.  See type description for default values of each field.",
@@ -959,6 +989,13 @@
         "spec": {
           "description": "Spec holds the gateway deployment spec. DEPRECATED: Use Container instead.",
           "$ref": "#/definitions/io.k8s.api.core.v1.PodSpec"
+        },
+        "tolerations": {
+          "description": "If specified, the pod's tolerations.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.k8s.api.core.v1.Toleration"
+          }
         },
         "volumes": {
           "description": "Volumes is a list of volumes that can be mounted by containers in a workflow.",
@@ -2019,6 +2056,10 @@
         "source"
       ],
       "properties": {
+        "liveObject": {
+          "description": "LiveObject specifies whether the resource should be directly fetched from K8s instead of being marshaled from the resource artifact. If set to true, the resource artifact must contain the information required to uniquely identify the resource in the cluster, that is, you must specify \"apiVersion\", \"kind\" as well as \"name\" and \"namespace\" meta data. Only valid for operation type `update`",
+          "type": "boolean"
+        },
         "operation": {
           "description": "Operation refers to the type of operation performed on the k8s resource. Default value is Create.",
           "type": "string"

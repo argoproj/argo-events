@@ -54,9 +54,10 @@ func (ctx *gatewayContext) buildServiceResource() (*corev1.Service, error) {
 			Name: fmt.Sprintf("%s-gateway", ctx.gateway.Name),
 		},
 		Spec: corev1.ServiceSpec{
-			Ports:    ctx.gateway.Spec.Service.Ports,
-			Type:     corev1.ServiceTypeClusterIP,
-			Selector: labels,
+			Ports:     ctx.gateway.Spec.Service.Ports,
+			Type:      corev1.ServiceTypeClusterIP,
+			ClusterIP: ctx.gateway.Spec.Service.ClusterIP,
+			Selector:  labels,
 		},
 	}
 	if err := controllerscommon.SetObjectMeta(ctx.gateway, svc, v1alpha1.SchemaGroupVersionKind); err != nil {
@@ -100,6 +101,13 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 		common.LabelGatewayName: ctx.gateway.Name,
 		common.LabelObjectName:  ctx.gateway.Name,
 	}
+	podTemplateLabels := make(map[string]string)
+	if len(ctx.gateway.Spec.Template.Metadata.Labels) > 0 {
+		podTemplateLabels = ctx.gateway.Spec.Template.Metadata.Labels
+	}
+	for k, v := range labels {
+		podTemplateLabels[k] = v
+	}
 
 	eventContainer := corev1.Container{
 		Name:            "main",
@@ -122,7 +130,8 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
+				Labels:      podTemplateLabels,
+				Annotations: ctx.gateway.Spec.Template.Metadata.Annotations,
 			},
 			Spec: corev1.PodSpec{
 				ServiceAccountName: ctx.gateway.Spec.Template.ServiceAccountName,
@@ -133,17 +142,19 @@ func (ctx *gatewayContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 						ImagePullPolicy: corev1.PullAlways,
 						Resources: corev1.ResourceRequirements{
 							Requests: corev1.ResourceList{
-								corev1.ResourceCPU:    apiresource.MustParse("10m"),
-								corev1.ResourceMemory: apiresource.MustParse("64Mi"),
+								corev1.ResourceCPU:    apiresource.MustParse("5m"),
+								corev1.ResourceMemory: apiresource.MustParse("10Mi"),
 							},
 							Limits: corev1.ResourceList{
-								corev1.ResourceCPU:    apiresource.MustParse("500m"),
+								corev1.ResourceCPU:    apiresource.MustParse("50m"),
 								corev1.ResourceMemory: apiresource.MustParse("128Mi"),
 							},
 						},
 					},
 					eventContainer,
 				},
+				Affinity:        ctx.gateway.Spec.Template.Affinity,
+				Tolerations:     ctx.gateway.Spec.Template.Tolerations,
 				Volumes:         ctx.gateway.Spec.Template.Volumes,
 				SecurityContext: ctx.gateway.Spec.Template.SecurityContext,
 			},
@@ -161,6 +172,13 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 		common.LabelGatewayName: ctx.gateway.Name,
 		common.LabelObjectName:  ctx.gateway.Name,
 	}
+	podTemplateLabels := make(map[string]string)
+	if len(ctx.gateway.Spec.Template.Metadata.Labels) > 0 {
+		podTemplateLabels = ctx.gateway.Spec.Template.Metadata.Labels
+	}
+	for k, v := range labels {
+		podTemplateLabels[k] = v
+	}
 
 	return &appv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
@@ -169,7 +187,8 @@ func (ctx *gatewayContext) makeLegacyDeploymentSpec() (*appv1.DeploymentSpec, er
 		Replicas: &replicas,
 		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
+				Labels:      podTemplateLabels,
+				Annotations: ctx.gateway.Spec.Template.Metadata.Annotations,
 			},
 			Spec: *ctx.gateway.Spec.Template.Spec,
 		},

@@ -110,7 +110,7 @@ func TestMarkGatewayNodePhase(t *testing.T) {
 		convey.So(resultStatus.Name, convey.ShouldEqual, n.eventSourceNotification.name)
 
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
-			"4567": v1alpha1.NodeStatus{
+			"4567": {
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
 				Name:    "fake",
@@ -127,7 +127,7 @@ func TestGetNodeByID(t *testing.T) {
 	convey.Convey("Given a node id, retrieve the node", t, func() {
 		gc := getGatewayContext()
 		gc.gateway.Status.Nodes = map[string]v1alpha1.NodeStatus{
-			"1234": v1alpha1.NodeStatus{
+			"1234": {
 				Phase:   v1alpha1.NodePhaseNew,
 				Message: "init",
 				Name:    "fake",

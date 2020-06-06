@@ -35,6 +35,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayResource": schema_pkg_apis_gateway_v1alpha1_GatewayResource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewaySpec":     schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.GatewayStatus":   schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref),
+		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Metadata":        schema_pkg_apis_gateway_v1alpha1_Metadata(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NATSSubscriber":  schema_pkg_apis_gateway_v1alpha1_NATSSubscriber(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.NodeStatus":      schema_pkg_apis_gateway_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Service":         schema_pkg_apis_gateway_v1alpha1_Service(ref),
@@ -318,6 +319,47 @@ func schema_pkg_apis_gateway_v1alpha1_GatewayStatus(ref common.ReferenceCallback
 	}
 }
 
+func schema_pkg_apis_gateway_v1alpha1_Metadata(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Metadata holds the annotations and labels of a gateway pod",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"annotations": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_gateway_v1alpha1_NATSSubscriber(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -430,7 +472,7 @@ func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) comm
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "The list of ports that are exposed by this service.",
+							Description: "The list of ports that are exposed by this ClusterIP service.",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -439,6 +481,13 @@ func schema_pkg_apis_gateway_v1alpha1_Service(ref common.ReferenceCallback) comm
 									},
 								},
 							},
+						},
+					},
+					"clusterIP": {
+						SchemaProps: spec.SchemaProps{
+							Description: "clusterIP is the IP address of the service and is usually assigned randomly by the master. If an address is specified manually and is not in use by others, it will be allocated to the service; otherwise, creation of the service will fail. This field can not be changed through updates. Valid values are \"None\", empty string (\"\"), or a valid IP address. \"None\" can be specified for headless services when proxying is not required. More info: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"spec": {
@@ -513,6 +562,12 @@ func schema_pkg_apis_gateway_v1alpha1_Template(ref common.ReferenceCallback) com
 				Description: "Template holds the information of a Gateway deployment template",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Metdata sets the pods's metadata, i.e. annotations and labels",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Metadata"),
+						},
+					},
 					"serviceAccountName": {
 						SchemaProps: spec.SchemaProps{
 							Description: "ServiceAccountName is the name of the ServiceAccount to use to run gateway pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/",
@@ -551,6 +606,25 @@ func schema_pkg_apis_gateway_v1alpha1_Template(ref common.ReferenceCallback) com
 							Ref:         ref("k8s.io/api/core/v1.PodSecurityContext"),
 						},
 					},
+					"affinity": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod's scheduling constraints",
+							Ref:         ref("k8s.io/api/core/v1.Affinity"),
+						},
+					},
+					"tolerations": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If specified, the pod's tolerations.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("k8s.io/api/core/v1.Toleration"),
+									},
+								},
+							},
+						},
+					},
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Spec holds the gateway deployment spec. DEPRECATED: Use Container instead.",
@@ -561,6 +635,6 @@ func schema_pkg_apis_gateway_v1alpha1_Template(ref common.ReferenceCallback) com
 			},
 		},
 		Dependencies: []string{
-			"k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.Volume"},
+			"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1.Metadata", "k8s.io/api/core/v1.Affinity", "k8s.io/api/core/v1.Container", "k8s.io/api/core/v1.PodSecurityContext", "k8s.io/api/core/v1.PodSpec", "k8s.io/api/core/v1.Toleration", "k8s.io/api/core/v1.Volume"},
 	}
 }

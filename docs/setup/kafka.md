@@ -57,4 +57,4 @@ for installation instructions.
 7. Once a message is published, an argo workflow will be triggered. Run `argo list` to find the workflow. 
 
 ## Troubleshoot
-Please read the [FAQ](https://argoproj.github.io/argo-events/faq/).
+Please read the [FAQ](https://argoproj.github.io/argo-events/FAQ/).

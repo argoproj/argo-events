@@ -846,6 +846,85 @@ Resources refers to the metadata about the gateway resources
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Metadata">
+
+Metadata
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.Template">Template</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Metadata holds the annotations and labels of a gateway pod
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>annotations</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>labels</code></br> <em> map\[string\]string </em>
+
+</td>
+
+<td>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.NATSSubscriber">
 
 NATSSubscriber
@@ -1242,7 +1321,36 @@ Description
 
 <p>
 
-The list of ports that are exposed by this service.
+The list of ports that are exposed by this ClusterIP service.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>clusterIP</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+clusterIP is the IP address of the service and is usually assigned
+randomly by the master. If an address is specified manually and is not
+in use by others, it will be allocated to the service; otherwise,
+creation of the service will fail. This field can not be changed through
+updates. Valid values are “None”, empty string (“”), or a valid IP
+address. “None” can be specified for headless services when proxying is
+not required. More info:
+<a href="https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies">https://kubernetes.io/docs/concepts/services-networking/service/\#virtual-ips-and-service-proxies</a>
 
 </p>
 
@@ -1425,6 +1533,27 @@ Description
 
 <td>
 
+<code>metadata</code></br> <em>
+<a href="#argoproj.io/v1alpha1.Metadata"> Metadata </a> </em>
+
+</td>
+
+<td>
+
+<p>
+
+Metdata sets the pods’s metadata, i.e. annotations and labels
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
 <code>serviceAccountName</code></br> <em> string </em>
 
 </td>
@@ -1513,6 +1642,54 @@ Kubernetes core/v1.PodSecurityContext </a> </em>
 SecurityContext holds pod-level security attributes and common container
 settings. Optional: Defaults to empty. See type description for default
 values of each field.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>affinity</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#affinity-v1-core">
+Kubernetes core/v1.Affinity </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s scheduling constraints
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>tolerations</code></br> <em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#toleration-v1-core">
+\[\]Kubernetes core/v1.Toleration </a> </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If specified, the pod’s tolerations.
 
 </p>
 
