@@ -1599,6 +1599,13 @@ func schema_pkg_apis_eventsources_v1alpha1_ResourceFilter(ref common.ReferenceCa
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
+					"afterStart": {
+						SchemaProps: spec.SchemaProps{
+							Description: "If the resource is created after the start time then the event is treated as valid.",
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
 			},
 		},
