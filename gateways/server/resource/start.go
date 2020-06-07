@@ -274,11 +274,11 @@ func passFilters(event *InformerEvent, filter *v1alpha1.ResourceFilter, startTim
 	}
 	created := uObj.GetCreationTimestamp()
 	if !filter.CreatedBy.IsZero() && created.UTC().After(filter.CreatedBy.UTC()) {
-		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s", created.UTC().String(), filter.CreatedBy.UTC().String())
+		log.Infof("resource is created after filter time. creation-timestamp: %s, filter-creation-timestamp: %s\n", created.UTC().String(), filter.CreatedBy.UTC().String())
 		return false
 	}
 	if filter.AfterStart && created.UTC().Before(startTime.UTC()) {
-		log.Infof("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s", created.UTC().String(), startTime.UTC().String())
+		log.Infof("resource is created before service start time. creation-timestamp: %s, start-timestamp: %s\n", created.UTC().String(), startTime.UTC().String())
 		return false
 	}
 	return true
