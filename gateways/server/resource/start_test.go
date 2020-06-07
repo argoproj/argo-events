@@ -18,7 +18,9 @@ package resource
 
 import (
 	"testing"
+	"time"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/mitchellh/mapstructure"
 	"github.com/smartystreets/goconvey/convey"
@@ -69,10 +71,10 @@ func TestFilter(t *testing.T) {
 		err = mapstructure.Decode(pod, &outmap)
 		convey.So(err, convey.ShouldBeNil)
 
-		err = passFilters(&InformerEvent{
+		pass := passFilters(&InformerEvent{
 			Obj:  &unstructured.Unstructured{Object: outmap},
 			Type: "ADD",
-		}, resourceEventSource.Filter)
-		convey.So(err, convey.ShouldBeNil)
+		}, resourceEventSource.Filter, time.Now(), common.NewArgoEventsLogger().WithField("a", "b"))
+		convey.So(pass, convey.ShouldBeTrue)
 	})
 }

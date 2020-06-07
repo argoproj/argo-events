@@ -21,6 +21,8 @@ spec:
         - ADD
       # optional.
       filter:
+        # This indicates only watch the events happened after the service start time.
+        afterStart: true
         # labels and filters are meant to provide K8s API options to filter the object list that are being watched.
         # Please read https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api for more details.
 
