@@ -54,7 +54,8 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 			},
 			Type: corev1.ServiceTypeClusterIP,
 			Selector: map[string]string{
-				common.LabelOwnerName: ctx.sensor.Name,
+				common.LabelSensorName: ctx.sensor.Name,
+				common.LabelOwnerName:  ctx.sensor.Name,
 			},
 		},
 	}
@@ -88,6 +89,7 @@ func (ctx *sensorContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
 
 	replicas := int32(1)
 	labels := map[string]string{
+		common.LabelSensorName: ctx.sensor.Name,
 		common.LabelObjectName: ctx.sensor.Name,
 	}
 	sensorContainer := corev1.Container{
