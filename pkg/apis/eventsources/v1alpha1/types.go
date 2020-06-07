@@ -461,6 +461,18 @@ type StorageGridEventSource struct {
 	Events []string `json:"events,omitempty" protobuf:"bytes,2,opt,name=events"`
 	// Filter on object key which caused the notification.
 	Filter *StorageGridFilter `json:"filter,omitempty" protobuf:"bytes,3,opt,name=filter"`
+	// TopicArn
+	TopicArn string `json:"topicArn" protobuf:"bytes,4,name=topicArn"`
+	// Name of the bucket to register notifications for.
+	Bucket string `json:"bucket" protobuf:"bytes,5,name=bucket"`
+	// S3 region.
+	// Defaults to us-east-1
+	// +optional
+	Region string `json:"region,omitempty" protobuf:"bytes,6,opt,name=region"`
+	// Auth token for storagegrid api
+	AuthToken *corev1.SecretKeySelector `json:"authToken" protobuf:"bytes,7,name=authToken"`
+	// ApiURL is the url of the storagegrid api.
+	ApiURL string `json:"apiURL" protobuf:"bytes,8,name=apiURL"`
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects

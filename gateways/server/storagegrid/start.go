@@ -17,7 +17,9 @@ limitations under the License.
 package storagegrid
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -48,6 +50,17 @@ var (
        <RequestId>` + generateUUID().String() + `</RequestId>
     </ResponseMetadata> 
 </PublishResponse>` + "\n"
+
+	notificationBodyTemplate = `
+<?xml version="1.0" encoding="UTF-8"?>
+  <NotificationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <TopicConfiguration>
+       <Id>%s</Id>
+       <Topic>%s</Topic>
+       %s
+    </TopicConfiguration>
+  </NotificationConfiguration>
+` + "\n"
 )
 
 // set up the activation and inactivation channels to control the state of routes.
@@ -171,6 +184,53 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 
 // PostActivate performs operations once the route is activated and ready to consume requests
 func (router *Router) PostActivate() error {
+	eventSource := router.storageGridEventSource
+	route := router.route
+
+	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
+	apiURL := common.FormattedURL(eventSource.ApiURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket))
+
+	logger := route.Logger.WithFields(
+		map[string]interface{}{
+			common.LabelEventSource: route.EventSource.Name,
+			"registration-url":      registrationURL,
+			"bucket":                eventSource.Bucket,
+			"auth-secret-name":      eventSource.AuthToken.Name,
+			"api-url":               apiURL,
+		})
+
+	logger.Infoln("registering notification configuration on storagegrid...")
+
+	var events []string
+	for _, event := range eventSource.Events {
+		events = append(events, fmt.Sprintf("<Event>%s</Event>", event))
+	}
+
+	eventXML := strings.Join(events, "\n")
+
+	notificationBody := fmt.Sprintf(notificationBodyTemplate, route.EventSource.Name, eventSource.TopicArn, eventXML)
+
+	notification := &storageGridNotificationRequest{
+		Notification: notificationBody,
+	}
+
+	notificationRequest, err := json.Marshal(notification)
+	if err != nil {
+		return err
+	}
+
+	client := http.Client{}
+	request, err := http.NewRequest(http.MethodPut, apiURL, bytes.NewReader(notificationRequest))
+	if err != nil {
+		return err
+	}
+
+	_, err = client.Do(request)
+	if err != nil {
+		return err
+	}
+
+	logger.Infoln("successfully registered notification configuration on storagegrid")
 	return nil
 }
 

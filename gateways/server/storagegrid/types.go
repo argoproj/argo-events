@@ -38,6 +38,10 @@ type Router struct {
 	storageGridEventSource *v1alpha1.StorageGridEventSource
 }
 
+type storageGridNotificationRequest struct {
+	Notification string `json:"notification"`
+}
+
 // storageGridNotification is the bucket notification received from storage grid
 type storageGridNotification struct {
 	Action  string `json:"Action"`
