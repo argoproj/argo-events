@@ -87,6 +87,8 @@ const (
 	EnvVarGatewayServerPort = "GATEWAY_SERVER_PORT"
 	// ProcessorPort is the default port for the gateway event processor server to run on.
 	GatewayProcessorPort = "9300"
+	//LabelGatewayName is the label for gateway name
+	LabelGatewayName = "gateway-name"
 )
 
 const (
@@ -108,8 +110,6 @@ const (
 	LabelOwnerName = "owner-name"
 	// LabelObjectName is the label for object name
 	LabelObjectName = "object-name"
-	//LabelGatewayName is the label for gateway name
-	LabelGatewayName = "gateway-name"
 )
 
 // various supported media types

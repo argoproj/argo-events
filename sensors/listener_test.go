@@ -17,7 +17,7 @@ limitations under the License.
 package sensors
 
 import (
-	"context"
+	"encoding/json"
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/types"
@@ -78,7 +78,11 @@ func TestHandleEvent(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.updateFunc()
-			result := sensorCtx.handleEvent(context.Background(), event)
+			eventBody, err := json.Marshal(&event)
+			if err != nil {
+				assert.Fail(t, err.Error())
+			}
+			result := sensorCtx.handleEvent(eventBody)
 			assert.Equal(t, test.result, result)
 		})
 	}
