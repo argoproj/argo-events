@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/nats-io/go-nats"
 	"io/ioutil"
 	"net/http"
 
@@ -29,6 +28,7 @@ import (
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/types"
 	cloudevents "github.com/cloudevents/sdk-go"
+	"github.com/nats-io/go-nats"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
