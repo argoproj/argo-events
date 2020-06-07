@@ -17,15 +17,18 @@ limitations under the License.
 package main
 
 import (
-	"context"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	cloudevents "github.com/cloudevents/sdk-go"
-	cloudeventsnats "github.com/cloudevents/sdk-go/pkg/cloudevents/transport/nats"
 	"github.com/google/uuid"
+	"github.com/nats-io/go-nats"
+	"github.com/sirupsen/logrus"
 )
 
 // updateSubscriberClients updates the active clients for event subscribers
@@ -34,51 +37,21 @@ func (gatewayContext *GatewayContext) updateSubscriberClients() {
 		return
 	}
 
-	if gatewayContext.httpSubscribers == nil {
-		gatewayContext.httpSubscribers = make(map[string]cloudevents.Client)
-	}
 	if gatewayContext.natsSubscribers == nil {
-		gatewayContext.natsSubscribers = make(map[string]cloudevents.Client)
-	}
-
-	// http subscribers
-	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
-		if _, ok := gatewayContext.httpSubscribers[subscriber]; !ok {
-			t, err := cloudevents.NewHTTPTransport(
-				cloudevents.WithTarget(subscriber),
-				cloudevents.WithEncoding(cloudevents.HTTPBinaryV03),
-			)
-			if err != nil {
-				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
-				continue
-			}
-
-			client, err := cloudevents.NewClient(t)
-			if err != nil {
-				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
-				continue
-			}
-			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gatewayContext.httpSubscribers[subscriber] = client
-		}
+		gatewayContext.natsSubscribers = make(map[string]*nats.Conn)
 	}
 
 	// nats subscribers
 	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
 		if _, ok := gatewayContext.natsSubscribers[subscriber.Name]; !ok {
-			t, err := cloudeventsnats.New(subscriber.ServerURL, subscriber.Subject)
+			conn, err := nats.Connect(subscriber.ServerURL)
 			if err != nil {
-				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a transport")
+				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to connect to subscriber")
 				continue
 			}
 
-			client, err := cloudevents.NewClient(t)
-			if err != nil {
-				gatewayContext.logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to create a client")
-				continue
-			}
 			gatewayContext.logger.WithField("subscriber", subscriber).Infoln("added a client for the subscriber")
-			gatewayContext.natsSubscribers[subscriber.Name] = client
+			gatewayContext.natsSubscribers[subscriber.Name] = conn
 		}
 	}
 }
@@ -100,37 +73,53 @@ func (gatewayContext *GatewayContext) dispatchEvent(gatewayEvent *gateways.Event
 
 	completeSuccess := true
 
+	eventBody, err := json.Marshal(cloudEvent)
+	if err != nil {
+		logger.WithError(err).Errorln("failed to marshal the event")
+		return err
+	}
+
 	// http subscribers
 	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.HTTP {
-		client, ok := gatewayContext.httpSubscribers[subscriber]
-		if !ok {
-			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
+		request, err := http.NewRequest(http.MethodPost, subscriber, bytes.NewReader(eventBody))
+		if err != nil {
+			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to construct http request for the event")
 			completeSuccess = false
 			continue
 		}
 
-		_, _, err := client.Send(context.Background(), *cloudEvent)
+		response, err := gatewayContext.httpClient.Do(request)
 		if err != nil {
-			logger.WithError(err).WithField("target", subscriber).Warnln("failed to send the event")
+			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to send http request for the event")
 			completeSuccess = false
 			continue
 		}
+
+		logger.WithFields(logrus.Fields{
+			"status":     response.Status,
+			"subscriber": subscriber,
+		}).Infoln("successfully sent event to the subscriber")
 	}
 
 	// NATS subscribers
 	for _, subscriber := range gatewayContext.gateway.Spec.Subscribers.NATS {
-		client, ok := gatewayContext.natsSubscribers[subscriber.Name]
+		conn, ok := gatewayContext.natsSubscribers[subscriber.Name]
 		if !ok {
 			gatewayContext.logger.WithField("subscriber", subscriber).Warnln("unable to send event. no client found for the subscriber")
 			completeSuccess = false
 			continue
 		}
 
-		if _, _, err := client.Send(context.Background(), *cloudEvent); err != nil {
-			logger.WithError(err).WithField("target", subscriber).Warnln("failed to send the event")
+		if err := conn.Publish(subscriber.Subject, eventBody); err != nil {
+			logger.WithError(err).WithField("subscriber", subscriber).Warnln("failed to publish the event")
 			completeSuccess = false
 			continue
 		}
+
+		logger.WithFields(logrus.Fields{
+			"subscriber": subscriber.Name,
+			"subject":    subscriber.Subject,
+		}).Infoln("successfully published event on the subject")
 	}
 
 	response := "dispatched event"

@@ -4058,6 +4058,29 @@ treated as valid.
 
 </tr>
 
+<tr>
+
+<td>
+
+<code>afterStart</code></br> <em> bool </em>
+
+</td>
+
+<td>
+
+<em>(Optional)</em>
+
+<p>
+
+If the resource is created after the start time then the event is
+treated as valid.
+
+</p>
+
+</td>
+
+</tr>
+
 </tbody>
 
 </table>

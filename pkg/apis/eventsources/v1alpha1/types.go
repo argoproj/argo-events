@@ -168,6 +168,9 @@ type ResourceFilter struct {
 	// If resource is created before the specified time then the event is treated as valid.
 	// +optional
 	CreatedBy metav1.Time `json:"createdBy,omitempty" protobuf:"bytes,4,opt,name=createdBy"`
+	// If the resource is created after the start time then the event is treated as valid.
+	// +optional
+	AfterStart bool `json:"afterStart,omitempty" protobuf:"bytes,5,opt,name=afterStart"`
 }
 
 // Selector represents conditional operation to select K8s objects.
