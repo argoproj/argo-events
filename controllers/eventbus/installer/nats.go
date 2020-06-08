@@ -77,8 +77,8 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	// default to token auth
-	defaultAuthStrategy := v1alpha1.AuthStrategyToken
+	// default to none
+	defaultAuthStrategy := v1alpha1.AuthStrategyNone
 	authStrategy := natsObj.Native.Auth
 	if authStrategy == nil {
 		authStrategy = &defaultAuthStrategy
@@ -93,11 +93,12 @@ func (i *natsInstaller) Install() (*v1alpha1.BusConfig, error) {
 	}
 	i.eventBus.Status.MarkDeployed("Succeeded", "NATS is deployed")
 	i.eventBus.Status.MarkConfigured()
+	clusterID := generateClusterID(i.eventBus)
 	busConfig := &v1alpha1.BusConfig{
 		NATS: &v1alpha1.NATSConfig{
 			URL:       fmt.Sprintf("nats://%s:%s", generateServiceName(i.eventBus), strconv.Itoa(int(clientPort))),
-			ClusterID: generateClusterID(i.eventBus),
-			Auth:      *authStrategy,
+			ClusterID: &clusterID,
+			Auth:      authStrategy,
 		},
 	}
 	if *authStrategy != v1alpha1.AuthStrategyNone {

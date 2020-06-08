@@ -38,7 +38,9 @@ var (
 		},
 		Spec: v1alpha1.EventBusSpec{
 			NATS: &v1alpha1.NATSBus{
-				Native: &v1alpha1.NativeStrategy{},
+				Native: &v1alpha1.NativeStrategy{
+					Auth: &v1alpha1.AuthStrategyToken,
+				},
 			},
 		},
 	}
@@ -120,7 +122,7 @@ func TestInstallationAuthtoken(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
 		assert.NotEmpty(t, busconf.NATS.URL)
-		assert.Equal(t, busconf.NATS.Auth, v1alpha1.AuthStrategyToken)
+		assert.Equal(t, busconf.NATS.Auth, &v1alpha1.AuthStrategyToken)
 
 		ctx := context.TODO()
 		svcList := &corev1.ServiceList{}
@@ -167,7 +169,7 @@ func TestInstallationAuthNone(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, busconf.NATS)
 		assert.NotEmpty(t, busconf.NATS.URL)
-		assert.Equal(t, busconf.NATS.Auth, v1alpha1.AuthStrategyNone)
+		assert.Equal(t, busconf.NATS.Auth, &v1alpha1.AuthStrategyNone)
 
 		ctx := context.TODO()
 		svcList := &corev1.ServiceList{}

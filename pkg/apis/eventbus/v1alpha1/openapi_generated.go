@@ -241,25 +241,29 @@ func schema_pkg_apis_eventbus_v1alpha1_NATSConfig(ref common.ReferenceCallback) 
 				Properties: map[string]spec.Schema{
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "NATS host url",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"clusterID": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Cluster ID for nats streaming, if it's missing, treat it as NATS server",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"auth": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Description: "Auth strategy, default to AuthStrategyNone",
+							Type:        []string{"string"},
+							Format:      "",
 						},
 					},
 					"accessSecret": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
+							Description: "Secret for auth",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
 						},
 					},
 				},

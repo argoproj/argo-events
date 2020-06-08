@@ -560,6 +560,12 @@ Description
 
 <td>
 
+<p>
+
+NATS host url
+
+</p>
+
 </td>
 
 </tr>
@@ -573,6 +579,14 @@ Description
 </td>
 
 <td>
+
+<em>(Optional)</em>
+
+<p>
+
+Cluster ID for nats streaming, if it’s missing, treat it as NATS server
+
+</p>
 
 </td>
 
@@ -589,6 +603,14 @@ Description
 
 <td>
 
+<em>(Optional)</em>
+
+<p>
+
+Auth strategy, default to AuthStrategyNone
+
+</p>
+
 </td>
 
 </tr>
@@ -604,6 +626,14 @@ Kubernetes core/v1.SecretKeySelector </a> </em>
 </td>
 
 <td>
+
+<em>(Optional)</em>
+
+<p>
+
+Secret for auth
+
+</p>
 
 </td>
 
