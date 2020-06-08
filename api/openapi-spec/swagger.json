@@ -695,7 +695,6 @@
       "type": "object",
       "required": [
         "metadata",
-        "status",
         "spec"
       ],
       "properties": {
@@ -766,8 +765,7 @@
       "description": "GatewaySpec represents gateway specifications",
       "type": "object",
       "required": [
-        "type",
-        "processorPort"
+        "type"
       ],
       "properties": {
         "eventSourceRef": {
@@ -1299,13 +1297,7 @@
       "description": "EventContext holds the context of the cloudevent received from a gateway.",
       "type": "object",
       "required": [
-        "id",
-        "source",
-        "specversion",
-        "type",
-        "dataContentType",
-        "subject",
-        "time"
+        "source"
       ],
       "properties": {
         "dataContentType": {
@@ -1368,9 +1360,6 @@
     "io.argoproj.sensor.v1alpha1.EventDependencyFilter": {
       "description": "EventDependencyFilter defines filters and constraints for a event.",
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "context": {
           "description": "Context filter constraints",
@@ -1808,8 +1797,7 @@
       "type": "object",
       "required": [
         "metadata",
-        "spec",
-        "status"
+        "spec"
       ],
       "properties": {
         "apiVersion": {
@@ -2156,8 +2144,7 @@
       "description": "Trigger is an action taken, output produced, an event created, a message sent",
       "type": "object",
       "required": [
-        "template",
-        "policy"
+        "template"
       ],
       "properties": {
         "parameters": {

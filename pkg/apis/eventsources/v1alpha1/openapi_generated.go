@@ -223,7 +223,6 @@ func schema_pkg_apis_eventsources_v1alpha1_CalendarEventSource(ref common.Refere
 						},
 					},
 				},
-				Required: []string{"schedule", "interval"},
 			},
 		},
 	}
@@ -341,7 +340,7 @@ func schema_pkg_apis_eventsources_v1alpha1_EventSource(ref common.ReferenceCallb
 						},
 					},
 				},
-				Required: []string{"metadata", "status", "spec"},
+				Required: []string{"metadata", "spec"},
 			},
 		},
 		Dependencies: []string{
@@ -1378,7 +1377,7 @@ func schema_pkg_apis_eventsources_v1alpha1_PubSubEventSource(ref common.Referenc
 					},
 					"enableWorkflowIdentity": {
 						SchemaProps: spec.SchemaProps{
-							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.",
+							Description: "EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile. If true, authentication is done with WorkflowIdentity. If false or omitted, authentication is done with CredentialsFile.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},

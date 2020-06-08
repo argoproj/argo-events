@@ -4318,7 +4318,6 @@ spec:
             type:
               type: string
           required:
-          - processorPort
           - type
           type: object
         status:
@@ -4372,7 +4371,6 @@ spec:
       required:
       - metadata
       - spec
-      - status
       type: object
   version: v1alpha1
   versions:

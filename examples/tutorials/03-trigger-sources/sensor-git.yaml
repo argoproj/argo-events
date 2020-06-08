@@ -5,6 +5,7 @@ metadata:
 spec:
   template:
     container:
+      name: main
       volumeMounts:
         - mountPath: /git/argoproj
           name: argoproj

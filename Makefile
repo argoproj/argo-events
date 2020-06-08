@@ -169,3 +169,7 @@ start:
 lint:
 	golangci-lint run --fix
 
+.PHONY: test-examples
+test-examples:
+	./hack/test-examples.sh
+

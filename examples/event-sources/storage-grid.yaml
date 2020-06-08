@@ -9,6 +9,7 @@ spec:
       # hook contains configuration for the HTTP server running in the gateway.
       # StorageGrid will send events to following port and endpoint
       webhook:
+        url: "http://localhost"
         # port to run HTTP server on
         port: "8080"
         # HTTP request method to allow. In this case, only POST requests are accepted

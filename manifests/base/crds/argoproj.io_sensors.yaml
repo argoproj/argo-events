@@ -53,13 +53,7 @@ spec:
                           type:
                             type: string
                         required:
-                        - dataContentType
-                        - id
                         - source
-                        - specversion
-                        - subject
-                        - time
-                        - type
                         type: object
                       data:
                         items:
@@ -89,8 +83,6 @@ spec:
                           stop:
                             type: string
                         type: object
-                    required:
-                    - name
                     type: object
                   gatewayName:
                     type: string
@@ -5104,7 +5096,6 @@ spec:
                     - name
                     type: object
                 required:
-                - policy
                 - template
                 type: object
               type: array
@@ -5151,13 +5142,7 @@ spec:
                           type:
                             type: string
                         required:
-                        - dataContentType
-                        - id
                         - source
-                        - specversion
-                        - subject
-                        - time
-                        - type
                         type: object
                       data:
                         format: byte
@@ -5221,7 +5206,6 @@ spec:
       required:
       - metadata
       - spec
-      - status
       type: object
   version: v1alpha1
   versions:

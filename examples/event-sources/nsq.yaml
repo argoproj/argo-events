@@ -24,8 +24,8 @@ spec:
         steps: 5
         # factor to increase on each step.
         # setting factor > 1 makes the backoff exponential.
-        factor: 2
-        jitter: 0.2
+        factor: "2"
+        jitter: "0.2"
 
 #    example-tls:
 #      hostAddress: nsqlookupd.argo-events.svc:4161

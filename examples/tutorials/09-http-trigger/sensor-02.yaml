@@ -16,7 +16,7 @@ spec:
     - template:
         name: http-trigger
         http:
-          serverURL: http://http-server.argo-events.svc:8090/hi
+          url: http://http-server.argo-events.svc:8090/hi
           payload:
             - src:
                 dependencyName: test-dep

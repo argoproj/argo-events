@@ -614,7 +614,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventContext(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"id", "source", "specversion", "type", "dataContentType", "subject", "time"},
+				Required: []string{"source"},
 			},
 		},
 		Dependencies: []string{
@@ -705,7 +705,6 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependencyFilter(ref common.ReferenceC
 						},
 					},
 				},
-				Required: []string{"name"},
 			},
 		},
 		Dependencies: []string{
@@ -1427,7 +1426,7 @@ func schema_pkg_apis_sensor_v1alpha1_Sensor(ref common.ReferenceCallback) common
 						},
 					},
 				},
-				Required: []string{"metadata", "spec", "status"},
+				Required: []string{"metadata", "spec"},
 			},
 		},
 		Dependencies: []string{
@@ -2024,7 +2023,7 @@ func schema_pkg_apis_sensor_v1alpha1_Trigger(ref common.ReferenceCallback) commo
 						},
 					},
 				},
-				Required: []string{"template", "policy"},
+				Required: []string{"template"},
 			},
 		},
 		Dependencies: []string{

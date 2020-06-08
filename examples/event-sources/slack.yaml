@@ -9,6 +9,7 @@ spec:
       # hook contains configuration for the HTTP server running in the gateway.
       # Slack will send events to following port and endpoint
       webhook:
+        url: "http://localhost"
         # endpoint to listen events on
         endpoint: "/"
         # port to run HTTP server on
@@ -33,6 +34,7 @@ spec:
     # with secure connection
     example-secure:
       webhook:
+        url: "https://localhost"
         endpoint: "/"
         port: "14000"
         method: "POST"

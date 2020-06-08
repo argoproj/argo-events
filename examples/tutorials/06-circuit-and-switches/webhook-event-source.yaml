@@ -7,6 +7,7 @@ spec:
   webhook:
     # gateway can run multiple HTTP servers. Simply define a unique port to start a new HTTP server
     example:
+      url: "http://localhost"
       # port to run HTTP server on
       port: "12000"
       # endpoint to listen to

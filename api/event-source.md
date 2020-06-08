@@ -3494,7 +3494,7 @@ for GCP
 
 EnableWorkflowIdentity determines if your project authenticates to GCP
 with WorkflowIdentity or CredentialsFile. If true, authentication is
-done with WorkflowIdentity. If false or omited, authentication is done
+done with WorkflowIdentity. If false or omitted, authentication is done
 with CredentialsFile.
 
 </p>

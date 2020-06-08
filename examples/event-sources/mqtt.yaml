@@ -14,7 +14,7 @@ spec:
       # source will be JSON
       jsonBody: true
       # client id
-      clientId: 2345
+      clientId: "2345"
       # optional backoff time for connection retries.
       # if not provided, default connection backoff time will be used.
       connectionBackoff:
@@ -24,8 +24,8 @@ spec:
         steps: 5
         # factor to increase on each step.
         # setting factor > 1 makes backoff exponential.
-        factor: 2
-        jitter: 0.2
+        factor: "2"
+        jitter: "0.2"
 
 #    example-tls:
 #      url: "tcp://mqtt.argo-events:1883"

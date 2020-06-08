@@ -41,7 +41,7 @@ const (
 type Gateway struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Status            GatewayStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
+	Status            GatewayStatus `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 	Spec              GatewaySpec   `json:"spec" protobuf:"bytes,3,opt,name=spec"`
 }
 
@@ -69,7 +69,7 @@ type GatewaySpec struct {
 	// +optional
 	Subscribers *Subscribers `json:"subscribers,omitempty" protobuf:"bytes,5,opt,name=subscribers"`
 	// Port on which the gateway event source processor is running on.
-	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
+	ProcessorPort string `json:"processorPort,omitempty" protobuf:"bytes,6,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
 	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
 }

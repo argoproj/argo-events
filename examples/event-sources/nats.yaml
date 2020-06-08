@@ -22,8 +22,8 @@ spec:
         steps: 5
         # factor to increase on each step.
         # setting factor > 1 makes backoff exponential.
-        factor: 2
-        jitter: 0.2
+        factor: "2"
+        jitter: "0.2"
 
 #    example-tls:
 #      url: nats://nats.argo-events.svc:4222

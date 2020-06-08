@@ -116,7 +116,7 @@ type Sensor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
 	Spec              SensorSpec   `json:"spec" protobuf:"bytes,2,opt,name=spec"`
-	Status            SensorStatus `json:"status" protobuf:"bytes,3,opt,name=status"`
+	Status            SensorStatus `json:"status,omitempty" protobuf:"bytes,3,opt,name=status"`
 }
 
 // SensorList is the list of Sensor resources
@@ -223,7 +223,7 @@ type DependencyGroup struct {
 // EventDependencyFilter defines filters and constraints for a event.
 type EventDependencyFilter struct {
 	// Name is the name of event filter
-	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	Name string `json:"name,omitempty" protobuf:"bytes,1,name=name"`
 	// Time filter on the event with escalation
 	Time *TimeFilter `json:"time,omitempty" protobuf:"bytes,2,opt,name=time"`
 	// Context filter constraints
@@ -287,7 +287,7 @@ type Trigger struct {
 	// Parameters is the list of parameters applied to the trigger template definition
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,2,rep,name=parameters"`
 	// Policy to configure backoff and execution criteria for the trigger
-	Policy *TriggerPolicy `json:"policy" protobuf:"bytes,3,opt,name=policy"`
+	Policy *TriggerPolicy `json:"policy,omitempty" protobuf:"bytes,3,opt,name=policy"`
 }
 
 // TriggerTemplate is the template that describes trigger specification.
@@ -841,19 +841,19 @@ type Event struct {
 // EventContext holds the context of the cloudevent received from a gateway.
 type EventContext struct {
 	// ID of the event; must be non-empty and unique within the scope of the producer.
-	ID string `json:"id" protobuf:"bytes,1,name=id"`
+	ID string `json:"id,omitempty" protobuf:"bytes,1,name=id"`
 	// Source - A URI describing the event producer.
 	Source string `json:"source" protobuf:"bytes,2,name=source"`
 	// SpecVersion - The version of the CloudEvents specification used by the event.
-	SpecVersion string `json:"specversion" protobuf:"bytes,3,name=specVersion"`
+	SpecVersion string `json:"specversion,omitempty" protobuf:"bytes,3,name=specVersion"`
 	// Type - The type of the occurrence which has happened.
-	Type string `json:"type" protobuf:"bytes,4,name=type"`
+	Type string `json:"type,omitempty" protobuf:"bytes,4,name=type"`
 	// DataContentType - A MIME (RFC2046) string describing the media type of `data`.
-	DataContentType string `json:"dataContentType" protobuf:"bytes,5,name=dataContentType"`
+	DataContentType string `json:"dataContentType,omitempty" protobuf:"bytes,5,name=dataContentType"`
 	// Subject - The subject of the event in the context of the event producer
-	Subject string `json:"subject" protobuf:"bytes,6,name=subject"`
+	Subject string `json:"subject,omitempty" protobuf:"bytes,6,name=subject"`
 	// Time - A Timestamp when the event happened.
-	Time metav1.Time `json:"time" protobuf:"bytes,7,name=time"`
+	Time metav1.Time `json:"time,omitempty" protobuf:"bytes,7,name=time"`
 }
 
 // HasLocation whether or not an minio has a location defined

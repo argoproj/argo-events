@@ -33,7 +33,7 @@ import (
 type EventSource struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata" protobuf:"bytes,1,opt,name=metadata"`
-	Status            EventSourceStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
+	Status            EventSourceStatus `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 	Spec              *EventSourceSpec  `json:"spec" protobuf:"bytes,3,opt,name=spec"`
 }
 
@@ -101,9 +101,9 @@ type EventSourceSpec struct {
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 type CalendarEventSource struct {
 	// Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-	Schedule string `json:"schedule" protobuf:"bytes,1,name=schedule"`
+	Schedule string `json:"schedule,omitempty" protobuf:"bytes,1,name=schedule"`
 	// Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-	Interval string `json:"interval" protobuf:"bytes,2,name=interval"`
+	Interval string `json:"interval,omitempty" protobuf:"bytes,2,name=interval"`
 	// ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
 	ExclusionDates []string `json:"exclusionDates,omitempty" protobuf:"bytes,3,opt,name=exclusionDates"`
 	// Timezone in which to run the schedule

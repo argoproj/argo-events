@@ -98,7 +98,7 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBus(ref common.ReferenceCallback) co
 						},
 					},
 				},
-				Required: []string{"metadata", "spec", "status"},
+				Required: []string{"metadata", "spec"},
 			},
 		},
 		Dependencies: []string{

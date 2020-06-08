@@ -109,7 +109,7 @@ func schema_pkg_apis_gateway_v1alpha1_Gateway(ref common.ReferenceCallback) comm
 						},
 					},
 				},
-				Required: []string{"metadata", "status", "spec"},
+				Required: []string{"metadata", "spec"},
 			},
 		},
 		Dependencies: []string{
@@ -245,7 +245,7 @@ func schema_pkg_apis_gateway_v1alpha1_GatewaySpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"type", "processorPort"},
+				Required: []string{"type"},
 			},
 		},
 		Dependencies: []string{
