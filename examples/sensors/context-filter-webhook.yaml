@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: webhook
+      eventSourceName: webhook-event-source
       eventName: example
       # The filter is applied on the context of the event.
       # The trigger will be executed only of the event passes the filter

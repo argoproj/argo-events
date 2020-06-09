@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: mqtt
+      eventSourceName: mqtt-event-source
       eventName: example
   triggers:
     - template:

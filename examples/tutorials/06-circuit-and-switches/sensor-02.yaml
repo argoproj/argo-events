@@ -7,10 +7,10 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep-webhook
-      gatewayName: webhook-gateway
+      eventSourceName: webhook-event-source
       eventName: example
     - name: test-dep-minio
-      gatewayName: minio-gateway
+      eventSourceName: minio-event-source
       eventName: example
 
   # group event dependencies

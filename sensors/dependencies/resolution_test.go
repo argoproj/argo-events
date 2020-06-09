@@ -19,6 +19,7 @@ package dependencies
 import (
 	"testing"
 
+	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,7 +35,7 @@ func TestResolveDependency(t *testing.T) {
 		{
 			name: "unknown dependency",
 			updateFunc: func() {
-				obj.Spec.Dependencies[0].GatewayName = "fake-gateway"
+				obj.Spec.Dependencies[0].GatewayName = "fake-source"
 				obj.Spec.Dependencies[0].EventName = "example"
 			},
 			testFunc: func(dep *v1alpha1.EventDependency) {
@@ -44,7 +45,7 @@ func TestResolveDependency(t *testing.T) {
 		{
 			name: "known dependency",
 			updateFunc: func() {
-				obj.Spec.Dependencies[0].GatewayName = "fake-gateway"
+				obj.Spec.Dependencies[0].GatewayName = "fake-source"
 				obj.Spec.Dependencies[0].EventName = "example-1"
 			},
 			testFunc: func(dep *v1alpha1.EventDependency) {
@@ -65,7 +66,7 @@ func TestResolveDependency(t *testing.T) {
 
 	event := &v1alpha1.Event{
 		Context: &v1alpha1.EventContext{
-			Source:  "fake-gateway",
+			Source:  "fake-source",
 			Subject: "example-1",
 		},
 		Data: nil,
@@ -74,7 +75,7 @@ func TestResolveDependency(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			test.updateFunc()
-			dependency := ResolveDependency(obj.Spec.Dependencies, event)
+			dependency := ResolveDependency(obj.Spec.Dependencies, event, common.NewArgoEventsLogger())
 			test.testFunc(dependency)
 		})
 	}

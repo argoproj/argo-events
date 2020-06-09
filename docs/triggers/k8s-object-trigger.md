@@ -36,7 +36,7 @@ set up event-driven pipelines for existing workloads.
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: webhook-gateway
+              eventSourceName: webhook-event-source
               eventName: example
           subscription:
             http:

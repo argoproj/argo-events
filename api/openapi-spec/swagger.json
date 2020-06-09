@@ -1357,6 +1357,7 @@
       "required": [
         "name",
         "gatewayName",
+        "eventSourceName",
         "eventName"
       ],
       "properties": {
@@ -1364,12 +1365,16 @@
           "description": "EventName is the name of the event",
           "type": "string"
         },
+        "eventSourceName": {
+          "description": "EventSourceName is the name of EventSource that Sensor depends on",
+          "type": "string"
+        },
         "filters": {
           "description": "Filters and rules governing toleration of success and constraints on the context and data of an event",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.EventDependencyFilter"
         },
         "gatewayName": {
-          "description": "GatewayName is the name of the gateway from whom the event is received",
+          "description": "GatewayName is the name of the gateway from whom the event is received DEPRECATED: Use EventSourceName instead.",
           "type": "string"
         },
         "name": {

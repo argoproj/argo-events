@@ -10,7 +10,7 @@ spec:
       port: 9300
   dependencies:
     - name: test-dep
-      gatewayName: slack
+      eventSourceName: slack-event-source
       eventName: example-insecure
   triggers:
     - template:

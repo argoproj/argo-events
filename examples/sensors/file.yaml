@@ -7,7 +7,7 @@ spec:
     serviceAccountName: argo-events-sa
   dependencies:
     - name: test-dep
-      gatewayName: file
+      eventSourceName: file-event-source
       eventName: example
   subscription:
     http:

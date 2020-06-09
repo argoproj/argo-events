@@ -24,7 +24,7 @@ The NATS trigger specification is available [here](https://github.com/argoproj/a
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: minio-gateway
+              eventSourceName: minio-event-source
               eventName: example
           subscription:
             http:

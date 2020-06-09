@@ -20,9 +20,9 @@ payload structure as,
 
         {
             "context": {
-              "type": "type_of_gateway",
+              "type": "type_of_eventsource",
               "specVersion": "cloud_events_version",
-              "source": "name_of_the_gateway",
+              "source": "name_of_the_eventsource",
               "eventID": "unique_event_id",
               "time": "event_time",
               "dataContentType": "type_of_data",

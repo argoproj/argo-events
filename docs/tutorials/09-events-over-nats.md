@@ -110,7 +110,7 @@ Up until now, you have seen the gateway dispatch events to sensor over HTTP. In 
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: webhook-gateway
+              eventSourceName: webhook-event-source
               eventName: example
           subscription:
             nats:
@@ -214,7 +214,7 @@ You can easily set up a gateway to send events over both HTTP and NATS,
             serviceAccountName: argo-events-sa
           dependencies:
             - name: test-dep
-              gatewayName: webhook-gateway
+              eventSourceName: webhook-event-source
               eventName: example
           subscription:
             http:

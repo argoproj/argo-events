@@ -673,7 +673,14 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 					},
 					"gatewayName": {
 						SchemaProps: spec.SchemaProps{
-							Description: "GatewayName is the name of the gateway from whom the event is received",
+							Description: "GatewayName is the name of the gateway from whom the event is received DEPRECATED: Use EventSourceName instead.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"eventSourceName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventSourceName is the name of EventSource that Sensor depends on",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -692,7 +699,7 @@ func schema_pkg_apis_sensor_v1alpha1_EventDependency(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"name", "gatewayName", "eventName"},
+				Required: []string{"name", "gatewayName", "eventSourceName", "eventName"},
 			},
 		},
 		Dependencies: []string{
