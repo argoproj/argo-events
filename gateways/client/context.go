@@ -24,7 +24,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsources/clientset/versioned"
+	eventsourceClientset "github.com/argoproj/argo-events/pkg/client/eventsource/clientset/versioned"
 	gwclientset "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned"
 	"github.com/nats-io/go-nats"
 	"github.com/sirupsen/logrus"

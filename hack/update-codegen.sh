@@ -31,8 +31,8 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
 
 subheader "running codegen for eventsource"
 bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
-  github.com/argoproj/argo-events/pkg/client/eventsources github.com/argoproj/argo-events/pkg/apis \
-  "eventsources:v1alpha1" \
+  github.com/argoproj/argo-events/pkg/client/eventsource github.com/argoproj/argo-events/pkg/apis \
+  "eventsource:v1alpha1" \
   --go-header-file hack/custom-boilerplate.go.txt
 
 subheader "running codegen for eventbus"
