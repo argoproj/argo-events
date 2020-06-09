@@ -55,9 +55,9 @@ var (
 <?xml version="1.0" encoding="UTF-8"?>
   <NotificationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
     <TopicConfiguration>
-       <Id>%s</Id>
-       <Topic>%s</Topic>
-       %s
+      <Id>%s</Id>
+      <Topic>%s</Topic>
+      %s
     </TopicConfiguration>
   </NotificationConfiguration>
 ` + "\n"
@@ -187,6 +187,11 @@ func (router *Router) PostActivate() error {
 	eventSource := router.storageGridEventSource
 	route := router.route
 
+	authToken, err := common.GetSecretValue(router.k8sClient, eventSource.Namespace, eventSource.AuthToken)
+	if err != nil {
+		return err
+	}
+
 	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
 	apiURL := common.FormattedURL(eventSource.ApiURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket))
 
@@ -203,7 +208,7 @@ func (router *Router) PostActivate() error {
 
 	var events []string
 	for _, event := range eventSource.Events {
-		events = append(events, fmt.Sprintf("<Event>%s</Event>", event))
+		events = append(events, fmt.Sprintf("      <Event>%s</Event>", event))
 	}
 
 	eventXML := strings.Join(events, "\n")
@@ -224,6 +229,10 @@ func (router *Router) PostActivate() error {
 	if err != nil {
 		return err
 	}
+
+	bearer := "Bearer " + authToken
+
+	request.Header.Add()
 
 	_, err = client.Do(request)
 	if err != nil {
@@ -253,10 +262,15 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
+	if storagegridEventSource.Namespace == "" {
+		storagegridEventSource.Namespace = listener.Namespace
+	}
+
 	route := webhook.NewRoute(storagegridEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
 		route:                  route,
 		storageGridEventSource: storagegridEventSource,
+		k8sClient:              listener.K8sClient,
 	}, controller, eventStream)
 }

@@ -18,6 +18,7 @@ package storagegrid
 
 import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	"k8s.io/client-go/kubernetes"
 	"time"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
@@ -28,6 +29,9 @@ import (
 type EventListener struct {
 	// Logger logs stuff
 	Logger *logrus.Logger
+	// k8sClient is Kubernetes client
+	K8sClient kubernetes.Interface
+	Namespace string
 }
 
 // Router manages route
@@ -36,6 +40,8 @@ type Router struct {
 	route *webhook.Route
 	// storageGridEventSource refers to event source which contains configuration to consume events from storage grid
 	storageGridEventSource *v1alpha1.StorageGridEventSource
+	// k8sClient is Kubernetes client
+	k8sClient kubernetes.Interface
 }
 
 type storageGridNotificationRequest struct {
