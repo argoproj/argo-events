@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -20,11 +21,21 @@ import (
 )
 
 const (
-	natsImageEnvVar     = "NATS_IMAGE"
 	natsStreamingEnvVar = "NATS_STREAMING_IMAGE"
 )
 
-var log = ctrl.Log.WithName(eventbus.ControllerName)
+var (
+	log = ctrl.Log.WithName(eventbus.ControllerName)
+
+	namespaced       bool
+	managedNamespace string
+)
+
+func init() {
+	flag.BoolVar(&namespaced, "namespaced", false, "run the controller as namespaced mode")
+	flag.StringVar(&managedNamespace, "managed-namespace", os.Getenv("NAMESPACE"), "namespace that controller watches, default to the installation namespace")
+	flag.Parse()
+}
 
 func main() {
 	ecfg := uzap.NewProductionEncoderConfig()
@@ -32,15 +43,15 @@ func main() {
 	encoder := zapcore.NewConsoleEncoder(ecfg)
 	ctrl.SetLogger(zap.New(zap.UseDevMode(false), zap.WriteTo(os.Stdout), zap.Encoder(encoder)))
 	mainLog := log.WithName("main")
-	natsImage, defined := os.LookupEnv(natsImageEnvVar)
-	if !defined {
-		panic(fmt.Errorf("required environment variable '%s' not defined", natsImageEnvVar))
-	}
-	streamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
+	natsStreamingImage, defined := os.LookupEnv(natsStreamingEnvVar)
 	if !defined {
 		panic(fmt.Errorf("required environment variable '%s' not defined", natsStreamingEnvVar))
 	}
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{})
+	opts := ctrl.Options{}
+	if namespaced {
+		opts.Namespace = managedNamespace
+	}
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), opts)
 	if err != nil {
 		panic(err)
 	}
@@ -51,7 +62,7 @@ func main() {
 	}
 	// A controller with DefaultControllerRateLimiter
 	c, err := controller.New(eventbus.ControllerName, mgr, controller.Options{
-		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsImage, streamingImage, log.WithName("reconciler")),
+		Reconciler: eventbus.NewReconciler(mgr.GetClient(), mgr.GetScheme(), natsStreamingImage, log.WithName("reconciler")),
 	})
 	if err != nil {
 		mainLog.Error(err, "unable to set up individual controller")
