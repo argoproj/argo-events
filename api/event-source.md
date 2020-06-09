@@ -988,7 +988,7 @@ Minio event sources
 
 <code>calendar</code></br> <em>
 <a href="#argoproj.io/v1alpha1.CalendarEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.CalendarEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource
 </a> </em>
 
 </td>
@@ -1011,7 +1011,7 @@ Calendar event sources
 
 <code>file</code></br> <em>
 <a href="#argoproj.io/v1alpha1.FileEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.FileEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource
 </a> </em>
 
 </td>
@@ -1034,7 +1034,7 @@ File event sources
 
 <code>resource</code></br> <em>
 <a href="#argoproj.io/v1alpha1.ResourceEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.ResourceEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource
 </a> </em>
 
 </td>
@@ -1079,7 +1079,7 @@ Webhook event sources
 
 <code>amqp</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AMQPEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AMQPEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource
 </a> </em>
 
 </td>
@@ -1102,7 +1102,7 @@ AMQP event sources
 
 <code>kafka</code></br> <em>
 <a href="#argoproj.io/v1alpha1.KafkaEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.KafkaEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource
 </a> </em>
 
 </td>
@@ -1125,7 +1125,7 @@ Kafka event sources
 
 <code>mqtt</code></br> <em>
 <a href="#argoproj.io/v1alpha1.MQTTEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.MQTTEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource
 </a> </em>
 
 </td>
@@ -1148,7 +1148,7 @@ MQTT event sources
 
 <code>nats</code></br> <em>
 <a href="#argoproj.io/v1alpha1.NATSEventsSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NATSEventsSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource
 </a> </em>
 
 </td>
@@ -1171,7 +1171,7 @@ NATS event sources
 
 <code>sns</code></br> <em>
 <a href="#argoproj.io/v1alpha1.SNSEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SNSEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource
 </a> </em>
 
 </td>
@@ -1194,7 +1194,7 @@ SNS event sources
 
 <code>sqs</code></br> <em>
 <a href="#argoproj.io/v1alpha1.SQSEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SQSEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource
 </a> </em>
 
 </td>
@@ -1217,7 +1217,7 @@ SQS event sources
 
 <code>pubSub</code></br> <em>
 <a href="#argoproj.io/v1alpha1.PubSubEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.PubSubEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource
 </a> </em>
 
 </td>
@@ -1240,7 +1240,7 @@ PubSub eevnt sources
 
 <code>github</code></br> <em>
 <a href="#argoproj.io/v1alpha1.GithubEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GithubEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource
 </a> </em>
 
 </td>
@@ -1263,7 +1263,7 @@ Github event sources
 
 <code>gitlab</code></br> <em>
 <a href="#argoproj.io/v1alpha1.GitlabEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GitlabEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource
 </a> </em>
 
 </td>
@@ -1286,7 +1286,7 @@ Gitlab event sources
 
 <code>hdfs</code></br> <em>
 <a href="#argoproj.io/v1alpha1.HDFSEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.HDFSEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource
 </a> </em>
 
 </td>
@@ -1309,7 +1309,7 @@ HDFS event sources
 
 <code>slack</code></br> <em>
 <a href="#argoproj.io/v1alpha1.SlackEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.SlackEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource
 </a> </em>
 
 </td>
@@ -1332,7 +1332,7 @@ Slack event sources
 
 <code>storageGrid</code></br> <em>
 <a href="#argoproj.io/v1alpha1.StorageGridEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource
 </a> </em>
 
 </td>
@@ -1355,7 +1355,7 @@ StorageGrid event sources
 
 <code>azureEventsHub</code></br> <em>
 <a href="#argoproj.io/v1alpha1.AzureEventsHubEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.AzureEventsHubEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource
 </a> </em>
 
 </td>
@@ -1378,7 +1378,7 @@ AzureEventsHub event sources
 
 <code>stripe</code></br> <em>
 <a href="#argoproj.io/v1alpha1.StripeEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StripeEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource
 </a> </em>
 
 </td>
@@ -1401,7 +1401,7 @@ Stripe event sources
 
 <code>emitter</code></br> <em>
 <a href="#argoproj.io/v1alpha1.EmitterEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.EmitterEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource
 </a> </em>
 
 </td>
@@ -1424,7 +1424,7 @@ Emitter event source
 
 <code>redis</code></br> <em>
 <a href="#argoproj.io/v1alpha1.RedisEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.RedisEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource
 </a> </em>
 
 </td>
@@ -1447,7 +1447,7 @@ Redis event source
 
 <code>nsq</code></br> <em>
 <a href="#argoproj.io/v1alpha1.NSQEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.NSQEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource
 </a> </em>
 
 </td>
@@ -1470,7 +1470,7 @@ NSQ event source
 
 <code>generic</code></br> <em>
 <a href="#argoproj.io/v1alpha1.GenericEventSource">
-map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.GenericEventSource
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource
 </a> </em>
 
 </td>

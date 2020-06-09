@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/mitchellh/mapstructure"
 	"github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"

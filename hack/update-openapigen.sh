@@ -35,8 +35,8 @@ go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
 # EventSource
 go run ${CODEGEN_PKG}/cmd/openapi-gen/openapi-gen.go \
     --go-header-file ${REPO_ROOT}/hack/custom-boilerplate.go.txt \
-    --input-dirs github.com/argoproj/argo-events/pkg/apis/eventsources/${VERSION} \
-    --output-package github.com/argoproj/argo-events/pkg/apis/eventsources/${VERSION} \
+    --input-dirs github.com/argoproj/argo-events/pkg/apis/eventsource/${VERSION} \
+    --output-package github.com/argoproj/argo-events/pkg/apis/eventsource/${VERSION} \
     $@
 
 # EventBus
