@@ -5,6 +5,9 @@ resources:
   - ../base
   - rbac
 
+patchesStrategicMerge:
+  - overlays/eventbus-controller-deployment.yaml
+
 patchesJson6902:
   - path: ./overlays/gateway-controller-configmap.yaml
     target:
