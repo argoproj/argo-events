@@ -30,7 +30,7 @@ set up event-driven pipelines for existing workloads.
         apiVersion: argoproj.io/v1alpha1
         kind: Sensor
         metadata:
-          name: webhook-sensor
+          name: webhook
         spec:
           template:
             serviceAccountName: argo-events-sa
