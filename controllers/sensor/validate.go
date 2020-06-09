@@ -452,9 +452,9 @@ func validateDependencies(eventDependencies []v1alpha1.EventDependency) error {
 		if dep.Name == "" {
 			return errors.New("event dependency must define a name")
 		}
-
-		if dep.GatewayName == "" {
-			return errors.New("event dependency must define the gateway name")
+		// TODO: GatewayName will be deprecated
+		if dep.EventSourceName == "" && dep.GatewayName == "" {
+			return errors.New("event dependency must define the EventSource name")
 		}
 
 		if dep.EventName == "" {
