@@ -85,7 +85,7 @@ type Context struct {
 	// URL is the url of the server.
 	URL string `json:"url" protobuf:"bytes,4,name=url"`
 	// ServerCertPath refers the file that contains the cert.
-	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,4,opt,name=serverCertPath"`
+	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,6,opt,name=serverCertPath"`
 	// ServerKeyPath refers the file that contains private key
 	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,5,opt,name=serverKeyPath"`
 }
