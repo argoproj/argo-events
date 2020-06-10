@@ -639,7 +639,7 @@ type TriggerParameterSource struct {
 	// DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
 	// To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
 	// See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,3,opt,name=dataKey"`
+	DataKey string `json:"dataKey,omitempty" protobuf:"bytes,6,opt,name=dataKey"`
 	// DataTemplate is a go-template for extracting a string from the event's data.
 	// If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
