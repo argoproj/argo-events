@@ -1,6 +1,4 @@
-// module github.com/argoproj/argo-events
-// TODO revert this line
-module github.com/alexec/argo-events
+module github.com/argoproj/argo-events
 
 go 1.13
 
