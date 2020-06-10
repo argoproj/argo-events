@@ -312,7 +312,7 @@ type TriggerTemplate struct {
 	ArgoWorkflow *ArgoWorkflowTrigger `json:"argoWorkflow,omitempty" protobuf:"bytes,4,opt,name=argoWorkflow"`
 	// HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.
 	// +optional
-	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,4,opt,name=http"`
+	HTTP *HTTPTrigger `json:"http,omitempty" protobuf:"bytes,5,opt,name=http"`
 	// AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
 	// +optional
 	AWSLambda *AWSLambdaTrigger `json:"awsLambda,omitempty" protobuf:"bytes,6,opt,name=awsLambda"`

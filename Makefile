@@ -152,3 +152,10 @@ build-e2e-images: sensor-controller-image gateway-controller-image gateway-clien
 lint:
 	golangci-lint run
 
+.PHONY: proto
+proto:
+	go-to-protobuf \
+ 		--only-idl  \
+        --go-header-file=./hack/custom-boilerplate.go.txt \
+        --packages=github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \
+        --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
