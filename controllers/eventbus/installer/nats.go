@@ -292,7 +292,7 @@ func (i *natsInstaller) createAuthSecrets(ctx context.Context, strategy v1alpha1
 		serverAuthText := fmt.Sprintf(`authorization {
   token: "%s"
 }`, token)
-		clientAuthText := fmt.Sprintf("token=%s", token)
+		clientAuthText := fmt.Sprintf("token: \"%s\"", token)
 		// Create server auth secret
 		expectedSSecret, err := i.buildServerAuthSecret(strategy, serverAuthText)
 		if err != nil {

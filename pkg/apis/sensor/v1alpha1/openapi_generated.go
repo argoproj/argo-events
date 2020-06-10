@@ -857,7 +857,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPSubscription(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "HTTPSubscription holds the context of the HTTP subscription of events for the sensor.",
+				Description: "HTTPSubscription holds the context of the HTTP subscription of events for the sensor. DEPRECATED",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"port": {
@@ -1509,12 +1509,6 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Template"),
 						},
 					},
-					"subscription": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Subscription refers to the modes of events subscriptions for the sensor. At least one of the types of subscription must be defined in order for sensor to be meaningful.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription"),
-						},
-					},
 					"circuit": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Circuit is a boolean expression of dependency groups",
@@ -1542,9 +1536,16 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 							Format:      "",
 						},
 					},
+					"eventBusName": {
+						SchemaProps: spec.SchemaProps{
+							Description: "EventBusRef references to a EventBus name. By default the value is \"default\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 					"serviceLabels": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceLabels to be set for the service generated",
+							Description: "ServiceLabels to be set for the service generated DEPRECATED: Service will not be created in the future.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -1559,7 +1560,7 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 					},
 					"serviceAnnotations": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ServiceAnnotations refers to annotations to be set for the service generated",
+							Description: "ServiceAnnotations refers to annotations to be set for the service generated DEPRECATED: Service will not be created in the future.",
 							Type:        []string{"object"},
 							AdditionalProperties: &spec.SchemaOrBool{
 								Allows: true,
@@ -1570,6 +1571,12 @@ func schema_pkg_apis_sensor_v1alpha1_SensorSpec(ref common.ReferenceCallback) co
 									},
 								},
 							},
+						},
+					},
+					"subscription": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Subscription refers to the modes of events subscriptions for the sensor. At least one of the types of subscription must be defined in order for sensor to be meaningful. DEPRECATED: Use EventBus instead",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription"),
 						},
 					},
 				},
@@ -1588,30 +1595,23 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 				Description: "SensorStatus contains information about the status of a sensor.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"phase": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Phase is the high-level summary of the sensor.",
-							Type:        []string{"string"},
-							Format:      "",
+					"conditions": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-patch-merge-key": "type",
+								"x-kubernetes-patch-strategy":  "merge",
+							},
 						},
-					},
-					"startedAt": {
 						SchemaProps: spec.SchemaProps{
-							Description: "StartedAt is the time at which this sensor was initiated",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"completedAt": {
-						SchemaProps: spec.SchemaProps{
-							Description: "CompletedAt is the time at which this sensor was completed",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Message is a human readable string indicating details about a sensor in its phase",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Conditions are the latest available observations of a resource's current state.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Condition"),
+									},
+								},
+							},
 						},
 					},
 					"nodes": {
@@ -1648,18 +1648,12 @@ func schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref common.ReferenceCallback) 
 							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
 						},
 					},
-					"resources": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Resources refers to metadata of the resources created for the sensor",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources"),
-						},
-					},
 				},
-				Required: []string{"phase", "triggerCycleStatus", "lastCycleTime"},
+				Required: []string{"triggerCycleStatus", "lastCycleTime"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
+			"github.com/argoproj/argo-events/pkg/apis/common.Condition", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -1821,7 +1815,7 @@ func schema_pkg_apis_sensor_v1alpha1_Subscription(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "Subscription holds different modes of subscription available for sensor to consume events.",
+				Description: "Subscription holds different modes of subscription available for sensor to consume events. DEPRECATED",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"http": {

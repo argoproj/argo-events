@@ -17,7 +17,6 @@ limitations under the License.
 package sensors
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -30,6 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/eventbus"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/dependencies"
 	"github.com/argoproj/argo-events/sensors/types"
@@ -44,33 +44,51 @@ func (sensorCtx *SensorContext) ListenEvents() error {
 		}
 	}()
 
-	// sync Sensor resource after updates
-	go sensorCtx.syncSensor(context.Background())
-
 	errCh := make(chan error)
-
-	// listen events over http
-	if sensorCtx.Sensor.Spec.Subscription.HTTP != nil {
+	if sensorCtx.EventBusConfig != nil {
 		go func() {
-			if err := sensorCtx.listenEventsOverHTTP(); err != nil {
-				errCh <- errors.Wrap(err, "failed to listen events over HTTP subscription")
+			if err := sensorCtx.listenEventsOverEventBus(); err != nil {
+				errCh <- errors.Wrap(err, "failed to listen events over EventBus")
 			}
 		}()
-	}
+	} else {
+		// TODO: unsupport these.
+		sensorCtx.Logger.Warn("spec.subscription is deprecated, will be unsupported soon, please use EventBus instead")
+		// listen events over http
+		if sensorCtx.Sensor.Spec.Subscription.HTTP != nil {
+			go func() {
+				if err := sensorCtx.listenEventsOverHTTP(); err != nil {
+					errCh <- errors.Wrap(err, "failed to listen events over HTTP subscription")
+				}
+			}()
+		}
 
-	// listen events over nats
-	if sensorCtx.Sensor.Spec.Subscription.NATS != nil {
-		go func() {
-			if err := sensorCtx.listenEventsOverNATS(); err != nil {
-				errCh <- errors.Wrap(err, "failed to listen events over NATS subscription")
-			}
-		}()
+		// listen events over nats
+		if sensorCtx.Sensor.Spec.Subscription.NATS != nil {
+			go func() {
+				if err := sensorCtx.listenEventsOverNATS(); err != nil {
+					errCh <- errors.Wrap(err, "failed to listen events over NATS subscription")
+				}
+			}()
+		}
 	}
-
 	err := <-errCh
 	sensorCtx.Logger.WithError(err).Errorln("subscription failure. stopping sensor operations")
 
 	return nil
+}
+
+func (sensorCtx *SensorContext) listenEventsOverEventBus() error {
+	// sensor := sensorCtx.Sensor
+	// sensor.Spec.Triggers
+	ebDriver := eventbus.GetDriver(*sensorCtx.EventBusConfig, "", sensorCtx.Logger)
+	return
+}
+
+// Categorize all the trigger into groups
+// Return a map with key - depName, value: trigger list
+func (sensorCtx *SensorContext) categorizeTriggers() map[string][]v1alpha1.Trigger {
+
 }
 
 // listenEventsOverHTTP listens to events over HTTP

@@ -1961,7 +1961,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.HTTPSubscription": {
-      "description": "HTTPSubscription holds the context of the HTTP subscription of events for the sensor.",
+      "description": "HTTPSubscription holds the context of the HTTP subscription of events for the sensor. DEPRECATED",
       "type": "object",
       "required": [
         "port"
@@ -2360,22 +2360,26 @@
           "description": "ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails. Once sensor state is set to `error`, no further triggers will be processed.",
           "type": "boolean"
         },
+        "eventBusName": {
+          "description": "EventBusRef references to a EventBus name. By default the value is \"default\"",
+          "type": "string"
+        },
         "serviceAnnotations": {
-          "description": "ServiceAnnotations refers to annotations to be set for the service generated",
+          "description": "ServiceAnnotations refers to annotations to be set for the service generated DEPRECATED: Service will not be created in the future.",
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
         },
         "serviceLabels": {
-          "description": "ServiceLabels to be set for the service generated",
+          "description": "ServiceLabels to be set for the service generated DEPRECATED: Service will not be created in the future.",
           "type": "object",
           "additionalProperties": {
             "type": "string"
           }
         },
         "subscription": {
-          "description": "Subscription refers to the modes of events subscriptions for the sensor. At least one of the types of subscription must be defined in order for sensor to be meaningful.",
+          "description": "Subscription refers to the modes of events subscriptions for the sensor. At least one of the types of subscription must be defined in order for sensor to be meaningful. DEPRECATED: Use EventBus instead",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Subscription"
         },
         "template": {
@@ -2395,22 +2399,22 @@
       "description": "SensorStatus contains information about the status of a sensor.",
       "type": "object",
       "required": [
-        "phase",
         "triggerCycleStatus",
         "lastCycleTime"
       ],
       "properties": {
-        "completedAt": {
-          "description": "CompletedAt is the time at which this sensor was completed",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+        "conditions": {
+          "description": "Conditions are the latest available observations of a resource's current state.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/io.argoproj.common.Condition"
+          },
+          "x-kubernetes-patch-merge-key": "type",
+          "x-kubernetes-patch-strategy": "merge"
         },
         "lastCycleTime": {
           "description": "LastCycleTime is the time when last trigger cycle completed",
           "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
-        },
-        "message": {
-          "description": "Message is a human readable string indicating details about a sensor in its phase",
-          "type": "string"
         },
         "nodes": {
           "description": "Nodes is a mapping between a node ID and the node's status it records the states for the FSM of this sensor.",
@@ -2418,18 +2422,6 @@
           "additionalProperties": {
             "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.NodeStatus"
           }
-        },
-        "phase": {
-          "description": "Phase is the high-level summary of the sensor.",
-          "type": "string"
-        },
-        "resources": {
-          "description": "Resources refers to metadata of the resources created for the sensor",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.SensorResources"
-        },
-        "startedAt": {
-          "description": "StartedAt is the time at which this sensor was initiated",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
         },
         "triggerCycleCount": {
           "description": "TriggerCycleCount is the count of sensor's trigger cycle runs.",
@@ -2529,7 +2521,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.Subscription": {
-      "description": "Subscription holds different modes of subscription available for sensor to consume events.",
+      "description": "Subscription holds different modes of subscription available for sensor to consume events. DEPRECATED",
       "type": "object",
       "properties": {
         "http": {

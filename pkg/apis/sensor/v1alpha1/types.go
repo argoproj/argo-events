@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"fmt"
+	fmt "fmt"
 	"hash/fnv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -137,22 +137,26 @@ type SensorSpec struct {
 	// Template is the pod specification for the sensor
 	// +optional
 	Template Template `json:"template,omitempty" protobuf:"bytes,3,opt,name=template"`
-	// Subscription refers to the modes of events subscriptions for the sensor.
-	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
-	Subscription *Subscription `json:"subscription,omitempty" protobuf:"bytes,4,opt,name=subscription"`
 	// Circuit is a boolean expression of dependency groups
-	Circuit string `json:"circuit,omitempty" protobuf:"bytes,5,opt,name=circuit"`
-
+	Circuit string `json:"circuit,omitempty" protobuf:"bytes,4,opt,name=circuit"`
 	// DependencyGroups is a list of the groups of events.
-	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,6,rep,name=dependencyGroups"`
+	DependencyGroups []DependencyGroup `json:"dependencyGroups,omitempty" protobuf:"bytes,5,rep,name=dependencyGroups"`
 	// ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
 	// Once sensor state is set to `error`, no further triggers will be processed.
-	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,7,opt,name=errorOnFailedRound"`
+	ErrorOnFailedRound bool `json:"errorOnFailedRound,omitempty" protobuf:"varint,6,opt,name=errorOnFailedRound"`
+	// EventBusRef references to a EventBus name. By default the value is "default"
+	EventBusName string `json:"eventBusName,omitempty" protobuf:"bytes,7,opt,name=eventBusName"`
 	// ServiceLabels to be set for the service generated
+	// DEPRECATED: Service will not be created in the future.
 	ServiceLabels map[string]string `json:"serviceLabels,omitempty" protobuf:"bytes,8,rep,name=serviceLabels"`
 	// ServiceAnnotations refers to annotations to be set
 	// for the service generated
+	// DEPRECATED: Service will not be created in the future.
 	ServiceAnnotations map[string]string `json:"serviceAnnotations,omitempty" protobuf:"bytes,9,rep,name=serviceAnnotations"`
+	// Subscription refers to the modes of events subscriptions for the sensor.
+	// At least one of the types of subscription must be defined in order for sensor to be meaningful.
+	// DEPRECATED: Use EventBus instead
+	Subscription *Subscription `json:"subscription,omitempty" protobuf:"bytes,10,opt,name=subscription"`
 }
 
 // Template holds the information of a sensor deployment template
@@ -179,6 +183,7 @@ type Template struct {
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.
+// DEPRECATED
 type Subscription struct {
 	// HTTP refers to the HTTP subscription of events for the sensor.
 	// +optional
@@ -189,6 +194,7 @@ type Subscription struct {
 }
 
 // HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
+// DEPRECATED
 type HTTPSubscription struct {
 	// Port on which sensor server should run.
 	Port int32 `json:"port" protobuf:"varint,1,opt,name=port"`
@@ -698,25 +704,16 @@ type SensorResources struct {
 
 // SensorStatus contains information about the status of a sensor.
 type SensorStatus struct {
-	// Phase is the high-level summary of the sensor.
-	Phase NodePhase `json:"phase" protobuf:"bytes,1,opt,name=phase,casttype=NodePhase"`
-	// StartedAt is the time at which this sensor was initiated
-	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,2,opt,name=startedAt"`
-	// CompletedAt is the time at which this sensor was completed
-	CompletedAt metav1.Time `json:"completedAt,omitempty" protobuf:"bytes,3,opt,name=completedAt"`
-	// Message is a human readable string indicating details about a sensor in its phase
-	Message string `json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`
+	apicommon.Status `json:",inline" protobuf:"bytes,1,opt,name=status"`
 	// Nodes is a mapping between a node ID and the node's status
 	// it records the states for the FSM of this sensor.
-	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,5,rep,name=nodes"`
+	Nodes map[string]NodeStatus `json:"nodes,omitempty" protobuf:"bytes,2,rep,name=nodes"`
 	// TriggerCycleCount is the count of sensor's trigger cycle runs.
-	TriggerCycleCount int32 `json:"triggerCycleCount,omitempty" protobuf:"varint,6,opt,name=triggerCycleCount"`
+	TriggerCycleCount int32 `json:"triggerCycleCount,omitempty" protobuf:"varint,3,opt,name=triggerCycleCount"`
 	// TriggerCycleState is the status from last cycle of triggers execution.
-	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,7,opt,name=triggerCycleStatus,casttype=TriggerCycleState"`
+	TriggerCycleStatus TriggerCycleState `json:"triggerCycleStatus" protobuf:"bytes,4,opt,name=triggerCycleStatus,casttype=TriggerCycleState"`
 	// LastCycleTime is the time when last trigger cycle completed
-	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,8,opt,name=lastCycleTime"`
-	// Resources refers to metadata of the resources created for the sensor
-	Resources *SensorResources `json:"resources,omitempty" protobuf:"bytes,9,opt,name=resources"`
+	LastCycleTime metav1.Time `json:"lastCycleTime" protobuf:"bytes,5,opt,name=lastCycleTime"`
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.
@@ -745,6 +742,53 @@ type NodeStatus struct {
 	UpdatedAt metav1.MicroTime `json:"updatedAt,omitempty" protobuf:"bytes,10,opt,name=updatedAt"`
 	// ResolvedAt refers to the time at which the node was resolved.
 	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
+}
+
+const (
+	// SensorConditionDepencencyProvided has the status True when the
+	// Sensor has valid dependencies provided.
+	SensorConditionDepencencyProvided apicommon.ConditionType = "DependenciesProvided"
+	// SensorConditionTriggersProvided has the status True when the
+	// Sensor has valid triggers provided.
+	SensorConditionTriggersProvided apicommon.ConditionType = "TriggersProvided"
+	// SensorConditionDeployed has the status True when the Sensor
+	// has its Deployment created.
+	SensorConditionDeployed apicommon.ConditionType = "Deployed"
+)
+
+// InitConditions sets conditions to Unknown state.
+func (s *SensorStatus) InitConditions() {
+	s.InitializeConditions(SensorConditionDepencencyProvided, SensorConditionTriggersProvided, SensorConditionDeployed)
+}
+
+// MarkDependenciesProvided set the sensor has valid dependencies provided.
+func (s *SensorStatus) MarkDependenciesProvided() {
+	s.MarkTrue(SensorConditionDepencencyProvided)
+}
+
+// MarkDependenciesNotProvided set the sensor has invalid dependencies provided.
+func (s *SensorStatus) MarkDependenciesNotProvided(reason, message string) {
+	s.MarkFalse(SensorConditionDepencencyProvided, reason, message)
+}
+
+// MarkTriggersProvided set the sensor has valid triggers provided.
+func (s *SensorStatus) MarkTriggersProvided() {
+	s.MarkTrue(SensorConditionTriggersProvided)
+}
+
+// MarkTriggersNotProvided set the sensor has invalid triggers provided.
+func (s *SensorStatus) MarkTriggersNotProvided(reason, message string) {
+	s.MarkFalse(SensorConditionTriggersProvided, reason, message)
+}
+
+// MarkDeployed set the sensor has been deployed.
+func (s *SensorStatus) MarkDeployed() {
+	s.MarkTrue(SensorConditionDeployed)
+}
+
+// MarkDeployFailed set the sensor deploy failed
+func (s *SensorStatus) MarkDeployFailed(reason, message string) {
+	s.MarkFalse(SensorConditionDeployed, reason, message)
 }
 
 // ArtifactLocation describes the source location for an external artifact
@@ -866,25 +910,6 @@ type EventContext struct {
 // HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
 	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
-}
-
-// IsComplete determines if the node has reached an end state
-func (node NodeStatus) IsComplete() bool {
-	return node.Phase == NodePhaseComplete ||
-		node.Phase == NodePhaseError
-}
-
-// IsComplete determines if the sensor has reached an end state
-func (s *Sensor) IsComplete() bool {
-	if !(s.Status.Phase == NodePhaseComplete || s.Status.Phase == NodePhaseError) {
-		return false
-	}
-	for _, node := range s.Status.Nodes {
-		if !node.IsComplete() {
-			return false
-		}
-	}
-	return true
 }
 
 // AreAllNodesSuccess determines if all nodes of the given type have completed successfully

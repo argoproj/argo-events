@@ -45,3 +45,11 @@ var (
 	NSQEvent         EventSourceType = "nsq"
 	GenericEvent     EventSourceType = "generic"
 )
+
+// EventBusType is the type of event bus
+type EventBusType string
+
+// possible event bus types
+var (
+	EventBusNATS EventBusType = "nats"
+)

@@ -17,33 +17,348 @@ limitations under the License.
 package sensor
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"math/rand"
+	"time"
 
+	"github.com/go-logr/logr"
 	"github.com/imdario/mergo"
-
-	"github.com/argoproj/argo-events/common"
-	controllerscommon "github.com/argoproj/argo-events/controllers/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/pkg/errors"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	apierror "k8s.io/apimachinery/pkg/api/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/argoproj/argo-events/common"
+	controllerscommon "github.com/argoproj/argo-events/controllers/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-// generateServiceSpec returns a K8s service spec for the sensor
-func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
-	port := common.SensorServerPort
-	if ctx.sensor.Spec.Subscription.HTTP != nil {
-		port = int(ctx.sensor.Spec.Subscription.HTTP.Port)
+// AdaptorArgs are the args needed to create a sensor deployment
+type AdaptorArgs struct {
+	// controller namespace
+	Namespace string
+	Image     string
+	Sensor    *v1alpha1.Sensor
+	Labels    map[string]string
+}
+
+// Reconcile does the real logic
+func Reconcile(client client.Client, args *AdaptorArgs, logger logr.Logger) error {
+	ctx := context.Background()
+	sensor := args.Sensor
+	eventBus := &eventbusv1alpha1.EventBus{}
+	eventBusName := "default"
+	if len(sensor.Spec.EventBusName) > 0 {
+		eventBusName = sensor.Spec.EventBusName
+	}
+	eventBusExisting := true
+	err := client.Get(ctx, types.NamespacedName{Namespace: sensor.Namespace, Name: eventBusName}, eventBus)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			eventBusExisting = false
+		} else {
+			sensor.Status.MarkDeployFailed("GetEventBusFailed", "Failed to get EventBus.")
+			logger.Error(err, "failed to get EventBus", "eventBusName", eventBusName)
+			return err
+		}
+	}
+	if !eventBusExisting {
+		// DEPRECATED: Build lagecy resources
+		// TODO: Remove following and error out.
+		return reconcileLegacy(ctx, client, args, logger)
+	}
+	if !eventBus.Status.IsReady() {
+		sensor.Status.MarkDeployFailed("EventBusNotReady", "EventBus not ready.")
+		logger.Error(err, "event bus is not in ready status", "eventBusName", eventBusName)
+		return errors.New("eventbus not ready")
+	}
+	expectedDeploy, err := buildDeployment(args, eventBus, logger)
+	if err != nil {
+		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
+		logger.Error(err, "failed to build deployment spec")
+		return err
+	}
+	deploy, err := getDeployment(ctx, client, args)
+	if err != nil && !apierrors.IsNotFound(err) {
+		sensor.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
+		logger.Error(err, "error getting existing deployment")
+		return err
+	}
+	if deploy != nil {
+		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
+			deploy.Spec = expectedDeploy.Spec
+			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
+			err = client.Update(ctx, deploy)
+			if err != nil {
+				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
+				logger.Error(err, "error updating existing deployment")
+				return err
+			}
+			logger.Info("deployment is updated", "deploymentName", deploy.Name)
+		}
+	} else {
+		err = client.Create(ctx, expectedDeploy)
+		if err != nil {
+			sensor.Status.MarkDeployFailed("CreateDeploymentFailed", "Failed to create a deployment")
+			logger.Error(err, "error creating a deployment")
+			return err
+		}
+		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
+	}
+	sensor.Status.MarkDeployed()
+	return nil
+}
+
+// EventBus not existing create legacy service
+// DEPRECATED
+func reconcileLegacy(ctx context.Context, client client.Client, args *AdaptorArgs, logger logr.Logger) error {
+	sensor := args.Sensor
+	expectedDeploy, err := buildDeployment(args, nil, logger)
+	if err != nil {
+		sensor.Status.MarkDeployFailed("BuildDeploymentSpecFailed", "Failed to build Deployment spec.")
+		logger.Error(err, "failed to build deployment spec")
+		return err
+	}
+	expectedService, err := buildLegacyService(args, logger)
+	if err != nil {
+		sensor.Status.MarkDeployFailed("BuildServiceSpecFailed", "Failed to build legacy Service spec.")
+		logger.Error(err, "failed to build service spec")
+		return err
+	}
+	deploy, err := getDeployment(ctx, client, args)
+	if err != nil && !apierrors.IsNotFound(err) {
+		sensor.Status.MarkDeployFailed("GetDeploymentFailed", "Get existing deployment failed")
+		logger.Error(err, "error getting existing deployment")
+		return err
+	}
+	svc, err := getLegacyService(ctx, client, args)
+	if err != nil && !apierrors.IsNotFound(err) {
+		sensor.Status.MarkDeployFailed("GetLegacyServiceFailed", "Get existing legacy service failed")
+		logger.Error(err, "error getting existing service")
+		return err
 	}
 
-	serviceSpec := &corev1.Service{
+	if deploy != nil {
+		if deploy.Annotations != nil && deploy.Annotations[common.AnnotationResourceSpecHash] != expectedDeploy.Annotations[common.AnnotationResourceSpecHash] {
+			deploy.Spec = expectedDeploy.Spec
+			deploy.Annotations[common.AnnotationResourceSpecHash] = expectedDeploy.Annotations[common.AnnotationResourceSpecHash]
+			err = client.Update(ctx, deploy)
+			if err != nil {
+				sensor.Status.MarkDeployFailed("UpdateDeploymentFailed", "Failed to update existing deployment")
+				logger.Error(err, "error updating existing deployment")
+				return err
+			}
+			logger.Info("deployment is updated", "deploymentName", deploy.Name)
+		}
+	} else {
+		err = client.Create(ctx, expectedDeploy)
+		if err != nil {
+			sensor.Status.MarkDeployFailed("CreateDeploymentFailed", "Failed to create a deployment")
+			logger.Error(err, "error creating a deployment")
+			return err
+		}
+		logger.Info("deployment is created", "deploymentName", expectedDeploy.Name)
+	}
+
+	if svc != nil {
+		if svc.Annotations != nil && svc.Annotations[common.AnnotationResourceSpecHash] != expectedService.Annotations[common.AnnotationResourceSpecHash] {
+			svc.Spec = expectedService.Spec
+			svc.Annotations[common.AnnotationResourceSpecHash] = expectedService.Annotations[common.AnnotationResourceSpecHash]
+			err = client.Update(ctx, svc)
+			if err != nil {
+				sensor.Status.MarkDeployFailed("UpdateServiceFailed", "Failed to update existing service")
+				logger.Error(err, "error updating existing service")
+				return err
+			}
+			logger.Info("service is updated", "serviceName", svc.Name)
+		}
+	} else {
+		err = client.Create(ctx, expectedService)
+		if err != nil {
+			sensor.Status.MarkDeployFailed("CreateServiceFailed", "Failed to create a legacy service")
+			logger.Error(err, "error creating a legacy service")
+			return err
+		}
+		logger.Info("service is created", "serviceName", expectedService.Name)
+	}
+	sensor.Status.MarkDeployed()
+	return nil
+}
+
+func getDeployment(ctx context.Context, cl client.Client, args *AdaptorArgs) (*appv1.Deployment, error) {
+	dl := &appv1.DeploymentList{}
+	err := cl.List(ctx, dl, &client.ListOptions{
+		Namespace:     args.Sensor.Namespace,
+		LabelSelector: labelSelector(args.Labels),
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, deploy := range dl.Items {
+		if metav1.IsControlledBy(&deploy, args.Sensor) {
+			return &deploy, nil
+		}
+	}
+	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
+}
+
+func buildDeployment(args *AdaptorArgs, eventBus *eventbusv1alpha1.EventBus, log logr.Logger) (*appv1.Deployment, error) {
+	deploymentSpec, err := buildDeploymentSpec(args, log)
+	if err != nil {
+		return nil, err
+	}
+	sensorBytes, err := json.Marshal(args.Sensor)
+	if err != nil {
+		return nil, errors.New("failed marshal sensor spec")
+	}
+	encodedSensorSpec := base64.StdEncoding.EncodeToString([]byte(sensorBytes))
+	envVars := []corev1.EnvVar{
+		{
+			Name:  common.EnvVarSensorObject,
+			Value: encodedSensorSpec,
+		},
+		{
+			Name:  common.SensorNamespace,
+			Value: args.Sensor.Namespace,
+		},
+	}
+	if eventBus != nil {
+		if !eventBus.Status.IsReady() {
+			return nil, errors.New("event bus is not ready")
+		}
+		busConfigBytes, err := json.Marshal(eventBus.Status.Config)
+		if err != nil {
+			return nil, errors.Errorf("failed marshal event bus config: %v", err)
+		}
+		encodedBusConfig := base64.StdEncoding.EncodeToString([]byte(busConfigBytes))
+		envVars = append(envVars, corev1.EnvVar{Name: common.EnvVarEventBusConfig, Value: encodedBusConfig})
+		if eventBus.Status.Config.NATS != nil {
+			natsConf := eventBus.Status.Config.NATS
+			if natsConf.Auth != nil && natsConf.AccessSecret != nil {
+				// Mount the secret as volume instead of using evnFrom to gain the ability
+				// for the sensor deployment to auto reload when the secret changes
+				volumes := deploymentSpec.Template.Spec.Volumes
+				volumes = append(volumes, corev1.Volume{
+					Name: "auth-volume",
+					VolumeSource: corev1.VolumeSource{
+						Secret: &corev1.SecretVolumeSource{
+							SecretName: natsConf.AccessSecret.Name,
+							Items: []corev1.KeyToPath{
+								{
+									Key:  natsConf.AccessSecret.Key,
+									Path: "auth.yaml",
+								},
+							},
+						},
+					},
+				})
+				deploymentSpec.Template.Spec.Volumes = volumes
+				volumeMounts := deploymentSpec.Template.Spec.Containers[0].VolumeMounts
+				volumeMounts = append(volumeMounts, corev1.VolumeMount{Name: "auth-volume", MountPath: "/etc/eventbus/auth"})
+				deploymentSpec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
+			}
+		} else {
+			return nil, errors.New("unsupported event bus")
+		}
+	}
+	envs := deploymentSpec.Template.Spec.Containers[0].Env
+	envs = append(envs, envVars...)
+	deploymentSpec.Template.Spec.Containers[0].Env = envs
+	deployment := &appv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        fmt.Sprintf("%s-sensor", ctx.sensor.Name),
-			Labels:      ctx.sensor.Spec.ServiceLabels,
-			Annotations: ctx.sensor.Spec.ServiceAnnotations,
+			Namespace:    args.Sensor.Namespace,
+			GenerateName: fmt.Sprintf("%s-sensor-", args.Sensor.Name),
+			Labels:       args.Labels,
+		},
+		Spec: *deploymentSpec,
+	}
+	if err := controllerscommon.SetObjectMeta(args.Sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
+		return nil, err
+	}
+	return deployment, nil
+}
+
+func buildDeploymentSpec(args *AdaptorArgs, log logr.Logger) (*appv1.DeploymentSpec, error) {
+	// Deprecated spec, will be unsupported soon.
+	if args.Sensor.Spec.Template.Spec != nil {
+		log.Info("WARNING: spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
+		return buildLegacyDeploymentSpec(args.Sensor), nil
+	}
+
+	replicas := int32(1)
+	sensorContainer := corev1.Container{
+		Image:           args.Image,
+		ImagePullPolicy: corev1.PullAlways,
+	}
+	if args.Sensor.Spec.Template.Container != nil {
+		if err := mergo.Merge(&sensorContainer, args.Sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
+			return nil, err
+		}
+	}
+	sensorContainer.Name = "main"
+	return &appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: args.Labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: args.Labels,
+			},
+			Spec: corev1.PodSpec{
+				ServiceAccountName: args.Sensor.Spec.Template.ServiceAccountName,
+				Containers: []corev1.Container{
+					sensorContainer,
+				},
+				Volumes:         args.Sensor.Spec.Template.Volumes,
+				SecurityContext: args.Sensor.Spec.Template.SecurityContext,
+			},
+		},
+	}, nil
+}
+
+// buildLegacyDeploymentSpec is deprecated, will be unsupported soon.
+func buildLegacyDeploymentSpec(sensor *v1alpha1.Sensor) *appv1.DeploymentSpec {
+	replicas := int32(1)
+	labels := map[string]string{
+		common.LabelObjectName: sensor.Name,
+	}
+	return &appv1.DeploymentSpec{
+		Selector: &metav1.LabelSelector{
+			MatchLabels: labels,
+		},
+		Replicas: &replicas,
+		Template: corev1.PodTemplateSpec{
+			ObjectMeta: metav1.ObjectMeta{
+				Labels: labels,
+			},
+			Spec: *sensor.Spec.Template.Spec,
+		},
+	}
+}
+
+// buildLegacyService builds a service that exposes sensor.
+// DEPRECATED: This is to make it backward compatible.
+func buildLegacyService(args *AdaptorArgs, log logr.Logger) (*corev1.Service, error) {
+	port := common.SensorServerPort
+	if args.Sensor.Spec.Subscription.HTTP != nil {
+		port = int(args.Sensor.Spec.Subscription.HTTP.Port)
+	}
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fmt.Sprintf("%s-sensor", args.Sensor.Name),
+			Labels:      args.Labels,
+			Annotations: args.Sensor.Spec.ServiceAnnotations,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -52,194 +367,44 @@ func (ctx *sensorContext) generateServiceSpec() *corev1.Service {
 					TargetPort: intstr.FromInt(port),
 				},
 			},
-			Type: corev1.ServiceTypeClusterIP,
-			Selector: map[string]string{
-				common.LabelSensorName: ctx.sensor.Name,
-				common.LabelOwnerName:  ctx.sensor.Name,
-			},
+			Type:     corev1.ServiceTypeClusterIP,
+			Selector: args.Labels,
 		},
 	}
-
-	// Non-overrideable labels required by sensor service
-	if serviceSpec.ObjectMeta.Labels == nil {
-		serviceSpec.ObjectMeta.Labels = map[string]string{}
-	}
-
-	serviceSpec.ObjectMeta.Labels[common.LabelSensorName] = ctx.sensor.Name
-	serviceSpec.ObjectMeta.Labels[LabelControllerInstanceID] = ctx.controller.Config.InstanceID
-
-	return serviceSpec
-}
-
-// serviceBuilder builds a new service that exposes sensor.
-func (ctx *sensorContext) serviceBuilder() (*corev1.Service, error) {
-	service := ctx.generateServiceSpec()
-	if err := controllerscommon.SetObjectMeta(ctx.sensor, service, v1alpha1.SchemaGroupVersionKind); err != nil {
+	if err := controllerscommon.SetObjectMeta(args.Sensor, service, v1alpha1.SchemaGroupVersionKind); err != nil {
 		return nil, err
 	}
 	return service, nil
 }
 
-func (ctx *sensorContext) makeDeploymentSpec() (*appv1.DeploymentSpec, error) {
-	// Deprecated spec, will be unsupported soon.
-	if ctx.sensor.Spec.Template.Spec != nil {
-		ctx.logger.WithField("name", ctx.sensor.Name).WithField("namespace", ctx.sensor.Namespace).Warn("spec.template.spec is DEPRECATED, it will be unsupported soon, please use spec.template.container")
-		return ctx.makeLegacyDeploymentSpec(), nil
+func getLegacyService(ctx context.Context, cl client.Client, args *AdaptorArgs) (*corev1.Service, error) {
+	sl := &corev1.ServiceList{}
+	err := cl.List(ctx, sl, &client.ListOptions{
+		Namespace:     args.Sensor.Namespace,
+		LabelSelector: labelSelector(args.Labels),
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	replicas := int32(1)
-	labels := map[string]string{
-		common.LabelSensorName: ctx.sensor.Name,
-		common.LabelObjectName: ctx.sensor.Name,
-	}
-	sensorContainer := corev1.Container{
-		Image:           ctx.controller.sensorImage,
-		ImagePullPolicy: corev1.PullAlways,
-	}
-	if ctx.sensor.Spec.Template.Container != nil {
-		if err := mergo.Merge(&sensorContainer, ctx.sensor.Spec.Template.Container, mergo.WithOverride); err != nil {
-			return nil, err
+	for _, svc := range sl.Items {
+		if metav1.IsControlledBy(&svc, args.Sensor) {
+			return &svc, nil
 		}
 	}
-	sensorContainer.Name = "main"
-	return &appv1.DeploymentSpec{
-		Selector: &metav1.LabelSelector{
-			MatchLabels: labels,
-		},
-		Replicas: &replicas,
-		Template: corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
-			},
-			Spec: corev1.PodSpec{
-				ServiceAccountName: ctx.sensor.Spec.Template.ServiceAccountName,
-				Containers: []corev1.Container{
-					sensorContainer,
-				},
-				Volumes:         ctx.sensor.Spec.Template.Volumes,
-				SecurityContext: ctx.sensor.Spec.Template.SecurityContext,
-			},
-		},
-	}, nil
+	return nil, apierrors.NewNotFound(schema.GroupResource{}, "")
 }
 
-// makeLegacyDeploymentSpec is deprecated, will be unsupported soon.
-func (ctx *sensorContext) makeLegacyDeploymentSpec() *appv1.DeploymentSpec {
-	replicas := int32(1)
-	labels := map[string]string{
-		common.LabelObjectName: ctx.sensor.Name,
-	}
-	return &appv1.DeploymentSpec{
-		Selector: &metav1.LabelSelector{
-			MatchLabels: labels,
-		},
-		Replicas: &replicas,
-		Template: corev1.PodTemplateSpec{
-			ObjectMeta: metav1.ObjectMeta{
-				Labels: labels,
-			},
-			Spec: *ctx.sensor.Spec.Template.Spec,
-		},
-	}
+func labelSelector(labelMap map[string]string) labels.Selector {
+	return labels.SelectorFromSet(labelMap)
 }
 
-// deploymentBuilder builds the deployment specification for the sensor
-func (ctx *sensorContext) deploymentBuilder() (*appv1.Deployment, error) {
-	deploymentSpec, err := ctx.makeDeploymentSpec()
-	if err != nil {
-		return nil, err
+// generate a random string as token with given length
+func generateToken(length int) string {
+	seeds := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = seeds[seededRand.Intn(len(seeds))]
 	}
-	deployment := &appv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Namespace:    ctx.sensor.Namespace,
-			GenerateName: fmt.Sprintf("%s-sensor-", ctx.sensor.Name),
-			Labels:       deploymentSpec.Template.Labels,
-		},
-		Spec: *deploymentSpec,
-	}
-	envVars := []corev1.EnvVar{
-		{
-			Name:  common.SensorName,
-			Value: ctx.sensor.Name,
-		},
-		{
-			Name:  common.SensorNamespace,
-			Value: ctx.sensor.Namespace,
-		},
-		{
-			Name:  common.EnvVarControllerInstanceID,
-			Value: ctx.controller.Config.InstanceID,
-		},
-	}
-	for i, container := range deployment.Spec.Template.Spec.Containers {
-		container.Env = append(container.Env, envVars...)
-		deployment.Spec.Template.Spec.Containers[i] = container
-	}
-	if err := controllerscommon.SetObjectMeta(ctx.sensor, deployment, v1alpha1.SchemaGroupVersionKind); err != nil {
-		return nil, err
-	}
-	return deployment, nil
-}
-
-// createDeployment creates a deployment for the sensor
-func (ctx *sensorContext) createDeployment(deployment *appv1.Deployment) (*appv1.Deployment, error) {
-	return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Create(deployment)
-}
-
-// createService creates a service for the sensor
-func (ctx *sensorContext) createService(service *corev1.Service) (*corev1.Service, error) {
-	return ctx.controller.k8sClient.CoreV1().Services(ctx.sensor.Namespace).Create(service)
-}
-
-// updateDeployment updates the deployment for the sensor
-func (ctx *sensorContext) updateDeployment() (*appv1.Deployment, error) {
-	newDeployment, err := ctx.deploymentBuilder()
-	if err != nil {
-		return nil, err
-	}
-
-	currentMetadata := ctx.sensor.Status.Resources.Deployment
-	if currentMetadata == nil {
-		return nil, errors.New("deployment metadata is expected to be set in sensor object")
-	}
-
-	currentDeployment, err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
-	if err != nil {
-		if apierror.IsNotFound(err) {
-			ctx.updated = true
-			return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Create(newDeployment)
-		}
-		return nil, err
-	}
-
-	if currentDeployment.Annotations != nil && currentDeployment.Annotations[common.AnnotationResourceSpecHash] != newDeployment.Annotations[common.AnnotationResourceSpecHash] {
-		ctx.updated = true
-		currentDeployment.Spec = newDeployment.Spec
-		currentDeployment.Annotations[common.AnnotationResourceSpecHash] = newDeployment.Annotations[common.AnnotationResourceSpecHash]
-		return ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Namespace).Update(currentDeployment)
-	}
-	return currentDeployment, nil
-}
-
-// updateService updates the service for the sensor
-func (ctx *sensorContext) updateService() (*corev1.Service, error) {
-	currentMetadata := ctx.sensor.Status.Resources.Service
-
-	newService, err := ctx.serviceBuilder()
-	if err != nil {
-		return nil, err
-	}
-
-	if currentMetadata == nil {
-		ctx.updated = true
-		return ctx.controller.k8sClient.CoreV1().Services(newService.Namespace).Create(newService)
-	}
-
-	if currentMetadata.Annotations != nil && currentMetadata.Annotations[common.AnnotationResourceSpecHash] != newService.Annotations[common.AnnotationResourceSpecHash] {
-		ctx.updated = true
-		if err := ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Delete(currentMetadata.Name, &metav1.DeleteOptions{}); err != nil {
-			return nil, err
-		}
-	}
-	return ctx.controller.k8sClient.CoreV1().Services(currentMetadata.Namespace).Get(currentMetadata.Name, metav1.GetOptions{})
+	return string(b)
 }

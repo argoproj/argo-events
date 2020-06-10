@@ -54,6 +54,11 @@ const (
 	EnvVarGatewayServerImage = "GATEWAY_SERVER_IMAGE"
 	// EnvVarSensorImage refers to the default sensor image
 	EnvVarSensorImage = "SENSOR_IMAGE"
+	// EnvVarSensorObject refers to the env of based64 encoded sensor spec
+	EnvVarSensorObject = "SENSOR_OBJECT"
+
+	// EnvVarEventBusConfig refers to the eventbus config env
+	EnvVarEventBusConfig = "EVENTBUS_CONFIG"
 )
 
 // Controller labels

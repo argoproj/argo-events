@@ -1,5 +1,5 @@
 /*
-Copyright 2018 BlackRock, Inc.
+Copyright 2020 BlackRock, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,213 +17,242 @@ limitations under the License.
 package sensor
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-
+	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	"github.com/argoproj/argo-events/common"
+	eventbusv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
-var sensorObj = &v1alpha1.Sensor{
-	ObjectMeta: metav1.ObjectMeta{
-		Name:      "fake-sensor",
-		Namespace: "faker",
-	},
-	Spec: v1alpha1.SensorSpec{
-		Template: v1alpha1.Template{
-			ServiceAccountName: "fake-sa",
-			Container: &corev1.Container{
-				VolumeMounts: []corev1.VolumeMount{
+const (
+	testNamespace = "test-ns"
+)
+
+var (
+	testLabels = map[string]string{"controller": "test-controller"}
+
+	sensorObj = &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-sensor",
+			Namespace: testNamespace,
+		},
+		Spec: v1alpha1.SensorSpec{
+			Template: v1alpha1.Template{
+				ServiceAccountName: "fake-sa",
+				Container: &corev1.Container{
+					VolumeMounts: []corev1.VolumeMount{
+						{
+							MountPath: "/test-data",
+							Name:      "test-data",
+						},
+					},
+				},
+				Volumes: []corev1.Volume{
 					{
-						MountPath: "/test-data",
-						Name:      "test-data",
+						Name: "test-data",
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{},
+						},
 					},
 				},
 			},
-			Volumes: []corev1.Volume{
+			Subscription: &v1alpha1.Subscription{
+				HTTP: &v1alpha1.HTTPSubscription{Port: 12000},
+			},
+			Triggers: []v1alpha1.Trigger{
 				{
-					Name: "test-data",
-					VolumeSource: corev1.VolumeSource{
-						EmptyDir: &corev1.EmptyDirVolumeSource{},
-					},
-				},
-			},
-		},
-		Subscription: &v1alpha1.Subscription{
-			HTTP: &v1alpha1.HTTPSubscription{Port: 12000},
-		},
-		Triggers: []v1alpha1.Trigger{
-			{
-				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "k8s.io",
-							Version:  "",
-							Resource: "pods",
+					Template: &v1alpha1.TriggerTemplate{
+						Name: "fake-trigger",
+						K8s: &v1alpha1.StandardK8STrigger{
+							GroupVersionResource: metav1.GroupVersionResource{
+								Group:    "k8s.io",
+								Version:  "",
+								Resource: "pods",
+							},
+							Operation: "create",
+							Source:    &v1alpha1.ArtifactLocation{},
 						},
-						Operation: "create",
-						Source:    &v1alpha1.ArtifactLocation{},
 					},
 				},
 			},
-		},
-		Dependencies: []v1alpha1.EventDependency{
-			{
-				Name:        "fake-dep",
-				GatewayName: "fake-gateway",
-				EventName:   "fake-one",
+			Dependencies: []v1alpha1.EventDependency{
+				{
+					Name:        "fake-dep",
+					GatewayName: "fake-gateway",
+					EventName:   "fake-one",
+				},
 			},
 		},
-	},
-}
+	}
 
-var sensorObjNoTemplate = &v1alpha1.Sensor{
-	ObjectMeta: metav1.ObjectMeta{
-		Name:      "fake-sensor",
-		Namespace: "faker",
-	},
-	Spec: v1alpha1.SensorSpec{
-		Subscription: &v1alpha1.Subscription{
-			HTTP: &v1alpha1.HTTPSubscription{Port: 12000},
+	sensorObjNoTemplate = &v1alpha1.Sensor{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fake-sensor",
+			Namespace: testNamespace,
 		},
-		Triggers: []v1alpha1.Trigger{
-			{
-				Template: &v1alpha1.TriggerTemplate{
-					Name: "fake-trigger",
-					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: metav1.GroupVersionResource{
-							Group:    "k8s.io",
-							Version:  "",
-							Resource: "pods",
+		Spec: v1alpha1.SensorSpec{
+			Subscription: &v1alpha1.Subscription{
+				HTTP: &v1alpha1.HTTPSubscription{Port: 12000},
+			},
+			Triggers: []v1alpha1.Trigger{
+				{
+					Template: &v1alpha1.TriggerTemplate{
+						Name: "fake-trigger",
+						K8s: &v1alpha1.StandardK8STrigger{
+							GroupVersionResource: metav1.GroupVersionResource{
+								Group:    "k8s.io",
+								Version:  "",
+								Resource: "pods",
+							},
+							Operation: "create",
+							Source:    &v1alpha1.ArtifactLocation{},
 						},
-						Operation: "create",
-						Source:    &v1alpha1.ArtifactLocation{},
+					},
+				},
+			},
+			Dependencies: []v1alpha1.EventDependency{
+				{
+					Name:        "fake-dep",
+					GatewayName: "fake-gateway",
+					EventName:   "fake-one",
+				},
+			},
+		},
+	}
+
+	fakeEventBus = &eventbusv1alpha1.EventBus{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: eventbusv1alpha1.SchemeGroupVersion.String(),
+			Kind:       "EventBus",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      "default",
+		},
+		Spec: eventbusv1alpha1.EventBusSpec{
+			NATS: &eventbusv1alpha1.NATSBus{
+				Native: &eventbusv1alpha1.NativeStrategy{
+					Auth: &eventbusv1alpha1.AuthStrategyToken,
+				},
+			},
+		},
+		Status: eventbusv1alpha1.EventBusStatus{
+			Config: eventbusv1alpha1.BusConfig{
+				NATS: &eventbusv1alpha1.NATSConfig{
+					URL:  "nats://xxxx",
+					Auth: &eventbusv1alpha1.AuthStrategyToken,
+					AccessSecret: &corev1.SecretKeySelector{
+						Key: "test-key",
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: "test-name",
+						},
 					},
 				},
 			},
 		},
-		Dependencies: []v1alpha1.EventDependency{
-			{
-				Name:        "fake-dep",
-				GatewayName: "fake-gateway",
-				EventName:   "fake-one",
-			},
-		},
-	},
-}
-
-func TestResource_BuildService(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	for _, sObj := range sensorObjs {
-		controller := getController()
-		opctx := newSensorContext(sObj.DeepCopy(), controller)
-		service, err := opctx.serviceBuilder()
-		assert.Nil(t, err)
-		assert.NotNil(t, service)
-		assert.NotEmpty(t, service.Annotations[common.AnnotationResourceSpecHash])
 	}
-}
+)
 
-func TestResource_BuildServiceWithLabelsAnnotations(t *testing.T) {
+func Test_BuildDeployment(t *testing.T) {
 	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	for _, sObj := range sensorObjs {
-		controller := getController()
-		sensorCopy := sObj.DeepCopy()
-
-		sensorCopy.Spec.ServiceLabels = map[string]string{}
-		sensorCopy.Spec.ServiceLabels["test-label"] = "label1"
-		sensorCopy.Spec.ServiceAnnotations = map[string]string{}
-		sensorCopy.Spec.ServiceAnnotations["test-annotation"] = "annotation1"
-
-		opctx := newSensorContext(sensorCopy, controller)
-		service, err := opctx.serviceBuilder()
-		assert.Nil(t, err)
-		assert.NotNil(t, service)
-		assert.NotEmpty(t, service.Annotations[common.AnnotationResourceSpecHash])
-		assert.NotNil(t, service.ObjectMeta.Labels)
-		assert.NotNil(t, service.ObjectMeta.Annotations)
-		assert.Equal(t, service.ObjectMeta.Labels["test-label"], "label1")
-		assert.Equal(t, service.ObjectMeta.Annotations["test-annotation"], "annotation1")
-	}
-}
-
-func TestResource_BuildDeployment(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	for _, sObj := range sensorObjs {
-		controller := getController()
-		opctx := newSensorContext(sObj.DeepCopy(), controller)
-		deployment, err := opctx.deploymentBuilder()
-		assert.Nil(t, err)
-		assert.NotNil(t, deployment)
-		assert.NotEmpty(t, deployment.Annotations[common.AnnotationResourceSpecHash])
-		assert.Equal(t, int(*deployment.Spec.Replicas), 1)
-	}
-}
-
-func TestResource_SetupContainers(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	for _, sObj := range sensorObjs {
-		controller := getController()
-		opctx := newSensorContext(sObj.DeepCopy(), controller)
-		deployment, err := opctx.deploymentBuilder()
-		assert.Nil(t, err)
-		assert.NotNil(t, deployment)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[0].Name, common.SensorName)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[0].Value, opctx.sensor.Name)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[1].Name, common.SensorNamespace)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[1].Value, opctx.sensor.Namespace)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[2].Name, common.EnvVarControllerInstanceID)
-		assert.Equal(t, deployment.Spec.Template.Spec.Containers[0].Env[2].Value, controller.Config.InstanceID)
-	}
-}
-
-func TestResource_UpdateResources(t *testing.T) {
-	sensorObjs := []*v1alpha1.Sensor{sensorObj, sensorObjNoTemplate}
-	for _, sObj := range sensorObjs {
-		controller := getController()
-		ctx := newSensorContext(sObj.DeepCopy(), controller)
-		err := ctx.createSensorResources()
-		assert.Nil(t, err)
-
-		tests := []struct {
-			name       string
-			updateFunc func()
-			testFunc   func(t *testing.T, oldResources *v1alpha1.SensorResources)
-		}{
-			{
-				name: "update deployment when sensor template is updated",
-				updateFunc: func() {
-					ctx.sensor.Spec.Template.ServiceAccountName = "updated-sa-name"
-				},
-				testFunc: func(t *testing.T, oldResources *v1alpha1.SensorResources) {
-					oldDeployment := oldResources.Deployment
-					deployment, err := ctx.controller.k8sClient.AppsV1().Deployments(ctx.sensor.Status.Resources.Deployment.Namespace).Get(ctx.sensor.Status.Resources.Deployment.Name, metav1.GetOptions{})
-					assert.Nil(t, err)
-					assert.NotNil(t, deployment)
-					assert.NotEqual(t, oldDeployment.Annotations[common.AnnotationResourceSpecHash], deployment.Annotations[common.AnnotationResourceSpecHash])
-
-					oldService := oldResources.Service
-					service, err := ctx.controller.k8sClient.CoreV1().Services(ctx.sensor.Status.Resources.Service.Namespace).Get(ctx.sensor.Status.Resources.Service.Name, metav1.GetOptions{})
-					assert.Nil(t, err)
-					assert.NotNil(t, service)
-					assert.Equal(t, oldService.Annotations[common.AnnotationResourceSpecHash], service.Annotations[common.AnnotationResourceSpecHash])
-				},
-			},
+	t.Run("test build without eventbus", func(t *testing.T) {
+		for _, sObj := range sensorObjs {
+			args := &AdaptorArgs{
+				Image:  testImage,
+				Sensor: sObj,
+				Labels: testLabels,
+			}
+			deployment, err := buildDeployment(args, nil, ctrl.Log.WithName("test"))
+			assert.Nil(t, err)
+			assert.NotNil(t, deployment)
+			assert.NotEmpty(t, deployment.Annotations[common.AnnotationResourceSpecHash])
+			assert.Equal(t, int(*deployment.Spec.Replicas), 1)
 		}
-
-		for _, test := range tests {
-			oldResources := ctx.sensor.Status.Resources.DeepCopy()
-			t.Run(test.name, func(t *testing.T) {
-				test.updateFunc()
-				err := ctx.updateSensorResources()
-				assert.Nil(t, err)
-				test.testFunc(t, oldResources)
-			})
+	})
+	t.Run("test build with eventbus", func(t *testing.T) {
+		for _, sObj := range sensorObjs {
+			args := &AdaptorArgs{
+				Image:  testImage,
+				Sensor: sObj,
+				Labels: testLabels,
+			}
+			deployment, err := buildDeployment(args, fakeEventBus, ctrl.Log.WithName("test"))
+			assert.Nil(t, err)
+			assert.NotNil(t, deployment)
+			volumes := deployment.Spec.Template.Spec.Volumes
+			assert.True(t, len(volumes) > 0)
+			hasAuthVolume := false
+			for _, vol := range volumes {
+				if vol.Name == "auth-volume" {
+					hasAuthVolume = true
+					break
+				}
+			}
+			assert.True(t, hasAuthVolume)
 		}
-	}
+	})
+}
+
+func TestResourceReconcile(t *testing.T) {
+	t.Run("test resource reconcile without eventbus", func(t *testing.T) {
+		cl := fake.NewFakeClient(sensorObj)
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+		err := Reconcile(cl, args, ctrl.Log.WithName("test"))
+		assert.Nil(t, err)
+		assert.True(t, sensorObj.Status.IsReady())
+
+		ctx := context.TODO()
+		svcList := &corev1.ServiceList{}
+		err = cl.List(ctx, svcList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(svcList.Items))
+	})
+
+	t.Run("test resource reconcile with eventbus", func(t *testing.T) {
+		ctx := context.TODO()
+		cl := fake.NewFakeClient(sensorObj)
+		obj := fakeEventBus.DeepCopyObject()
+		testBus := obj.(*eventbusv1alpha1.EventBus)
+		testBus.Status.MarkDeployed("test", "test")
+		testBus.Status.MarkConfigured()
+		err := cl.Create(ctx, testBus)
+		assert.Nil(t, err)
+		args := &AdaptorArgs{
+			Image:  testImage,
+			Sensor: sensorObj,
+			Labels: testLabels,
+		}
+		err = Reconcile(cl, args, ctrl.Log.WithName("test"))
+		assert.Nil(t, err)
+		assert.True(t, sensorObj.Status.IsReady())
+
+		deployList := &appv1.DeploymentList{}
+		err = cl.List(ctx, deployList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(deployList.Items))
+
+		svcList := &corev1.ServiceList{}
+		err = cl.List(ctx, svcList, &client.ListOptions{
+			Namespace: testNamespace,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(svcList.Items))
+	})
 }
