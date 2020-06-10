@@ -127,8 +127,25 @@ coverage:
 clean:
 	-rm -rf ${CURRENT_DIR}/dist
 
+$(GOPATH)/bin/go-to-protobuf:
+	go get k8s.io/code-generator/cmd/go-to-protobuf@v0.16.7-beta.0
+	go mod tidy
+
+.PHONY: protos
+protos: \
+	pkg/apis/eventsource/v1alpha1/generated.proto \
+	pkg/apis/eventbus/v1alpha1/generated.proto \
+	pkg/apis/sensor/v1alpha1/generated.proto
+
+%/generated.proto: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name types.go)
+	$(GOPATH)/bin/go-to-protobuf \
+        --only-idl  \
+        --go-header-file=./hack/custom-boilerplate.go.txt \
+        --packages=github.com/argoproj/argo-events/$* \
+        --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
+
 .PHONY: codegen
-codegen:
+codegen: $(PROTOS)
 	go mod vendor
 	./hack/update-codegen.sh
 	./hack/update-openapigen.sh
@@ -152,10 +169,3 @@ build-e2e-images: sensor-controller-image gateway-controller-image gateway-clien
 lint:
 	golangci-lint run
 
-.PHONY: proto
-proto:
-	go-to-protobuf \
- 		--only-idl  \
-        --go-header-file=./hack/custom-boilerplate.go.txt \
-        --packages=github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \
-        --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1

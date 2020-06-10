@@ -367,7 +367,7 @@ type GithubEventSource struct {
 	GithubUploadURL string `json:"githubUploadURL,omitempty" protobuf:"bytes,12,opt,name=githubUploadURL"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
 	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,13.opt,name=namespace"`
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,13,opt,name=namespace"`
 	// DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
 	// +optional
 	DeleteHookOnFinish bool `json:"deleteHookOnFinish,omitempty" protobuf:"bytes,14,opt,name=deleteHookOnFinish"`

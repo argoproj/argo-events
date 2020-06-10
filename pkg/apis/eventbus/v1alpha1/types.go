@@ -139,7 +139,3 @@ func (s *EventBusStatus) MarkConfigured() {
 func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
 	s.Status.MarkFalse(EventBusConditionConfigured, reason, message)
 }
-
-func init() {
-	SchemeBuilder.Register(&EventBus{}, &EventBusList{})
-}
