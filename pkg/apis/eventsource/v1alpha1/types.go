@@ -277,7 +277,7 @@ type SNSEventSource struct {
 	Region string `json:"region" protobuf:"bytes,6,name=region"`
 	// RoleARN is the Amazon Resource Name (ARN) of the role to assume.
 	// +optional
-	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,6,opt,name=roleARN"`
+	RoleARN string `json:"roleARN,omitempty" protobuf:"bytes,7,opt,name=roleARN"`
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
