@@ -125,7 +125,7 @@ func (router *Router) PostActivate() error {
 
 	logger := route.Logger.WithFields(map[string]interface{}{
 		common.LabelEventSource: route.EventSource.Name,
-		"project-id":            gitlabEventSource.ProjectId,
+		"project-id":            gitlabEventSource.ProjectID,
 	})
 
 	logger.Infoln("retrieving the access token credentials...")
@@ -142,9 +142,9 @@ func (router *Router) PostActivate() error {
 
 	formattedUrl := common.FormattedURL(gitlabEventSource.Webhook.URL, gitlabEventSource.Webhook.Endpoint)
 
-	hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(gitlabEventSource.ProjectId, &gitlab.ListProjectHooksOptions{})
+	hooks, _, err := router.gitlabClient.Projects.ListProjectHooks(gitlabEventSource.ProjectID, &gitlab.ListProjectHooksOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectId)
+		return errors.Wrapf(err, "failed to list existing hooks to check for duplicates for project id %s", router.gitlabEventSource.ProjectID)
 	}
 
 	var existingHook *gitlab.ProjectHook
@@ -215,7 +215,7 @@ func (router *Router) PostActivate() error {
 
 	if !isAlreadyExists {
 		logger.Infoln("creating project hook...")
-		newHook, _, err = router.gitlabClient.Projects.AddProjectHook(router.gitlabEventSource.ProjectId, opt.(*gitlab.AddProjectHookOptions))
+		newHook, _, err = router.gitlabClient.Projects.AddProjectHook(router.gitlabEventSource.ProjectID, opt.(*gitlab.AddProjectHookOptions))
 		if err != nil {
 			return errors.Errorf("failed to add project hook. err: %+v", err)
 		}
@@ -224,7 +224,7 @@ func (router *Router) PostActivate() error {
 		if existingHook == nil {
 			return errors.Errorf("existing hook contents are empty, unable to edit existing webhook")
 		}
-		newHook, _, err = router.gitlabClient.Projects.EditProjectHook(router.gitlabEventSource.ProjectId, existingHook.ID, opt.(*gitlab.EditProjectHookOptions))
+		newHook, _, err = router.gitlabClient.Projects.EditProjectHook(router.gitlabEventSource.ProjectID, existingHook.ID, opt.(*gitlab.EditProjectHookOptions))
 		if err != nil {
 			return errors.Errorf("failed to add project hook. err: %+v", err)
 		}
@@ -243,12 +243,12 @@ func (router *Router) PostInactivate() error {
 	if gitlabEventSource.DeleteHookOnFinish {
 		logger := route.Logger.WithFields(map[string]interface{}{
 			common.LabelEventSource: route.EventSource.Name,
-			"project-id":            gitlabEventSource.ProjectId,
+			"project-id":            gitlabEventSource.ProjectID,
 			"hook-id":               router.hook.ID,
 		})
 
 		logger.Infoln("deleting project hook...")
-		if _, err := router.gitlabClient.Projects.DeleteProjectHook(router.gitlabEventSource.ProjectId, router.hook.ID); err != nil {
+		if _, err := router.gitlabClient.Projects.DeleteProjectHook(router.gitlabEventSource.ProjectID, router.hook.ID); err != nil {
 			return errors.Errorf("failed to delete hook. err: %+v", err)
 		}
 

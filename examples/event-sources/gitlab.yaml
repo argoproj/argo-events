@@ -8,7 +8,7 @@ spec:
   gitlab:
     example:
       # id of the project
-      projectId: "1"
+      projectID: "1"
       # Github will send events to following port and endpoint
       webhook:
         # endpoint to listen to events on

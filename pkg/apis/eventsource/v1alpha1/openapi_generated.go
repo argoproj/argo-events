@@ -964,9 +964,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Ref:         ref("github.com/argoproj/argo-events/gateways/server/common/webhook.Context"),
 						},
 					},
-					"projectId": {
+					"projectID": {
 						SchemaProps: spec.SchemaProps{
-							Description: "ProjectId is the id of project for which integration needs to setup",
+							Description: "ProjectID is the id of project for which integration needs to setup",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1013,7 +1013,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook", "projectId", "events", "accessToken", "gitlabBaseURL"},
+				Required: []string{"webhook", "projectID", "events", "accessToken", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{

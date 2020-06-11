@@ -2193,7 +2193,7 @@ Webhook holds configuration to run a http server
 
 <td>
 
-<code>projectId</code></br> <em> string </em>
+<code>projectID</code></br> <em> string </em>
 
 </td>
 
@@ -2201,7 +2201,7 @@ Webhook holds configuration to run a http server
 
 <p>
 
-ProjectId is the id of project for which integration needs to setup
+ProjectID is the id of project for which integration needs to setup
 
 </p>
 

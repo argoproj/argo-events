@@ -60,7 +60,7 @@ func validate(eventSource *v1alpha1.GitlabEventSource) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
-	if eventSource.ProjectId == "" {
+	if eventSource.ProjectID == "" {
 		return fmt.Errorf("project id can't be empty")
 	}
 	if eventSource.Events == nil {
