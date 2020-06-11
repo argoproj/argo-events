@@ -1867,12 +1867,53 @@ func schema_pkg_apis_eventsources_v1alpha1_StorageGridEventSource(ref common.Ref
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter"),
 						},
 					},
+					"topicArn": {
+						SchemaProps: spec.SchemaProps{
+							Description: "TopicArn",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"bucket": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Name of the bucket to register notifications for.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"region": {
+						SchemaProps: spec.SchemaProps{
+							Description: "S3 region. Defaults to us-east-1",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"authToken": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Auth token for storagegrid api",
+							Ref:         ref("k8s.io/api/core/v1.SecretKeySelector"),
+						},
+					},
+					"apiURL": {
+						SchemaProps: spec.SchemaProps{
+							Description: "ApiURL is the url of the storagegrid api.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"namespace": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Namespace refers to Kubernetes namespace to read auth token from. Defaults to gateway namespace",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"webhook"},
+				Required: []string{"webhook", "topicArn", "bucket", "authToken", "apiURL"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter"},
+			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1.StorageGridFilter", "k8s.io/api/core/v1.SecretKeySelector"},
 	}
 }
 

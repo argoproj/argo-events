@@ -17,7 +17,6 @@ limitations under the License.
 package storagegrid
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -31,6 +30,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
 	"github.com/ghodss/yaml"
+	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
 	"github.com/joncalhoun/qson"
 )
@@ -52,14 +52,13 @@ var (
 </PublishResponse>` + "\n"
 
 	notificationBodyTemplate = `
-<?xml version="1.0" encoding="UTF-8"?>
-  <NotificationConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-    <TopicConfiguration>
-      <Id>%s</Id>
-      <Topic>%s</Topic>
-      %s
-    </TopicConfiguration>
-  </NotificationConfiguration>
+<NotificationConfiguration>
+	<TopicConfiguration>
+	  <Id>%s</Id>
+	  <Topic>%s</Topic>
+	  %s
+	</TopicConfiguration>
+</NotificationConfiguration>
 ` + "\n"
 )
 
@@ -71,19 +70,6 @@ func init() {
 // generateUUID returns a new uuid
 func generateUUID() uuid.UUID {
 	return uuid.New()
-}
-
-// filterEvent filters notification based on event filter in a gateway configuration
-func filterEvent(notification *storageGridNotification, eventSource *v1alpha1.StorageGridEventSource) bool {
-	if eventSource.Events == nil {
-		return true
-	}
-	for _, filterEvent := range eventSource.Events {
-		if notification.Message.Records[0].EventName == filterEvent {
-			return true
-		}
-	}
-	return false
 }
 
 // filterName filters object key based on configured prefix and/or suffix
@@ -173,7 +159,7 @@ func (router *Router) HandleRoute(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	if filterEvent(notification, router.storageGridEventSource) && filterName(notification, router.storageGridEventSource) {
+	if filterName(notification, router.storageGridEventSource) {
 		logger.WithError(err).Errorln("new event received, dispatching event on route's data channel")
 		route.DataCh <- b
 		return
@@ -193,7 +179,8 @@ func (router *Router) PostActivate() error {
 	}
 
 	registrationURL := common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint)
-	apiURL := common.FormattedURL(eventSource.ApiURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket))
+
+	client := resty.New()
 
 	logger := route.Logger.WithFields(
 		map[string]interface{}{
@@ -201,14 +188,77 @@ func (router *Router) PostActivate() error {
 			"registration-url":      registrationURL,
 			"bucket":                eventSource.Bucket,
 			"auth-secret-name":      eventSource.AuthToken.Name,
-			"api-url":               apiURL,
+			"api-url":               eventSource.ApiURL,
 		})
+
+	logger.Infoln("checking if the endpoint already exists...")
+
+	response, err := client.R().
+		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetAuthToken(authToken).
+		SetResult(&getEndpointResponse{}).
+		SetError(&genericResponse{}).
+		Get(common.FormattedURL(eventSource.ApiURL, "/org/endpoints"))
+	if err != nil {
+		return err
+	}
+
+	if !response.IsSuccess() {
+		errObj := response.Error().(*genericResponse)
+		return fmt.Errorf("failed to list existing endpoints. reason: %s", errObj.Message.Text)
+	}
+
+	endpointResponse := response.Result().(*getEndpointResponse)
+
+	isURNExists := false
+
+	for _, endpoint := range endpointResponse.Data {
+		if endpoint.EndpointURN == eventSource.TopicArn {
+			logger.Infoln("endpoint with topic urn already exists, won't register duplicate endpoint")
+			isURNExists = true
+			break
+		}
+	}
+
+	if !isURNExists {
+		logger.Infoln("endpoint urn does not exist, registering a new endpoint")
+		newEndpoint := createEndpointRequest{
+			DisplayName: router.route.EventSource.Name,
+			EndpointURI: common.FormattedURL(eventSource.Webhook.URL, eventSource.Webhook.Endpoint),
+			EndpointURN: eventSource.TopicArn,
+			AuthType:    "anonymous",
+			InsecureTLS: true,
+		}
+
+		newEndpointBody, err := json.Marshal(&newEndpoint)
+		if err != nil {
+			return err
+		}
+
+		response, err := client.R().
+			SetHeader("Content-Type", common.MediaTypeJSON).
+			SetAuthToken(authToken).
+			SetBody(string(newEndpointBody)).
+			SetResult(&genericResponse{}).
+			SetError(&genericResponse{}).
+			Post(common.FormattedURL(eventSource.ApiURL, "/org/endpoints"))
+		if err != nil {
+			return err
+		}
+
+		if !response.IsSuccess() {
+			errObj := response.Error().(*genericResponse)
+			return fmt.Errorf("failed to register the endpoint. reason: %s", errObj.Message.Text)
+		}
+
+		logger.Infoln("successfully registered the endpoint")
+	}
 
 	logger.Infoln("registering notification configuration on storagegrid...")
 
 	var events []string
 	for _, event := range eventSource.Events {
-		events = append(events, fmt.Sprintf("      <Event>%s</Event>", event))
+		events = append(events, fmt.Sprintf("<Event>%s</Event>", event))
 	}
 
 	eventXML := strings.Join(events, "\n")
@@ -219,24 +269,25 @@ func (router *Router) PostActivate() error {
 		Notification: notificationBody,
 	}
 
-	notificationRequest, err := json.Marshal(notification)
+	notificationRequestBody, err := json.Marshal(notification)
 	if err != nil {
 		return err
 	}
 
-	client := http.Client{}
-	request, err := http.NewRequest(http.MethodPut, apiURL, bytes.NewReader(notificationRequest))
+	response, err = client.R().
+		SetHeader("Content-Type", common.MediaTypeJSON).
+		SetAuthToken(authToken).
+		SetBody(string(notificationRequestBody)).
+		SetResult(&registerNotificationResponse{}).
+		SetError(&genericResponse{}).
+		Put(common.FormattedURL(eventSource.ApiURL, fmt.Sprintf("/org/containers/%s/notification", eventSource.Bucket)))
 	if err != nil {
 		return err
 	}
 
-	bearer := "Bearer " + authToken
-
-	request.Header.Add()
-
-	_, err = client.Do(request)
-	if err != nil {
-		return err
+	if !response.IsSuccess() {
+		errObj := response.Error().(*genericResponse)
+		return fmt.Errorf("failed to configure notification. reason %s\n", errObj.Message.Text)
 	}
 
 	logger.Infoln("successfully registered notification configuration on storagegrid")
