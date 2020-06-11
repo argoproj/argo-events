@@ -7,12 +7,12 @@ run:
   skip-files:
     - "pkg/apis/sensor/v1alpha1/openapi_generated.go"
     - "pkg/apis/gateway/v1alpha1/openapi_generated.go"
-    - "pkg/apis/eventsources/v1alpha1/openapi_generated.go"
+    - "pkg/apis/eventsource/v1alpha1/openapi_generated.go"
     - "pkg/apis/common/openapi_generated.go"
     - "pkg/apis/common/deepcopy_generated.go"
     - "pkg/apis/sensor/v1alpha1/zz_generated.deepcopy.go"
     - "pkg/apis/gateway/v1alpha1/zz_generated.deepcopy.go"
-    - "pkg/apis/eventsources/v1alpha1/zz_generated.deepcopy.go"
+    - "pkg/apis/eventsource/v1alpha1/zz_generated.deepcopy.go"
 linters:
   enable:
     - bodyclose

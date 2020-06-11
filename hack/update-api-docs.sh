@@ -21,7 +21,7 @@ cd "${FAKE_REPOPATH}"
 # Event Source
 go run ${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/main.go \
  -config "${FAKE_REPOPATH}/vendor/github.com/ahmetb/gen-crd-api-reference-docs/example-config.json" \
- -api-dir "github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1" \
+ -api-dir "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1" \
  -out-file "${FAKE_REPOPATH}/api/event-source.html" \
  -template-dir "${FAKE_REPOPATH}/hack/api-docs-template"
 

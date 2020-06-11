@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
+	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -59,13 +60,25 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size        int                  `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
-	Auth        *AuthStrategy        `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,3,opt,name=persistence"`
+	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
+	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
+	// +optional
+	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
 }
 
 // PersistenceStrategy defines the strategy of persistence
 type PersistenceStrategy struct {
+	// Name of the StorageClass required by the claim.
+	// More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1
+	// +optional
+	StorageClassName *string `json:"storageClassName,omitempty" protobuf:"bytes,1,opt,name=storageClassName"`
+	// Available access modes such as ReadWriteOnce, ReadWriteMany
+	// https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+	// +optional
+	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
+	// Volume size, e.g. 10Gi
+	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -75,10 +88,17 @@ type BusConfig struct {
 
 // NATSConfig holds the config of NATS
 type NATSConfig struct {
-	URL          string                   `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
-	ClusterID    string                   `json:"clusterID,omitempty" protobuf:"bytes,1,opt,name=clusterID"`
-	Auth         AuthStrategy             `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
-	AccessSecret corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,3,opt,name=accessSecret"`
+	// NATS host url
+	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
+	// Cluster ID for nats streaming, if it's missing, treat it as NATS server
+	// +optional
+	ClusterID *string `json:"clusterID,omitempty" protobuf:"bytes,2,opt,name=clusterID"`
+	// Auth strategy, default to AuthStrategyNone
+	// +optional
+	Auth *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
+	// Secret for auth
+	// +optional
+	AccessSecret *corev1.SecretKeySelector `json:"accessSecret,omitempty" protobuf:"bytes,4,opt,name=accessSecret"`
 }
 
 const (

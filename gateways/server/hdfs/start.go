@@ -13,7 +13,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server"
 	"github.com/argoproj/argo-events/gateways/server/common/fsevent"
 	"github.com/argoproj/argo-events/gateways/server/common/naivewatcher"
-	"github.com/argoproj/argo-events/pkg/apis/eventsources/v1alpha1"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/colinmarc/hdfs"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
