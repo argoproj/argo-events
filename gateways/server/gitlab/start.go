@@ -157,16 +157,38 @@ func (router *Router) PostActivate() error {
 		}
 	}
 
+	defaultEventValue := false
+
 	editOpt := &gitlab.EditProjectHookOptions{
-		URL:                   &formattedUrl,
-		Token:                 &c.token,
-		EnableSSLVerification: &router.gitlabEventSource.EnableSSLVerification,
+		URL:                      &formattedUrl,
+		ConfidentialNoteEvents:   &defaultEventValue,
+		PushEvents:               &defaultEventValue,
+		IssuesEvents:             &defaultEventValue,
+		ConfidentialIssuesEvents: &defaultEventValue,
+		MergeRequestsEvents:      &defaultEventValue,
+		TagPushEvents:            &defaultEventValue,
+		NoteEvents:               &defaultEventValue,
+		JobEvents:                &defaultEventValue,
+		PipelineEvents:           &defaultEventValue,
+		WikiPageEvents:           &defaultEventValue,
+		EnableSSLVerification:    &router.gitlabEventSource.EnableSSLVerification,
+		Token:                    &c.token,
 	}
 
 	addOpt := &gitlab.AddProjectHookOptions{
-		URL:                   &formattedUrl,
-		Token:                 &c.token,
-		EnableSSLVerification: &router.gitlabEventSource.EnableSSLVerification,
+		URL:                      &formattedUrl,
+		Token:                    &c.token,
+		EnableSSLVerification:    &router.gitlabEventSource.EnableSSLVerification,
+		ConfidentialNoteEvents:   &defaultEventValue,
+		PushEvents:               &defaultEventValue,
+		IssuesEvents:             &defaultEventValue,
+		ConfidentialIssuesEvents: &defaultEventValue,
+		MergeRequestsEvents:      &defaultEventValue,
+		TagPushEvents:            &defaultEventValue,
+		NoteEvents:               &defaultEventValue,
+		JobEvents:                &defaultEventValue,
+		PipelineEvents:           &defaultEventValue,
+		WikiPageEvents:           &defaultEventValue,
 	}
 
 	var opt interface{}
