@@ -5008,29 +5008,6 @@ ApiURL is the url of the storagegrid api.
 
 </tr>
 
-<tr>
-
-<td>
-
-<code>namespace</code></br> <em> string </em>
-
-</td>
-
-<td>
-
-<em>(Optional)</em>
-
-<p>
-
-Namespace refers to Kubernetes namespace to read auth token from.
-Defaults to gateway namespace
-
-</p>
-
-</td>
-
-</tr>
-
 </tbody>
 
 </table>

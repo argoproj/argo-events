@@ -473,10 +473,6 @@ type StorageGridEventSource struct {
 	AuthToken *corev1.SecretKeySelector `json:"authToken" protobuf:"bytes,7,name=authToken"`
 	// ApiURL is the url of the storagegrid api.
 	ApiURL string `json:"apiURL" protobuf:"bytes,8,name=apiURL"`
-	// Namespace refers to Kubernetes namespace to read auth token from.
-	// Defaults to gateway namespace
-	// +optional
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects

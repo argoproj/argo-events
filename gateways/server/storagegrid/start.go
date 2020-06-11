@@ -173,7 +173,7 @@ func (router *Router) PostActivate() error {
 	eventSource := router.storageGridEventSource
 	route := router.route
 
-	authToken, err := common.GetSecretValue(router.k8sClient, eventSource.Namespace, eventSource.AuthToken)
+	authToken, err := common.GetSecretValue(router.k8sClient, router.namespace, eventSource.AuthToken)
 	if err != nil {
 		return err
 	}
@@ -313,15 +313,12 @@ func (listener *EventListener) StartEventSource(eventSource *gateways.EventSourc
 		return err
 	}
 
-	if storagegridEventSource.Namespace == "" {
-		storagegridEventSource.Namespace = listener.Namespace
-	}
-
 	route := webhook.NewRoute(storagegridEventSource.Webhook, listener.Logger, eventSource)
 
 	return webhook.ManageRoute(&Router{
 		route:                  route,
 		storageGridEventSource: storagegridEventSource,
 		k8sClient:              listener.K8sClient,
+		namespace:              listener.Namespace,
 	}, controller, eventStream)
 }

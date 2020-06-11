@@ -42,6 +42,7 @@ type Router struct {
 	storageGridEventSource *v1alpha1.StorageGridEventSource
 	// k8sClient is Kubernetes client
 	k8sClient kubernetes.Interface
+	namespace string
 }
 
 type storageGridNotificationRequest struct {
