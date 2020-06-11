@@ -20,7 +20,6 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/sirupsen/logrus"
-	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -46,6 +45,7 @@ type Router struct {
 	hook *gitlab.ProjectHook
 	// gitlabEventSource is the event source that contains configuration necessary to consume events from GitLab
 	gitlabEventSource *v1alpha1.GitlabEventSource
+	namespace         string
 }
 
 // cred stores the api access token

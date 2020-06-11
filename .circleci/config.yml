@@ -19,6 +19,23 @@ jobs:
           key: go-dep-cache-{{ checksum "go.sum" }}-v4
           paths:
             - ./vendor
+
+  # test runs the tests
+  test:
+    docker:
+      - image: golang:1.13.7
+    working_directory: /go/src/github.com/argoproj/argo-events
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-dep-cache-{{ checksum "go.sum" }}-v4
+            - go-dep-cache-
+      - run: go get -u github.com/gobuffalo/packr/packr
+      - run:
+          name: Test Project
+          command: make test
+
   # build runs the build of the linux artifacts and persists the packages to the circleci workspace
   build:
     docker:

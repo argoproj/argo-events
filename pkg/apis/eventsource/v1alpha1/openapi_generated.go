@@ -973,9 +973,16 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 					},
 					"event": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Event is a gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.",
-							Type:        []string{"string"},
-							Format:      "",
+							Description: "Events are gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.",
+							Type:        []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
 						},
 					},
 					"accessToken": {
@@ -998,23 +1005,9 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"namespace": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Namespace refers to Kubernetes namespace which is used to retrieve access token from.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
 					"deleteHookOnFinish": {
 						SchemaProps: spec.SchemaProps{
 							Description: "DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-					"allowDuplicate": {
-						SchemaProps: spec.SchemaProps{
-							Description: "AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations. Defaults to false.",
 							Type:        []string{"boolean"},
 							Format:      "",
 						},
