@@ -131,32 +131,6 @@ func TestGenerateUUID(t *testing.T) {
 	})
 }
 
-func TestFilterEvent(t *testing.T) {
-	convey.Convey("Given a storage grid event, test whether it passes the filter", t, func() {
-		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &webhook.Context{
-				Endpoint: "/",
-				URL:      "testurl",
-				Port:     "8080",
-			},
-			Events: []string{
-				"ObjectCreated:Put",
-			},
-			Filter: &v1alpha1.StorageGridFilter{
-				Prefix: "hello-",
-				Suffix: ".txt",
-			},
-		}
-		var gridNotification *storageGridNotification
-		err := json.Unmarshal([]byte(notification), &gridNotification)
-		convey.So(err, convey.ShouldBeNil)
-		convey.So(gridNotification, convey.ShouldNotBeNil)
-
-		ok := filterEvent(gridNotification, storageGridEventSource)
-		convey.So(ok, convey.ShouldEqual, true)
-	})
-}
-
 func TestFilterName(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether the object key passes the filter", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{

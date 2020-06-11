@@ -3,9 +3,9 @@ kind: EventSource
 metadata:
   name: storage-grid-event-source
 spec:
-  type: storage-grid
+  type: storagegrid
   storageGrid:
-    example-insecure:
+    example:
       # hook contains configuration for the HTTP server running in the gateway.
       # StorageGrid will send events to following port and endpoint
       webhook:
@@ -15,24 +15,18 @@ spec:
         method: POST
         # endpoint to listen events on
         endpoint: "/"
+        # url for StorageGrid to send notifications to. Make sure that this URL is reachable from StorageGrid
+        url: gateway-url
       # List of supported events can be derived from AWS S3 events https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#supported-notification-event-types
-      # Remove S3 prefix from event type to make it a StorageGrid event.
       events:
-        - ObjectCreated:Put
-
-#    example-secure:
-#      webhook:
-#        # port to run HTTP server on
-#        port: "8090"
-#        # HTTP request method to allow. In this case, only POST requests are accepted
-#        method: POST
-#        # endpoint to listen events on
-#        endpoint: "/"
-#        # path to file that is mounted in gateway pod which contains certs
-#        serverCertPath: "some path in pod"
-#        # path to file that is mounted in gateway pod which contains private key
-#        serverKeyPath: "some path in pod"
-#      # for events object PUT, POST, COPY and object removal
-#      events:
-#        - ObjectCreated:*
-#        - ObjectRemoved:Delete
+        - s3:ObjectCreated:*
+      # More info available at https://docs.netapp.com/sgws-110/index.jsp?topic=%2Fcom.netapp.doc.sg-tenant-admin%2FGUID-7D83D20B-F061-40ED-8C7C-F3395047B8C5.html
+      topicArn: topic arn
+      # Name of the bucket to listen notifications for
+      bucket: name of the bucket
+      # This is the URL of your StorageGrid API Portal
+      apiURL: storagegrid api url
+      # Auth Token to authenticate against StorageGrid API
+      authToken:
+        name: name of k8s secret that holds storagegrid auth token
+        key: key within secret that holds the token value

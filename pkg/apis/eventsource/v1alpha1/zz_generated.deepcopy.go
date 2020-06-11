@@ -866,6 +866,11 @@ func (in *StorageGridEventSource) DeepCopyInto(out *StorageGridEventSource) {
 		*out = new(StorageGridFilter)
 		**out = **in
 	}
+	if in.AuthToken != nil {
+		in, out := &in.AuthToken, &out.AuthToken
+		*out = new(v1.SecretKeySelector)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 
