@@ -21,11 +21,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 type Details struct {
@@ -450,8 +451,10 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 	id := obj.NodeID("fake-dependency")
 	obj.Status.Nodes = map[string]v1alpha1.NodeStatus{
@@ -473,7 +476,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
+	err = ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }

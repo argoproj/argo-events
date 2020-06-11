@@ -960,32 +960,3 @@ message S3Filter {
   optional string suffix = 2 [(gogoproto.customname) = "Suffix", (gogoproto.nullable) = false];
 }
 
-message Backoff {
-  // The initial duration.
-  optional int64 duration = 1 [(gogoproto.casttype) = "time.Duration", (gogoproto.customname) = "Duration", (gogoproto.nullable) = false];
-
-  // Duration is multiplied by factor each iteration, if factor is not zero
-  // and the limits imposed by Steps and Cap have not been reached.
-  // Should not be negative.
-  // The jitter does not contribute to the updates to the duration parameter.
-  optional double factor = 2 [(gogoproto.customname) = "Factor", (gogoproto.nullable) = false];
-
-  // The sleep at each iteration is the duration plus an additional
-  // amount chosen uniformly at random from the interval between
-  // zero and `jitter*duration`.
-  optional double jitter = 3 [(gogoproto.customname) = "Jitter", (gogoproto.nullable) = false];
-
-  // The remaining number of iterations in which the duration
-  // parameter may change (but progress can be stopped earlier by
-  // hitting the cap). If not positive, the duration is not
-  // changed. Used for exponential backoff in combination with
-  // Factor and Cap.
-  optional int64 steps = 4 [(gogoproto.customname) = "Steps", (gogoproto.nullable) = false];
-
-  // A limit on revised values of the duration parameter. If a
-  // multiplication by the factor parameter would make the duration
-  // exceed the cap then the duration is set to the cap and the
-  // steps parameter is set to zero.
-  optional int64 cap = 5 [(gogoproto.casttype) = "time.Duration", (gogoproto.customname) = "Cap", (gogoproto.nullable) = false];
-}
-

@@ -27,7 +27,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/wait"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
@@ -667,7 +666,7 @@ type K8sResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels" protobuf:"bytes,1,name=labels"`
 	// Backoff before checking resource state
-	Backoff wait.Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
+	Backoff Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
 	// the state of the resource
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,name=errorOnBackoffTimeout"`
