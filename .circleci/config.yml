@@ -31,7 +31,6 @@ jobs:
           keys:
             - go-dep-cache-{{ checksum "go.sum" }}-v4
             - go-dep-cache-
-      - run: go get -u github.com/gobuffalo/packr/packr
       - run:
           name: Test Project
           command: make test
@@ -91,6 +90,7 @@ workflows:
               only: /.*/
       - build:
           requires:
+            - test
             - install_dep
           filters:
             tags:

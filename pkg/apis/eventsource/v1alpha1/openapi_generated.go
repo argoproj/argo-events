@@ -971,7 +971,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 							Format:      "",
 						},
 					},
-					"event": {
+					"events": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Events are gitlab event to listen to. Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.",
 							Type:        []string{"array"},
@@ -1013,7 +1013,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GitlabEventSource(ref common.Reference
 						},
 					},
 				},
-				Required: []string{"webhook", "projectId", "event", "accessToken", "gitlabBaseURL"},
+				Required: []string{"webhook", "projectId", "events", "accessToken", "gitlabBaseURL"},
 			},
 		},
 		Dependencies: []string{

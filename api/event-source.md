@@ -2213,7 +2213,7 @@ ProjectId is the id of project for which integration needs to setup
 
 <td>
 
-<code>event</code></br> <em> \[\]string </em>
+<code>events</code></br> <em> \[\]string </em>
 
 </td>
 

@@ -381,7 +381,7 @@ type GitlabEventSource struct {
 	ProjectId string `json:"projectId" protobuf:"bytes,2,name=projectId"`
 	// Events are gitlab event to listen to.
 	// Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
-	Events []string `json:"event" protobuf:"bytes,3,name=event"`
+	Events []string `json:"events" protobuf:"bytes,3,name=events"`
 	// AccessToken is reference to k8 secret which holds the gitlab api access information
 	AccessToken *corev1.SecretKeySelector `json:"accessToken" protobuf:"bytes,4,name=accessToken"`
 	// EnableSSLVerification to enable ssl verification
