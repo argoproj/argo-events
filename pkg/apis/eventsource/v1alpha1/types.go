@@ -182,7 +182,7 @@ type Selector struct {
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
 	// +optional
 	Operation string `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
-	// Value
+	// Data
 	Value string `json:"value" protobuf:"bytes,3,name=value"`
 }
 
@@ -583,7 +583,7 @@ type NSQEventSource struct {
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 type GenericEventSource struct {
-	// Value of the event source
+	// Data of the event source
 	Value string `json:"value" protobuf:"bytes,1,name=value"`
 }
 

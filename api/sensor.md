@@ -436,7 +436,7 @@ ArtifactLocation
 
 <p>
 
-ArtifactLocation describes the source location for an external minio
+ArtifactLocation describes the source location for an external artifact
 
 </p>
 
@@ -479,7 +479,7 @@ github.com/argoproj/argo-events/pkg/apis/common.S3Artifact </em>
 
 <p>
 
-S3 compliant minio
+S3 compliant artifact
 
 </p>
 
@@ -499,7 +499,7 @@ S3 compliant minio
 
 <p>
 
-Inline minio is embedded in sensor spec as a string
+Inline artifact is embedded in sensor spec as a string
 
 </p>
 
@@ -520,7 +520,7 @@ Inline minio is embedded in sensor spec as a string
 
 <p>
 
-File minio is minio stored in a file
+File artifact is artifact stored in a file
 
 </p>
 
@@ -541,7 +541,7 @@ URLArtifact </a> </em>
 
 <p>
 
-URL to fetch the minio from
+URL to fetch the artifact from
 
 </p>
 
@@ -563,7 +563,7 @@ URL to fetch the minio from
 
 <p>
 
-Configmap that stores the minio
+Configmap that stores the artifact
 
 </p>
 
@@ -584,7 +584,7 @@ GitArtifact </a> </em>
 
 <p>
 
-Git repository hosting the minio
+Git repository hosting the artifact
 
 </p>
 
@@ -597,8 +597,8 @@ Git repository hosting the minio
 <td>
 
 <code>resource</code></br> <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#unstructured-unstructured-v1">
-Kubernetes meta/v1/unstructured.Unstructured </a> </em>
+<a href="#argoproj.io/v1alpha1.ResourceArtifact"> ResourceArtifact </a>
+</em>
 
 </td>
 
@@ -904,7 +904,7 @@ ConfigmapArtifact
 
 <p>
 
-ConfigmapArtifact contains information about minio in k8 configmap
+ConfigmapArtifact contains information about artifact in k8 configmap
 
 </p>
 
@@ -1313,8 +1313,8 @@ Type contains the JSON type of the data
 
 <p>
 
-Value is the allowed string values for this key Booleans are passed
-using strconv.ParseBool() Numbers are parsed using as float64 using
+Data is the allowed string values for this key Booleans are passed using
+strconv.ParseBool() Numbers are parsed using as float64 using
 strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 
 </p>
@@ -2003,7 +2003,7 @@ FileArtifact
 
 <p>
 
-FileArtifact contains information about an minio in a filesystem
+FileArtifact contains information about an artifact in a filesystem
 
 </p>
 
@@ -2068,7 +2068,7 @@ GitArtifact
 
 <p>
 
-GitArtifact contains information about an minio stored in git
+GitArtifact contains information about an artifact stored in git
 
 </p>
 
@@ -4043,6 +4043,65 @@ Parameters is the list of key-value extracted from event’s payload that
 are applied to the trigger resource.
 
 </p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.ResourceArtifact">
+
+ResourceArtifact
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>Data</code></br> <em> \[\]byte </em>
+
+</td>
+
+<td>
 
 </td>
 
@@ -6356,7 +6415,7 @@ and
 
 <p>
 
-Value is the default literal value to use for this parameter source This
+Data is the default literal value to use for this parameter source This
 is only used if the DataKey is invalid. If the DataKey is invalid and
 this is not defined, this param source will produce an error.
 
@@ -6882,7 +6941,7 @@ URLArtifact
 
 <p>
 
-URLArtifact contains information about an minio at an http endpoint.
+URLArtifact contains information about an artifact at an http endpoint.
 
 </p>
 

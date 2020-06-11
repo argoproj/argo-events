@@ -210,7 +210,7 @@ Kubernetes meta/v1.GroupVersionResource
 <a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
 </p>
 <p>
-<p>ArtifactLocation describes the source location for an external minio</p>
+<p>ArtifactLocation describes the source location for an external artifact</p>
 </p>
 <table>
 <thead>
@@ -228,7 +228,7 @@ github.com/argoproj/argo-events/pkg/apis/common.S3Artifact
 </em>
 </td>
 <td>
-<p>S3 compliant minio</p>
+<p>S3 compliant artifact</p>
 </td>
 </tr>
 <tr>
@@ -239,7 +239,7 @@ string
 </em>
 </td>
 <td>
-<p>Inline minio is embedded in sensor spec as a string</p>
+<p>Inline artifact is embedded in sensor spec as a string</p>
 </td>
 </tr>
 <tr>
@@ -252,7 +252,7 @@ FileArtifact
 </em>
 </td>
 <td>
-<p>File minio is minio stored in a file</p>
+<p>File artifact is artifact stored in a file</p>
 </td>
 </tr>
 <tr>
@@ -265,7 +265,7 @@ URLArtifact
 </em>
 </td>
 <td>
-<p>URL to fetch the minio from</p>
+<p>URL to fetch the artifact from</p>
 </td>
 </tr>
 <tr>
@@ -278,7 +278,7 @@ ConfigmapArtifact
 </em>
 </td>
 <td>
-<p>Configmap that stores the minio</p>
+<p>Configmap that stores the artifact</p>
 </td>
 </tr>
 <tr>
@@ -291,15 +291,15 @@ GitArtifact
 </em>
 </td>
 <td>
-<p>Git repository hosting the minio</p>
+<p>Git repository hosting the artifact</p>
 </td>
 </tr>
 <tr>
 <td>
 <code>resource</code></br>
 <em>
-<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#unstructured-unstructured-v1">
-Kubernetes meta/v1/unstructured.Unstructured
+<a href="#argoproj.io/v1alpha1.ResourceArtifact">
+ResourceArtifact
 </a>
 </em>
 </td>
@@ -442,7 +442,7 @@ Defaults to sensor&rsquo;s namespace.</p>
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>ConfigmapArtifact contains information about minio in k8 configmap</p>
+<p>ConfigmapArtifact contains information about artifact in k8 configmap</p>
 </p>
 <table>
 <thead>
@@ -645,7 +645,7 @@ JSONType
 </em>
 </td>
 <td>
-<p>Value is the allowed string values for this key
+<p>Data is the allowed string values for this key
 Booleans are passed using strconv.ParseBool()
 Numbers are parsed using as float64 using strconv.ParseFloat()
 Strings are taken as is
@@ -991,7 +991,7 @@ EventContext
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>FileArtifact contains information about an minio in a filesystem</p>
+<p>FileArtifact contains information about an artifact in a filesystem</p>
 </p>
 <table>
 <thead>
@@ -1020,7 +1020,7 @@ string
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>GitArtifact contains information about an minio stored in git</p>
+<p>GitArtifact contains information about an artifact stored in git</p>
 </p>
 <table>
 <thead>
@@ -2017,6 +2017,34 @@ string
 <em>(Optional)</em>
 <p>Parameters is the list of key-value extracted from event&rsquo;s payload that are applied to
 the trigger resource.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.ResourceArtifact">ResourceArtifact
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>Data</code></br>
+<em>
+[]byte
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -3209,7 +3237,7 @@ string
 </em>
 </td>
 <td>
-<p>Value is the default literal value to use for this parameter source
+<p>Data is the default literal value to use for this parameter source
 This is only used if the DataKey is invalid.
 If the DataKey is invalid and this is not defined, this param source will produce an error.</p>
 </td>
@@ -3478,7 +3506,7 @@ OpenWhiskTrigger
 <a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
 </p>
 <p>
-<p>URLArtifact contains information about an minio at an http endpoint.</p>
+<p>URLArtifact contains information about an artifact at an http endpoint.</p>
 </p>
 <table>
 <thead>

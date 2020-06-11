@@ -54,6 +54,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":            schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NodeStatus":             schema_pkg_apis_sensor_v1alpha1_NodeStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger":       schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceArtifact":       schema_pkg_apis_sensor_v1alpha1_ResourceArtifact(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Sensor":                 schema_pkg_apis_sensor_v1alpha1_Sensor(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorList":             schema_pkg_apis_sensor_v1alpha1_SensorList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorResources":        schema_pkg_apis_sensor_v1alpha1_SensorResources(ref),
@@ -212,57 +213,57 @@ func schema_pkg_apis_sensor_v1alpha1_ArtifactLocation(ref common.ReferenceCallba
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ArtifactLocation describes the source location for an external minio",
+				Description: "ArtifactLocation describes the source location for an external artifact",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"s3": {
 						SchemaProps: spec.SchemaProps{
-							Description: "S3 compliant minio",
+							Description: "S3 compliant artifact",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/common.S3Artifact"),
 						},
 					},
 					"inline": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Inline minio is embedded in sensor spec as a string",
+							Description: "Inline artifact is embedded in sensor spec as a string",
 							Type:        []string{"string"},
 							Format:      "",
 						},
 					},
 					"file": {
 						SchemaProps: spec.SchemaProps{
-							Description: "File minio is minio stored in a file",
+							Description: "File artifact is artifact stored in a file",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact"),
 						},
 					},
 					"url": {
 						SchemaProps: spec.SchemaProps{
-							Description: "URL to fetch the minio from",
+							Description: "URL to fetch the artifact from",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"),
 						},
 					},
 					"configmap": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Configmap that stores the minio",
+							Description: "Configmap that stores the artifact",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact"),
 						},
 					},
 					"git": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Git repository hosting the minio",
+							Description: "Git repository hosting the artifact",
 							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact"),
 						},
 					},
 					"resource": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Resource is generic template for K8s resource",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"),
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceArtifact"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact", "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured.Unstructured"},
+			"github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ConfigmapArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.FileArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ResourceArtifact", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.URLArtifact"},
 	}
 }
 
@@ -346,7 +347,7 @@ func schema_pkg_apis_sensor_v1alpha1_ConfigmapArtifact(ref common.ReferenceCallb
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "ConfigmapArtifact contains information about minio in k8 configmap",
+				Description: "ConfigmapArtifact contains information about artifact in k8 configmap",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
@@ -500,7 +501,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Description: "Data is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -757,7 +758,7 @@ func schema_pkg_apis_sensor_v1alpha1_FileArtifact(ref common.ReferenceCallback) 
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "FileArtifact contains information about an minio in a filesystem",
+				Description: "FileArtifact contains information about an artifact in a filesystem",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {
@@ -776,7 +777,7 @@ func schema_pkg_apis_sensor_v1alpha1_GitArtifact(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "GitArtifact contains information about an minio stored in git",
+				Description: "GitArtifact contains information about an artifact stored in git",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"url": {
@@ -1472,6 +1473,25 @@ func schema_pkg_apis_sensor_v1alpha1_OpenWhiskTrigger(ref common.ReferenceCallba
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/api/core/v1.SecretKeySelector"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_ResourceArtifact(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Data": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "byte",
+						},
+					},
+				},
+				Required: []string{"Data"},
+			},
+		},
 	}
 }
 
@@ -2237,7 +2257,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
+							Description: "Data is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -2414,7 +2434,7 @@ func schema_pkg_apis_sensor_v1alpha1_URLArtifact(ref common.ReferenceCallback) c
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "URLArtifact contains information about an minio at an http endpoint.",
+				Description: "URLArtifact contains information about an artifact at an http endpoint.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"path": {

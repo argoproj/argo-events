@@ -86,28 +86,28 @@ message ArgoWorkflowTrigger {
   optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4 [(gogoproto.customname) = "GroupVersionResource"];
 }
 
-// ArtifactLocation describes the source location for an external minio
+// ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
-  // S3 compliant minio
+  // S3 compliant artifact
   optional S3Artifact s3 = 1 [(gogoproto.customname) = "S3"];
 
-  // Inline minio is embedded in sensor spec as a string
+  // Inline artifact is embedded in sensor spec as a string
   optional string inline = 2 [(gogoproto.customname) = "Inline"];
 
-  // File minio is minio stored in a file
+  // File artifact is artifact stored in a file
   optional FileArtifact file = 3 [(gogoproto.customname) = "File"];
 
-  // URL to fetch the minio from
+  // URL to fetch the artifact from
   optional URLArtifact url = 4 [(gogoproto.customname) = "URL"];
 
-  // Configmap that stores the minio
+  // Configmap that stores the artifact
   optional ConfigmapArtifact configmap = 5 [(gogoproto.customname) = "Configmap"];
 
-  // Git repository hosting the minio
+  // Git repository hosting the artifact
   optional GitArtifact git = 6 [(gogoproto.customname) = "Git"];
 
   // Resource is generic template for K8s resource
-  optional Unstructured resource = 7 [(gogoproto.customname) = "Resource"];
+  optional ResourceArtifact resource = 7 [(gogoproto.customname) = "Resource"];
 }
 
 // Backoff for an operation
@@ -139,7 +139,7 @@ message BasicAuth {
   optional string namespace = 9 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
 }
 
-// ConfigmapArtifact contains information about minio in k8 configmap
+// ConfigmapArtifact contains information about artifact in k8 configmap
 message ConfigmapArtifact {
   // Name of the configmap
   optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
@@ -191,7 +191,7 @@ message DataFilter {
   optional string type = 2 [(gogoproto.casttype) = "JSONType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
 
   // +listType=value
-  // Value is the allowed string values for this key
+  // Data is the allowed string values for this key
   // Booleans are passed using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
@@ -276,12 +276,12 @@ message EventDependencyFilter {
   repeated DataFilter data = 4 [(gogoproto.customname) = "Data", (gogoproto.nullable) = false];
 }
 
-// FileArtifact contains information about an minio in a filesystem
+// FileArtifact contains information about an artifact in a filesystem
 message FileArtifact {
   optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
 }
 
-// GitArtifact contains information about an minio stored in git
+// GitArtifact contains information about an artifact stored in git
 message GitArtifact {
   // Git URL
   optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
@@ -546,6 +546,10 @@ message OpenWhiskTrigger {
   // +listType=triggerParameters
   // +optional
   repeated TriggerParameter parameters = 7 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+}
+
+message ResourceArtifact {
+  optional bytes data = 1 [(gogoproto.customname) = "Data"];
 }
 
 // Sensor is the definition of a sensor resource
@@ -843,7 +847,7 @@ message TriggerParameterSource {
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
   optional string dataTemplate = 4 [(gogoproto.customname) = "DataTemplate", (gogoproto.nullable) = false];
 
-  // Value is the default literal value to use for this parameter source
+  // Data is the default literal value to use for this parameter source
   // This is only used if the DataKey is invalid.
   // If the DataKey is invalid and this is not defined, this param source will produce an error.
   optional string value = 5 [(gogoproto.customname) = "Value"];
@@ -916,7 +920,7 @@ message TriggerTemplate {
   optional OpenWhiskTrigger openWhisk = 11 [(gogoproto.customname) = "OpenWhisk"];
 }
 
-// URLArtifact contains information about an minio at an http endpoint.
+// URLArtifact contains information about an artifact at an http endpoint.
 message URLArtifact {
   // Path is the complete URL
   optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];

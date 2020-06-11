@@ -1081,35 +1081,35 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.ArtifactLocation": {
-      "description": "ArtifactLocation describes the source location for an external minio",
+      "description": "ArtifactLocation describes the source location for an external artifact",
       "type": "object",
       "properties": {
         "configmap": {
-          "description": "Configmap that stores the minio",
+          "description": "Configmap that stores the artifact",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ConfigmapArtifact"
         },
         "file": {
-          "description": "File minio is minio stored in a file",
+          "description": "File artifact is artifact stored in a file",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.FileArtifact"
         },
         "git": {
-          "description": "Git repository hosting the minio",
+          "description": "Git repository hosting the artifact",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.GitArtifact"
         },
         "inline": {
-          "description": "Inline minio is embedded in sensor spec as a string",
+          "description": "Inline artifact is embedded in sensor spec as a string",
           "type": "string"
         },
         "resource": {
           "description": "Resource is generic template for K8s resource",
-          "$ref": "#/definitions/io.k8s.apimachinery.pkg.apis.meta.v1.unstructured.Unstructured"
+          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ResourceArtifact"
         },
         "s3": {
-          "description": "S3 compliant minio",
+          "description": "S3 compliant artifact",
           "$ref": "#/definitions/io.argoproj.common.S3Artifact"
         },
         "url": {
-          "description": "URL to fetch the minio from",
+          "description": "URL to fetch the artifact from",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.URLArtifact"
         }
       }
@@ -1165,7 +1165,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.ConfigmapArtifact": {
-      "description": "ConfigmapArtifact contains information about minio in k8 configmap",
+      "description": "ConfigmapArtifact contains information about artifact in k8 configmap",
       "type": "object",
       "required": [
         "name",
@@ -1260,7 +1260,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+          "description": "Data is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
           "type": "array",
           "items": {
             "type": "string"
@@ -1408,7 +1408,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.FileArtifact": {
-      "description": "FileArtifact contains information about an minio in a filesystem",
+      "description": "FileArtifact contains information about an artifact in a filesystem",
       "type": "object",
       "properties": {
         "path": {
@@ -1417,7 +1417,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.GitArtifact": {
-      "description": "GitArtifact contains information about an minio stored in git",
+      "description": "GitArtifact contains information about an artifact stored in git",
       "type": "object",
       "required": [
         "url",
@@ -1823,6 +1823,18 @@
         "version": {
           "description": "Version for the API. Defaults to v1.",
           "type": "string"
+        }
+      }
+    },
+    "io.argoproj.sensor.v1alpha1.ResourceArtifact": {
+      "type": "object",
+      "required": [
+        "Data"
+      ],
+      "properties": {
+        "Data": {
+          "type": "string",
+          "format": "byte"
         }
       }
     },
@@ -2258,7 +2270,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
+          "description": "Data is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
           "type": "string"
         }
       }
@@ -2353,7 +2365,7 @@
       }
     },
     "io.argoproj.sensor.v1alpha1.URLArtifact": {
-      "description": "URLArtifact contains information about an minio at an http endpoint.",
+      "description": "URLArtifact contains information about an artifact at an http endpoint.",
       "type": "object",
       "required": [
         "path"

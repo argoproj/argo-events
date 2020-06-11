@@ -17,16 +17,18 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
 	"time"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
+
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -274,7 +276,7 @@ type DataFilter struct {
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type"`
 	// +listType=value
-	// Value is the allowed string values for this key
+	// Data is the allowed string values for this key
 	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
 	// Strings are taken as is
@@ -645,7 +647,7 @@ type TriggerParameterSource struct {
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
 	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
 	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,4,opt,name=dataTemplate"`
-	// Value is the default literal value to use for this parameter source
+	// Data is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,5,opt,name=value"`
@@ -750,25 +752,51 @@ type NodeStatus struct {
 	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
 }
 
-// ArtifactLocation describes the source location for an external minio
-type ArtifactLocation struct {
-	// S3 compliant minio
-	S3 *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
-	// Inline minio is embedded in sensor spec as a string
-	Inline *string `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
-	// File minio is minio stored in a file
-	File *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
-	// URL to fetch the minio from
-	URL *URLArtifact `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
-	// Configmap that stores the minio
-	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
-	// Git repository hosting the minio
-	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
-	// Resource is generic template for K8s resource
-	Resource *unstructured.Unstructured `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+type ResourceArtifact struct {
+	Data []byte
 }
 
-// ConfigmapArtifact contains information about minio in k8 configmap
+func (a *ResourceArtifact) UnmarshalJSON(value []byte) error {
+	a.Data = value
+	return nil
+}
+
+func (a *ResourceArtifact) MarshalJSON() ([]byte, error) {
+	return a.Data, nil
+}
+
+func (a *ResourceArtifact) Object() (map[string]interface{}, error) {
+	obj := map[string]interface{}{}
+	err := json.Unmarshal(a.Data, &obj)
+	if err != nil {
+		return nil, err
+	}
+	object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&obj)
+	if err != nil {
+		return nil, err
+	}
+	return object, nil
+}
+
+// ArtifactLocation describes the source location for an external artifact
+type ArtifactLocation struct {
+	// S3 compliant artifact
+	S3 *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	// Inline artifact is embedded in sensor spec as a string
+	Inline *string `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
+	// File artifact is artifact stored in a file
+	File *FileArtifact `json:"file,omitempty" protobuf:"bytes,3,opt,name=file"`
+	// URL to fetch the artifact from
+	URL *URLArtifact `json:"url,omitempty" protobuf:"bytes,4,opt,name=url"`
+	// Configmap that stores the artifact
+	Configmap *ConfigmapArtifact `json:"configmap,omitempty" protobuf:"bytes,5,opt,name=configmap"`
+	// Git repository hosting the artifact
+	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
+	// Resource is generic template for K8s resource
+	Resource *ResourceArtifact `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+}
+
+// ConfigmapArtifact contains information about artifact in k8 configmap
 type ConfigmapArtifact struct {
 	// Name of the configmap
 	Name string `json:"name" protobuf:"bytes,1,name=name"`
@@ -778,12 +806,12 @@ type ConfigmapArtifact struct {
 	Key string `json:"key" protobuf:"bytes,3,name=key"`
 }
 
-// FileArtifact contains information about an minio in a filesystem
+// FileArtifact contains information about an artifact in a filesystem
 type FileArtifact struct {
 	Path string `json:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
 }
 
-// URLArtifact contains information about an minio at an http endpoint.
+// URLArtifact contains information about an artifact at an http endpoint.
 type URLArtifact struct {
 	// Path is the complete URL
 	Path string `json:"path" protobuf:"bytes,1,name=path"`
@@ -791,7 +819,7 @@ type URLArtifact struct {
 	VerifyCert bool `json:"verifyCert,omitempty" protobuf:"bytes,2,opt,name=verifyCert"`
 }
 
-// GitArtifact contains information about an minio stored in git
+// GitArtifact contains information about an artifact stored in git
 type GitArtifact struct {
 	// Git URL
 	URL string `json:"url" protobuf:"bytes,1,name=url"`
@@ -866,7 +894,7 @@ type EventContext struct {
 	Time metav1.Time `json:"time" protobuf:"bytes,7,name=time"`
 }
 
-// HasLocation whether or not an minio has a location defined
+// HasLocation whether or not an artifact has a location defined
 func (a *ArtifactLocation) HasLocation() bool {
 	return a.S3 != nil || a.Inline != nil || a.File != nil || a.URL != nil
 }
