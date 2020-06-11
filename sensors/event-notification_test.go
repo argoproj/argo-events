@@ -305,11 +305,13 @@ func TestOperateEventNotification(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 
-	err := sensorCtx.operateEventNotification(&types.Notification{
+	err = sensorCtx.operateEventNotification(&types.Notification{
 		Event:            event,
 		EventDependency:  &obj.Spec.Dependencies[0],
 		Sensor:           obj,

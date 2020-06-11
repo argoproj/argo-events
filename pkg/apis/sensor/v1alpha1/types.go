@@ -24,6 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -754,6 +755,14 @@ type NodeStatus struct {
 
 type ResourceArtifact struct {
 	Data []byte
+}
+
+func NewResourceArtifact(un *unstructured.Unstructured) (*ResourceArtifact, error) {
+	data, err := json.Marshal(un.Object)
+	if err != nil {
+		return nil, err
+	}
+	return &ResourceArtifact{Data: data}, nil
 }
 
 func (a *ResourceArtifact) UnmarshalJSON(value []byte) error {

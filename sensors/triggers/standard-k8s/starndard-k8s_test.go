@@ -75,8 +75,10 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
@@ -121,8 +123,10 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 
 	fakeSensor.Spec.Triggers[0].Template.K8s.Parameters = []v1alpha1.TriggerParameter{
@@ -150,8 +154,10 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)

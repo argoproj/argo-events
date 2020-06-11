@@ -27,8 +27,10 @@ import (
 
 func TestFetchKubernetesResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
+	artifact, err := v1alpha1.NewResourceArtifact(deployment)
+	assert.NoError(t, err)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
-		Resource: deployment,
+		Resource: artifact,
 	}
 	uObj, err := FetchKubernetesResource(fake.NewSimpleClientset(), sensorObj.Spec.Triggers[0].Template.K8s.Source, sensorObj.Namespace, &metav1.GroupVersionResource{
 		Group:    "argoproj.io",

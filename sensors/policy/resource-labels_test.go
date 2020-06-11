@@ -20,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -28,6 +27,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic/fake"
+
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Unstructured {
@@ -51,6 +52,8 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 
 	runtimeScheme := runtime.NewScheme()
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
+	artifact, err := v1alpha1.NewResourceArtifact(uObj)
+	assert.NoError(t, err)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
@@ -61,7 +64,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 					Version:  "v1",
 				},
 				Source: &v1alpha1.ArtifactLocation{
-					Resource: uObj,
+					Resource: artifact,
 				},
 			},
 		},
@@ -131,7 +134,6 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 		Client:  namespacableClient,
 	}
 
-	var err error
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			uObj, err = test.updateFunc(uObj)

@@ -16,15 +16,17 @@ limitations under the License.
 package argo_workflow
 
 import (
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/fake"
-	"testing"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 var sensorObj = &v1alpha1.Sensor{
@@ -69,13 +71,17 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 func getFakeWfTrigger() *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
-
+	un := newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test")
+	artifact, err := v1alpha1.NewResourceArtifact(un)
+	if err != nil {
+		panic(err)
+	}
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake",
 			ArgoWorkflow: &v1alpha1.ArgoWorkflowTrigger{
 				Source: &v1alpha1.ArtifactLocation{
-					Resource: newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test"),
+					Resource: artifact,
 				},
 				Operation: "Submit",
 				GroupVersionResource: &metav1.GroupVersionResource{
