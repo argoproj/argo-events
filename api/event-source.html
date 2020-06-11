@@ -2488,6 +2488,65 @@ StorageGridFilter
 <p>Filter on object key which caused the notification.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>topicArn</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>TopicArn</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>bucket</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name of the bucket to register notifications for.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>region</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>S3 region.
+Defaults to us-east-1</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>authToken</code></br>
+<em>
+<a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#secretkeyselector-v1-core">
+Kubernetes core/v1.SecretKeySelector
+</a>
+</em>
+</td>
+<td>
+<p>Auth token for storagegrid api</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>apiURL</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>ApiURL is the url of the storagegrid api.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="argoproj.io/v1alpha1.StorageGridFilter">StorageGridFilter

@@ -99,7 +99,7 @@ func getEventingServer(eventType apicommon.EventSourceType, restConfig *rest.Con
 	case apicommon.SlackEvent:
 		return &slack.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
 	case apicommon.StorageGridEvent:
-		return &storagegrid.EventListener{Logger: log}, nil
+		return &storagegrid.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
 	case apicommon.StripeEvent:
 		return &stripe.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
 	case apicommon.WebhookEvent:

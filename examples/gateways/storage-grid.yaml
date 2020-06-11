@@ -3,7 +3,7 @@ kind: Gateway
 metadata:
   name: storage-grid
 spec:
-  type: storage-grid
+  type: storagegrid
   eventSourceRef:
     name: storage-grid-event-source
   template:
@@ -14,4 +14,4 @@ spec:
         targetPort: 8080
   subscribers:
     http:
-      - "http://storage-grid-watcher-sensor.argo-events.svc:9300/"
+      - "http://storage-grid-sensor.argo-events.svc:9300/"
