@@ -20,6 +20,7 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/sirupsen/logrus"
+	"github.com/xanzy/go-gitlab"
 	"k8s.io/client-go/kubernetes"
 )
 

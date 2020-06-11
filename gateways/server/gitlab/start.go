@@ -31,6 +31,7 @@ import (
 	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
+	"github.com/xanzy/go-gitlab"
 	corev1 "k8s.io/api/core/v1"
 )
 

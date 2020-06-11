@@ -83,6 +83,12 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - test:
+          requires:
+            - install_dep
+          filters:
+            tags:
+              only: /.*/
       - build:
           requires:
             - install_dep
