@@ -28,7 +28,8 @@ import (
 	"github.com/argoproj/argo-events/gateways/server/storagegrid"
 	"github.com/argoproj/argo-events/gateways/server/stripe"
 	"github.com/argoproj/argo-events/gateways/server/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -50,7 +51,7 @@ func main() {
 		panic("namespace is not provided")
 	}
 	clientset := kubernetes.NewForConfigOrDie(restConfig)
-	eventType := apicommon.EventSourceType(args[0])
+	eventType := gatewayv1alpha1.EventSourceType(args[0])
 	es, err := getEventingServer(eventType, restConfig, clientset, namespace, common.NewArgoEventsLogger())
 	if err != nil {
 		panic(err)
@@ -58,51 +59,51 @@ func main() {
 	server.StartGateway(es)
 }
 
-func getEventingServer(eventType apicommon.EventSourceType, restConfig *rest.Config, clientset kubernetes.Interface, namespace string, log *logrus.Logger) (gateways.EventingServer, error) {
+func getEventingServer(eventType gatewayv1alpha1.EventSourceType, restConfig *rest.Config, clientset kubernetes.Interface, namespace string, log *logrus.Logger) (gateways.EventingServer, error) {
 	switch eventType {
-	case apicommon.AMQPEvent:
+	case gatewayv1alpha1.AMQPEvent:
 		return &amqp.EventListener{Logger: log}, nil
-	case apicommon.SNSEvent:
+	case gatewayv1alpha1.SNSEvent:
 		return &aws_sns.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.SQSEvent:
+	case gatewayv1alpha1.SQSEvent:
 		return &aws_sqs.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.AzureEventsHub:
+	case gatewayv1alpha1.AzureEventsHub:
 		return &azure_events_hub.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.CalendarEvent:
+	case gatewayv1alpha1.CalendarEvent:
 		return &calendar.EventListener{Logger: log}, nil
-	case apicommon.EmitterEvent:
+	case gatewayv1alpha1.EmitterEvent:
 		return &emitter.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.FileEvent:
+	case gatewayv1alpha1.FileEvent:
 		return &file.EventListener{Logger: log}, nil
-	case apicommon.PubSubEvent:
+	case gatewayv1alpha1.PubSubEvent:
 		return &pubsub.EventListener{Logger: log}, nil
-	case apicommon.GitHubEvent:
+	case gatewayv1alpha1.GitHubEvent:
 		return &github.EventListener{Logger: log, Namespace: namespace, K8sClient: clientset}, nil
-	case apicommon.GitLabEvent:
+	case gatewayv1alpha1.GitLabEvent:
 		return &gitlab.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.HDFSEvent:
+	case gatewayv1alpha1.HDFSEvent:
 		return &hdfs.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.KafkaEvent:
+	case gatewayv1alpha1.KafkaEvent:
 		return &kafka.EventListener{Logger: log}, nil
-	case apicommon.MinioEvent:
+	case gatewayv1alpha1.MinioEvent:
 		return &minio.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.MQTTEvent:
+	case gatewayv1alpha1.MQTTEvent:
 		return &mqtt.EventListener{Logger: log}, nil
-	case apicommon.NATSEvent:
+	case gatewayv1alpha1.NATSEvent:
 		return &nats.EventListener{Logger: log}, nil
-	case apicommon.NSQEvent:
+	case gatewayv1alpha1.NSQEvent:
 		return &nsq.EventListener{Logger: log}, nil
-	case apicommon.RedisEvent:
+	case gatewayv1alpha1.RedisEvent:
 		return &redis.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.ResourceEvent:
+	case gatewayv1alpha1.ResourceEvent:
 		return &resource.EventListener{Logger: log, K8RestConfig: restConfig}, nil
-	case apicommon.SlackEvent:
+	case gatewayv1alpha1.SlackEvent:
 		return &slack.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.StorageGridEvent:
+	case gatewayv1alpha1.StorageGridEvent:
 		return &storagegrid.EventListener{Logger: log}, nil
-	case apicommon.StripeEvent:
+	case gatewayv1alpha1.StripeEvent:
 		return &stripe.EventListener{Logger: log, K8sClient: clientset, Namespace: namespace}, nil
-	case apicommon.WebhookEvent:
+	case gatewayv1alpha1.WebhookEvent:
 		return &webhook.EventListener{Logger: log}, nil
 	default:
 		return nil, errors.New("invalid event type")

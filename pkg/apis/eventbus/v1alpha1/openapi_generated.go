@@ -30,6 +30,7 @@ import (
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig":           schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref),
+		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.Condition":           schema_pkg_apis_eventbus_v1alpha1_Condition(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBus":            schema_pkg_apis_eventbus_v1alpha1_EventBus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusList":        schema_pkg_apis_eventbus_v1alpha1_EventBusList(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.EventBusSpec":        schema_pkg_apis_eventbus_v1alpha1_EventBusSpec(ref),
@@ -58,6 +59,56 @@ func schema_pkg_apis_eventbus_v1alpha1_BusConfig(ref common.ReferenceCallback) c
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.NATSConfig"},
+	}
+}
+
+func schema_pkg_apis_eventbus_v1alpha1_Condition(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Condition contains details about resource state",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Condition type.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Condition status, True, False or Unknown.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"lastTransitionTime": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Last time the condition transitioned from one status to another.",
+							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.Time"),
+						},
+					},
+					"reason": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Unique, this should be a short, machine understandable string that gives the reason for condition's last transition. For example, \"ImageNotFound\"",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Human-readable message indicating details about last transition.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+				Required: []string{"type", "status"},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
 	}
 }
 
@@ -186,9 +237,16 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 				Description: "EventBusStatus holds the status of the eventbus resource",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"status": {
+					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.Status"),
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.Condition"),
+									},
+								},
+							},
 						},
 					},
 					"config": {
@@ -201,7 +259,7 @@ func schema_pkg_apis_eventbus_v1alpha1_EventBusStatus(ref common.ReferenceCallba
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/common.Status", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig"},
+			"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.BusConfig", "github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1.Condition"},
 	}
 }
 
@@ -281,9 +339,9 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 				Description: "NativeStrategy indicates to install a native NATS service",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"size": {
+					"replicas": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Size is the NATS StatefulSet size",
+							Description: "Replicas is the NATS StatefulSet size",
 							Type:        []string{"integer"},
 							Format:      "int32",
 						},
@@ -334,7 +392,7 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 							Format:      "",
 						},
 					},
-					"size": {
+					"volumeSize": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Volume size, e.g. 10Gi",
 							Ref:         ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),

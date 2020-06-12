@@ -7,7 +7,6 @@ import (
 	"os"
 	"strings"
 
-	cv1 "github.com/argoproj/argo-events/pkg/apis/common"
 	gwv1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	sv1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/go-openapi/spec"
@@ -29,17 +28,11 @@ func main() {
 	sOAPIDefs := sv1.GetOpenAPIDefinitions(func(name string) spec.Ref {
 		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
 	})
-	cOAPIDefs := cv1.GetOpenAPIDefinitions(func(name string) spec.Ref {
-		return spec.MustCreateRef("#/definitions/" + common.EscapeJsonPointer(swaggify(name)))
-	})
 	defs := spec.Definitions{}
 	for defName, val := range gwOAPIDefs {
 		defs[swaggify(defName)] = val.Schema
 	}
 	for defName, val := range sOAPIDefs {
-		defs[swaggify(defName)] = val.Schema
-	}
-	for defName, val := range cOAPIDefs {
 		defs[swaggify(defName)] = val.Schema
 	}
 	swagger := spec.Swagger{

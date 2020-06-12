@@ -1,7 +1,10 @@
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/common"
+	"reflect"
+	"sort"
+	"time"
+
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,7 +38,7 @@ type EventBusSpec struct {
 
 // EventBusStatus holds the status of the eventbus resource
 type EventBusStatus struct {
-	Status common.Status `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	Conditions []Condition `json:"conditions,omitempty" protobuf:"bytes,1,rep,name=conditions"`
 	// Config holds the fininalized configuration of EventBus
 	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
 }
@@ -59,8 +62,8 @@ var (
 
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
-	// Size is the NATS StatefulSet size
-	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	// Replicas is the NATS StatefulSet size
+	Replicas     int32         `json:"replicas,omitempty" protobuf:"bytes,1,opt,name=replicas"`
 	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
 	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
 	// +optional
@@ -78,7 +81,7 @@ type PersistenceStrategy struct {
 	// +optional
 	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
 	// Volume size, e.g. 10Gi
-	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
+	VolumeSize *apiresource.Quantity `json:"volumeSize,omitempty" protobuf:"bytes,3,opt,name=volumeSize"`
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -104,38 +107,179 @@ type NATSConfig struct {
 const (
 	// EventBusConditionDeployed has the status True when the EventBus
 	// has its RestfulSet/Deployment ans service created.
-	EventBusConditionDeployed common.ConditionType = "Deployed"
+	EventBusConditionDeployed ConditionType = "Deployed"
 	// EventBusConditionConfigured has the status True when the EventBus
 	// has its configuration ready.
-	EventBusConditionConfigured common.ConditionType = "Configured"
+	EventBusConditionConfigured ConditionType = "Configured"
 )
-
-// InitConditions sets conditions to Unknown state.
-func (s *EventBusStatus) InitConditions() {
-	s.Status.InitConditions(EventBusConditionDeployed, EventBusConditionConfigured)
-}
 
 // MarkDeployed set the bus has been deployed.
 func (s *EventBusStatus) MarkDeployed(reason, message string) {
-	s.Status.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
+	s.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeploying set the bus is deploying
 func (s *EventBusStatus) MarkDeploying(reason, message string) {
-	s.Status.MarkUnknown(EventBusConditionDeployed, reason, message)
+	s.MarkUnknown(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeployFailed set the bus deploy failed
 func (s *EventBusStatus) MarkDeployFailed(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionDeployed, reason, message)
+	s.MarkFalse(EventBusConditionDeployed, reason, message)
 }
 
 // MarkConfigured set the bus configuration has been done.
 func (s *EventBusStatus) MarkConfigured() {
-	s.Status.MarkTrue(EventBusConditionConfigured)
+	s.MarkTrue(EventBusConditionConfigured)
 }
 
 // MarkNotConfigured set the bus status not configured.
 func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionConfigured, reason, message)
+	s.MarkFalse(EventBusConditionConfigured, reason, message)
+}
+
+// ConditionType is a valid value of Condition.Type
+type ConditionType string
+
+// Condition contains details about resource state
+type Condition struct {
+	// Condition type.
+	// +required
+	Type ConditionType `json:"type" protobuf:"bytes,1,opt,name=type" protobuf:"bytes,1,opt,name=type"`
+	// Condition status, True, False or Unknown.
+	// +required
+	Status corev1.ConditionStatus `json:"status" protobuf:"bytes,2,opt,name=status"`
+	// Last time the condition transitioned from one status to another.
+	// +optional
+	LastTransitionTime metav1.Time `json:"lastTransitionTime,omitempty" protobuf:"bytes,4,opt,name=lastTransitionTime"`
+	// Unique, this should be a short, machine understandable string that gives the reason
+	// for condition's last transition. For example, "ImageNotFound"
+	// +optional
+	Reason string `json:"reason,omitempty" protobuf:"bytes,5,opt,name=reason"`
+	// Human-readable message indicating details about last transition.
+	// +optional
+	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
+}
+
+// IsTrue tells if the condition is True
+func (c *Condition) IsTrue() bool {
+	if c == nil {
+		return false
+	}
+	return c.Status == corev1.ConditionTrue
+}
+
+// IsFalse tells if the condition is False
+func (c *Condition) IsFalse() bool {
+	if c == nil {
+		return false
+	}
+	return c.Status == corev1.ConditionFalse
+}
+
+// IsUnknown tells if the condition is Unknown
+func (c *Condition) IsUnknown() bool {
+	if c == nil {
+		return true
+	}
+	return c.Status == corev1.ConditionUnknown
+}
+
+// GetReason returns as Reason
+func (c *Condition) GetReason() string {
+	if c == nil {
+		return ""
+	}
+	return c.Reason
+}
+
+// GetMessage returns a Message
+func (c *Condition) GetMessage() string {
+	if c == nil {
+		return ""
+	}
+	return c.Message
+}
+
+// InitConditions initializes the contions to Unknown
+func (s *EventBusStatus) InitConditions(conditionTypes ...ConditionType) {
+	for _, t := range conditionTypes {
+		c := Condition{
+			Type:   t,
+			Status: corev1.ConditionUnknown,
+		}
+		s.SetCondition(c)
+	}
+}
+
+// SetCondition sets a condition
+func (s *EventBusStatus) SetCondition(condition Condition) {
+	var conditions []Condition
+	for _, c := range s.Conditions {
+		if c.Type != condition.Type {
+			conditions = append(conditions, c)
+		} else {
+			condition.LastTransitionTime = c.LastTransitionTime
+			if reflect.DeepEqual(&condition, &c) {
+				return
+			}
+		}
+	}
+	condition.LastTransitionTime = metav1.NewTime(time.Now())
+	conditions = append(conditions, condition)
+	// Sort for easy read
+	sort.Slice(conditions, func(i, j int) bool { return conditions[i].Type < conditions[j].Type })
+	s.Conditions = conditions
+}
+
+func (s *EventBusStatus) markTypeStatus(t ConditionType, status corev1.ConditionStatus, reason, message string) {
+	s.SetCondition(Condition{
+		Type:    t,
+		Status:  status,
+		Reason:  reason,
+		Message: message,
+	})
+}
+
+// MarkTrue sets the status of t to true
+func (s *EventBusStatus) MarkTrue(t ConditionType) {
+	s.markTypeStatus(t, corev1.ConditionTrue, "", "")
+}
+
+// MarkTrueWithReason sets the status of t to true with reason
+func (s *EventBusStatus) MarkTrueWithReason(t ConditionType, reason, message string) {
+	s.markTypeStatus(t, corev1.ConditionTrue, reason, message)
+}
+
+// MarkFalse sets the status of t to fasle
+func (s *EventBusStatus) MarkFalse(t ConditionType, reason, message string) {
+	s.markTypeStatus(t, corev1.ConditionFalse, reason, message)
+}
+
+// MarkUnknown sets the status of t to unknown
+func (s *EventBusStatus) MarkUnknown(t ConditionType, reason, message string) {
+	s.markTypeStatus(t, corev1.ConditionUnknown, reason, message)
+}
+
+// GetCondition returns the condition of a condtion type
+func (s *EventBusStatus) GetCondition(t ConditionType) *Condition {
+	for _, c := range s.Conditions {
+		if c.Type == t {
+			return &c
+		}
+	}
+	return nil
+}
+
+// IsReady returns true when all the conditions are true
+func (s *EventBusStatus) IsReady() bool {
+	if len(s.Conditions) == 0 {
+		return false
+	}
+	for _, c := range s.Conditions {
+		if !c.IsTrue() {
+			return false
+		}
+	}
+	return true
 }

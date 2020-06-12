@@ -22,17 +22,18 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
+	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates the gateway event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	if apicommon.EventSourceType(eventSource.Type) != apicommon.KafkaEvent {
+	if gatewayv1alpha1.EventSourceType(eventSource.Type) != gatewayv1alpha1.KafkaEvent {
 		return &gateways.ValidEventSource{
 			IsValid: false,
-			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.KafkaEvent)),
+			Reason:  common.ErrEventSourceTypeMismatch(string(gatewayv1alpha1.KafkaEvent)),
 		}, nil
 	}
 

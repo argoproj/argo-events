@@ -23,7 +23,8 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
+
 	"github.com/argoproj/argo-events/pkg/apis/events"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -47,7 +48,7 @@ func TestListenEvents(t *testing.T) {
 
 	calendarEventSource := &v1alpha1.CalendarEventSource{
 		Interval:    "2s",
-		UserPayload: &raw,
+		UserPayload: raw,
 	}
 
 	body, err := yaml.Marshal(calendarEventSource)
@@ -75,7 +76,7 @@ func TestListenEvents(t *testing.T) {
 		Name:  "fake",
 		Value: body,
 		Id:    "1234",
-		Type:  string(apicommon.CalendarEvent),
+		Type:  string(gatewayv1alpha1.CalendarEvent),
 	}, channels)
 	assert.Nil(t, err)
 }

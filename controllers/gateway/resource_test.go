@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/argoproj/argo-events/common"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -38,7 +38,7 @@ var gatewayObj = &v1alpha1.Gateway{
 			Name: "fake-event-source",
 		},
 		Replica:       1,
-		Type:          apicommon.WebhookEvent,
+		Type:          v1alpha1.WebhookEvent,
 		ProcessorPort: "8080",
 		Template: v1alpha1.Template{
 			ServiceAccountName: "fake-sa",
@@ -71,7 +71,7 @@ var gatewayObjNoTemplate = &v1alpha1.Gateway{
 			Name: "fake-event-source",
 		},
 		Replica:       1,
-		Type:          apicommon.WebhookEvent,
+		Type:          v1alpha1.WebhookEvent,
 		ProcessorPort: "8080",
 		Service: &v1alpha1.Service{
 			Ports: []corev1.ServicePort{

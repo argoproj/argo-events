@@ -24,11 +24,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
-
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // NotificationType represent a type of notifications that are handled by a sensor
@@ -194,7 +190,7 @@ type Subscription struct {
 // HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
 type HTTPSubscription struct {
 	// Port on which sensor server should run.
-	Port int `json:"port" protobuf:"bytes,1,name=port"`
+	Port int32 `json:"port" protobuf:"bytes,1,name=port"`
 }
 
 // NATSSubscription holds the context of the NATS subscription of events for the sensor
@@ -415,7 +411,7 @@ type HTTPTrigger struct {
 	// Timeout refers to the HTTP request timeout in seconds.
 	// Default value is 60 seconds.
 	// +optional
-	Timeout int `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
+	Timeout int64 `json:"timeout,omitempty" protobuf:"bytes,6,opt,name=timeout"`
 	// BasicAuth configuration for the http request.
 	// +optional
 	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
@@ -479,14 +475,14 @@ type KafkaTrigger struct {
 	// More info at https://kafka.apache.org/documentation/#intro_topics
 	Topic string `json:"topic" protobuf:"bytes,2,name=topic"`
 	// Partition to write data to.
-	Partition int `json:"partition" protobuf:"bytes,3,name=partition"`
+	Partition int32 `json:"partition" protobuf:"bytes,3,name=partition"`
 	// Parameters is the list of parameters that is applied to resolved Kafka trigger object.
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,4,rep,name=parameters"`
 	// RequiredAcks used in producer to tell the broker how many replica acknowledgements
 	// Defaults to 1 (Only wait for the leader to ack).
 	// +optional.
-	RequiredAcks int `json:"requiredAcks,omitempty" protobuf:"bytes,5,opt,name=requiredAcks"`
+	RequiredAcks int32 `json:"requiredAcks,omitempty" protobuf:"bytes,5,opt,name=requiredAcks"`
 	// Compress determines whether to compress message or not.
 	// Defaults to false.
 	// If set to true, compresses message using snappy compression.
@@ -495,7 +491,7 @@ type KafkaTrigger struct {
 	// FlushFrequency refers to the frequency in milliseconds to flush batches.
 	// Defaults to 500 milliseconds.
 	// +optional
-	FlushFrequency int `json:"flushFrequency,omitempty" protobuf:"bytes,7,opt,name=flushFrequency"`
+	FlushFrequency int32 `json:"flushFrequency,omitempty" protobuf:"bytes,7,opt,name=flushFrequency"`
 	// TLS configuration for the Kafka producer.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,8,opt,name=tls"`
@@ -677,7 +673,7 @@ type StatusPolicy struct {
 	// Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
 	// the trigger will marked as successful else it will result in trigger failure.
 	// +listType=allowedStatuses
-	Allow []int `json:"allow" protobuf:"bytes,1,name=allow"`
+	Allow []int32 `json:"allow" protobuf:"bytes,1,name=allow"`
 }
 
 // Backoff for an operation
@@ -689,7 +685,7 @@ type Backoff struct {
 	// The amount of jitter applied each iteration
 	Jitter float64 `json:"jitter" protobuf:"bytes,3,opt,name=jitter"`
 	// Exit with error after this many steps
-	Steps int `json:"steps" protobuf:"bytes,4,opt,name=steps"`
+	Steps int32 `json:"steps" protobuf:"bytes,4,opt,name=steps"`
 }
 
 // SensorResources holds the metadata of the resources created for the sensor
@@ -752,44 +748,10 @@ type NodeStatus struct {
 	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
 }
 
-type ResourceArtifact struct {
-	Data []byte `protobuf:"bytes,1,opt,name=data"`
-}
-
-func NewResourceArtifact(un *unstructured.Unstructured) (*ResourceArtifact, error) {
-	data, err := json.Marshal(un.Object)
-	if err != nil {
-		return nil, err
-	}
-	return &ResourceArtifact{Data: data}, nil
-}
-
-func (a *ResourceArtifact) UnmarshalJSON(value []byte) error {
-	a.Data = value
-	return nil
-}
-
-func (a *ResourceArtifact) MarshalJSON() ([]byte, error) {
-	return a.Data, nil
-}
-
-func (a *ResourceArtifact) Object() (map[string]interface{}, error) {
-	obj := map[string]interface{}{}
-	err := json.Unmarshal(a.Data, &obj)
-	if err != nil {
-		return nil, err
-	}
-	object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&obj)
-	if err != nil {
-		return nil, err
-	}
-	return object, nil
-}
-
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
 	// S3 compliant artifact
-	S3 *apicommon.S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
+	S3 *S3Artifact `json:"s3,omitempty" protobuf:"bytes,1,opt,name=s3"`
 	// Inline artifact is embedded in sensor spec as a string
 	Inline *string `json:"inline,omitempty" protobuf:"bytes,2,opt,name=inline"`
 	// File artifact is artifact stored in a file
@@ -801,7 +763,32 @@ type ArtifactLocation struct {
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 	// Resource is generic template for K8s resource
-	Resource *ResourceArtifact `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+	Resource json.RawMessage `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+}
+
+// S3Artifact contains information about an S3 connection and bucket
+type S3Artifact struct {
+	Endpoint  string                    `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
+	Bucket    *S3Bucket                 `json:"bucket" protobuf:"bytes,2,opt,name=bucket"`
+	Region    string                    `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
+	Insecure  bool                      `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
+	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
+	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
+	// +listType=string
+	Events []string  `json:"events,omitempty" protobuf:"bytes,7,opt,name=events"`
+	Filter *S3Filter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
+}
+
+// S3Bucket contains information to describe an S3 Bucket
+type S3Bucket struct {
+	Key  string `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
+	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
+}
+
+// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+type S3Filter struct {
+	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
+	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap

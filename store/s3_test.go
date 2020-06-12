@@ -19,13 +19,14 @@ package store
 import (
 	"testing"
 
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
+
 	"github.com/smartystreets/goconvey/convey"
 )
 
 func TestNewMinioClient(t *testing.T) {
 	convey.Convey("Given a configuration, get minio client", t, func() {
-		client, err := NewMinioClient(&apicommon.S3Artifact{
+		client, err := NewMinioClient(&v1alpha1.S3Artifact{
 			Endpoint: "fake",
 			Region:   "us-east-1",
 		}, Credentials{
@@ -39,7 +40,7 @@ func TestNewMinioClient(t *testing.T) {
 
 func TestNewS3Reader(t *testing.T) {
 	convey.Convey("Given a minio client, get a reader", t, func() {
-		reader, err := NewS3Reader(&apicommon.S3Artifact{
+		reader, err := NewS3Reader(&v1alpha1.S3Artifact{
 			Endpoint: "fake",
 			Region:   "us-east-1",
 		}, &Credentials{

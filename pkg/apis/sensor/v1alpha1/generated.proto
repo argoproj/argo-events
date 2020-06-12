@@ -97,7 +97,7 @@ message ArtifactLocation {
   optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional ResourceArtifact resource = 7;
+  optional bytes resource = 7;
 }
 
 // Backoff for an operation
@@ -336,7 +336,7 @@ message GitRemoteConfig {
 // HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
 message HTTPSubscription {
   // Port on which sensor server should run.
-  optional int64 port = 1;
+  optional int32 port = 1;
 }
 
 // HTTPTrigger is the trigger for the HTTP request
@@ -538,8 +538,38 @@ message OpenWhiskTrigger {
   repeated TriggerParameter parameters = 7;
 }
 
-message ResourceArtifact {
-  optional bytes data = 1;
+// S3Artifact contains information about an S3 connection and bucket
+message S3Artifact {
+  optional string endpoint = 1;
+
+  optional S3Bucket bucket = 2;
+
+  optional string region = 3;
+
+  optional bool insecure = 4;
+
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
+
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
+
+  // +listType=string
+  repeated string events = 7;
+
+  optional S3Filter filter = 8;
+}
+
+// S3Bucket contains information to describe an S3 Bucket
+message S3Bucket {
+  optional string key = 1;
+
+  optional string name = 2;
+}
+
+// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
+message S3Filter {
+  optional string prefix = 1;
+
+  optional string suffix = 2;
 }
 
 // Sensor is the definition of a sensor resource
@@ -917,36 +947,5 @@ message URLArtifact {
 
   // VerifyCert decides whether the connection is secure or not
   optional bool verifyCert = 2;
-}
-
-message S3Artifact {
-  optional string endpoint = 1;
-
-  optional S3Bucket bucket = 2;
-
-  optional string region = 3;
-
-  optional bool insecure = 4;
-
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
-
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
-
-  // +listType=string
-  repeated string events = 7;
-
-  optional S3Filter filter = 8;
-}
-
-message S3Bucket {
-  optional string key = 1;
-
-  optional string name = 2;
-}
-
-message S3Filter {
-  optional string prefix = 1;
-
-  optional string suffix = 2;
 }
 
