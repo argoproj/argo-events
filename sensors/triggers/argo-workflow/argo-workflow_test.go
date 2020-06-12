@@ -84,7 +84,7 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 					Resource: artifact,
 				},
 				Operation: "Submit",
-				GroupVersionResource: &metav1.GroupVersionResource{
+				GroupVersionResource: metav1.GroupVersionResource{
 					Group:    "argoproj.io",
 					Version:  "v1alpha1",
 					Resource: "workflows",

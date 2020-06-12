@@ -20,51 +20,41 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.eventsource.v1alpha1;
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 
 // Package-wide variables from generator "generated".
-option (gogoproto.marshaler_all) = true;
-option (gogoproto.stable_marshaler_all) = true;
-option (gogoproto.sizer_all) = true;
-option (gogoproto.goproto_stringer_all) = false;
-option (gogoproto.stringer_all) = true;
-option (gogoproto.unmarshaler_all) = true;
-option (gogoproto.goproto_unrecognized_all) = false;
-option (gogoproto.goproto_enum_prefix_all) = false;
-option (gogoproto.goproto_getters_all) = false;
 option go_package = "v1alpha1";
 
 // AMQPEventSource refers to an event-source for AMQP stream events
 message AMQPEventSource {
   // URL for rabbitmq service
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // ExchangeName is the exchange name
   // For more information, visit https://www.rabbitmq.com/tutorials/amqp-concepts.html
-  optional string exchangeName = 2 [(gogoproto.customname) = "ExchangeName", (gogoproto.nullable) = false];
+  optional string exchangeName = 2;
 
   // ExchangeType is rabbitmq exchange type
-  optional string exchangeType = 3 [(gogoproto.customname) = "ExchangeType", (gogoproto.nullable) = false];
+  optional string exchangeType = 3;
 
   // Routing key for bindings
-  optional string routingKey = 4 [(gogoproto.customname) = "RoutingKey", (gogoproto.nullable) = false];
+  optional string routingKey = 4;
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 5 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 5;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 6 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 6;
 
   // TLS configuration for the amqp client.
   // +optional
-  optional TLSConfig tls = 7 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 7;
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub
@@ -72,80 +62,80 @@ message AMQPEventSource {
 message AzureEventsHubEventSource {
   // FQDN of the EventHubs namespace you created
   // More info at https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string
-  optional string fqdn = 1 [(gogoproto.customname) = "FQDN", (gogoproto.nullable) = false];
+  optional string fqdn = 1;
 
   // SharedAccessKeyName is the name you chose for your application's SAS keys
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 2 [(gogoproto.customname) = "SharedAccessKeyName"];
+  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKeyName = 2;
 
   // SharedAccessKey is the the generated value of the key
-  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 3 [(gogoproto.customname) = "SharedAccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector sharedAccessKey = 3;
 
   // Event Hub path/name
-  optional string hubName = 4 [(gogoproto.customname) = "HubName", (gogoproto.nullable) = false];
+  optional string hubName = 4;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve the shared access key and name from.
   // +optional
-  optional string namespace = 5 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 5;
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
 // Schedule takes precedence over interval; interval takes precedence over recurrence
 message CalendarEventSource {
   // Schedule is a cron-like expression. For reference, see: https://en.wikipedia.org/wiki/Cron
-  optional string schedule = 1 [(gogoproto.customname) = "Schedule", (gogoproto.nullable) = false];
+  optional string schedule = 1;
 
   // Interval is a string that describes an interval duration, e.g. 1s, 30m, 2h...
-  optional string interval = 2 [(gogoproto.customname) = "Interval", (gogoproto.nullable) = false];
+  optional string interval = 2;
 
   // ExclusionDates defines the list of DATE-TIME exceptions for recurring events.
   // +listType=string
-  repeated string exclusionDates = 3 [(gogoproto.customname) = "ExclusionDates"];
+  repeated string exclusionDates = 3;
 
   // Timezone in which to run the schedule
   // +optional
-  optional string timezone = 4 [(gogoproto.customname) = "Timezone", (gogoproto.nullable) = false];
+  optional string timezone = 4;
 
   // UserPayload will be sent to sensor as extra data once the event is triggered
   // +optional
-  optional bytes userPayload = 5 [(gogoproto.casttype) = "encoding/json.RawMessage", (gogoproto.customname) = "UserPayload"];
+  optional bytes userPayload = 5;
 }
 
 // EmitterEventSource describes the event source for emitter
 // More info at https://emitter.io/develop/getting-started/
 message EmitterEventSource {
   // Broker URI to connect to.
-  optional string broker = 1 [(gogoproto.customname) = "Broker", (gogoproto.nullable) = false];
+  optional string broker = 1;
 
   // ChannelKey refers to the channel key
-  optional string channelKey = 2 [(gogoproto.customname) = "ChannelKey", (gogoproto.nullable) = false];
+  optional string channelKey = 2;
 
   // ChannelName refers to the channel name
-  optional string channelName = 3 [(gogoproto.customname) = "ChannelName", (gogoproto.nullable) = false];
+  optional string channelName = 3;
 
   // Namespace to use to retrieve the channel key and optional username/password
   // +optional
-  optional string namespace = 4 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 4;
 
   // Username to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector username = 5 [(gogoproto.customname) = "Username"];
+  optional k8s.io.api.core.v1.SecretKeySelector username = 5;
 
   // Password to use to connect to broker
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 6 [(gogoproto.customname) = "Password"];
+  optional k8s.io.api.core.v1.SecretKeySelector password = 6;
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 7 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 7;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 8;
 
   // TLS configuration for the emitter client.
   // +optional
-  optional TLSConfig tls = 9 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 9;
 }
 
 // EventSource is the definition of a eventsource resource
@@ -153,674 +143,674 @@ message EmitterEventSource {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message EventSource {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1 [(gogoproto.customname) = "ObjectMeta", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
-  optional EventSourceStatus status = 2 [(gogoproto.customname) = "Status", (gogoproto.nullable) = false];
+  optional EventSourceStatus status = 2;
 
-  optional EventSourceSpec spec = 3 [(gogoproto.customname) = "Spec"];
+  optional EventSourceSpec spec = 3;
 }
 
 // EventSourceList is the list of eventsource resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message EventSourceList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1 [(gogoproto.customname) = "ListMeta", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   // +listType=eventsource
-  repeated EventSource items = 2 [(gogoproto.customname) = "Items", (gogoproto.nullable) = false];
+  repeated EventSource items = 2;
 }
 
 // EventSourceSpec refers to specification of event-source resource
 message EventSourceSpec {
   // Minio event sources
-  map<string, S3Artifact> minio = 1 [(gogoproto.customname) = "Minio", (gogoproto.nullable) = false];
+  map<string, S3Artifact> minio = 1;
 
   // Calendar event sources
-  map<string, CalendarEventSource> calendar = 2 [(gogoproto.customname) = "Calendar", (gogoproto.nullable) = false];
+  map<string, CalendarEventSource> calendar = 2;
 
   // File event sources
-  map<string, FileEventSource> file = 3 [(gogoproto.customname) = "File", (gogoproto.nullable) = false];
+  map<string, FileEventSource> file = 3;
 
   // Resource event sources
-  map<string, ResourceEventSource> resource = 4 [(gogoproto.customname) = "Resource", (gogoproto.nullable) = false];
+  map<string, ResourceEventSource> resource = 4;
 
   // Webhook event sources
-  map<string, Context> webhook = 5 [(gogoproto.customname) = "Webhook", (gogoproto.nullable) = false];
+  map<string, Context> webhook = 5;
 
   // AMQP event sources
-  map<string, AMQPEventSource> amqp = 6 [(gogoproto.customname) = "AMQP", (gogoproto.nullable) = false];
+  map<string, AMQPEventSource> amqp = 6;
 
   // Kafka event sources
-  map<string, KafkaEventSource> kafka = 7 [(gogoproto.customname) = "Kafka", (gogoproto.nullable) = false];
+  map<string, KafkaEventSource> kafka = 7;
 
   // MQTT event sources
-  map<string, MQTTEventSource> mqtt = 8 [(gogoproto.customname) = "MQTT", (gogoproto.nullable) = false];
+  map<string, MQTTEventSource> mqtt = 8;
 
   // NATS event sources
-  map<string, NATSEventsSource> nats = 9 [(gogoproto.customname) = "NATS", (gogoproto.nullable) = false];
+  map<string, NATSEventsSource> nats = 9;
 
   // SNS event sources
-  map<string, SNSEventSource> sns = 10 [(gogoproto.customname) = "SNS", (gogoproto.nullable) = false];
+  map<string, SNSEventSource> sns = 10;
 
   // SQS event sources
-  map<string, SQSEventSource> sqs = 11 [(gogoproto.customname) = "SQS", (gogoproto.nullable) = false];
+  map<string, SQSEventSource> sqs = 11;
 
   // PubSub eevnt sources
-  map<string, PubSubEventSource> pubSub = 12 [(gogoproto.customname) = "PubSub", (gogoproto.nullable) = false];
+  map<string, PubSubEventSource> pubSub = 12;
 
   // Github event sources
-  map<string, GithubEventSource> github = 13 [(gogoproto.customname) = "Github", (gogoproto.nullable) = false];
+  map<string, GithubEventSource> github = 13;
 
   // Gitlab event sources
-  map<string, GitlabEventSource> gitlab = 14 [(gogoproto.customname) = "Gitlab", (gogoproto.nullable) = false];
+  map<string, GitlabEventSource> gitlab = 14;
 
   // HDFS event sources
-  map<string, HDFSEventSource> hdfs = 15 [(gogoproto.customname) = "HDFS", (gogoproto.nullable) = false];
+  map<string, HDFSEventSource> hdfs = 15;
 
   // Slack event sources
-  map<string, SlackEventSource> slack = 16 [(gogoproto.customname) = "Slack", (gogoproto.nullable) = false];
+  map<string, SlackEventSource> slack = 16;
 
   // StorageGrid event sources
-  map<string, StorageGridEventSource> storageGrid = 17 [(gogoproto.customname) = "StorageGrid", (gogoproto.nullable) = false];
+  map<string, StorageGridEventSource> storageGrid = 17;
 
   // AzureEventsHub event sources
-  map<string, AzureEventsHubEventSource> azureEventsHub = 18 [(gogoproto.customname) = "AzureEventsHub", (gogoproto.nullable) = false];
+  map<string, AzureEventsHubEventSource> azureEventsHub = 18;
 
   // Stripe event sources
-  map<string, StripeEventSource> stripe = 19 [(gogoproto.customname) = "Stripe", (gogoproto.nullable) = false];
+  map<string, StripeEventSource> stripe = 19;
 
   // Emitter event source
-  map<string, EmitterEventSource> emitter = 20 [(gogoproto.customname) = "Emitter", (gogoproto.nullable) = false];
+  map<string, EmitterEventSource> emitter = 20;
 
   // Redis event source
-  map<string, RedisEventSource> redis = 21 [(gogoproto.customname) = "Redis", (gogoproto.nullable) = false];
+  map<string, RedisEventSource> redis = 21;
 
   // NSQ event source
-  map<string, NSQEventSource> nsq = 22 [(gogoproto.customname) = "NSQ", (gogoproto.nullable) = false];
+  map<string, NSQEventSource> nsq = 22;
 
   // Generic event source
-  map<string, GenericEventSource> generic = 23 [(gogoproto.customname) = "Generic", (gogoproto.nullable) = false];
+  map<string, GenericEventSource> generic = 23;
 
   // Type of the event source
-  optional string type = 24 [(gogoproto.casttype) = "github.com/argoproj/argo-events/pkg/apis/common.EventSourceType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
+  optional string type = 24;
 }
 
 // EventSourceStatus holds the status of the event-source resource
 message EventSourceStatus {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdAt = 1 [(gogoproto.customname) = "CreatedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdAt = 1;
 }
 
 // FileEventSource describes an event-source for file related events.
 message FileEventSource {
   // Type of file operations to watch
   // Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
-  optional string eventType = 1 [(gogoproto.customname) = "EventType", (gogoproto.nullable) = false];
+  optional string eventType = 1;
 
   // WatchPathConfig contains configuration about the file path to watch
-  optional WatchPathConfig watchPathConfig = 2 [(gogoproto.customname) = "WatchPathConfig", (gogoproto.nullable) = false];
+  optional WatchPathConfig watchPathConfig = 2;
 
   // Use polling instead of inotify
-  optional bool polling = 3 [(gogoproto.customname) = "Polling", (gogoproto.nullable) = false];
+  optional bool polling = 3;
 }
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 message GenericEventSource {
   // Data of the event source
-  optional string value = 1 [(gogoproto.customname) = "Value", (gogoproto.nullable) = false];
+  optional string value = 1;
 }
 
 // GithubEventSource refers to event-source for github related events
 message GithubEventSource {
   // Id is the webhook's id
-  optional int64 id = 1 [(gogoproto.customname) = "Id", (gogoproto.nullable) = false];
+  optional int64 id = 1;
 
   // Webhook refers to the configuration required to run a http server
-  optional Context webhook = 2 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 2;
 
   // Owner refers to GitHub owner name i.e. argoproj
-  optional string owner = 3 [(gogoproto.customname) = "Owner", (gogoproto.nullable) = false];
+  optional string owner = 3;
 
   // Repository refers to GitHub repo name i.e. argo-events
-  optional string repository = 4 [(gogoproto.customname) = "Repository", (gogoproto.nullable) = false];
+  optional string repository = 4;
 
   // Events refer to Github events to subscribe to which the gateway will subscribe
   // +listType=string
-  repeated string events = 5 [(gogoproto.customname) = "Events"];
+  repeated string events = 5;
 
   // APIToken refers to a K8s secret containing github api token
-  optional k8s.io.api.core.v1.SecretKeySelector apiToken = 15 [(gogoproto.customname) = "APIToken"];
+  optional k8s.io.api.core.v1.SecretKeySelector apiToken = 15;
 
   // WebhookSecret refers to K8s secret containing GitHub webhook secret
   // https://developer.github.com/webhooks/securing/
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7 [(gogoproto.customname) = "WebhookSecret"];
+  optional k8s.io.api.core.v1.SecretKeySelector webhookSecret = 7;
 
   // Insecure tls verification
-  optional bool insecure = 8 [(gogoproto.customname) = "Insecure", (gogoproto.nullable) = false];
+  optional bool insecure = 8;
 
   // Active refers to status of the webhook for event deliveries.
   // https://developer.github.com/webhooks/creating/#active
   // +optional
-  optional bool active = 9 [(gogoproto.customname) = "Active", (gogoproto.nullable) = false];
+  optional bool active = 9;
 
   // ContentType of the event delivery
-  optional string contentType = 10 [(gogoproto.customname) = "ContentType", (gogoproto.nullable) = false];
+  optional string contentType = 10;
 
   // GitHub base URL (for GitHub Enterprise)
   // +optional
-  optional string githubBaseURL = 11 [(gogoproto.customname) = "GithubBaseURL", (gogoproto.nullable) = false];
+  optional string githubBaseURL = 11;
 
   // GitHub upload URL (for GitHub Enterprise)
   // +optional
-  optional string githubUploadURL = 12 [(gogoproto.customname) = "GithubUploadURL", (gogoproto.nullable) = false];
+  optional string githubUploadURL = 12;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve webhook secret and api token from.
   // +optional
-  optional string namespace = 13 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 13;
 
   // DeleteHookOnFinish determines whether to delete the GitHub hook for the repository once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 14 [(gogoproto.customname) = "DeleteHookOnFinish", (gogoproto.nullable) = false];
+  optional bool deleteHookOnFinish = 14;
 }
 
 // GitlabEventSource refers to event-source related to Gitlab events
 message GitlabEventSource {
   // Webhook holds configuration to run a http server
-  optional Context webhook = 1 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 1;
 
   // ProjectId is the id of project for which integration needs to setup
-  optional string projectId = 2 [(gogoproto.customname) = "ProjectId", (gogoproto.nullable) = false];
+  optional string projectId = 2;
 
   // Event is a gitlab event to listen to.
   // Refer https://github.com/xanzy/go-gitlab/blob/bf34eca5d13a9f4c3f501d8a97b8ac226d55e4d9/projects.go#L794.
-  optional string event = 3 [(gogoproto.customname) = "Event", (gogoproto.nullable) = false];
+  optional string event = 3;
 
   // AccessToken is reference to k8 secret which holds the gitlab api access information
-  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 4 [(gogoproto.customname) = "AccessToken"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessToken = 4;
 
   // EnableSSLVerification to enable ssl verification
   // +optional
-  optional bool enableSSLVerification = 5 [(gogoproto.customname) = "EnableSSLVerification", (gogoproto.nullable) = false];
+  optional bool enableSSLVerification = 5;
 
   // GitlabBaseURL is the base URL for API requests to a custom endpoint
-  optional string gitlabBaseURL = 6 [(gogoproto.customname) = "GitlabBaseURL", (gogoproto.nullable) = false];
+  optional string gitlabBaseURL = 6;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve access token from.
   // +optional
-  optional string namespace = 7 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 7;
 
   // DeleteHookOnFinish determines whether to delete the GitLab hook for the project once the event source is stopped.
   // +optional
-  optional bool deleteHookOnFinish = 8 [(gogoproto.customname) = "DeleteHookOnFinish", (gogoproto.nullable) = false];
+  optional bool deleteHookOnFinish = 8;
 
   // AllowDuplicate allows the gateway to register the same webhook integrations for multiple event source configurations.
   // Defaults to false.
   // +optional.
-  optional bool allowDuplicate = 9 [(gogoproto.customname) = "AllowDuplicate", (gogoproto.nullable) = false];
+  optional bool allowDuplicate = 9;
 }
 
 // HDFSEventSource refers to event-source for HDFS related events
 message HDFSEventSource {
-  optional WatchPathConfig watchPathConfig = 2 [(gogoproto.customname) = "WatchPathConfig", (gogoproto.nullable) = false];
+  optional WatchPathConfig watchPathConfig = 2;
 
   // Type of file operations to watch
-  optional string type = 3 [(gogoproto.customname) = "Type", (gogoproto.nullable) = false];
+  optional string type = 3;
 
   // CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
-  optional string checkInterval = 4 [(gogoproto.customname) = "CheckInterval", (gogoproto.nullable) = false];
+  optional string checkInterval = 4;
 
   // Addresses is accessible addresses of HDFS name nodes
   // +listType=string
-  repeated string addresses = 5 [(gogoproto.customname) = "Addresses"];
+  repeated string addresses = 5;
 
   // HDFSUser is the user to access HDFS file system.
   // It is ignored if either ccache or keytab is used.
-  optional string hdfsUser = 6 [(gogoproto.customname) = "HDFSUser", (gogoproto.nullable) = false];
+  optional string hdfsUser = 6;
 
   // KrbCCacheSecret is the secret selector for Kerberos ccache
   // Either ccache or keytab can be set to use Kerberos.
-  optional k8s.io.api.core.v1.SecretKeySelector krbCCacheSecret = 7 [(gogoproto.customname) = "KrbCCacheSecret"];
+  optional k8s.io.api.core.v1.SecretKeySelector krbCCacheSecret = 7;
 
   // KrbKeytabSecret is the secret selector for Kerberos keytab
   // Either ccache or keytab can be set to use Kerberos.
-  optional k8s.io.api.core.v1.SecretKeySelector krbKeytabSecret = 8 [(gogoproto.customname) = "KrbKeytabSecret"];
+  optional k8s.io.api.core.v1.SecretKeySelector krbKeytabSecret = 8;
 
   // KrbUsername is the Kerberos username used with Kerberos keytab
   // It must be set if keytab is used.
-  optional string krbUsername = 9 [(gogoproto.customname) = "KrbUsername", (gogoproto.nullable) = false];
+  optional string krbUsername = 9;
 
   // KrbRealm is the Kerberos realm used with Kerberos keytab
   // It must be set if keytab is used.
-  optional string krbRealm = 10 [(gogoproto.customname) = "KrbRealm", (gogoproto.nullable) = false];
+  optional string krbRealm = 10;
 
   // KrbConfig is the configmap selector for Kerberos config as string
   // It must be set if either ccache or keytab is used.
-  optional k8s.io.api.core.v1.ConfigMapKeySelector krbConfigConfigMap = 11 [(gogoproto.customname) = "KrbConfigConfigMap"];
+  optional k8s.io.api.core.v1.ConfigMapKeySelector krbConfigConfigMap = 11;
 
   // KrbServicePrincipalName is the principal name of Kerberos service
   // It must be set if either ccache or keytab is used.
-  optional string krbServicePrincipalName = 12 [(gogoproto.customname) = "KrbServicePrincipalName", (gogoproto.nullable) = false];
+  optional string krbServicePrincipalName = 12;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
   // +optional
-  optional string namespace = 1 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 1;
 }
 
 // KafkaEventSource refers to event-source for Kafka related events
 message KafkaEventSource {
   // URL to kafka cluster
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Partition name
-  optional string partition = 2 [(gogoproto.customname) = "Partition", (gogoproto.nullable) = false];
+  optional string partition = 2;
 
   // Topic name
-  optional string topic = 3 [(gogoproto.customname) = "Topic", (gogoproto.nullable) = false];
+  optional string topic = 3;
 
   // Backoff holds parameters applied to connection.
-  optional Backoff connectionBackoff = 4 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 4;
 
   // TLS configuration for the kafka client.
   // +optional
-  optional TLSConfig tls = 5 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 5;
 }
 
 // MQTTEventSource refers to event-source for MQTT related events
 message MQTTEventSource {
   // URL to connect to broker
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Topic name
-  optional string topic = 2 [(gogoproto.customname) = "Topic", (gogoproto.nullable) = false];
+  optional string topic = 2;
 
   // ClientID is the id of the client
-  optional string clientId = 3 [(gogoproto.customname) = "ClientId", (gogoproto.nullable) = false];
+  optional string clientId = 3;
 
   // ConnectionBackoff holds backoff applied to connection.
-  optional Backoff connectionBackoff = 4 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 4;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 5 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 5;
 
   // TLS configuration for the mqtt client.
   // +optional
-  optional TLSConfig tls = 6 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 6;
 }
 
 // NATSEventSource refers to event-source for NATS related events
 message NATSEventsSource {
   // URL to connect to NATS cluster
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Subject holds the name of the subject onto which messages are published
-  optional string subject = 2 [(gogoproto.customname) = "Subject", (gogoproto.nullable) = false];
+  optional string subject = 2;
 
   // ConnectionBackoff holds backoff applied to connection.
-  optional Backoff connectionBackoff = 3 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 3;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 4 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 4;
 
   // TLS configuration for the nats client.
   // +optional
-  optional TLSConfig tls = 5 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 5;
 }
 
 // NSQEventSource describes the event source for NSQ PubSub
 // More info at https://godoc.org/github.com/nsqio/go-nsq
 message NSQEventSource {
   // HostAddress is the address of the host for NSQ lookup
-  optional string hostAddress = 1 [(gogoproto.customname) = "HostAddress", (gogoproto.nullable) = false];
+  optional string hostAddress = 1;
 
   // Topic to subscribe to.
-  optional string topic = 2 [(gogoproto.customname) = "Topic", (gogoproto.nullable) = false];
+  optional string topic = 2;
 
   // Channel used for subscription
-  optional string channel = 3 [(gogoproto.customname) = "Channel", (gogoproto.nullable) = false];
+  optional string channel = 3;
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 4 [(gogoproto.customname) = "ConnectionBackoff"];
+  optional Backoff connectionBackoff = 4;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 5 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 5;
 
   // TLS configuration for the nsq client.
   // +optional
-  optional TLSConfig tls = 6 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 6;
 }
 
 // PubSubEventSource refers to event-source for GCP PubSub related events.
 message PubSubEventSource {
   // ProjectID is the unique identifier for your project on GCP
-  optional string projectID = 1 [(gogoproto.customname) = "ProjectID", (gogoproto.nullable) = false];
+  optional string projectID = 1;
 
   // TopicProjectID identifies the project where the topic should exist or be created
   // (assumed to be the same as ProjectID by default)
-  optional string topicProjectID = 2 [(gogoproto.customname) = "TopicProjectID", (gogoproto.nullable) = false];
+  optional string topicProjectID = 2;
 
   // Topic on which a subscription will be created
-  optional string topic = 3 [(gogoproto.customname) = "Topic", (gogoproto.nullable) = false];
+  optional string topic = 3;
 
   // CredentialsFile is the file that contains credentials to authenticate for GCP
-  optional string credentialsFile = 4 [(gogoproto.customname) = "CredentialsFile", (gogoproto.nullable) = false];
+  optional string credentialsFile = 4;
 
   // EnableWorkflowIdentity determines if your project authenticates to GCP with WorkflowIdentity or CredentialsFile.
   // If true, authentication is done with WorkflowIdentity. If false or omited, authentication is done with CredentialsFile.
   // +optional
-  optional bool enableWorkflowIdentity = 5 [(gogoproto.customname) = "EnableWorkflowIdentity", (gogoproto.nullable) = false];
+  optional bool enableWorkflowIdentity = 5;
 
   // DeleteSubscriptionOnFinish determines whether to delete the GCP PubSub subscription once the event source is stopped.
   // +optional
-  optional bool deleteSubscriptionOnFinish = 6 [(gogoproto.customname) = "DeleteSubscriptionOnFinish", (gogoproto.nullable) = false];
+  optional bool deleteSubscriptionOnFinish = 6;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 8;
 }
 
 // RedisEventSource describes an event source for the Redis PubSub.
 // More info at https://godoc.org/github.com/go-redis/redis#example-PubSub
 message RedisEventSource {
   // HostAddress refers to the address of the Redis host/server
-  optional string hostAddress = 1 [(gogoproto.customname) = "HostAddress", (gogoproto.nullable) = false];
+  optional string hostAddress = 1;
 
   // Password required for authentication if any.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2 [(gogoproto.customname) = "Password"];
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
 
   // Namespace to use to retrieve the password from. It should only be specified if password is declared
   // +optional
-  optional string namespace = 3 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 3;
 
   // DB to use. If not specified, default DB 0 will be used.
   // +optional
-  optional int64 db = 4 [(gogoproto.customname) = "DB", (gogoproto.nullable) = false];
+  optional int64 db = 4;
 
   // Channels to subscribe to listen events.
   // +listType=string
-  repeated string channels = 5 [(gogoproto.customname) = "Channels"];
+  repeated string channels = 5;
 
   // TLS configuration for the redis client.
   // +optional
-  optional TLSConfig tls = 6 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 6;
 }
 
 // ResourceEventSource refers to a event-source for K8s resource related events.
 message ResourceEventSource {
   // Namespace where resource is deployed
-  optional string namespace = 1 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 1;
 
   // Filter is applied on the metadata of the resource
   // If you apply filter, then the internal event informer will only monitor objects that pass the filter.
   // +optional
-  optional ResourceFilter filter = 2 [(gogoproto.customname) = "Filter"];
+  optional ResourceFilter filter = 2;
 
   // Group of the resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4 [(gogoproto.customname) = "GroupVersionResource", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4;
 
   // EventTypes is the list of event type to watch.
   // Possible values are - ADD, UPDATE and DELETE.
-  repeated string eventTypes = 3 [(gogoproto.casttype) = "ResourceEventType", (gogoproto.customname) = "EventTypes"];
+  repeated string eventTypes = 3;
 }
 
 // ResourceFilter contains K8 ObjectMeta information to further filter resource event objects
 message ResourceFilter {
   // Prefix filter is applied on the resource name.
   // +optional
-  optional string prefix = 1 [(gogoproto.customname) = "Prefix", (gogoproto.nullable) = false];
+  optional string prefix = 1;
 
   // Labels provide listing options to K8s API to watch resource/s.
   // Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/label-selectors/ for more info.
   // +optional
-  repeated Selector labels = 2 [(gogoproto.customname) = "Labels", (gogoproto.nullable) = false];
+  repeated Selector labels = 2;
 
   // Fields provide listing options to K8s API to watch resource/s.
   // Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/ for more info.
   // +optional
-  repeated Selector fields = 3 [(gogoproto.customname) = "Fields", (gogoproto.nullable) = false];
+  repeated Selector fields = 3;
 
   // If resource is created before the specified time then the event is treated as valid.
   // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdBy = 4 [(gogoproto.customname) = "CreatedBy", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time createdBy = 4;
 
   // If the resource is created after the start time then the event is treated as valid.
   // +optional
-  optional bool afterStart = 5 [(gogoproto.customname) = "AfterStart", (gogoproto.nullable) = false];
+  optional bool afterStart = 5;
 }
 
 // SNSEventSource refers to event-source for AWS SNS related events
 message SNSEventSource {
   // Webhook configuration for http server
-  optional Context webhook = 1 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 1;
 
   // TopicArn
-  optional string topicArn = 2 [(gogoproto.customname) = "TopicArn", (gogoproto.nullable) = false];
+  optional string topicArn = 2;
 
   // AccessKey refers K8 secret containing aws access key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 3 [(gogoproto.customname) = "AccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 3;
 
   // SecretKey refers K8 secret containing aws secret key
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4 [(gogoproto.customname) = "SecretKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 4;
 
   // Namespace refers to Kubernetes namespace to read access related secret from.
   // +optional
-  optional string namespace = 5 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 5;
 
   // Region is AWS region
-  optional string region = 6 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
+  optional string region = 6;
 
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
-  optional string roleARN = 7 [(gogoproto.customname) = "RoleARN", (gogoproto.nullable) = false];
+  optional string roleARN = 7;
 }
 
 // SQSEventSource refers to event-source for AWS SQS related events
 message SQSEventSource {
   // AccessKey refers K8 secret containing aws access key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 1 [(gogoproto.customname) = "AccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 1;
 
   // SecretKey refers K8 secret containing aws secret key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 2 [(gogoproto.customname) = "SecretKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 2;
 
   // Region is AWS region
-  optional string region = 3 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
+  optional string region = 3;
 
   // Queue is AWS SQS queue to listen to for messages
-  optional string queue = 4 [(gogoproto.customname) = "Queue", (gogoproto.nullable) = false];
+  optional string queue = 4;
 
   // WaitTimeSeconds is The duration (in seconds) for which the call waits for a message to arrive
   // in the queue before returning.
-  optional int64 waitTimeSeconds = 5 [(gogoproto.customname) = "WaitTimeSeconds", (gogoproto.nullable) = false];
+  optional int64 waitTimeSeconds = 5;
 
   // Namespace refers to Kubernetes namespace to read access related secret from.
   // +optional
-  optional string namespace = 6 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 6;
 
   // RoleARN is the Amazon Resource Name (ARN) of the role to assume.
   // +optional
-  optional string roleARN = 7 [(gogoproto.customname) = "RoleARN", (gogoproto.nullable) = false];
+  optional string roleARN = 7;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
   // +optional
-  optional bool jsonBody = 8 [(gogoproto.customname) = "JSONBody", (gogoproto.nullable) = false];
+  optional bool jsonBody = 8;
 
   // QueueAccountId is the ID of the account that created the queue to monitor
   // +optional
-  optional string queueAccountId = 9 [(gogoproto.customname) = "QueueAccountId", (gogoproto.nullable) = false];
+  optional string queueAccountId = 9;
 }
 
 // Selector represents conditional operation to select K8s objects.
 message Selector {
   // Key name
-  optional string key = 1 [(gogoproto.customname) = "Key", (gogoproto.nullable) = false];
+  optional string key = 1;
 
   // Supported operations like ==, !=, <=, >= etc.
   // Defaults to ==.
   // Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
   // +optional
-  optional string operation = 2 [(gogoproto.customname) = "Operation", (gogoproto.nullable) = false];
+  optional string operation = 2;
 
   // Data
-  optional string value = 3 [(gogoproto.customname) = "Value", (gogoproto.nullable) = false];
+  optional string value = 3;
 }
 
 // SlackEventSource refers to event-source for Slack related events
 message SlackEventSource {
   // Slack App signing secret
-  optional k8s.io.api.core.v1.SecretKeySelector signingSecret = 1 [(gogoproto.customname) = "SigningSecret"];
+  optional k8s.io.api.core.v1.SecretKeySelector signingSecret = 1;
 
   // Token for URL verification handshake
-  optional k8s.io.api.core.v1.SecretKeySelector token = 2 [(gogoproto.customname) = "Token"];
+  optional k8s.io.api.core.v1.SecretKeySelector token = 2;
 
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 3 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 3;
 
   // Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
   // +optional
-  optional string namespace = 4 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 4;
 }
 
 // StorageGridEventSource refers to event-source for StorageGrid related events
 message StorageGridEventSource {
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 1 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 1;
 
   // Events are s3 bucket notification events.
   // For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
   // Note that storage grid notifications do not contain `s3:`
   // +listType=string
-  repeated string events = 2 [(gogoproto.customname) = "Events"];
+  repeated string events = 2;
 
   // Filter on object key which caused the notification.
-  optional StorageGridFilter filter = 3 [(gogoproto.customname) = "Filter"];
+  optional StorageGridFilter filter = 3;
 }
 
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects
 // +k8s:openapi-gen=true
 message StorageGridFilter {
-  optional string prefix = 1 [(gogoproto.customname) = "Prefix", (gogoproto.nullable) = false];
+  optional string prefix = 1;
 
-  optional string suffix = 2 [(gogoproto.customname) = "Suffix", (gogoproto.nullable) = false];
+  optional string suffix = 2;
 }
 
 // StripeEventSource describes the event source for stripe webhook notifications
 // More info at https://stripe.com/docs/webhooks
 message StripeEventSource {
   // Webhook holds configuration for a REST endpoint
-  optional Context webhook = 1 [(gogoproto.customname) = "Webhook"];
+  optional Context webhook = 1;
 
   // CreateWebhook if specified creates a new webhook programmatically.
   // +optional
-  optional bool createWebhook = 2 [(gogoproto.customname) = "CreateWebhook", (gogoproto.nullable) = false];
+  optional bool createWebhook = 2;
 
   // APIKey refers to K8s secret that holds Stripe API key. Used only if CreateWebhook is enabled.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector apiKey = 3 [(gogoproto.customname) = "APIKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector apiKey = 3;
 
   // Namespace to retrieve the APIKey secret from. Must be specified in order to read API key from APIKey K8s secret.
   // +optional
-  optional string namespace = 4 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 4;
 
   // EventFilter describes the type of events to listen to. If not specified, all types of events will be processed.
   // More info at https://stripe.com/docs/api/events/list
   // +optional
   // +listType=string
-  repeated string eventFilter = 5 [(gogoproto.customname) = "EventFilter"];
+  repeated string eventFilter = 5;
 }
 
 // TLSConfig refers to TLS configuration for a client.
 message TLSConfig {
   // CACertPath refers the file path that contains the CA cert.
-  optional string caCertPath = 1 [(gogoproto.customname) = "CACertPath", (gogoproto.nullable) = false];
+  optional string caCertPath = 1;
 
   // ClientCertPath refers the file path that contains client cert.
-  optional string clientCertPath = 2 [(gogoproto.customname) = "ClientCertPath", (gogoproto.nullable) = false];
+  optional string clientCertPath = 2;
 
   // ClientKeyPath refers the file path that contains client key.
-  optional string clientKeyPath = 3 [(gogoproto.customname) = "ClientKeyPath", (gogoproto.nullable) = false];
+  optional string clientKeyPath = 3;
 }
 
 message Backoff {
-  optional int64 duration = 1 [(gogoproto.casttype) = "time.Duration", (gogoproto.customname) = "Duration", (gogoproto.nullable) = false];
+  optional int64 duration = 1;
 
   // the base duration
-  optional double factor = 2 [(gogoproto.customname) = "Factor", (gogoproto.nullable) = false];
+  optional double factor = 2;
 
   // Duration is multiplied by factor each iteration
-  optional double jitter = 3 [(gogoproto.customname) = "Jitter", (gogoproto.nullable) = false];
+  optional double jitter = 3;
 
   // The amount of jitter applied each iteration
-  optional int64 steps = 4 [(gogoproto.customname) = "Steps", (gogoproto.nullable) = false];
+  optional int64 steps = 4;
 }
 
 message S3Artifact {
-  optional string endpoint = 1 [(gogoproto.customname) = "Endpoint", (gogoproto.nullable) = false];
+  optional string endpoint = 1;
 
-  optional S3Bucket bucket = 2 [(gogoproto.customname) = "Bucket"];
+  optional S3Bucket bucket = 2;
 
-  optional string region = 3 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
+  optional string region = 3;
 
-  optional bool insecure = 4 [(gogoproto.customname) = "Insecure", (gogoproto.nullable) = false];
+  optional bool insecure = 4;
 
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5 [(gogoproto.customname) = "AccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
 
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6 [(gogoproto.customname) = "SecretKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
 
   // +listType=string
-  repeated string events = 7 [(gogoproto.customname) = "Events"];
+  repeated string events = 7;
 
-  optional S3Filter filter = 8 [(gogoproto.customname) = "Filter"];
+  optional S3Filter filter = 8;
 }
 
 message S3Bucket {
-  optional string key = 1 [(gogoproto.customname) = "Key", (gogoproto.nullable) = false];
+  optional string key = 1;
 
-  optional string name = 2 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 2;
 }
 
 message S3Filter {
-  optional string prefix = 1 [(gogoproto.customname) = "Prefix", (gogoproto.nullable) = false];
+  optional string prefix = 1;
 
-  optional string suffix = 2 [(gogoproto.customname) = "Suffix", (gogoproto.nullable) = false];
+  optional string suffix = 2;
 }
 
 message WatchPathConfig {
   // Directory to watch for events
-  optional string directory = 1 [(gogoproto.customname) = "Directory", (gogoproto.nullable) = false];
+  optional string directory = 1;
 
   // Path is relative path of object to watch with respect to the directory
-  optional string path = 2 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
+  optional string path = 2;
 
   // PathRegexp is regexp of relative path of object to watch with respect to the directory
-  optional string pathRegexp = 3 [(gogoproto.customname) = "PathRegexp", (gogoproto.nullable) = false];
+  optional string pathRegexp = 3;
 }
 
 message Context {
   // REST API endpoint
-  optional string endpoint = 1 [(gogoproto.customname) = "Endpoint", (gogoproto.nullable) = false];
+  optional string endpoint = 1;
 
   // Method is HTTP request method that indicates the desired action to be performed for a given resource.
   // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-  optional string method = 2 [(gogoproto.customname) = "Method", (gogoproto.nullable) = false];
+  optional string method = 2;
 
   // Port on which HTTP server is listening for incoming events.
-  optional string port = 3 [(gogoproto.customname) = "Port", (gogoproto.nullable) = false];
+  optional string port = 3;
 
   // URL is the url of the server.
-  optional string url = 4 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 4;
 
   // ServerCertPath refers the file that contains the cert.
-  optional string serverCertPath = 6 [(gogoproto.customname) = "ServerCertPath", (gogoproto.nullable) = false];
+  optional string serverCertPath = 6;
 
   // ServerKeyPath refers the file that contains private key
-  optional string serverKeyPath = 5 [(gogoproto.customname) = "ServerKeyPath", (gogoproto.nullable) = false];
+  optional string serverKeyPath = 5;
 }
 

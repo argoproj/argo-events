@@ -20,161 +20,151 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1;
 
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/schema/generated.proto";
 
 // Package-wide variables from generator "generated".
-option (gogoproto.marshaler_all) = true;
-option (gogoproto.stable_marshaler_all) = true;
-option (gogoproto.sizer_all) = true;
-option (gogoproto.goproto_stringer_all) = false;
-option (gogoproto.stringer_all) = true;
-option (gogoproto.unmarshaler_all) = true;
-option (gogoproto.goproto_unrecognized_all) = false;
-option (gogoproto.goproto_enum_prefix_all) = false;
-option (gogoproto.goproto_getters_all) = false;
 option go_package = "v1alpha1";
 
 // AWSLambdaTrigger refers to specification of the trigger to invoke an AWS Lambda function
 message AWSLambdaTrigger {
   // FunctionName refers to the name of the function to invoke.
-  optional string functionName = 1 [(gogoproto.customname) = "FunctionName", (gogoproto.nullable) = false];
+  optional string functionName = 1;
 
   // AccessKey refers K8 secret containing aws access key
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 2 [(gogoproto.customname) = "AccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 2;
 
   // SecretKey refers K8 secret containing aws secret key
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 3 [(gogoproto.customname) = "SecretKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 3;
 
   // Namespace refers to Kubernetes namespace to read access related secret from.
   // Defaults to sensor's namespace.
   // +optional.
-  optional string namespace = 4 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 4;
 
   // Region is AWS region
-  optional string region = 5 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
+  optional string region = 5;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   // +listType=payloadParameters
-  repeated TriggerParameter payload = 6 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 6;
 
   // Parameters is the list of key-value extracted from event's payload that are applied to
   // the trigger resource.
   // +listType=triggerParameters
   // +optional
-  repeated TriggerParameter parameters = 7 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 7;
 }
 
 // ArgoWorkflowTrigger is the trigger for the Argo Workflow
 message ArgoWorkflowTrigger {
   // Source of the K8 resource file(s)
-  optional ArtifactLocation source = 1 [(gogoproto.customname) = "Source"];
+  optional ArtifactLocation source = 1;
 
   // Operation refers to the type of operation performed on the argo workflow resource.
   // Default value is Submit.
   // +optional
-  optional string operation = 2 [(gogoproto.casttype) = "ArgoWorkflowOperation", (gogoproto.customname) = "Operation", (gogoproto.nullable) = false];
+  optional string operation = 2;
 
   // Parameters is the list of parameters to pass to resolved Argo Workflow object
   // +listType=triggerParameters
-  repeated TriggerParameter parameters = 3 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 3;
 
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4 [(gogoproto.customname) = "GroupVersionResource"];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 4;
 }
 
 // ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
   // S3 compliant artifact
-  optional S3Artifact s3 = 1 [(gogoproto.customname) = "S3"];
+  optional S3Artifact s3 = 1;
 
   // Inline artifact is embedded in sensor spec as a string
-  optional string inline = 2 [(gogoproto.customname) = "Inline"];
+  optional string inline = 2;
 
   // File artifact is artifact stored in a file
-  optional FileArtifact file = 3 [(gogoproto.customname) = "File"];
+  optional FileArtifact file = 3;
 
   // URL to fetch the artifact from
-  optional URLArtifact url = 4 [(gogoproto.customname) = "URL"];
+  optional URLArtifact url = 4;
 
   // Configmap that stores the artifact
-  optional ConfigmapArtifact configmap = 5 [(gogoproto.customname) = "Configmap"];
+  optional ConfigmapArtifact configmap = 5;
 
   // Git repository hosting the artifact
-  optional GitArtifact git = 6 [(gogoproto.customname) = "Git"];
+  optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional ResourceArtifact resource = 7 [(gogoproto.customname) = "Resource"];
+  optional ResourceArtifact resource = 7;
 }
 
 // Backoff for an operation
 message Backoff {
   // Duration is the duration in nanoseconds
-  optional int64 duration = 1 [(gogoproto.casttype) = "time.Duration", (gogoproto.customname) = "Duration", (gogoproto.nullable) = false];
+  optional int64 duration = 1;
 
   // Duration is multiplied by factor each iteration
-  optional double factor = 2 [(gogoproto.customname) = "Factor", (gogoproto.nullable) = false];
+  optional double factor = 2;
 
   // The amount of jitter applied each iteration
-  optional double jitter = 3 [(gogoproto.customname) = "Jitter", (gogoproto.nullable) = false];
+  optional double jitter = 3;
 
   // Exit with error after this many steps
-  optional int64 steps = 4 [(gogoproto.customname) = "Steps", (gogoproto.nullable) = false];
+  optional int64 steps = 4;
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
 message BasicAuth {
   // Username refers to the Kubernetes secret that holds the username required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1 [(gogoproto.customname) = "Username"];
+  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
 
   // Password refers to the Kubernetes secret that holds the password required for basic auth.
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2 [(gogoproto.customname) = "Password"];
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
 
   // Namespace to read the secrets from.
   // Defaults to sensor's namespace.
   // +optional
-  optional string namespace = 9 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 9;
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap
 message ConfigmapArtifact {
   // Name of the configmap
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // Namespace where configmap is deployed
-  optional string namespace = 2 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 2;
 
   // Key within configmap data which contains trigger resource definition
-  optional string key = 3 [(gogoproto.customname) = "Key", (gogoproto.nullable) = false];
+  optional string key = 3;
 }
 
 // CustomTrigger refers to the specification of the custom trigger.
 message CustomTrigger {
   // ServerURL is the url of the gRPC server that executes custom trigger
-  optional string serverURL = 1 [(gogoproto.customname) = "ServerURL", (gogoproto.nullable) = false];
+  optional string serverURL = 1;
 
   // Secure refers to type of the connection between sensor to custom trigger gRPC
-  optional bool secure = 2 [(gogoproto.customname) = "Secure", (gogoproto.nullable) = false];
+  optional bool secure = 2;
 
   // CertFilePath is path to the cert file within sensor for secure connection between sensor and custom trigger gRPC server.
-  optional string certFilePath = 3 [(gogoproto.customname) = "CertFilePath", (gogoproto.nullable) = false];
+  optional string certFilePath = 3;
 
   // ServerNameOverride for the secure connection between sensor and custom trigger gRPC server.
-  optional string serverNameOverride = 4 [(gogoproto.customname) = "ServerNameOverride", (gogoproto.nullable) = false];
+  optional string serverNameOverride = 4;
 
   // Spec is the custom trigger resource specification that custom trigger gRPC server knows how to interpret.
-  map<string, string> spec = 5 [(gogoproto.customname) = "Spec", (gogoproto.nullable) = false];
+  map<string, string> spec = 5;
 
   // Parameters is the list of parameters that is applied to resolved custom trigger trigger object.
   // +listType=triggerParameters
-  repeated TriggerParameter parameters = 6 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 6;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   // +listType=payloadParameters
-  repeated TriggerParameter payload = 7 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 7;
 }
 
 // DataFilter describes constraints and filters for event data
@@ -185,10 +175,10 @@ message DataFilter {
   // Path is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
   // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-  optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
+  optional string path = 1;
 
   // Type contains the JSON type of the data
-  optional string type = 2 [(gogoproto.casttype) = "JSONType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
+  optional string type = 2;
 
   // +listType=value
   // Data is the allowed string values for this key
@@ -196,285 +186,285 @@ message DataFilter {
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
   // Nils this value is ignored
-  repeated string value = 3 [(gogoproto.customname) = "Value"];
+  repeated string value = 3;
 
   // Comparator compares the event data with a user given value.
   // Can be ">=", ">", "=", "<", or "<=".
   // Is optional, and if left blank treated as equality "=".
-  optional string comparator = 4 [(gogoproto.casttype) = "Comparator", (gogoproto.customname) = "Comparator", (gogoproto.nullable) = false];
+  optional string comparator = 4;
 }
 
 // DependencyGroup is the group of dependencies
 message DependencyGroup {
   // Name of the group
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // +listType=dependencies
   // Dependencies of events
-  repeated string dependencies = 2 [(gogoproto.customname) = "Dependencies"];
+  repeated string dependencies = 2;
 }
 
 // Event represents the cloudevent received from a gateway.
 message Event {
-  optional EventContext context = 1 [(gogoproto.customname) = "Context"];
+  optional EventContext context = 1;
 
-  optional bytes data = 2 [(gogoproto.customname) = "Data"];
+  optional bytes data = 2;
 }
 
 // EventContext holds the context of the cloudevent received from a gateway.
 message EventContext {
   // ID of the event; must be non-empty and unique within the scope of the producer.
-  optional string id = 1 [(gogoproto.customname) = "ID", (gogoproto.nullable) = false];
+  optional string id = 1;
 
   // Source - A URI describing the event producer.
-  optional string source = 2 [(gogoproto.customname) = "Source", (gogoproto.nullable) = false];
+  optional string source = 2;
 
   // SpecVersion - The version of the CloudEvents specification used by the event.
-  optional string specversion = 3 [(gogoproto.customname) = "SpecVersion", (gogoproto.nullable) = false];
+  optional string specversion = 3;
 
   // Type - The type of the occurrence which has happened.
-  optional string type = 4 [(gogoproto.customname) = "Type", (gogoproto.nullable) = false];
+  optional string type = 4;
 
   // DataContentType - A MIME (RFC2046) string describing the media type of `data`.
-  optional string dataContentType = 5 [(gogoproto.customname) = "DataContentType", (gogoproto.nullable) = false];
+  optional string dataContentType = 5;
 
   // Subject - The subject of the event in the context of the event producer
-  optional string subject = 6 [(gogoproto.customname) = "Subject", (gogoproto.nullable) = false];
+  optional string subject = 6;
 
   // Time - A Timestamp when the event happened.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time time = 7 [(gogoproto.customname) = "Time", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time time = 7;
 }
 
 // EventDependency describes a dependency
 message EventDependency {
   // Name is a unique name of this dependency
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // GatewayName is the name of the gateway from whom the event is received
-  optional string gatewayName = 2 [(gogoproto.customname) = "GatewayName", (gogoproto.nullable) = false];
+  optional string gatewayName = 2;
 
   // EventName is the name of the event
-  optional string eventName = 3 [(gogoproto.customname) = "EventName", (gogoproto.nullable) = false];
+  optional string eventName = 3;
 
   // Filters and rules governing toleration of success and constraints on the context and data of an event
-  optional EventDependencyFilter filters = 4 [(gogoproto.customname) = "Filters"];
+  optional EventDependencyFilter filters = 4;
 }
 
 // EventDependencyFilter defines filters and constraints for a event.
 message EventDependencyFilter {
   // Name is the name of event filter
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // Time filter on the event with escalation
-  optional TimeFilter time = 2 [(gogoproto.customname) = "Time"];
+  optional TimeFilter time = 2;
 
   // Context filter constraints
-  optional EventContext context = 3 [(gogoproto.customname) = "Context"];
+  optional EventContext context = 3;
 
   // +listType=data
   // Data filter constraints with escalation
-  repeated DataFilter data = 4 [(gogoproto.customname) = "Data", (gogoproto.nullable) = false];
+  repeated DataFilter data = 4;
 }
 
 // FileArtifact contains information about an artifact in a filesystem
 message FileArtifact {
-  optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
+  optional string path = 1;
 }
 
 // GitArtifact contains information about an artifact stored in git
 message GitArtifact {
   // Git URL
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Directory to clone the repository. We clone complete directory because GitArtifact is not limited to any specific Git service providers.
   // Hence we don't use any specific git provider client.
-  optional string cloneDirectory = 2 [(gogoproto.customname) = "CloneDirectory", (gogoproto.nullable) = false];
+  optional string cloneDirectory = 2;
 
   // Creds contain reference to git username and password
   // +optional
-  optional GitCreds creds = 3 [(gogoproto.customname) = "Creds"];
+  optional GitCreds creds = 3;
 
   // Namespace where creds are stored.
   // +optional
-  optional string namespace = 4 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 4;
 
   // SSHKeyPath is path to your ssh key path. Use this if you don't want to provide username and password.
   // ssh key path must be mounted in sensor pod.
   // +optional
-  optional string sshKeyPath = 5 [(gogoproto.customname) = "SSHKeyPath", (gogoproto.nullable) = false];
+  optional string sshKeyPath = 5;
 
   // Path to file that contains trigger resource definition
-  optional string filePath = 6 [(gogoproto.customname) = "FilePath", (gogoproto.nullable) = false];
+  optional string filePath = 6;
 
   // Branch to use to pull trigger resource
   // +optional
-  optional string branch = 7 [(gogoproto.customname) = "Branch", (gogoproto.nullable) = false];
+  optional string branch = 7;
 
   // Tag to use to pull trigger resource
   // +optional
-  optional string tag = 8 [(gogoproto.customname) = "Tag", (gogoproto.nullable) = false];
+  optional string tag = 8;
 
   // Ref to use to pull trigger resource. Will result in a shallow clone and
   // fetch.
   // +optional
-  optional string ref = 9 [(gogoproto.customname) = "Ref", (gogoproto.nullable) = false];
+  optional string ref = 9;
 
   // Remote to manage set of tracked repositories. Defaults to "origin".
   // Refer https://git-scm.com/docs/git-remote
   // +optional
-  optional GitRemoteConfig remote = 10 [(gogoproto.customname) = "Remote"];
+  optional GitRemoteConfig remote = 10;
 }
 
 // GitCreds contain reference to git username and password
 message GitCreds {
-  optional k8s.io.api.core.v1.SecretKeySelector username = 1 [(gogoproto.customname) = "Username"];
+  optional k8s.io.api.core.v1.SecretKeySelector username = 1;
 
-  optional k8s.io.api.core.v1.SecretKeySelector password = 2 [(gogoproto.customname) = "Password"];
+  optional k8s.io.api.core.v1.SecretKeySelector password = 2;
 }
 
 // GitRemoteConfig contains the configuration of a Git remote
 message GitRemoteConfig {
   // Name of the remote to fetch from.
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // +listType=urls
   // URLs the URLs of a remote repository. It must be non-empty. Fetch will
   // always use the first URL, while push will use all of them.
-  repeated string urls = 2 [(gogoproto.customname) = "URLS"];
+  repeated string urls = 2;
 }
 
 // HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
 message HTTPSubscription {
   // Port on which sensor server should run.
-  optional int64 port = 1 [(gogoproto.customname) = "Port", (gogoproto.nullable) = false];
+  optional int64 port = 1;
 }
 
 // HTTPTrigger is the trigger for the HTTP request
 message HTTPTrigger {
   // URL refers to the URL to send HTTP request to.
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Payload is the list of key-value extracted from an event payload to construct the HTTP request payload.
   // +listType=atomic
-  repeated TriggerParameter payload = 2 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 2;
 
   // TLS configuration for the HTTP client.
   // +optional
-  optional TLSConfig tls = 3 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 3;
 
   // Method refers to the type of the HTTP request.
   // Refer https://golang.org/src/net/http/method.go for more info.
   // Default value is POST.
   // +optional
-  optional string method = 4 [(gogoproto.customname) = "Method", (gogoproto.nullable) = false];
+  optional string method = 4;
 
   // Parameters is the list of key-value extracted from event's payload that are applied to
   // the HTTP trigger resource.
   // +listType=atomic
-  repeated TriggerParameter parameters = 5 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 5;
 
   // Timeout refers to the HTTP request timeout in seconds.
   // Default value is 60 seconds.
   // +optional
-  optional int64 timeout = 6 [(gogoproto.customname) = "Timeout", (gogoproto.nullable) = false];
+  optional int64 timeout = 6;
 
   // BasicAuth configuration for the http request.
   // +optional
-  optional BasicAuth basicAuth = 7 [(gogoproto.customname) = "BasicAuth"];
+  optional BasicAuth basicAuth = 7;
 
   // Headers for the HTTP request.
   // +mapType=granular
   // +optional
-  map<string, string> headers = 8 [(gogoproto.customname) = "Headers", (gogoproto.nullable) = false];
+  map<string, string> headers = 8;
 }
 
 // K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
 message K8sResourcePolicy {
   // Labels required to identify whether a resource is in success state
-  map<string, string> labels = 1 [(gogoproto.customname) = "Labels", (gogoproto.nullable) = false];
+  map<string, string> labels = 1;
 
   // Backoff before checking resource state
-  optional Backoff backoff = 2 [(gogoproto.customname) = "Backoff", (gogoproto.nullable) = false];
+  optional Backoff backoff = 2;
 
   // ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
   // the state of the resource
-  optional bool errorOnBackoffTimeout = 3 [(gogoproto.customname) = "ErrorOnBackoffTimeout", (gogoproto.nullable) = false];
+  optional bool errorOnBackoffTimeout = 3;
 }
 
 // KafkaTrigger refers to the specification of the Kafka trigger.
 message KafkaTrigger {
   // URL of the Kafka broker.
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Name of the topic.
   // More info at https://kafka.apache.org/documentation/#intro_topics
-  optional string topic = 2 [(gogoproto.customname) = "Topic", (gogoproto.nullable) = false];
+  optional string topic = 2;
 
   // Partition to write data to.
-  optional int64 partition = 3 [(gogoproto.customname) = "Partition", (gogoproto.nullable) = false];
+  optional int64 partition = 3;
 
   // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
   // +listType=triggerParameters
-  repeated TriggerParameter parameters = 4 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 4;
 
   // RequiredAcks used in producer to tell the broker how many replica acknowledgements
   // Defaults to 1 (Only wait for the leader to ack).
   // +optional.
-  optional int64 requiredAcks = 5 [(gogoproto.customname) = "RequiredAcks", (gogoproto.nullable) = false];
+  optional int64 requiredAcks = 5;
 
   // Compress determines whether to compress message or not.
   // Defaults to false.
   // If set to true, compresses message using snappy compression.
   // +optional
-  optional bool compress = 6 [(gogoproto.customname) = "Compress", (gogoproto.nullable) = false];
+  optional bool compress = 6;
 
   // FlushFrequency refers to the frequency in milliseconds to flush batches.
   // Defaults to 500 milliseconds.
   // +optional
-  optional int64 flushFrequency = 7 [(gogoproto.customname) = "FlushFrequency", (gogoproto.nullable) = false];
+  optional int64 flushFrequency = 7;
 
   // TLS configuration for the Kafka producer.
   // +optional
-  optional TLSConfig tls = 8 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 8;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   // +listType=payloadParameters
-  repeated TriggerParameter payload = 9 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 9;
 
   // The partitioning key for the messages put on the Kafka topic.
   // Defaults to broker url.
   // +optional.
-  optional string partitioningKey = 10 [(gogoproto.customname) = "PartitioningKey", (gogoproto.nullable) = false];
+  optional string partitioningKey = 10;
 }
 
 // NATSSubscription holds the context of the NATS subscription of events for the sensor
 message NATSSubscription {
   // ServerURL refers to NATS server url.
-  optional string serverURL = 1 [(gogoproto.customname) = "ServerURL", (gogoproto.nullable) = false];
+  optional string serverURL = 1;
 
   // Subject refers to NATS subject name.
-  optional string subject = 2 [(gogoproto.customname) = "Subject", (gogoproto.nullable) = false];
+  optional string subject = 2;
 }
 
 // NATSTrigger refers to the specification of the NATS trigger.
 message NATSTrigger {
   // URL of the NATS cluster.
-  optional string url = 1 [(gogoproto.customname) = "URL", (gogoproto.nullable) = false];
+  optional string url = 1;
 
   // Name of the subject to put message on.
-  optional string subject = 2 [(gogoproto.customname) = "Subject", (gogoproto.nullable) = false];
+  optional string subject = 2;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   // +listType=payloadParameters
-  repeated TriggerParameter payload = 3 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 3;
 
   // Parameters is the list of parameters that is applied to resolved NATS trigger object.
   // +listType=triggerParameters
-  repeated TriggerParameter parameters = 4 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 4;
 
   // TLS configuration for the NATS producer.
   // +optional
-  optional TLSConfig tls = 5 [(gogoproto.customname) = "TLS"];
+  optional TLSConfig tls = 5;
 }
 
 // NodeStatus describes the status for an individual node in the sensor's FSM.
@@ -482,74 +472,74 @@ message NATSTrigger {
 message NodeStatus {
   // ID is a unique identifier of a node within a sensor
   // It is a hash of the node name
-  optional string id = 1 [(gogoproto.customname) = "ID", (gogoproto.nullable) = false];
+  optional string id = 1;
 
   // Name is a unique name in the node tree used to generate the node ID
-  optional string name = 2 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 2;
 
   // DisplayName is the human readable representation of the node
-  optional string displayName = 3 [(gogoproto.customname) = "DisplayName", (gogoproto.nullable) = false];
+  optional string displayName = 3;
 
   // Type is the type of the node
-  optional string type = 4 [(gogoproto.casttype) = "NodeType", (gogoproto.customname) = "Type", (gogoproto.nullable) = false];
+  optional string type = 4;
 
   // Phase of the node
-  optional string phase = 5 [(gogoproto.casttype) = "NodePhase", (gogoproto.customname) = "Phase", (gogoproto.nullable) = false];
+  optional string phase = 5;
 
   // StartedAt is the time at which this node started
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6 [(gogoproto.customname) = "StartedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime startedAt = 6;
 
   // CompletedAt is the time at which this node completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7 [(gogoproto.customname) = "CompletedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime completedAt = 7;
 
   // store data or something to save for event notifications or trigger events
-  optional string message = 8 [(gogoproto.customname) = "Message", (gogoproto.nullable) = false];
+  optional string message = 8;
 
   // Event stores the last seen event for this node
-  optional Event event = 9 [(gogoproto.customname) = "Event"];
+  optional Event event = 9;
 
   // UpdatedAt refers to the time at which the node was updated.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updatedAt = 10 [(gogoproto.customname) = "UpdatedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime updatedAt = 10;
 
   // ResolvedAt refers to the time at which the node was resolved.
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime resolvedAt = 11 [(gogoproto.customname) = "ResolvedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.MicroTime resolvedAt = 11;
 }
 
 // OpenWhiskTrigger refers to the specification of the OpenWhisk trigger.
 message OpenWhiskTrigger {
   // Host URL of the OpenWhisk.
-  optional string host = 1 [(gogoproto.customname) = "Host", (gogoproto.nullable) = false];
+  optional string host = 1;
 
   // Version for the API.
   // Defaults to v1.
   // +optional
-  optional string version = 2 [(gogoproto.customname) = "Version", (gogoproto.nullable) = false];
+  optional string version = 2;
 
   // Namespace for the action.
   // Defaults to "_".
   // +optional.
-  optional string namespace = 3 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 3;
 
   // AuthToken for authentication.
   // +optional
-  optional k8s.io.api.core.v1.SecretKeySelector authToken = 4 [(gogoproto.customname) = "AuthToken"];
+  optional k8s.io.api.core.v1.SecretKeySelector authToken = 4;
 
   // Name of the action/function.
-  optional string actionName = 5 [(gogoproto.customname) = "ActionName", (gogoproto.nullable) = false];
+  optional string actionName = 5;
 
   // Payload is the list of key-value extracted from an event payload to construct the request payload.
   // +listType=payloadParameters
-  repeated TriggerParameter payload = 6 [(gogoproto.customname) = "Payload", (gogoproto.nullable) = false];
+  repeated TriggerParameter payload = 6;
 
   // Parameters is the list of key-value extracted from event's payload that are applied to
   // the trigger resource.
   // +listType=triggerParameters
   // +optional
-  repeated TriggerParameter parameters = 7 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 7;
 }
 
 message ResourceArtifact {
-  optional bytes data = 1 [(gogoproto.customname) = "Data"];
+  optional bytes data = 1;
 }
 
 // Sensor is the definition of a sensor resource
@@ -558,98 +548,98 @@ message ResourceArtifact {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 // +k8s:openapi-gen=true
 message Sensor {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1 [(gogoproto.customname) = "ObjectMeta", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta metadata = 1;
 
-  optional SensorSpec spec = 2 [(gogoproto.customname) = "Spec", (gogoproto.nullable) = false];
+  optional SensorSpec spec = 2;
 
-  optional SensorStatus status = 3 [(gogoproto.customname) = "Status", (gogoproto.nullable) = false];
+  optional SensorStatus status = 3;
 }
 
 // SensorList is the list of Sensor resources
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 message SensorList {
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1 [(gogoproto.customname) = "ListMeta", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ListMeta metadata = 1;
 
   // +listType=items
-  repeated Sensor items = 2 [(gogoproto.customname) = "Items", (gogoproto.nullable) = false];
+  repeated Sensor items = 2;
 }
 
 // SensorResources holds the metadata of the resources created for the sensor
 message SensorResources {
   // Deployment holds the metadata of the deployment for the sensor
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta deployment = 1 [(gogoproto.customname) = "Deployment"];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta deployment = 1;
 
   // Service holds the metadata of the service for the sensor
   // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta service = 2 [(gogoproto.customname) = "Service"];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.ObjectMeta service = 2;
 }
 
 // SensorSpec represents desired sensor state
 message SensorSpec {
   // +listType=dependencies
   // Dependencies is a list of the events that this sensor is dependent on.
-  repeated EventDependency dependencies = 1 [(gogoproto.customname) = "Dependencies", (gogoproto.nullable) = false];
+  repeated EventDependency dependencies = 1;
 
   // +listType=triggers
   // Triggers is a list of the things that this sensor evokes. These are the outputs from this sensor.
-  repeated Trigger triggers = 2 [(gogoproto.customname) = "Triggers", (gogoproto.nullable) = false];
+  repeated Trigger triggers = 2;
 
   // Template is the pod specification for the sensor
   // +optional
-  optional Template template = 3 [(gogoproto.customname) = "Template", (gogoproto.nullable) = false];
+  optional Template template = 3;
 
   // Subscription refers to the modes of events subscriptions for the sensor.
   // At least one of the types of subscription must be defined in order for sensor to be meaningful.
-  optional Subscription subscription = 4 [(gogoproto.customname) = "Subscription"];
+  optional Subscription subscription = 4;
 
   // Circuit is a boolean expression of dependency groups
-  optional string circuit = 5 [(gogoproto.customname) = "Circuit", (gogoproto.nullable) = false];
+  optional string circuit = 5;
 
   // +listType=dependencyGroups
   // DependencyGroups is a list of the groups of events.
-  repeated DependencyGroup dependencyGroups = 6 [(gogoproto.customname) = "DependencyGroups", (gogoproto.nullable) = false];
+  repeated DependencyGroup dependencyGroups = 6;
 
   // ErrorOnFailedRound if set to true, marks sensor state as `error` if the previous trigger round fails.
   // Once sensor state is set to `error`, no further triggers will be processed.
-  optional bool errorOnFailedRound = 7 [(gogoproto.customname) = "ErrorOnFailedRound", (gogoproto.nullable) = false];
+  optional bool errorOnFailedRound = 7;
 
   // ServiceLabels to be set for the service generated
-  map<string, string> serviceLabels = 11 [(gogoproto.customname) = "ServiceLabels", (gogoproto.nullable) = false];
+  map<string, string> serviceLabels = 11;
 
   // ServiceAnnotations refers to annotations to be set
   // for the service generated
-  map<string, string> serviceAnnotations = 9 [(gogoproto.customname) = "ServiceAnnotations", (gogoproto.nullable) = false];
+  map<string, string> serviceAnnotations = 9;
 }
 
 // SensorStatus contains information about the status of a sensor.
 message SensorStatus {
   // Phase is the high-level summary of the sensor.
-  optional string phase = 1 [(gogoproto.casttype) = "NodePhase", (gogoproto.customname) = "Phase", (gogoproto.nullable) = false];
+  optional string phase = 1;
 
   // StartedAt is the time at which this sensor was initiated
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2 [(gogoproto.customname) = "StartedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time startedAt = 2;
 
   // CompletedAt is the time at which this sensor was completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3 [(gogoproto.customname) = "CompletedAt", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time completedAt = 3;
 
   // Message is a human readable string indicating details about a sensor in its phase
-  optional string message = 4 [(gogoproto.customname) = "Message", (gogoproto.nullable) = false];
+  optional string message = 4;
 
   // Nodes is a mapping between a node ID and the node's status
   // it records the states for the FSM of this sensor.
-  map<string, NodeStatus> nodes = 5 [(gogoproto.customname) = "Nodes", (gogoproto.nullable) = false];
+  map<string, NodeStatus> nodes = 5;
 
   // TriggerCycleCount is the count of sensor's trigger cycle runs.
-  optional int32 triggerCycleCount = 6 [(gogoproto.customname) = "TriggerCycleCount", (gogoproto.nullable) = false];
+  optional int32 triggerCycleCount = 6;
 
   // TriggerCycleState is the status from last cycle of triggers execution.
-  optional string triggerCycleStatus = 7 [(gogoproto.casttype) = "TriggerCycleState", (gogoproto.customname) = "TriggerCycleStatus", (gogoproto.nullable) = false];
+  optional string triggerCycleStatus = 7;
 
   // LastCycleTime is the time when last trigger cycle completed
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastCycleTime = 8 [(gogoproto.customname) = "LastCycleTime", (gogoproto.nullable) = false];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastCycleTime = 8;
 
   // Resources refers to metadata of the resources created for the sensor
-  optional SensorResources resources = 9 [(gogoproto.customname) = "Resources"];
+  optional SensorResources resources = 9;
 }
 
 // SlackTrigger refers to the specification of the slack notification trigger.
@@ -658,41 +648,41 @@ message SlackTrigger {
   // the trigger resource.
   // +listType=triggerParameters
   // +optional
-  repeated TriggerParameter parameters = 1 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 1;
 
   // SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
-  optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2 [(gogoproto.customname) = "SlackToken"];
+  optional k8s.io.api.core.v1.SecretKeySelector slackToken = 2;
 
   // Namespace to read the password secret from.
   // This is required if the password secret selector is specified.
   // +optional
-  optional string namespace = 3 [(gogoproto.customname) = "Namespace", (gogoproto.nullable) = false];
+  optional string namespace = 3;
 
   // Channel refers to which Slack channel to send slack message.
   // +optional
-  optional string channel = 4 [(gogoproto.customname) = "Channel", (gogoproto.nullable) = false];
+  optional string channel = 4;
 
   // Message refers to the message to send to the Slack channel.
   // +optional
-  optional string message = 5 [(gogoproto.customname) = "Message", (gogoproto.nullable) = false];
+  optional string message = 5;
 }
 
 // StandardK8sTrigger is the standard Kubernetes resource trigger
 message StandardK8sTrigger {
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 1 [(gogoproto.customname) = "GroupVersionResource"];
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 1;
 
   // Source of the K8 resource file(s)
-  optional ArtifactLocation source = 2 [(gogoproto.customname) = "Source"];
+  optional ArtifactLocation source = 2;
 
   // Operation refers to the type of operation performed on the k8s resource.
   // Default value is Create.
   // +optional
-  optional string operation = 3 [(gogoproto.casttype) = "KubernetesResourceOperation", (gogoproto.customname) = "Operation", (gogoproto.nullable) = false];
+  optional string operation = 3;
 
   // Parameters is the list of parameters that is applied to resolved K8s trigger object.
   // +listType=triggerParameters
-  repeated TriggerParameter parameters = 4 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 4;
 
   // PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch.
   // possible values:
@@ -702,7 +692,7 @@ message StandardK8sTrigger {
   // "application/apply-patch+yaml".
   // Defaults to "application/merge-patch+json"
   // +optional
-  optional string patchStrategy = 5 [(gogoproto.casttype) = "k8s.io/apimachinery/pkg/types.PatchType", (gogoproto.customname) = "PatchStrategy", (gogoproto.nullable) = false];
+  optional string patchStrategy = 5;
 
   // LiveObject specifies whether the resource should be directly fetched from K8s instead
   // of being marshaled from the resource artifact. If set to true, the resource artifact
@@ -711,7 +701,7 @@ message StandardK8sTrigger {
   // data.
   // Only valid for operation type `update`
   // +optional
-  optional bool liveObject = 6 [(gogoproto.customname) = "LiveObject", (gogoproto.nullable) = false];
+  optional bool liveObject = 6;
 }
 
 // StatusPolicy refers to the policy used to check the state of the trigger using response status
@@ -719,30 +709,30 @@ message StatusPolicy {
   // Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
   // the trigger will marked as successful else it will result in trigger failure.
   // +listType=allowedStatuses
-  repeated int64 allow = 1 [(gogoproto.customname) = "Allow"];
+  repeated int64 allow = 1;
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.
 message Subscription {
   // HTTP refers to the HTTP subscription of events for the sensor.
   // +optional
-  optional HTTPSubscription http = 1 [(gogoproto.customname) = "HTTP"];
+  optional HTTPSubscription http = 1;
 
   // NATS refers to the NATS subscription of events for the sensor
   // +optional
-  optional NATSSubscription nats = 2 [(gogoproto.customname) = "NATS"];
+  optional NATSSubscription nats = 2;
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client
 message TLSConfig {
   // CACertPath refers the file path that contains the CA cert.
-  optional string caCertPath = 1 [(gogoproto.customname) = "CACertPath", (gogoproto.nullable) = false];
+  optional string caCertPath = 1;
 
   // ClientCertPath refers the file path that contains client cert.
-  optional string clientCertPath = 2 [(gogoproto.customname) = "ClientCertPath", (gogoproto.nullable) = false];
+  optional string clientCertPath = 2;
 
   // ClientKeyPath refers the file path that contains client key.
-  optional string clientKeyPath = 3 [(gogoproto.customname) = "ClientKeyPath", (gogoproto.nullable) = false];
+  optional string clientKeyPath = 3;
 }
 
 // Template holds the information of a sensor deployment template
@@ -750,26 +740,26 @@ message Template {
   // ServiceAccountName is the name of the ServiceAccount to use to run gateway pod.
   // More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   // +optional
-  optional string serviceAccountName = 1 [(gogoproto.customname) = "ServiceAccountName", (gogoproto.nullable) = false];
+  optional string serviceAccountName = 1;
 
   // Container is the main container image to run in the gateway pod
   // +optional
-  optional k8s.io.api.core.v1.Container container = 2 [(gogoproto.customname) = "Container"];
+  optional k8s.io.api.core.v1.Container container = 2;
 
   // Volumes is a list of volumes that can be mounted by containers in a workflow.
   // +patchStrategy=merge
   // +patchMergeKey=name
   // +optional
-  repeated k8s.io.api.core.v1.Volume volumes = 3 [(gogoproto.customname) = "Volumes", (gogoproto.nullable) = false];
+  repeated k8s.io.api.core.v1.Volume volumes = 3;
 
   // SecurityContext holds pod-level security attributes and common container settings.
   // Optional: Defaults to empty.  See type description for default values of each field.
   // +optional
-  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 4 [(gogoproto.customname) = "SecurityContext"];
+  optional k8s.io.api.core.v1.PodSecurityContext securityContext = 4;
 
   // Spec holds the sensor deployment spec.
   // DEPRECATED: Use Container instead.
-  optional k8s.io.api.core.v1.PodSpec spec = 5 [(gogoproto.customname) = "Spec"];
+  optional k8s.io.api.core.v1.PodSpec spec = 5;
 }
 
 // TimeFilter describes a window in time.
@@ -780,86 +770,86 @@ message TimeFilter {
   // Start is the beginning of a time window.
   // Before this time, events for this event are ignored and
   // format is hh:mm:ss
-  optional string start = 1 [(gogoproto.customname) = "Start", (gogoproto.nullable) = false];
+  optional string start = 1;
 
   // StopPattern is the end of a time window.
   // After this time, events for this event are ignored and
   // format is hh:mm:ss
-  optional string stop = 2 [(gogoproto.customname) = "Stop", (gogoproto.nullable) = false];
+  optional string stop = 2;
 }
 
 // Trigger is an action taken, output produced, an event created, a message sent
 message Trigger {
   // Template describes the trigger specification.
-  optional TriggerTemplate template = 1 [(gogoproto.customname) = "Template"];
+  optional TriggerTemplate template = 1;
 
   // +listType=templateParameters
   // Parameters is the list of parameters applied to the trigger template definition
-  repeated TriggerParameter parameters = 2 [(gogoproto.customname) = "Parameters", (gogoproto.nullable) = false];
+  repeated TriggerParameter parameters = 2;
 
   // Policy to configure backoff and execution criteria for the trigger
-  optional TriggerPolicy policy = 3 [(gogoproto.customname) = "Policy"];
+  optional TriggerPolicy policy = 3;
 }
 
 // TriggerParameter indicates a passed parameter to a service template
 message TriggerParameter {
   // Src contains a source reference to the value of the parameter from a dependency
-  optional TriggerParameterSource src = 1 [(gogoproto.customname) = "Src"];
+  optional TriggerParameterSource src = 1;
 
   // Dest is the JSONPath of a resource key.
   // A path is a series of keys separated by a dot. The colon character can be escaped with '.'
   // The -1 key can be used to append a value to an existing array.
   // See https://github.com/tidwall/sjson#path-syntax for more information about how this is used.
-  optional string dest = 2 [(gogoproto.customname) = "Dest", (gogoproto.nullable) = false];
+  optional string dest = 2;
 
   // Operation is what to do with the existing value at Dest, whether to
   // 'prepend', 'overwrite', or 'append' it.
-  optional string operation = 3 [(gogoproto.casttype) = "TriggerParameterOperation", (gogoproto.customname) = "Operation", (gogoproto.nullable) = false];
+  optional string operation = 3;
 }
 
 // TriggerParameterSource defines the source for a parameter from a event event
 message TriggerParameterSource {
   // DependencyName refers to the name of the dependency. The event which is stored for this dependency is used as payload
   // for the parameterization. Make sure to refer to one of the dependencies you have defined under Dependencies list.
-  optional string dependencyName = 1 [(gogoproto.customname) = "DependencyName", (gogoproto.nullable) = false];
+  optional string dependencyName = 1;
 
   // ContextKey is the JSONPath of the event's (JSON decoded) context key
   // ContextKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
   // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-  optional string contextKey = 2 [(gogoproto.customname) = "ContextKey", (gogoproto.nullable) = false];
+  optional string contextKey = 2;
 
   // ContextTemplate is a go-template for extracting a string from the event's context.
   // If a ContextTemplate is provided with a ContextKey, the template will be evaluated first and fallback to the ContextKey.
   // The templating follows the standard go-template syntax as well as sprig's extra functions.
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-  optional string contextTemplate = 3 [(gogoproto.customname) = "ContextTemplate", (gogoproto.nullable) = false];
+  optional string contextTemplate = 3;
 
   // DataKey is the JSONPath of the event's (JSON decoded) data key
   // DataKey is a series of keys separated by a dot. A key may contain wildcard characters '*' and '?'.
   // To access an array value use the index as the key. The dot and wildcard characters can be escaped with '\\'.
   // See https://github.com/tidwall/gjson#path-syntax for more information on how to use this.
-  optional string dataKey = 6 [(gogoproto.customname) = "DataKey", (gogoproto.nullable) = false];
+  optional string dataKey = 6;
 
   // DataTemplate is a go-template for extracting a string from the event's data.
   // If a DataTemplate is provided with a DataKey, the template will be evaluated first and fallback to the DataKey.
   // The templating follows the standard go-template syntax as well as sprig's extra functions.
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
-  optional string dataTemplate = 4 [(gogoproto.customname) = "DataTemplate", (gogoproto.nullable) = false];
+  optional string dataTemplate = 4;
 
   // Data is the default literal value to use for this parameter source
   // This is only used if the DataKey is invalid.
   // If the DataKey is invalid and this is not defined, this param source will produce an error.
-  optional string value = 5 [(gogoproto.customname) = "Value"];
+  optional string value = 5;
 }
 
 // TriggerPolicy dictates the policy for the trigger retries
 message TriggerPolicy {
   // K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
-  optional K8sResourcePolicy k8s = 1 [(gogoproto.customname) = "K8s"];
+  optional K8sResourcePolicy k8s = 1;
 
   // Status refers to the policy used to check the state of the trigger using response status
-  optional StatusPolicy status = 2 [(gogoproto.customname) = "Status"];
+  optional StatusPolicy status = 2;
 }
 
 // TriggerSwitch describes condition which must be satisfied in order to execute a trigger.
@@ -867,96 +857,96 @@ message TriggerPolicy {
 message TriggerSwitch {
   // +listType=any
   // Any acts as a OR operator between dependencies
-  repeated string any = 1 [(gogoproto.customname) = "Any"];
+  repeated string any = 1;
 
   // +listType=all
   // All acts as a AND operator between dependencies
-  repeated string all = 2 [(gogoproto.customname) = "All"];
+  repeated string all = 2;
 }
 
 // TriggerTemplate is the template that describes trigger specification.
 message TriggerTemplate {
   // Name is a unique name of the action to take.
-  optional string name = 1 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 1;
 
   // Switch is the condition to execute the trigger.
   // +optional
-  optional TriggerSwitch switch = 2 [(gogoproto.customname) = "Switch"];
+  optional TriggerSwitch switch = 2;
 
   // StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.
   // +optional
-  optional StandardK8sTrigger k8s = 3 [(gogoproto.customname) = "K8s"];
+  optional StandardK8sTrigger k8s = 3;
 
   // ArgoWorkflow refers to the trigger that can perform various operations on an Argo workflow.
   // +optional
-  optional ArgoWorkflowTrigger argoWorkflow = 4 [(gogoproto.customname) = "ArgoWorkflow"];
+  optional ArgoWorkflowTrigger argoWorkflow = 4;
 
   // HTTP refers to the trigger designed to dispatch a HTTP request with on-the-fly constructable payload.
   // +optional
-  optional HTTPTrigger http = 5 [(gogoproto.customname) = "HTTP"];
+  optional HTTPTrigger http = 5;
 
   // AWSLambda refers to the trigger designed to invoke AWS Lambda function with with on-the-fly constructable payload.
   // +optional
-  optional AWSLambdaTrigger awsLambda = 6 [(gogoproto.customname) = "AWSLambda"];
+  optional AWSLambdaTrigger awsLambda = 6;
 
   // CustomTrigger refers to the trigger designed to connect to a gRPC trigger server and execute a custom trigger.
   // +optional
-  optional CustomTrigger custom = 7 [(gogoproto.customname) = "CustomTrigger"];
+  optional CustomTrigger custom = 7;
 
   // Kafka refers to the trigger designed to place messages on Kafka topic.
   // +optional.
-  optional KafkaTrigger kafka = 8 [(gogoproto.customname) = "Kafka"];
+  optional KafkaTrigger kafka = 8;
 
   // NATS refers to the trigger designed to place message on NATS subject.
   // +optional.
-  optional NATSTrigger nats = 9 [(gogoproto.customname) = "NATS"];
+  optional NATSTrigger nats = 9;
 
   // Slack refers to the trigger designed to send slack notification message.
   // +optional
-  optional SlackTrigger slack = 10 [(gogoproto.customname) = "Slack"];
+  optional SlackTrigger slack = 10;
 
   // OpenWhisk refers to the trigger designed to invoke OpenWhisk action.
   // +optional
-  optional OpenWhiskTrigger openWhisk = 11 [(gogoproto.customname) = "OpenWhisk"];
+  optional OpenWhiskTrigger openWhisk = 11;
 }
 
 // URLArtifact contains information about an artifact at an http endpoint.
 message URLArtifact {
   // Path is the complete URL
-  optional string path = 1 [(gogoproto.customname) = "Path", (gogoproto.nullable) = false];
+  optional string path = 1;
 
   // VerifyCert decides whether the connection is secure or not
-  optional bool verifyCert = 2 [(gogoproto.customname) = "VerifyCert", (gogoproto.nullable) = false];
+  optional bool verifyCert = 2;
 }
 
 message S3Artifact {
-  optional string endpoint = 1 [(gogoproto.customname) = "Endpoint", (gogoproto.nullable) = false];
+  optional string endpoint = 1;
 
-  optional S3Bucket bucket = 2 [(gogoproto.customname) = "Bucket"];
+  optional S3Bucket bucket = 2;
 
-  optional string region = 3 [(gogoproto.customname) = "Region", (gogoproto.nullable) = false];
+  optional string region = 3;
 
-  optional bool insecure = 4 [(gogoproto.customname) = "Insecure", (gogoproto.nullable) = false];
+  optional bool insecure = 4;
 
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5 [(gogoproto.customname) = "AccessKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
 
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6 [(gogoproto.customname) = "SecretKey"];
+  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
 
   // +listType=string
-  repeated string events = 7 [(gogoproto.customname) = "Events"];
+  repeated string events = 7;
 
-  optional S3Filter filter = 8 [(gogoproto.customname) = "Filter"];
+  optional S3Filter filter = 8;
 }
 
 message S3Bucket {
-  optional string key = 1 [(gogoproto.customname) = "Key", (gogoproto.nullable) = false];
+  optional string key = 1;
 
-  optional string name = 2 [(gogoproto.customname) = "Name", (gogoproto.nullable) = false];
+  optional string name = 2;
 }
 
 message S3Filter {
-  optional string prefix = 1 [(gogoproto.customname) = "Prefix", (gogoproto.nullable) = false];
+  optional string prefix = 1;
 
-  optional string suffix = 2 [(gogoproto.customname) = "Suffix", (gogoproto.nullable) = false];
+  optional string suffix = 2;
 }
 

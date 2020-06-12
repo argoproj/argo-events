@@ -390,7 +390,7 @@ type ArgoWorkflowTrigger struct {
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,name=groupVersionResource"`
+	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 }
 
 // HTTPTrigger is the trigger for the HTTP request
@@ -753,7 +753,7 @@ type NodeStatus struct {
 }
 
 type ResourceArtifact struct {
-	Data []byte
+	Data []byte `protobuf:"bytes,1,opt,name=data"`
 }
 
 func NewResourceArtifact(un *unstructured.Unstructured) (*ResourceArtifact, error) {

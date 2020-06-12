@@ -146,7 +146,7 @@ type ResourceEventSource struct {
 	// +optional
 	Filter *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	// Group of the resource
-	metav1.GroupVersionResource `json:",inline"`
+	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 	// EventTypes is the list of event type to watch.
 	// Possible values are - ADD, UPDATE and DELETE.
 	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,3,name=eventTypes"`
@@ -285,7 +285,7 @@ type SQSEventSource struct {
 	// AccessKey refers K8 secret containing aws access key
 	AccessKey *corev1.SecretKeySelector `json:"accessKey,omitempty" protobuf:"bytes,1,opt,name=accessKey"`
 	// SecretKey refers K8 secret containing aws secret key
-	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,2,opt,name=accessKey"`
+	SecretKey *corev1.SecretKeySelector `json:"secretKey,omitempty" protobuf:"bytes,2,opt,name=secretKey"`
 	// Region is AWS region
 	Region string `json:"region" protobuf:"bytes,3,name=region"`
 	// Queue is AWS SQS queue to listen to for messages
@@ -346,7 +346,7 @@ type GithubEventSource struct {
 	// +listType=string
 	Events []string `json:"events" protobuf:"bytes,5,rep,name=events"`
 	// APIToken refers to a K8s secret containing github api token
-	APIToken *corev1.SecretKeySelector `json:"apiToken"`
+	APIToken *corev1.SecretKeySelector `json:"apiToken" protobuf:"bytes,15,opt,name=apiToken"`
 	// WebhookSecret refers to K8s secret containing GitHub webhook secret
 	// https://developer.github.com/webhooks/securing/
 	// +optional
@@ -403,35 +403,35 @@ type GitlabEventSource struct {
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {
-	fsevent.WatchPathConfig `json:",inline"`
+	fsevent.WatchPathConfig `json:",inline" protobuf:"bytes,2,opt,name=watchPathConfig"`
 	// Type of file operations to watch
-	Type string `json:"type"`
+	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
-	CheckInterval string `json:"checkInterval,omitempty"`
+	CheckInterval string `json:"checkInterval,omitempty" protobuf:"bytes,4,opt,name=checkInterval"`
 	// Addresses is accessible addresses of HDFS name nodes
 	// +listType=string
-	Addresses []string `json:"addresses"`
+	Addresses []string `json:"addresses" protobuf:"bytes,5,rep,name=addresses"`
 	// HDFSUser is the user to access HDFS file system.
 	// It is ignored if either ccache or keytab is used.
-	HDFSUser string `json:"hdfsUser,omitempty"`
+	HDFSUser string `json:"hdfsUser,omitempty" protobuf:"bytes,6,opt,name=hdfsUser"`
 	// KrbCCacheSecret is the secret selector for Kerberos ccache
 	// Either ccache or keytab can be set to use Kerberos.
-	KrbCCacheSecret *corev1.SecretKeySelector `json:"krbCCacheSecret,omitempty"`
+	KrbCCacheSecret *corev1.SecretKeySelector `json:"krbCCacheSecret,omitempty" protobuf:"bytes,7,opt,name=krbCCacheSecret"`
 	// KrbKeytabSecret is the secret selector for Kerberos keytab
 	// Either ccache or keytab can be set to use Kerberos.
-	KrbKeytabSecret *corev1.SecretKeySelector `json:"krbKeytabSecret,omitempty"`
+	KrbKeytabSecret *corev1.SecretKeySelector `json:"krbKeytabSecret,omitempty" protobuf:"bytes,8,opt,name=krbKeytabSecret"`
 	// KrbUsername is the Kerberos username used with Kerberos keytab
 	// It must be set if keytab is used.
-	KrbUsername string `json:"krbUsername,omitempty"`
+	KrbUsername string `json:"krbUsername,omitempty" protobuf:"bytes,9,opt,name=krbUsername"`
 	// KrbRealm is the Kerberos realm used with Kerberos keytab
 	// It must be set if keytab is used.
-	KrbRealm string `json:"krbRealm,omitempty"`
+	KrbRealm string `json:"krbRealm,omitempty" protobuf:"bytes,10,opt,name=krbRealm"`
 	// KrbConfig is the configmap selector for Kerberos config as string
 	// It must be set if either ccache or keytab is used.
-	KrbConfigConfigMap *corev1.ConfigMapKeySelector `json:"krbConfigConfigMap,omitempty"`
+	KrbConfigConfigMap *corev1.ConfigMapKeySelector `json:"krbConfigConfigMap,omitempty" protobuf:"bytes,11,opt,name=krbConfigConfigMap"`
 	// KrbServicePrincipalName is the principal name of Kerberos service
 	// It must be set if either ccache or keytab is used.
-	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty"`
+	KrbServicePrincipalName string `json:"krbServicePrincipalName,omitempty" protobuf:"bytes,12,opt,name=krbServicePrincipalName"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve cache secret and ket tab secret from.
 	// +optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,1,opt,name=namespace"`
@@ -466,8 +466,8 @@ type StorageGridEventSource struct {
 // Filter represents filters to apply to bucket notifications for specifying constraints on objects
 // +k8s:openapi-gen=true
 type StorageGridFilter struct {
-	Prefix string `json:"prefix"`
-	Suffix string `json:"suffix"`
+	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
+	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
 }
 
 // AzureEventsHubEventSource describes the event source for azure events hub

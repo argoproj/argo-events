@@ -140,7 +140,6 @@ protos: \
 
 %/generated.proto: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name types.go)
 	$(GOPATH)/bin/go-to-protobuf \
-        --only-idl  \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/$* \
         --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1

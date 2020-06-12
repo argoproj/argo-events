@@ -195,7 +195,7 @@ func validateArgoWorkflowTrigger(trigger *v1alpha1.ArgoWorkflowTrigger) error {
 	if trigger.Source == nil {
 		return errors.New("k8s trigger for does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource == nil {
+	if trigger.GroupVersionResource.Size() == 0 {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
