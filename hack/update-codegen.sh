@@ -41,6 +41,10 @@ bash -x ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   "eventbus:v1alpha1" \
   --go-header-file hack/custom-boilerplate.go.txt
 
+subheader "running codegen for common"
+go run $FAKE_REPOPATH/vendor/k8s.io/gengo/examples/deepcopy-gen/main.go -i github.com/argoproj/argo-events/pkg/apis/common -p github.com/argoproj/argo-events/pkg/apis/common \
+   --go-header-file hack/custom-boilerplate.go.txt
+
 # gofmt the tree
 subheader "running gofmt"
 find . -name "*.go" -type f -print0 | xargs -0 gofmt -s -w

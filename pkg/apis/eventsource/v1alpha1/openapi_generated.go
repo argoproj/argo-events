@@ -50,9 +50,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource":          schema_pkg_apis_eventsource_v1alpha1_RedisEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource":       schema_pkg_apis_eventsource_v1alpha1_ResourceEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceFilter":            schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Bucket":                  schema_pkg_apis_eventsource_v1alpha1_S3Bucket(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3EventSource":             schema_pkg_apis_eventsource_v1alpha1_S3EventSource(ref),
-		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Filter":                  schema_pkg_apis_eventsource_v1alpha1_S3Filter(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource":            schema_pkg_apis_eventsource_v1alpha1_SNSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource":            schema_pkg_apis_eventsource_v1alpha1_SQSEventSource(ref),
 		"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector":                  schema_pkg_apis_eventsource_v1alpha1_Selector(ref),
@@ -424,7 +421,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 								Allows: true,
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3EventSource"),
+										Ref: ref("github.com/argoproj/argo-events/pkg/apis/common.S3Artifact"),
 									},
 								},
 							},
@@ -750,7 +747,7 @@ func schema_pkg_apis_eventsource_v1alpha1_EventSourceSpec(ref common.ReferenceCa
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3EventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource"},
+			"github.com/argoproj/argo-events/gateways/server/common/webhook.Context", "github.com/argoproj/argo-events/pkg/apis/common.S3Artifact", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AMQPEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.AzureEventsHubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.CalendarEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.EmitterEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.FileEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GenericEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GithubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.GitlabEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.HDFSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.KafkaEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.MQTTEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NATSEventsSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.NSQEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.PubSubEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.RedisEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.ResourceEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SNSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SQSEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.SlackEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StorageGridEventSource", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.StripeEventSource"},
 	}
 }
 
@@ -1614,130 +1611,6 @@ func schema_pkg_apis_eventsource_v1alpha1_ResourceFilter(ref common.ReferenceCal
 		},
 		Dependencies: []string{
 			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Selector", "k8s.io/apimachinery/pkg/apis/meta/v1.Time"},
-	}
-}
-
-func schema_pkg_apis_eventsource_v1alpha1_S3Bucket(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "S3Bucket contains information to describe an S3 Bucket",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"key": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"name"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_eventsource_v1alpha1_S3EventSource(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "S3EventSource contains information about an S3 connection and bucket",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"endpoint": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"bucket": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Bucket"),
-						},
-					},
-					"region": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"insecure": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"boolean"},
-							Format: "",
-						},
-					},
-					"accessKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"secretKey": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/api/core/v1.SecretKeySelector"),
-						},
-					},
-					"events": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "string",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"filter": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Filter"),
-						},
-					},
-				},
-				Required: []string{"endpoint", "bucket", "accessKey", "secretKey"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Bucket", "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.S3Filter", "k8s.io/api/core/v1.SecretKeySelector"},
-	}
-}
-
-func schema_pkg_apis_eventsource_v1alpha1_S3Filter(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"prefix": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"suffix": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"prefix", "suffix"},
-			},
-		},
 	}
 }
 

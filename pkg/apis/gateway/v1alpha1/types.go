@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -53,36 +54,6 @@ type GatewayList struct {
 	Items []Gateway `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
-// EventSourceType is the type of event source supported by the gateway
-type EventSourceType string
-
-// possible event source types
-var (
-	MinioEvent       EventSourceType = "minio"
-	CalendarEvent    EventSourceType = "calendar"
-	FileEvent        EventSourceType = "file"
-	ResourceEvent    EventSourceType = "resource"
-	WebhookEvent     EventSourceType = "webhook"
-	AMQPEvent        EventSourceType = "amqp"
-	KafkaEvent       EventSourceType = "kafka"
-	MQTTEvent        EventSourceType = "mqtt"
-	NATSEvent        EventSourceType = "nats"
-	SNSEvent         EventSourceType = "sns"
-	SQSEvent         EventSourceType = "sqs"
-	PubSubEvent      EventSourceType = "pubsub"
-	GitHubEvent      EventSourceType = "github"
-	GitLabEvent      EventSourceType = "gitlab"
-	HDFSEvent        EventSourceType = "hdfs"
-	SlackEvent       EventSourceType = "slack"
-	StorageGridEvent EventSourceType = "storagegrid"
-	AzureEventsHub   EventSourceType = "azureEventsHub"
-	StripeEvent      EventSourceType = "stripe"
-	EmitterEvent     EventSourceType = "emitter"
-	RedisEvent       EventSourceType = "redis"
-	NSQEvent         EventSourceType = "nsq"
-	GenericEvent     EventSourceType = "generic"
-)
-
 // GatewaySpec represents gateway specifications
 type GatewaySpec struct {
 	// Template is the pod specification for the gateway
@@ -91,7 +62,7 @@ type GatewaySpec struct {
 	// EventSourceRef refers to event-source that stores event source configurations for the gateway
 	EventSourceRef *EventSourceRef `json:"eventSourceRef,omitempty" protobuf:"bytes,2,opt,name=eventSourceRef"`
 	// Type is the type of gateway. Used as metadata.
-	Type EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// Service is the specifications of the service to expose the gateway
 	// +optional
 	Service *Service `json:"service,omitempty" protobuf:"bytes,4,opt,name=service"`
@@ -102,7 +73,7 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
-	Replica int32 `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
+	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
 }
 
 // Template holds the information of a Gateway deployment template

@@ -22,18 +22,17 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 )
 
 // ValidateEventSource validates storage grid event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	if gatewayv1alpha1.EventSourceType(eventSource.Type) != gatewayv1alpha1.StorageGridEvent {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.StorageGridEvent {
 		return &gateways.ValidEventSource{
 			IsValid: false,
-			Reason:  common.ErrEventSourceTypeMismatch(string(gatewayv1alpha1.StorageGridEvent)),
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.StorageGridEvent)),
 		}, nil
 	}
 

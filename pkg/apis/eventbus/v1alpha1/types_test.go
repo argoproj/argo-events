@@ -6,6 +6,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	corev1 "k8s.io/api/core/v1"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 func TestEventBusStatusIsReady(t *testing.T) {
@@ -55,7 +57,7 @@ func TestEventBusStatusIsReady(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.s.IsReady()
+			got := test.s.Status.IsReady()
 			if diff := cmp.Diff(test.expect, got); diff != "" {
 				t.Errorf("%s: unexpected condition (-expect, +got) = %v", test.name, diff)
 			}
@@ -67,8 +69,8 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 	tests := []struct {
 		name       string
 		s          *EventBusStatus
-		qCondition ConditionType
-		expect     *Condition
+		qCondition common.ConditionType
+		expect     *common.Condition
 	}{
 		{
 			name:       "uninitialized",
@@ -84,7 +86,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 				return s
 			}(),
 			qCondition: EventBusConditionDeployed,
-			expect: &Condition{
+			expect: &common.Condition{
 				Status: corev1.ConditionUnknown,
 				Type:   EventBusConditionDeployed,
 			},
@@ -98,7 +100,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 				return s
 			}(),
 			qCondition: EventBusConditionDeployed,
-			expect: &Condition{
+			expect: &common.Condition{
 				Status:  corev1.ConditionTrue,
 				Type:    EventBusConditionDeployed,
 				Reason:  "test",
@@ -114,7 +116,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 				return s
 			}(),
 			qCondition: EventBusConditionDeployed,
-			expect: &Condition{
+			expect: &common.Condition{
 				Status:  corev1.ConditionFalse,
 				Type:    EventBusConditionDeployed,
 				Reason:  "test",
@@ -130,7 +132,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 				return s
 			}(),
 			qCondition: EventBusConditionConfigured,
-			expect: &Condition{
+			expect: &common.Condition{
 				Status:  corev1.ConditionTrue,
 				Type:    EventBusConditionConfigured,
 				Reason:  "",
@@ -146,7 +148,7 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 				return s
 			}(),
 			qCondition: EventBusConditionConfigured,
-			expect: &Condition{
+			expect: &common.Condition{
 				Status:  corev1.ConditionFalse,
 				Type:    EventBusConditionConfigured,
 				Reason:  "test",
@@ -156,8 +158,8 @@ func TestEventBusStatusGetCondition(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.s.GetCondition(test.qCondition)
-			ignoreFields := cmpopts.IgnoreFields(Condition{},
+			got := test.s.Status.GetCondition(test.qCondition)
+			ignoreFields := cmpopts.IgnoreFields(common.Condition{},
 				"LastTransitionTime")
 			if diff := cmp.Diff(test.expect, got, ignoreFields); diff != "" {
 				t.Errorf("unexpected condition (-expect, +got) = %v", diff)

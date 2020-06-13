@@ -20,8 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/minio/minio-go"
 	log "github.com/sirupsen/logrus"
 )
@@ -29,12 +28,12 @@ import (
 // S3Reader implements the ArtifactReader interface and allows reading artifacts from S3 compatible API store
 type S3Reader struct {
 	client *minio.Client
-	s3     *v1alpha1.S3Artifact
+	s3     *apicommon.S3Artifact
 	creds  *Credentials
 }
 
 // NewS3Reader creates a new ArtifactReader for an S3 compatible store
-func NewS3Reader(s3 *v1alpha1.S3Artifact, creds *Credentials) (ArtifactReader, error) {
+func NewS3Reader(s3 *apicommon.S3Artifact, creds *Credentials) (ArtifactReader, error) {
 	client, err := NewMinioClient(s3, *creds)
 	if err != nil {
 		return nil, err
@@ -66,7 +65,7 @@ func (reader *S3Reader) Read() ([]byte, error) {
 }
 
 // NewMinioClient instantiates a new minio client object to access s3 compatible APIs
-func NewMinioClient(s3 *v1alpha1.S3Artifact, creds Credentials) (*minio.Client, error) {
+func NewMinioClient(s3 *apicommon.S3Artifact, creds Credentials) (*minio.Client, error) {
 	var minioClient *minio.Client
 	var err error
 	if s3.Region != "" {

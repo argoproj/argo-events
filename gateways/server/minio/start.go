@@ -19,18 +19,17 @@ package minio
 import (
 	"encoding/json"
 
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	"github.com/argoproj/argo-events/gateways/server"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	"github.com/argoproj/argo-events/pkg/apis/events"
+	"github.com/argoproj/argo-events/store"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
-
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
-	"github.com/argoproj/argo-events/gateways/server"
-	"github.com/argoproj/argo-events/pkg/apis/events"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-	"github.com/argoproj/argo-events/store"
 )
 
 // MinioEventSourceListener implements Eventing for minio event sources
@@ -68,7 +67,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	logger := listener.Logger.WithField(common.LabelEventSource, eventSource.Name)
 
 	logger.Infoln("parsing minio event source...")
-	var minioEventSource *v1alpha1.S3Artifact
+	var minioEventSource *apicommon.S3Artifact
 	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
 		return errors.Wrapf(err, "failed to parse event source %s", eventSource.Name)
@@ -119,7 +118,7 @@ func (listener *EventListener) listenEvents(eventSource *gateways.EventSource, c
 	return nil
 }
 
-func getFilters(eventSource *v1alpha1.S3Artifact) (string, string) {
+func getFilters(eventSource *apicommon.S3Artifact) (string, string) {
 	if eventSource.Filter == nil {
 		return "", ""
 	}

@@ -20,8 +20,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/pkg/errors"
@@ -29,10 +28,10 @@ import (
 
 // ValidateEventSource validates nsq event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	if gatewayv1alpha1.EventSourceType(eventSource.Type) != gatewayv1alpha1.NSQEvent {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.NSQEvent {
 		return &gateways.ValidEventSource{
 			IsValid: false,
-			Reason:  common.ErrEventSourceTypeMismatch(string(gatewayv1alpha1.NSQEvent)),
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.NSQEvent)),
 		}, nil
 	}
 

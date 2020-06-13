@@ -23,6 +23,7 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	eventSourceV1Alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	"github.com/ghodss/yaml"
@@ -297,95 +298,95 @@ func (gatewayContext *GatewayContext) initEventSourceContexts(eventSource *event
 	var err error
 
 	switch gatewayContext.gateway.Spec.Type {
-	case v1alpha1.SNSEvent:
+	case apicommon.SNSEvent:
 		for key, value := range eventSource.Spec.SNS {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.SQSEvent:
+	case apicommon.SQSEvent:
 		for key, value := range eventSource.Spec.SQS {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.PubSubEvent:
+	case apicommon.PubSubEvent:
 		for key, value := range eventSource.Spec.PubSub {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.NATSEvent:
+	case apicommon.NATSEvent:
 		for key, value := range eventSource.Spec.NATS {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.FileEvent:
+	case apicommon.FileEvent:
 		for key, value := range eventSource.Spec.File {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.CalendarEvent:
+	case apicommon.CalendarEvent:
 		for key, value := range eventSource.Spec.Calendar {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.AMQPEvent:
+	case apicommon.AMQPEvent:
 		for key, value := range eventSource.Spec.AMQP {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.GitHubEvent:
+	case apicommon.GitHubEvent:
 		for key, value := range eventSource.Spec.Github {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.GitLabEvent:
+	case apicommon.GitLabEvent:
 		for key, value := range eventSource.Spec.Gitlab {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.HDFSEvent:
+	case apicommon.HDFSEvent:
 		for key, value := range eventSource.Spec.HDFS {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.KafkaEvent:
+	case apicommon.KafkaEvent:
 		for key, value := range eventSource.Spec.Kafka {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.MinioEvent:
+	case apicommon.MinioEvent:
 		for key, value := range eventSource.Spec.Minio {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.MQTTEvent:
+	case apicommon.MQTTEvent:
 		for key, value := range eventSource.Spec.MQTT {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.ResourceEvent:
+	case apicommon.ResourceEvent:
 		for key, value := range eventSource.Spec.Resource {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.SlackEvent:
+	case apicommon.SlackEvent:
 		for key, value := range eventSource.Spec.Slack {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.StorageGridEvent:
+	case apicommon.StorageGridEvent:
 		for key, value := range eventSource.Spec.StorageGrid {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.WebhookEvent:
+	case apicommon.WebhookEvent:
 		for key, value := range eventSource.Spec.Webhook {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.AzureEventsHub:
+	case apicommon.AzureEventsHub:
 		for key, value := range eventSource.Spec.AzureEventsHub {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.StripeEvent:
+	case apicommon.StripeEvent:
 		for key, value := range eventSource.Spec.Stripe {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.EmitterEvent:
+	case apicommon.EmitterEvent:
 		for key, value := range eventSource.Spec.Emitter {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.RedisEvent:
+	case apicommon.RedisEvent:
 		for key, value := range eventSource.Spec.Redis {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.NSQEvent:
+	case apicommon.NSQEvent:
 		for key, value := range eventSource.Spec.NSQ {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}
-	case v1alpha1.GenericEvent:
+	case apicommon.GenericEvent:
 		for key, value := range eventSource.Spec.Generic {
 			gatewayContext.populateEventSourceContexts(key, value, eventSourceContexts)
 		}

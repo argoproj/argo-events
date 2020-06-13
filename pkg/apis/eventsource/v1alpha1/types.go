@@ -18,12 +18,12 @@ package v1alpha1
 import (
 	"encoding/json"
 
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways/server/common/fsevent"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // EventSource is the definition of a eventsource resource
@@ -46,12 +46,10 @@ type EventSourceList struct {
 	Items []EventSource `json:"items" protobuf:"bytes,2,opt,name=items"`
 }
 
-type EventSourceType string
-
 // EventSourceSpec refers to specification of event-source resource
 type EventSourceSpec struct {
 	// Minio event sources
-	Minio map[string]S3EventSource `json:"minio,omitempty" protobuf:"bytes,1,opt,name=minio"`
+	Minio map[string]apicommon.S3Artifact `json:"minio,omitempty" protobuf:"bytes,1,opt,name=minio"`
 	// Calendar event sources
 	Calendar map[string]CalendarEventSource `json:"calendar,omitempty" protobuf:"bytes,2,opt,name=calendar"`
 	// File event sources
@@ -97,32 +95,7 @@ type EventSourceSpec struct {
 	// Generic event source
 	Generic map[string]GenericEventSource `json:"generic,omitempty" protobuf:"bytes,23,opt,name=generic"`
 	// Type of the event source
-	Type EventSourceType `json:"type" protobuf:"bytes,24,name=type"`
-}
-
-// S3EventSource contains information about an S3 connection and bucket
-type S3EventSource struct {
-	Endpoint  string                    `json:"endpoint" protobuf:"bytes,1,opt,name=endpoint"`
-	Bucket    *S3Bucket                 `json:"bucket" protobuf:"bytes,2,opt,name=bucket"`
-	Region    string                    `json:"region,omitempty" protobuf:"bytes,3,opt,name=region"`
-	Insecure  bool                      `json:"insecure,omitempty" protobuf:"varint,4,opt,name=insecure"`
-	AccessKey *corev1.SecretKeySelector `json:"accessKey" protobuf:"bytes,5,opt,name=accessKey"`
-	SecretKey *corev1.SecretKeySelector `json:"secretKey" protobuf:"bytes,6,opt,name=secretKey"`
-	// +listType=string
-	Events []string  `json:"events,omitempty" protobuf:"bytes,7,opt,name=events"`
-	Filter *S3Filter `json:"filter,omitempty" protobuf:"bytes,8,opt,name=filter"`
-}
-
-// S3Bucket contains information to describe an S3 Bucket
-type S3Bucket struct {
-	Key  string `json:"key,omitempty" protobuf:"bytes,1,opt,name=key"`
-	Name string `json:"name" protobuf:"bytes,2,opt,name=name"`
-}
-
-// S3Filter represents filters to apply to bucket nofifications for specifying constraints on objects
-type S3Filter struct {
-	Prefix string `json:"prefix" protobuf:"bytes,1,opt,name=prefix"`
-	Suffix string `json:"suffix" protobuf:"bytes,2,opt,name=suffix"`
+	Type apicommon.EventSourceType `json:"type" protobuf:"bytes,24,name=type"`
 }
 
 // CalendarEventSource describes a time based dependency. One of the fields (schedule, interval, or recurrence) must be passed.
@@ -140,7 +113,7 @@ type CalendarEventSource struct {
 	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
 	// UserPayload will be sent to sensor as extra data once the event is triggered
 	// +optional
-	UserPayload json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload"`
+	UserPayload *json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload"`
 }
 
 // FileEventSource describes an event-source for file related events.

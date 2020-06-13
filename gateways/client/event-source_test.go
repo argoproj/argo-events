@@ -27,7 +27,7 @@ import (
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
 	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	esv1alpha1 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
 	gwfake "github.com/argoproj/argo-events/pkg/client/gateway/clientset/versioned/fake"
@@ -51,7 +51,7 @@ func getGatewayContext() *GatewayContext {
 				Subscribers: &v1alpha1.Subscribers{
 					HTTP: []string{},
 				},
-				Type: v1alpha1.WebhookEvent,
+				Type: apicommon.WebhookEvent,
 			},
 		},
 		eventSourceContexts: make(map[string]*EventSourceContext),
@@ -74,7 +74,7 @@ func getEventSource() *esv1alpha1.EventSource {
 					Port:     "13000",
 				},
 			},
-			Type: v1alpha1.WebhookEvent,
+			Type: apicommon.WebhookEvent,
 		},
 	}
 }

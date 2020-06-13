@@ -34,30 +34,6 @@ message BusConfig {
   optional NATSConfig nats = 1;
 }
 
-// Condition contains details about resource state
-message Condition {
-  // Condition type.
-  // +required
-  optional string type = 1;
-
-  // Condition status, True, False or Unknown.
-  // +required
-  optional string status = 2;
-
-  // Last time the condition transitioned from one status to another.
-  // +optional
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 4;
-
-  // Unique, this should be a short, machine understandable string that gives the reason
-  // for condition's last transition. For example, "ImageNotFound"
-  // +optional
-  optional string reason = 5;
-
-  // Human-readable message indicating details about last transition.
-  // +optional
-  optional string message = 6;
-}
-
 // EventBus is the definition of a eventbus resource
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -87,7 +63,7 @@ message EventBusSpec {
 
 // EventBusStatus holds the status of the eventbus resource
 message EventBusStatus {
-  repeated Condition conditions = 1;
+  optional Status status = 1;
 
   // Config holds the fininalized configuration of EventBus
   optional BusConfig config = 2;
@@ -122,8 +98,8 @@ message NATSConfig {
 
 // NativeStrategy indicates to install a native NATS service
 message NativeStrategy {
-  // Replicas is the NATS StatefulSet size
-  optional int32 replicas = 1;
+  // Size is the NATS StatefulSet size
+  optional int64 size = 1;
 
   optional string auth = 2;
 
@@ -146,6 +122,37 @@ message PersistenceStrategy {
   optional string accessMode = 2;
 
   // Volume size, e.g. 10Gi
-  optional k8s.io.apimachinery.pkg.api.resource.Quantity volumeSize = 3;
+  optional k8s.io.apimachinery.pkg.api.resource.Quantity size = 3;
+}
+
+message Condition {
+  // Condition type.
+  // +required
+  optional string type = 1;
+
+  // Condition status, True, False or Unknown.
+  // +required
+  optional string status = 2;
+
+  // Last time the condition transitioned from one status to another.
+  // +optional
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.Time lastTransitionTime = 4;
+
+  // Unique, this should be a short, machine understandable string that gives the reason
+  // for condition's last transition. For example, "ImageNotFound"
+  // +optional
+  optional string reason = 5;
+
+  // Human-readable message indicating details about last transition.
+  // +optional
+  optional string message = 6;
+}
+
+message Status {
+  // Conditions are the latest available observations of a resource's current state.
+  // +optional
+  // +patchMergeKey=type
+  // +patchStrategy=merge
+  repeated Condition conditions = 1;
 }
 

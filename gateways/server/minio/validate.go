@@ -22,23 +22,21 @@ import (
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/gateways"
-	gatewayv1alpha1 "github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1"
-	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
-
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/ghodss/yaml"
 	"github.com/minio/minio-go"
 )
 
 // ValidateEventSource validates the minio event source
 func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSource *gateways.EventSource) (*gateways.ValidEventSource, error) {
-	if gatewayv1alpha1.EventSourceType(eventSource.Type) != gatewayv1alpha1.MinioEvent {
+	if apicommon.EventSourceType(eventSource.Type) != apicommon.MinioEvent {
 		return &gateways.ValidEventSource{
 			IsValid: false,
-			Reason:  common.ErrEventSourceTypeMismatch(string(gatewayv1alpha1.MinioEvent)),
+			Reason:  common.ErrEventSourceTypeMismatch(string(apicommon.MinioEvent)),
 		}, nil
 	}
 
-	var minioEventSource *v1alpha1.S3Artifact
+	var minioEventSource *apicommon.S3Artifact
 	err := yaml.Unmarshal(eventSource.Value, &minioEventSource)
 	if err != nil {
 		listener.Logger.WithError(err).Error("failed to parse the minio event source")
@@ -59,7 +57,7 @@ func (listener *EventListener) ValidateEventSource(ctx context.Context, eventSou
 	}, nil
 }
 
-func validate(eventSource *v1alpha1.S3Artifact) error {
+func validate(eventSource *apicommon.S3Artifact) error {
 	if eventSource == nil {
 		return common.ErrNilEventSource
 	}
