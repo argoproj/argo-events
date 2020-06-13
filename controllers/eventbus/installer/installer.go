@@ -21,7 +21,7 @@ type Installer interface {
 func Install(eventBus *v1alpha1.EventBus, client client.Client, natsStreamingImage string, logger logr.Logger) error {
 	installer, err := getInstaller(eventBus, client, natsStreamingImage, logger)
 	if err != nil {
-		logger.Error(err, "failed to an installer")
+		logger.Error(err, "failed to get an installer")
 	}
 	busConfig, err := installer.Install()
 	if err != nil {

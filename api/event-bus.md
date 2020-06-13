@@ -372,12 +372,18 @@ Description
 
 <td>
 
-<code>status</code></br> <em>
+<code>Status</code></br> <em>
 github.com/argoproj/argo-events/pkg/apis/common.Status </em>
 
 </td>
 
 <td>
+
+<p>
+
+(Members of <code>Status</code> are embedded into this type.)
+
+</p>
 
 </td>
 
@@ -574,7 +580,7 @@ NATS host url
 
 <td>
 
-<code>clusterID</code></br> <em> string </em>
+<code>clusterId</code></br> <em> string </em>
 
 </td>
 
@@ -694,7 +700,7 @@ Description
 
 <td>
 
-<code>size</code></br> <em> int </em>
+<code>replicas</code></br> <em> int32 </em>
 
 </td>
 
@@ -702,7 +708,7 @@ Description
 
 <p>
 
-Size is the NATS StatefulSet size
+Replicas is the NATS StatefulSet replicas
 
 </p>
 
@@ -860,7 +866,7 @@ Available access modes such as ReadWriteOnce, ReadWriteMany
 
 <td>
 
-<code>size</code></br> <em>
+<code>volumeSize</code></br> <em>
 k8s.io/apimachinery/pkg/api/resource.Quantity </em>
 
 </td>

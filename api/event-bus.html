@@ -172,12 +172,15 @@ NATSBus
 <tbody>
 <tr>
 <td>
-<code>status</code></br>
+<code>Status</code></br>
 <em>
 github.com/argoproj/argo-events/pkg/apis/common.Status
 </em>
 </td>
 <td>
+<p>
+(Members of <code>Status</code> are embedded into this type.)
+</p>
 </td>
 </tr>
 <tr>
@@ -271,7 +274,7 @@ string
 </tr>
 <tr>
 <td>
-<code>clusterID</code></br>
+<code>clusterId</code></br>
 <em>
 string
 </em>
@@ -330,13 +333,13 @@ Kubernetes core/v1.SecretKeySelector
 <tbody>
 <tr>
 <td>
-<code>size</code></br>
+<code>replicas</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
-<p>Size is the NATS StatefulSet size</p>
+<p>Replicas is the NATS StatefulSet replicas</p>
 </td>
 </tr>
 <tr>
@@ -423,7 +426,7 @@ Kubernetes core/v1.PersistentVolumeAccessMode
 </tr>
 <tr>
 <td>
-<code>size</code></br>
+<code>volumeSize</code></br>
 <em>
 k8s.io/apimachinery/pkg/api/resource.Quantity
 </em>

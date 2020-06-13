@@ -1,10 +1,11 @@
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // EventBus is the definition of a eventbus resource
@@ -35,9 +36,9 @@ type EventBusSpec struct {
 
 // EventBusStatus holds the status of the eventbus resource
 type EventBusStatus struct {
-	Status common.Status `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	common.Status `json:",inline"`
 	// Config holds the fininalized configuration of EventBus
-	Config BusConfig `json:"config,omitempty" protobuf:"bytes,2,opt,name=config"`
+	Config BusConfig `json:"config,omitempty" protobuf:"bytes,1,opt,name=config"`
 }
 
 // NATSBus holds the NATS eventbus information
@@ -59,8 +60,8 @@ var (
 
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
-	// Size is the NATS StatefulSet size
-	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	// Replicas is the NATS StatefulSet replicas
+	Replicas     int32         `json:"replicas,omitempty" protobuf:"bytes,1,opt,name=replicas"`
 	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
 	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
 	// +optional
@@ -78,7 +79,7 @@ type PersistenceStrategy struct {
 	// +optional
 	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
 	// Volume size, e.g. 10Gi
-	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
+	VolumeSize *apiresource.Quantity `json:"volumeSize,omitempty" protobuf:"bytes,3,opt,name=volumeSize"`
 }
 
 // BusConfig has the finalized configuration for EventBus
@@ -92,7 +93,7 @@ type NATSConfig struct {
 	URL string `json:"url,omitempty" protobuf:"bytes,1,opt,name=url"`
 	// Cluster ID for nats streaming, if it's missing, treat it as NATS server
 	// +optional
-	ClusterID *string `json:"clusterID,omitempty" protobuf:"bytes,2,opt,name=clusterID"`
+	ClusterID *string `json:"clusterId,omitempty" protobuf:"bytes,2,opt,name=clusterId"`
 	// Auth strategy, default to AuthStrategyNone
 	// +optional
 	Auth *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,3,opt,name=auth"`
@@ -112,32 +113,32 @@ const (
 
 // InitConditions sets conditions to Unknown state.
 func (s *EventBusStatus) InitConditions() {
-	s.Status.InitConditions(EventBusConditionDeployed, EventBusConditionConfigured)
+	s.InitializeConditions(EventBusConditionDeployed, EventBusConditionConfigured)
 }
 
 // MarkDeployed set the bus has been deployed.
 func (s *EventBusStatus) MarkDeployed(reason, message string) {
-	s.Status.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
+	s.MarkTrueWithReason(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeploying set the bus is deploying
 func (s *EventBusStatus) MarkDeploying(reason, message string) {
-	s.Status.MarkUnknown(EventBusConditionDeployed, reason, message)
+	s.MarkUnknown(EventBusConditionDeployed, reason, message)
 }
 
 // MarkDeployFailed set the bus deploy failed
 func (s *EventBusStatus) MarkDeployFailed(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionDeployed, reason, message)
+	s.MarkFalse(EventBusConditionDeployed, reason, message)
 }
 
 // MarkConfigured set the bus configuration has been done.
 func (s *EventBusStatus) MarkConfigured() {
-	s.Status.MarkTrue(EventBusConditionConfigured)
+	s.MarkTrue(EventBusConditionConfigured)
 }
 
 // MarkNotConfigured set the bus status not configured.
 func (s *EventBusStatus) MarkNotConfigured(reason, message string) {
-	s.Status.MarkFalse(EventBusConditionConfigured, reason, message)
+	s.MarkFalse(EventBusConditionConfigured, reason, message)
 }
 
 func init() {

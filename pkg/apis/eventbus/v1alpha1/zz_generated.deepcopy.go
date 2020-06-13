@@ -242,8 +242,8 @@ func (in *PersistenceStrategy) DeepCopyInto(out *PersistenceStrategy) {
 		*out = new(v1.PersistentVolumeAccessMode)
 		**out = **in
 	}
-	if in.Size != nil {
-		in, out := &in.Size, &out.Size
+	if in.VolumeSize != nil {
+		in, out := &in.VolumeSize, &out.VolumeSize
 		x := (*in).DeepCopy()
 		*out = &x
 	}

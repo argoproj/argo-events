@@ -3,11 +3,11 @@ package installer
 import (
 	"testing"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 const (

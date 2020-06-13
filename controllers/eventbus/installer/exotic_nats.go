@@ -3,8 +3,9 @@ package installer
 import (
 	"errors"
 
-	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 	"github.com/go-logr/logr"
+
+	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
 )
 
 // exoticNATSInstaller is an inalleration implementation of exotic nats config.

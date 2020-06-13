@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-logr/logr"
 	appv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -22,8 +23,6 @@ import (
 	"github.com/argoproj/argo-events/common"
 	controllerscommon "github.com/argoproj/argo-events/controllers/common"
 	"github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1"
-
-	"github.com/go-logr/logr"
 )
 
 const (
@@ -427,7 +426,7 @@ func (i *natsInstaller) buildConfigMap() (*corev1.ConfigMap, error) {
 	clusterID := generateClusterID(i.eventBus)
 	svcName := generateServiceName(i.eventBus)
 	ssName := generateStatefulSetName(i.eventBus)
-	size := i.eventBus.Spec.NATS.Native.Size
+	size := int(i.eventBus.Spec.NATS.Native.Replicas)
 	if size < 3 {
 		size = 3
 	}
@@ -540,7 +539,7 @@ func (i *natsInstaller) buildStatefulSet(serviceName, configmapName, authSecretN
 
 func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSecretName string) appv1.StatefulSetSpec {
 	// Streaming requires minimal size 3.
-	replicas := int32(i.eventBus.Spec.NATS.Native.Size)
+	replicas := i.eventBus.Spec.NATS.Native.Replicas
 	if replicas < 3 {
 		replicas = 3
 	}
@@ -635,8 +634,8 @@ func (i *natsInstaller) buildStatefulSetSpec(serviceName, configmapName, authSec
 		pvcName := generatePVCName(i.eventBus)
 		// Default volume size
 		volSize := apiresource.MustParse("5Gi")
-		if i.eventBus.Spec.NATS.Native.Persistence.Size != nil {
-			volSize = *i.eventBus.Spec.NATS.Native.Persistence.Size
+		if i.eventBus.Spec.NATS.Native.Persistence.VolumeSize != nil {
+			volSize = *i.eventBus.Spec.NATS.Native.Persistence.VolumeSize
 		}
 		// Default to ReadWriteOnce
 		accessMode := corev1.ReadWriteOnce
