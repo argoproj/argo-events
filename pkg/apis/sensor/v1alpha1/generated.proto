@@ -20,6 +20,7 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.sensor.v1alpha1;
 
+import "github.com/argoproj/argo-events/pkg/apis/common/generated.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
@@ -79,7 +80,7 @@ message ArgoWorkflowTrigger {
 // ArtifactLocation describes the source location for an external artifact
 message ArtifactLocation {
   // S3 compliant artifact
-  optional S3Artifact s3 = 1;
+  optional github.com.argoproj.argo_events.pkg.apis.common.S3Artifact s3 = 1;
 
   // Inline artifact is embedded in sensor spec as a string
   optional string inline = 2;
@@ -112,7 +113,7 @@ message Backoff {
   optional double jitter = 3;
 
   // Exit with error after this many steps
-  optional int64 steps = 4;
+  optional int32 steps = 4;
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
@@ -336,7 +337,7 @@ message GitRemoteConfig {
 // HTTPSubscription holds the context of the HTTP subscription of events for the sensor.
 message HTTPSubscription {
   // Port on which sensor server should run.
-  optional int64 port = 1;
+  optional int32 port = 1;
 }
 
 // HTTPTrigger is the trigger for the HTTP request
@@ -401,7 +402,7 @@ message KafkaTrigger {
   optional string topic = 2;
 
   // Partition to write data to.
-  optional int64 partition = 3;
+  optional int32 partition = 3;
 
   // Parameters is the list of parameters that is applied to resolved Kafka trigger object.
   // +listType=triggerParameters
@@ -410,7 +411,7 @@ message KafkaTrigger {
   // RequiredAcks used in producer to tell the broker how many replica acknowledgements
   // Defaults to 1 (Only wait for the leader to ack).
   // +optional.
-  optional int64 requiredAcks = 5;
+  optional int32 requiredAcks = 5;
 
   // Compress determines whether to compress message or not.
   // Defaults to false.
@@ -421,7 +422,7 @@ message KafkaTrigger {
   // FlushFrequency refers to the frequency in milliseconds to flush batches.
   // Defaults to 500 milliseconds.
   // +optional
-  optional int64 flushFrequency = 7;
+  optional int32 flushFrequency = 7;
 
   // TLS configuration for the Kafka producer.
   // +optional
@@ -709,7 +710,7 @@ message StatusPolicy {
   // Allow refers to the list of allowed response statuses. If the response status of the the trigger is within the list,
   // the trigger will marked as successful else it will result in trigger failure.
   // +listType=allowedStatuses
-  repeated int64 allow = 1;
+  repeated int32 allow = 1;
 }
 
 // Subscription holds different modes of subscription available for sensor to consume events.
@@ -917,36 +918,5 @@ message URLArtifact {
 
   // VerifyCert decides whether the connection is secure or not
   optional bool verifyCert = 2;
-}
-
-message S3Artifact {
-  optional string endpoint = 1;
-
-  optional S3Bucket bucket = 2;
-
-  optional string region = 3;
-
-  optional bool insecure = 4;
-
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
-
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
-
-  // +listType=string
-  repeated string events = 7;
-
-  optional S3Filter filter = 8;
-}
-
-message S3Bucket {
-  optional string key = 1;
-
-  optional string name = 2;
-}
-
-message S3Filter {
-  optional string prefix = 1;
-
-  optional string suffix = 2;
 }
 

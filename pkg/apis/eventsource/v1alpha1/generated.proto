@@ -20,6 +20,7 @@ syntax = 'proto2';
 
 package github.com.argoproj.argo_events.pkg.apis.eventsource.v1alpha1;
 
+import "github.com/argoproj/argo-events/pkg/apis/common/generated.proto";
 import "k8s.io/api/core/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/apis/meta/v1/generated.proto";
 import "k8s.io/apimachinery/pkg/runtime/generated.proto";
@@ -162,7 +163,7 @@ message EventSourceList {
 // EventSourceSpec refers to specification of event-source resource
 message EventSourceSpec {
   // Minio event sources
-  map<string, S3Artifact> minio = 1;
+  map<string, github.com.argoproj.argo_events.pkg.apis.common.S3Artifact> minio = 1;
 
   // Calendar event sources
   map<string, CalendarEventSource> calendar = 2;
@@ -749,37 +750,6 @@ message Backoff {
 
   // The amount of jitter applied each iteration
   optional int64 steps = 4;
-}
-
-message S3Artifact {
-  optional string endpoint = 1;
-
-  optional S3Bucket bucket = 2;
-
-  optional string region = 3;
-
-  optional bool insecure = 4;
-
-  optional k8s.io.api.core.v1.SecretKeySelector accessKey = 5;
-
-  optional k8s.io.api.core.v1.SecretKeySelector secretKey = 6;
-
-  // +listType=string
-  repeated string events = 7;
-
-  optional S3Filter filter = 8;
-}
-
-message S3Bucket {
-  optional string key = 1;
-
-  optional string name = 2;
-}
-
-message S3Filter {
-  optional string prefix = 1;
-
-  optional string suffix = 2;
 }
 
 message WatchPathConfig {

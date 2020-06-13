@@ -73,7 +73,7 @@ type GatewaySpec struct {
 	// Port on which the gateway event source processor is running on.
 	ProcessorPort string `json:"processorPort" protobuf:"bytes,6,opt,name=processorPort"`
 	// Replica is the gateway deployment replicas
-	Replica int `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
+	Replica int32 `json:"replica,omitempty" protobuf:"bytes,9,opt,name=replica"`
 }
 
 // Template holds the information of a Gateway deployment template
