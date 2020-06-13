@@ -146,7 +146,7 @@ type ResourceEventSource struct {
 	// +optional
 	Filter *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	// Group of the resource
-	metav1.GroupVersionResource `json:",inline"`
+	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 	// EventTypes is the list of event type to watch.
 	// Possible values are - ADD, UPDATE and DELETE.
 	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,3,name=eventTypes"`
@@ -182,7 +182,7 @@ type Selector struct {
 	// Refer https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors for more info.
 	// +optional
 	Operation string `json:"operation,omitempty" protobuf:"bytes,2,opt,name=operation"`
-	// Data
+	// Value
 	Value string `json:"value" protobuf:"bytes,3,name=value"`
 }
 
@@ -403,7 +403,7 @@ type GitlabEventSource struct {
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {
-	fsevent.WatchPathConfig `json:",inline"`
+	fsevent.WatchPathConfig `json:",inline" protobuf:"bytes,13,opt,name=watchPathConfig"`
 	// Type of file operations to watch
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)

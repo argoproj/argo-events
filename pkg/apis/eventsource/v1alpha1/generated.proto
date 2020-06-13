@@ -351,7 +351,7 @@ message GitlabEventSource {
 
 // HDFSEventSource refers to event-source for HDFS related events
 message HDFSEventSource {
-  optional WatchPathConfig watchPathConfig = 2;
+  optional WatchPathConfig watchPathConfig = 13;
 
   // Type of file operations to watch
   optional string type = 3;

@@ -276,7 +276,7 @@ type DataFilter struct {
 	// Type contains the JSON type of the data
 	Type JSONType `json:"type" protobuf:"bytes,2,opt,name=type"`
 	// +listType=value
-	// Data is the allowed string values for this key
+	// Value is the allowed string values for this key
 	// Booleans are passed using strconv.ParseBool()
 	// Numbers are parsed using as float64 using strconv.ParseFloat()
 	// Strings are taken as is
@@ -349,7 +349,7 @@ type TriggerSwitch struct {
 // StandardK8STrigger is the standard Kubernetes resource trigger
 type StandardK8STrigger struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	metav1.GroupVersionResource `json:",inline"`
+	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,7,opt,name=groupVersionResource"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,2,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
@@ -390,7 +390,7 @@ type ArgoWorkflowTrigger struct {
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	metav1.GroupVersionResource `json:",inline"`
+	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 }
 
 type Headers struct {
@@ -650,7 +650,7 @@ type TriggerParameterSource struct {
 	// The templating follows the standard go-template syntax as well as sprig's extra functions.
 	// See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
 	DataTemplate string `json:"dataTemplate,omitempty" protobuf:"bytes,4,opt,name=dataTemplate"`
-	// Data is the default literal value to use for this parameter source
+	// Value is the default literal value to use for this parameter source
 	// This is only used if the DataKey is invalid.
 	// If the DataKey is invalid and this is not defined, this param source will produce an error.
 	Value *string `json:"value,omitempty" protobuf:"bytes,5,opt,name=value"`
