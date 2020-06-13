@@ -20,10 +20,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/common"
+	"github.com/argoproj/argo-events/gateways"
+	v1alpha12 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 // NewController returns a webhook controller
@@ -37,7 +39,7 @@ func NewController() *Controller {
 }
 
 // NewRoute returns a vanilla route
-func NewRoute(hookContext *Context, logger *logrus.Logger, eventSource *gateways.EventSource) *Route {
+func NewRoute(hookContext *v1alpha12.Context, logger *logrus.Logger, eventSource *gateways.EventSource) *Route {
 	return &Route{
 		Context:     hookContext,
 		Logger:      logger,

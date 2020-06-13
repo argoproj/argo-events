@@ -1114,7 +1114,8 @@
         },
         "resource": {
           "description": "Resource is generic template for K8s resource",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.ResourceArtifact"
+          "type": "string",
+          "format": "byte"
         },
         "s3": {
           "description": "S3 compliant artifact",
@@ -1123,36 +1124,6 @@
         "url": {
           "description": "URL to fetch the artifact from",
           "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.URLArtifact"
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.Backoff": {
-      "description": "Backoff for an operation",
-      "type": "object",
-      "required": [
-        "duration",
-        "factor"
-      ],
-      "properties": {
-        "duration": {
-          "description": "Duration is the duration in nanoseconds",
-          "type": "integer",
-          "format": "int64"
-        },
-        "factor": {
-          "description": "Duration is multiplied by factor each iteration",
-          "type": "number",
-          "format": "double"
-        },
-        "jitter": {
-          "description": "The amount of jitter applied each iteration",
-          "type": "number",
-          "format": "double"
-        },
-        "steps": {
-          "description": "Exit with error after this many steps",
-          "type": "integer",
-          "format": "int32"
         }
       }
     },
@@ -1543,7 +1514,10 @@
         },
         "headers": {
           "description": "Headers for the HTTP request.",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Headers"
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
         },
         "method": {
           "description": "Method refers to the type of the HTTP request. Refer https://golang.org/src/net/http/method.go for more info. Default value is POST.",
@@ -1580,17 +1554,6 @@
         }
       }
     },
-    "io.argoproj.sensor.v1alpha1.Headers": {
-      "type": "object",
-      "required": [
-        "Foo"
-      ],
-      "properties": {
-        "Foo": {
-          "type": "string"
-        }
-      }
-    },
     "io.argoproj.sensor.v1alpha1.K8SResourcePolicy": {
       "description": "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
       "type": "object",
@@ -1601,7 +1564,7 @@
       "properties": {
         "backoff": {
           "description": "Backoff before checking resource state",
-          "$ref": "#/definitions/io.argoproj.sensor.v1alpha1.Backoff"
+          "$ref": "#/definitions/io.argoproj.common.Backoff"
         },
         "errorOnBackoffTimeout": {
           "description": "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
@@ -1837,18 +1800,6 @@
         "version": {
           "description": "Version for the API. Defaults to v1.",
           "type": "string"
-        }
-      }
-    },
-    "io.argoproj.sensor.v1alpha1.ResourceArtifact": {
-      "type": "object",
-      "required": [
-        "Data"
-      ],
-      "properties": {
-        "Data": {
-          "type": "string",
-          "format": "byte"
         }
       }
     },

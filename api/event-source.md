@@ -169,7 +169,7 @@ Routing key for bindings
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -560,6 +560,185 @@ triggered
 
 </table>
 
+<h3 id="argoproj.io/v1alpha1.Context">
+
+Context
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.EventSourceSpec">EventSourceSpec</a>,
+<a href="#argoproj.io/v1alpha1.GithubEventSource">GithubEventSource</a>,
+<a href="#argoproj.io/v1alpha1.GitlabEventSource">GitlabEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SNSEventSource">SNSEventSource</a>,
+<a href="#argoproj.io/v1alpha1.SlackEventSource">SlackEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StorageGridEventSource">StorageGridEventSource</a>,
+<a href="#argoproj.io/v1alpha1.StripeEventSource">StripeEventSource</a>)
+
+</p>
+
+<p>
+
+<p>
+
+Context holds a general purpose REST API context
+
+</p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>endpoint</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+REST API endpoint
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>method</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Method is HTTP request method that indicates the desired action to be
+performed for a given resource. See RFC7231 Hypertext Transfer Protocol
+(HTTP/1.1): Semantics and Content
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>port</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Port on which HTTP server is listening for incoming events.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>url</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+URL is the url of the server.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverCertPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerCertPath refers the file that contains the cert.
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>serverKeyPath</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+ServerKeyPath refers the file that contains private key
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
 <h3 id="argoproj.io/v1alpha1.EmitterEventSource">
 
 EmitterEventSource
@@ -744,7 +923,7 @@ Password to use to connect to broker
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -1055,9 +1234,9 @@ Resource event sources
 
 <td>
 
-<code>webhook</code></br> <em>
-map\[string\]github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+map\[string\]github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1.Context
+</a> </em>
 
 </td>
 
@@ -1653,7 +1832,7 @@ for more information
 <td>
 
 <code>watchPathConfig</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig
+<a href="#argoproj.io/v1alpha1.WatchPathConfig"> WatchPathConfig </a>
 </em>
 
 </td>
@@ -1837,9 +2016,8 @@ Id is the webhook’s id
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -2171,9 +2349,8 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -2419,7 +2596,7 @@ Description
 <td>
 
 <code>WatchPathConfig</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/fsevent.WatchPathConfig
+<a href="#argoproj.io/v1alpha1.WatchPathConfig"> WatchPathConfig </a>
 </em>
 
 </td>
@@ -2789,7 +2966,7 @@ Topic name
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -2944,7 +3121,7 @@ ClientID is the id of the client
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -3102,7 +3279,7 @@ Subject holds the name of the subject onto which messages are published
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -3281,7 +3458,7 @@ Channel used for subscription
 <td>
 
 <code>connectionBackoff</code></br> <em>
-github.com/argoproj/argo-events/common.Backoff </em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -4136,9 +4313,8 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -4744,9 +4920,8 @@ Token for URL verification handshake
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -4841,9 +5016,8 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -5041,9 +5215,8 @@ Description
 
 <td>
 
-<code>webhook</code></br> <em>
-github.com/argoproj/argo-events/gateways/server/common/webhook.Context
-</em>
+<code>webhook</code></br> <em> <a href="#argoproj.io/v1alpha1.Context">
+Context </a> </em>
 
 </td>
 
@@ -5263,6 +5436,113 @@ ClientCertPath refers the file path that contains client cert.
 <p>
 
 ClientKeyPath refers the file path that contains client key.
+
+</p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.WatchPathConfig">
+
+WatchPathConfig
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.FileEventSource">FileEventSource</a>,
+<a href="#argoproj.io/v1alpha1.HDFSEventSource">HDFSEventSource</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>directory</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Directory to watch for events
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>path</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+Path is relative path of object to watch with respect to the directory
+
+</p>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<code>pathRegexp</code></br> <em> string </em>
+
+</td>
+
+<td>
+
+<p>
+
+PathRegexp is regexp of relative path of object to watch with respect to
+the directory
 
 </p>
 

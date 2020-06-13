@@ -17,14 +17,13 @@ limitations under the License.
 package store
 
 import (
+	"encoding/json"
 	"errors"
 
 	"github.com/ghodss/yaml"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	log "github.com/sirupsen/logrus"
-
-	sensorv1alpha1 "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
 // ResourceReader implements the ArtifactReader interface for resource artifacts
@@ -33,15 +32,21 @@ type ResourceReader struct {
 }
 
 // NewResourceReader creates a new ArtifactReader for resource
-func NewResourceReader(resourceArtifact *sensorv1alpha1.ResourceArtifact) (ArtifactReader, error) {
+func NewResourceReader(resourceArtifact json.RawMessage) (ArtifactReader, error) {
 	if resourceArtifact == nil {
 		return nil, errors.New("ResourceArtifact does not exist")
 	}
-	object, err := resourceArtifact.Object()
+	data, err := json.Marshal(resourceArtifact)
 	if err != nil {
 		return nil, err
 	}
-	return &ResourceReader{&unstructured.Unstructured{Object: object}}, nil
+	object := make(map[string]interface{})
+	err = json.Unmarshal(data, &object)
+	if err != nil {
+		return nil, err
+	}
+	un := &unstructured.Unstructured{Object: object}
+	return &ResourceReader{un}, nil
 }
 
 func (reader *ResourceReader) Read() ([]byte, error) {

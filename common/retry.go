@@ -21,15 +21,9 @@ import (
 
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
-)
 
-// Backoff defines an operational backoff
-type Backoff struct {
-	Duration time.Duration `json:"duration"` // the base duration
-	Factor   float64       `json:"factor"`   // Duration is multiplied by factor each iteration
-	Jitter   float64       `json:"jitter"`   // The amount of jitter applied each iteration
-	Steps    int           `json:"steps"`    // Exit with error after this many steps
-}
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
+)
 
 // DefaultRetry is a default retry backoff settings when retrying API calls
 var DefaultRetry = wait.Backoff{
@@ -49,7 +43,7 @@ func IsRetryableKubeAPIError(err error) bool {
 }
 
 // GetConnectionBackoff returns a connection backoff option
-func GetConnectionBackoff(backoff *Backoff) *wait.Backoff {
+func GetConnectionBackoff(backoff *apicommon.Backoff) *wait.Backoff {
 	result := wait.Backoff{
 		Duration: DefaultRetry.Duration,
 		Factor:   DefaultRetry.Factor,
@@ -69,7 +63,7 @@ func GetConnectionBackoff(backoff *Backoff) *wait.Backoff {
 		result.Jitter = backoff.Jitter
 	}
 	if backoff.Steps != 0 {
-		result.Steps = backoff.Steps
+		result.Steps = backoff.GetSteps()
 	}
 	return &result
 }

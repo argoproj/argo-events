@@ -46,7 +46,7 @@ message AMQPEventSource {
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 5;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 5;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -101,6 +101,28 @@ message CalendarEventSource {
   optional bytes userPayload = 5;
 }
 
+// Context holds a general purpose REST API context
+message Context {
+  // REST API endpoint
+  optional string endpoint = 1;
+
+  // Method is HTTP request method that indicates the desired action to be performed for a given resource.
+  // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
+  optional string method = 2;
+
+  // Port on which HTTP server is listening for incoming events.
+  optional string port = 3;
+
+  // URL is the url of the server.
+  optional string url = 4;
+
+  // ServerCertPath refers the file that contains the cert.
+  optional string serverCertPath = 6;
+
+  // ServerKeyPath refers the file that contains private key
+  optional string serverKeyPath = 5;
+}
+
 // EmitterEventSource describes the event source for emitter
 // More info at https://emitter.io/develop/getting-started/
 message EmitterEventSource {
@@ -127,7 +149,7 @@ message EmitterEventSource {
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 7;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 7;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -255,7 +277,7 @@ message FileEventSource {
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 message GenericEventSource {
-  // Data of the event source
+  // Value of the event source
   optional string value = 1;
 }
 
@@ -408,7 +430,7 @@ message KafkaEventSource {
   optional string topic = 3;
 
   // Backoff holds parameters applied to connection.
-  optional Backoff connectionBackoff = 4;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 4;
 
   // TLS configuration for the kafka client.
   // +optional
@@ -427,7 +449,7 @@ message MQTTEventSource {
   optional string clientId = 3;
 
   // ConnectionBackoff holds backoff applied to connection.
-  optional Backoff connectionBackoff = 4;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 4;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -448,7 +470,7 @@ message NATSEventsSource {
   optional string subject = 2;
 
   // ConnectionBackoff holds backoff applied to connection.
-  optional Backoff connectionBackoff = 3;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 3;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -474,7 +496,7 @@ message NSQEventSource {
 
   // Backoff holds parameters applied to connection.
   // +optional
-  optional Backoff connectionBackoff = 4;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff connectionBackoff = 4;
 
   // JSONBody specifies that all event body payload coming from this
   // source will be JSON
@@ -739,19 +761,6 @@ message TLSConfig {
   optional string clientKeyPath = 3;
 }
 
-message Backoff {
-  optional int64 duration = 1;
-
-  // the base duration
-  optional double factor = 2;
-
-  // Duration is multiplied by factor each iteration
-  optional double jitter = 3;
-
-  // The amount of jitter applied each iteration
-  optional int64 steps = 4;
-}
-
 message WatchPathConfig {
   // Directory to watch for events
   optional string directory = 1;
@@ -761,26 +770,5 @@ message WatchPathConfig {
 
   // PathRegexp is regexp of relative path of object to watch with respect to the directory
   optional string pathRegexp = 3;
-}
-
-message Context {
-  // REST API endpoint
-  optional string endpoint = 1;
-
-  // Method is HTTP request method that indicates the desired action to be performed for a given resource.
-  // See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-  optional string method = 2;
-
-  // Port on which HTTP server is listening for incoming events.
-  optional string port = 3;
-
-  // URL is the url of the server.
-  optional string url = 4;
-
-  // ServerCertPath refers the file that contains the cert.
-  optional string serverCertPath = 6;
-
-  // ServerKeyPath refers the file that contains private key
-  optional string serverKeyPath = 5;
 }
 

@@ -20,9 +20,11 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/argoproj/argo-events/gateways"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+
+	"github.com/argoproj/argo-events/gateways"
+	v1alpha12 "github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 var (
@@ -45,7 +47,7 @@ type Router interface {
 // Route contains general information about a route
 type Route struct {
 	// Context refers to the webhook context
-	Context *Context
+	Context *v1alpha12.Context
 	// Logger to log stuff
 	Logger *logrus.Logger
 	// StartCh controls the
@@ -71,21 +73,4 @@ type Controller struct {
 	RouteActivateChan chan Router
 	// RouteDeactivateChan handles inactivation of routes
 	RouteDeactivateChan chan Router
-}
-
-// Context holds a general purpose REST API context
-type Context struct {
-	// REST API endpoint
-	Endpoint string `json:"endpoint" protobuf:"bytes,1,name=endpoint"`
-	// Method is HTTP request method that indicates the desired action to be performed for a given resource.
-	// See RFC7231 Hypertext Transfer Protocol (HTTP/1.1): Semantics and Content
-	Method string `json:"method" protobuf:"bytes,2,name=method"`
-	// Port on which HTTP server is listening for incoming events.
-	Port string `json:"port" protobuf:"bytes,3,name=port"`
-	// URL is the url of the server.
-	URL string `json:"url" protobuf:"bytes,4,name=url"`
-	// ServerCertPath refers the file that contains the cert.
-	ServerCertPath string `json:"serverCertPath,omitempty" protobuf:"bytes,6,opt,name=serverCertPath"`
-	// ServerKeyPath refers the file that contains private key
-	ServerKeyPath string `json:"serverKeyPath,omitempty" protobuf:"bytes,5,opt,name=serverKeyPath"`
 }

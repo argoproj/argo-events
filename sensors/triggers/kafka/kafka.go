@@ -80,7 +80,7 @@ func NewKafkaTrigger(sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, kafkaPr
 
 		ff := 500
 		if kafkatrigger.FlushFrequency != 0 {
-			ff = kafkatrigger.FlushFrequency
+			ff = int(kafkatrigger.FlushFrequency)
 		}
 		config.Producer.Flush.Frequency = time.Duration(ff)
 

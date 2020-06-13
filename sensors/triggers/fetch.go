@@ -25,7 +25,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func FetchKubernetesResource(client kubernetes.Interface, source *v1alpha1.ArtifactLocation, namespace string, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	if source == nil {
 		return nil, errors.Errorf("trigger source for k8s is empty")
 	}

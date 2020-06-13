@@ -131,14 +131,14 @@ $(GOPATH)/bin/go-to-protobuf:
 	go get k8s.io/code-generator/cmd/go-to-protobuf@v0.16.7-beta.0
 	go mod tidy
 
-pkg/apis/common/generated.proto:  $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis/common -name types.go)
+pkg/apis/common/generated.proto:  $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis/common -name '*.go' -not -name '*generated*')
 	$(GOPATH)/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/pkg/apis/common \
         --apimachinery-packages=+k8s.io/apimachinery/pkg/util/intstr,+k8s.io/apimachinery/pkg/api/resource,k8s.io/apimachinery/pkg/runtime/schema,+k8s.io/apimachinery/pkg/runtime,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/api/core/v1,k8s.io/api/policy/v1beta1
 
 .PHONY: protos
-protos: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name types.go) pkg/apis/common/generated.proto
+protos: $(GOPATH)/bin/go-to-protobuf $(shell find pkg/apis -name '*.go' -not -name '*generated*') pkg/apis/common/generated.proto
 	$(GOPATH)/bin/go-to-protobuf \
         --go-header-file=./hack/custom-boilerplate.go.txt \
         --packages=github.com/argoproj/argo-events/pkg/apis/eventbus/v1alpha1,github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1,github.com/argoproj/argo-events/pkg/apis/gateway/v1alpha1,github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1 \

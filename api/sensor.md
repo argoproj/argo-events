@@ -596,9 +596,7 @@ Git repository hosting the artifact
 
 <td>
 
-<code>resource</code></br> <em>
-<a href="#argoproj.io/v1alpha1.ResourceArtifact"> ResourceArtifact </a>
-</em>
+<code>resource</code></br> <em> encoding/json.RawMessage </em>
 
 </td>
 
@@ -607,137 +605,6 @@ Git repository hosting the artifact
 <p>
 
 Resource is generic template for K8s resource
-
-</p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.Backoff">
-
-Backoff
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy</a>)
-
-</p>
-
-<p>
-
-<p>
-
-Backoff for an operation
-
-</p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>duration</code></br> <em> time.Duration </em>
-
-</td>
-
-<td>
-
-<p>
-
-Duration is the duration in nanoseconds
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>factor</code></br> <em> float64 </em>
-
-</td>
-
-<td>
-
-<p>
-
-Duration is multiplied by factor each iteration
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>jitter</code></br> <em> float64 </em>
-
-</td>
-
-<td>
-
-<p>
-
-The amount of jitter applied each iteration
-
-</p>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td>
-
-<code>steps</code></br> <em> int32 </em>
-
-</td>
-
-<td>
-
-<p>
-
-Exit with error after this many steps
 
 </p>
 
@@ -2790,8 +2657,7 @@ BasicAuth configuration for the http request.
 
 <td>
 
-<code>headers</code></br> <em> <a href="#argoproj.io/v1alpha1.Headers">
-Headers </a> </em>
+<code>headers</code></br> <em> map\[string\]string </em>
 
 </td>
 
@@ -2804,65 +2670,6 @@ Headers </a> </em>
 Headers for the HTTP request.
 
 </p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.Headers">
-
-Headers
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
-
-</p>
-
-<p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>Foo</code></br> <em> string </em>
-
-</td>
-
-<td>
 
 </td>
 
@@ -2969,8 +2776,8 @@ Labels required to identify whether a resource is in success state
 
 <td>
 
-<code>backoff</code></br> <em> <a href="#argoproj.io/v1alpha1.Backoff">
-Backoff </a> </em>
+<code>backoff</code></br> <em>
+github.com/argoproj/argo-events/pkg/apis/common.Backoff </em>
 
 </td>
 
@@ -4110,65 +3917,6 @@ Parameters is the list of key-value extracted from event’s payload that
 are applied to the trigger resource.
 
 </p>
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
-
-<h3 id="argoproj.io/v1alpha1.ResourceArtifact">
-
-ResourceArtifact
-
-</h3>
-
-<p>
-
-(<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.ArtifactLocation">ArtifactLocation</a>)
-
-</p>
-
-<p>
-
-</p>
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-
-Field
-
-</th>
-
-<th>
-
-Description
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td>
-
-<code>Data</code></br> <em> \[\]byte </em>
-
-</td>
-
-<td>
 
 </td>
 

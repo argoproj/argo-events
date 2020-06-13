@@ -24,13 +24,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 	"github.com/argoproj/argo-events/sensors/policy"
 	"github.com/argoproj/argo-events/sensors/triggers"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
 )
 
 // HTTPTrigger describes the trigger to invoke HTTP request
@@ -156,7 +157,9 @@ func (t *HTTPTrigger) Execute(resource interface{}) (interface{}, error) {
 	}
 
 	if trigger.Headers != nil {
-		request.Header = trigger.Headers
+		for name, value := range trigger.Headers {
+			request.Header[name] = []string{value}
+		}
 	}
 
 	basicAuth := trigger.BasicAuth
@@ -201,7 +204,7 @@ func (t *HTTPTrigger) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger execution response")
 	}
 
-	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())
 
 	return p.ApplyPolicy()
 }

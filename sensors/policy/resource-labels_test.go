@@ -28,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic/fake"
 
+	"github.com/argoproj/argo-events/pkg/apis/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"
 )
 
@@ -74,7 +75,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 				Labels: map[string]string{
 					"complete": "true",
 				},
-				Backoff: v1alpha1.Backoff{
+				Backoff: common.Backoff{
 					Steps:    2,
 					Duration: time.Second * 1,
 					Factor:   2,

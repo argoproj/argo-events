@@ -43,7 +43,7 @@ func (rl *ResourceLabels) ApplyPolicy() error {
 		Duration: rl.Trigger.Policy.K8s.Backoff.Duration,
 		Factor:   rl.Trigger.Policy.K8s.Backoff.Factor,
 		Jitter:   rl.Trigger.Policy.K8s.Backoff.Jitter,
-		Steps:    rl.Trigger.Policy.K8s.Backoff.Steps,
+		Steps:    int(rl.Trigger.Policy.K8s.Backoff.Steps),
 	}, func() (bool, error) {
 		obj, err := rl.Client.Namespace(rl.Obj.GetNamespace()).Get(rl.Obj.GetName(), metav1.GetOptions{})
 		if err != nil {

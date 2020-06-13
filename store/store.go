@@ -61,7 +61,7 @@ type ArtifactReader interface {
 }
 
 // FetchArtifact from the location, decode it using explicit types, and unstructure it
-func FetchArtifact(reader ArtifactReader, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func FetchArtifact(reader ArtifactReader, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	var err error
 	var obj []byte
 	obj, err = reader.Read()
@@ -97,7 +97,7 @@ func GetArtifactReader(loc *ss_v1alpha1.ArtifactLocation, creds *Credentials, cl
 	return nil, fmt.Errorf("unknown artifact location: %v", *loc)
 }
 
-func decodeAndUnstructure(b []byte, gvr *metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
+func decodeAndUnstructure(b []byte, gvr metav1.GroupVersionResource) (*unstructured.Unstructured, error) {
 	gvk := registry.KindFor(schema.GroupVersionResource{
 		Group:    gvr.Group,
 		Version:  gvr.Version,

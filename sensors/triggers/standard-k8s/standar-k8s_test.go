@@ -17,6 +17,7 @@ limitations under the License.
 package standard_k8s
 
 import (
+	"encoding/json"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"testing"
 	"time"
@@ -42,7 +43,7 @@ var sensorObj = &v1alpha1.Sensor{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "apps",
 							Version:  "v1",
 							Resource: "deployments",
@@ -75,8 +76,9 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestStandardK8sTrigger_FetchResource(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact, err := v1alpha1.NewResourceArtifact(deployment)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(deployment)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: artifact,
 	}
@@ -123,8 +125,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact, err := v1alpha1.NewResourceArtifact(deployment)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(deployment)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	fakeSensor.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: artifact,
 	}
@@ -154,8 +157,9 @@ func TestStandardK8sTrigger_ApplyResourceParameters(t *testing.T) {
 
 func TestStandardK8sTrigger_Execute(t *testing.T) {
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "test")
-	artifact, err := v1alpha1.NewResourceArtifact(deployment)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(deployment)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	sensorObj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: artifact,
 	}

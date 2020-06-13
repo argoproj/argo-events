@@ -23,10 +23,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/ghodss/yaml"
 	"github.com/smartystreets/goconvey/convey"
+
+	"github.com/argoproj/argo-events/gateways/server/common/webhook"
+	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 )
 
 var (
@@ -81,7 +82,7 @@ var (
 func TestRouteActiveHandler(t *testing.T) {
 	convey.Convey("Given a route configuration", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &webhook.Context{
+			Webhook: &v1alpha1.Context{
 				Endpoint: "/",
 				URL:      "testurl",
 				Port:     "8080",
@@ -134,7 +135,7 @@ func TestGenerateUUID(t *testing.T) {
 func TestFilterEvent(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether it passes the filter", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &webhook.Context{
+			Webhook: &v1alpha1.Context{
 				Endpoint: "/",
 				URL:      "testurl",
 				Port:     "8080",
@@ -160,7 +161,7 @@ func TestFilterEvent(t *testing.T) {
 func TestFilterName(t *testing.T) {
 	convey.Convey("Given a storage grid event, test whether the object key passes the filter", t, func() {
 		storageGridEventSource := &v1alpha1.StorageGridEventSource{
-			Webhook: &webhook.Context{
+			Webhook: &v1alpha1.Context{
 				Endpoint: "/",
 				URL:      "testurl",
 				Port:     "8080",

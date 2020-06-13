@@ -20,12 +20,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 
 	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
@@ -393,10 +390,6 @@ type ArgoWorkflowTrigger struct {
 	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
 }
 
-type Headers struct {
-	Foo string `protobuf:"bytes,1,opt,name=foo"`
-}
-
 // HTTPTrigger is the trigger for the HTTP request
 type HTTPTrigger struct {
 	// URL refers to the URL to send HTTP request to.
@@ -425,7 +418,7 @@ type HTTPTrigger struct {
 	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
 	// Headers for the HTTP request.
 	// +optional
-	Headers Headers `json:"headers,omitempty" protobuf:"bytes,8,opt,name=headers"`
+	Headers map[string]string `json:"headers,omitempty" protobuf:"bytes,8,rep,name=headers"`
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client
@@ -669,7 +662,7 @@ type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
 	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`
 	// Backoff before checking resource state
-	Backoff Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
+	Backoff apicommon.Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
 	// the state of the resource
 	ErrorOnBackoffTimeout bool `json:"errorOnBackoffTimeout" protobuf:"bytes,3,name=errorOnBackoffTimeout"`
@@ -683,16 +676,12 @@ type StatusPolicy struct {
 	Allow []int32 `json:"allow" protobuf:"bytes,1,name=allow"`
 }
 
-// Backoff for an operation
-type Backoff struct {
-	// Duration is the duration in nanoseconds
-	Duration time.Duration `json:"duration" protobuf:"bytes,1,name=duration"`
-	// Duration is multiplied by factor each iteration
-	Factor float64 `json:"factor" protobuf:"bytes,2,name=factor"`
-	// The amount of jitter applied each iteration
-	Jitter float64 `json:"jitter,omitempty" protobuf:"bytes,3,opt,name=jitter"`
-	// Exit with error after this many steps
-	Steps int32 `json:"steps,omitempty" protobuf:"bytes,4,opt,name=steps"`
+func (in *StatusPolicy) GetAllow() []int {
+	statuses := make([]int, len(in.Allow))
+	for i, s := range in.Allow {
+		statuses[i] = int(s)
+	}
+	return statuses
 }
 
 // SensorResources holds the metadata of the resources created for the sensor
@@ -755,40 +744,6 @@ type NodeStatus struct {
 	ResolvedAt metav1.MicroTime `json:"resolvedAt,omitempty" protobuf:"bytes,11,opt,name=resolvedAt"`
 }
 
-type ResourceArtifact struct {
-	Data []byte `protobuf:"bytes,1,opt,name=data"`
-}
-
-func NewResourceArtifact(un *unstructured.Unstructured) (*ResourceArtifact, error) {
-	data, err := json.Marshal(un.Object)
-	if err != nil {
-		return nil, err
-	}
-	return &ResourceArtifact{Data: data}, nil
-}
-
-func (a *ResourceArtifact) UnmarshalJSON(value []byte) error {
-	a.Data = value
-	return nil
-}
-
-func (a *ResourceArtifact) MarshalJSON() ([]byte, error) {
-	return a.Data, nil
-}
-
-func (a *ResourceArtifact) Object() (map[string]interface{}, error) {
-	obj := map[string]interface{}{}
-	err := json.Unmarshal(a.Data, &obj)
-	if err != nil {
-		return nil, err
-	}
-	object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&obj)
-	if err != nil {
-		return nil, err
-	}
-	return object, nil
-}
-
 // ArtifactLocation describes the source location for an external artifact
 type ArtifactLocation struct {
 	// S3 compliant artifact
@@ -804,7 +759,7 @@ type ArtifactLocation struct {
 	// Git repository hosting the artifact
 	Git *GitArtifact `json:"git,omitempty" protobuf:"bytes,6,opt,name=git"`
 	// Resource is generic template for K8s resource
-	Resource *ResourceArtifact `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
+	Resource json.RawMessage `json:"resource,omitempty" protobuf:"bytes,7,opt,name=resource"`
 }
 
 // ConfigmapArtifact contains information about artifact in k8 configmap

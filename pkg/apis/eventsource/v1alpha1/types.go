@@ -18,12 +18,10 @@ package v1alpha1
 import (
 	"encoding/json"
 
-	"github.com/argoproj/argo-events/common"
-	"github.com/argoproj/argo-events/gateways/server/common/fsevent"
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
-	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	apicommon "github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // EventSource is the definition of a eventsource resource
@@ -57,7 +55,7 @@ type EventSourceSpec struct {
 	// Resource event sources
 	Resource map[string]ResourceEventSource `json:"resource,omitempty" protobuf:"bytes,4,opt,name=resource"`
 	// Webhook event sources
-	Webhook map[string]webhook.Context `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
+	Webhook map[string]Context `json:"webhook,omitempty" protobuf:"bytes,5,opt,name=webhook"`
 	// AMQP event sources
 	AMQP map[string]AMQPEventSource `json:"amqp,omitempty" protobuf:"bytes,6,opt,name=amqp"`
 	// Kafka event sources
@@ -113,7 +111,7 @@ type CalendarEventSource struct {
 	Timezone string `json:"timezone,omitempty" protobuf:"bytes,4,opt,name=timezone"`
 	// UserPayload will be sent to sensor as extra data once the event is triggered
 	// +optional
-	UserPayload *json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload"`
+	UserPayload json.RawMessage `json:"userPayload,omitempty" protobuf:"bytes,5,opt,name=userPayload"`
 }
 
 // FileEventSource describes an event-source for file related events.
@@ -122,7 +120,7 @@ type FileEventSource struct {
 	// Refer https://github.com/fsnotify/fsnotify/blob/master/fsnotify.go for more information
 	EventType string `json:"eventType" protobuf:"bytes,1,name=eventType"`
 	// WatchPathConfig contains configuration about the file path to watch
-	WatchPathConfig fsevent.WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,name=watchPathConfig"`
+	WatchPathConfig WatchPathConfig `json:"watchPathConfig" protobuf:"bytes,2,name=watchPathConfig"`
 	// Use polling instead of inotify
 	Polling bool `json:"polling,omitempty" protobuf:"bytes,3,opt,name=polling"`
 }
@@ -199,7 +197,7 @@ type AMQPEventSource struct {
 	RoutingKey string `json:"routingKey" protobuf:"bytes,4,name=routingKey"`
 	// Backoff holds parameters applied to connection.
 	// +optional
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,5,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,5,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -218,7 +216,7 @@ type KafkaEventSource struct {
 	// Topic name
 	Topic string `json:"topic" protobuf:"bytes,3,name=topic"`
 	// Backoff holds parameters applied to connection.
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 	// TLS configuration for the kafka client.
 	// +optional
 	TLS *TLSConfig `json:"tls,omitempty" protobuf:"bytes,5,opt,name=tls"`
@@ -233,7 +231,7 @@ type MQTTEventSource struct {
 	// ClientID is the id of the client
 	ClientId string `json:"clientId" protobuf:"bytes,3,name=clientId"`
 	// ConnectionBackoff holds backoff applied to connection.
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -250,7 +248,7 @@ type NATSEventsSource struct {
 	// Subject holds the name of the subject onto which messages are published
 	Subject string `json:"subject" protobuf:"bytes,2,name=2"`
 	// ConnectionBackoff holds backoff applied to connection.
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,3,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,3,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -263,7 +261,7 @@ type NATSEventsSource struct {
 // SNSEventSource refers to event-source for AWS SNS related events
 type SNSEventSource struct {
 	// Webhook configuration for http server
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// TopicArn
 	TopicArn string `json:"topicArn" protobuf:"bytes,2,name=topicArn"`
 	// AccessKey refers K8 secret containing aws access key
@@ -337,7 +335,7 @@ type GithubEventSource struct {
 	// Id is the webhook's id
 	Id int64 `json:"id" protobuf:"bytes,1,name=id"`
 	// Webhook refers to the configuration required to run a http server
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,2,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,2,name=webhook"`
 	// Owner refers to GitHub owner name i.e. argoproj
 	Owner string `json:"owner" protobuf:"bytes,3,name=owner"`
 	// Repository refers to GitHub repo name i.e. argo-events
@@ -376,7 +374,7 @@ type GithubEventSource struct {
 // GitlabEventSource refers to event-source related to Gitlab events
 type GitlabEventSource struct {
 	// Webhook holds configuration to run a http server
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// ProjectId is the id of project for which integration needs to setup
 	ProjectId string `json:"projectId" protobuf:"bytes,2,name=projectId"`
 	// Event is a gitlab event to listen to.
@@ -403,7 +401,7 @@ type GitlabEventSource struct {
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {
-	fsevent.WatchPathConfig `json:",inline" protobuf:"bytes,13,opt,name=watchPathConfig"`
+	WatchPathConfig `json:",inline" protobuf:"bytes,13,opt,name=watchPathConfig"`
 	// Type of file operations to watch
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
@@ -444,7 +442,7 @@ type SlackEventSource struct {
 	// Token for URL verification handshake
 	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,opt,name=token"`
 	// Webhook holds configuration for a REST endpoint
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.
 	// +optional
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
@@ -453,7 +451,7 @@ type SlackEventSource struct {
 // StorageGridEventSource refers to event-source for StorageGrid related events
 type StorageGridEventSource struct {
 	// Webhook holds configuration for a REST endpoint
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// Events are s3 bucket notification events.
 	// For more information on s3 notifications, follow https://docs.aws.amazon.com/AmazonS3/latest/dev/NotificationHowTo.html#notification-how-to-event-types-and-destinations
 	// Note that storage grid notifications do not contain `s3:`
@@ -491,7 +489,7 @@ type AzureEventsHubEventSource struct {
 // More info at https://stripe.com/docs/webhooks
 type StripeEventSource struct {
 	// Webhook holds configuration for a REST endpoint
-	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
+	Webhook *Context `json:"webhook" protobuf:"bytes,1,name=webhook"`
 	// CreateWebhook if specified creates a new webhook programmatically.
 	// +optional
 	CreateWebhook bool `json:"createWebhook,omitempty" protobuf:"bytes,2,opt,name=createWebhook"`
@@ -528,7 +526,7 @@ type EmitterEventSource struct {
 	Password *corev1.SecretKeySelector `json:"password,omitempty" protobuf:"bytes,6,opt,name=password"`
 	// Backoff holds parameters applied to connection.
 	// +optional
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,7,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional
@@ -571,7 +569,7 @@ type NSQEventSource struct {
 	Channel string `json:"channel" protobuf:"bytes,3,name=channel"`
 	// Backoff holds parameters applied to connection.
 	// +optional
-	ConnectionBackoff *common.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
+	ConnectionBackoff *apicommon.Backoff `json:"connectionBackoff,omitempty" protobuf:"bytes,4,opt,name=connectionBackoff"`
 	// JSONBody specifies that all event body payload coming from this
 	// source will be JSON
 	// +optional

@@ -98,22 +98,7 @@ message ArtifactLocation {
   optional GitArtifact git = 6;
 
   // Resource is generic template for K8s resource
-  optional ResourceArtifact resource = 7;
-}
-
-// Backoff for an operation
-message Backoff {
-  // Duration is the duration in nanoseconds
-  optional int64 duration = 1;
-
-  // Duration is multiplied by factor each iteration
-  optional double factor = 2;
-
-  // The amount of jitter applied each iteration
-  optional double jitter = 3;
-
-  // Exit with error after this many steps
-  optional int32 steps = 4;
+  optional bytes resource = 7;
 }
 
 // BasicAuth contains the reference to K8s secrets that holds the username and password
@@ -375,11 +360,7 @@ message HTTPTrigger {
 
   // Headers for the HTTP request.
   // +optional
-  optional Headers headers = 8;
-}
-
-message Headers {
-  optional string foo = 1;
+  map<string, string> headers = 8;
 }
 
 // K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
@@ -388,7 +369,7 @@ message K8SResourcePolicy {
   map<string, string> labels = 1;
 
   // Backoff before checking resource state
-  optional Backoff backoff = 2;
+  optional github.com.argoproj.argo_events.pkg.apis.common.Backoff backoff = 2;
 
   // ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
   // the state of the resource
@@ -540,10 +521,6 @@ message OpenWhiskTrigger {
   // +listType=triggerParameters
   // +optional
   repeated TriggerParameter parameters = 7;
-}
-
-message ResourceArtifact {
-  optional bytes data = 1;
 }
 
 // Sensor is the definition of a sensor resource

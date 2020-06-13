@@ -180,7 +180,7 @@ func (t *TriggerImpl) ApplyPolicy(resource interface{}) error {
 		return errors.New("failed to interpret the trigger execution response")
 	}
 
-	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.Allow)
+	p := policy.NewStatusPolicy(response.StatusCode, t.Trigger.Policy.Status.GetAllow())
 
 	return p.ApplyPolicy()
 }

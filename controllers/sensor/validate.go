@@ -169,7 +169,7 @@ func validateK8sTrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger.Source == nil {
 		return errors.New("k8s trigger for does not contain an absolute action")
 	}
-	if trigger.GroupVersionResource == nil {
+	if trigger.GroupVersionResource.Resource == "" {
 		return errors.New("must provide group, version and resource for the resource")
 	}
 	switch trigger.Operation {
