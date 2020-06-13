@@ -816,7 +816,7 @@ func schema_pkg_apis_eventsource_v1alpha1_GenericEventSource(ref common.Referenc
 				Properties: map[string]spec.Schema{
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Data of the event source",
+							Description: "Value of the event source",
 							Type:        []string{"string"},
 							Format:      "",
 						},
@@ -1776,7 +1776,7 @@ func schema_pkg_apis_eventsource_v1alpha1_Selector(ref common.ReferenceCallback)
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Data",
+							Description: "Value",
 							Type:        []string{"string"},
 							Format:      "",
 						},

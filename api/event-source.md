@@ -1754,7 +1754,7 @@ Description
 
 <p>
 
-Data of the event source
+Value of the event source
 
 </p>
 
@@ -4637,7 +4637,7 @@ for more info.
 
 <p>
 
-Data
+Value
 
 </p>
 

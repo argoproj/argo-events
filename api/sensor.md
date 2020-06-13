@@ -1320,8 +1320,8 @@ Type contains the JSON type of the data
 
 <p>
 
-Data is the allowed string values for this key Booleans are passed using
-strconv.ParseBool() Numbers are parsed using as float64 using
+Value is the allowed string values for this key Booleans are passed
+using strconv.ParseBool() Numbers are parsed using as float64 using
 strconv.ParseFloat() Strings are taken as is Nils this value is ignored
 
 </p>
@@ -6482,7 +6482,7 @@ and
 
 <p>
 
-Data is the default literal value to use for this parameter source This
+Value is the default literal value to use for this parameter source This
 is only used if the DataKey is invalid. If the DataKey is invalid and
 this is not defined, this param source will produce an error.
 

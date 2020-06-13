@@ -520,7 +520,7 @@ func schema_pkg_apis_sensor_v1alpha1_DataFilter(ref common.ReferenceCallback) co
 							},
 						},
 						SchemaProps: spec.SchemaProps{
-							Description: "Data is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
+							Description: "Value is the allowed string values for this key Booleans are passed using strconv.ParseBool() Numbers are parsed using as float64 using strconv.ParseFloat() Strings are taken as is Nils this value is ignored",
 							Type:        []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
@@ -2297,7 +2297,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerParameterSource(ref common.Reference
 					},
 					"value": {
 						SchemaProps: spec.SchemaProps{
-							Description: "Data is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
+							Description: "Value is the default literal value to use for this parameter source This is only used if the DataKey is invalid. If the DataKey is invalid and this is not defined, this param source will produce an error.",
 							Type:        []string{"string"},
 							Format:      "",
 						},

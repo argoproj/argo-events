@@ -70,7 +70,7 @@ type SQSEventData struct {
 	// A unique identifier for the message. A MessageId is considered unique across
 	// all AWS accounts for an extended period of time.
 	MessageId string `json:"messageId"`
-	// Each message attribute consists of a Name, Type, and Data. For more information,
+	// Each message attribute consists of a Name, Type, and Value. For more information,
 	// see Amazon SQS Message Attributes
 	// (https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-attributes.html)
 	// in the Amazon Simple Queue Service Developer Guide.

@@ -182,7 +182,7 @@ message DataFilter {
   optional string type = 2;
 
   // +listType=value
-  // Data is the allowed string values for this key
+  // Value is the allowed string values for this key
   // Booleans are passed using strconv.ParseBool()
   // Numbers are parsed using as float64 using strconv.ParseFloat()
   // Strings are taken as is
@@ -841,7 +841,7 @@ message TriggerParameterSource {
   // See https://pkg.go.dev/text/template and https://masterminds.github.io/sprig/
   optional string dataTemplate = 4;
 
-  // Data is the default literal value to use for this parameter source
+  // Value is the default literal value to use for this parameter source
   // This is only used if the DataKey is invalid.
   // If the DataKey is invalid and this is not defined, this param source will produce an error.
   optional string value = 5;

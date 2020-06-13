@@ -583,7 +583,7 @@ type NSQEventSource struct {
 
 // GenericEventSource refers to a generic event source. It can be used to implement a custom event source.
 type GenericEventSource struct {
-	// Data of the event source
+	// Value of the event source
 	Value string `json:"value" protobuf:"bytes,1,name=value"`
 }
 

@@ -659,7 +659,7 @@ message Selector {
   // +optional
   optional string operation = 2;
 
-  // Data
+  // Value
   optional string value = 3;
 }
 
