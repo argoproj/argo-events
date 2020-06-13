@@ -549,7 +549,7 @@ type RedisEventSource struct {
 	Namespace string `json:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
 	// DB to use. If not specified, default DB 0 will be used.
 	// +optional
-	DB int `json:"db,omitempty" protobuf:"bytes,4,opt,name=db"`
+	DB int32 `json:"db,omitempty" protobuf:"bytes,4,opt,name=db"`
 	// Channels to subscribe to listen events.
 	// +listType=string
 	Channels []string `json:"channels" protobuf:"bytes,5,name=channels"`

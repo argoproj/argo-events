@@ -1,10 +1,11 @@
 package v1alpha1
 
 import (
-	"github.com/argoproj/argo-events/pkg/apis/common"
 	corev1 "k8s.io/api/core/v1"
 	apiresource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/argoproj/argo-events/pkg/apis/common"
 )
 
 // EventBus is the definition of a eventbus resource
@@ -60,7 +61,7 @@ var (
 // NativeStrategy indicates to install a native NATS service
 type NativeStrategy struct {
 	// Size is the NATS StatefulSet size
-	Size         int           `json:"size,omitempty" protobuf:"bytes,1,opt,name=size"`
+	Replicas     int32         `json:"replicas,omitempty" protobuf:"bytes,1,opt,name=replicas"`
 	Auth         *AuthStrategy `json:"auth,omitempty" protobuf:"bytes,2,opt,name=auth"`
 	AntiAffinity bool          `json:"antiAffinity,omitempty" protobuf:"bytes,3,opt,name=antiAffinity"`
 	// +optional
@@ -78,7 +79,7 @@ type PersistenceStrategy struct {
 	// +optional
 	AccessMode *corev1.PersistentVolumeAccessMode `json:"accessMode,omitempty" protobuf:"bytes,2,opt,name=accessMode"`
 	// Volume size, e.g. 10Gi
-	Size *apiresource.Quantity `json:"size,omitempty" protobuf:"bytes,3,opt,name=size"`
+	VolumeSize *apiresource.Quantity `json:"volumeSize,omitempty" protobuf:"bytes,3,opt,name=volumeSize"`
 }
 
 // BusConfig has the finalized configuration for EventBus
