@@ -48,8 +48,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.GitRemoteConfig":        schema_pkg_apis_sensor_v1alpha1_GitRemoteConfig(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPSubscription":       schema_pkg_apis_sensor_v1alpha1_HTTPSubscription(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger":            schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref),
+		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Headers":                schema_pkg_apis_sensor_v1alpha1_Headers(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy":      schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy":      schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger":           schema_pkg_apis_sensor_v1alpha1_KafkaTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSSubscription":       schema_pkg_apis_sensor_v1alpha1_NATSSubscription(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger":            schema_pkg_apis_sensor_v1alpha1_NATSTrigger(ref),
@@ -63,7 +63,6 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SensorStatus":           schema_pkg_apis_sensor_v1alpha1_SensorStatus(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger":           schema_pkg_apis_sensor_v1alpha1_SlackTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref),
-		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger":     schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy":           schema_pkg_apis_sensor_v1alpha1_StatusPolicy(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Subscription":           schema_pkg_apis_sensor_v1alpha1_Subscription(ref),
 		"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig":              schema_pkg_apis_sensor_v1alpha1_TLSConfig(ref),
@@ -323,7 +322,7 @@ func schema_pkg_apis_sensor_v1alpha1_Backoff(ref common.ReferenceCallback) commo
 						},
 					},
 				},
-				Required: []string{"duration", "factor", "jitter", "steps"},
+				Required: []string{"duration", "factor"},
 			},
 		},
 	}
@@ -1043,23 +1042,7 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 					"headers": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Headers for the HTTP request.",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type: []string{"array"},
-										Items: &spec.SchemaOrArray{
-											Schema: &spec.Schema{
-												SchemaProps: spec.SchemaProps{
-													Type:   []string{"string"},
-													Format: "",
-												},
-											},
-										},
-									},
-								},
-							},
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Headers"),
 						},
 					},
 				},
@@ -1067,7 +1050,26 @@ func schema_pkg_apis_sensor_v1alpha1_HTTPTrigger(ref common.ReferenceCallback) c
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.BasicAuth", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Headers", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TLSConfig", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"},
+	}
+}
+
+func schema_pkg_apis_sensor_v1alpha1_Headers(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Type: []string{"object"},
+				Properties: map[string]spec.Schema{
+					"Foo": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"Foo"},
+			},
+		},
 	}
 }
 
@@ -1075,7 +1077,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallb
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+				Description: "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"labels": {
@@ -1107,51 +1109,7 @@ func schema_pkg_apis_sensor_v1alpha1_K8SResourcePolicy(ref common.ReferenceCallb
 						},
 					},
 				},
-				Required: []string{"labels", "backoff", "errorOnBackoffTimeout"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_K8sResourcePolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"labels": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Labels required to identify whether a resource is in success state",
-							Type:        []string{"object"},
-							AdditionalProperties: &spec.SchemaOrBool{
-								Allows: true,
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
-					"backoff": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Backoff before checking resource state",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.Backoff"),
-						},
-					},
-					"errorOnBackoffTimeout": {
-						SchemaProps: spec.SchemaProps{
-							Description: "ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine the state of the resource",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"labels", "backoff", "errorOnBackoffTimeout"},
+				Required: []string{"backoff", "errorOnBackoffTimeout"},
 			},
 		},
 		Dependencies: []string{
@@ -1957,13 +1915,25 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "StandardK8sTrigger is the standard Kubernetes resource trigger",
+				Description: "StandardK8STrigger is the standard Kubernetes resource trigger",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"groupVersionResource": {
+					"group": {
 						SchemaProps: spec.SchemaProps{
-							Description: "The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource",
-							Ref:         ref("k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource"),
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"version": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"resource": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"source": {
@@ -2012,68 +1982,7 @@ func schema_pkg_apis_sensor_v1alpha1_StandardK8STrigger(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"parameters"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter", "k8s.io/apimachinery/pkg/apis/meta/v1.GroupVersionResource"},
-	}
-}
-
-func schema_pkg_apis_sensor_v1alpha1_StandardK8sTrigger(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "StandardK8sTrigger is the standard Kubernetes resource trigger",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"source": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Source of the K8 resource file(s)",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArtifactLocation"),
-						},
-					},
-					"operation": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Operation refers to the type of operation performed on the k8s resource. Default value is Create.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"parameters": {
-						VendorExtensible: spec.VendorExtensible{
-							Extensions: spec.Extensions{
-								"x-kubernetes-list-type": "triggerParameters",
-							},
-						},
-						SchemaProps: spec.SchemaProps{
-							Description: "Parameters is the list of parameters that is applied to resolved K8s trigger object.",
-							Type:        []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerParameter"),
-									},
-								},
-							},
-						},
-					},
-					"patchStrategy": {
-						SchemaProps: spec.SchemaProps{
-							Description: "PatchStrategy controls the K8s object patching strategy when the trigger operation is specified as patch. possible values: \"application/json-patch+json\" \"application/merge-patch+json\" \"application/strategic-merge-patch+json\" \"application/apply-patch+yaml\". Defaults to \"application/merge-patch+json\"",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"liveObject": {
-						SchemaProps: spec.SchemaProps{
-							Description: "LiveObject specifies whether the resource should be directly fetched from K8s instead of being marshaled from the resource artifact. If set to true, the resource artifact must contain the information required to uniquely identify the resource in the cluster, that is, you must specify \"apiVersion\", \"kind\" as well as \"name\" and \"namespace\" meta data. Only valid for operation type `update`",
-							Type:        []string{"boolean"},
-							Format:      "",
-						},
-					},
-				},
-				Required: []string{"source"},
+				Required: []string{"group", "version", "resource", "source"},
 			},
 		},
 		Dependencies: []string{
@@ -2409,8 +2318,8 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 				Properties: map[string]spec.Schema{
 					"k8s": {
 						SchemaProps: spec.SchemaProps{
-							Description: "K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy"),
+							Description: "K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy"),
 						},
 					},
 					"status": {
@@ -2423,7 +2332,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerPolicy(ref common.ReferenceCallback)
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8sResourcePolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.K8SResourcePolicy", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StatusPolicy"},
 	}
 }
 
@@ -2500,8 +2409,8 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 					},
 					"k8s": {
 						SchemaProps: spec.SchemaProps{
-							Description: "StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.",
-							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger"),
+							Description: "StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.",
+							Ref:         ref("github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger"),
 						},
 					},
 					"argoWorkflow": {
@@ -2557,7 +2466,7 @@ func schema_pkg_apis_sensor_v1alpha1_TriggerTemplate(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8sTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
+			"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.AWSLambdaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.ArgoWorkflowTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.CustomTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.HTTPTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.KafkaTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.NATSTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.OpenWhiskTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.SlackTrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.StandardK8STrigger", "github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1.TriggerSwitch"},
 	}
 }
 

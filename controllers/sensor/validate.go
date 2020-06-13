@@ -162,7 +162,7 @@ func validateTriggerTemplate(template *v1alpha1.TriggerTemplate) error {
 }
 
 // validateK8sTrigger validates a kubernetes trigger
-func validateK8sTrigger(trigger *v1alpha1.StandardK8sTrigger) error {
+func validateK8sTrigger(trigger *v1alpha1.StandardK8STrigger) error {
 	if trigger == nil {
 		return errors.New("k8s trigger for can't be nil")
 	}
@@ -533,7 +533,7 @@ func validateTriggerPolicy(trigger *v1alpha1.Trigger) error {
 }
 
 // validateK8sTriggerPolicy validates a k8s trigger policy
-func validateK8sTriggerPolicy(policy *v1alpha1.K8sResourcePolicy) error {
+func validateK8sTriggerPolicy(policy *v1alpha1.K8SResourcePolicy) error {
 	if policy == nil {
 		return nil
 	}

@@ -207,7 +207,7 @@ Kubernetes meta/v1.GroupVersionResource
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 </p>
 <p>
 <p>ArtifactLocation describes the source location for an external artifact</p>
@@ -312,6 +312,10 @@ ResourceArtifact
 <h3 id="argoproj.io/v1alpha1.Backoff">Backoff
 </h3>
 <p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy</a>)
+</p>
+<p>
 <p>Backoff for an operation</p>
 </p>
 <table>
@@ -359,7 +363,7 @@ float64
 <td>
 <code>steps</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1263,7 +1267,7 @@ always use the first URL, while push will use all of them.</p>
 <td>
 <code>port</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1359,7 +1363,7 @@ the HTTP trigger resource.</p>
 <td>
 <code>timeout</code></br>
 <em>
-int
+int64
 </em>
 </td>
 <td>
@@ -1386,12 +1390,42 @@ BasicAuth
 <td>
 <code>headers</code></br>
 <em>
-map[string][]string
+<a href="#argoproj.io/v1alpha1.Headers">
+Headers
+</a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
 <p>Headers for the HTTP request.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="argoproj.io/v1alpha1.Headers">Headers
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>Foo</code></br>
+<em>
+string
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -1405,14 +1439,14 @@ map[string][]string
 <p>
 <p>JSONType contains the supported JSON types for data filtering</p>
 </p>
-<h3 id="argoproj.io/v1alpha1.K8sResourcePolicy">K8sResourcePolicy
+<h3 id="argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.TriggerPolicy">TriggerPolicy</a>)
 </p>
 <p>
-<p>K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
+<p>K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
 </p>
 <table>
 <thead>
@@ -1437,7 +1471,9 @@ map[string]string
 <td>
 <code>backoff</code></br>
 <em>
-k8s.io/apimachinery/pkg/util/wait.Backoff
+<a href="#argoproj.io/v1alpha1.Backoff">
+Backoff
+</a>
 </em>
 </td>
 <td>
@@ -1502,7 +1538,7 @@ More info at <a href="https://kafka.apache.org/documentation/#intro_topics">http
 <td>
 <code>partition</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1526,7 +1562,7 @@ int
 <td>
 <code>requiredAcks</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1552,7 +1588,7 @@ If set to true, compresses message using snappy compression.</p>
 <td>
 <code>flushFrequency</code></br>
 <em>
-int
+int32
 </em>
 </td>
 <td>
@@ -1606,7 +1642,7 @@ Defaults to broker url.</p>
 (<code>string</code> alias)</p></h3>
 <p>
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 </p>
 <p>
 <p>KubernetesResourceOperation refers to the type of operation performed on the K8s resource</p>
@@ -2614,14 +2650,14 @@ string
 </tr>
 </tbody>
 </table>
-<h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger
+<h3 id="argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger
 </h3>
 <p>
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.TriggerTemplate">TriggerTemplate</a>)
 </p>
 <p>
-<p>StandardK8sTrigger is the standard Kubernetes resource trigger</p>
+<p>StandardK8STrigger is the standard Kubernetes resource trigger</p>
 </p>
 <table>
 <thead>
@@ -2746,7 +2782,7 @@ Only valid for operation type <code>update</code></p>
 <td>
 <code>allow</code></br>
 <em>
-[]int
+[]int32
 </em>
 </td>
 <td>
@@ -3077,7 +3113,7 @@ TriggerPolicy
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>, 
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>, 
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>, 
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>, 
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 </p>
 <p>
@@ -3265,13 +3301,13 @@ If the DataKey is invalid and this is not defined, this param source will produc
 <td>
 <code>k8s</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.K8sResourcePolicy">
-K8sResourcePolicy
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy">
+K8SResourcePolicy
 </a>
 </em>
 </td>
 <td>
-<p>K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
+<p>K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels</p>
 </td>
 </tr>
 <tr>
@@ -3377,14 +3413,14 @@ TriggerSwitch
 <td>
 <code>k8s</code></br>
 <em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">
-StandardK8sTrigger
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">
+StandardK8STrigger
 </a>
 </em>
 </td>
 <td>
 <em>(Optional)</em>
-<p>StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.</p>
+<p>StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.</p>
 </td>
 </tr>
 <tr>

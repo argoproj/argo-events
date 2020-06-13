@@ -374,13 +374,16 @@ message HTTPTrigger {
   optional BasicAuth basicAuth = 7;
 
   // Headers for the HTTP request.
-  // +mapType=granular
   // +optional
-  map<string, string> headers = 8;
+  optional Headers headers = 8;
 }
 
-// K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
-message K8sResourcePolicy {
+message Headers {
+  optional string foo = 1;
+}
+
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+message K8SResourcePolicy {
   // Labels required to identify whether a resource is in success state
   map<string, string> labels = 1;
 
@@ -668,10 +671,10 @@ message SlackTrigger {
   optional string message = 5;
 }
 
-// StandardK8sTrigger is the standard Kubernetes resource trigger
-message StandardK8sTrigger {
+// StandardK8STrigger is the standard Kubernetes resource trigger
+message StandardK8STrigger {
   // The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 1;
+  optional k8s.io.apimachinery.pkg.apis.meta.v1.GroupVersionResource groupVersionResource = 7;
 
   // Source of the K8 resource file(s)
   optional ArtifactLocation source = 2;
@@ -846,8 +849,8 @@ message TriggerParameterSource {
 
 // TriggerPolicy dictates the policy for the trigger retries
 message TriggerPolicy {
-  // K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
-  optional K8sResourcePolicy k8s = 1;
+  // K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+  optional K8SResourcePolicy k8s = 1;
 
   // Status refers to the policy used to check the state of the trigger using response status
   optional StatusPolicy status = 2;
@@ -874,9 +877,9 @@ message TriggerTemplate {
   // +optional
   optional TriggerSwitch switch = 2;
 
-  // StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.
+  // StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.
   // +optional
-  optional StandardK8sTrigger k8s = 3;
+  optional StandardK8STrigger k8s = 3;
 
   // ArgoWorkflow refers to the trigger that can perform various operations on an Argo workflow.
   // +optional

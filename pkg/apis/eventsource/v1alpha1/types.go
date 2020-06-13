@@ -146,7 +146,7 @@ type ResourceEventSource struct {
 	// +optional
 	Filter *ResourceFilter `json:"filter,omitempty" protobuf:"bytes,2,opt,name=filter"`
 	// Group of the resource
-	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
+	metav1.GroupVersionResource `json:",inline"`
 	// EventTypes is the list of event type to watch.
 	// Possible values are - ADD, UPDATE and DELETE.
 	EventTypes []ResourceEventType `json:"eventTypes" protobuf:"bytes,3,name=eventTypes"`
@@ -403,7 +403,7 @@ type GitlabEventSource struct {
 
 // HDFSEventSource refers to event-source for HDFS related events
 type HDFSEventSource struct {
-	fsevent.WatchPathConfig `json:",inline" protobuf:"bytes,2,opt,name=watchPathConfig"`
+	fsevent.WatchPathConfig `json:",inline"`
 	// Type of file operations to watch
 	Type string `json:"type" protobuf:"bytes,3,opt,name=type"`
 	// CheckInterval is a string that describes an interval duration to check the directory state, e.g. 1s, 30m, 2h... (defaults to 1m)
@@ -442,7 +442,7 @@ type SlackEventSource struct {
 	// Slack App signing secret
 	SigningSecret *corev1.SecretKeySelector `json:"signingSecret,omitempty" protobuf:"bytes,1,opt,name=signingSecret"`
 	// Token for URL verification handshake
-	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,name=token"`
+	Token *corev1.SecretKeySelector `json:"token,omitempty" protobuf:"bytes,2,opt,name=token"`
 	// Webhook holds configuration for a REST endpoint
 	Webhook *webhook.Context `json:"webhook" protobuf:"bytes,3,name=webhook"`
 	// Namespace refers to Kubernetes namespace which is used to retrieve token and signing secret from.

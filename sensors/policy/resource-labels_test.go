@@ -57,7 +57,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
-			K8s: &v1alpha1.StandardK8sTrigger{
+			K8s: &v1alpha1.StandardK8STrigger{
 				GroupVersionResource: &metav1.GroupVersionResource{
 					Group:    "apps",
 					Resource: "deployments",
@@ -69,7 +69,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 			},
 		},
 		Policy: &v1alpha1.TriggerPolicy{
-			K8s: &v1alpha1.K8sResourcePolicy{
+			K8s: &v1alpha1.K8SResourcePolicy{
 				ErrorOnBackoffTimeout: true,
 				Labels: map[string]string{
 					"complete": "true",

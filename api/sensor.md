@@ -428,7 +428,7 @@ ArtifactLocation
 
 (<em>Appears on:</em>
 <a href="#argoproj.io/v1alpha1.ArgoWorkflowTrigger">ArgoWorkflowTrigger</a>,
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 
 </p>
 
@@ -626,6 +626,13 @@ Backoff
 
 <p>
 
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy">K8SResourcePolicy</a>)
+
+</p>
+
+<p>
+
 <p>
 
 Backoff for an operation
@@ -722,7 +729,7 @@ The amount of jitter applied each iteration
 
 <td>
 
-<code>steps</code></br> <em> int </em>
+<code>steps</code></br> <em> int32 </em>
 
 </td>
 
@@ -2553,7 +2560,7 @@ Description
 
 <td>
 
-<code>port</code></br> <em> int </em>
+<code>port</code></br> <em> int32 </em>
 
 </td>
 
@@ -2737,7 +2744,7 @@ are applied to the HTTP trigger resource.
 
 <td>
 
-<code>timeout</code></br> <em> int </em>
+<code>timeout</code></br> <em> int64 </em>
 
 </td>
 
@@ -2783,7 +2790,8 @@ BasicAuth configuration for the http request.
 
 <td>
 
-<code>headers</code></br> <em> map\[string\]\[\]string </em>
+<code>headers</code></br> <em> <a href="#argoproj.io/v1alpha1.Headers">
+Headers </a> </em>
 
 </td>
 
@@ -2796,6 +2804,65 @@ BasicAuth configuration for the http request.
 Headers for the HTTP request.
 
 </p>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<h3 id="argoproj.io/v1alpha1.Headers">
+
+Headers
+
+</h3>
+
+<p>
+
+(<em>Appears on:</em>
+<a href="#argoproj.io/v1alpha1.HTTPTrigger">HTTPTrigger</a>)
+
+</p>
+
+<p>
+
+</p>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+
+Field
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>
+
+<code>Foo</code></br> <em> string </em>
+
+</td>
+
+<td>
 
 </td>
 
@@ -2830,9 +2897,9 @@ JSONType contains the supported JSON types for data filtering
 
 </p>
 
-<h3 id="argoproj.io/v1alpha1.K8sResourcePolicy">
+<h3 id="argoproj.io/v1alpha1.K8SResourcePolicy">
 
-K8sResourcePolicy
+K8SResourcePolicy
 
 </h3>
 
@@ -2847,7 +2914,7 @@ K8sResourcePolicy
 
 <p>
 
-K8sResourcePolicy refers to the policy used to check the state of K8s
+K8SResourcePolicy refers to the policy used to check the state of K8s
 based triggers using using labels
 
 </p>
@@ -2902,8 +2969,8 @@ Labels required to identify whether a resource is in success state
 
 <td>
 
-<code>backoff</code></br> <em> k8s.io/apimachinery/pkg/util/wait.Backoff
-</em>
+<code>backoff</code></br> <em> <a href="#argoproj.io/v1alpha1.Backoff">
+Backoff </a> </em>
 
 </td>
 
@@ -3037,7 +3104,7 @@ Name of the topic. More info at
 
 <td>
 
-<code>partition</code></br> <em> int </em>
+<code>partition</code></br> <em> int32 </em>
 
 </td>
 
@@ -3080,7 +3147,7 @@ trigger object.
 
 <td>
 
-<code>requiredAcks</code></br> <em> int </em>
+<code>requiredAcks</code></br> <em> int32 </em>
 
 </td>
 
@@ -3124,7 +3191,7 @@ false. If set to true, compresses message using snappy compression.
 
 <td>
 
-<code>flushFrequency</code></br> <em> int </em>
+<code>flushFrequency</code></br> <em> int32 </em>
 
 </td>
 
@@ -3225,7 +3292,7 @@ KubernetesResourceOperation (<code>string</code> alias)
 <p>
 
 (<em>Appears on:</em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>)
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>)
 
 </p>
 
@@ -5162,9 +5229,9 @@ Message refers to the message to send to the Slack channel.
 
 </table>
 
-<h3 id="argoproj.io/v1alpha1.StandardK8sTrigger">
+<h3 id="argoproj.io/v1alpha1.StandardK8STrigger">
 
-StandardK8sTrigger
+StandardK8STrigger
 
 </h3>
 
@@ -5179,7 +5246,7 @@ StandardK8sTrigger
 
 <p>
 
-StandardK8sTrigger is the standard Kubernetes resource trigger
+StandardK8STrigger is the standard Kubernetes resource trigger
 
 </p>
 
@@ -5420,7 +5487,7 @@ Description
 
 <td>
 
-<code>allow</code></br> <em> \[\]int </em>
+<code>allow</code></br> <em> \[\]int32 </em>
 
 </td>
 
@@ -6089,7 +6156,7 @@ TriggerParameter
 <a href="#argoproj.io/v1alpha1.NATSTrigger">NATSTrigger</a>,
 <a href="#argoproj.io/v1alpha1.OpenWhiskTrigger">OpenWhiskTrigger</a>,
 <a href="#argoproj.io/v1alpha1.SlackTrigger">SlackTrigger</a>,
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger">StandardK8sTrigger</a>,
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger">StandardK8STrigger</a>,
 <a href="#argoproj.io/v1alpha1.Trigger">Trigger</a>)
 
 </p>
@@ -6481,7 +6548,7 @@ Description
 <td>
 
 <code>k8s</code></br> <em>
-<a href="#argoproj.io/v1alpha1.K8sResourcePolicy"> K8sResourcePolicy
+<a href="#argoproj.io/v1alpha1.K8SResourcePolicy"> K8SResourcePolicy
 </a> </em>
 
 </td>
@@ -6490,7 +6557,7 @@ Description
 
 <p>
 
-K8sResourcePolicy refers to the policy used to check the state of K8s
+K8SResourcePolicy refers to the policy used to check the state of K8s
 based triggers using using labels
 
 </p>
@@ -6713,7 +6780,7 @@ Switch is the condition to execute the trigger.
 <td>
 
 <code>k8s</code></br> <em>
-<a href="#argoproj.io/v1alpha1.StandardK8sTrigger"> StandardK8sTrigger
+<a href="#argoproj.io/v1alpha1.StandardK8STrigger"> StandardK8STrigger
 </a> </em>
 
 </td>
@@ -6724,7 +6791,7 @@ Switch is the condition to execute the trigger.
 
 <p>
 
-StandardK8sTrigger refers to the trigger designed to create or update a
+StandardK8STrigger refers to the trigger designed to create or update a
 generic Kubernetes resource.
 
 </p>

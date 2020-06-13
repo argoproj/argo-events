@@ -36,7 +36,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// StandardK8sTrigger implements Trigger interface for standard Kubernetes resources
+// StandardK8STrigger implements Trigger interface for standard Kubernetes resources
 type StandardK8sTrigger struct {
 	// K8sClient is kubernetes client
 	K8sClient kubernetes.Interface
@@ -52,7 +52,7 @@ type StandardK8sTrigger struct {
 	namespableDynamicClient dynamic.NamespaceableResourceInterface
 }
 
-// NewStandardK8sTrigger returns a new StandardK8sTrigger
+// NewStandardK8sTrigger returns a new StandardK8STrigger
 func NewStandardK8sTrigger(k8sClient kubernetes.Interface, dynamicClient dynamic.Interface, sensor *v1alpha1.Sensor, trigger *v1alpha1.Trigger, logger *logrus.Logger) *StandardK8sTrigger {
 	return &StandardK8sTrigger{
 		K8sClient:     k8sClient,

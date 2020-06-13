@@ -306,9 +306,9 @@ type TriggerTemplate struct {
 	// Switch is the condition to execute the trigger.
 	// +optional
 	Switch *TriggerSwitch `json:"switch,omitempty" protobuf:"bytes,2,opt,name=switch"`
-	// StandardK8sTrigger refers to the trigger designed to create or update a generic Kubernetes resource.
+	// StandardK8STrigger refers to the trigger designed to create or update a generic Kubernetes resource.
 	// +optional
-	K8s *StandardK8sTrigger `json:"k8s,omitempty" protobuf:"bytes,3,opt,name=k8s"`
+	K8s *StandardK8STrigger `json:"k8s,omitempty" protobuf:"bytes,3,opt,name=k8s"`
 	// ArgoWorkflow refers to the trigger that can perform various operations on an Argo workflow.
 	// +optional
 	ArgoWorkflow *ArgoWorkflowTrigger `json:"argoWorkflow,omitempty" protobuf:"bytes,4,opt,name=argoWorkflow"`
@@ -346,10 +346,10 @@ type TriggerSwitch struct {
 	All []string `json:"all,omitempty" protobuf:"bytes,2,rep,name=all"`
 }
 
-// StandardK8sTrigger is the standard Kubernetes resource trigger
-type StandardK8sTrigger struct {
+// StandardK8STrigger is the standard Kubernetes resource trigger
+type StandardK8STrigger struct {
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	*metav1.GroupVersionResource `json:",inline" protobuf:"bytes,1,name=groupVersionResource"`
+	metav1.GroupVersionResource `json:",inline"`
 	// Source of the K8 resource file(s)
 	Source *ArtifactLocation `json:"source" protobuf:"bytes,2,opt,name=source"`
 	// Operation refers to the type of operation performed on the k8s resource.
@@ -390,7 +390,11 @@ type ArgoWorkflowTrigger struct {
 	// +listType=triggerParameters
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,3,rep,name=parameters"`
 	// The unambiguous kind of this object - used in order to retrieve the appropriate kubernetes api client for this resource
-	metav1.GroupVersionResource `json:",inline" protobuf:"bytes,4,opt,name=groupVersionResource"`
+	metav1.GroupVersionResource `json:",inline"`
+}
+
+type Headers struct {
+	Foo string `protobuf:"bytes,1,opt,name=foo"`
 }
 
 // HTTPTrigger is the trigger for the HTTP request
@@ -420,9 +424,8 @@ type HTTPTrigger struct {
 	// +optional
 	BasicAuth *BasicAuth `json:"basicAuth,omitempty" protobuf:"bytes,7,opt,name=basicAuth"`
 	// Headers for the HTTP request.
-	// +mapType=granular
 	// +optional
-	Headers map[string][]string `json:"headers,omitempty" protobuf:"bytes,8,opt,name=headers"`
+	Headers Headers `json:"headers,omitempty" protobuf:"bytes,8,opt,name=headers"`
 }
 
 // TLSConfig refers to TLS configuration for the HTTP client
@@ -553,7 +556,7 @@ type SlackTrigger struct {
 	// +optional
 	Parameters []TriggerParameter `json:"parameters,omitempty" protobuf:"bytes,1,rep,name=parameters"`
 	// SlackToken refers to the Kubernetes secret that holds the slack token required to send messages.
-	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,name=slackToken"`
+	SlackToken *corev1.SecretKeySelector `json:"slackToken" protobuf:"bytes,2,opt,name=slackToken"`
 	// Namespace to read the password secret from.
 	// This is required if the password secret selector is specified.
 	// +optional
@@ -655,16 +658,16 @@ type TriggerParameterSource struct {
 
 // TriggerPolicy dictates the policy for the trigger retries
 type TriggerPolicy struct {
-	// K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
-	K8s *K8sResourcePolicy `json:"k8s,omitempty" protobuf:"bytes,1,opt,name=k8s"`
+	// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+	K8s *K8SResourcePolicy `json:"k8s,omitempty" protobuf:"bytes,1,opt,name=k8s"`
 	// Status refers to the policy used to check the state of the trigger using response status
 	Status *StatusPolicy `json:"status,omitempty" protobuf:"bytes,2,opt,name=status"`
 }
 
-// K8sResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
-type K8sResourcePolicy struct {
+// K8SResourcePolicy refers to the policy used to check the state of K8s based triggers using using labels
+type K8SResourcePolicy struct {
 	// Labels required to identify whether a resource is in success state
-	Labels map[string]string `json:"labels" protobuf:"bytes,1,name=labels"`
+	Labels map[string]string `json:"labels,omitempty" protobuf:"bytes,1,rep,name=labels"`
 	// Backoff before checking resource state
 	Backoff Backoff `json:"backoff" protobuf:"bytes,2,name=backoff"`
 	// ErrorOnBackoffTimeout determines whether sensor should transition to error state if the trigger policy is unable to determine
@@ -683,13 +686,13 @@ type StatusPolicy struct {
 // Backoff for an operation
 type Backoff struct {
 	// Duration is the duration in nanoseconds
-	Duration time.Duration `json:"duration" protobuf:"bytes,1,opt,name=duration"`
+	Duration time.Duration `json:"duration" protobuf:"bytes,1,name=duration"`
 	// Duration is multiplied by factor each iteration
-	Factor float64 `json:"factor" protobuf:"bytes,2,opt,name=factor"`
+	Factor float64 `json:"factor" protobuf:"bytes,2,name=factor"`
 	// The amount of jitter applied each iteration
-	Jitter float64 `json:"jitter" protobuf:"bytes,3,opt,name=jitter"`
+	Jitter float64 `json:"jitter,omitempty" protobuf:"bytes,3,opt,name=jitter"`
 	// Exit with error after this many steps
-	Steps int32 `json:"steps" protobuf:"bytes,4,opt,name=steps"`
+	Steps int32 `json:"steps,omitempty" protobuf:"bytes,4,opt,name=steps"`
 }
 
 // SensorResources holds the metadata of the resources created for the sensor
