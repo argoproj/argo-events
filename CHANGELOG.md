@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.16.0
+
++ Add affinity, tolerations in template and clusterIP in service #663
++ Support for using a live K8s resource in standard K8s triggers #671
++ Introduce EventBus CRD #674
++ Enhanced filter for resource gateway #682
++ Fix gateway client http requests #684
++ Fix k8s trigger operations #695
++ Support to register multiple events in a GitLab webhook #696
+
 ## v0.15.0
 
 + Made deployment/Service template optional in Gateway #598
