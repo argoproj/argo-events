@@ -68,6 +68,10 @@ type NativeStrategy struct {
 	Persistence *PersistenceStrategy `json:"persistence,omitempty" protobuf:"bytes,4,opt,name=persistence"`
 }
 
+func (in *NativeStrategy) GetReplicas() int {
+	return int(in.Replicas)
+}
+
 // PersistenceStrategy defines the strategy of persistence
 type PersistenceStrategy struct {
 	// Name of the StorageClass required by the claim.

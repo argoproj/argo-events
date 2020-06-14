@@ -17,6 +17,7 @@ limitations under the License.
 package sensors
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -92,8 +93,9 @@ func TestProcessQueue(t *testing.T) {
 	}
 
 	deployment := newUnstructured("apps/v1", "Deployment", "fake", "fake-deployment")
-	artifact, err := v1alpha1.NewResourceArtifact(deployment)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(deployment)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: artifact,
 	}

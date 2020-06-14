@@ -451,8 +451,9 @@ func TestApplyResourceParameters(t *testing.T) {
 		Data: []byte("{\"name\": {\"first\": \"test-deployment\"} }"),
 	}
 
-	artifact, err := v1alpha1.NewResourceArtifact(deployment)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(deployment)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	obj.Spec.Triggers[0].Template.K8s.Source = &v1alpha1.ArtifactLocation{
 		Resource: artifact,
 	}
@@ -476,7 +477,7 @@ func TestApplyResourceParameters(t *testing.T) {
 		},
 	}
 
-	err = ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
+	err := ApplyResourceParameters(obj, obj.Spec.Triggers[0].Template.K8s.Parameters, deployment)
 	assert.Nil(t, err)
 	assert.Equal(t, deployment.GetName(), "test-deployment")
 }

@@ -17,6 +17,7 @@ limitations under the License.
 package policy
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -50,16 +51,16 @@ func newUnstructured(apiVersion, kind, namespace, name string) *unstructured.Uns
 
 func TestResourceLabels_ApplyPolicy(t *testing.T) {
 	uObj := newUnstructured("apps/v1", "Deployment", "fake", "test")
-
 	runtimeScheme := runtime.NewScheme()
 	client := fake.NewSimpleDynamicClient(runtimeScheme, uObj)
-	artifact, err := v1alpha1.NewResourceArtifact(uObj)
-	assert.NoError(t, err)
+	data, _ := json.Marshal(uObj)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake-trigger",
 			K8s: &v1alpha1.StandardK8STrigger{
-				GroupVersionResource: &metav1.GroupVersionResource{
+				GroupVersionResource: metav1.GroupVersionResource{
 					Group:    "apps",
 					Resource: "deployments",
 					Version:  "v1",
@@ -137,6 +138,7 @@ func TestResourceLabels_ApplyPolicy(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			var err error
 			uObj, err = test.updateFunc(uObj)
 			assert.Nil(t, err)
 			err = resourceLabelsPolicy.ApplyPolicy()

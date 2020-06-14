@@ -16,6 +16,7 @@ limitations under the License.
 package argo_workflow
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -40,7 +41,7 @@ var sensorObj = &v1alpha1.Sensor{
 				Template: &v1alpha1.TriggerTemplate{
 					Name: "fake-trigger",
 					K8s: &v1alpha1.StandardK8STrigger{
-						GroupVersionResource: &metav1.GroupVersionResource{
+						GroupVersionResource: metav1.GroupVersionResource{
 							Group:    "apps",
 							Version:  "v1",
 							Resource: "deployments",
@@ -72,10 +73,9 @@ func getFakeWfTrigger() *ArgoWorkflowTrigger {
 	runtimeScheme := runtime.NewScheme()
 	client := dynamicFake.NewSimpleDynamicClient(runtimeScheme)
 	un := newUnstructured("argoproj.io/v1alpha1", "Workflow", "fake", "test")
-	artifact, err := v1alpha1.NewResourceArtifact(un)
-	if err != nil {
-		panic(err)
-	}
+	data, _ := json.Marshal(un)
+	artifact := json.RawMessage{}
+	_ = json.Unmarshal(data, &artifact)
 	trigger := &v1alpha1.Trigger{
 		Template: &v1alpha1.TriggerTemplate{
 			Name: "fake",

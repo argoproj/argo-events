@@ -281,7 +281,7 @@ func schema_pkg_apis_eventbus_v1alpha1_NativeStrategy(ref common.ReferenceCallba
 				Description: "NativeStrategy indicates to install a native NATS service",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"size": {
+					"replicas": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Size is the NATS StatefulSet size",
 							Type:        []string{"integer"},
@@ -334,7 +334,7 @@ func schema_pkg_apis_eventbus_v1alpha1_PersistenceStrategy(ref common.ReferenceC
 							Format:      "",
 						},
 					},
-					"size": {
+					"volumeSize": {
 						SchemaProps: spec.SchemaProps{
 							Description: "Volume size, e.g. 10Gi",
 							Ref:         ref("k8s.io/apimachinery/pkg/api/resource.Quantity"),

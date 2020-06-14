@@ -167,5 +167,5 @@ build-e2e-images: sensor-controller-image gateway-controller-image gateway-clien
 
 .PHONY: lint
 lint:
-	golangci-lint run
+	golangci-lint run --fix
 

@@ -17,14 +17,16 @@ limitations under the License.
 package store
 
 import (
+	"encoding/json"
+	"testing"
+
 	"github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"testing"
 )
 
 func TestNewResourceReader(t *testing.T) {
 	convey.Convey("Given a resource, get new reader", t, func() {
-		reader, err := NewResourceReader(&unstructured.Unstructured{
+		un := unstructured.Unstructured{
 			Object: map[string]interface{}{
 				"apiVersion": "v1",
 				"kind":       "Secret",
@@ -37,11 +39,15 @@ func TestNewResourceReader(t *testing.T) {
 					"secret": "c2VjcmV0",
 				},
 			},
-		})
+		}
+		data, _ := json.Marshal(un)
+		artifact := json.RawMessage{}
+		_ = json.Unmarshal(data, &artifact)
+		reader, err := NewResourceReader(artifact)
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(reader, convey.ShouldNotBeNil)
 
-		data, err := reader.Read()
+		data, err = reader.Read()
 		convey.So(err, convey.ShouldBeNil)
 		convey.So(data, convey.ShouldNotBeNil)
 	})

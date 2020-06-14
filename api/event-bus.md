@@ -694,7 +694,7 @@ Description
 
 <td>
 
-<code>size</code></br> <em> int </em>
+<code>replicas</code></br> <em> int32 </em>
 
 </td>
 
@@ -860,7 +860,7 @@ Available access modes such as ReadWriteOnce, ReadWriteMany
 
 <td>
 
-<code>size</code></br> <em>
+<code>volumeSize</code></br> <em>
 k8s.io/apimachinery/pkg/api/resource.Quantity </em>
 
 </td>

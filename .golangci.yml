@@ -5,30 +5,17 @@ run:
     - vendor
     - "gateways/server/common/naivewatcher"
   skip-files:
-    - "pkg/apis/sensor/v1alpha1/openapi_generated.go"
-    - "pkg/apis/gateway/v1alpha1/openapi_generated.go"
-    - "pkg/apis/eventsource/v1alpha1/openapi_generated.go"
-    - "pkg/apis/common/openapi_generated.go"
-    - "pkg/apis/common/deepcopy_generated.go"
-    - "pkg/apis/sensor/v1alpha1/zz_generated.deepcopy.go"
-    - "pkg/apis/gateway/v1alpha1/zz_generated.deepcopy.go"
-    - "pkg/apis/eventsource/v1alpha1/zz_generated.deepcopy.go"
+    - ".*generated.*"
 linters:
   enable:
-    - bodyclose
     - deadcode
     - depguard
     - dogsled
-    - dupl
-    - errcheck
     - goconst
     - gocritic
-    - gocyclo
     - gofmt
     - goimports
-    - golint
     - goprintffuncname
-    - gosec
     - gosimple
     - govet
     - ineffassign
@@ -36,13 +23,10 @@ linters:
     - misspell
     - nakedret
     - rowserrcheck
-    - scopelint
     - staticcheck
     - structcheck
-    - stylecheck
     - typecheck
     - unconvert
-    - unparam
     - unused
     - varcheck
     - whitespace

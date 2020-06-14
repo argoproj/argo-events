@@ -163,7 +163,7 @@ func (t *KafkaTrigger) Execute(resource interface{}) (interface{}, error) {
 		Topic:     trigger.Topic,
 		Key:       sarama.StringEncoder(pk),
 		Value:     sarama.ByteEncoder(payload),
-		Partition: int32(trigger.Partition),
+		Partition: trigger.Partition,
 		Timestamp: time.Now().UTC(),
 	}
 

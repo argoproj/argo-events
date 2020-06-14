@@ -124,14 +124,14 @@ func TestTriggerImpl_ApplyResourceParameters(t *testing.T) {
 func TestTriggerImpl_ApplyPolicy(t *testing.T) {
 	trigger := getFakeTriggerImpl()
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{200, 300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{200, 300}},
 	}
 	response := &http.Response{StatusCode: 200}
 	err := trigger.ApplyPolicy(response)
 	assert.Nil(t, err)
 
 	trigger.Trigger.Policy = &v1alpha1.TriggerPolicy{
-		Status: &v1alpha1.StatusPolicy{Allow: []int{300}},
+		Status: &v1alpha1.StatusPolicy{Allow: []int32{300}},
 	}
 	err = trigger.ApplyPolicy(response)
 	assert.NotNil(t, err)

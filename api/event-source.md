@@ -3671,7 +3671,7 @@ for GCP
 
 EnableWorkflowIdentity determines if your project authenticates to GCP
 with WorkflowIdentity or CredentialsFile. If true, authentication is
-done with WorkflowIdentity. If false or omited, authentication is done
+done with WorkflowIdentity. If false or omitted, authentication is done
 with CredentialsFile.
 
 </p>
@@ -3850,7 +3850,7 @@ specified if password is declared
 
 <td>
 
-<code>db</code></br> <em> int </em>
+<code>db</code></br> <em> int32 </em>
 
 </td>
 

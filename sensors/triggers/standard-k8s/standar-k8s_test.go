@@ -18,9 +18,10 @@ package standard_k8s
 
 import (
 	"encoding/json"
-	k8stypes "k8s.io/apimachinery/pkg/types"
 	"testing"
 	"time"
+
+	k8stypes "k8s.io/apimachinery/pkg/types"
 
 	"github.com/argoproj/argo-events/common"
 	"github.com/argoproj/argo-events/pkg/apis/sensor/v1alpha1"

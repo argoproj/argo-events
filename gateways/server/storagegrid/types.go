@@ -17,8 +17,9 @@ limitations under the License.
 package storagegrid
 
 import (
-	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 	"time"
+
+	"github.com/argoproj/argo-events/gateways/server/common/webhook"
 
 	"github.com/argoproj/argo-events/pkg/apis/eventsource/v1alpha1"
 	"github.com/sirupsen/logrus"

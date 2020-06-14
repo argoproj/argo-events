@@ -47,7 +47,7 @@ func TestListenEvents(t *testing.T) {
 
 	calendarEventSource := &v1alpha1.CalendarEventSource{
 		Interval:    "2s",
-		UserPayload: &raw,
+		UserPayload: raw,
 	}
 
 	body, err := yaml.Marshal(calendarEventSource)
